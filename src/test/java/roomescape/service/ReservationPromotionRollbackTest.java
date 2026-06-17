@@ -86,13 +86,13 @@ class ReservationPromotionRollbackTest {
 
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
-        Long id = timeRepository.save(reservationTime);
+        Long id = timeRepository.save(reservationTime).getId();
         return new ReservationTime(id, reservationTime.getStartAt());
     }
 
     private Theme createTheme() {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
-        Long id = themeRepository.save(theme);
+        Long id = themeRepository.save(theme).getId();
         return new Theme(
             id,
             theme.getName(),

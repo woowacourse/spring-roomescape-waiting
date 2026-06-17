@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static roomescape.domain.exception.DomainErrorCode.REFERENTIAL_INTEGRITY;
+import static roomescape.domain.exception.DomainErrorCode.THEME_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,7 +30,8 @@ public class ThemeService {
     }
 
     public Theme getTheme(Long id) {
-        return themeRepository.getById(id, "존재하지 않는 테마입니다.");
+        return themeRepository.findById(id)
+            .orElseThrow(() -> new RoomEscapeException(THEME_NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
     public List<Theme> getPopularTop10Themes(LocalDate now, Integer days) {
@@ -40,12 +42,13 @@ public class ThemeService {
 
     @Transactional
     public Theme addTheme(ThemeRequest request) {
-        Long id = themeRepository.save(
+        return themeRepository.save(
             new Theme(
                 request.name(),
                 request.description(),
-                request.thumbnailImageUrl()));
-        return getTheme(id);
+                request.thumbnailImageUrl()
+            )
+        );
     }
 
     @Transactional

@@ -7,15 +7,11 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationTimeRepository;
 
-@JdbcTest
-@Import({
-    JdbcReservationTimeRepository.class,
-})
+@DataJpaTest
 class JdbcReservationTimeRepositoryTest {
 
     private static final LocalTime TEN = LocalTime.of(10, 0);
@@ -27,7 +23,7 @@ class JdbcReservationTimeRepositoryTest {
     @Test
     void 예약시간을_저장한다() {
         ReservationTime tenClock = new ReservationTime(TEN);
-        Long saveId = timeRepository.save(tenClock);
+        Long saveId = timeRepository.save(tenClock).getId();
 
         Optional<ReservationTime> reservationTime = timeRepository.findById(saveId);
 
@@ -43,7 +39,7 @@ class JdbcReservationTimeRepositoryTest {
         timeRepository.save(twelveClock);
 
         ReservationTime tenClock = new ReservationTime(TEN);
-        Long tenClockSaveId = timeRepository.save(tenClock);
+        Long tenClockSaveId = timeRepository.save(tenClock).getId();
 
         List<ReservationTime> reservationTimes = timeRepository.findAll();
 
@@ -57,7 +53,7 @@ class JdbcReservationTimeRepositoryTest {
     @Test
     void 예약시간_id_존재여부() {
         ReservationTime twelveClock = new ReservationTime(TWELVE);
-        Long saveId = timeRepository.save(twelveClock);
+        Long saveId = timeRepository.save(twelveClock).getId();
 
         assertThat(timeRepository.existsById(saveId)).isTrue();
         assertThat(timeRepository.existsById(999L)).isFalse();
@@ -66,7 +62,7 @@ class JdbcReservationTimeRepositoryTest {
     @Test
     void 예약시간을_삭제한다() {
         ReservationTime twelveClock = new ReservationTime(TWELVE);
-        Long saveId = timeRepository.save(twelveClock);
+        Long saveId = timeRepository.save(twelveClock).getId();
 
         timeRepository.deleteById(saveId);
 

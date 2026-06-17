@@ -1,6 +1,8 @@
 package roomescape.service;
 
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
+import static roomescape.domain.exception.DomainErrorCode.RESERVATION_TIME_NOT_FOUND;
+import static roomescape.domain.exception.DomainErrorCode.THEME_NOT_FOUND;
 
 import jakarta.annotation.Nonnull;
 
@@ -146,11 +148,19 @@ public class ReservationService {
     }
 
     private ReservationTime getReservationTime(Long timeId) {
-        return timeRepository.getById(timeId, "예약할 수 없는 시간입니다.");
+        return timeRepository.findById(timeId)
+            .orElseThrow(() -> new RoomEscapeException(
+                RESERVATION_TIME_NOT_FOUND,
+                "예약할 수 없는 시간입니다."
+            ));
     }
 
     private Theme getTheme(Long themeId) {
-        return themeRepository.getById(themeId, "예약할 수 없는 테마입니다.");
+        return themeRepository.findById(themeId)
+            .orElseThrow(() -> new RoomEscapeException(
+                THEME_NOT_FOUND,
+                "예약할 수 없는 테마입니다."
+            ));
     }
 
     @Nonnull
@@ -207,7 +217,7 @@ public class ReservationService {
         verifyNoConflict(updated);
         Reservation updatedWithSlot = withSavedSlot(updated);
         reservationRepository.updateDateTime(updatedWithSlot);
-        
+
         return getReservation(id);
     }
 

@@ -87,7 +87,7 @@ class ReservationTimeServiceTest {
         ReservationTimeRequest request = new ReservationTimeRequest(TEN);
         ReservationTime reservationTime = reservationTimeService.addReservationTime(request);
 
-        Long themeId = themeRepository.save(new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png"));
+        Long themeId = themeRepository.save(new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png")).getId();
         Optional<Theme> theme = themeRepository.findById(themeId);
 
         reservationRepository.save(createReservation(

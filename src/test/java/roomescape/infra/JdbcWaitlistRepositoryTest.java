@@ -8,7 +8,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -20,12 +20,10 @@ import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitlistRepository;
 
-@JdbcTest
+@DataJpaTest
 @Import({
     JdbcReservationRepository.class,
     JdbcSlotRepository.class,
-    JdbcReservationTimeRepository.class,
-    JdbcThemeRepository.class,
     JdbcWaitlistRepository.class
 })
 class JdbcWaitlistRepositoryTest {
@@ -83,13 +81,13 @@ class JdbcWaitlistRepositoryTest {
 
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
-        Long id = timeRepository.save(reservationTime);
+        Long id = timeRepository.save(reservationTime).getId();
         return new ReservationTime(id, reservationTime.getStartAt());
     }
 
     private Theme createTheme() {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
-        Long id = themeRepository.save(theme);
+        Long id = themeRepository.save(theme).getId();
         return new Theme(
             id,
             theme.getName(),

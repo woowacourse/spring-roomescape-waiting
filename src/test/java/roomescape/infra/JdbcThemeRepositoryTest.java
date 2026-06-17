@@ -7,16 +7,12 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Theme;
 import roomescape.repository.ThemeRepository;
 
-@JdbcTest
-@Import({
-    JdbcThemeRepository.class,
-})
+@DataJpaTest
 class JdbcThemeRepositoryTest {
 
     private static final String THEME_NAME = "방탈출 제목";
@@ -32,7 +28,7 @@ class JdbcThemeRepositoryTest {
             THEME_NAME,
             THEME_DESCRIPTION,
             THEME_THUMBNAIL)
-        );
+        ).getId();
 
         Optional<Theme> theme = themeRepository.findById(saveId);
 
@@ -50,7 +46,7 @@ class JdbcThemeRepositoryTest {
             THEME_NAME,
             THEME_DESCRIPTION,
             THEME_THUMBNAIL)
-        );
+        ).getId();
 
         List<Theme> themes = themeRepository.findAll();
 
@@ -69,7 +65,7 @@ class JdbcThemeRepositoryTest {
             THEME_NAME,
             THEME_DESCRIPTION,
             THEME_THUMBNAIL)
-        );
+        ).getId();
 
         themeRepository.deleteById(saveId);
 

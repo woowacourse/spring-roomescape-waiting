@@ -118,7 +118,7 @@ class ThemeServiceTest {
 
     @Test
     void 예약_목록에_삭제할_테마가_존재한다면_테마를_삭제할_수_없다() {
-        Long timeSaveId = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Long timeSaveId = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
         Optional<ReservationTime> reservationTime = reservationTimeRepository.findById(timeSaveId);
         Theme theme = themeService.addTheme(new ThemeRequest(
             THEME_NAME,

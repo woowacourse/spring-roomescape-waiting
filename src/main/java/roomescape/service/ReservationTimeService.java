@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static roomescape.domain.exception.DomainErrorCode.REFERENTIAL_INTEGRITY;
+import static roomescape.domain.exception.DomainErrorCode.RESERVATION_TIME_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,7 +33,8 @@ public class ReservationTimeService {
     }
 
     public ReservationTime getReservationTime(Long id) {
-        return reservationtimeRepository.getById(id, "존재하지 않는 예약 시간입니다.");
+        return reservationtimeRepository.findById(id)
+            .orElseThrow(() -> new RoomEscapeException(RESERVATION_TIME_NOT_FOUND, "존재하지 않는 예약 시간입니다."));
     }
 
     public List<ReservationTimeStatus> getTimeSlotsWithReservationStatus(LocalDate date, Long themeId) {
@@ -46,8 +48,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTime addReservationTime(ReservationTimeRequest request) {
-        Long id = reservationtimeRepository.save(new ReservationTime(request.startAt()));
-        return getReservationTime(id);
+        return reservationtimeRepository.save(new ReservationTime(request.startAt()));
     }
 
     @Transactional
