@@ -517,8 +517,8 @@
             orderId: paymentReservation.orderId,
             orderName,
             customerName: tokenInfo()?.username || tokenInfo()?.sub,
-            successUrl: `${baseUrl}/payments/success`,
-            failUrl: `${baseUrl}/payments/fail`,
+            successUrl: `${baseUrl}/payment-success.html`,
+            failUrl: `${baseUrl}/payment-fail.html`,
         });
     }
 
@@ -602,33 +602,28 @@
             return;
         }
         const tbody = R.h('tbody');
-        reservedRows.forEach(reservation => tbody.appendChild(renderReservationRow(reservation)));
+        reservedRows.forEach(reservation => tbody.appendChild(renderReservedRow(reservation)));
         waitingRows.forEach(waiting => tbody.appendChild(renderWaitingRow(waiting)));
         section.appendChild(R.h('div', {className: 'table-wrap'}, [
             R.h('table', {}, [
                 R.h('thead', {}, [
-                    R.h('tr', {}, ['ID', '테마', '날짜', '시간', '결제 상태', 'orderId', 'paymentKey', '금액', '액션'].map(text => R.h('th', {text}))),
+                    R.h('tr', {}, ['ID', '테마', '날짜', '시간', '상태', '액션'].map(text => R.h('th', {text}))),
                 ]),
                 tbody,
             ]),
         ]));
     }
 
-    function renderReservationRow(reservation) {
+    function renderReservedRow(reservation) {
         return R.h('tr', {}, [
             R.h('td', {}, [R.badge(`#${reservation.id}`)]),
             R.h('td', {text: reservation.themeName || '–'}),
             R.h('td', {text: reservation.date}),
             R.h('td', {text: reservation.time || '–'}),
-            R.h('td', {}, [paymentStatusBadge(reservation.paymentStatus)]),
-            R.h('td', {text: reservation.orderId || '–', style: {wordBreak: 'break-all'}}),
-            R.h('td', {text: reservation.paymentKey || '–', style: {wordBreak: 'break-all'}}),
-            R.h('td', {text: reservation.amount == null ? '–' : `${reservation.amount.toLocaleString()}원`}),
+            R.h('td', {}, [R.badge('예약 완료', 'green')]),
             R.h('td', {style: {display: 'flex', gap: '6px'}}, [
-                ...(reservation.reservationStatus === 'RESERVED' ? [
-                    R.button('btn btn-ghost btn-sm', '✏️ 수정', () => openEditModal(reservation)),
-                    R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(reservation.id)),
-                ] : [R.h('span', {text: '–', style: {color: 'var(--text-muted)'}})]),
+                R.button('btn btn-ghost btn-sm', '✏️ 수정', () => openEditModal(reservation)),
+                R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(reservation.id)),
             ]),
         ]);
     }
@@ -640,26 +635,10 @@
             R.h('td', {text: waiting.date}),
             R.h('td', {text: waiting.time || '–'}),
             R.h('td', {}, [R.badge(`대기 ${waiting.waitingOrder}번`, 'yellow')]),
-            R.h('td', {text: '–'}),
-            R.h('td', {text: '–'}),
-            R.h('td', {text: '–'}),
-            R.h('td', {text: '–'}),
             R.h('td', {style: {display: 'flex', gap: '6px'}}, [
                 R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(waiting.id)),
             ]),
         ]);
-    }
-
-    function paymentStatusBadge(status) {
-        const labels = {
-            PAYMENT_PENDING: ['결제 대기', 'yellow'],
-            CONFIRMED: ['확정(CONFIRMED)', 'green'],
-            FAILED: ['실패', 'red'],
-            CHECK_REQUIRED: ['확인 필요', 'yellow'],
-            NONE: ['결제 정보 없음', ''],
-        };
-        const [label, tone] = labels[status] || [status || '–', ''];
-        return R.badge(label, tone);
     }
 
     async function cancelReservation(id) {
