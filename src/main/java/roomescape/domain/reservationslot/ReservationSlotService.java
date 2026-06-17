@@ -2,16 +2,16 @@ package roomescape.domain.reservationslot;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.dto.ReservationCountResult;
 import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationdate.ReservationDateRepository;
+import roomescape.domain.reservationdate.JpaReservationDateRepository;
 import roomescape.domain.reservationslot.dto.ReservationSlotResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.theme.JpaThemeRepository;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
 import roomescape.support.exception.errors.ReservationSlotErrors;
@@ -21,9 +21,9 @@ import roomescape.support.exception.errors.ThemeErrors;
 @RequiredArgsConstructor
 public class ReservationSlotService {
 
-    private final ReservationSlotRepository reservationSlotRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationDateRepository reservationDateRepository;
+    private final JpaReservationSlotRepository reservationSlotRepository;
+    private final JpaThemeRepository themeRepository;
+    private final JpaReservationDateRepository reservationDateRepository;
     private final ReservationRepository reservationRepository;
 
     public List<ReservationSlotResponse> getReservationSlots(Long themeId, Long dateId) {
@@ -46,7 +46,7 @@ public class ReservationSlotService {
                 reservationDate.getId(),
                 theme.getId()
             ).orElseGet(() -> saveReservationSlot(reservationDate, reservationTime, theme));
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             return reservationSlotRepository.findByScheduleToUpdate(
                 reservationTime.getId(),
                 reservationDate.getId(),

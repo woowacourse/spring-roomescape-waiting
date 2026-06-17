@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final JpaUserRepository userRepository;
 
     public User findOrCreateUser(String name) {
         return userRepository.findByName(name)

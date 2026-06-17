@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservationslot.ReservationSlotRepository;
+import roomescape.domain.reservationslot.JpaReservationSlotRepository;
 import roomescape.domain.theme.admin.dto.AdminThemeResponse;
 import roomescape.domain.theme.admin.dto.CreateThemeRequest;
 import roomescape.domain.theme.admin.dto.CreateThemeResponse;
@@ -23,8 +23,9 @@ public class ThemeService {
     private static final int RANK_LIMIT = 10;
     private static final int RANK_DAYS_LIMIT = 7;
 
-    private final ThemeRepository themeRepository;
-    private final ReservationSlotRepository reservationSlotRepository;
+    private final JpaThemeRepository themeRepository;
+    private final JpaReservationSlotRepository reservationSlotRepository;
+    private final ThemeRepository themeQueryRepository;
 
     private final Clock clock;
 
@@ -55,7 +56,7 @@ public class ThemeService {
     public List<ThemeRankResponse> getThemeRank() {
         LocalDate today = LocalDate.now(clock);
         LocalDate startDay = today.minusDays(RANK_DAYS_LIMIT);
-        List<ThemeRankResult> popularThemes = themeRepository.findPopularThemes(RANK_LIMIT, startDay, today);
+        List<ThemeRankResult> popularThemes = themeQueryRepository.findPopularThemes(RANK_LIMIT, startDay, today);
         return popularThemes.stream()
             .map(ThemeRankResponse::from)
             .toList();

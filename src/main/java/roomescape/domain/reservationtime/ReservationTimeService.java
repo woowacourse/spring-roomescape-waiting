@@ -3,7 +3,7 @@ package roomescape.domain.reservationtime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservationslot.ReservationSlotRepository;
+import roomescape.domain.reservationslot.JpaReservationSlotRepository;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeRequest;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeResponse;
 import roomescape.domain.reservationtime.admin.dto.ReservationTimeResponse;
@@ -15,8 +15,8 @@ import roomescape.support.exception.errors.ReservationTimeErrors;
 @RequiredArgsConstructor
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationSlotRepository reservationSlotRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationSlotRepository reservationSlotRepository;
 
     public CreateTimeResponse createReservationTime(CreateTimeRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.save(request.toEntity());
