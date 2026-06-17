@@ -61,7 +61,7 @@ CREATE INDEX idx_reservation_name ON reservation (name);
 CREATE TABLE payment
 (
     id             BIGINT      NOT NULL AUTO_INCREMENT,
-    reservation_id BIGINT      NOT NULL,
+    reservation_id BIGINT      NOT NULL UNIQUE,
     order_id       VARCHAR(64) NOT NULL UNIQUE,
     amount         BIGINT      NOT NULL,
     payment_key    VARCHAR(200),

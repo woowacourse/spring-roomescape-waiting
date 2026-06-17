@@ -9,6 +9,8 @@ public interface PaymentRepository {
 
     Optional<Payment> findByOrderId(String orderId);
 
+    Optional<Payment> findByReservationId(Long reservationId);
+
     void updatePaymentKey(String orderId, String paymentKey);
 
     void deleteByOrderId(String orderId);

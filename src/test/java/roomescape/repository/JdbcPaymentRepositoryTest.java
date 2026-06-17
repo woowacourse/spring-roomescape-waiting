@@ -47,6 +47,22 @@ class JdbcPaymentRepositoryTest {
     }
 
     @Test
+    @DisplayName("reservationId 로 주문을 조회한다")
+    void findByReservationId() {
+        paymentRepository.save(new Payment(null, 1L, "order-xyz", 30_000L, null));
+
+        Payment found = paymentRepository.findByReservationId(1L).orElseThrow();
+        assertThat(found.orderId()).isEqualTo("order-xyz");
+        assertThat(found.reservationId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 reservationId 조회 시 빈 Optional 을 반환한다")
+    void findByReservationId_notFound() {
+        assertThat(paymentRepository.findByReservationId(999L)).isEmpty();
+    }
+
+    @Test
     @DisplayName("orderId로 주문을 삭제한다")
     void deleteByOrderId() {
         paymentRepository.save(new Payment(null, 1L, "order-xyz", 30_000L, null));

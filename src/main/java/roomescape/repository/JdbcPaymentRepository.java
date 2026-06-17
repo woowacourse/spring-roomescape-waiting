@@ -68,6 +68,16 @@ public class JdbcPaymentRepository implements PaymentRepository {
     }
 
     @Override
+    public Optional<Payment> findByReservationId(Long reservationId) {
+        String sql = "SELECT id, reservation_id, order_id, amount, payment_key FROM payment WHERE reservation_id = ?";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, paymentRowMapper, reservationId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public void updatePaymentKey(String orderId, String paymentKey) {
         int affectedRows = jdbcTemplate.update(
                 "UPDATE payment SET payment_key = ? WHERE order_id = ?",

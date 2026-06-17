@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 import roomescape.domain.Payment;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
@@ -42,6 +43,8 @@ class PaymentServiceTest {
     private PaymentGateway paymentGateway;
     @Mock
     private ReservationRepository reservationRepository;
+    @Mock
+    private PlatformTransactionManager transactionManager;
     @InjectMocks
     private PaymentService paymentService;
 
@@ -57,6 +60,33 @@ class PaymentServiceTest {
         assertThat(order.amount()).isEqualTo(AMOUNT);
         assertThat(order.orderId()).startsWith("order-");
         assertThat(order.paymentKey()).isNull();
+    }
+
+    @Test
+    @DisplayName("같은 예약에 미승인 주문이 남아 있으면 새로 만들지 않고 재사용한다")
+    void createOrder_reusesPendingOrder() {
+        Payment existing = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        given(paymentRepository.findByReservationId(RESERVATION_ID)).willReturn(Optional.of(existing));
+
+        Payment order = paymentService.createOrder(RESERVATION_ID, AMOUNT);
+
+        assertThat(order).isEqualTo(existing);
+        verify(paymentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("이미 승인된 주문만 있으면 새 주문을 생성한다")
+    void createOrder_createsNewWhenExistingConfirmed() {
+        Payment confirmed = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, PAYMENT_KEY);
+        given(paymentRepository.findByReservationId(RESERVATION_ID)).willReturn(Optional.of(confirmed));
+        given(paymentRepository.save(any(Payment.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        Payment order = paymentService.createOrder(RESERVATION_ID, AMOUNT);
+
+        assertThat(order.paymentKey()).isNull();
+        assertThat(order.orderId()).isNotEqualTo(ORDER_ID);
+        verify(paymentRepository).save(any(Payment.class));
     }
 
     @Test
