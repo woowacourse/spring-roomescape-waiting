@@ -8,8 +8,4 @@ public interface PaymentOrderRepository {
     Long save(PaymentOrder paymentOrder);
 
     Optional<PaymentOrder> findByOrderId(String orderId);
-
-    int updatePaymentKey(String orderId, String paymentKey);
-
-    int deleteByOrderId(String orderId);
 }
