@@ -789,7 +789,7 @@
 
     username = loginMember.name;
     document.getElementById('headerName').textContent = username;
-    switchSection('popular');
+    handlePaymentRedirect();
   }
 
   async function logout() {
@@ -802,6 +802,26 @@
     t.textContent = msg;
     t.className = `toast ${type} show`;
     setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  function handlePaymentRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    if (payment === 'success') {
+      switchSection('my');
+      showToast('예약이 확정되었습니다.');
+      window.history.replaceState({}, document.title, '/user.html');
+      return;
+    }
+    if (payment === 'fail') {
+      switchSection('booking');
+      const code = params.get('code');
+      const message = params.get('message') || '결제에 실패했습니다.';
+      showToast(code ? `${code}: ${message}` : message, 'error');
+      window.history.replaceState({}, document.title, '/user.html');
+      return;
+    }
+    switchSection('popular');
   }
 
   async function readErrorMessage(res, fallback) {
@@ -1144,9 +1164,25 @@
         failUrl: order.failUrl
       });
     } catch (e) {
-      showToast(e.message, 'error');
+      console.error('Toss payment error', e);
+      showToast(paymentErrorMessage(e), 'error');
       recoverReservationFlow(e);
     }
+  }
+
+  function paymentErrorMessage(error) {
+    const code = error?.code || error?.errorCode || error?.data?.code;
+    const message = error?.message || error?.errorMessage || error?.data?.message;
+    if (code && message) {
+      return `${code}: ${message}`;
+    }
+    if (message) {
+      return message;
+    }
+    if (code) {
+      return `${code}: 결제창을 열 수 없습니다.`;
+    }
+    return 'Toss 결제창을 열 수 없습니다. 클라이언트 키를 확인해주세요.';
   }
 
   async function recoverReservationFlow(error) {
