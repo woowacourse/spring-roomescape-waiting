@@ -11,6 +11,7 @@ import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationEditableStatus;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
+import roomescape.feature.payment.domain.Payment;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -35,13 +36,15 @@ public final class ReservationMapper {
             requestDto.themeId());
     }
 
-    public ReservationResponseDto toResponseDto(Reservation reservation, Integer waitingNumber) {
+    public ReservationResponseDto toResponseDto(Reservation reservation, Integer waitingNumber, Payment payment) {
         ReservationEditableStatus status = getStatus(reservation);
+        String orderId = payment == null ? null : payment.getOrderId();
+        String paymentKey = payment == null ? null : payment.getPaymentKey();
 
         return new ReservationResponseDto(reservation.getId(), reservation.getName().value(), reservation.getDate(),
             timeMapper.toReservationResponseDto(reservation.getTime()),
             themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber,
-            reservation.getOrderStatus());
+            reservation.getOrderStatus(), orderId, paymentKey, reservation.getAmount());
     }
 
     private ReservationEditableStatus getStatus(Reservation reservation) {

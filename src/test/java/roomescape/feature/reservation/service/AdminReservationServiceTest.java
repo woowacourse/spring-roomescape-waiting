@@ -51,6 +51,8 @@ class AdminReservationServiceTest {
     private PaymentApprover paymentApprover;
     @Mock
     private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private OrderPaymentService orderPaymentService;
 
     private AdminReservationService reservationService;
 
@@ -59,7 +61,7 @@ class AdminReservationServiceTest {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         reservationService = new ReservationManagementService(
             reservationRepository, timeRepository, themeRepository, paymentApprover,
-            new PaymentProperties("test_ck", 1_000L), mapper, eventPublisher);
+            new PaymentProperties("test_ck", 1_000L), mapper, eventPublisher, orderPaymentService);
     }
 
     private Time timeWithId(Long id) {

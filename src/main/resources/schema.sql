@@ -27,7 +27,7 @@ CREATE TABLE reservation (
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     status ENUM('ACTIVE', 'CANCELED', 'DELETED', 'WAITING') DEFAULT 'ACTIVE',
-    order_status ENUM('PENDING', 'CONFIRMED') NOT NULL DEFAULT 'PENDING',
+    order_status ENUM('PENDING', 'CONFIRMED', 'CONFIRMATION_REQUIRED') NOT NULL DEFAULT 'PENDING',
     order_amount BIGINT NOT NULL DEFAULT 0,
     version BIGINT NOT NULL DEFAULT 0,
     active_flag BOOLEAN GENERATED ALWAYS AS (
@@ -52,6 +52,18 @@ ON reservation_time (active_start_at);
 
 CREATE UNIQUE INDEX uq_active_theme
 ON theme (active_name);
+
+CREATE TABLE payment (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT NOT NULL,
+    order_id VARCHAR(64) NOT NULL,
+    payment_key VARCHAR(255) NOT NULL,
+    amount BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+);
+
+CREATE UNIQUE INDEX uq_payment_order_id ON payment (order_id);
 
 CREATE TABLE shedlock (
     name VARCHAR(64) NOT NULL,

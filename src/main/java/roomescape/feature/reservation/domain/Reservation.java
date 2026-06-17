@@ -116,7 +116,8 @@ public class Reservation {
         if (this.status != ReservationStatus.ACTIVE) {
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
-        if (this.orderStatus != OrderStatus.PENDING) {
+        // PENDING(미결제)과 CONFIRMATION_REQUIRED(결과 불명)는 확정 가능. 이미 CONFIRMED 인 경우만 거절한다.
+        if (this.orderStatus == OrderStatus.CONFIRMED) {
             throw new GeneralException(ReservationErrorType.ALREADY_CONFIRMED_ORDER);
         }
         if (this.amount != paidAmount) {
@@ -125,6 +126,22 @@ public class Reservation {
 
         return new Reservation(
             this.id, this.name, this.slot, this.status, OrderStatus.CONFIRMED, this.amount, this.version);
+    }
+
+    /**
+     * 결제 결과가 불명확(read timeout 등)할 때 '확인 필요' 상태로 표시한다.
+     * 결제 실패로 단정하지 않으며, 이후 재확인으로 확정될 수 있다.
+     */
+    public Reservation markConfirmationRequired() {
+        if (this.status != ReservationStatus.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+        if (this.orderStatus != OrderStatus.PENDING) {
+            throw new GeneralException(ReservationErrorType.ALREADY_CONFIRMED_ORDER);
+        }
+
+        return new Reservation(
+            this.id, this.name, this.slot, this.status, OrderStatus.CONFIRMATION_REQUIRED, this.amount, this.version);
     }
 
     private void validateCancelable(ReserverName requestName) {

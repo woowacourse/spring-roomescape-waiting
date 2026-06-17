@@ -7,6 +7,7 @@ import roomescape.feature.time.dto.response.ReservationTimeResponseDto;
 
 public record ReservationResponseDto(Long id, String name, LocalDate date, ReservationTimeResponseDto time,
                                      ReservationThemeResponseDto theme, ReservationEditableStatus status,
-                                     String message, Integer waitingNumber, OrderStatus orderStatus) {
+                                     String message, Integer waitingNumber, OrderStatus orderStatus,
+                                     String orderId, String paymentKey, Long amount) {
 
 }

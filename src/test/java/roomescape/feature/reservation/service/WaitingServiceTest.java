@@ -56,6 +56,8 @@ class WaitingServiceTest {
     private PaymentApprover paymentApprover;
     @Mock
     private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private OrderPaymentService orderPaymentService;
 
     private WaitingService waitingService;
 
@@ -64,7 +66,7 @@ class WaitingServiceTest {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         waitingService = new ReservationManagementService(
             reservationRepository, timeRepository, themeRepository, paymentApprover,
-            new PaymentProperties("test_ck", 1_000L), mapper, eventPublisher);
+            new PaymentProperties("test_ck", 1_000L), mapper, eventPublisher, orderPaymentService);
     }
 
     private Time timeWithId(Long id) {

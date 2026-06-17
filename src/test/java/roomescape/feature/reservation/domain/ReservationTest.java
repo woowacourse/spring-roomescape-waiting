@@ -282,5 +282,48 @@ class ReservationTest {
                     .isInstanceOf(GeneralException.class)
                     .hasMessage("결제 금액이 올바르지 않습니다.");
         }
+
+        @Test
+        void CONFIRMATION_REQUIRED_상태에서도_확정할_수_있다() {
+            // given: 결과 불명(확인 필요) 상태의 예약을 재확인하는 상황
+            Reservation confirmationRequired = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME,
+                    ReservationStatus.ACTIVE, OrderStatus.CONFIRMATION_REQUIRED, DEFAULT_AMOUNT, 0L);
+
+            // when
+            Reservation confirmed = confirmationRequired.confirmOrder(DEFAULT_AMOUNT);
+
+            // then
+            assertThat(confirmed.getOrderStatus()).isEqualTo(OrderStatus.CONFIRMED);
+        }
+    }
+
+    @Nested
+    class 확인_필요로_표시한다 {
+
+        @Test
+        void PENDING이면_CONFIRMATION_REQUIRED로_전이된다() {
+            // given
+            Reservation activeReservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+
+            // when
+            Reservation marked = activeReservation.markConfirmationRequired();
+
+            // then
+            assertThat(marked.getOrderStatus()).isEqualTo(OrderStatus.CONFIRMATION_REQUIRED);
+        }
+
+        @Test
+        void 이미_확정된_주문이면_예외를_던진다() {
+            // given
+            Reservation confirmedReservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME,
+                    ReservationStatus.ACTIVE, OrderStatus.CONFIRMED, 0L);
+
+            // when & then
+            assertThatThrownBy(confirmedReservation::markConfirmationRequired)
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("이미 주문이 확정된 예약입니다.");
+        }
     }
 }

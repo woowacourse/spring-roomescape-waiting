@@ -44,7 +44,8 @@ class AdminReservationControllerTest {
             new ReservationTimeResponseDto(1L, TimeFixture.VALID_10_00.getStartAt(), false),
             new ReservationThemeResponseDto(1L, ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(), ThemeFixture.VALID.getImageUrl(), false),
-            ReservationEditableStatus.EDITABLE, "", null, OrderStatus.CONFIRMED
+            ReservationEditableStatus.EDITABLE, "", null, OrderStatus.CONFIRMED,
+            "test_order_id", "test_payment_key", 1_000L
         );
     }
 
