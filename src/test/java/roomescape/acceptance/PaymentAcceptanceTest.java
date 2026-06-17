@@ -19,9 +19,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.PaymentGateway;
+import roomescape.client.TossPaymentException;
 import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
-import roomescape.service.exception.PaymentException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -52,7 +52,7 @@ class PaymentAcceptanceTest {
             return confirmation -> {
                 // paymentKey 가 "reject" 면 카드 거절을 흉내 내 승인 실패 경로를 검증한다.
                 if ("reject".equals(confirmation.paymentKey())) {
-                    throw new PaymentException.CardRejected("카드가 거절되었습니다");
+                    throw new TossPaymentException.CardRejected("카드가 거절되었습니다");
                 }
                 return new PaymentResult(
                         confirmation.paymentKey(),

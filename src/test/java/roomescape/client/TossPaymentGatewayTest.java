@@ -24,7 +24,6 @@ import org.springframework.web.client.RestClient;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
-import roomescape.service.exception.PaymentException;
 
 class TossPaymentGatewayTest {
 
@@ -80,30 +79,30 @@ class TossPaymentGatewayTest {
     }
 
     @Test
-    @DisplayName("에러 응답 본문이 비어 있어도 실패를 삼키지 않고 PaymentException 으로 던진다")
+    @DisplayName("에러 응답 본문이 비어 있어도 실패를 삼키지 않고 TossPaymentException 으로 던진다")
     void confirm_emptyErrorBody() {
         server.expect(requestTo(CONFIRM_URL))
                 .andRespond(withStatus(HttpStatusCode.valueOf(500)));
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(CONFIRMATION))
-                .isInstanceOf(PaymentException.class)
-                .extracting(e -> ((PaymentException) e).getCode())
+                .isInstanceOf(TossPaymentException.class)
+                .extracting(e -> ((TossPaymentException) e).getCode())
                 .isEqualTo("UNKNOWN");
     }
 
     static Stream<Arguments> errorCases() {
         return Stream.of(
-                arguments(400, "ALREADY_PROCESSED_PAYMENT", PaymentException.AlreadyProcessed.class),
-                arguments(400, "DUPLICATED_ORDER_ID", PaymentException.DuplicatedOrder.class),
-                arguments(400, "NOT_FOUND_PAYMENT_SESSION", PaymentException.SessionExpired.class),
-                arguments(400, "INVALID_REQUEST", PaymentException.InvalidRequest.class),
-                arguments(401, "UNAUTHORIZED_KEY", PaymentException.GatewayConfig.class),
-                arguments(401, "INVALID_API_KEY", PaymentException.GatewayConfig.class),
-                arguments(403, "REJECT_CARD_PAYMENT", PaymentException.CardRejected.class),
-                arguments(404, "NOT_FOUND_PAYMENT", PaymentException.PaymentNotFound.class),
-                arguments(500, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", PaymentException.Retryable.class),
-                // 정의되지 않은 코드는 기본 PaymentException 으로 떨어진다.
-                arguments(400, "SOME_UNDEFINED_CODE", PaymentException.class)
+                arguments(400, "ALREADY_PROCESSED_PAYMENT", TossPaymentException.AlreadyProcessed.class),
+                arguments(400, "DUPLICATED_ORDER_ID", TossPaymentException.DuplicatedOrder.class),
+                arguments(400, "NOT_FOUND_PAYMENT_SESSION", TossPaymentException.SessionExpired.class),
+                arguments(400, "INVALID_REQUEST", TossPaymentException.InvalidRequest.class),
+                arguments(401, "UNAUTHORIZED_KEY", TossPaymentException.GatewayConfig.class),
+                arguments(401, "INVALID_API_KEY", TossPaymentException.GatewayConfig.class),
+                arguments(403, "REJECT_CARD_PAYMENT", TossPaymentException.CardRejected.class),
+                arguments(404, "NOT_FOUND_PAYMENT", TossPaymentException.PaymentNotFound.class),
+                arguments(500, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", TossPaymentException.Retryable.class),
+                // 정의되지 않은 코드는 기본 TossPaymentException 으로 떨어진다.
+                arguments(400, "SOME_UNDEFINED_CODE", TossPaymentException.class)
         );
     }
 }

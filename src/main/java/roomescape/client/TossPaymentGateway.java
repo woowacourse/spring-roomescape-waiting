@@ -15,11 +15,10 @@ import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
-import roomescape.service.exception.PaymentException;
 
 /**
  * PaymentGateway 포트의 Toss 구현(어댑터). Toss 의 요청·응답·에러 포맷은 이 클래스 밖으로 새어 나가지 않는다(부패 방지 계층).
- * 외부 에러 코드 → 도메인성 PaymentException 으로의 번역도 이 안에서만 일어난다.
+ * 외부 에러 코드 → 도메인 예외(TossPaymentException) 매핑은 TossPaymentException.of 가 맡는다.
  */
 @Component
 public class TossPaymentGateway implements PaymentGateway {
@@ -44,7 +43,7 @@ public class TossPaymentGateway implements PaymentGateway {
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    throw toPaymentException(readError(res));
+                    throw TossPaymentException.of(res.getStatusCode(), readError(res));
                 })
                 .body(TossPaymentResponse.class);
         return toResult(response);
@@ -73,22 +72,5 @@ public class TossPaymentGateway implements PaymentGateway {
         } catch (IOException e) {
             return new TossErrorResponse(UNKNOWN_CODE, "토스 에러 응답을 해석할 수 없습니다: " + new String(body, StandardCharsets.UTF_8));
         }
-    }
-
-    /**
-     * Toss 에러 코드를 도메인성 예외로 매핑한다. 정의되지 않은 코드는 기본 PaymentException 으로 떨어진다.
-     */
-    private PaymentException toPaymentException(TossErrorResponse error) {
-        return switch (error.code()) {
-            case "ALREADY_PROCESSED_PAYMENT" -> new PaymentException.AlreadyProcessed(error.message());
-            case "DUPLICATED_ORDER_ID" -> new PaymentException.DuplicatedOrder(error.message());
-            case "NOT_FOUND_PAYMENT_SESSION" -> new PaymentException.SessionExpired(error.message());
-            case "INVALID_REQUEST" -> new PaymentException.InvalidRequest(error.message());
-            case "UNAUTHORIZED_KEY", "INVALID_API_KEY" -> new PaymentException.GatewayConfig(error.message());
-            case "REJECT_CARD_PAYMENT" -> new PaymentException.CardRejected(error.message());
-            case "NOT_FOUND_PAYMENT" -> new PaymentException.PaymentNotFound(error.message());
-            case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> new PaymentException.Retryable(error.message());
-            default -> new PaymentException(error.code(), error.message());
-        };
     }
 }
