@@ -87,7 +87,7 @@ public class OrderRepository {
         return jdbcTemplate.query(sql, Map.of(), rowMapper);
     }
 
-    public void confirm(String orderId, String paymentKey) {
+    public void confirm(String orderId, String paymentKey, PaymentStatus status) {
         String sql = """
                 UPDATE payment_order
                 SET payment_key = :paymentKey, status = :status
@@ -96,7 +96,7 @@ public class OrderRepository {
         int affected = jdbcTemplate.update(sql, Map.of(
                 "orderId", orderId,
                 "paymentKey", paymentKey,
-                "status", PaymentStatus.DONE.name()
+                "status", status.name()
         ));
 
         if (affected == 0) {

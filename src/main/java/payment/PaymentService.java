@@ -39,8 +39,10 @@ public class PaymentService {
 
     PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
     PaymentResult result = paymentGateway.confirm(confirmation);
-    orderRepository.confirm(orderId, result.paymentKey());
-    eventPublisher.publishEvent(new PaymentConfirmedEvent(order.reservationId()));
+    orderRepository.confirm(orderId, result.paymentKey(), result.status());
+    if (result.status() == PaymentStatus.DONE) {
+      eventPublisher.publishEvent(new PaymentConfirmedEvent(order.reservationId()));
+    }
     return result;
   }
 
