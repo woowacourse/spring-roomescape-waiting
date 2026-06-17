@@ -1,5 +1,7 @@
 package roomescape.reservation.presentation.dto;
 
+import roomescape.reservation.application.port.out.payment.PaymentResult;
+
 public record PaymentConfirmResponse(
         String paymentKey,
         String orderId,
@@ -7,12 +9,12 @@ public record PaymentConfirmResponse(
         Long approvedAmount
 ) {
 
-    public static PaymentConfirmResponse of(String paymentKey, String orderId, String status, Long approvedAmount) {
+    public static PaymentConfirmResponse of(PaymentResult result) {
         return new PaymentConfirmResponse(
-                paymentKey,
-                orderId,
-                status,
-                approvedAmount
+                result.paymentKey(),
+                result.orderId(),
+                result.status().name(),
+                result.approvedAmount()
         );
     }
 }

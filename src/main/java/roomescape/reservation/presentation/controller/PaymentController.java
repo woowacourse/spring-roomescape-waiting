@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.dto.PaymentConfirmCommand;
+import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.application.service.PaymentService;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.presentation.dto.PaymentConfigResponse;
@@ -47,13 +48,8 @@ public class PaymentController {
             @Valid @RequestBody PaymentConfirmRequest request
     ) {
         PaymentConfirmCommand command = request.toCommand();
-        var result = paymentService.confirm(command);
-        return ResponseEntity.ok(PaymentConfirmResponse.of(
-                result.paymentKey(),
-                result.orderId(),
-                result.status().name(),
-                result.approvedAmount()
-        ));
+        PaymentResult result = paymentService.confirm(command);
+        return ResponseEntity.ok(PaymentConfirmResponse.of(result));
     }
 
     @PostMapping("/fail")
