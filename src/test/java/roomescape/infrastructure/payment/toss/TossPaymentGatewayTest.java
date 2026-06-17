@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -57,7 +58,8 @@ class TossPaymentGatewayTest {
     }
 
     @Test
-    void confirm이_성공하면_status가_DONE인_결과를_반환한다() {
+    @DisplayName("confirm이 성공하면 status가 DONE인 결과를 반환한다.")
+    void confirmPayment_Success() {
         enqueue(200, """
                 {
                   "paymentKey": "test_pk_1",
@@ -80,7 +82,8 @@ class TossPaymentGatewayTest {
     }
 
     @Test
-    void 이미_처리된_결제면_AlreadyProcessed가_던져진다() {
+    @DisplayName("이미 처리된 결제면 AlreadyProcessed가 던져진다.")
+    void confirmPayment_WhenPaymentIsAlreadyProcessed_ThrowAlreadyProcessed() {
         enqueue(400, """
                 {"code": "ALREADY_PROCESSED_PAYMENT", "message": "이미 처리된 결제 입니다."}
                 """);
@@ -92,7 +95,9 @@ class TossPaymentGatewayTest {
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")
     @MethodSource("errorCases")
-    void 에러코드별로_매핑된_예외가_던져진다(int httpStatus, String code, Class<? extends Throwable> expected) {
+    @DisplayName("에러 코드별로 매핑된 예외가 던져진다.")
+    void confirmPayment_WhenErrorResponse_ThrowMappingException(int httpStatus, String code,
+                                                                Class<? extends Throwable> expected) {
         enqueue(httpStatus, "{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(

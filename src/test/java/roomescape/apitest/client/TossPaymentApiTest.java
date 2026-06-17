@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,8 @@ public class TossPaymentApiTest {
     }
 
     @Test
-    void 존재하지_않는_결제건을_승인하면_토스가_에러를_내려주고_도메인_예외로_변환된다() {
+    @DisplayName("존재하지 않는 결제건을 승인하면 토스가 에러를 내려주고 도메인 예외로 변환된다.")
+    void confirmPayment_WhenPaymentDoesNotExist_ThrowTossPaymentException() {
         // 유효한 결제 인증을 거치지 않은 임의의 paymentKey/orderId -> 토스가 4xx 에러를 응답한다.
         var confirmation = new PaymentConfirmation(
                 "tgen_does_not_exist_payment_key",
@@ -52,7 +54,8 @@ public class TossPaymentApiTest {
 
     @Test
     @Disabled("PAYMENT_KEY / ORDER_ID / AMOUNT 상수에 샌드박스 결제로 얻은 값을 직접 넣고 이 @Disabled 를 지우면 실행됩니다.")
-    void 샌드박스에서_인증한_결제건을_승인하면_DONE_결과를_반환한다() {
+    @DisplayName("샌드박스에서 인증한 결제건을 승인하면 DONE 결과를 반환한다.")
+    void confirmPayment_Success() throws TossPaymentException {
         // 같은 paymentKey 는 한 번만 승인된다(두 번째부터 ALREADY_PROCESSED_PAYMENT).
         var result = tossPaymentGateway.confirm(
                 new PaymentConfirmation(PAYMENT_KEY, ORDER_ID, AMOUNT));
