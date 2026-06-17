@@ -38,7 +38,6 @@ public class ActiveReservationService {
         }
     }
 
-    @Transactional(propagation = Propagation.NESTED)
     public ReservationInfo transferReservation(final Long id, final TimeSlot slot, final ReservationCreateCommand command) {
         if (reservationRepository.existsByActiveSlotId(slot.getId())) {
             throw new ReservationInUseException("이미 확정 예약이 존재합니다.");
