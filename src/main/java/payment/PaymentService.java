@@ -33,6 +33,9 @@ public class PaymentService {
     if (!order.amount().equals(amount)) {
       throw new PaymentAmountMismatchException(order.amount(), amount);
     }
+    if (order.status() == PaymentStatus.DONE) {
+      return new PaymentResult(order.paymentKey(), orderId, order.amount(), order.status());
+    }
 
     PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
     PaymentResult result = paymentGateway.confirm(confirmation);

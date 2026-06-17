@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -72,6 +73,22 @@ class PaymentServiceTest {
         assertThat(order.status()).isEqualTo(PaymentStatus.DONE);
         Reservation reservation = reservationDao.findById(pending.reservation().id()).orElseThrow();
         assertThat(reservation.status()).isEqualTo(ReservationStatus.CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("이미 승인된 주문을 다시 confirm하면 게이트웨이를 재호출하지 않고 기존 결과를 반환한다.")
+    void confirmIsIdempotentForAlreadyDoneOrder() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        when(paymentGateway.confirm(new PaymentConfirmation("payment-key", pending.orderId(), 5_000L)))
+                .thenReturn(new PaymentResult("payment-key", pending.orderId(), 5_000L, PaymentStatus.DONE));
+        paymentService.confirm("payment-key", pending.orderId(), 5_000L);
+
+        PaymentResult result = paymentService.confirm("payment-key", pending.orderId(), 5_000L);
+
+        assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
+        assertThat(result.paymentKey()).isEqualTo("payment-key");
+        verify(paymentGateway, times(1)).confirm(any(PaymentConfirmation.class));
     }
 
     @Test
