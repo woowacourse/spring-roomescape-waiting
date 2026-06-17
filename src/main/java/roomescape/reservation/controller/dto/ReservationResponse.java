@@ -10,7 +10,8 @@ public record ReservationResponse(
         String name,
         LocalDate date,
         ReservationTimeResponse time,
-        ThemeResponse theme
+        ThemeResponse theme,
+        String orderId
 ) {
 
     public static ReservationResponse from(ReservationResult result) {
@@ -19,7 +20,8 @@ public record ReservationResponse(
                 result.name(),
                 result.date(),
                 ReservationTimeResponse.from(result.time()),
-                ThemeResponse.from(result.theme())
+                ThemeResponse.from(result.theme()),
+                result.orderId()
         );
     }
 }

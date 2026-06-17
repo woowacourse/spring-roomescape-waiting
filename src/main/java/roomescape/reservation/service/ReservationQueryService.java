@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.repository.PaymentRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.reservation.repository.ReservationQueryDao;
@@ -30,13 +33,16 @@ public class ReservationQueryService {
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationQueryDao reservationQueryDao;
+    private final PaymentRepository paymentRepository;
 
     public ReservationQueryService(ReservationRepository reservationRepository,
                                    ReservationWaitingRepository reservationWaitingRepository,
-                                   ReservationQueryDao reservationQueryDao) {
+                                   ReservationQueryDao reservationQueryDao,
+                                   PaymentRepository paymentRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationQueryDao = reservationQueryDao;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<ReservationResult> findAll() {
@@ -61,8 +67,18 @@ public class ReservationQueryService {
 
     private List<ReservationWithStatusResult> getReservationResults(String name) {
         return reservationRepository.findAllByName(name).stream()
-                .map(ReservationWithStatusResult::from)
+                .map(this::toResultWithOrderId)
                 .toList();
+    }
+
+    private ReservationWithStatusResult toResultWithOrderId(Reservation reservation) {
+        if (reservation.isConfirmed()) {
+            return ReservationWithStatusResult.from(reservation);
+        }
+        String orderId = paymentRepository.findByReservationId(reservation.getId())
+                .map(Payment::getOrderId)
+                .orElse(null);
+        return ReservationWithStatusResult.from(reservation, orderId);
     }
 
     private List<ReservationWithStatusResult> getReservationWaitingResults(List<ReservationWaiting> waitings) {

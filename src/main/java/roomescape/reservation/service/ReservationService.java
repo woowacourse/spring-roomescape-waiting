@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.service.PaymentService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
@@ -29,15 +31,18 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final PaymentService paymentService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeService reservationTimeService,
                               ThemeService themeService,
-                              ReservationWaitingRepository reservationWaitingRepository) {
+                              ReservationWaitingRepository reservationWaitingRepository,
+                              PaymentService paymentService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.paymentService = paymentService;
     }
 
     @Transactional
@@ -49,7 +54,8 @@ public class ReservationService {
         validateSlotAvailable(null, command.name(), slot);
         Reservation newReservation = new Reservation(command.name(), slot, requestTime);
         Reservation result = reservationRepository.save(newReservation);
-        return ReservationResult.from(result);
+        Payment payment = paymentService.issuePendingPayment(result);
+        return ReservationResult.from(result, payment.getOrderId());
     }
 
     @Transactional
@@ -101,6 +107,7 @@ public class ReservationService {
                 new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())
         );
 
+        paymentService.deleteByReservationId(reservation.getId());
         reservationRepository.delete(reservation);
         promoteNextWaiting(waitings, requestTime);
     }
@@ -125,6 +132,7 @@ public class ReservationService {
     private void createReservationFromWaiting(ReservationWaiting waiting, LocalDateTime requestTime) {
         reservationWaitingRepository.delete(waiting);
         Reservation newReservation = waiting.toReservation(requestTime);
-        reservationRepository.save(newReservation);
+        Reservation saved = reservationRepository.save(newReservation);
+        paymentService.issuePendingPayment(saved);
     }
 }

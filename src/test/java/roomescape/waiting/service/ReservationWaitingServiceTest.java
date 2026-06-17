@@ -40,7 +40,7 @@ import roomescape.waiting.service.dto.ReservationWaitingResult;
 class ReservationWaitingServiceTest {
 
     private Reservation buildReservation(Long id, String name, ReservationSlot slot) {
-        return new Reservation(id, name, slot, slot.date().atStartOfDay());
+        return new Reservation(id, name, slot, slot.date().atStartOfDay(), true);
     }
 
     private void givenReservationTimeAndTheme() {

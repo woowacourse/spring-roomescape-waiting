@@ -10,15 +10,21 @@ public record ReservationResult(
         String name,
         LocalDate date,
         ReservationTimeResult time,
-        ThemeResult theme
+        ThemeResult theme,
+        String orderId
 ) {
     public static ReservationResult from(Reservation reservation) {
+        return from(reservation, null);
+    }
+
+    public static ReservationResult from(Reservation reservation, String orderId) {
         return new ReservationResult(
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getDate(),
                 ReservationTimeResult.from(reservation.getTime()),
-                ThemeResult.from(reservation.getTheme())
+                ThemeResult.from(reservation.getTheme()),
+                orderId
         );
     }
 }

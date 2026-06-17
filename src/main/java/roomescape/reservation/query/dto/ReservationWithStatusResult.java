@@ -14,10 +14,15 @@ public record ReservationWithStatusResult(
         ReservationTime time,
         Theme theme,
         ReservationStatus status,
-        Long waitingOrder
+        Long waitingOrder,
+        String orderId
 ) {
 
     public static ReservationWithStatusResult from(Reservation reservation) {
+        return from(reservation, null);
+    }
+
+    public static ReservationWithStatusResult from(Reservation reservation, String orderId) {
         return new ReservationWithStatusResult(
                 reservation.getId(),
                 reservation.getName(),
@@ -25,7 +30,8 @@ public record ReservationWithStatusResult(
                 reservation.getTime(),
                 reservation.getTheme(),
                 ReservationStatus.RESERVED,
-                0L
+                0L,
+                orderId
         );
     }
 
@@ -37,7 +43,8 @@ public record ReservationWithStatusResult(
                 waiting.getTime(),
                 waiting.getTheme(),
                 ReservationStatus.WAITING,
-                rank
+                rank,
+                null
         );
     }
 }
