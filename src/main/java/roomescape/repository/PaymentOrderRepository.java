@@ -14,5 +14,7 @@ public interface PaymentOrderRepository {
 
     void complete(String orderId, String paymentKey);
 
-    void deleteByOrderId(String orderId);
+    void markUnknown(String orderId, String paymentKey);
+
+    void markFailed(String orderId);
 }

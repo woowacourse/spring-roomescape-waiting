@@ -2,11 +2,16 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 import roomescape.client.PaymentAmountMismatchException;
+import roomescape.client.PaymentAlreadyProcessedException;
 import roomescape.client.PaymentConfirmation;
+import roomescape.client.PaymentConfirmationUnknownException;
+import roomescape.client.PaymentFailureException;
 import roomescape.client.PaymentGateway;
+import roomescape.client.PaymentGatewayRetryableException;
 import roomescape.client.PaymentResult;
 import roomescape.client.PaymentStatus;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentOrderStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -33,7 +38,7 @@ class PaymentServiceTest {
         ReservationRepository reservationRepository = new FakeReservationRepository();
         SpyPaymentGateway paymentGateway = new SpyPaymentGateway();
         PaymentService paymentService = new PaymentService(orderRepository, reservationRepository, paymentGateway);
-        orderRepository.save(new PaymentOrder("order-1", 1L, 50_000L, null));
+        orderRepository.save(new PaymentOrder("order-1", 1L, 50_000L, "idempotency-key-1", null, PaymentOrderStatus.PENDING));
 
         assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 10_000L))
                 .isInstanceOf(PaymentAmountMismatchException.class);
@@ -49,13 +54,15 @@ class PaymentServiceTest {
         SpyPaymentGateway paymentGateway = new SpyPaymentGateway();
         PaymentService paymentService = new PaymentService(orderRepository, reservationRepository, paymentGateway);
         Reservation reservation = reservationRepository.save(pendingReservation());
-        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, null));
+        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, "idempotency-key-1", null, PaymentOrderStatus.PENDING));
 
         PaymentResult result = paymentService.confirm("payment-key", "order-1", 50_000L);
 
         assertThat(paymentGateway.called).isTrue();
+        assertThat(paymentGateway.confirmation.idempotencyKey()).isEqualTo("idempotency-key-1");
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(orderRepository.findByOrderId("order-1").orElseThrow().paymentKey()).isEqualTo("payment-key");
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().status()).isEqualTo(PaymentOrderStatus.CONFIRMED);
         assertThat(reservationRepository.findById(reservation.getId()).orElseThrow().getStatus())
                 .isEqualTo(ReservationStatus.CONFIRMED);
     }
@@ -67,12 +74,95 @@ class PaymentServiceTest {
         SpyPaymentGateway paymentGateway = new SpyPaymentGateway();
         PaymentService paymentService = new PaymentService(orderRepository, reservationRepository, paymentGateway);
         Reservation reservation = reservationRepository.save(pendingReservation());
-        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, null));
+        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, "idempotency-key-1", null, PaymentOrderStatus.PENDING));
 
         paymentService.cancelPending("order-1");
 
-        assertThat(orderRepository.findByOrderId("order-1")).isEmpty();
-        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().status()).isEqualTo(PaymentOrderStatus.FAILED);
+        assertThat(reservationRepository.findById(reservation.getId())).isPresent();
+    }
+
+    @Test
+    void 승인_응답을_받지_못하면_paymentKey를_저장하고_확인_필요_상태로_남긴다() {
+        FakePaymentOrderRepository orderRepository = new FakePaymentOrderRepository();
+        FakeReservationRepository reservationRepository = new FakeReservationRepository();
+        UnknownPaymentGateway paymentGateway = new UnknownPaymentGateway();
+        PaymentService paymentService = new PaymentService(orderRepository, reservationRepository, paymentGateway);
+        Reservation reservation = reservationRepository.save(pendingReservation());
+        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, "idempotency-key-1", null, PaymentOrderStatus.PENDING));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 50_000L))
+                .isInstanceOf(PaymentConfirmationUnknownException.class);
+
+        PaymentOrder order = orderRepository.findByOrderId("order-1").orElseThrow();
+        assertThat(order.paymentKey()).isEqualTo("payment-key");
+        assertThat(order.status()).isEqualTo(PaymentOrderStatus.UNKNOWN);
+        assertThat(reservationRepository.findById(reservation.getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.PENDING);
+    }
+
+    @Test
+    void 승인_API가_명시적_실패를_응답하면_주문을_실패_상태로_남긴다() {
+        FakePaymentOrderRepository orderRepository = new FakePaymentOrderRepository();
+        FakeReservationRepository reservationRepository = new FakeReservationRepository();
+        PaymentService paymentService = new PaymentService(
+                orderRepository,
+                reservationRepository,
+                confirmation -> {
+                    throw new PaymentFailureException("REJECT_CARD_PAYMENT", "카드가 거절되었습니다.");
+                }
+        );
+        Reservation reservation = reservationRepository.save(pendingReservation());
+        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, "idempotency-key-1", null, PaymentOrderStatus.PENDING));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 50_000L))
+                .isInstanceOf(PaymentFailureException.class);
+
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().status()).isEqualTo(PaymentOrderStatus.FAILED);
+        assertThat(reservationRepository.findById(reservation.getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.PENDING);
+    }
+
+    @Test
+    void 이미_처리됨이나_재시도성_오류는_확인_필요_상태로_남긴다() {
+        FakePaymentOrderRepository orderRepository = new FakePaymentOrderRepository();
+        FakeReservationRepository reservationRepository = new FakeReservationRepository();
+        PaymentService paymentService = new PaymentService(
+                orderRepository,
+                reservationRepository,
+                confirmation -> {
+                    throw new PaymentGatewayRetryableException("FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", "일시 오류");
+                }
+        );
+        Reservation reservation = reservationRepository.save(pendingReservation());
+        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, "idempotency-key-1", null, PaymentOrderStatus.PENDING));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 50_000L))
+                .isInstanceOf(PaymentGatewayRetryableException.class);
+
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().status()).isEqualTo(PaymentOrderStatus.UNKNOWN);
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().paymentKey()).isEqualTo("payment-key");
+    }
+
+    @Test
+    void 이미_처리된_결제_응답은_확인_필요_상태로_남긴다() {
+        FakePaymentOrderRepository orderRepository = new FakePaymentOrderRepository();
+        FakeReservationRepository reservationRepository = new FakeReservationRepository();
+        PaymentService paymentService = new PaymentService(
+                orderRepository,
+                reservationRepository,
+                confirmation -> {
+                    throw new PaymentAlreadyProcessedException("이미 처리된 결제입니다.");
+                }
+        );
+        Reservation reservation = reservationRepository.save(pendingReservation());
+        orderRepository.save(new PaymentOrder("order-1", reservation.getId(), 50_000L, "idempotency-key-1", null, PaymentOrderStatus.PENDING));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 50_000L))
+                .isInstanceOf(PaymentAlreadyProcessedException.class);
+
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().status()).isEqualTo(PaymentOrderStatus.UNKNOWN);
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().paymentKey()).isEqualTo("payment-key");
     }
 
     private Reservation pendingReservation() {
@@ -84,16 +174,26 @@ class PaymentServiceTest {
     private static class SpyPaymentGateway implements PaymentGateway {
 
         private boolean called;
+        private PaymentConfirmation confirmation;
 
         @Override
         public PaymentResult confirm(PaymentConfirmation confirmation) {
             called = true;
+            this.confirmation = confirmation;
             return new PaymentResult(
                     confirmation.paymentKey(),
                     confirmation.orderId(),
                     PaymentStatus.DONE,
                     confirmation.amount()
             );
+        }
+    }
+
+    private static class UnknownPaymentGateway implements PaymentGateway {
+
+        @Override
+        public PaymentResult confirm(PaymentConfirmation confirmation) {
+            throw new PaymentConfirmationUnknownException("확인 필요", new RuntimeException());
         }
     }
 
@@ -121,12 +221,40 @@ class PaymentServiceTest {
         @Override
         public void complete(String orderId, String paymentKey) {
             PaymentOrder order = orders.get(orderId);
-            orders.put(orderId, new PaymentOrder(order.orderId(), order.reservationId(), order.amount(), paymentKey));
+            orders.put(orderId, new PaymentOrder(
+                    order.orderId(),
+                    order.reservationId(),
+                    order.amount(),
+                    order.idempotencyKey(),
+                    paymentKey,
+                    PaymentOrderStatus.CONFIRMED
+            ));
         }
 
         @Override
-        public void deleteByOrderId(String orderId) {
-            orders.remove(orderId);
+        public void markUnknown(String orderId, String paymentKey) {
+            PaymentOrder order = orders.get(orderId);
+            orders.put(orderId, new PaymentOrder(
+                    order.orderId(),
+                    order.reservationId(),
+                    order.amount(),
+                    order.idempotencyKey(),
+                    paymentKey,
+                    PaymentOrderStatus.UNKNOWN
+            ));
+        }
+
+        @Override
+        public void markFailed(String orderId) {
+            PaymentOrder order = orders.get(orderId);
+            orders.put(orderId, new PaymentOrder(
+                    order.orderId(),
+                    order.reservationId(),
+                    order.amount(),
+                    order.idempotencyKey(),
+                    order.paymentKey(),
+                    PaymentOrderStatus.FAILED
+            ));
         }
     }
 }

@@ -3,8 +3,12 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.client.PaymentAmountMismatchException;
+import roomescape.client.PaymentAlreadyProcessedException;
 import roomescape.client.PaymentConfirmation;
+import roomescape.client.PaymentConfirmationUnknownException;
+import roomescape.client.PaymentFailureException;
 import roomescape.client.PaymentGateway;
+import roomescape.client.PaymentGatewayRetryableException;
 import roomescape.client.PaymentResult;
 import roomescape.domain.PaymentOrder;
 import roomescape.repository.PaymentOrderRepository;
@@ -35,7 +39,21 @@ public class PaymentService {
             throw new PaymentAmountMismatchException(order.amount(), amount);
         }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        PaymentResult result;
+        try {
+            result = paymentGateway.confirm(
+                    new PaymentConfirmation(paymentKey, orderId, amount, order.idempotencyKey())
+            );
+        } catch (PaymentConfirmationUnknownException e) {
+            paymentOrderRepository.markUnknown(orderId, paymentKey);
+            throw e;
+        } catch (PaymentFailureException e) {
+            paymentOrderRepository.markFailed(orderId);
+            throw e;
+        } catch (PaymentGatewayRetryableException | PaymentAlreadyProcessedException e) {
+            paymentOrderRepository.markUnknown(orderId, paymentKey);
+            throw e;
+        }
         paymentOrderRepository.complete(orderId, result.paymentKey());
         reservationRepository.confirm(order.reservationId());
         return result;
@@ -47,9 +65,6 @@ public class PaymentService {
             return;
         }
         paymentOrderRepository.findByOrderId(orderId)
-                .ifPresent(order -> {
-                    paymentOrderRepository.deleteByOrderId(orderId);
-                    reservationRepository.deletePendingById(order.reservationId());
-                });
+                .ifPresent(order -> paymentOrderRepository.markFailed(orderId));
     }
 }

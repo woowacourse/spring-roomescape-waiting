@@ -5,7 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import roomescape.client.toss.TossPaymentException;
+import roomescape.client.PaymentConfirmationUnknownException;
+import roomescape.client.PaymentException;
 import roomescape.domain.PaymentOrder;
 import roomescape.repository.PaymentOrderRepository;
 import roomescape.service.PaymentService;
@@ -53,10 +54,12 @@ public class PaymentController {
             model.addAttribute("result", result);
             model.addAttribute("paymentKey", paymentKey);
             return "success";
-        } catch (TossPaymentException e) {
-            return failView(model, e.getCode(), e.getMessage(), orderId);
+        } catch (PaymentConfirmationUnknownException e) {
+            return failView(model, "결제 확인이 필요해요", e.getCode(), e.getMessage(), orderId);
+        } catch (PaymentException e) {
+            return failView(model, "결제를 실패했어요", e.getCode(), e.getMessage(), orderId);
         } catch (RuntimeException e) {
-            return failView(model, "PAYMENT_FAILED", e.getMessage(), orderId);
+            return failView(model, "결제를 실패했어요", "PAYMENT_FAILED", e.getMessage(), orderId);
         }
     }
 
@@ -68,10 +71,11 @@ public class PaymentController {
             Model model
     ) {
         paymentService.cancelPending(orderId);
-        return failView(model, code, message, orderId);
+        return failView(model, "결제를 실패했어요", code, message, orderId);
     }
 
-    private String failView(Model model, String code, String message, String orderId) {
+    private String failView(Model model, String title, String code, String message, String orderId) {
+        model.addAttribute("title", title);
         model.addAttribute("code", code);
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
