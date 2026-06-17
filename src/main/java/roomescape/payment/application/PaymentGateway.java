@@ -7,4 +7,5 @@ import roomescape.payment.application.dto.PaymentResult;
 public interface PaymentGateway {
     PaymentResult confirm(PaymentConfirmation confirmation);
     PaymentResult cancel(PaymentCancel cancel);
+    PaymentResult getStatus(String orderId);
 }

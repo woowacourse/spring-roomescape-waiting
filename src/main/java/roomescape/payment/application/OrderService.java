@@ -7,14 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.application.exception.OrderUpdateException;
 import roomescape.payment.domain.Order;
 import roomescape.payment.domain.OrderRepository;
 import roomescape.payment.application.dto.OrderInfo;
 import roomescape.reservation.application.ReservationReader;
 import roomescape.reservation.application.dto.ReservationIntegrationInfo;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -25,6 +29,35 @@ public class OrderService {
     private final Clock clock;
     private final OrderRepository orderRepository;
     private final ReservationReader reservationReader;
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void fail(String orderId) {
+        Order order = orderRepository.getByOrderId(orderId);
+        Order failed = order.fail(clock);
+        int affected = orderRepository.update(failed);
+        if (affected == 0) {
+            log.error("결제 실패 상태 갱신 중 에러 발생. OrderId: {}", orderId);
+            throw new OrderUpdateException("결제 실패 상태 저장에 실패했습니다.");
+        }
+    }
+
+    @Transactional
+    public Order complete(String orderId, String paymentKey) {
+        Order order = orderRepository.getByOrderId(orderId);
+        Order completed = order.complete(paymentKey, clock);
+        if (orderRepository.update(completed) == 0) {
+            throw new OrderUpdateException("주문 갱신 실패 (affected row 0)");
+        }
+        return completed;
+    }
+
+    @Transactional
+    public Order cancel(String orderId) {
+        Order order = orderRepository.getByOrderId(orderId);
+        Order cancelled = order.cancel(clock);
+        orderRepository.update(cancelled);
+        return cancelled;
+    }
 
     @Transactional
     public void createOrder(Long reservationId) {
