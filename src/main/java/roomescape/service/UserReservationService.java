@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

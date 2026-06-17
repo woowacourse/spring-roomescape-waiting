@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import roomescape.client.TossPaymentException;
 import roomescape.domain.Payment;
 import roomescape.domain.PaymentResult;
 import roomescape.domain.Reservation;
@@ -14,6 +13,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.PaymentService;
 import roomescape.service.exception.PaymentAmountMismatchException;
+import roomescape.service.exception.PaymentException;
 import roomescape.service.exception.ResourceNotFoundException;
 
 /**
@@ -72,7 +72,7 @@ public class CheckoutController {
             // 위변조 차단. 결제 대기 상태로 남은 주문/예약을 failUrl 과 동일하게 정리한다.
             paymentService.cancelOrder(orderId);
             return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId);
-        } catch (TossPaymentException e) {
+        } catch (PaymentException e) {
             // 승인 실패(카드 거절·키 오류 등). 결제 대기 주문/예약을 정리해 고아 데이터가 남지 않게 한다.
             paymentService.cancelOrder(orderId);
             return failView(model, e.getCode(), e.getMessage(), orderId);
