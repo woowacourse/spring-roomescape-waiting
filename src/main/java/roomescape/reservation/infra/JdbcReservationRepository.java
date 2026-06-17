@@ -206,6 +206,15 @@ public class JdbcReservationRepository implements ReservationRepository {
         return rows > 0;
     }
 
+    @Override
+    public boolean markAsUncertain(Long reservationId) {
+        int rows = jdbcTemplate.update(
+                "UPDATE reservation SET status = 'UNCERTAIN' WHERE id = ? AND status = 'PENDING_PAYMENT'",
+                reservationId
+        );
+        return rows > 0;
+    }
+
     private Reservation mapReservation(Long id, String name, LocalDate date, Long themeId, Long timeId,
                                         ReservationStatus status, Long amount) {
         return Reservation.builder()

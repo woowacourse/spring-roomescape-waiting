@@ -5,26 +5,34 @@ package roomescape.payment.order;
  */
 public class Order {
 
-  private final String orderId;
-  private final Long amount;
-  private final Long reservationId;
+    private final String orderId;
+    private final Long amount;
+    private final Long reservationId;
+    private String paymentKey;
 
-  public Order(String orderId, Long amount, Long reservationId) {
-    this.orderId = orderId;
-    this.amount = amount;
-    this.reservationId = reservationId;
-  }
+    public Order(String orderId, Long amount, Long reservationId) {
+        this.orderId = orderId;
+        this.amount = amount;
+        this.reservationId = reservationId;
+    }
 
-  public String getOrderId() {
-    return orderId;
-  }
+    public String getOrderId() {
+        return orderId;
+    }
 
-  public Long getAmount() {
-    return amount;
-  }
+    public Long getAmount() {
+        return amount;
+    }
 
-  public Long getReservationId() {
-    return reservationId;
-  }
+    public Long getReservationId() {
+        return reservationId;
+    }
 
+    public String getPaymentKey() {
+        return paymentKey;
+    }
+
+    public void setPaymentKey(String paymentKey) {
+        this.paymentKey = paymentKey;
+    }
 }

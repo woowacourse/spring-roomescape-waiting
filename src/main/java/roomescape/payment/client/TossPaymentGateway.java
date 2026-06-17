@@ -1,7 +1,5 @@
 package roomescape.payment.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -10,7 +8,6 @@ import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.PaymentStatus;
 import roomescape.payment.client.dto.ConfirmRequest;
-import roomescape.payment.client.dto.TossErrorResponse;
 import roomescape.payment.client.dto.TossPaymentResponse;
 
 /**
@@ -20,11 +17,9 @@ import roomescape.payment.client.dto.TossPaymentResponse;
 public class TossPaymentGateway implements PaymentGateway {
 
   private final RestClient tossRestClient;
-  private final ObjectMapper objectMapper;
 
-  public TossPaymentGateway(RestClient tossRestClient, ObjectMapper objectMapper) {
+  public TossPaymentGateway(RestClient tossRestClient) {
     this.tossRestClient = tossRestClient;
-    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -34,12 +29,9 @@ public class TossPaymentGateway implements PaymentGateway {
     var response = tossRestClient.post()
         .uri("/v1/payments/confirm")
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Idempotency-Key", confirmation.orderId())
         .body(request)
         .retrieve()
-        .onStatus(HttpStatusCode::isError, (req, res) -> {
-          var error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
-          throw TossPaymentException.of(res.getStatusCode(), error);
-        })
         .body(TossPaymentResponse.class);
     return toResult(response);
   }

@@ -29,4 +29,6 @@ public interface ReservationRepository {
     boolean insertFromOldestWaiting(LocalDate date, Long themeId, Long timeId);
 
     boolean confirmPayment(Long reservationId);
+
+    boolean markAsUncertain(Long reservationId);
 }

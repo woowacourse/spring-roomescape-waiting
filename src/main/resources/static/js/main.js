@@ -584,6 +584,7 @@ async function loadReservations(options = {}) {
             api(`/reservations?${params.toString()}`),
             api(`/waitings?${params.toString()}`)
         ]);
+
     } catch (error) {
         state.myReservations = [];
         state.myWaitings = [];

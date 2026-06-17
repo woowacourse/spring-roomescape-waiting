@@ -419,18 +419,29 @@ function renderMyReservationsContent(hasName) {
         <span>관리</span>
       </div>
       ${state.myReservations.map((reservation) => {
-        const isPending = reservation.status === "PENDING_PAYMENT";
+        const status = reservation.status;
+        const isPending = status === "PENDING_PAYMENT";
+        const isUncertain = status === "UNCERTAIN";
+
+        const statusCell = isPending
+          ? '<span class="waiting-badge">결제 대기</span>'
+          : isUncertain
+            ? '<span class="uncertain-badge">확인 필요</span>'
+            : "확정";
+
+        const editButton = (!isPending && !isUncertain)
+          ? `<button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}">변경</button>`
+          : "";
+
         return `
         <div class="table-row" role="row">
           <span>${escapeHtml(reservation.name)}</span>
           <span>${escapeHtml(reservation.theme.name)}</span>
           <span>${escapeHtml(reservation.date)} ${escapeHtml(reservation.time.startAt)}</span>
-          <span>${isPending ? '<span class="waiting-badge">결제 대기</span>' : "확정"}</span>
+          <span>${statusCell}</span>
           <span class="table-actions">
-            ${isPending
-              ? `<a class="primary-button" href="/payment?reservationId=${reservation.id}">결제</a>`
-              : `<button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}">변경</button>`
-            }
+            ${isPending ? `<a class="primary-button" href="/payment?reservationId=${reservation.id}">결제</a>` : ""}
+            ${editButton}
             <button class="danger-button" type="button" data-action="delete-reservation" data-reservation-id="${reservation.id}">취소</button>
           </span>
         </div>
