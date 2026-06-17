@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.ReservationRequest;
