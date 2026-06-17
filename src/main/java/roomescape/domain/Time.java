@@ -1,12 +1,27 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
+@Table(name = "time")
 public class Time {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "start_at")
+    private LocalTime startAt;
+
+    protected Time() {
+    }
 
     public Time(Long id, LocalTime startAt) {
         validate(startAt);

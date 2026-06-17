@@ -1,0 +1,7 @@
+POST http://localhost:8080/reservations
+Content-Type: application/json
+
+{
+  "name": "게스트",
+  "themeSlotId": 91
+}

@@ -1,18 +1,56 @@
 package roomescape.domain;
 
-import roomescape.domain.reservationStatus.PendingStatus;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.ReservationStatus;
+import roomescape.domain.reservationStatus.PendingStatus;
+import roomescape.domain.reservationStatus.ReservationStatusConverter;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
+@Table(
+        name = "reservation",
+        uniqueConstraints = @UniqueConstraint(columnNames = "confirmed_theme_slot_id")
+)
 public class Reservation {
 
-    private final Long id;
-    private final String name;
-    private final ThemeSlot themeSlot;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "theme_slot_id", nullable = false)
+    private ThemeSlot themeSlot;
+
+    @Column(name = "status", nullable = false)
+    @Convert(converter = ReservationStatusConverter.class)
     private ReservationStatus reservationStatus;
+
+    @Column(
+            name = "confirmed_theme_slot_id",
+            columnDefinition = "BIGINT GENERATED ALWAYS AS (CASE WHEN status = 'CONFIRMED' THEN theme_slot_id ELSE NULL END)",
+            insertable = false,
+            updatable = false
+    )
+    private Long confirmedThemeSlotId;
+
+    protected Reservation() {
+    }
 
     public Reservation(String name, ThemeSlot themeSlot) {
         validate(name, themeSlot);
@@ -96,6 +134,11 @@ public class Reservation {
 
     public void changeStatus(ReservationStatus reservationStatus) {
         this.reservationStatus = reservationStatus;
+    }
+
+    public void changeThemeSlot(ThemeSlot themeSlot) {
+        validate(name, themeSlot);
+        this.themeSlot = themeSlot;
     }
 
     public void confirm() {

@@ -127,6 +127,7 @@ public class ReservationService {
         Reservation reservation = getReservationForUpdateOrElseThrow(reservationId);
         validateModifiable(reservation);
         String expectedStatus = reservation.getReservationStatusName();
+        ThemeSlot previousThemeSlot = reservation.getThemeSlot();
         ThemeSlot themeSlot = getThemeSlotWithOrderedLock(reservation.getThemeSlotId(), themeSlotId);
 
         validateBeforeDate(themeSlot);
@@ -147,14 +148,14 @@ public class ReservationService {
             updateStatusOrElseThrow(updateReservation, expectedStatus);
             reservationRepository.updateThemeSlot(updateReservation);
             if (shouldPromotePreviousSlot) {
-                promoteWaitingReservationOrReleaseSlot(reservation);
+                promoteWaitingReservationOrReleaseSlot(previousThemeSlot);
             }
             return updateReservation;
         }
         reservationRepository.updateThemeSlot(updateReservation);
         updateStatusOrElseThrow(updateReservation, expectedStatus);
         if (shouldPromotePreviousSlot) {
-            promoteWaitingReservationOrReleaseSlot(reservation);
+            promoteWaitingReservationOrReleaseSlot(previousThemeSlot);
         }
         return updateReservation;
     }
@@ -187,11 +188,15 @@ public class ReservationService {
     }
 
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
+        promoteWaitingReservationOrReleaseSlot(reservation.getThemeSlot());
+    }
+
+    private void promoteWaitingReservationOrReleaseSlot(ThemeSlot themeSlot) {
         while (true) {
-            Optional<Reservation> waitingReservation = reservationRepository.findFirstPendingByThemeSlotId(reservation.getThemeSlotId());
+            Optional<Reservation> waitingReservation = reservationRepository.findFirstPendingByThemeSlotId(themeSlot.getId());
 
             if (waitingReservation.isEmpty()) {
-                updateThemeSlotReserved(reservation.getThemeSlot(), false);
+                updateThemeSlotReserved(themeSlot, false);
                 return;
             }
 

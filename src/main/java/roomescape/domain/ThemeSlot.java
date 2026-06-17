@@ -1,15 +1,45 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
+@Table(
+        name = "theme_slot",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"theme_id", "date", "time_id"})
+)
 public class ThemeSlot {
 
-    private final Long id;
-    private final Theme theme;
-    private final LocalDate date;
-    private final Time time;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "time_id", nullable = false)
+    private Time time;
+
+    @Column(name = "is_reserved", nullable = false)
     private boolean isReserved;
+
+    protected ThemeSlot() {
+    }
 
     public ThemeSlot(Theme theme, LocalDate date, Time time, boolean isReserved) {
         this.id = null;
