@@ -5,6 +5,8 @@ const PAYMENT_SUCCESS_ROUTE = "/#/payment/processing";
 const PAYMENT_FAIL_ROUTE = "/#/payment/fail";
 const DESKTOP_PAYMENT_QUERY = "(pointer: fine) and (min-width: 768px)";
 const processedApprovalKeys = new Set();
+const processedFailureOrderIds = new Set();
+const processingFailureOrderIds = new Set();
 let approvingKey = "";
 let approvingPromise = null;
 
@@ -155,6 +157,40 @@ export function parseTossFailRedirectParams(search, hash) {
         orderId,
         message
     };
+}
+
+export async function cleanupTossFailRedirectPayment(params) {
+    const orderId = String(params?.orderId || "").trim();
+
+    if (!orderId) {
+        return {ok: true, skipped: true, orderId: ""};
+    }
+
+    if (processedFailureOrderIds.has(orderId)) {
+        return {ok: true, skipped: true, orderId};
+    }
+
+    if (processingFailureOrderIds.has(orderId)) {
+        return {ok: true, skipped: true, orderId};
+    }
+
+    processingFailureOrderIds.add(orderId);
+
+    try {
+        await api("/payments/fail", {
+            method: "POST",
+            body: {
+                code: String(params?.code || "").trim(),
+                message: String(params?.message || "").trim(),
+                orderId
+            }
+        });
+        processedFailureOrderIds.add(orderId);
+    } finally {
+        processingFailureOrderIds.delete(orderId);
+    }
+
+    return {ok: true, skipped: false, orderId};
 }
 
 export async function approveTossRedirectPayment(params) {

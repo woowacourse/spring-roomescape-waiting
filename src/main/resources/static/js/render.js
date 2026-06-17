@@ -182,19 +182,15 @@ function renderPaymentProcessing() {
 function renderPaymentFail() {
     const failure = state.payment.failure;
     const retryReservation = findRetryablePaymentReservation(failure.orderId);
-    const canceled = failure.code === "PAY_PROCESS_CANCELED";
-    const title = canceled ? "결제가 취소되었습니다" : "결제를 완료하지 못했습니다";
-    const description = retryReservation
-        ? "예약은 결제 대기 상태입니다. 같은 주문으로 다시 결제할 수 있습니다."
-        : "예약 조회에서 이름으로 예약을 찾은 뒤 결제 대기 예약을 다시 결제해 주세요.";
-    const detailMessage = failure.message || "결제가 완료되지 않았습니다.";
+    const copy = resolvePaymentFailureCopy(failure, retryReservation);
+    const detailMessage = failure.message || copy.detail;
 
     return `
     <main class="page-shell">
       <section class="payment-processing-panel" aria-live="polite">
         <p class="section-kicker">Payment</p>
-        <h1>${escapeHtml(title)}</h1>
-        <p>${escapeHtml(description)}</p>
+        <h1>${escapeHtml(copy.title)}</h1>
+        <p>${escapeHtml(copy.description)}</p>
         <dl class="payment-processing-summary">
           <div>
             <dt>사유</dt>
@@ -210,7 +206,7 @@ function renderPaymentFail() {
           ${renderPaymentPanel(retryReservation, {
               compact: true,
               title: "결제 재시도",
-              description: "이 주문번호와 연결된 결제 대기 예약입니다."
+              description: "정리가 완료되기 전까지 같은 주문으로 다시 결제할 수 있습니다."
           })}
         ` : ""}
         <div class="payment-fail-actions">
@@ -219,6 +215,40 @@ function renderPaymentFail() {
       </section>
     </main>
   `;
+}
+
+function resolvePaymentFailureCopy(failure, retryReservation) {
+    const hasOrderId = Boolean(String(failure.orderId || "").trim());
+    const retryDescription = retryReservation
+        ? "예약은 아직 결제 대기 상태입니다. 잠시 후에도 남아 있으면 예약 조회에서 다시 확인해 주세요."
+        : "정리가 끝난 결제 대기 예약은 다시 결제할 수 없습니다. 필요한 경우 예약을 새로 진행해 주세요.";
+
+    switch (failure.code) {
+        case "PAY_PROCESS_CANCELED":
+            return {
+                title: "결제가 취소되었습니다",
+                description: hasOrderId ? retryDescription : "결제창에서 결제가 취소되었습니다. 주문번호가 없어 정리할 예약은 없습니다.",
+                detail: "사용자가 결제를 취소했습니다."
+            };
+        case "PAY_PROCESS_ABORTED":
+            return {
+                title: "결제 진행이 중단되었습니다",
+                description: hasOrderId ? retryDescription : "결제 인증이 완료되지 않았습니다. 예약 조회에서 현재 상태를 확인해 주세요.",
+                detail: "결제 인증 과정이 중단되었습니다."
+            };
+        case "REJECT_CARD_COMPANY":
+            return {
+                title: "카드사에서 결제를 거절했습니다",
+                description: hasOrderId ? retryDescription : "카드사 승인 거절로 결제가 완료되지 않았습니다. 다른 결제수단으로 다시 시도해 주세요.",
+                detail: "카드사에서 결제를 승인하지 않았습니다."
+            };
+        default:
+            return {
+                title: "결제를 완료하지 못했습니다",
+                description: hasOrderId ? retryDescription : "결제 실패 정보에 주문번호가 없어 정리 요청을 보내지 않았습니다.",
+                detail: "결제가 완료되지 않았습니다."
+            };
+    }
 }
 
 function renderPopularThemes(popular) {

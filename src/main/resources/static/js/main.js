@@ -4,6 +4,7 @@ import {ADMIN_TABS, canSubmitReservation, isPastReservation, selectedTheme, sele
 import {render, syncThemeFilter} from "./render.js";
 import {
     approveTossRedirectPayment,
+    cleanupTossFailRedirectPayment,
     isPaymentPendingReservation,
     parseTossFailRedirectParams,
     parseTossRedirectParams,
@@ -28,6 +29,9 @@ async function boot() {
     if (routeResult.paymentProcessing) {
         void processPaymentRedirect(routeResult.paymentParams);
     }
+    if (routeResult.paymentFailure) {
+        void processPaymentFailureCleanup(routeResult.paymentParams);
+    }
 
     try {
         await loadAllData({silent: true});
@@ -50,6 +54,9 @@ function handleRoute() {
     if (routeResult.paymentProcessing) {
         void processPaymentRedirect(routeResult.paymentParams);
     }
+    if (routeResult.paymentFailure) {
+        void processPaymentFailureCleanup(routeResult.paymentParams);
+    }
 }
 
 function applyRoute() {
@@ -59,25 +66,31 @@ function applyRoute() {
     if (route === "admin") {
         state.route = "admin";
         state.adminTab = ADMIN_TABS.has(tab) ? tab : "themes";
-        return {paymentProcessing: false};
+        return {paymentProcessing: false, paymentFailure: false};
     }
 
     if (route === "payment" && tab === "processing") {
         state.route = "payment-processing";
         return {
             paymentProcessing: true,
+            paymentFailure: false,
             paymentParams: parseTossRedirectParams(location.search, location.hash)
         };
     }
 
     if (route === "payment" && tab === "fail") {
         state.route = "payment-fail";
-        applyPaymentFailRoute(parseTossFailRedirectParams(location.search, location.hash));
-        return {paymentProcessing: false};
+        const paymentParams = parseTossFailRedirectParams(location.search, location.hash);
+        applyPaymentFailRoute(paymentParams);
+        return {
+            paymentProcessing: false,
+            paymentFailure: true,
+            paymentParams
+        };
     }
 
     state.route = "reserve";
-    return {paymentProcessing: false};
+    return {paymentProcessing: false, paymentFailure: false};
 }
 
 function parseRouteHash(hash) {
@@ -192,6 +205,48 @@ function applyPaymentFailRoute(params) {
         status: "failed",
         message: params.message
     };
+}
+
+async function processPaymentFailureCleanup(params) {
+    try {
+        const result = await cleanupTossFailRedirectPayment(params);
+
+        if (result.skipped) {
+            return;
+        }
+
+        await refreshAfterFailedPaymentCleanup(result.orderId);
+    } catch (error) {
+        showToast(error.message || "결제 실패 기록을 정리하지 못했습니다.", "error");
+    } finally {
+        render();
+    }
+}
+
+async function refreshAfterFailedPaymentCleanup(orderId) {
+    try {
+        await loadAllData({silent: true});
+        ensureSelectedTheme();
+        if (state.selectedThemeId) {
+            await loadAvailableTimes({silent: true});
+        }
+        await reloadReservationSearchIfNeeded();
+    } finally {
+        reconcileFailedPaymentCleanup(orderId);
+    }
+}
+
+function reconcileFailedPaymentCleanup(orderId) {
+    if (!orderId) {
+        return;
+    }
+
+    if (isMatchingPendingPaymentOrder(state.payment.pendingContext?.reservation, orderId)) {
+        state.payment.pendingContext = null;
+    }
+
+    state.reservations = state.reservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
+    state.searchedReservations = state.searchedReservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
 }
 
 async function handleClick(event) {
