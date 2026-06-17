@@ -22,60 +22,60 @@ VALUES (1, '잃어버린 시간의 방', '멈춰버린 시계탑에서 사라진
        (11, '마녀의 숲', '깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마', 'https://example.com/images/witch-forest.jpg'),
        (12, '사라진 열차', '한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마', 'https://example.com/images/missing-train.jpg');
 
-INSERT INTO reservation (id, name, date, time_id, theme_id)
+INSERT INTO reservation (id, name, date, time_id, theme_id, payment_status)
 VALUES
     -- 2026-05-01
-    (1, '김민준', DATEADD('DAY', -7, CURRENT_DATE), 1, 1),
-    (2, '이서연', DATEADD('DAY', -7, CURRENT_DATE), 2, 1),
-    (3, '박도윤', DATEADD('DAY', -7, CURRENT_DATE), 3, 2),
-    (4, '최하윤', DATEADD('DAY', -7, CURRENT_DATE), 4, 3),
+    (1, '김민준', DATEADD('DAY', -7, CURRENT_DATE), 1, 1, 'CONFIRMED'),
+    (2, '이서연', DATEADD('DAY', -7, CURRENT_DATE), 2, 1, 'CONFIRMED'),
+    (3, '박도윤', DATEADD('DAY', -7, CURRENT_DATE), 3, 2, 'CONFIRMED'),
+    (4, '최하윤', DATEADD('DAY', -7, CURRENT_DATE), 4, 3, 'CONFIRMED'),
 
     -- 2026-05-02
-    (5, '정지호', DATEADD('DAY', -6, CURRENT_DATE), 1, 1),
-    (6, '강지민', DATEADD('DAY', -6, CURRENT_DATE), 2, 2),
-    (7, '조서아', DATEADD('DAY', -6, CURRENT_DATE), 3, 2),
-    (8, '윤하준', DATEADD('DAY', -6, CURRENT_DATE), 4, 4),
-    (9, '임서준', DATEADD('DAY', -6, CURRENT_DATE), 5, 5),
+    (5, '정지호', DATEADD('DAY', -6, CURRENT_DATE), 1, 1, 'CONFIRMED'),
+    (6, '강지민', DATEADD('DAY', -6, CURRENT_DATE), 2, 2, 'CONFIRMED'),
+    (7, '조서아', DATEADD('DAY', -6, CURRENT_DATE), 3, 2, 'CONFIRMED'),
+    (8, '윤하준', DATEADD('DAY', -6, CURRENT_DATE), 4, 4, 'CONFIRMED'),
+    (9, '임서준', DATEADD('DAY', -6, CURRENT_DATE), 5, 5, 'CONFIRMED'),
 
     -- 2026-05-03
-    (10, '한유진', DATEADD('DAY', -5, CURRENT_DATE), 1, 1),
-    (11, '오시우', DATEADD('DAY', -5, CURRENT_DATE), 2, 3),
-    (12, '신채원', DATEADD('DAY', -5, CURRENT_DATE), 3, 3),
-    (13, '서지안', DATEADD('DAY', -5, CURRENT_DATE), 4, 4),
+    (10, '한유진', DATEADD('DAY', -5, CURRENT_DATE), 1, 1, 'CONFIRMED'),
+    (11, '오시우', DATEADD('DAY', -5, CURRENT_DATE), 2, 3, 'CONFIRMED'),
+    (12, '신채원', DATEADD('DAY', -5, CURRENT_DATE), 3, 3, 'CONFIRMED'),
+    (13, '서지안', DATEADD('DAY', -5, CURRENT_DATE), 4, 4, 'CONFIRMED'),
 
     -- 2026-05-04
-    (14, '권도현', DATEADD('DAY', -4, CURRENT_DATE), 1, 1),
-    (15, '황예준', DATEADD('DAY', -4, CURRENT_DATE), 2, 2),
-    (16, '안수빈', DATEADD('DAY', -4, CURRENT_DATE), 3, 4),
-    (17, '송민서', DATEADD('DAY', -4, CURRENT_DATE), 4, 5),
-    (18, '류지우', DATEADD('DAY', -4, CURRENT_DATE), 5, 6),
+    (14, '권도현', DATEADD('DAY', -4, CURRENT_DATE), 1, 1, 'CONFIRMED'),
+    (15, '황예준', DATEADD('DAY', -4, CURRENT_DATE), 2, 2, 'CONFIRMED'),
+    (16, '안수빈', DATEADD('DAY', -4, CURRENT_DATE), 3, 4, 'CONFIRMED'),
+    (17, '송민서', DATEADD('DAY', -4, CURRENT_DATE), 4, 5, 'CONFIRMED'),
+    (18, '류지우', DATEADD('DAY', -4, CURRENT_DATE), 5, 6, 'CONFIRMED'),
 
     -- 2026-05-05
-    (19, '장서윤', DATEADD('DAY', -3, CURRENT_DATE), 1, 1),
-    (20, '백현우', DATEADD('DAY', -3, CURRENT_DATE), 2, 2),
-    (21, '남지후', DATEADD('DAY', -3, CURRENT_DATE), 3, 3),
-    (22, '문하린', DATEADD('DAY', -3, CURRENT_DATE), 4, 6),
+    (19, '장서윤', DATEADD('DAY', -3, CURRENT_DATE), 1, 1, 'CONFIRMED'),
+    (20, '백현우', DATEADD('DAY', -3, CURRENT_DATE), 2, 2, 'CONFIRMED'),
+    (21, '남지후', DATEADD('DAY', -3, CURRENT_DATE), 3, 3, 'CONFIRMED'),
+    (22, '문하린', DATEADD('DAY', -3, CURRENT_DATE), 4, 6, 'CONFIRMED'),
 
     -- 2026-05-06
-    (23, '유준서', DATEADD('DAY', -2, CURRENT_DATE), 1, 4),
-    (24, '배아린', DATEADD('DAY', -2, CURRENT_DATE), 2, 5),
-    (25, '홍시온', DATEADD('DAY', -2, CURRENT_DATE), 3, 6),
-    (26, '진서우', DATEADD('DAY', -2, CURRENT_DATE), 4, 7),
+    (23, '유준서', DATEADD('DAY', -2, CURRENT_DATE), 1, 4, 'CONFIRMED'),
+    (24, '배아린', DATEADD('DAY', -2, CURRENT_DATE), 2, 5, 'CONFIRMED'),
+    (25, '홍시온', DATEADD('DAY', -2, CURRENT_DATE), 3, 6, 'CONFIRMED'),
+    (26, '진서우', DATEADD('DAY', -2, CURRENT_DATE), 4, 7, 'CONFIRMED'),
 
     -- 2026-05-07
-    (27, '고은우', DATEADD('DAY', -1, CURRENT_DATE), 1, 7),
-    (28, '민채린', DATEADD('DAY', -1, CURRENT_DATE), 2, 8),
-    (29, '차윤재', DATEADD('DAY', -1, CURRENT_DATE), 3, 9),
-    (30, '나예린', DATEADD('DAY', -1, CURRENT_DATE), 4, 10);
+    (27, '고은우', DATEADD('DAY', -1, CURRENT_DATE), 1, 7, 'CONFIRMED'),
+    (28, '민채린', DATEADD('DAY', -1, CURRENT_DATE), 2, 8, 'CONFIRMED'),
+    (29, '차윤재', DATEADD('DAY', -1, CURRENT_DATE), 3, 9, 'CONFIRMED'),
+    (30, '나예린', DATEADD('DAY', -1, CURRENT_DATE), 4, 10, 'CONFIRMED');
 
-INSERT INTO reservation (id, name, date, time_id, theme_id)
-VALUES (31, '테스트1', DATEADD('DAY', -8, CURRENT_DATE), 1, 12),
-       (32, '테스트2', DATEADD('DAY', -9, CURRENT_DATE), 2, 12),
-       (33, '테스트3', DATEADD('DAY', -10, CURRENT_DATE), 1, 12),
-       (34, '테스트4', DATEADD('DAY', -11, CURRENT_DATE), 2, 12),
-       (35, '테스트5', DATEADD('DAY', -12, CURRENT_DATE), 1, 12),
-       (36, '테스트6', DATEADD('DAY', -13, CURRENT_DATE), 2, 12),
-       (37, '테스트7', DATEADD('DAY', -14, CURRENT_DATE), 1, 12),
-       (38, '테스트8', DATEADD('DAY', -15, CURRENT_DATE), 2, 12),
-       (39, '테스트9', DATEADD('DAY', -16, CURRENT_DATE), 1, 12),
-       (40, '테스트10', DATEADD('DAY', -17, CURRENT_DATE), 2, 12);
+INSERT INTO reservation (id, name, date, time_id, theme_id, payment_status)
+VALUES (31, '테스트1', DATEADD('DAY', -8, CURRENT_DATE), 1, 12, 'CONFIRMED'),
+       (32, '테스트2', DATEADD('DAY', -9, CURRENT_DATE), 2, 12, 'CONFIRMED'),
+       (33, '테스트3', DATEADD('DAY', -10, CURRENT_DATE), 1, 12, 'CONFIRMED'),
+       (34, '테스트4', DATEADD('DAY', -11, CURRENT_DATE), 2, 12, 'CONFIRMED'),
+       (35, '테스트5', DATEADD('DAY', -12, CURRENT_DATE), 1, 12, 'CONFIRMED'),
+       (36, '테스트6', DATEADD('DAY', -13, CURRENT_DATE), 2, 12, 'CONFIRMED'),
+       (37, '테스트7', DATEADD('DAY', -14, CURRENT_DATE), 1, 12, 'CONFIRMED'),
+       (38, '테스트8', DATEADD('DAY', -15, CURRENT_DATE), 2, 12, 'CONFIRMED'),
+       (39, '테스트9', DATEADD('DAY', -16, CURRENT_DATE), 1, 12, 'CONFIRMED'),
+       (40, '테스트10', DATEADD('DAY', -17, CURRENT_DATE), 2, 12, 'CONFIRMED');
