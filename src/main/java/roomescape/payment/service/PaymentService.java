@@ -18,6 +18,7 @@ import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -66,20 +67,23 @@ public class PaymentService {
     public Reservation confirm(String paymentKey, String orderId, long amount) {
         PaymentOrder paymentOrder = findOrder(orderId);
 
+        if (!paymentOrder.hasAmount(amount)) {
+            throw new PaymentAmountMismatchException("결제 금액이 주문 금액과 일치하지 않습니다.");
+        }
         if (paymentOrder.isConfirmed()) {
-            throw new PaymentAlreadyProcessedException("이미 승인된 결제입니다.");
+            return confirmIdempotently(paymentOrder, paymentKey);
         }
         if (!paymentOrder.isReady()) {
             throw new PaymentInvalidRequestException("결제 대기 중인 주문이 아닙니다.");
         }
-        if (!paymentOrder.hasAmount(amount)) {
-            throw new PaymentAmountMismatchException("결제 금액이 주문 금액과 일치하지 않습니다.");
-        }
 
-        PaymentResult paymentResult = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-        if (paymentResult.amount() != amount) {
-            throw new PaymentGatewayException("결제 승인 응답 금액이 요청 금액과 일치하지 않습니다.");
+        PaymentResult paymentResult;
+        try {
+            paymentResult = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        } catch (PaymentAlreadyProcessedException exception) {
+            return confirmAlreadyProcessedOrder(orderId, paymentKey, amount, exception);
         }
+        validatePaymentResult(paymentResult, paymentKey, orderId, amount);
 
         Reservation reservation = reservationService.create(
                 paymentOrder.getName(),
@@ -95,6 +99,43 @@ public class PaymentService {
         ));
 
         return reservation;
+    }
+
+    private Reservation confirmAlreadyProcessedOrder(
+            String orderId,
+            String paymentKey,
+            long amount,
+            PaymentAlreadyProcessedException exception
+    ) {
+        PaymentOrder refreshedOrder = findOrder(orderId);
+        if (refreshedOrder.isConfirmed() && refreshedOrder.hasAmount(amount)) {
+            return confirmIdempotently(refreshedOrder, paymentKey);
+        }
+
+        throw exception;
+    }
+
+    private Reservation confirmIdempotently(PaymentOrder paymentOrder, String paymentKey) {
+        if (!Objects.equals(paymentOrder.getPaymentKey(), paymentKey)) {
+            throw new PaymentAlreadyProcessedException("이미 다른 결제 키로 승인된 결제입니다.");
+        }
+        if (paymentOrder.getReservationId() == null) {
+            throw new PaymentGatewayException("이미 승인된 결제 주문의 예약 정보가 없습니다.");
+        }
+
+        return reservationService.findById(paymentOrder.getReservationId());
+    }
+
+    private void validatePaymentResult(PaymentResult paymentResult, String paymentKey, String orderId, long amount) {
+        if (!Objects.equals(paymentResult.paymentKey(), paymentKey)) {
+            throw new PaymentGatewayException("결제 승인 응답 키가 요청 키와 일치하지 않습니다.");
+        }
+        if (!Objects.equals(paymentResult.orderId(), orderId)) {
+            throw new PaymentGatewayException("결제 승인 응답 주문번호가 요청 주문번호와 일치하지 않습니다.");
+        }
+        if (paymentResult.amount() != amount) {
+            throw new PaymentGatewayException("결제 승인 응답 금액이 요청 금액과 일치하지 않습니다.");
+        }
     }
 
     @Transactional

@@ -13,22 +13,27 @@ import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentOrder;
 import roomescape.payment.domain.PaymentOrderStatus;
 import roomescape.payment.domain.PaymentResult;
+import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +57,9 @@ class PaymentServiceTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ReservationService reservationService;
 
     @MockitoBean
     private PaymentGateway paymentGateway;
@@ -102,6 +110,107 @@ class PaymentServiceTest {
     }
 
     @Test
+    @DisplayName("이미 확정된 주문을 같은 결제 키로 다시 승인하면 기존 예약을 반환한다.")
+    void confirm_success_whenOrderAlreadyConfirmedWithSamePaymentKey() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder paymentReadyOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenAnswer(invocation -> {
+                    PaymentConfirmation confirmation = invocation.getArgument(0);
+                    return new PaymentResult(
+                            confirmation.paymentKey(),
+                            confirmation.orderId(),
+                            confirmation.amount()
+                    );
+                });
+
+        Reservation firstReservation = paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        );
+        Reservation secondReservation = paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        );
+
+        assertThat(secondReservation.getId()).isEqualTo(firstReservation.getId());
+        assertThat(countAllReservations()).isEqualTo(1);
+        verify(paymentGateway, times(1)).confirm(any(PaymentConfirmation.class));
+    }
+
+    @Test
+    @DisplayName("이미 확정된 주문을 다른 결제 키로 다시 승인하면 실패한다.")
+    void confirm_fail_whenOrderAlreadyConfirmedWithDifferentPaymentKey() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder paymentReadyOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenAnswer(invocation -> {
+                    PaymentConfirmation confirmation = invocation.getArgument(0);
+                    return new PaymentResult(
+                            confirmation.paymentKey(),
+                            confirmation.orderId(),
+                            confirmation.amount()
+                    );
+                });
+
+        paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        );
+
+        assertThatThrownBy(() -> paymentService.confirm(
+                "other-payment-key",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        ))
+                .isInstanceOf(PaymentAlreadyProcessedException.class)
+                .hasMessage("이미 다른 결제 키로 승인된 결제입니다.");
+
+        assertThat(countAllReservations()).isEqualTo(1);
+        verify(paymentGateway, times(1)).confirm(any(PaymentConfirmation.class));
+    }
+
+    @Test
+    @DisplayName("승인 API가 이미 처리됨을 응답해도 로컬 주문이 같은 결제 키로 확정되어 있으면 기존 예약을 반환한다.")
+    void confirm_success_whenGatewayAlreadyProcessedAndLocalOrderIsConfirmed() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder paymentReadyOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenAnswer(invocation -> {
+                    PaymentConfirmation confirmation = invocation.getArgument(0);
+                    Reservation reservation = reservationService.create(NAME, FUTURE_DATE, time.getId(), theme.getId());
+                    PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(confirmation.orderId()).orElseThrow();
+                    paymentOrderRepository.update(paymentOrder.confirm(
+                            confirmation.paymentKey(),
+                            reservation.getId(),
+                            LocalDateTime.now()
+                    ));
+
+                    throw new PaymentAlreadyProcessedException("이미 승인된 결제입니다.");
+                });
+
+        Reservation reservation = paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        );
+
+        PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow();
+        assertThat(reservation.getId()).isEqualTo(paymentOrder.getReservationId());
+        assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.CONFIRMED);
+        assertThat(countAllReservations()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("같은 예약 정보로 결제 대기 주문이 있으면 새 주문을 만들지 않는다.")
     void prepare_fail_whenReadyOrderAlreadyExists() {
         ReservationTime time = saveReservationTime(10);
@@ -131,6 +240,52 @@ class PaymentServiceTest {
                 .isInstanceOf(PaymentAmountMismatchException.class);
 
         verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
+        assertThat(countAllReservations()).isZero();
+        assertThat(paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow().getStatus())
+                .isEqualTo(PaymentOrderStatus.READY);
+    }
+
+    @Test
+    @DisplayName("결제 승인 응답의 주문번호가 요청 주문번호와 다르면 예약을 생성하지 않는다.")
+    void confirm_fail_whenGatewayOrderIdMismatchDoesNotCreateReservation() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder paymentReadyOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenReturn(new PaymentResult("payment-key-123", "other-order-id", paymentReadyOrder.amount()));
+
+        assertThatThrownBy(() -> paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        ))
+                .isInstanceOf(PaymentGatewayException.class)
+                .hasMessage("결제 승인 응답 주문번호가 요청 주문번호와 일치하지 않습니다.");
+
+        assertThat(countAllReservations()).isZero();
+        assertThat(paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow().getStatus())
+                .isEqualTo(PaymentOrderStatus.READY);
+    }
+
+    @Test
+    @DisplayName("결제 승인 응답의 결제 키가 요청 키와 다르면 예약을 생성하지 않는다.")
+    void confirm_fail_whenGatewayPaymentKeyMismatchDoesNotCreateReservation() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder paymentReadyOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenReturn(new PaymentResult("other-payment-key", paymentReadyOrder.orderId(), paymentReadyOrder.amount()));
+
+        assertThatThrownBy(() -> paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        ))
+                .isInstanceOf(PaymentGatewayException.class)
+                .hasMessage("결제 승인 응답 키가 요청 키와 일치하지 않습니다.");
+
         assertThat(countAllReservations()).isZero();
         assertThat(paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow().getStatus())
                 .isEqualTo(PaymentOrderStatus.READY);

@@ -16,14 +16,18 @@ public class PaymentOrder {
     private final String orderId;
     private final long amount;
     private final PaymentOrderStatus status;
+
     private final String name;
     private final LocalDate date;
     private final Long timeId;
     private final Long themeId;
+
     private final String paymentKey;
     private final Long reservationId;
+
     private final String failureCode;
     private final String failureMessage;
+
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
     private final LocalDateTime confirmedAt;

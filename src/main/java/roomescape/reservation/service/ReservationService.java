@@ -51,6 +51,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
+    public Reservation findById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
+    }
+
+    @Transactional(readOnly = true)
     public void validateCreatable(String name, LocalDate date, Long timeId, Long themeId) {
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
