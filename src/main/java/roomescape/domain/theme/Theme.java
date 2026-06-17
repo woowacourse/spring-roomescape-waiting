@@ -2,7 +2,7 @@ package roomescape.domain.theme;
 
 import java.util.Objects;
 import roomescape.common.DomainAssert;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
 
 public class Theme {
     private final Long id;

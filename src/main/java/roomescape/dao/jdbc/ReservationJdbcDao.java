@@ -18,11 +18,11 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.vo.Slot;
+import roomescape.common.vo.Slot;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
 
 @Repository
 public class ReservationJdbcDao implements ReservationDao {

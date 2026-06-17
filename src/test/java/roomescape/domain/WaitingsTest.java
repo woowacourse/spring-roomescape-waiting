@@ -16,8 +16,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.domain.vo.Name;
-import roomescape.domain.vo.Slot;
+import roomescape.common.vo.Name;
+import roomescape.common.vo.Slot;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.Waitings;
 

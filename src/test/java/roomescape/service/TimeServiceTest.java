@@ -33,7 +33,7 @@ import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
 import roomescape.domain.time.TimeService;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
 import roomescape.dto.request.TimeRequestDto;
 
 @JdbcTest

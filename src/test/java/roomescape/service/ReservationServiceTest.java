@@ -44,7 +44,7 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
 import roomescape.domain.waiting.WaitingService;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;

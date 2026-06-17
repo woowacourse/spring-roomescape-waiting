@@ -11,7 +11,7 @@ import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.member.Member;
-import roomescape.domain.vo.Slot;
+import roomescape.common.vo.Slot;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;

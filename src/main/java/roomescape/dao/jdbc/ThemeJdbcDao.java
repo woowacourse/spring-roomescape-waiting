@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeReservationCount;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
 import roomescape.dto.response.AvailableTimeResponseDto;
 import roomescape.dto.response.TimeResponseDto;
 

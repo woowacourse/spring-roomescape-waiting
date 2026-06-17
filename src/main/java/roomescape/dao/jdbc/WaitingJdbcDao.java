@@ -14,13 +14,13 @@ import org.springframework.stereotype.Repository;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
-import roomescape.domain.vo.Slot;
+import roomescape.common.vo.Slot;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.Waitings;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
 
 @Repository
 public class WaitingJdbcDao implements WaitingDao {

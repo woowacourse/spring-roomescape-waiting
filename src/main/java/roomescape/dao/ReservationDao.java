@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.vo.Slot;
+import roomescape.common.vo.Slot;
 
 public interface ReservationDao extends CommonDao<Reservation> {
     List<Reservation> findAll(int limit, int offset);

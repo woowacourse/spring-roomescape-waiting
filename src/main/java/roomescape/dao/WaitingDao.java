@@ -3,7 +3,7 @@ package roomescape.dao;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.vo.Slot;
+import roomescape.common.vo.Slot;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.Waitings;
 

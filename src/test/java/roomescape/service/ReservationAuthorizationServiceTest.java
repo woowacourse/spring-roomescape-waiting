@@ -31,7 +31,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.store.Store;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.Time;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
 
 @JdbcTest
 @Import({ReservationAuthorizationService.class, ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class,

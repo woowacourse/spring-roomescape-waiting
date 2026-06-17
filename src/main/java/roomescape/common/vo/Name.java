@@ -1,4 +1,4 @@
-package roomescape.domain.vo;
+package roomescape.common.vo;
 
 import java.util.Objects;
 import roomescape.common.exception.InvalidInputException;

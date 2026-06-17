@@ -11,7 +11,7 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.member.Member;
-import roomescape.domain.vo.Slot;
+import roomescape.common.vo.Slot;
 import roomescape.domain.time.Time;
 import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
