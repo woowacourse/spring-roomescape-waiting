@@ -13,14 +13,6 @@ public record TossConfirmResponse(
 ) {
 
     public PaymentResult toPaymentResult() {
-        return new PaymentResult(paymentKey, orderId, totalAmount, mapStatus(status), approvedAt);
-    }
-
-    private static PaymentStatus mapStatus(String tossStatus) {
-        return switch (tossStatus) {
-            case "DONE" -> PaymentStatus.APPROVED;
-            case "CANCELED", "PARTIAL_CANCELED" -> PaymentStatus.CANCELED;
-            default -> PaymentStatus.ABORTED;
-        };
+        return new PaymentResult(paymentKey, orderId, totalAmount, PaymentStatus.getStatus(status), approvedAt);
     }
 }
