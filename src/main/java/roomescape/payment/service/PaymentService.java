@@ -50,18 +50,6 @@ public class PaymentService {
         return result;
     }
 
-    private PaymentResult requestPaymentConfirm(Payment payment, String paymentKey) {
-        try {
-            return paymentGateway.confirm(new PaymentConfirmation(paymentKey, payment.getOrderId(), payment.getAmount()));
-        } catch (TossPaymentException e) {
-            handleTossPaymentException(payment, e);
-            throw e;
-        } catch (RuntimeException e) {
-            handleUnknownPaymentException(payment);
-            throw e;
-        }
-    }
-
     @Transactional
     public void cancelPendingByOrderId(String orderId) {
         if (orderId == null) {
@@ -72,6 +60,18 @@ public class PaymentService {
             paymentRepository.update(payment);
             cancelReservation(payment.getSlotId(), payment.getReservationId(), payment.getAmount());
         });
+    }
+
+    private PaymentResult requestPaymentConfirm(Payment payment, String paymentKey) {
+        try {
+            return paymentGateway.confirm(new PaymentConfirmation(paymentKey, payment.getOrderId(), payment.getAmount()));
+        } catch (TossPaymentException e) {
+            handleTossPaymentException(payment, e);
+            throw e;
+        } catch (RuntimeException e) {
+            handleUnknownPaymentException(payment);
+            throw e;
+        }
     }
 
     private void confirmReservation(Long slotId, Long reservationId) {
@@ -134,7 +134,7 @@ public class PaymentService {
                 .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다."));
     }
 
-    public void cancelAndPromote(Reservations changed) {
+    private void cancelAndPromote(Reservations changed) {
         changed.values().forEach(reservationRepository::updateStatus);
     }
 
