@@ -22,8 +22,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import roomescape.feature.payment.PaymentConnectionException;
 import roomescape.feature.payment.PaymentException;
 import roomescape.feature.payment.PaymentFailureType;
+import roomescape.feature.payment.PaymentTimeoutException;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.global.error.dto.ErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
@@ -235,6 +237,30 @@ class GlobalExceptionHandlerTest {
             ResponseEntity<ErrorResponseDto> response = handler.handlePaymentException(exception);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
+
+    @Nested
+    class 전송_계층_실패_처리 {
+
+        @Test
+        void 연결_실패는_503과_PAYMENT_GATEWAY_UNREACHABLE을_반환한다() {
+            PaymentConnectionException exception = new PaymentConnectionException(new RuntimeException("connect refused"));
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentConnectionException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+            assertThat(response.getBody().code()).isEqualTo("PAYMENT_GATEWAY_UNREACHABLE");
+        }
+
+        @Test
+        void 읽기_타임아웃은_504와_PAYMENT_RESULT_UNKNOWN을_반환한다() {
+            PaymentTimeoutException exception = new PaymentTimeoutException(new RuntimeException("read timed out"));
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentTimeoutException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
+            assertThat(response.getBody().code()).isEqualTo("PAYMENT_RESULT_UNKNOWN");
         }
     }
 

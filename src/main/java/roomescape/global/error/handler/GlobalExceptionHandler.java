@@ -15,8 +15,10 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import roomescape.feature.payment.PaymentConnectionException;
 import roomescape.feature.payment.PaymentException;
 import roomescape.feature.payment.PaymentFailureType;
+import roomescape.feature.payment.PaymentTimeoutException;
 import roomescape.global.error.dto.ErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponsesDto;
@@ -124,6 +126,20 @@ public class GlobalExceptionHandler {
             case ALREADY_DONE -> HttpStatus.OK;
             case CLIENT_FAULT, UNKNOWN -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
+    }
+
+    @ExceptionHandler(PaymentConnectionException.class)
+    public ResponseEntity<ErrorResponseDto> handlePaymentConnectionException(PaymentConnectionException e) {
+        // 연결 실패: 요청이 토스에 전송된 적 없어 '미청구'가 확정 → 재시도 안내가 가능한 결제 실패.
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body(new ErrorResponseDto("PAYMENT_GATEWAY_UNREACHABLE", "결제 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요."));
+    }
+
+    @ExceptionHandler(PaymentTimeoutException.class)
+    public ResponseEntity<ErrorResponseDto> handlePaymentTimeoutException(PaymentTimeoutException e) {
+        // 읽기 타임아웃: 결제 결과가 불명 → 실패로 단정하지 않고 '확인 중'으로 안내한다. (중복 결제는 멱등키로 방지)
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
+            .body(new ErrorResponseDto("PAYMENT_RESULT_UNKNOWN", "결제 결과를 확인하고 있습니다. 잠시 후 다시 확인해주세요."));
     }
 
     @ExceptionHandler(Exception.class)
