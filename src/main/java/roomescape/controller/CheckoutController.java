@@ -69,9 +69,16 @@ public class CheckoutController {
             model.addAttribute("paymentKey", paymentKey);
             return "success";
         } catch (PaymentAmountMismatchException e) {
+            // 위변조 차단. 결제 대기 상태로 남은 주문/예약을 failUrl 과 동일하게 정리한다.
+            paymentService.cancelOrder(orderId);
             return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId);
         } catch (TossPaymentException e) {
+            // 승인 실패(카드 거절·키 오류 등). 결제 대기 주문/예약을 정리해 고아 데이터가 남지 않게 한다.
+            paymentService.cancelOrder(orderId);
             return failView(model, e.getCode(), e.getMessage(), orderId);
+        } catch (ResourceNotFoundException e) {
+            // 주문을 찾을 수 없는 경우. 정리할 대상이 없으므로 안내만 한다.
+            return failView(model, "ORDER_NOT_FOUND", e.getMessage(), orderId);
         }
     }
 

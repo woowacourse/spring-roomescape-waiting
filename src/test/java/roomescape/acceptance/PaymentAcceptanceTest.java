@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.client.TossPaymentException;
 import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
@@ -48,12 +49,18 @@ class PaymentAcceptanceTest {
         @Bean
         @Primary
         PaymentGateway stubPaymentGateway() {
-            return confirmation -> new PaymentResult(
-                    confirmation.paymentKey(),
-                    confirmation.orderId(),
-                    PaymentStatus.DONE,
-                    confirmation.amount()
-            );
+            return confirmation -> {
+                // paymentKey 가 "reject" 면 카드 거절을 흉내 내 승인 실패 경로를 검증한다.
+                if ("reject".equals(confirmation.paymentKey())) {
+                    throw new TossPaymentException.CardRejected("카드가 거절되었습니다");
+                }
+                return new PaymentResult(
+                        confirmation.paymentKey(),
+                        confirmation.orderId(),
+                        PaymentStatus.DONE,
+                        confirmation.amount()
+                );
+            };
         }
     }
 
@@ -109,8 +116,8 @@ class PaymentAcceptanceTest {
     }
 
     @Test
-    @DisplayName("승인 금액이 주문 금액과 다르면 예약은 PENDING 으로 남는다")
-    void 금액_불일치_시_예약은_확정되지_않는다() {
+    @DisplayName("승인 금액이 주문 금액과 다르면 승인 없이 차단되고 대기 예약/주문이 정리된다")
+    void 금액_불일치_시_차단되고_정리된다() {
         long reservationId = 예약_생성("브라운");
         RestAssured.given()
                 .when().get("/payments/checkout?reservationId=" + reservationId)
@@ -123,7 +130,35 @@ class PaymentAcceptanceTest {
                 .when().get("/payments/success?paymentKey=" + PAYMENT_KEY + "&orderId=" + orderId + "&amount=9999")
                 .then().statusCode(200);
 
-        assertThat(예약_상태(reservationId)).isEqualTo("PENDING");
+        assertThat(예약_존재_수(reservationId)).isZero();
+        assertThat(주문_존재_수(orderId)).isZero();
+    }
+
+    @Test
+    @DisplayName("승인 실패(카드 거절) 시 결제 대기 예약과 주문이 정리된다")
+    void 승인_실패_시_대기_예약과_주문이_정리된다() {
+        long reservationId = 예약_생성("브라운");
+        RestAssured.given()
+                .when().get("/payments/checkout?reservationId=" + reservationId)
+                .then().statusCode(200);
+        String orderId = jdbcTemplate.queryForObject(
+                "SELECT order_id FROM payment WHERE reservation_id = ?", String.class, reservationId);
+
+        // paymentKey=reject → 스텁 게이트웨이가 카드 거절 예외를 던진다.
+        RestAssured.given()
+                .when().get("/payments/success?paymentKey=reject&orderId=" + orderId + "&amount=" + PRICE)
+                .then().statusCode(200);
+
+        assertThat(예약_존재_수(reservationId)).isZero();
+        assertThat(주문_존재_수(orderId)).isZero();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 주문으로 승인 요청해도 JSON 404 가 아닌 fail 뷰(200)로 응답한다")
+    void 존재하지_않는_주문_승인은_fail_뷰로_응답한다() {
+        RestAssured.given()
+                .when().get("/payments/success?paymentKey=" + PAYMENT_KEY + "&orderId=order-none&amount=" + PRICE)
+                .then().statusCode(200);
     }
 
     @Test
@@ -168,5 +203,15 @@ class PaymentAcceptanceTest {
     private String 예약_상태(long reservationId) {
         return jdbcTemplate.queryForObject(
                 "SELECT status FROM reservation WHERE id = ?", String.class, reservationId);
+    }
+
+    private long 예약_존재_수(long reservationId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE id = ?", Long.class, reservationId);
+    }
+
+    private long 주문_존재_수(String orderId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM payment WHERE order_id = ?", Long.class, orderId);
     }
 }
