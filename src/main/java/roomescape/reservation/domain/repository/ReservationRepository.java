@@ -16,6 +16,8 @@ public interface ReservationRepository {
 
     Integer delete(Long id);
 
+    Integer deleteByIdAndStatus(Long id, ReservationStatus status);
+
     Boolean existsBySlot(ReservationSlot slot);
 
     Boolean existsByUserAndSlot(String username, ReservationSlot slot);

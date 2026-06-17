@@ -84,4 +84,18 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
             throw new UniqueConstraintViolationException(e);
         }
     }
+
+    @Override
+    public Integer deletePendingByOrderId(String orderId) {
+        return jdbcTemplate.update(
+                """
+                        DELETE FROM payment_order
+                        WHERE order_id = ?
+                            AND status = ?
+                            AND payment_key IS NULL
+                        """,
+                orderId,
+                PaymentOrderStatus.PENDING.name()
+        );
+    }
 }

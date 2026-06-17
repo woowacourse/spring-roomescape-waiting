@@ -184,6 +184,51 @@ class PaymentApiTest {
         });
     }
 
+    @DisplayName("결제 취소 실패 콜백에 주문 ID가 없으면 정리 없이 204를 반환합니다.")
+    @Test
+    void fail_payment_without_order_id_no_op() {
+        Map<String, String> requestBody = Map.of(
+                "code", "PAY_PROCESS_CANCELED",
+                "message", "사용자가 결제를 취소했습니다."
+        );
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when().post("/payments/fail")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @DisplayName("결제 실패 콜백은 대기 중인 주문과 연결 예약을 정리하고 204를 반환합니다.")
+    @Test
+    void fail_payment_pending_order_cleanup() {
+        PaymentOrder order = preparePaymentOrder();
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(paymentFailRequest(order.getOrderId().value()))
+                .when().post("/payments/fail")
+                .then().log().all()
+                .statusCode(204);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isFalse();
+        });
+    }
+
+    @DisplayName("결제 실패 콜백은 알 수 없는 주문 ID에도 멱등하게 204를 반환합니다.")
+    @Test
+    void fail_payment_unknown_order_id_no_op() {
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(paymentFailRequest("unknown-order-id"))
+                .when().post("/payments/fail")
+                .then().log().all()
+                .statusCode(204);
+    }
+
     private static Stream<Arguments> paymentExceptionMappings() {
         return Stream.of(
                 Arguments.of(
@@ -242,6 +287,14 @@ class PaymentApiTest {
                 "paymentKey", PAYMENT_KEY,
                 "orderId", order.getOrderId().value(),
                 "amount", order.getAmount().value()
+        );
+    }
+
+    private Map<String, Object> paymentFailRequest(String orderId) {
+        return Map.of(
+                "code", "PAY_PROCESS_CANCELED",
+                "message", "사용자가 결제를 취소했습니다.",
+                "orderId", orderId
         );
     }
 }

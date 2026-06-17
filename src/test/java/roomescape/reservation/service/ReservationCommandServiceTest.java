@@ -19,10 +19,12 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.global.exception.UniqueConstraintViolationException;
+import roomescape.reservation.application.dto.PaymentFailCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
+import roomescape.reservation.domain.PaymentOrder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
@@ -425,5 +427,102 @@ class ReservationCommandServiceTest {
             softly.assertThat(reservation.getUser()).isEqualTo(ReservationFixture.userNameStark());
             softly.assertThat(waitingRank).isEqualTo(1);
         });
+    }
+
+    @DisplayName("결제 실패 정리는 대기 중인 주문과 연결 예약을 삭제한다.")
+    @Test
+    void cleanup_pending_payment_failure() {
+        PaymentOrder order = preparePaymentOrder("스타크");
+
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isFalse();
+        });
+    }
+
+    @DisplayName("결제 실패 정리는 대기 중인 주문 예약 삭제 후 첫 번째 대기를 예약으로 승격한다.")
+    @Test
+    void cleanup_pending_payment_failure_promotes_first_waiting() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long reservationId = testHelper.insertReservation(
+                "피노",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        PaymentOrder order = orderRepository.save(PaymentOrder.create(reservationId, 50_000L));
+        testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        testHelper.insertWaiting("네오", ReservationFixture.futureReservationDate(), themeId, timeId);
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.findReservationNameBySlot(slot)).contains("스타크");
+            softly.assertThat(testHelper.findWaitingRank("네오", slot)).isEqualTo(1);
+        });
+    }
+
+    @DisplayName("결제 실패 정리는 이미 확정된 주문과 예약을 삭제하지 않는다.")
+    @Test
+    void cleanup_confirmed_payment_failure_no_op() {
+        PaymentOrder order = preparePaymentOrder("스타크");
+        testHelper.confirmPaymentOrder(order, "confirmed-payment-key");
+
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isTrue();
+            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("CONFIRMED");
+        });
+    }
+
+    @DisplayName("결제 실패 정리는 대기 중인 주문이 확정 예약을 가리켜도 예약을 삭제하지 않는다.")
+    @Test
+    void cleanup_pending_payment_failure_does_not_delete_confirmed_reservation() {
+        PaymentOrder order = preparePaymentOrder("스타크");
+        testHelper.confirmReservation(order.getReservationId());
+
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
+            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isTrue();
+            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("CONFIRMED");
+        });
+    }
+
+    @DisplayName("결제 실패 정리는 알 수 없는 주문 ID에도 아무것도 삭제하지 않는다.")
+    @Test
+    void cleanup_unknown_payment_failure_no_op() {
+        assertThatNoException().isThrownBy(() ->
+                reservationCommandService.cleanupPendingPaymentFailure(new PaymentFailCommand("unknown-order-id", NOW))
+        );
+    }
+
+    private PaymentOrder preparePaymentOrder(String name) {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long reservationId = testHelper.insertReservation(
+                name,
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        return orderRepository.save(PaymentOrder.create(reservationId, 50_000L));
+    }
+
+    private PaymentFailCommand paymentFailCommand(PaymentOrder order) {
+        return new PaymentFailCommand(order.getOrderId().value(), NOW);
     }
 }

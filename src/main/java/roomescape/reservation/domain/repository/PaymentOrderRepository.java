@@ -9,4 +9,6 @@ public interface PaymentOrderRepository {
     Optional<PaymentOrder> findByOrderId(String orderId);
 
     Integer confirm(PaymentOrder paymentOrder);
+
+    Integer deletePendingByOrderId(String orderId);
 }

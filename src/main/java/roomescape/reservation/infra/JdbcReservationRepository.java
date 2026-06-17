@@ -120,6 +120,15 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Integer deleteByIdAndStatus(Long id, ReservationStatus status) {
+        return jdbcTemplate.update(
+                "DELETE FROM reservation WHERE id = ? AND status = ?",
+                id,
+                status.name()
+        );
+    }
+
+    @Override
     public Boolean existsBySlot(ReservationSlot slot) {
         return jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?)",
