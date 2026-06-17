@@ -43,6 +43,7 @@ public class RoomescapeApplicationConcurrencyTest {
     public void setUp() {
         RestAssured.port = port;
         jdbcTemplate.update("delete from waiting");
+        jdbcTemplate.update("delete from reservation_order");
         jdbcTemplate.update("delete from reservation");
         jdbcTemplate.update("delete from slot");
         jdbcTemplate.update("delete from reservation_time");

@@ -14,6 +14,7 @@ import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.exception.ReferencedDataException;
+import roomescape.repository.JdbcReservationOrderRepository;
 import roomescape.repository.JdbcReservationRepository;
 import roomescape.repository.JdbcReservationTimeRepository;
 import roomescape.repository.JdbcReservationWaitingRepository;
@@ -26,7 +27,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @JdbcTest
 @Import({ThemeService.class, JdbcThemeRepository.class,
         ReservationService.class, SlotDomainService.class, JdbcSlotRepository.class, JdbcReservationRepository.class,
-        JdbcReservationTimeRepository.class, JdbcReservationWaitingRepository.class})
+        JdbcReservationTimeRepository.class, JdbcReservationWaitingRepository.class,
+        ReservationOrderService.class, JdbcReservationOrderRepository.class})
 class ThemeServiceTest {
 
     @Autowired

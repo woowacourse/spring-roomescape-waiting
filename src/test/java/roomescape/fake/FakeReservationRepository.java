@@ -60,7 +60,7 @@ public class FakeReservationRepository implements ReservationRepository {
         for (int i = 0; i < store.size(); i++) {
             Reservation r = store.get(i);
             if (r.getId() != null && r.getId().equals(id)) {
-                store.set(i, Reservation.restore(id, r.getSlot(), name, r.getCreatedAt()));
+                store.set(i, Reservation.restore(id, r.getSlot(), name, r.getCreatedAt(), r.isPaid()));
                 return;
             }
         }
@@ -71,11 +71,40 @@ public class FakeReservationRepository implements ReservationRepository {
         for (int i = 0; i < store.size(); i++) {
             Reservation r = store.get(i);
             if (r.getId() != null && r.getId().equals(id)) {
-                store.set(i, Reservation.restore(id, r.getSlot(), name, createdAt));
+                store.set(i, Reservation.restore(id, r.getSlot(), name, createdAt, r.isPaid()));
                 return 1;
             }
         }
         return 0;
+    }
+
+    @Override
+    public int updatePaid(Long id, boolean paid) {
+        for (int i = 0; i < store.size(); i++) {
+            Reservation r = store.get(i);
+            if (r.getId() != null && r.getId().equals(id)) {
+                store.set(i, r.updatePaid(paid));
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public List<Reservation> findUnpaidCreatedBefore(LocalDateTime threshold) {
+        return store.stream()
+                .filter(reservation -> !reservation.isPaid())
+                .filter(reservation -> reservation.getCreatedAt().isBefore(threshold))
+                .toList();
+    }
+
+    @Override
+    public int deleteUnpaidByIds(List<Long> ids) {
+        int before = store.size();
+        store.removeIf(reservation -> reservation.getId() != null
+                && ids.contains(reservation.getId())
+                && !reservation.isPaid());
+        return before - store.size();
     }
 
     @Override
