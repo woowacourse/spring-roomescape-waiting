@@ -60,8 +60,7 @@ CREATE TABLE `order`
     status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP,
     payment_key VARCHAR(255),
-    PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+    PRIMARY KEY (id)
 );
 
 CREATE UNIQUE INDEX unique_theme_name
