@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS store_managers;
+DROP TABLE IF EXISTS payment_order;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
@@ -54,6 +55,18 @@ CREATE TABLE reservation
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (store_id) REFERENCES store (id)
+);
+
+CREATE TABLE payment_order
+(
+    id             BIGINT      NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT      NOT NULL,
+    order_id       VARCHAR(64) NOT NULL,
+    amount         BIGINT      NOT NULL,
+    created_at     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE (order_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
 
 CREATE TABLE store_managers

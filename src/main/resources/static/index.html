@@ -184,6 +184,7 @@
 <script src="app.js"></script>
 <script>
     const R = Roomescape;
+    const RESERVATION_AMOUNT = 10000;
     const state = {selectedTheme: null, selectedDate: null, selectedTime: null, themes: [], isWaiting: false};
     const themePageState = {page: 0, hasNext: false};
 
@@ -473,15 +474,19 @@
         const isWaiting = state.isWaiting;
         if (isWaiting && !confirm('이미 예약된 슬롯입니다. 대기 등록하시겠습니까?')) return;
         const endpoint = isWaiting ? '/reservations/waiting' : '/reservations';
+        const body = {
+            themeId: state.selectedTheme.id,
+            date: state.selectedDate,
+            timeId: state.selectedTime.id,
+            storeId: 1,
+        };
+        if (!isWaiting) {
+            body.amount = RESERVATION_AMOUNT;
+        }
         try {
             await R.api('POST', endpoint, {
                 token: R.auth.getMemberToken(),
-                body: {
-                    themeId: state.selectedTheme.id,
-                    date: state.selectedDate,
-                    timeId: state.selectedTime.id,
-                    storeId: 1,
-                },
+                body,
             });
             R.toast(
                 isWaiting

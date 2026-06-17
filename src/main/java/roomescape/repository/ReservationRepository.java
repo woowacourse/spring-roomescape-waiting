@@ -28,6 +28,9 @@ public interface ReservationRepository {
 
     boolean existsReservedByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);
 
+    boolean existsReservedOrPaymentPendingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId,
+                                                                        Long storeId);
+
     boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
                                                        Long userId);
 

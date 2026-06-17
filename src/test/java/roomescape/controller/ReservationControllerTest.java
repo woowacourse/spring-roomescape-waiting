@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.dto.command.CreateReservationCommand;
+import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.dto.response.ReservationWithStatusResponses;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
@@ -106,19 +107,23 @@ class ReservationControllerTest {
     @Test
     void POST_reservations_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
         given(reservationService.createReservation(any(CreateReservationCommand.class)))
-                .willReturn(Fixtures.sampleReservation(7L));
+                .willReturn(new ReservationPaymentResponse(7L, "order_123456", 10_000L));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-05-06",
                 "themeId", 1,
                 "timeId", 1,
-                "storeId", 1);
+                "storeId", 1,
+                "amount", 10_000);
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/reservations/7"));
+                .andExpect(header().string("Location", "/reservations/7"))
+                .andExpect(jsonPath("$.reservationId").value(7))
+                .andExpect(jsonPath("$.orderId").value("order_123456"))
+                .andExpect(jsonPath("$.amount").value(10_000));
     }
 
     @Test
@@ -130,7 +135,8 @@ class ReservationControllerTest {
                 "date", "2026-05-06",
                 "themeId", 1,
                 "timeId", 1,
-                "storeId", 1);
+                "storeId", 1,
+                "amount", 10_000);
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,7 +154,8 @@ class ReservationControllerTest {
                 "date", "2026-05-06",
                 "themeId", 1,
                 "timeId", 1,
-                "storeId", 1);
+                "storeId", 1,
+                "amount", 10_000);
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -367,6 +374,7 @@ class ReservationControllerTest {
         body.put("date", "2026-05-08");
         body.put("timeId", 1);
         body.put("storeId", 1);
+        body.put("amount", 10_000);
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -381,6 +389,7 @@ class ReservationControllerTest {
         body.put("date", "2026-05-08");
         body.put("themeId", 1);
         body.put("timeId", 1);
+        body.put("amount", 10_000);
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)

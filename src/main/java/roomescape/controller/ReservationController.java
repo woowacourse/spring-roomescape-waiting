@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Reservation;
 import roomescape.dto.command.CancelReservationCommand;
 import roomescape.dto.command.CreateReservationCommand;
+import roomescape.dto.request.CreatePaymentReservationRequest;
 import roomescape.dto.request.CreateReservationRequest;
+import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationWithStatusResponses;
 import roomescape.dto.command.UpdateReservationCommand;
@@ -43,14 +45,14 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createReservation(
+    public ResponseEntity<ReservationPaymentResponse> createReservation(
             @LoginUserId Long userId,
-            @Valid @RequestBody CreateReservationRequest request) {
-        Reservation createdReservation = reservationService.createReservation(
+            @Valid @RequestBody CreatePaymentReservationRequest request) {
+        ReservationPaymentResponse createdReservation = reservationService.createReservation(
                 CreateReservationCommand.of(userId, request));
 
-        URI location = URI.create("/reservations/" + createdReservation.getId());
-        return ResponseEntity.created(location).build();
+        URI location = URI.create("/reservations/" + createdReservation.reservationId());
+        return ResponseEntity.created(location).body(createdReservation);
     }
 
     @PostMapping("/waiting")

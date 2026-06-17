@@ -112,6 +112,18 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsReservedOrPaymentPendingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId,
+                                                                               Long themeId, Long storeId) {
+        return store.values().stream()
+                .anyMatch(r -> r.getDate().equals(date)
+                        && r.getTime().getId().equals(timeId)
+                        && r.getTheme().getId().equals(themeId)
+                        && r.getStore().getId().equals(storeId)
+                        && (r.getStatus().equals(ReservationStatus.RESERVED)
+                        || r.getStatus().equals(ReservationStatus.PAYMENT_PENDING)));
+    }
+
+    @Override
     public boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
                                                               Long userId) {
         return store.values().stream()

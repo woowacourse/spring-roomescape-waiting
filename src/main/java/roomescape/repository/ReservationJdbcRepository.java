@@ -245,6 +245,25 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsReservedOrPaymentPendingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId,
+                                                                               Long themeId, Long storeId) {
+        String sql = """
+                select exists(
+                    select 1
+                    from reservation
+                    where date = ?
+                      and time_id = ?
+                      and theme_id = ?
+                      and store_id = ?
+                      and status in (?, ?)
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class,
+                date, timeId, themeId, storeId, ReservationStatus.RESERVED.name(),
+                ReservationStatus.PAYMENT_PENDING.name()));
+    }
+
+    @Override
     public boolean existsByReservationTimeId(Long timeId) {
         String sql = "select exists(select 1 from reservation where time_id = ?)";
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId));
