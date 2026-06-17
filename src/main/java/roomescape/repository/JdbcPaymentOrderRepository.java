@@ -79,15 +79,21 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     }
 
     @Override
+    public void recordPaymentKey(String orderId, String paymentKey) {
+        String sql = "UPDATE payment_order SET payment_key = ? WHERE order_id = ?";
+        jdbcTemplate.update(sql, paymentKey, orderId);
+    }
+
+    @Override
     public void complete(String orderId, String paymentKey) {
         String sql = "UPDATE payment_order SET payment_key = ?, status = ? WHERE order_id = ?";
         jdbcTemplate.update(sql, paymentKey, PaymentOrderStatus.CONFIRMED.name(), orderId);
     }
 
     @Override
-    public void markUnknown(String orderId, String paymentKey) {
-        String sql = "UPDATE payment_order SET payment_key = ?, status = ? WHERE order_id = ?";
-        jdbcTemplate.update(sql, paymentKey, PaymentOrderStatus.UNKNOWN.name(), orderId);
+    public void markUnknown(String orderId) {
+        String sql = "UPDATE payment_order SET status = ? WHERE order_id = ?";
+        jdbcTemplate.update(sql, PaymentOrderStatus.UNKNOWN.name(), orderId);
     }
 
     @Override

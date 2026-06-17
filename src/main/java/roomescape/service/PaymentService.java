@@ -38,6 +38,7 @@ public class PaymentService {
         if (!order.amount().equals(amount)) {
             throw new PaymentAmountMismatchException(order.amount(), amount);
         }
+        paymentOrderRepository.recordPaymentKey(orderId, paymentKey);
 
         PaymentResult result;
         try {
@@ -45,13 +46,13 @@ public class PaymentService {
                     new PaymentConfirmation(paymentKey, orderId, amount, order.idempotencyKey())
             );
         } catch (PaymentConfirmationUnknownException e) {
-            paymentOrderRepository.markUnknown(orderId, paymentKey);
+            paymentOrderRepository.markUnknown(orderId);
             throw e;
         } catch (PaymentFailureException e) {
             paymentOrderRepository.markFailed(orderId);
             throw e;
         } catch (PaymentGatewayRetryableException | PaymentAlreadyProcessedException e) {
-            paymentOrderRepository.markUnknown(orderId, paymentKey);
+            paymentOrderRepository.markUnknown(orderId);
             throw e;
         }
         paymentOrderRepository.complete(orderId, result.paymentKey());

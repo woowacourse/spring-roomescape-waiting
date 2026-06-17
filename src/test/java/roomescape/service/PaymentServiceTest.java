@@ -119,6 +119,7 @@ class PaymentServiceTest {
                 .isInstanceOf(PaymentFailureException.class);
 
         assertThat(orderRepository.findByOrderId("order-1").orElseThrow().status()).isEqualTo(PaymentOrderStatus.FAILED);
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().paymentKey()).isEqualTo("payment-key");
         assertThat(reservationRepository.findById(reservation.getId()).orElseThrow().getStatus())
                 .isEqualTo(ReservationStatus.PENDING);
     }
@@ -219,6 +220,19 @@ class PaymentServiceTest {
         }
 
         @Override
+        public void recordPaymentKey(String orderId, String paymentKey) {
+            PaymentOrder order = orders.get(orderId);
+            orders.put(orderId, new PaymentOrder(
+                    order.orderId(),
+                    order.reservationId(),
+                    order.amount(),
+                    order.idempotencyKey(),
+                    paymentKey,
+                    order.status()
+            ));
+        }
+
+        @Override
         public void complete(String orderId, String paymentKey) {
             PaymentOrder order = orders.get(orderId);
             orders.put(orderId, new PaymentOrder(
@@ -232,14 +246,14 @@ class PaymentServiceTest {
         }
 
         @Override
-        public void markUnknown(String orderId, String paymentKey) {
+        public void markUnknown(String orderId) {
             PaymentOrder order = orders.get(orderId);
             orders.put(orderId, new PaymentOrder(
                     order.orderId(),
                     order.reservationId(),
                     order.amount(),
                     order.idempotencyKey(),
-                    paymentKey,
+                    order.paymentKey(),
                     PaymentOrderStatus.UNKNOWN
             ));
         }
