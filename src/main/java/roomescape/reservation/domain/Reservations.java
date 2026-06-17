@@ -84,6 +84,12 @@ public record Reservations(
         }
     }
 
+    public Optional<Reservation> findPromoted() {
+        return values.stream()
+                .filter(reservation -> reservation.getStatus().equals(ReservationStatus.PENDING_PAYMENT))
+                .findFirst();
+    }
+
     public boolean hasReserved() {
         return values.stream()
                 .anyMatch(r -> r.isReserved() || r.isPendingPayment());

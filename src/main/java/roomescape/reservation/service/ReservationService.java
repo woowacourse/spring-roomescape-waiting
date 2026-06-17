@@ -51,6 +51,7 @@ public class ReservationService {
         return ReservationWithSlotDetailDto.of(saved, slot);
     }
 
+    // 취소, 변경에서 승격자의 Payment를 생성하는 건 PASS
     @Transactional
     public Reservation cancel(Long slotId, Long reservationId, String requesterName) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);

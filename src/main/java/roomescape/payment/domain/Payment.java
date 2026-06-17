@@ -42,7 +42,7 @@ public class Payment {
         updateStatus(PaymentStatus.FAILED);
     }
 
-    public void markUnknown() {
+    public void unknown() {
         updateStatus(PaymentStatus.UNKNOWN);
     }
 

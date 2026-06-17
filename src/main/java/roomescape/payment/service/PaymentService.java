@@ -1,6 +1,7 @@
 package roomescape.payment.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.payment.client.PaymentGateway;
@@ -30,6 +31,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
+    private final PropertyResolver propertyResolver;
 
     @Transactional
     public Payment createPendingPayment(Long reservationId, Long slotId, Long amount) {
@@ -41,25 +43,21 @@ public class PaymentService {
         Payment payment = findPayment(orderId);
         payment.validateAmountMatch(amount);
 
+        PaymentResult result = requestPaymentConfirm(payment, paymentKey);
+
+        completePayment(payment, paymentKey);
+        confirmReservation(payment.getSlotId(), payment.getReservationId());
+        return result;
+    }
+
+    private PaymentResult requestPaymentConfirm(Payment payment, String paymentKey) {
         try {
-            PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-            payment.confirm(paymentKey);
-            paymentRepository.update(payment);
-            confirmReservation(payment.getSlotId(), payment.getReservationId());
-            return result;
+            return paymentGateway.confirm(new PaymentConfirmation(paymentKey, payment.getOrderId(), payment.getAmount()));
         } catch (TossPaymentException e) {
-            if (e.isRetryable()) {
-                payment.markUnknown();
-                updatePaymentStatus(payment);
-                throw e;
-            }
-            payment.fail();
-            updatePaymentStatus(payment);
-            cancelReservation(payment.getSlotId(), payment.getReservationId());
+            handleTossPaymentException(payment, e);
             throw e;
-        } catch (Exception e) {
-            payment.markUnknown();
-            updatePaymentStatus(payment);
+        } catch (RuntimeException e) {
+            handleUnknownPaymentException(payment);
             throw e;
         }
     }
@@ -72,7 +70,7 @@ public class PaymentService {
         paymentRepository.findByOrderId(orderId).ifPresent(payment -> {
             payment.fail();
             paymentRepository.update(payment);
-            cancelReservation(payment.getSlotId(), payment.getReservationId());
+            cancelReservation(payment.getSlotId(), payment.getReservationId(), payment.getAmount());
         });
     }
 
@@ -82,10 +80,13 @@ public class PaymentService {
         reservationRepository.updateStatus(confirmed);
     }
 
-    private void cancelReservation(Long slotId, Long reservationId) {
+    private void cancelReservation(Long slotId, Long reservationId, Long amount) {
         ReservationSlot slot = getSlotAndReservationsWithLock(slotId);
         Reservations changed = slot.cancelByManager(reservationId);
         cancelAndPromote(changed);
+        changed.findPromoted().ifPresent(promoted -> {
+            createPendingPayment(promoted.getId(), slotId, amount);
+        });
     }
 
     private ReservationSlot getSlotAndReservationsWithLock(Long slotId) {
@@ -93,6 +94,35 @@ public class PaymentService {
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
         List<Reservation> activeReservations = reservationRepository.findReservedAndWaitingBySlotId(slotId);
         return slot.withReservations(new Reservations(activeReservations));
+    }
+
+    private void handleTossPaymentException(Payment payment, TossPaymentException e) {
+        if (e.isRetryable()) {
+            unknownPayment(payment);
+            return;
+        }
+
+        failPayment(payment);
+        cancelReservation(payment.getSlotId(), payment.getReservationId(), payment.getAmount());
+    }
+
+    private void handleUnknownPaymentException(Payment payment) {
+        unknownPayment(payment);
+    }
+
+    private void failPayment(Payment payment) {
+        payment.fail();
+        updatePaymentStatus(payment);
+    }
+
+    private void unknownPayment(Payment payment) {
+        payment.unknown();
+        updatePaymentStatus(payment);
+    }
+
+    private void completePayment(Payment payment, String paymentKey) {
+        payment.confirm(paymentKey);
+        updatePaymentStatus(payment);
     }
 
     private void updatePaymentStatus(Payment payment) {
