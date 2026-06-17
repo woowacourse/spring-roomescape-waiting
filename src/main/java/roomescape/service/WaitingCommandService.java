@@ -14,7 +14,8 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.TemporaryConflictException;
-import payment.order.OrderService;
+import org.springframework.context.ApplicationEventPublisher;
+import payment.ReservationPendingPaymentEvent;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -33,7 +34,7 @@ public class WaitingCommandService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
-    private final OrderService orderService;
+    private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
     public Waiting create(String name, LocalDate date, long timeId, long themeId) {
@@ -107,7 +108,7 @@ public class WaitingCommandService {
         waitingDao.deleteById(waiting.id());
         try {
             Reservation reservation = reservationDao.save(Reservation.forPendingPayment(waiting.owner(), waiting.slot()));
-            orderService.createReady(reservation.id(), LocalDateTime.now(clock));
+            eventPublisher.publishEvent(new ReservationPendingPaymentEvent(reservation.id(), LocalDateTime.now(clock)));
         } catch (DataIntegrityViolationException e) {
             throw new TemporaryConflictException("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }

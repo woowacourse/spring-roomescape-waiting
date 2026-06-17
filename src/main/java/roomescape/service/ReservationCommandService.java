@@ -13,6 +13,8 @@ import roomescape.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
+import org.springframework.context.ApplicationEventPublisher;
+import payment.ReservationPendingPaymentEvent;
 import payment.order.Order;
 import payment.order.OrderService;
 import roomescape.repository.ReservationDao;
@@ -30,6 +32,7 @@ public class ReservationCommandService {
 
     private final WaitingCommandService waitingCommandService;
     private final OrderService orderService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -61,7 +64,9 @@ public class ReservationCommandService {
         }
 
         Reservation savedReservation = save(reservation);
-        Order order = orderService.createReady(savedReservation.id(), now);
+        eventPublisher.publishEvent(new ReservationPendingPaymentEvent(savedReservation.id(), now));
+        Order order = orderService.findByReservationId(savedReservation.id())
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
 
         return new PendingReservation(
                 savedReservation,
