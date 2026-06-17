@@ -135,7 +135,7 @@ public class ReceptionFacade {
     }
 
     private ReceptionResponse saveReservationOrWait(ServiceReservationCreateRequest request,
-                                                     ReservationTime reservationTime, Theme theme) {
+                                                    ReservationTime reservationTime, Theme theme) {
         reservationService.deleteStalePendingBefore(LocalDateTime.now(clock).minusMinutes(PENDING_PAYMENT_TTL_MINUTES));
         Optional<Long> lockedId = reservationService.lockBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
