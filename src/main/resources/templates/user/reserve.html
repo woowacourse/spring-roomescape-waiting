@@ -5,12 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>사용자 — 예약</title>
     <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <style>
+        #paymentPanel { display: none; }
+
+        .amount-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 0.5rem 0 1.25rem;
+        }
+
+        .pay-summary {
+            background: #121920;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .pay-summary strong {
+            color: var(--text);
+        }
+
+        #paymentBtn {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .widget-loading {
+            text-align: center;
+            color: var(--muted);
+            padding: 2rem 0;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
 <header th:replace="~{fragments/site :: siteHeader}"></header>
 <main>
     <h1>예약하기</h1>
     <p class="muted"><a th:href="@{/user}">← 사용자 홈</a></p>
+
     <div class="panel">
         <h2>1. 날짜</h2>
         <div class="form-row">
@@ -40,23 +81,51 @@
         </div>
         <p id="status" class="status-msg" style="display:none;"></p>
     </div>
+
+    <!-- 결제 패널: PENDING 예약 후 노출 -->
+    <div class="panel" id="paymentPanel">
+        <h2>5. 결제</h2>
+        <div class="pay-summary" id="paySummary"></div>
+        <div class="amount-display" id="amountDisplay"></div>
+        <div id="payment-method">
+            <div class="widget-loading">결제 수단을 불러오는 중…</div>
+        </div>
+        <div id="agreement"></div>
+        <button type="button" class="btn btn-primary" id="paymentBtn">결제하기</button>
+        <p id="paymentStatus" class="status-msg" style="display:none;"></p>
+    </div>
 </main>
-<script>
-    const gameDate = document.getElementById('gameDate');
-    const themePick = document.getElementById('themePick');
-    const themeHint = document.getElementById('themeHint');
-    const timeChips = document.getElementById('timeChips');
-    const timeHint = document.getElementById('timeHint');
-    const memberName = document.getElementById('memberName');
-    const submitBtn = document.getElementById('submitBtn');
-    const status = document.getElementById('status');
+
+<script th:inline="javascript">
+    const TOSS_CLIENT_KEY = /*[[${tossClientKey}]]*/ '';
+
+    const gameDate    = document.getElementById('gameDate');
+    const themePick   = document.getElementById('themePick');
+    const themeHint   = document.getElementById('themeHint');
+    const timeChips   = document.getElementById('timeChips');
+    const timeHint    = document.getElementById('timeHint');
+    const memberName  = document.getElementById('memberName');
+    const submitBtn   = document.getElementById('submitBtn');
+    const status      = document.getElementById('status');
+    const paymentPanel  = document.getElementById('paymentPanel');
+    const paySummary    = document.getElementById('paySummary');
+    const amountDisplay = document.getElementById('amountDisplay');
+    const paymentBtn    = document.getElementById('paymentBtn');
+    const paymentStatus = document.getElementById('paymentStatus');
 
     let themes = [];
-    let times = [];
+    let times  = [];
     let reservations = [];
-    let selectedThemeId = null;
-    let selectedTimeId = null;
+    let selectedThemeId   = null;
+    let selectedThemeName = '';
+    let selectedTimeId    = null;
+    let selectedTimeLabel = '';
     let selectedTimeBooked = false;
+
+    // Toss 결제 위젯 인스턴스
+    let paymentWidget = null;
+    // 현재 결제 대기 중인 orderId
+    let pendingOrderId = null;
 
     function localYmd(d) {
         const y = d.getFullYear();
@@ -67,14 +136,30 @@
 
     function showStatus(text, ok) {
         status.textContent = text;
-        status.className = 'status-msg ' + (ok ? 'ok' : 'err');
+        status.className   = 'status-msg ' + (ok ? 'ok' : 'err');
         status.style.display = 'block';
+    }
+
+    function showPaymentStatus(text, ok) {
+        paymentStatus.textContent = text;
+        paymentStatus.className   = 'status-msg ' + (ok ? 'ok' : 'err');
+        paymentStatus.style.display = 'block';
     }
 
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    // sessionStorage에서 customerKey를 꺼내거나 새로 발급
+    function getOrCreateCustomerKey() {
+        let key = sessionStorage.getItem('toss-customer-key');
+        if (!key) {
+            key = 'guest-' + crypto.randomUUID().replace(/-/g, '');
+            sessionStorage.setItem('toss-customer-key', key);
+        }
+        return key;
     }
 
     async function refreshReservations() {
@@ -93,7 +178,8 @@
 
     function renderTimes() {
         timeChips.innerHTML = '';
-        selectedTimeId = null;
+        selectedTimeId    = null;
+        selectedTimeLabel = '';
         selectedTimeBooked = false;
         submitBtn.disabled = true;
         submitBtn.textContent = '예약 요청';
@@ -120,11 +206,12 @@
             btn.textContent = isBooked ? `${label} (대기)` : label;
             if (isBooked) btn.title = '이미 예약됨 — 대기 신청으로 처리됩니다';
             btn.addEventListener('click', () => {
-                selectedTimeId = t.id;
+                selectedTimeId    = t.id;
+                selectedTimeLabel = label;
                 selectedTimeBooked = isBooked;
                 timeChips.querySelectorAll('.time-chip').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                submitBtn.textContent = isBooked ? '대기 신청' : '예약 요청';
+                submitBtn.textContent = isBooked ? '대기 신청' : '결제하기';
                 submitBtn.disabled = !memberName.value.trim();
             });
             timeChips.appendChild(btn);
@@ -149,7 +236,8 @@
                 <div class="t-name">${escapeHtml(th.name)}</div>
                 <div class="t-desc">${escapeHtml(th.description)}</div>`;
             b.addEventListener('click', () => {
-                selectedThemeId = th.id;
+                selectedThemeId   = th.id;
+                selectedThemeName = th.name;
                 themePick.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
                 b.classList.add('selected');
                 renderTimes();
@@ -158,14 +246,37 @@
         }
     }
 
-    gameDate.addEventListener('change', () => {
-        renderTimes();
-    });
+    gameDate.addEventListener('change', renderTimes);
 
     memberName.addEventListener('input', () => {
         submitBtn.disabled = !(selectedTimeId && memberName.value.trim());
     });
 
+    // ── Toss 결제 위젯 초기화 ──────────────────────────────
+    async function initPaymentWidget(amount) {
+        document.getElementById('payment-method').innerHTML =
+            '<div class="widget-loading">결제 수단을 불러오는 중…</div>';
+        document.getElementById('agreement').innerHTML = '';
+
+        const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+        const customerKey  = getOrCreateCustomerKey();
+        // 위젯 방식은 .payment()가 아닌 .widgets()
+        paymentWidget = tossPayments.widgets({ customerKey });
+
+        await paymentWidget.setAmount({ currency: 'KRW', value: amount });
+
+        await paymentWidget.renderPaymentMethods({
+            selector: '#payment-method',
+            variantKey: 'DEFAULT'
+        });
+
+        await paymentWidget.renderAgreement({
+            selector: '#agreement',
+            variantKey: 'AGREEMENT'
+        });
+    }
+
+    // ── 예약 요청 버튼 ──────────────────────────────────────
     submitBtn.addEventListener('click', async () => {
         status.style.display = 'none';
         const body = {
@@ -174,23 +285,72 @@
             timeId: selectedTimeId,
             themeId: selectedThemeId
         };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '처리 중…';
+
         try {
             const res = await fetch('/reservations', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             if (!res.ok) {
                 const errBody = await res.json().catch(() => ({}));
                 throw new Error(errBody.message || '요청에 실패했습니다.');
             }
-            showStatus(selectedTimeBooked ? '대기 신청이 완료되었습니다.' : '예약이 완료되었습니다.', true);
-            await refreshReservations();
-            renderTimes();
-            memberName.value = '';
-            submitBtn.disabled = true;
+            const data = await res.json();
+
+            if (data.status === 'WAITING') {
+                // 대기 신청 완료 — 결제 불필요
+                showStatus('대기 신청이 완료되었습니다.', true);
+                await refreshReservations();
+                renderTimes();
+                memberName.value = '';
+            } else if (data.status === 'PENDING') {
+                // 결제 필요 — Toss 위젯 초기화
+                pendingOrderId = data.orderId;
+
+                paySummary.innerHTML = `
+                    <div><strong>날짜</strong>  ${escapeHtml(data.date)}</div>
+                    <div><strong>테마</strong>  ${escapeHtml(selectedThemeName)}</div>
+                    <div><strong>시간</strong>  ${escapeHtml(selectedTimeLabel)}</div>
+                    <div><strong>예약자</strong> ${escapeHtml(data.name)}</div>`;
+                amountDisplay.textContent = `${Number(data.amount).toLocaleString()}원`;
+
+                paymentPanel.style.display = 'block';
+                paymentPanel.scrollIntoView({ behavior: 'smooth' });
+
+                await initPaymentWidget(data.amount);
+            }
         } catch (e) {
             showStatus(e.message, false);
+            submitBtn.disabled = false;
+            submitBtn.textContent = selectedTimeBooked ? '대기 신청' : '결제하기';
+        }
+    });
+
+    // ── 결제하기 버튼 ──────────────────────────────────────
+    paymentBtn.addEventListener('click', async () => {
+        if (!paymentWidget || !pendingOrderId) return;
+        paymentStatus.style.display = 'none';
+        paymentBtn.disabled = true;
+        paymentBtn.textContent = '결제 진행 중…';
+
+        try {
+            await paymentWidget.requestPayment({
+                orderId:      pendingOrderId,
+                orderName:    '방탈출 예약',
+                successUrl:   window.location.origin + '/user/payment/success',
+                failUrl:      window.location.origin + '/user/payment/fail',
+                customerName: memberName.value.trim()
+            });
+            // requestPayment는 페이지를 successUrl로 리다이렉트하므로
+            // 아래 코드는 오류가 발생한 경우에만 실행됩니다.
+        } catch (e) {
+            showPaymentStatus(e.message || '결제 요청 중 오류가 발생했습니다.', false);
+            paymentBtn.disabled = false;
+            paymentBtn.textContent = '결제하기';
         }
     });
 
@@ -204,8 +364,8 @@
                 fetch('/reservations')
             ]);
             if (!tr.ok || !ts.ok || !rr.ok) throw new Error('데이터를 불러오지 못했습니다.');
-            themes = await tr.json();
-            times = await ts.json();
+            themes       = await tr.json();
+            times        = await ts.json();
             reservations = await rr.json();
             renderThemes();
             renderTimes();

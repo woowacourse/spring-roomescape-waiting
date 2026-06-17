@@ -83,6 +83,6 @@ class ReservationFacadeTest {
 
   private ReservationCreateResponse reservationCreateResponse(Long id, ReservationStatus status) {
     return new ReservationCreateResponse(id, "누누", LocalDate.of(9999, 1, 1),
-        new TimeResponse(1L, LocalTime.of(10, 0)), status);
+        new TimeResponse(1L, LocalTime.of(10, 0)), status, null, null);
   }
 }

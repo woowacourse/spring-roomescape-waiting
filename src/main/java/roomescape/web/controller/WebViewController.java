@@ -1,10 +1,15 @@
 package roomescape.web.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class WebViewController {
+
+    @Value("${toss.client-key}")
+    private String tossClientKey;
 
     @GetMapping("/")
     public String welcome() {
@@ -37,8 +42,19 @@ public class WebViewController {
     }
 
     @GetMapping("/user/reserve")
-    public String userReserve() {
+    public String userReserve(Model model) {
+        model.addAttribute("tossClientKey", tossClientKey);
         return "user/reserve";
+    }
+
+    @GetMapping("/user/payment/success")
+    public String paymentSuccess() {
+        return "user/payment-success";
+    }
+
+    @GetMapping("/user/payment/fail")
+    public String paymentFail() {
+        return "user/payment-fail";
     }
 
     @GetMapping("/user/popular")

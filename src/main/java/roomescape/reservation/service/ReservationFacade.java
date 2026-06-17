@@ -50,6 +50,7 @@ public class ReservationFacade {
             if (reservationCreateResponse.status() == ReservationStatus.PENDING) {
                 String orderId = generateOrderId();
                 orderService.save(reservationCreateResponse.id(), orderId, DEFAULT_RESERVATION_PRICE);
+                return reservationCreateResponse.withOrder(orderId, DEFAULT_RESERVATION_PRICE);
             }
             return reservationCreateResponse;
         } finally {

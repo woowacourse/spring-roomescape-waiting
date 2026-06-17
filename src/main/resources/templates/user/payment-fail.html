@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>결제 실패</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <style>
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+        .result-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--danger);
+        }
+        .result-sub {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-table {
+            width: 100%;
+            font-size: 0.88rem;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        .info-table td {
+            padding: 0.5rem 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-table td:first-child {
+            color: var(--muted);
+            width: 6rem;
+        }
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <div class="panel" style="text-align:center; padding: 2rem 1.5rem;">
+        <div class="result-icon">&#10007;</div>
+        <div class="result-title">결제 실패</div>
+        <div class="result-sub" id="errorMessage">결제 중 오류가 발생했습니다.</div>
+    </div>
+
+    <div class="panel">
+        <h2>오류 정보</h2>
+        <table class="info-table">
+            <tbody>
+            <tr><td>오류 코드</td><td id="tdCode">—</td></tr>
+            <tr><td>주문 ID</td><td id="tdOrderId">—</td></tr>
+            </tbody>
+        </table>
+        <div class="actions">
+            <a th:href="@{/user/reserve}" class="btn btn-primary">다시 예약하기</a>
+            <a th:href="@{/user}" class="btn">사용자 홈</a>
+        </div>
+    </div>
+</main>
+<script>
+    const params  = new URLSearchParams(location.search);
+    const code    = params.get('code') ?? '';
+    const message = params.get('message') ?? '알 수 없는 오류가 발생했습니다.';
+    const orderId = params.get('orderId') ?? '';
+
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('tdCode').textContent       = code;
+    document.getElementById('tdOrderId').textContent    = orderId;
+</script>
+</body>
+</html>
