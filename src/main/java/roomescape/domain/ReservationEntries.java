@@ -73,6 +73,13 @@ public class ReservationEntries {
         entries.replaceAll(e -> e.isSameId(id) ? replacement : e);
     }
 
+    public void promotePending(long id) {
+        ReservationEntry entry = findById(id)
+                .filter(ReservationEntry::isPending)
+                .orElseThrow(() -> new EntityNotFoundException("결제 중인 예약 정보를 찾을 수 없습니다."));
+        replace(id, entry.promote());
+    }
+
     public void promoteFirstWaiting() {
         entries.stream()
                 .filter(ReservationEntry::isWaiting)

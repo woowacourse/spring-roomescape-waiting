@@ -116,6 +116,10 @@ public class Reservation {
                 .orElseThrow(() -> new EntityNotFoundException("저장된 예약 엔트리를 찾을 수 없습니다."));
     }
 
+    public void confirmPendingEntry(long entryId) {
+        entries.promotePending(entryId);
+    }
+
     public void cancelEntry(long entryId) {
         entries.cancel(entryId);
 

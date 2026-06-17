@@ -30,10 +30,28 @@ public class PaymentService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final PaymentOrderRepository paymentOrderRepository;
+    private final TossPaymentGateway tossPaymentGateway;
     private final Clock clock;
 
     @Value("${toss.client-key}")
     private String clientKey;
+
+    public TossPaymentResponse confirm(String paymentKey, String orderId, Long amount) {
+        PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("결제 정보를 찾을 수 없습니다."));
+
+        if (!paymentOrder.getAmount().equals(amount)) {
+            throw new IllegalArgumentException("결제 금액이 일치하지 않습니다.");
+        }
+
+        TossPaymentResponse response = tossPaymentGateway.confirm(paymentKey, orderId, amount);
+
+        Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
+        reservation.confirmPendingEntry(paymentOrder.getEntryId());
+        reservationRepository.update(reservation);
+
+        return response;
+    }
 
     public PreparePaymentResponse prepare(ReservationCommand command) {
         Reservation reservation = findOrCreateSlotForUpdate(command);
