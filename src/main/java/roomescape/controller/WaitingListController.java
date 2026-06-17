@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.WaitingListCreateCommand;
-import roomescape.dto.WaitingListDeleteCommand;
-import roomescape.dto.WaitingListDeleteRequest;
-import roomescape.dto.WaitingListResult;
+import roomescape.controller.dto.WaitingListDeleteRequest;
 import roomescape.service.WaitingListService;
+import roomescape.service.dto.command.WaitingListCreateCommand;
+import roomescape.service.dto.command.WaitingListDeleteCommand;
+import roomescape.service.dto.result.WaitingListResult;
 
 import java.net.URI;
 import java.time.LocalDate;

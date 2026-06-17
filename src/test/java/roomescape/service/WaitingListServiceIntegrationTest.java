@@ -13,9 +13,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
-import roomescape.dto.ReservationAvailableEvent;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingListRepository;
+import roomescape.service.dto.ReservationAvailableEvent;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

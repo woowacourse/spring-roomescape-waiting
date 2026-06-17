@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.dto.ThemeResult;
+import roomescape.service.dto.result.ThemeResult;
 import roomescape.support.SpringBootApiTest;
 
 import java.util.HashMap;

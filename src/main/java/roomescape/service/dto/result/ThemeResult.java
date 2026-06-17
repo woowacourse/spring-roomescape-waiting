@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.service.dto.result;
 
 import roomescape.domain.Theme;
 

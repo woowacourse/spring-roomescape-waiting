@@ -6,13 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Theme;
-import roomescape.dto.ThemeCreateCommand;
-import roomescape.dto.ThemeResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
+import roomescape.service.dto.command.ThemeCreateCommand;
+import roomescape.service.dto.result.ThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;

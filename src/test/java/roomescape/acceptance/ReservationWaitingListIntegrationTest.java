@@ -8,10 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.dto.ReservationAvailableEvent;
-import roomescape.dto.ReservationModifyCommand;
 import roomescape.service.ReservationService;
 import roomescape.service.WaitingListService;
+import roomescape.service.dto.ReservationAvailableEvent;
+import roomescape.service.dto.command.ReservationModifyCommand;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationTimesWithStatus;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.repository.dto.ReservationTimesWithStatus;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -207,8 +207,7 @@ public class ReservationRepository {
                         themeId,
                         date,
                         themeId
-                ).stream()
-                .toList();
+                ).stream().toList();
     }
 
     private long insertReservation(final Reservation reservation) {
