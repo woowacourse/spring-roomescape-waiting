@@ -51,7 +51,9 @@ public class ReservationRepository {
             resultSet.getTime("time_start_at").toLocalTime(),
             resultSet.getString("theme_name"),
             ReservationStatus.valueOf(resultSet.getString("status")),
-            resultSet.getString("order_id")
+            resultSet.getString("order_id"),
+            resultSet.getString("payment_key"),
+            resultSet.getObject("amount", Long.class)
     );
 
     public ReservationRepository(JdbcTemplate jdbcTemplate) {
