@@ -12,13 +12,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.dao.ReservationWaitingDao;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.domain.ReservationWaiting;
 
 class ReservationConcurrencyControllerTest extends ControllerTestSupport {
 
     @Autowired
-    private ReservationWaitingDao waitingDao;
+    private ReservationWaitingRepository waitingDao;
 
     @Test
     void 동시에_같은_슬롯에_대기_신청_시_순번이_보장된다() throws InterruptedException {

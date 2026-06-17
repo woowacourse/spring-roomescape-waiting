@@ -1,15 +1,12 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -17,22 +14,24 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
-
-import java.time.LocalDateTime;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationWaitingService {
-    private final ReservationWaitingDao reservationWaitingDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
-    private final ReservationDao reservationDao;
+    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, ReservationDao reservationDao) {
-        this.reservationWaitingDao = reservationWaitingDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
-        this.reservationDao = reservationDao;
+    public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository, ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+        this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
@@ -47,52 +46,49 @@ public class ReservationWaitingService {
         lockReservationForSlot(slot);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot);
-        ReservationWaiting savedReservationWaiting = reservationWaitingDao.insert(reservationWaiting);
+        ReservationWaiting savedReservationWaiting = reservationWaitingRepository.save(reservationWaiting);
 
-        int order = reservationWaitingDao.countOrder(slot, savedReservationWaiting.getId());
+        int order = reservationWaitingRepository.countOrder(slot, savedReservationWaiting.getId());
         return ReservationWaitingResponse.from(savedReservationWaiting, order);
     }
 
     @Transactional
     public void promoteFirstWaiting(ReservationSlot slot) {
-        reservationWaitingDao.selectFirstBySlot(slot).ifPresent(waiting -> {
-            reservationDao.insert(Reservation.createWithoutId(waiting.getName(), slot));
-            reservationWaitingDao.delete(waiting.getId());
+        reservationWaitingRepository.findFirstBySlotOrderByCreatedAt(slot).ifPresent(waiting -> {
+            reservationRepository.save(Reservation.createWithoutId(waiting.getName(), slot));
+            reservationWaitingRepository.deleteById(waiting.getId());
         });
     }
 
     @Transactional
     public void delete(Long reservationWaitingId) {
-        int deleted = reservationWaitingDao.delete(reservationWaitingId);
-        if (deleted == 0) {
-            throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_WAITING_NOT_FOUND);
-        }
+        reservationWaitingRepository.deleteById(reservationWaitingId);
     }
 
     private ReservationTime getTime(long timeId) {
-        return reservationTimeDao.selectById(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.NOT_FOUND));
     }
 
     private Theme getTheme(long themeId) {
-        return themeDao.selectById(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.NOT_FOUND));
     }
 
     private void lockReservationForSlot(ReservationSlot slot) {
-        reservationDao.findBySlotForUpdate(slot)
+        reservationRepository.findBySlotForUpdate(slot)
                 .orElseThrow(() -> new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private void validateUniqueReservationWaiting(String name, ReservationSlot slot) {
-        boolean exists = reservationWaitingDao.existsByNameAndSlot(name, slot);
+        boolean exists = reservationWaitingRepository.existsByNameAndSlot(name, slot);
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
         }
     }
 
     private void validateAlreadyReservationInSlot(String name, ReservationSlot slot) {
-        boolean exists = reservationDao.existsByNameAndSlot(name, slot);
+        boolean exists = reservationRepository.existsByNameAndSlot(name, slot);
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }

@@ -1,12 +1,27 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
 public class Reservation {
-    private final Long id;
-    private final String name;
-    private final ReservationSlot slot;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @Embedded
+    private ReservationSlot slot;
+
+    protected Reservation() {
+    }
 
     public Reservation(Long id, String name, ReservationSlot slot) {
         Objects.requireNonNull(name, "예약자명은 필수값 입니다.");
@@ -18,6 +33,10 @@ public class Reservation {
 
     public static Reservation createWithoutId(String name, ReservationSlot slot) {
         return new Reservation(null, name, slot);
+    }
+
+    public void changeSlot(ReservationSlot slot) {
+        this.slot = slot;
     }
 
     public Long getId() {

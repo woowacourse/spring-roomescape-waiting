@@ -15,10 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.DatabaseInitializer;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -38,16 +38,16 @@ public class ReservationTransactionTest {
     private ReservationWaitingService waitingService;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationWaitingDao waitingDao;
+    private ReservationWaitingRepository waitingDao;
 
     @Autowired
-    private ReservationTimeDao timeDao;
+    private ReservationTimeRepository timeDao;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @BeforeEach
     void setUp() {
@@ -58,9 +58,9 @@ public class ReservationTransactionTest {
     void 승격_실패_시_예약_삭제도_롤백된다() {
         // given
         ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        Theme theme = themeDao.insert(Theme.createWithoutId("방탈출1", "설명", "https://thumb.com"));
+        Theme theme = themeRepository.insert(Theme.createWithoutId("방탈출1", "설명", "https://thumb.com"));
         LocalDate date = LocalDate.now().plusDays(1);
-        Reservation reservation = reservationDao.insert(
+        Reservation reservation = reservationRepository.insert(
                 Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
         waitingDao.insert(
                 ReservationWaiting.createWithoutId("로지", LocalDateTime.now(),
@@ -75,7 +75,7 @@ public class ReservationTransactionTest {
                 .isInstanceOf(RuntimeException.class);
 
         // then
-        assertThat(reservationDao.selectById(reservation.getId())).isPresent();
+        assertThat(reservationRepository.selectById(reservation.getId())).isPresent();
         assertThat(waitingDao.select()).hasSize(1);
     }
 }

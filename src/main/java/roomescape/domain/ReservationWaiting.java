@@ -1,14 +1,29 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Entity
 public class ReservationWaiting {
-    private final Long id;
-    private final String name;
-    private final LocalDateTime createdAt;
-    private final ReservationSlot slot;
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private LocalDateTime createdAt;
+
+    @Embedded
+    private ReservationSlot slot;
+
+    public ReservationWaiting() {
+
+    }
 
     public ReservationWaiting(Long id, String name, LocalDateTime createdAt, ReservationSlot slot) {
         Objects.requireNonNull(name, "예약 대기자명은 필수값 입니다.");

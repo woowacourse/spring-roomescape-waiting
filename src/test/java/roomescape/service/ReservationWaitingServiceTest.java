@@ -13,10 +13,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -30,26 +30,26 @@ import roomescape.dto.response.ReservationWaitingResponse;
 class ReservationWaitingServiceTest {
 
     @Autowired
-    private ReservationTimeDao timeDao;
+    private ReservationTimeRepository timeDao;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Autowired
     private ReservationWaitingService waitingService;
 
     @Autowired
-    private ReservationWaitingDao reservationWaitingDao;
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @Test
     void 예약_대기를_추가한다() {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("로지",
+        reservationRepository.insert(Reservation.createWithoutId("로지",
                 new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
@@ -86,7 +86,7 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("로지",
+        reservationRepository.insert(Reservation.createWithoutId("로지",
                 new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "로지", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
@@ -104,7 +104,7 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("로지",
+        reservationRepository.insert(Reservation.createWithoutId("로지",
                 new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
@@ -123,7 +123,7 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("로지",
+        reservationRepository.insert(Reservation.createWithoutId("로지",
                 new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
 
         waitingService.createReservationWaiting(new CreateReservationWaitingCommand(
@@ -145,7 +145,7 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationWaiting saved = reservationWaitingDao.insert(
+        ReservationWaiting saved = reservationWaitingRepository.insert(
                 ReservationWaiting.createWithoutId("브라운", LocalDateTime.now(),
                         new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme))
         );
@@ -167,6 +167,6 @@ class ReservationWaitingServiceTest {
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
     }
 }

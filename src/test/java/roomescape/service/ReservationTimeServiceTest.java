@@ -15,15 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
-import roomescape.dao.ReservationDao;
+import roomescape.repository.ReservationRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.command.CreateReservationTimeCommand;
 import roomescape.dto.response.CreateReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -37,13 +37,13 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Autowired
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
@@ -134,14 +134,14 @@ class ReservationTimeServiceTest {
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return reservationTimeRepository.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
     }
 
     private void saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        reservationDao.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
+        reservationRepository.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
     }
 }

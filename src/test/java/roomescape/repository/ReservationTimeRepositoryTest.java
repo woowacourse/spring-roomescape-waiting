@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -13,11 +13,11 @@ import org.springframework.context.annotation.Import;
 import roomescape.domain.ReservationTime;
 
 @JdbcTest
-@Import(ReservationTimeDao.class)
-class ReservationTimeDaoTest {
+@Import(ReservationTimeRepository.class)
+class ReservationTimeRepositoryTest {
 
     @Autowired
-    private ReservationTimeDao timeDao;
+    private ReservationTimeRepository timeDao;
 
     @Test
     void 예약_시간을_생성한다() {

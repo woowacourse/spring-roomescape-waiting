@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
-import roomescape.dao.ReservationDao;
+import roomescape.repository.ReservationRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.dto.command.CreateReservationCommand;
@@ -24,11 +24,11 @@ import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationStatus;
-import roomescape.dao.ReservationWaitingDao;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.domain.ReservationWaiting;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -42,16 +42,16 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Autowired
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationWaitingDao waitingDao;
+    private ReservationWaitingRepository waitingDao;
 
     @BeforeEach
     void setUp() {
@@ -259,7 +259,7 @@ class ReservationServiceTest {
         reservationService.delete(reservation.getId());
 
         // then
-        assertThat(reservationDao.selectByName("로지")).hasSize(1);
+        assertThat(reservationRepository.selectByName("로지")).hasSize(1);
         assertThat(waitingDao.select()).isEmpty();
     }
 
@@ -274,7 +274,7 @@ class ReservationServiceTest {
         reservationService.delete(reservation.getId());
 
         // then
-        assertThat(reservationDao.select()).isEmpty();
+        assertThat(reservationRepository.select()).isEmpty();
         assertThat(waitingDao.select()).isEmpty();
     }
 
@@ -299,20 +299,20 @@ class ReservationServiceTest {
 
         // then
         // 맥스 1번 대기로 재정렬
-        assertThat(reservationDao.selectByName("로지")).hasSize(1);
+        assertThat(reservationRepository.selectByName("로지")).hasSize(1);
         assertThat(waitingDao.countOrder(slot, maxsWaiting.getId())).isEqualTo(1);
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return reservationTimeRepository.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
     }
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationDao.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
+        return reservationRepository.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
     }
 
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {

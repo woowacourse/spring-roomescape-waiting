@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -16,17 +16,17 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class})
-class ReservationDaoTest {
+@Import({ReservationRepository.class, ReservationTimeRepository.class, ThemeRepository.class})
+class ReservationRepositoryTest {
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeDao timeDao;
+    private ReservationTimeRepository timeDao;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Test
     void 예약을_생성한다() {
@@ -37,7 +37,7 @@ class ReservationDaoTest {
                 new ReservationSlot(LocalDate.of(2026, 5, 5), savedTime, savedTheme));
 
         // when
-        Reservation saved = reservationDao.insert(reservation);
+        Reservation saved = reservationRepository.insert(reservation);
 
         // then
         assertThat(saved)
@@ -58,14 +58,14 @@ class ReservationDaoTest {
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
         LocalDate date = LocalDate.of(2026, 5, 5);
 
-        reservationDao.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, savedTime1, savedTheme)));
-        reservationDao.insert(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime2, savedTheme)));
-        reservationDao.insert(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime3, savedTheme)));
-        reservationDao.insert(Reservation.createWithoutId("러로", new ReservationSlot(date, savedTime4, savedTheme)));
-        reservationDao.insert(Reservation.createWithoutId("밤밤", new ReservationSlot(date, savedTime5, savedTheme)));
+        reservationRepository.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, savedTime1, savedTheme)));
+        reservationRepository.insert(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime2, savedTheme)));
+        reservationRepository.insert(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime3, savedTheme)));
+        reservationRepository.insert(Reservation.createWithoutId("러로", new ReservationSlot(date, savedTime4, savedTheme)));
+        reservationRepository.insert(Reservation.createWithoutId("밤밤", new ReservationSlot(date, savedTime5, savedTheme)));
 
         // when
-        List<Reservation> reservations = reservationDao.select();
+        List<Reservation> reservations = reservationRepository.select();
 
         // then
         assertAll(
@@ -79,11 +79,11 @@ class ReservationDaoTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("브라운",
+        reservationRepository.insert(Reservation.createWithoutId("브라운",
                 new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
 
         // when
-        boolean result = reservationDao.existsByTimeId(time.getId());
+        boolean result = reservationRepository.existsByTimeId(time.getId());
 
         // then
         assertThat(result).isTrue();
@@ -92,7 +92,7 @@ class ReservationDaoTest {
     @Test
     void 특정_시간에_예약이_존재하지_않으면_false를_반환한다() {
         // when
-        boolean result = reservationDao.existsByTimeId(999L);
+        boolean result = reservationRepository.existsByTimeId(999L);
 
         // then
         assertThat(result).isFalse();
@@ -103,11 +103,11 @@ class ReservationDaoTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("브라운",
+        reservationRepository.insert(Reservation.createWithoutId("브라운",
                 new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
 
         // when
-        boolean result = reservationDao.existsByThemeId(theme.getId());
+        boolean result = reservationRepository.existsByThemeId(theme.getId());
 
         // then
         assertThat(result).isTrue();
@@ -116,7 +116,7 @@ class ReservationDaoTest {
     @Test
     void 특정_테마에_예약이_존재하지_않으면_false를_반환한다() {
         // when
-        boolean result = reservationDao.existsByThemeId(999L);
+        boolean result = reservationRepository.existsByThemeId(999L);
 
         // then
         assertThat(result).isFalse();
@@ -130,11 +130,11 @@ class ReservationDaoTest {
         Theme theme2 = saveTheme("방탈출2", "설명2", "https://asdfsdf.sdfs");
         LocalDate date = LocalDate.of(2026, 5, 5);
 
-        reservationDao.insert(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime, theme1)));
-        reservationDao.insert(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime, theme2)));
+        reservationRepository.insert(Reservation.createWithoutId("러키", new ReservationSlot(date, savedTime, theme1)));
+        reservationRepository.insert(Reservation.createWithoutId("로지", new ReservationSlot(date, savedTime, theme2)));
 
         // when
-        List<Reservation> result = reservationDao.selectByThemeIdAndDate(theme1.getId(), date);
+        List<Reservation> result = reservationRepository.selectByThemeIdAndDate(theme1.getId(), date);
 
         // then
         assertAll(
@@ -149,10 +149,10 @@ class ReservationDaoTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 5, 5);
-        reservationDao.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
+        reservationRepository.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
 
         // when
-        boolean result = reservationDao.existsBySlot(new ReservationSlot(date, time, theme));
+        boolean result = reservationRepository.existsBySlot(new ReservationSlot(date, time, theme));
 
         // then
         assertThat(result).isTrue();
@@ -166,7 +166,7 @@ class ReservationDaoTest {
         LocalDate date = LocalDate.of(2026, 5, 5);
 
         // when
-        boolean result = reservationDao.existsBySlot(new ReservationSlot(date, time, theme));
+        boolean result = reservationRepository.existsBySlot(new ReservationSlot(date, time, theme));
 
         // then
         assertThat(result).isFalse();
@@ -178,10 +178,10 @@ class ReservationDaoTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         LocalDate date = LocalDate.of(2026, 5, 5);
-        reservationDao.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
+        reservationRepository.insert(Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
 
         // when
-        boolean result = reservationDao.existsByNameAndSlot("브라운", new ReservationSlot(date, time, theme));
+        boolean result = reservationRepository.existsByNameAndSlot("브라운", new ReservationSlot(date, time, theme));
 
         // then
         assertThat(result).isTrue();
@@ -195,7 +195,7 @@ class ReservationDaoTest {
         LocalDate date = LocalDate.of(2026, 5, 5);
 
         // when
-        boolean result = reservationDao.existsByNameAndSlot("로지", new ReservationSlot(date, time, theme));
+        boolean result = reservationRepository.existsByNameAndSlot("로지", new ReservationSlot(date, time, theme));
 
         // then
         assertThat(result).isFalse();
@@ -207,11 +207,11 @@ class ReservationDaoTest {
         ReservationTime time1 = saveTime(10, 0);
         ReservationTime time2 = saveTime(11, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        Reservation saved = reservationDao.insert(
+        Reservation saved = reservationRepository.insert(
                 Reservation.createWithoutId("브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time1, theme)));
 
         // when
-        Reservation updated = reservationDao.update(saved.getId(), LocalDate.of(2026, 5, 6), time2.getId());
+        Reservation updated = reservationRepository.update(saved.getId(), LocalDate.of(2026, 5, 6), time2.getId());
 
         // then
         assertAll(
@@ -225,14 +225,14 @@ class ReservationDaoTest {
         // given
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-        Reservation saved = reservationDao.insert(
+        Reservation saved = reservationRepository.insert(
                 Reservation.createWithoutId("예약1", new ReservationSlot(LocalDate.of(2026, 5, 5), savedTime, savedTheme)));
 
         // when
-        reservationDao.delete(saved.getId());
+        reservationRepository.delete(saved.getId());
 
         // then
-        assertThat(reservationDao.select()).isEmpty();
+        assertThat(reservationRepository.select()).isEmpty();
     }
 
     private ReservationTime saveTime(int hour, int minute) {
@@ -240,6 +240,6 @@ class ReservationDaoTest {
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.insert(Theme.createWithoutId(name, description, thumbnail));
     }
 }
