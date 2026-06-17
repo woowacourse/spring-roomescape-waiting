@@ -10,6 +10,8 @@ import roomescape.slot.domain.ReservationSlot;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static roomescape.payment.domain.PaymentStatus.CONFIRMED;
+
 public record ReservationWithSlotDetailDto(
         Long id,
         Long slotId,
@@ -23,10 +25,12 @@ public record ReservationWithSlotDetailDto(
         Long waitingTurn,
         String orderId,
         Long amount,
-        PaymentStatus paymentStatus
+        PaymentStatus paymentStatus,
+        String paymentKey
 ) {
 
     public static ReservationWithSlotDetailDto from(ReservationWithSlotInformation projection) {
+        String paymentKey = projection.paymentStatus() == CONFIRMED ? projection.paymentKey() : null;
         return new ReservationWithSlotDetailDto(
                 projection.id(),
                 projection.slotId(),
@@ -40,11 +44,13 @@ public record ReservationWithSlotDetailDto(
                 projection.waitingTurn(),
                 projection.orderId(),
                 projection.paymentAmount(),
-                projection.paymentStatus()
+                projection.paymentStatus(),
+                paymentKey
         );
     }
 
     public static ReservationWithSlotDetailDto of(Reservation reservation, ReservationSlot slot, Payment payment) {
+        String paymentKey = payment.getStatus() == CONFIRMED ? payment.getPaymentKey() : null;
         return new ReservationWithSlotDetailDto(
                 reservation.getId(),
                 reservation.getSlotId(),
@@ -58,7 +64,8 @@ public record ReservationWithSlotDetailDto(
                 null,
                 payment.getOrderId(),
                 payment.getAmount(),
-                payment.getStatus()
+                payment.getStatus(),
+                paymentKey
         );
     }
 
@@ -73,6 +80,7 @@ public record ReservationWithSlotDetailDto(
                 slot.getTheme().getName(),
                 slot.getTheme().getThumbnailUrl(),
                 reservation.getStatus(),
+                null,
                 null,
                 null,
                 null,

@@ -141,6 +141,23 @@ function renderReservations(reservations) {
                 <p>상태: ${formatStatus(reservation.status, reservation.paymentStatus)}</p>
                 ${waitingTurnText}
 
+                <div class="reservation-order-details">
+                    <div class="order-detail-item">
+                        <span class="order-detail-label">결제금액</span>
+                        <span class="theme-price" style="font-size: 14px;">${(reservation.amount || 0).toLocaleString()}원</span>
+                    </div>
+                    <div class="order-detail-item">
+                        <span class="order-detail-label">주문번호</span>
+                        <span>${reservation.orderId}</span>
+                    </div>
+                    ${reservation.paymentKey ? `
+                        <div class="order-detail-item">
+                            <span class="order-detail-label">결제키</span>
+                            <span>${reservation.paymentKey}</span>
+                        </div>
+                    ` : ""}
+                </div>
+
                 <div class="button-group">
                     <button
                         class="payment-retry-button reschedule-button"
