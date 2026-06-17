@@ -42,6 +42,9 @@ public class ReservationServiceTest {
     @Mock
     private ReservationWaitingDao reservationWaitingDao;
 
+    @Mock
+    private roomescape.payment.order.dao.PaymentOrderDao paymentOrderDao;
+
     @InjectMocks
     private ReservationService reservationService;
 

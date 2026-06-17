@@ -58,6 +58,8 @@ public class ReservationControllerTest {
         params.put("themeId", 2L);
         params.put("date", LocalDate.now().plusDays(1).toString());
         params.put("timeId", 7L);
+        params.put("orderId", "order-1");
+        params.put("amount", 1000L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -74,6 +76,8 @@ public class ReservationControllerTest {
         params.put("date", LocalDate.now().plusDays(1).toString());
         params.put("timeId", 15L);
         params.put("themeId", 2L);
+        params.put("orderId", "order-1");
+        params.put("amount", 1000L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -224,7 +228,9 @@ public class ReservationControllerTest {
                 "name", name,
                 "themeId", themeId,
                 "date", date,
-                "timeId", timeId
+                "timeId", timeId,
+                "orderId", "order-" + name + themeId + date + timeId,
+                "amount", 1000L
         );
 
         return RestAssured.given().log().all()
@@ -234,7 +240,7 @@ public class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(201)
                 .extract()
-                .path("id");
+                .path("reservationId");
     }
 
     private Integer createWaiting(String name, Long themeId, String date, Long timeId) {
