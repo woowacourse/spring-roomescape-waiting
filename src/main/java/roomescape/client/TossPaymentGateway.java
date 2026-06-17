@@ -28,7 +28,7 @@ public class TossPaymentGateway {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (req, resp) -> {
                     var error = objectMapper.readValue(resp.getBody(), TossErrorResponse.class);
-                    throw new TossPaymentException(error.message());
+                    throw TossPaymentException.of(resp.getStatusCode(), error);
                 })
                 .body(TossPaymentResponse.class);
     }
