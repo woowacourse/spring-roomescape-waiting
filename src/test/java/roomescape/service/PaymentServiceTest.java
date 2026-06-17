@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,9 +21,12 @@ import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.repository.PaymentRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.exception.PaymentAmountMismatchException;
+import roomescape.service.exception.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -59,7 +64,7 @@ class PaymentServiceTest {
     void confirm() {
         Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
         PaymentResult result = new PaymentResult(PAYMENT_KEY, ORDER_ID, PaymentStatus.DONE, AMOUNT);
-        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(order);
+        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
         given(paymentGateway.confirm(any(PaymentConfirmation.class))).willReturn(result);
 
         PaymentResult actual = paymentService.confirm(PAYMENT_KEY, ORDER_ID, AMOUNT);
@@ -70,10 +75,21 @@ class PaymentServiceTest {
     }
 
     @Test
+    @DisplayName("주문이 없으면 ResourceNotFoundException 으로 차단한다")
+    void confirm_orderNotFound() {
+        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> paymentService.confirm(PAYMENT_KEY, ORDER_ID, AMOUNT))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verifyNoInteractions(paymentGateway);
+    }
+
+    @Test
     @DisplayName("금액이 다르면 게이트웨이 호출 전에 PaymentAmountMismatchException 으로 차단한다")
     void confirm_amountMismatch() {
         Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
-        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(order);
+        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
 
         assertThatThrownBy(() -> paymentService.confirm(PAYMENT_KEY, ORDER_ID, 9_999L))
                 .isInstanceOf(PaymentAmountMismatchException.class);
@@ -81,5 +97,36 @@ class PaymentServiceTest {
         verifyNoInteractions(paymentGateway);
         verify(paymentRepository, never()).updatePaymentKey(any(), any());
         verify(reservationRepository, never()).confirm(any());
+    }
+
+    @Test
+    @DisplayName("결제 실패 정리 시 PENDING 예약과 주문을 삭제한다")
+    void cancelOrder_pending() {
+        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        Reservation reservation = mock(Reservation.class);
+        given(reservation.getStatus()).willReturn(ReservationStatus.PENDING);
+        given(reservation.getId()).willReturn(RESERVATION_ID);
+        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
+        given(reservationRepository.findById(RESERVATION_ID)).willReturn(Optional.of(reservation));
+
+        paymentService.cancelOrder(ORDER_ID);
+
+        verify(reservationRepository).deleteById(RESERVATION_ID);
+        verify(paymentRepository).deleteByOrderId(ORDER_ID);
+    }
+
+    @Test
+    @DisplayName("결제 실패 정리 시 확정된 예약은 삭제하지 않는다")
+    void cancelOrder_confirmed() {
+        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        Reservation reservation = mock(Reservation.class);
+        given(reservation.getStatus()).willReturn(ReservationStatus.CONFIRMED);
+        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
+        given(reservationRepository.findById(RESERVATION_ID)).willReturn(Optional.of(reservation));
+
+        paymentService.cancelOrder(ORDER_ID);
+
+        verify(reservationRepository, never()).deleteById(any());
+        verify(paymentRepository, never()).deleteByOrderId(any());
     }
 }

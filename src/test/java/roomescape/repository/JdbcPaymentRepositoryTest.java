@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Payment;
-import roomescape.service.exception.ResourceNotFoundException;
 
 @JdbcTest
 @Import(JdbcPaymentRepository.class)
@@ -25,7 +23,7 @@ class JdbcPaymentRepositoryTest {
 
         assertThat(saved.id()).isNotNull();
 
-        Payment found = paymentRepository.findByOrderId("order-xyz");
+        Payment found = paymentRepository.findByOrderId("order-xyz").orElseThrow();
         assertThat(found.reservationId()).isEqualTo(1L);
         assertThat(found.amount()).isEqualTo(30_000L);
         assertThat(found.paymentKey()).isNull();
@@ -38,14 +36,23 @@ class JdbcPaymentRepositoryTest {
 
         paymentRepository.updatePaymentKey("order-xyz", "test_payment_key");
 
-        Payment found = paymentRepository.findByOrderId("order-xyz");
+        Payment found = paymentRepository.findByOrderId("order-xyz").orElseThrow();
         assertThat(found.paymentKey()).isEqualTo("test_payment_key");
     }
 
     @Test
-    @DisplayName("존재하지 않는 orderId 조회 시 예외가 발생한다")
+    @DisplayName("존재하지 않는 orderId 조회 시 빈 Optional 을 반환한다")
     void findByOrderId_notFound() {
-        assertThatThrownBy(() -> paymentRepository.findByOrderId("order-none"))
-                .isInstanceOf(ResourceNotFoundException.class);
+        assertThat(paymentRepository.findByOrderId("order-none")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("orderId로 주문을 삭제한다")
+    void deleteByOrderId() {
+        paymentRepository.save(new Payment(null, 1L, "order-xyz", 30_000L, null));
+
+        paymentRepository.deleteByOrderId("order-xyz");
+
+        assertThat(paymentRepository.findByOrderId("order-xyz")).isEmpty();
     }
 }

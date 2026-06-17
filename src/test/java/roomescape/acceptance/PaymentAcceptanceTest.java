@@ -126,6 +126,36 @@ class PaymentAcceptanceTest {
         assertThat(예약_상태(reservationId)).isEqualTo("PENDING");
     }
 
+    @Test
+    @DisplayName("결제 실패(failUrl)면 결제 대기 예약과 주문이 정리된다")
+    void 결제_실패_시_대기_예약과_주문이_정리된다() {
+        long reservationId = 예약_생성("브라운");
+        RestAssured.given()
+                .when().get("/payments/checkout?reservationId=" + reservationId)
+                .then().statusCode(200);
+        String orderId = jdbcTemplate.queryForObject(
+                "SELECT order_id FROM payment WHERE reservation_id = ?", String.class, reservationId);
+
+        RestAssured.given()
+                .when().get("/payments/fail?code=PAY_PROCESS_ABORTED&message=결제실패&orderId=" + orderId)
+                .then().statusCode(200);
+
+        Long reservationCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE id = ?", Long.class, reservationId);
+        Long paymentCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM payment WHERE order_id = ?", Long.class, orderId);
+        assertThat(reservationCount).isZero();
+        assertThat(paymentCount).isZero();
+    }
+
+    @Test
+    @DisplayName("orderId 없는 취소(failUrl)도 NPE 없이 처리된다")
+    void orderId_없는_취소도_정상_처리된다() {
+        RestAssured.given()
+                .when().get("/payments/fail?code=PAY_PROCESS_CANCELED&message=사용자취소")
+                .then().statusCode(200);
+    }
+
     private long 예약_생성(String name) {
         return RestAssured.given()
                 .contentType(ContentType.JSON)
