@@ -94,7 +94,7 @@ CREATE TABLE orders
     updated_at     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
-    CONSTRAINT unique_order_id UNIQUE (order_id),
+    CONSTRAINT unique_order_id UNIQUE (order_id)
 );
 
 CREATE TABLE store_managers

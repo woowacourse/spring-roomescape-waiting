@@ -38,6 +38,7 @@ import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.WebConfig;
+import roomescape.service.OrderService;
 import roomescape.service.ReservationService;
 
 @WebMvcTest(controllers = ReservationController.class,
@@ -54,6 +55,9 @@ class ReservationControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    @MockitoBean
+    private OrderService orderService;
 
     @Test
     @DisplayName("GET /reservations/mine - 로그인 사용자의 예약 목록을 응답한다")

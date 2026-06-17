@@ -39,8 +39,9 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final OrderService orderService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, OrderService orderService) {
         this.reservationService = reservationService;
+        this.orderService = orderService;
     }
 
     @GetMapping("/mine")
