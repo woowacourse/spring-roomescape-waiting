@@ -9,35 +9,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.config.UploadProperties;
-import roomescape.repository.ThemeRepository;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ThemeService {
     private final String uploadDir;
-    private final ThemeRepository themeDao;
+    private final ThemeRepository themeRepository;
 
-    public ThemeService(ThemeRepository themeDao, UploadProperties uploadProperties) {
-        this.themeDao = themeDao;
+    public ThemeService(ThemeRepository themeRepository, UploadProperties uploadProperties) {
         this.uploadDir = uploadProperties.imagesDir();
+        this.themeRepository = themeRepository;
     }
 
     public List<ThemeResponse> findAllThemes() {
-        List<Theme> themes = themeDao.findAllThemes();
+        List<Theme> themes = themeRepository.findAllThemes();
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
-    public List<ThemeResponse> findTopTheme(Long count) {
-        List<Theme> topTheme = themeDao.findTopThemes(count);
+    /*public List<ThemeResponse> findTopTheme(Long count) {
+        List<Theme> topTheme = themeRepository.findTopThemes(count);
         return topTheme.stream()
                 .map(ThemeResponse::from)
                 .toList();
-    }
+    }*/
 
     @Transactional
     public ThemeResponse create(ThemeRequest request) {
@@ -58,19 +58,18 @@ public class ThemeService {
         String imageUrl = "/images/" + fileName;
 
         Theme theme = new Theme(
-                null,
                 request.name(),
                 request.description(),
                 imageUrl
         );
 
-        Theme saved = themeDao.save(theme);
+        Theme saved = themeRepository.save(theme);
 
         return ThemeResponse.from(saved);
     }
 
     @Transactional
     public void delete(Long id) {
-        themeDao.delete(id);
+        themeRepository.deleteById(id);
     }
 }
