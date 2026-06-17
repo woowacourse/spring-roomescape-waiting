@@ -36,10 +36,12 @@ public class TossPaymentGateway implements PaymentGateway {
             backoff = @Backoff(delay = 3000, multiplier = 2) // TODO 기준 공부 후 적용
     )
     public PaymentResult confirm(PaymentConfirmation confirmation) {
+        System.out.println(confirmation.toString());
         try {
             TossPaymentResponse tossResponse = tossRestClient.post()
                     .uri("/v1/payments/confirm")
                     .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.orderId())
                     .body(confirmation)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, response) -> {
