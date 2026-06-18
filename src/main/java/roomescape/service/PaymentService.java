@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.client.TossPaymentGateway;
+import roomescape.client.dto.PaymentConfirmation;
 import roomescape.client.dto.TossPaymentResponse;
 import roomescape.controller.client.dto.response.PreparePaymentResponse;
 import roomescape.domain.PaymentOrder;
@@ -51,15 +52,16 @@ public class PaymentService {
         }
 
         log.info("[결제 승인 요청] orderId={} paymentKey={} amount={}", orderId, paymentKey, amount);
-        TossPaymentResponse response = tossPaymentGateway.confirm(paymentKey, orderId, amount);
-        log.info("[결제 승인 완료] orderId={} status={} approvedAt={}", response.orderId(), response.status(), response.approvedAt());
+        TossPaymentResponse response = tossPaymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        log.info("[결제 승인 완료] orderId={} status={} approvedAt={}", response.orderId(), response.status(),
+                response.approvedAt());
 
         Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
         reservation.confirmPendingEntry(paymentOrder.getEntryId());
         reservationRepository.update(reservation);
 
         log.info("[예약 확정] entryId={} PENDING→RESERVED", paymentOrder.getEntryId());
-        
+
         return new PaymentConfirmResult(
                 response,
                 reservation.getTheme().getName(),
