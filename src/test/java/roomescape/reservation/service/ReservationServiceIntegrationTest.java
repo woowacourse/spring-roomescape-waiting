@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -74,14 +74,14 @@ class ReservationServiceIntegrationTest {
     private PlatformTransactionManager transactionManager;
 
     @Autowired
-    private TestEntityManager entityManager;
+    private EntityManager entityManager;
 
     private TransactionTemplate transactionTemplate;
 
     @BeforeEach
     void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
-        reservationService = new ReservationService(reservationSlotRepository, reservationRepository,
+        reservationService = new ReservationService(entityManager, reservationSlotRepository, reservationRepository,
             reservationTimeRepository, reservationDateRepository, themeRepository);
     }
 

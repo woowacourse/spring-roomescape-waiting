@@ -14,6 +14,7 @@ import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +60,8 @@ class ReservationServiceTest {
     private Theme theme2;
 
     @Autowired
+    private EntityManager entityManager;
+    @Autowired
     private ReservationSlotRepository reservationSlotRepository;
     @Autowired
     private ReservationRepository reservationRepository;
@@ -75,7 +78,7 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setup() {
-        this.reservationService = new ReservationService(reservationSlotRepository,
+        this.reservationService = new ReservationService(entityManager, reservationSlotRepository,
             reservationRepository, reservationTimeRepository, reservationDateRepository,
             themeRepository);
 

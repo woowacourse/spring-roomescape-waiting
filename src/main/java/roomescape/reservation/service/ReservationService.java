@@ -7,6 +7,7 @@ import static roomescape.reservation.exception.ReservationErrorInformation.RESER
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ import roomescape.time.repository.ReservationTimeRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private final EntityManager entityManager;
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -78,14 +80,17 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
 
         lockSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        entityManager.refresh(reservation);
 
-        reservation = getReservation(id);
         ReservationStatus reservationStatus = reservation.getStatus();
         reservation.cancelByManager();
+        reservationRepository.flush();
+
         if (reservationStatus == RESERVED) {
             promoteWaitingReservation(reservation.getDate(), reservation.getTime(),
                 reservation.getTheme());
         }
+
         return reservationRepository.save(reservation);
     }
 
@@ -94,10 +99,12 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
 
         lockSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        entityManager.refresh(reservation);
 
-        reservation = getReservation(id);
         ReservationStatus reservationStatus = reservation.getStatus();
         reservation.cancel(requester);
+        reservationRepository.flush();
+
         if (reservationStatus == RESERVED) {
             promoteWaitingReservation(reservation.getDate(), reservation.getTime(),
                 reservation.getTheme());
@@ -119,13 +126,15 @@ public class ReservationService {
 
         lockSlot(previousDate, previousTime, theme);
         lockSlot(newDate, newTime, theme);
+        entityManager.refresh(reservation);
 
-        reservation = getReservation(command.id());
         previousDate = reservation.getDate();
         previousTime = reservation.getTime();
         theme = reservation.getTheme();
         reservation.changeSchedule(command.requester(), newDate, newTime);
         decideStatus(reservation);
+        reservationRepository.flush();
+
         promoteWaitingReservation(previousDate, previousTime, theme);
 
         return reservationRepository.save(reservation);
@@ -144,10 +153,15 @@ public class ReservationService {
 
         lockSlot(previousDate, previousTime, theme);
         lockSlot(newDate, newTime, theme);
+        entityManager.refresh(reservation);
 
-        reservation = getReservation(command.id());
+        previousDate = reservation.getDate();
+        previousTime = reservation.getTime();
+        theme = reservation.getTheme();
         reservation.changeScheduleByManager(newDate, newTime);
         decideStatus(reservation);
+        reservationRepository.flush();
+
         promoteWaitingReservation(previousDate, previousTime, theme);
 
         return reservationRepository.save(reservation);
