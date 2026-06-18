@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,14 +18,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.dto.ReservationCountResult;
+import roomescape.domain.reservation.JpaReservationRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationdate.JpaReservationDateRepository;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationslot.dto.ReservationSlotResponse;
+import roomescape.domain.reservationtime.JpaReservationTimeRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.JpaThemeRepository;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.user.User;
 import roomescape.support.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +44,10 @@ class ReservationSlotServiceTest {
     private JpaReservationDateRepository reservationDateRepository;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private JpaReservationRepository reservationRepository;
+
+    @Mock
+    private JpaReservationTimeRepository reservationTimeRepository;
 
     @InjectMocks
     private ReservationSlotService reservationSlotService;
@@ -51,12 +58,22 @@ class ReservationSlotServiceTest {
         // given
         Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
         ReservationDate reservationDate = ReservationDate.of(1L, LocalDate.of(2026, 5, 16));
+        ReservationTime firstTime = ReservationTime.of(1L, LocalTime.of(10, 0));
+        ReservationTime secondTime = ReservationTime.of(2L, LocalTime.of(11, 0));
+        ReservationSlot reservationSlot = ReservationSlot.of(1L, reservationDate, firstTime, theme);
+        LocalDateTime now = LocalDateTime.of(2026, 5, 16, 9, 0);
         given(themeRepository.findById(theme.getId())).willReturn(Optional.of(theme));
         given(reservationDateRepository.findById(reservationDate.getId())).willReturn(Optional.of(reservationDate));
-        given(reservationRepository.countReservation(theme.getId(), reservationDate.getId()))
+        given(reservationTimeRepository.findAllByOrderByStartAtAsc())
+            .willReturn(List.of(firstTime, secondTime));
+        given(reservationRepository.findReservationsForSlotAvailability(
+            theme.getId(),
+            reservationDate.getId(),
+            ReservationStatus.CANCELED
+        ))
             .willReturn(List.of(
-                ReservationCountResult.of(1L, LocalTime.of(10, 0), 2L),
-                ReservationCountResult.of(2L, LocalTime.of(11, 0), 0L)
+                Reservation.of(1L, reservationSlot, User.of(1L, "보예"), ReservationStatus.CONFIRMED, now, now),
+                Reservation.of(2L, reservationSlot, User.of(2L, "수민"), ReservationStatus.WAITING, now, now)
             ));
 
         // when
@@ -115,7 +132,7 @@ class ReservationSlotServiceTest {
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
         ReservationSlot existingSlot = ReservationSlot.of(1L, date, time, theme);
-        given(reservationSlotRepository.findByScheduleToUpdate(time.getId(), date.getId(), theme.getId()))
+        given(reservationSlotRepository.findSlotForCreation(time.getId(), date.getId(), theme.getId()))
             .willReturn(Optional.empty())
             .willReturn(Optional.of(existingSlot));
         given(reservationSlotRepository.save(any(ReservationSlot.class)))

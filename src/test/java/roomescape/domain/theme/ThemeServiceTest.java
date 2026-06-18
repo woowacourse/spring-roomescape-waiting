@@ -1,6 +1,7 @@
 package roomescape.domain.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -8,18 +9,22 @@ import static org.mockito.Mockito.verify;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.domain.reservation.JpaReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationslot.JpaReservationSlotRepository;
 import roomescape.domain.theme.admin.dto.AdminThemeResponse;
 import roomescape.domain.theme.admin.dto.CreateThemeRequest;
 import roomescape.domain.theme.admin.dto.CreateThemeResponse;
+import roomescape.domain.theme.dto.ThemeRankResponse;
 import roomescape.domain.theme.dto.ThemeResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,15 +37,24 @@ class ThemeServiceTest {
     private JpaReservationSlotRepository reservationSlotRepository;
 
     @Mock
-    private ThemeRepository themeQueryRepository;
+    private JpaReservationRepository reservationRepository;
 
     private final Clock clock = Clock.fixed(
         Instant.parse("2026-05-27T00:00:00Z"),
         ZoneId.of("Asia/Seoul")
     );
 
-    @InjectMocks
     private ThemeService themeService;
+
+    @BeforeEach
+    void setUp() {
+        themeService = new ThemeService(
+            themeRepository,
+            reservationSlotRepository,
+            reservationRepository,
+            clock
+        );
+    }
 
     @Test
     @DisplayName("관리자용 테마 목록을 조회한다.")
@@ -117,5 +131,41 @@ class ThemeServiceTest {
 
         // then
         verify(themeRepository).deleteById(themeId);
+    }
+
+    @Test
+    @DisplayName("예약된 테마 목록으로 인기 테마 순위를 계산한다.")
+    void getThemeRank() {
+        // given
+        Theme firstTheme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
+        Theme secondTheme = Theme.of(2L, "추리", "추리 테마", "mystery-url");
+        Theme thirdTheme = Theme.of(3L, "잠입", "잠입 테마", "escape-url");
+        given(reservationRepository.findThemesForRanking(
+            LocalDate.of(2026, 5, 20),
+            LocalDate.of(2026, 5, 27),
+            ReservationStatus.CANCELED
+        )).willReturn(List.of(
+            secondTheme,
+            firstTheme,
+            firstTheme,
+            thirdTheme,
+            thirdTheme
+        ));
+
+        // when
+        List<ThemeRankResponse> responses = themeService.getThemeRank();
+
+        // then
+        assertThat(responses)
+            .extracting(
+                ThemeRankResponse::id,
+                ThemeRankResponse::themeName,
+                ThemeRankResponse::rank
+            )
+            .containsExactly(
+                tuple(1L, "공포", 1),
+                tuple(3L, "잠입", 1),
+                tuple(2L, "추리", 3)
+            );
     }
 }

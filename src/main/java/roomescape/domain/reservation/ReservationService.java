@@ -4,7 +4,10 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +39,6 @@ import roomescape.support.exception.errors.ReservationTimeErrors;
 public class ReservationService {
 
     private final JpaReservationRepository reservationRepository;
-    private final ReservationRepository reservationQueryRepository;
     private final UserService userService;
     private final ReservationSlotService reservationSlotService;
     private final ThemeService themeService;
@@ -59,14 +61,68 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getAllReservations() {
-        return reservationQueryRepository.findAll().stream()
+        return findAllWithWaitingNumber().stream()
             .map(ReservationResponse::from)
             .toList();
     }
 
     public UserReservationsResponse getUserReservations(String username) {
-        List<ReservationWithWaitingNumber> userReservations = reservationQueryRepository.findReservations(username);
+        List<Reservation> reservations = reservationRepository.findUserReservations(username);
+        Map<Long, Long> waitingNumberByReservationId = calculateWaitingNumbersInSameSlots(reservations);
+        List<ReservationWithWaitingNumber> userReservations = reservations.stream()
+            .map(reservation -> new ReservationWithWaitingNumber(
+                reservation,
+                waitingNumberByReservationId.get(reservation.getId())
+            ))
+            .toList();
         return UserReservationsResponse.of(username, userReservations);
+    }
+
+    private List<ReservationWithWaitingNumber> findAllWithWaitingNumber() {
+        List<Reservation> reservations = reservationRepository.findReservationsForAdmin();
+        Map<Long, Long> waitingNumberByReservationId = calculateWaitingNumbers(reservations);
+        return reservations.stream()
+            .map(reservation -> new ReservationWithWaitingNumber(
+                reservation,
+                waitingNumberByReservationId.get(reservation.getId())
+            ))
+            .toList();
+    }
+
+    private Map<Long, Long> calculateWaitingNumbers(List<Reservation> reservations) {
+        Map<Long, Long> waitingNumberByReservationId = new HashMap<>();
+        Map<Long, Long> nextWaitingNumberBySlotId = new HashMap<>();
+
+        reservations.stream()
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+            .sorted(Comparator
+                .comparing((Reservation reservation) -> reservation.getReservationSlot().getId())
+                .thenComparing(Reservation::getUpdatedAt)
+                .thenComparing(Reservation::getId))
+            .forEach(reservation -> {
+                Long slotId = reservation.getReservationSlot().getId();
+                Long waitingNumber = nextWaitingNumberBySlotId.merge(slotId, 1L, Long::sum);
+                waitingNumberByReservationId.put(reservation.getId(), waitingNumber);
+            });
+
+        return waitingNumberByReservationId;
+    }
+
+    private Map<Long, Long> calculateWaitingNumbersInSameSlots(List<Reservation> reservations) {
+        List<Long> reservationSlotIds = reservations.stream()
+            .map(reservation -> reservation.getReservationSlot().getId())
+            .distinct()
+            .toList();
+
+        if (reservationSlotIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Reservation> waitingReservations = reservationRepository.findWaitingReservationsInSlots(
+            reservationSlotIds,
+            ReservationStatus.WAITING
+        );
+        return calculateWaitingNumbers(waitingReservations);
     }
 
     @Transactional
@@ -144,7 +200,7 @@ public class ReservationService {
     }
 
     private void updateReservationWhenSameSlot(Reservation reservation, ReservationSlot currentReservationSlot) {
-        Long currentReservationCount = reservationRepository.countActiveByReservationSlotId(
+        Long currentReservationCount = reservationRepository.countActiveReservationsInSlot(
             currentReservationSlot.getId(),
             ReservationStatus.CANCELED
         );
@@ -168,7 +224,7 @@ public class ReservationService {
         ReservationSlot currentSlot,
         ReservationSlot updatedSlot
     ) {
-        Long currentReservationCount = reservationRepository.countActiveByReservationSlotId(
+        Long currentReservationCount = reservationRepository.countActiveReservationsInSlot(
             updatedSlot.getId(),
             ReservationStatus.CANCELED
         );
@@ -188,11 +244,10 @@ public class ReservationService {
     }
 
     private void promoteFirstWaitingReservation(ReservationSlot reservationSlot) {
-        reservationRepository.findActiveReservationsInWaitingOrder(
+        reservationRepository.findWaitingReservationsForPromotion(
                 reservationSlot.getId(),
-                ReservationStatus.CANCELED
+                ReservationStatus.WAITING
             ).stream()
-            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
             .findFirst()
             .ifPresent(reservation -> reservationRepository.save(
                 reservation.update(ReservationStatus.CONFIRMED, clock)
@@ -200,7 +255,7 @@ public class ReservationService {
     }
 
     private Reservation buildReservation(ReservationSlot reservationSlot, User user) {
-        Long currentReservationCount = reservationRepository.countActiveByReservationSlotId(
+        Long currentReservationCount = reservationRepository.countActiveReservationsInSlot(
             reservationSlot.getId(),
             ReservationStatus.CANCELED
         );

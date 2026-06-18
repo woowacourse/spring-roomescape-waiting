@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface JpaReservationSlotRepository extends JpaRepository<ReservationSlot, Long> {
 
@@ -23,9 +22,5 @@ public interface JpaReservationSlotRepository extends JpaRepository<ReservationS
           and reservationSlot.date.id = :dateId
           and reservationSlot.theme.id = :themeId
         """)
-    Optional<ReservationSlot> findByScheduleToUpdate(
-        @Param("timeId") Long timeId,
-        @Param("dateId") Long dateId,
-        @Param("themeId") Long themeId
-    );
+    Optional<ReservationSlot> findSlotForCreation(Long timeId, Long dateId, Long themeId);
 }

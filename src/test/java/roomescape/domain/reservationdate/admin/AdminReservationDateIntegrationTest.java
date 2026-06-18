@@ -15,7 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.reservationdate.ReservationDate;
+import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.support.TestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class AdminReservationDateIntegrationTest {
@@ -24,7 +28,7 @@ class AdminReservationDateIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TestFixture testFixture;
 
     @Value("${token}")
     private String adminToken;
@@ -32,21 +36,13 @@ class AdminReservationDateIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_slot");
-        jdbcTemplate.update("DELETE FROM users");
-        jdbcTemplate.update("DELETE FROM reservation_date");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
+        testFixture.clear();
     }
 
     @Test
     @DisplayName("관리자의 예약 날짜 전체 조회를 end-to-end로 확인한다.")
     void getAllReservationDateForAdmin() {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_date(date) VALUES (?)",
-            "2026-06-01"
-        );
+        testFixture.saveDate("2026-06-01");
 
         given().log().all()
             .contentType(ContentType.JSON)
@@ -133,21 +129,12 @@ class AdminReservationDateIntegrationTest {
     @Test
     @DisplayName("관리자의 예약 날짜 삭제를 end-to-end로 확인한다.")
     void deleteReservationDate() {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_date(date) VALUES (?)",
-            "2026-06-01"
-        );
-
-        Long dateId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_date WHERE date = ?",
-            Long.class,
-            "2026-06-01"
-        );
+        ReservationDate reservationDate = testFixture.saveDate("2026-06-01");
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().delete("/admin/reservation-dates/{id}", dateId)
+            .when().delete("/admin/reservation-dates/{id}", reservationDate.getId())
             .then().log().all()
             .statusCode(204);
 
@@ -163,48 +150,15 @@ class AdminReservationDateIntegrationTest {
     @Test
     @DisplayName("이미 예약이 존재하는 날짜는 삭제할 수 없다.")
     void deleteReservationDateWhenDateInUse() {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_date(date) VALUES (?)",
-            "2026-06-01"
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation_time(start_at) VALUES (?)",
-            "10:00"
-        );
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            "공포",
-            "무서운 테마",
-            "theme-url"
-        );
-
-        Long dateId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_date WHERE date = ?",
-            Long.class,
-            "2026-06-01"
-        );
-        Long timeId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_time WHERE start_at = ?",
-            Long.class,
-            "10:00:00"
-        );
-        Long themeId = jdbcTemplate.queryForObject(
-            "SELECT id FROM theme WHERE name = ?",
-            Long.class,
-            "공포"
-        );
-
-        jdbcTemplate.update(
-            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
-            dateId,
-            timeId,
-            themeId
-        );
+        ReservationDate reservationDate = testFixture.saveDate("2026-06-01");
+        ReservationTime reservationTime = testFixture.saveTime("10:00");
+        Theme theme = testFixture.saveTheme("공포");
+        ReservationSlot reservationSlot = testFixture.saveSlot(reservationDate, reservationTime, theme);
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().delete("/admin/reservation-dates/{id}", dateId)
+            .when().delete("/admin/reservation-dates/{id}", reservationSlot.getDate().getId())
             .then().log().all()
             .statusCode(409)
             .body("code", is("RESERVATION_DATE_IN_USE"))

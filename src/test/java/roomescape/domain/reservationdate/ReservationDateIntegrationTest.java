@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.support.TestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationDateIntegrationTest {
@@ -21,26 +21,18 @@ class ReservationDateIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TestFixture testFixture;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_slot");
-        jdbcTemplate.update("DELETE FROM users");
-        jdbcTemplate.update("DELETE FROM reservation_date");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
+        testFixture.clear();
     }
 
     @Test
     @DisplayName("전체 예약 날짜 조회를 end-to-end로 확인한다.")
     void getAllReservationDates() {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_date(date) VALUES (?)",
-            "2026-06-01"
-        );
+        testFixture.saveDate("2026-06-01");
 
         given().log().all()
             .contentType(ContentType.JSON)

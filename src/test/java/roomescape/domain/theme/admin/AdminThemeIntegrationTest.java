@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.theme.Theme;
+import roomescape.support.TestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class AdminThemeIntegrationTest {
@@ -24,7 +25,7 @@ class AdminThemeIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TestFixture testFixture;
 
     @Value("${token}")
     private String adminToken;
@@ -32,21 +33,13 @@ class AdminThemeIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_slot");
-        jdbcTemplate.update("DELETE FROM users");
-        jdbcTemplate.update("DELETE FROM reservation_date");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
+        testFixture.clear();
     }
 
     @Test
     @DisplayName("관리자의 테마 전체 조회를 end-to-end로 확인한다.")
     void getAllThemeForAdmin() {
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            "공포", "무서운 테마", "theme-url"
-        );
+        testFixture.saveTheme("공포");
 
         given().log().all()
             .contentType(ContentType.JSON)
@@ -145,21 +138,12 @@ class AdminThemeIntegrationTest {
     @Test
     @DisplayName("관리자의 테마 삭제를 end-to-end로 확인한다.")
     void deleteTheme() {
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            "공포", "무서운 테마", "theme-url"
-        );
-
-        Long themeId = jdbcTemplate.queryForObject(
-            "SELECT id FROM theme WHERE name = ?",
-            Long.class,
-            "공포"
-        );
+        Theme theme = testFixture.saveTheme("공포");
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().delete("/admin/themes/{id}", themeId)
+            .when().delete("/admin/themes/{id}", theme.getId())
             .then().log().all()
             .statusCode(204);
 
