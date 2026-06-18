@@ -2,6 +2,7 @@ package roomescape.dto.response;
 
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
+import roomescape.domain.Waiting;
 import roomescape.dto.projection.ReservationOrderProjection;
 
 public record ReservationOrderResponse(Long id, String name, LocalDate date, ReservationTimeResponse timeResponse,
@@ -26,6 +27,18 @@ public record ReservationOrderResponse(Long id, String name, LocalDate date, Res
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
+                order,
+                toStatus(order)
+        );
+    }
+
+    public static ReservationOrderResponse from(Waiting waiting, long order) {
+        return new ReservationOrderResponse(
+                waiting.getId(),
+                waiting.getMember().getName(),
+                waiting.getDate(),
+                ReservationTimeResponse.from(waiting.getTime()),
+                ThemeResponse.from(waiting.getTheme()),
                 order,
                 toStatus(order)
         );

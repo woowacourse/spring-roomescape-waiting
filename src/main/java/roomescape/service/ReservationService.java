@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationOrderResponse;
@@ -19,6 +21,7 @@ import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.IdNotFoundException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,12 +29,15 @@ public class ReservationService {
     private ReservationRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
+    private WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
 
@@ -53,6 +59,10 @@ public class ReservationService {
         Theme theme = getValidTheme(request.themeId());
 
         validateReservationDateTime(request.date(), time);
+
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), time, theme)) {
+            throw new IllegalArgumentException("요청하신 날짜 및 시간에는 이미 예약이 존재합니다. 예약 대기를 신청해주세요.");
+        }
 
         Reservation reservation = new Reservation(request.name(), request.date(), time, theme, requestedAt);
 
@@ -77,13 +87,39 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IdNotFoundException("요청하신 예약을 찾을 수 없습니다."));
-        reservation.changeSchedule(request.date(), time);   // 변경 감지(dirty checking)로 커밋 시 UPDATE
+        reservation.changeSchedule(request.date(), time);
         return ReservationResponse.from(reservation);
     }
 
     @Transactional
     public void delete(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IdNotFoundException("요청하신 예약을 찾을 수 없습니다."));
+
         reservationRepository.deleteById(id);
+        promoteEarliestWaiting(reservation);
+    }
+
+    private void promoteEarliestWaiting(Reservation canceledReservation) {
+        Optional<Waiting> earliestWaiting = waitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderById(
+                canceledReservation.getDate(),
+                canceledReservation.getTime().getId(),
+                canceledReservation.getTheme().getId());
+
+        if (earliestWaiting.isEmpty()) {
+            return;
+        }
+
+        Waiting waiting = earliestWaiting.get();
+        waitingRepository.deleteById(waiting.getId());
+
+        Reservation promoted = new Reservation(
+                waiting.getMember().getName(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme(),
+                LocalDateTime.now());
+        reservationRepository.save(promoted);
     }
 
 
