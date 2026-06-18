@@ -1,4 +1,4 @@
-package roomescape.controller.admin;
+package roomescape.controller.api.admin;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -16,7 +16,7 @@ import roomescape.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
 
 @RestController
-@RequestMapping("/admin/themes")
+@RequestMapping("/api/admin/themes")
 public class AdminThemeController {
     private final ThemeService themeService;
 

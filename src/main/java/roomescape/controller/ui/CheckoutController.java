@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.ui;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -8,15 +8,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.exception.PaymentAmountMismatchException;
 import roomescape.exception.TossPaymentException;
 import roomescape.service.PaymentService;
+import roomescape.service.ReservationService;
 
 @Controller
 public class CheckoutController {
 
     private final PaymentService paymentService;
+    private final ReservationService reservationService;
     private final String clientKey;
 
-    public CheckoutController(PaymentService paymentService, @Value("${toss.client-key}") String clientKey) {
+    public CheckoutController(PaymentService paymentService, ReservationService reservationService, @Value("${toss.client-key}") String clientKey) {
         this.paymentService = paymentService;
+        this.reservationService = reservationService;
         this.clientKey = clientKey;
     }
 
@@ -42,11 +45,16 @@ public class CheckoutController {
             paymentService.confirm(paymentKey, orderId, amount);
             return "redirect:/?payment=success";
         } catch (PaymentAmountMismatchException e) {
-            return "redirect:/?payment=fail&code=AMOUNT_MISMATCH&message=" + e.getMessage();
+            reservationService.cancelByOrderId(orderId);
+            return "redirect:/?payment=fail&code=AMOUNT_MISMATCH&message=" + encode(e.getMessage());
+        } catch (TossPaymentException.ReadTimeout e) {
+            return "redirect:/?payment=uncertain&code=" + e.getCode() + "&message=" + encode(e.getMessage());
         } catch (TossPaymentException e) {
-            return "redirect:/?payment=fail&code=" + e.getCode() + "&message=" + e.getMessage();
+            reservationService.cancelByOrderId(orderId);
+            return "redirect:/?payment=fail&code=" + e.getCode() + "&message=" + encode(e.getMessage());
         } catch (Exception e) {
-            return "redirect:/?payment=fail&code=UNKNOWN&message=" + e.getMessage();
+            reservationService.cancelByOrderId(orderId);
+            return "redirect:/?payment=fail&code=UNKNOWN&message=" + encode(e.getMessage());
         }
     }
 
@@ -56,6 +64,14 @@ public class CheckoutController {
             @RequestParam(required = false) String message,
             @RequestParam(required = false) String orderId
     ) {
-        return "redirect:/?payment=fail&code=" + code + "&message=" + message;
+        if (orderId != null) {
+            reservationService.cancelByOrderId(orderId);
+        }
+        return "redirect:/?payment=fail&code=" + code + "&message=" + encode(message);
+    }
+
+    private String encode(String message) {
+        if (message == null) return "";
+        return java.net.URLEncoder.encode(message, java.nio.charset.StandardCharsets.UTF_8);
     }
 }

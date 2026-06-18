@@ -43,6 +43,10 @@ public class ReservationRank {
         return reservation.getOrderId();
     }
 
+    public String getPaymentKey() {
+        return reservation.getPaymentKey();
+    }
+
     public Long getAmount() {
         return reservation.getAmount();
     }

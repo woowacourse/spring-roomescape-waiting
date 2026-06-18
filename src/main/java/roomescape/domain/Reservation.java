@@ -76,6 +76,10 @@ public class Reservation {
         this.status = ReservationStatus.CONFIRMED;
     }
 
+    public void markUncertain() {
+        this.status = ReservationStatus.UNCERTAIN;
+    }
+
     public void setPaymentInfo(String orderId, Long amount) {
         this.orderId = orderId;
         this.amount = amount;
@@ -94,8 +98,12 @@ public class Reservation {
         return status == ReservationStatus.PENDING_PAYMENT;
     }
 
+    public boolean isUncertain() {
+        return status == ReservationStatus.UNCERTAIN;
+    }
+
     public boolean takesSlot() {
-        return isConfirmed() || isPendingPayment();
+        return isConfirmed() || isPendingPayment() || isUncertain();
     }
 
     public boolean isWaiting() {

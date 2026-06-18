@@ -22,6 +22,9 @@ public class TossPaymentException extends RuntimeException {
      * Toss 에러 응답({code, message})을 도메인 예외로 매핑한다. 정의되지 않은 코드는 기본 TossPaymentException 으로 떨어진다.
      */
     public static TossPaymentException of(HttpStatusCode status, TossErrorResponse error) {
+        if (status.equals(HttpStatus.UNAUTHORIZED)) {
+            return new GatewayConfig(error.message());
+        }
         return switch (error.code()) {
             case "ALREADY_PROCESSED_PAYMENT" -> new AlreadyProcessed(error.message());
             case "DUPLICATED_ORDER_ID" -> new DuplicatedOrder(error.message());
@@ -125,10 +128,33 @@ public class TossPaymentException extends RuntimeException {
      */
     public static class Retryable extends TossPaymentException {
 
+        public Retryable(HttpStatusCode status, String code, String message) {
+            super(status, code, message);
+        }
+
         public Retryable(String message) {
-            super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
+            this(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
         }
 
     }
 
+    /**
+     * 네트워크 연결 실패 (Connect Timeout 포함)
+     */
+    public static class ConnectionFailed extends Retryable {
+        public ConnectionFailed(String message, Throwable cause) {
+            super(HttpStatus.SERVICE_UNAVAILABLE, "CONNECTION_FAILED", message);
+            initCause(cause);
+        }
+    }
+
+    /**
+     * 응답 읽기 타임아웃 (Read Timeout). 승인 여부 불분명.
+     */
+    public static class ReadTimeout extends Retryable {
+        public ReadTimeout(String message, Throwable cause) {
+            super(HttpStatus.GATEWAY_TIMEOUT, "READ_TIMEOUT", message);
+            initCause(cause);
+        }
+    }
 }

@@ -132,6 +132,19 @@ public class ReservationService {
         promoteNextWaiting(reservation, currentReservations);
     }
 
+    @Transactional
+    public void cancelByOrderId(String orderId) {
+        reservationRepository.findByOrderId(orderId)
+                .ifPresent(reservation -> {
+                    if (reservation.isPendingPayment()) {
+                        Reservations currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
+                                reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
+                        reservationRepository.delete(reservation.getId());
+                        promoteNextWaiting(reservation, currentReservations);
+                    }
+                });
+    }
+
     private boolean isBefore(LocalDate date1, Long timeId1, LocalDate date2, Long timeId2) {
         if (date1.isBefore(date2)) {
             return true;

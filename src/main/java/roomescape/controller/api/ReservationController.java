@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.api;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -20,7 +20,7 @@ import roomescape.service.ReservationService;
 
 
 @RestController
-@RequestMapping("/reservations")
+@RequestMapping("/api/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -60,6 +60,12 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/by-order-id/{orderId}")
+    public ResponseEntity<Void> cancelByOrderId(@PathVariable String orderId) {
+        reservationService.cancelByOrderId(orderId);
         return ResponseEntity.noContent().build();
     }
 }

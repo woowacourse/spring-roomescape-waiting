@@ -1,4 +1,4 @@
-package roomescape.controller.admin;
+package roomescape.controller.api.admin;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,13 +41,13 @@ class AdminThemeControllerTest {
 
         given(themeService.create(any())).willReturn(new ThemeResponse(1L, name, description, "http://image.url"));
 
-        mockMvc.perform(multipart("/admin/themes")
+        mockMvc.perform(multipart("/api/admin/themes")
                         .file(file)
                         .param("name", name)
                         .param("description", description)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, containsString("/admin/themes/1")))
+                .andExpect(header().string(HttpHeaders.LOCATION, containsString("/api/admin/themes/1")))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value(name));
     }
@@ -56,7 +56,7 @@ class AdminThemeControllerTest {
     void 테마_삭제() throws Exception {
         willDoNothing().given(themeService).delete(16L);
 
-        mockMvc.perform(delete("/admin/themes/16"))
+        mockMvc.perform(delete("/api/admin/themes/16"))
                 .andExpect(status().isNoContent());
     }
 
@@ -65,7 +65,7 @@ class AdminThemeControllerTest {
         willThrow(new AlreadyExistsException("해당 테마에 예약이 존재하여 삭제할 수 없습니다."))
                 .given(themeService).delete(1L);
 
-        mockMvc.perform(delete("/admin/themes/1"))
+        mockMvc.perform(delete("/api/admin/themes/1"))
                 .andExpect(status().isConflict());
     }
 }

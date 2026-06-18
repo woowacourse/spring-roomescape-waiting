@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.api;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,7 +35,7 @@ public class ReservationTimeControllerTest {
         ReservationTimeResponse response = new ReservationTimeResponse(1L, LocalTime.of(10, 0));
         given(reservationTimeService.findAll()).willReturn(List.of(response));
 
-        mockMvc.perform(get("/times"))
+        mockMvc.perform(get("/api/times"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.length()").value(1))
@@ -48,7 +48,7 @@ public class ReservationTimeControllerTest {
         TimeSlotResponse response = new TimeSlotResponse(1L, LocalTime.of(10, 0), ReservationTimeStatus.AVAILABLE);
         given(reservationTimeService.findAvailableTime(1L, LocalDate.now())).willReturn(List.of(response));
 
-        mockMvc.perform(get("/times/available-times")
+        mockMvc.perform(get("/api/times/available-times")
                         .param("themeId", "1")
                         .param("date", LocalDate.now().toString()))
                 .andExpect(status().isOk())

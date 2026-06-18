@@ -16,7 +16,7 @@
     // 테마 관리
     async function loadThemes() {
         try {
-            const res = await fetch('/themes');
+            const res = await fetch('/api/themes');
             const themes = await res.json();
             const container = $('#admin-theme-list');
             if (!themes || themes.length === 0) {
@@ -39,7 +39,7 @@
         const formData = new FormData($('#theme-form'));
 
         try {
-            const res = await fetch('/admin/themes', {
+            const res = await fetch('/api/admin/themes', {
                 method: 'POST',
                 body: formData
             });
@@ -58,7 +58,7 @@
         const confirmed = await confirm('이 테마를 삭제하시겠습니까?');
         if (!confirmed) return;
         try {
-            const res = await fetch(`/admin/themes/${id}`, {method: 'DELETE'});
+            const res = await fetch(`/api/admin/themes/${id}`, {method: 'DELETE'});
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({message: '알 수 없는 오류가 발생했습니다.'}));
                 throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
@@ -72,7 +72,7 @@
     // 시간 관리
     async function loadTimes() {
         try {
-            const res = await fetch('/times');
+            const res = await fetch('/api/times');
             const times = await res.json();
             const container = $('#admin-time-list');
 
@@ -95,7 +95,7 @@
     $('#time-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch('/admin/times', {
+            const res = await fetch('/api/admin/times', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({startAt: $('#time-start').value + ':00'})
@@ -115,7 +115,7 @@
         const confirmed = await confirm('이 시간 슬롯을 삭제하시겠습니까?');
         if (!confirmed) return;
         try {
-            const res = await fetch(`/admin/times/${id}`, {method: 'DELETE'});
+            const res = await fetch(`/api/admin/times/${id}`, {method: 'DELETE'});
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({message: '알 수 없는 오류가 발생했습니다.'}));
                 throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');
@@ -129,27 +129,58 @@
     // 예약 관리
     async function loadReservations() {
         try {
-            const res = await fetch('/reservations');
+            const res = await fetch('/api/reservations');
             const list = await res.json();
             const container = $('#admin-reservation-list');
             if (!list || list.length === 0) {
-                container.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">현재 예약 내역이 없습니다.</td></tr>';
+                container.innerHTML = '<div style="text-align:center; padding:60px; color:var(--text-muted); background:var(--bg-admin); border-radius:12px; border:1px solid var(--border);">현재 예약 내역이 없습니다.</div>';
                 return;
             }
             container.innerHTML = list.map(r => {
                 const badge = getPillInfo(r.status);
                 return `
-                    <tr>
-                        <td>#${r.id}</td>
-                        <td style="font-weight:600;">${r.name}</td>
-                        <td>${r.date}</td>
-                        <td style="font-family:monospace;">${r.timeResponse.startAt.slice(0, 5)}</td>
-                        <td>${r.themeResponse.name}</td>
-                        <td><span class="badge ${badge.class}">${badge.text}</span></td>
-                        <td><button class="btn-danger-sm" onclick="deleteReservation(${r.id})">취소</button></td>
-                    </tr>
+                    <div class="res-card">
+                        <div class="res-id-sidebar">#${r.id}</div>
+                        <div class="res-content">
+                            <div class="res-user-box">
+                                <div class="res-name">${r.name}</div>
+                                <div class="res-date-time">
+                                    <i data-lucide="calendar" style="width:14px; height:14px;"></i> ${r.date}
+                                    <i data-lucide="clock" style="width:14px; height:14px; margin-left:8px;"></i> ${r.timeResponse.startAt.slice(0, 5)}
+                                </div>
+                            </div>
+                            
+                            <div class="res-theme-box">
+                                <div class="res-theme-label">Theme</div>
+                                <div class="res-theme-name">${r.themeResponse.name}</div>
+                            </div>
+                            
+                            <div class="res-payment-box">
+                                <div class="res-pay-row">
+                                    <span class="res-pay-label">주문번호</span>
+                                    <span class="res-pay-val">${r.orderId || '-'}</span>
+                                </div>
+                                <div class="res-pay-row">
+                                    <span class="res-pay-label">결제키</span>
+                                    <span class="res-pay-val">${r.paymentKey || '-'}</span>
+                                </div>
+                                <div class="res-amount-row">
+                                    <div class="res-pay-row">
+                                        <span class="res-pay-label">결제금액</span>
+                                        <span class="res-amount">${r.amount ? r.amount.toLocaleString() + '원' : '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="res-side-box">
+                                <span class="badge ${badge.class}">${badge.text}</span>
+                                <button class="btn-danger-sm" onclick="deleteReservation(${r.id})">예약 취소</button>
+                            </div>
+                        </div>
+                    </div>
                 `;
             }).join('');
+            lucide.createIcons();
         } catch (e) {
             console.error('예약 로드 실패', e);
         }
@@ -159,7 +190,7 @@
         const confirmed = await confirm('이 예약을 취소하시겠습니까?');
         if (!confirmed) return;
         try {
-            const res = await fetch(`/reservations/${id}`, {method: 'DELETE'});
+            const res = await fetch(`/api/reservations/${id}`, {method: 'DELETE'});
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({message: '알 수 없는 오류가 발생했습니다.'}));
                 throw new Error(errorData.message || '알 수 없는 오류가 발생했습니다.');

@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -59,11 +59,12 @@ class ReservationControllerTest {
                 new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror"),
                 ReservationStatus.CONFIRMED,
                 null,
+                null,
                 null
         );
         given(reservationService.save(any())).willReturn(response);
 
-        mockMvc.perform(post("/reservations")
+        mockMvc.perform(post("/api/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reservation)))
                 .andExpect(status().isOk())
@@ -84,11 +85,12 @@ class ReservationControllerTest {
                 new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror"),
                 ReservationStatus.CONFIRMED,
                 null,
+                null,
                 null
         );
         given(reservationService.findAll()).willReturn(List.of(response));
 
-        mockMvc.perform(get("/reservations"))
+        mockMvc.perform(get("/api/reservations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -106,11 +108,12 @@ class ReservationControllerTest {
                 ReservationStatus.WAITING,
                 1L,
                 null,
+                null,
                 null
         );
         given(reservationService.find("아나키")).willReturn(List.of(response));
 
-        mockMvc.perform(get("/reservations/my-reservation")
+        mockMvc.perform(get("/api/reservations/my-reservation")
                         .param("name", "아나키"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
@@ -132,11 +135,12 @@ class ReservationControllerTest {
                 new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror"),
                 ReservationStatus.CONFIRMED,
                 null,
+                null,
                 null
         );
         given(reservationService.update(any(), any())).willReturn(response);
 
-        mockMvc.perform(patch("/reservations/1")
+        mockMvc.perform(patch("/api/reservations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -148,7 +152,7 @@ class ReservationControllerTest {
     void 예약_삭제() throws Exception {
         willDoNothing().given(reservationService).delete(1L);
 
-        mockMvc.perform(delete("/reservations/1"))
+        mockMvc.perform(delete("/api/reservations/1"))
                 .andExpect(status().isNoContent());
     }
 }

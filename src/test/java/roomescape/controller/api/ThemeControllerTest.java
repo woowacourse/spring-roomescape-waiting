@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.api;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,7 +31,7 @@ class ThemeControllerTest {
         ThemeResponse response = new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror");
         given(themeService.findAllThemes()).willReturn(List.of(response));
 
-        mockMvc.perform(get("/themes"))
+        mockMvc.perform(get("/api/themes"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.length()").value(1))
@@ -44,7 +44,7 @@ class ThemeControllerTest {
         ThemeResponse response = new ThemeResponse(1L, "우테코 공포물", "레벨2 미션의 공포", "/horror");
         given(themeService.findTopTheme(10L)).willReturn(List.of(response));
 
-        mockMvc.perform(get("/themes/popular")
+        mockMvc.perform(get("/api/themes/popular")
                         .param("limit", "10"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
