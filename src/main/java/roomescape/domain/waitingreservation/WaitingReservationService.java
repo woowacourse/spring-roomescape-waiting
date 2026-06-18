@@ -2,6 +2,8 @@ package roomescape.domain.waitingreservation;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,8 +14,10 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeService;
+import roomescape.domain.waitingreservation.dto.RankProjection;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
+import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRankResponse;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.RoomescapeException;
@@ -58,15 +62,18 @@ public class WaitingReservationService {
             throw new RoomescapeException(WaitingReservationErrorCode.ALREADY_PROMOTED_TO_RESERVATION);
         }
 
-        int deletedCount = waitingReservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            log.warn("이미 삭제된 예약 대기 삭제 요청이 들어왔습니다. reservationId={}", id);
-        }
+        waitingReservationRepository.deleteById(id);
     }
 
     public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByName(String name) {
-        return waitingReservationRepository.findAllByNameWithRank(name)
+        List<WaitingReservation> waitingReservations = waitingReservationRepository.findAllByName(name);
+
+        Map<Long, Long> rankMap = waitingReservationRepository.findRankByName(name)
             .stream()
+            .collect(Collectors.toMap(RankProjection::getId, RankProjection::getRank));
+
+        return waitingReservations.stream()
+            .map(wr -> new WaitingReservationWithRank(wr, rankMap.get(wr.getId())))
             .map(WaitingReservationWithRankResponse::from)
             .toList();
     }

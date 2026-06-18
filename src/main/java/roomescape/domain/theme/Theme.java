@@ -1,16 +1,27 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.ThemeErrorCode;
 
+@Entity
 @Getter
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String content;
-    private final String url;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String content;
+    private String url;
+
+    protected Theme() {
+
+    }
 
     private Theme(Long id, String name, String content, String url) {
         validate(name, content, url);

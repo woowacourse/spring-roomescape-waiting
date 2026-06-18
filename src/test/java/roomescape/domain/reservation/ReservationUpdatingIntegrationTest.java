@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.ReservationUpdateRequest;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
@@ -86,24 +85,6 @@ class ReservationUpdatingIntegrationTest {
         assertThat(reservationRepository.existsByDateIdAndTimeIdAndThemeId(updateSlot.date.getId(), updateSlot.time.getId(), originSlot.theme.getId())).isTrue();
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isEmpty();
         assertThat(waitingReservationRepository.findById(secondWaiting.getId())).isPresent();
-    }
-
-    @Test
-    void 예약_수정_중_예약_수정이_실패하면_전체가_롤백된다() {
-        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(updateSlot.date.getId(), updateSlot.time.getId());
-
-        WaitingReservation firstWaiting = waitingReservationRepository.save(
-            waiting("이산", originSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
-        );
-
-        doThrow(new RuntimeException()).when(reservationRepository).updateReservation(originReservation.getId(), updateRequest.dateId(), updateRequest.timeId());
-
-        assertThatThrownBy(() -> reservationService.updateReservation(originReservation.getId(),  updateRequest))
-            .isInstanceOf(RuntimeException.class);
-
-        assertThat(reservationRepository.findById(originReservation.getId())).isPresent();
-        assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
-        assertThat(reservationRepository.findByName("이산")).isEmpty();
     }
 
     @Test

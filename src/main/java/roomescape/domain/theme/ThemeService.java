@@ -41,10 +41,7 @@ public class ThemeService {
         if (reservationRepository.countByThemeId(id) > 0) {
             throw new RoomescapeException(ThemeErrorCode.THEME_IN_USE);
         }
-        int deletedCount = themeRepository.deleteById(id);
-        if (deletedCount == 0) {
-            log.warn("삭제할 테마가 존재하지 않습니다. themeId = {}", id);
-        }
+        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponse> getAllTheme() {

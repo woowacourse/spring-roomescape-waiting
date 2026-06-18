@@ -1,18 +1,9 @@
 package roomescape.domain.reservationdate;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ReservationDateRepository {
-
-    Optional<ReservationDate> findById(Long id);
-
-    List<ReservationDate> findAll();
-
-    ReservationDate save(ReservationDate reservationDate);
-
-    int deleteById(Long id);
+public interface ReservationDateRepository extends JpaRepository<ReservationDate, Long> {
 
     boolean existsByPlayDay(LocalDate playDay);
 }

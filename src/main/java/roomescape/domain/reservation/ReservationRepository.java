@@ -1,29 +1,25 @@
 package roomescape.domain.reservation;
 
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Reservation save(Reservation reservation);
+    Long countByTimeId(Long timeId);
 
-    List<Reservation> findAll();
+    Long countByDateId(Long dateId);
 
-    int deleteById(Long id);
-
-    int countByTimeId(Long timeId);
-
-    int countByReservationDateId(Long dateId);
-
+    @Query("""
+        select r.time.id 
+        from Reservation r 
+        where r.theme.id = :themeId and r.date.id = :dateId
+    """)
     List<Long> findReservedTimes(Long themeId, Long dateId);
 
-    int countByThemeId(Long id);
+    Long countByThemeId(Long id);
 
     List<Reservation> findByName(String name);
-
-    Optional<Reservation> findById(Long id);
-
-    int updateReservation(Long id, Long dateId, Long timeId);
 
     boolean existsByDateIdAndTimeIdAndThemeId(Long dateId, Long timeId, Long themeId);
 

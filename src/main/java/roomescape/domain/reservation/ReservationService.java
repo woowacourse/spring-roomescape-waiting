@@ -46,6 +46,7 @@ public class ReservationService {
         return ReservationCreationResponse.from(savedReservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll()
             .stream()
@@ -54,12 +55,10 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        int deletedCount = reservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            log.warn("이미 삭제된 예약 삭제 요청이 들어왔습니다. reservationId={}", id);
-        }
+        reservationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getReservationsByName(String name) {
         return reservationRepository.findByName(name)
             .stream()
@@ -73,6 +72,7 @@ public class ReservationService {
         validateModifiable(reservation.getDate(), reservation.getTime());
 
         reservationRepository.deleteById(id);
+        reservationRepository.flush();
         promoteWaitingReservation(reservation);
     }
 
@@ -88,11 +88,12 @@ public class ReservationService {
         validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme()
             .getId());
 
-        int updatedCount = reservationRepository.updateReservation(id, request.dateId(), request.timeId());
-        if (updatedCount == 0) {
-            log.warn(" 수정할 예약 건이 없습니다. reservationId={}", id);
-        }
-        promoteWaitingReservation(reservation);
+        ReservationDate originalDate = reservation.getDate();
+        ReservationTime originalTime = reservation.getTime();
+        reservation.update(newReservationDate, newReservationTime);
+        reservationRepository.flush();
+
+        promoteWaitingReservationBySlot(originalDate, originalTime, reservation.getTheme());
         return ReservationResponse.from(findById(id));
     }
 
@@ -125,11 +126,12 @@ public class ReservationService {
     }
 
     private void promoteWaitingReservation(Reservation reservation) {
+        promoteWaitingReservationBySlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+    }
+
+    private void promoteWaitingReservationBySlot(ReservationDate date, ReservationTime time, Theme theme) {
         Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
-            reservation.getDate()
-                .getId(), reservation.getTime()
-                .getId(), reservation.getTheme()
-                .getId());
+            date.getId(), time.getId(), theme.getId());
         if (waitingReservationOpt.isPresent()) {
             WaitingReservation waitingReservation = waitingReservationOpt.get();
             reservationRepository.save(

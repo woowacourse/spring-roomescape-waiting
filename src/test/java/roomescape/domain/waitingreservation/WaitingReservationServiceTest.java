@@ -21,9 +21,9 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeService;
+import roomescape.domain.waitingreservation.dto.RankProjection;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
-import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRankResponse;
 import roomescape.support.exception.RoomescapeException;
 
@@ -141,9 +141,13 @@ class WaitingReservationServiceTest {
         WaitingReservation waiting = WaitingReservation.of(
             10L, "이산", date, time, theme, LocalDateTime.of(2026, 5, 5, 14, 0)
         );
-        WaitingReservationWithRank withRank = new WaitingReservationWithRank(waiting, 5L);
+        RankProjection rankProjection = new RankProjection() {
+            public Long getId() { return 10L; }
+            public Long getRank() { return 5L; }
+        };
 
-        when(waitingReservationRepository.findAllByNameWithRank("이산")).thenReturn(List.of(withRank));
+        when(waitingReservationRepository.findAllByName("이산")).thenReturn(List.of(waiting));
+        when(waitingReservationRepository.findRankByName("이산")).thenReturn(List.of(rankProjection));
 
         List<WaitingReservationWithRankResponse> result = waitingReservationService
             .getWaitingReservationsWithRankByName("이산");

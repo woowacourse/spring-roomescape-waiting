@@ -36,13 +36,10 @@ public class ReservationDateService {
     }
 
     public void deleteReservationDate(Long id) {
-        if (reservationRepository.countByReservationDateId(id) > 0) {
+        if (reservationRepository.countByDateId(id) > 0) {
             throw new RoomescapeException(ReservationDateErrorCode.RESERVATION_DATE_IN_USE);
         }
-        int deletedCount = reservationDateRepository.deleteById(id);
-        if (deletedCount == 0) {
-            log.warn("이미 삭제된 날짜의 삭제 요청이 들어왔습니다. dateId={}", id);
-        }
+        reservationDateRepository.deleteById(id);
     }
 
     public List<ReservationDateResponse> getAllAvailableReservationDate() {

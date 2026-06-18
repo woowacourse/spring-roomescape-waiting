@@ -161,4 +161,22 @@ class ReservationTest {
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("테마 엔티티 식별자 정보가 누락되었습니다.");
     }
+
+    @Test
+    void 날짜_시간을_업데이트_할_수_있다() {
+        // given
+        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(15, 40));
+        ReservationTime updateTime =  ReservationTime.createWithoutId(LocalTime.of(10, 00));
+        ReservationDate date = ReservationDate.createWithoutId(LocalDate.of(2026, 8, 5));
+        ReservationDate updateDate = ReservationDate.createWithoutId(LocalDate.of(2026, 8, 15));
+        Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
+        Reservation reservation = Reservation.createWithoutId("이산", date, time, theme);
+
+        // when
+        reservation.update(updateDate, updateTime);
+
+        // then
+        assertThat(reservation.getDate()).isEqualTo(updateDate);
+        assertThat(reservation.getTime()).isEqualTo(updateTime);
+    }
 }

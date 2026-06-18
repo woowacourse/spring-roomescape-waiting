@@ -1,5 +1,14 @@
 package roomescape.domain.waitingreservation;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import roomescape.domain.reservationdate.ReservationDate;
@@ -8,15 +17,35 @@ import roomescape.domain.theme.Theme;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.WaitingReservationErrorCode;
 
+@Entity
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name", "date_id", "time_id", "theme_id"})
+})
 @Getter
 public class WaitingReservation {
 
-    private final Long id;
-    private final String name;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final LocalDateTime createdAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "date_id")
+    private ReservationDate date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    private LocalDateTime createdAt;
+
+    protected WaitingReservation() {
+
+    }
 
     private WaitingReservation(Long id, String name, ReservationDate date, ReservationTime time, Theme theme,
         LocalDateTime createdAt) {
@@ -29,7 +58,8 @@ public class WaitingReservation {
         this.createdAt = createdAt;
     }
 
-    public static WaitingReservation createWithoutId(String name, ReservationDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+    public static WaitingReservation createWithoutId(String name, ReservationDate date, ReservationTime time,
+        Theme theme, LocalDateTime createdAt) {
         return new WaitingReservation(null, name, date, time, theme, createdAt);
     }
 
