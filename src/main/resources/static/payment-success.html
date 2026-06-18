@@ -10,40 +10,186 @@
   <main class="page">
     <section class="section">
       <p class="eyebrow">Payment</p>
-      <h1>결제 승인 처리 중</h1>
-      <div id="payment-result" class="result">결제를 승인하고 있습니다.</div>
+      <h1 id="payment-title">결제 승인 처리 중</h1>
+      <div id="payment-result" class="result payment-result" aria-live="polite"></div>
       <a class="secondary-button" href="/">예약 페이지로 돌아가기</a>
     </section>
   </main>
   <script>
     const params = new URLSearchParams(window.location.search);
+    const title = document.querySelector("#payment-title");
     const result = document.querySelector("#payment-result");
+    const paymentRequest = readPaymentRequest(params);
 
-    async function confirmPayment() {
-      const response = await fetch("/payments/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentKey: params.get("paymentKey"),
-          orderId: params.get("orderId"),
-          amount: Number(params.get("amount")),
-        }),
-      });
-      const body = await response.json();
-      if (!response.ok) {
-        result.textContent = body.detail || "결제 승인에 실패했습니다.";
-        return;
+    function readPaymentRequest(searchParams) {
+      const paymentKey = searchParams.get("paymentKey")?.trim();
+      const orderId = searchParams.get("orderId")?.trim();
+      const amountText = searchParams.get("amount")?.trim();
+      const amount = amountText ? Number(amountText) : NaN;
+
+      if (!paymentKey || !orderId || !Number.isSafeInteger(amount) || amount <= 0) {
+        return null;
       }
-      const themeName = document.createElement("strong");
-      themeName.textContent = body.theme.name;
-
-      const reservationInfo = document.createElement("p");
-      reservationInfo.textContent = `${body.date} ${body.time.startAt.slice(0, 5)} 예약이 확정되었습니다.`;
-
-      result.replaceChildren(themeName, reservationInfo);
+      return { paymentKey, orderId, amount };
     }
 
-    confirmPayment().catch(() => { result.textContent = "결제 승인에 실패했습니다."; });
+    function createElement(tagName, className, textContent) {
+      const element = document.createElement(tagName);
+      if (className) element.className = className;
+      if (textContent) element.textContent = textContent;
+      return element;
+    }
+
+    function createActionLink(textContent, href, className = "secondary-button") {
+      const link = createElement("a", className, textContent);
+      link.href = href;
+      return link;
+    }
+
+    function createRetryButton() {
+      const button = createElement("button", "primary-button", "같은 주문 다시 확인하기");
+      button.type = "button";
+      button.addEventListener("click", () => confirmPayment({ retryButton: button }));
+      return button;
+    }
+
+    function renderState({ heading, statusText, statusClass, messages, actions = [], helper }) {
+      title.textContent = heading;
+      const status = createElement("span", `result-status ${statusClass}`, statusText);
+      const messageNodes = messages.map((message) => createElement("p", null, message));
+      const children = [status, ...messageNodes];
+
+      if (helper) {
+        children.push(createElement("p", "payment-result-helper", helper));
+      }
+      if (actions.length > 0) {
+        const actionGroup = createElement("div", "payment-result-actions");
+        actionGroup.append(...actions);
+        children.push(actionGroup);
+      }
+      result.replaceChildren(...children);
+    }
+
+    function renderLoading(isRetry = false) {
+      const pendingRetryButton = createElement("button", "primary-button", "같은 주문 확인 중");
+      pendingRetryButton.type = "button";
+      pendingRetryButton.disabled = true;
+      renderState({
+        heading: isRetry ? "같은 주문 확인 중" : "결제 승인 처리 중",
+        statusText: "확인 중",
+        statusClass: "is-pending",
+        messages: [isRetry ? "같은 주문 정보로 승인 결과를 다시 확인하고 있습니다." : "결제 승인 결과를 확인하고 있습니다."],
+        actions: isRetry ? [pendingRetryButton] : [],
+      });
+    }
+
+    function renderInvalidQuery() {
+      renderState({
+        heading: "결제 정보를 확인할 수 없습니다",
+        statusText: "확인 불가",
+        statusClass: "is-error",
+        messages: ["결제 승인에 필요한 주문 정보가 올바르지 않습니다.", "예약 페이지에서 결제 내역을 확인하거나 예약을 다시 조회해 주세요."],
+        actions: [createActionLink("예약 페이지에서 확인하기", "/")],
+      });
+    }
+
+    function renderSuccess(body) {
+      const startAt = body.time.startAt.slice(0, 5);
+      renderState({
+        heading: "예약이 확정되었습니다",
+        statusText: "예약 확정",
+        statusClass: "is-confirmed",
+        messages: [body.theme.name, `${body.date} ${startAt} 예약이 확정되었습니다.`, `주문번호 ${body.orderId}`],
+        actions: [createActionLink("내 예약 확인하기", "/#my-reservations-title", "primary-button")],
+      });
+      result.querySelector("p").className = "payment-result-title";
+    }
+
+    function renderRetryableFailure(detail) {
+      renderState({
+        heading: "같은 주문 확인이 필요합니다",
+        statusText: "재확인 가능",
+        statusClass: "is-waiting",
+        messages: [detail || "일시적인 연결 문제로 결제 승인 결과를 확정하지 못했습니다."],
+        helper: "같은 주문번호와 금액으로 승인 상태만 다시 확인합니다. 새 결제나 추가 결제는 생성되지 않습니다.",
+        actions: [createRetryButton(), createActionLink("결제 내역 확인하기", "/#payment-history-title")],
+      });
+    }
+
+    function renderUnknownFailure(detail) {
+      renderState({
+        heading: "결제 완료 여부 확인이 필요합니다",
+        statusText: "확인 필요",
+        statusClass: "is-unknown",
+        messages: [
+          detail || "결제 승인 응답을 받지 못했습니다.",
+          "결제가 완료되었을 수 있어 승인 상태가 늦게 반영되는 중일 수 있습니다.",
+          "예약 페이지의 결제 내역에서 상태를 먼저 확인해 주세요.",
+        ],
+        actions: [createActionLink("결제 내역 확인하기", "/#payment-history-title", "primary-button")],
+      });
+    }
+
+    function renderGenericFailure(body) {
+      const detail = body?.detail || "결제 승인에 실패했습니다.";
+      renderState({
+        heading: "결제 승인을 완료하지 못했습니다",
+        statusText: "승인 실패",
+        statusClass: "is-error",
+        messages: [detail, "예약 페이지에서 예약과 결제 내역을 확인한 뒤 필요한 조치를 진행해 주세요."],
+        actions: [createActionLink("예약 페이지에서 확인하기", "/")],
+      });
+    }
+
+    function renderFetchFailure() {
+      renderState({
+        heading: "결제 결과를 확인하지 못했습니다",
+        statusText: "연결 실패",
+        statusClass: "is-error",
+        messages: ["네트워크 또는 화면 스크립트 문제로 승인 결과를 확인하지 못했습니다."],
+        helper: "같은 주문번호와 금액으로 승인 상태만 다시 확인합니다. 새 결제나 추가 결제는 생성되지 않습니다.",
+        actions: [createRetryButton(), createActionLink("결제 내역 확인하기", "/#payment-history-title")],
+      });
+    }
+
+    async function confirmPayment({ retryButton } = {}) {
+      if (!paymentRequest) {
+        renderInvalidQuery();
+        return;
+      }
+
+      try {
+        if (retryButton) {
+          retryButton.disabled = true;
+          retryButton.textContent = "같은 주문 확인 중";
+        }
+        renderLoading(Boolean(retryButton));
+
+        const response = await fetch("/payments/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(paymentRequest),
+        });
+        const body = await response.json();
+        if (!response.ok) {
+          if (body.code === "PAYMENT_RETRYABLE") {
+            renderRetryableFailure(body.detail);
+            return;
+          }
+          if (body.code === "PAYMENT_UNKNOWN") {
+            renderUnknownFailure(body.detail);
+            return;
+          }
+          renderGenericFailure(body);
+          return;
+        }
+        renderSuccess(body);
+      } catch {
+        renderFetchFailure();
+      }
+    }
+
+    confirmPayment();
   </script>
 </body>
 </html>

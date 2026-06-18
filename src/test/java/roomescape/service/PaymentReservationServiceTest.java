@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,13 +37,16 @@ class PaymentReservationServiceTest {
     @Test
     void preparePaymentConfirmationLocksAndValidatesPaymentTest() {
         Reservation pendingReservation = pendingReservation();
+        Reservation confirmingReservation = paymentConfirmingReservation();
         when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        when(reservationService.startPaymentConfirmation("order_test")).thenReturn(confirmingReservation);
 
         Reservation result = paymentReservationService.preparePaymentConfirmation("order_test", 50000L);
 
-        assertThat(result).isEqualTo(pendingReservation);
+        assertThat(result).isEqualTo(confirmingReservation);
         verify(reservationService, times(1)).lockByOrderId("order_test");
         verify(reservationService, times(1)).findByOrderId("order_test");
+        verify(reservationService, times(1)).startPaymentConfirmation("order_test");
     }
 
     @Test
@@ -58,26 +60,26 @@ class PaymentReservationServiceTest {
     }
 
     @Test
-    void confirmPaymentValidatesResultAndConfirmsReservationTest() {
+    void confirmPaymentConfirmsReservationTest() {
         PaymentResult paymentResult = new PaymentResult("payment_key", "order_test", "DONE", 50000L);
         Reservation confirmedReservation = pendingReservation().confirmPayment("payment_key");
         when(reservationService.confirmPayment("order_test", "payment_key")).thenReturn(confirmedReservation);
 
-        Reservation result = paymentReservationService.confirmPayment("order_test", paymentResult, 50000L);
+        Reservation result = paymentReservationService.confirmPayment("order_test", paymentResult);
 
         assertThat(result).isEqualTo(confirmedReservation);
         verify(reservationService, times(1)).confirmPayment("order_test", "payment_key");
     }
 
     @Test
-    void confirmPaymentGatewayResultMismatchExceptionTest() {
-        PaymentResult paymentResult = new PaymentResult("payment_key", "other_order", "DONE", 50000L);
+    void releasePaymentConfirmationTest() {
+        Reservation pendingReservation = pendingReservation();
+        when(reservationService.releasePaymentConfirmation("order_test")).thenReturn(pendingReservation);
 
-        assertThatThrownBy(() -> paymentReservationService.confirmPayment("order_test", paymentResult, 50000L))
-                .isInstanceOf(RoomEscapeException.class)
-                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
-                        .isEqualTo(DomainErrorCode.PAYMENT_FAILED));
-        verify(reservationService, never()).confirmPayment("order_test", "payment_key");
+        Reservation result = paymentReservationService.releasePaymentConfirmation("order_test");
+
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.PENDING);
+        verify(reservationService, times(1)).releasePaymentConfirmation("order_test");
     }
 
     @Test
@@ -94,5 +96,10 @@ class PaymentReservationServiceTest {
     private Reservation pendingReservation() {
         return new Reservation(1L, "fizz", LocalDate.of(2026, 5, 3), reservationTime, theme,
                 ReservationStatus.PENDING, "order_test", 50000L, null);
+    }
+
+    private Reservation paymentConfirmingReservation() {
+        return new Reservation(1L, "fizz", LocalDate.of(2026, 5, 3), reservationTime, theme,
+                ReservationStatus.PAYMENT_CONFIRMING, "order_test", 50000L, null);
     }
 }

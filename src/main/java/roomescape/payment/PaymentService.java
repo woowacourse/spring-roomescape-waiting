@@ -21,10 +21,11 @@ public class PaymentService {
 
         for (int attempt = 1; attempt <= MAX_CONFIRM_ATTEMPTS; attempt++) {
             try {
-                return PaymentConfirmationResult.success(paymentGateway.confirm(confirmation));
+                PaymentResult result = paymentGateway.confirm(confirmation);
+                return confirmationResult(result, orderId, amount);
             } catch (RoomEscapeException exception) {
                 if (!isRetryable(exception)) {
-                    throw exception;
+                    return PaymentConfirmationResult.failure(exception.code());
                 }
                 lastRetryableException = exception;
             }
@@ -32,7 +33,17 @@ public class PaymentService {
         if (lastRetryableException.code() == DomainErrorCode.PAYMENT_UNKNOWN) {
             return PaymentConfirmationResult.unknownResult();
         }
-        throw lastRetryableException;
+        return PaymentConfirmationResult.failure(lastRetryableException.code());
+    }
+
+    private PaymentConfirmationResult confirmationResult(PaymentResult result, String orderId, Long amount) {
+        if (!PaymentStatus.DONE.name().equals(result.status()) || !result.orderId().equals(orderId)) {
+            return PaymentConfirmationResult.failure(DomainErrorCode.PAYMENT_FAILED);
+        }
+        if (!result.approvedAmount().equals(amount)) {
+            return PaymentConfirmationResult.failure(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+        return PaymentConfirmationResult.success(result);
     }
 
     private boolean isRetryable(RoomEscapeException exception) {

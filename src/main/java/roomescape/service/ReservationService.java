@@ -89,6 +89,14 @@ public class ReservationService {
         return reservationRepository.confirmPayment(orderId, paymentKey);
     }
 
+    public Reservation startPaymentConfirmation(String orderId) {
+        return reservationRepository.startPaymentConfirmation(orderId);
+    }
+
+    public Reservation releasePaymentConfirmation(String orderId) {
+        return reservationRepository.releasePaymentConfirmation(orderId);
+    }
+
     public Reservation markPaymentUnknown(String orderId) {
         return reservationRepository.markPaymentUnknown(orderId);
     }
