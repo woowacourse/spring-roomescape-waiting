@@ -40,6 +40,8 @@ public class TossPaymentGateway implements PaymentGateway {
         TossPaymentResponse response = tossRestClient.post()
                 .uri("/v1/payments/confirm")
                 .contentType(MediaType.APPLICATION_JSON)
+                // 타임아웃으로 끊긴 뒤 재시도해도 같은 결제로 식별되도록 멱등키를 싣는다(주문당 고정값).
+                .header("Idempotency-Key", confirmation.idempotencyKey())
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this::mapError)

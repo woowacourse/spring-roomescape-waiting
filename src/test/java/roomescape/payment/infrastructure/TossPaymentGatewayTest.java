@@ -49,10 +49,28 @@ class TossPaymentGatewayTest {
 
         TossPaymentGateway gateway = gateway();
 
-        var result = gateway.confirm(new PaymentConfirmation("test_pk_1", "order_1", 10000L));
+        var result = gateway.confirm(new PaymentConfirmation("test_pk_1", "order_1", 10000L, "idem-key-1"));
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.approvedAmount()).isEqualTo(10000L);
+    }
+
+    @Test
+    void confirm_요청에_Idempotency_Key_헤더가_실린다() throws InterruptedException {
+        enqueue(200, """
+                {
+                  "paymentKey": "test_pk_1",
+                  "orderId": "order_1",
+                  "status": "DONE",
+                  "totalAmount": 10000
+                }
+                """);
+
+        TossPaymentGateway gateway = gateway();
+        gateway.confirm(new PaymentConfirmation("test_pk_1", "order_1", 10000L, "idem-key-1"));
+
+        var recordedRequest = mockWebServer.takeRequest();
+        assertThat(recordedRequest.getHeader("Idempotency-Key")).isEqualTo("idem-key-1");
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")
@@ -62,7 +80,7 @@ class TossPaymentGatewayTest {
 
         TossPaymentGateway gateway = gateway();
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order_1", 10000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order_1", 10000L, "idem-key-1")))
                 .isInstanceOf(expected);
     }
 

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 확인 필요</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    p.desc {
+      color: #888;
+      margin: 0 0 24px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 16px;
+    }
+
+    .row .label {
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .row .val {
+      text-align: right;
+      word-break: break-all;
+      color: #b08900;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      color: #3182f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>⏳ 결제 확인이 필요해요</h1>
+  <p class="desc">
+    토스로부터 응답을 받지 못했습니다. 결제가 이미 승인됐을 수도 있어 "결제 실패"로 단정하지 않습니다.<br/>
+    잠시 후 내 예약 페이지에서 결제 상태를 확인하거나 "결제 확인" 버튼으로 다시 시도해 주세요.
+    같은 주문은 멱등키로 보호되어 중복 승인되지 않습니다.
+  </p>
+
+  <div class="row"><span class="label">주문번호</span>
+    <span class="val" th:text="${orderId}">order-xxxx</span></div>
+
+  <a href="/index.html">← 내 예약 페이지로 이동</a>
+</div>
+</body>
+</html>

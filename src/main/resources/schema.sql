@@ -40,6 +40,7 @@ CREATE TABLE payment (
     reservation_id     BIGINT          NOT NULL,
     order_id           VARCHAR(64)     NOT NULL UNIQUE,
     payment_key        VARCHAR(255),
+    idempotency_key    VARCHAR(300)    NOT NULL,
     amount             BIGINT          NOT NULL,
     status             VARCHAR(20)     NOT NULL,
     created_at         TIMESTAMP       NOT NULL,
