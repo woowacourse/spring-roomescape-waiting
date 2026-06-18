@@ -377,86 +377,143 @@ fetch first ? rows only                        -- Pageable → SQL 표준 LIMIT
 
 ## 1-3. 영속성 컨텍스트 관찰 ⭐ 차원 A 핵심
 
-> 코드를 추가하기보다 **관찰**. 아래 6개를 직접 만들어 4필드(시도 코드 / 예측 / 실제 / 왜 다른가)로 캡처. 예측과 실제의 갭이 이 미션의 핵심 학습 신호.
+> ✅ **관찰 완료** (Boot 3.4.4 / Hibernate 6 / H2). `TransactionTemplate`으로 tx 경계를 직접 통제하며 6개를 4필드(시도/예측/실제/왜)로 캡처.
+> ⚠️ **장치 주의**: 우리 도메인(Theme/Reservation/Waiting)은 **세터 없는 불변 스타일**이라 dirty checking ①은 자연 트리거가 없다 → 리플렉션으로 필드를 강제 변경해 *메커니즘만* 관찰. 이 "트리거 부재" 자체가 1-2에서 미뤄둔 `@Modifying vs dirty checking` 결정의 답이 된다(① 끝).
+> 관찰 러너(`_Obs.java`)는 푸시하지 않음 — 관찰 도구일 뿐 프로덕션 코드 변경 0.
 
 ### ① dirty checking
 
 ```
-시도 코드:  @Transactional 메서드에서 entity 필드 수정 후 save 미호출
-예측:       commit 시점 UPDATE 자동 발행?
-실제:
-왜 다른가:
+시도:  @Transactional 안에서 em.find(Theme,1) → 리플렉션으로 name 변경 → save/persist 미호출 → 블록 종료(commit)
+예측:  commit 시점에 UPDATE 자동 발행?
+실제:  발행됨. 블록 종료(commit) 시 UPDATE 한 방.
+왜:    영속성 컨텍스트가 load 시점에 엔티티 스냅샷을 떠 두고, flush(=commit 직전)에 현재 상태와 비교해 변경 감지 → UPDATE 합성.
 ```
+발행 SQL:
+```sql
+update theme set description=?, name=?, thumbnail_url=? where id=?
+```
+**관찰 포인트**: 변경한 건 `name` 하나인데 **전 컬럼을 UPDATE**(`description`·`thumbnail_url`까지). `@DynamicUpdate` 무적용 기본값 — Hibernate는 변경 컬럼만 추리지 않고 전 컬럼 SET.
+
+**→ 1-2 미결 결정 종결 (@Modifying bulk vs dirty checking)**: 우리 도메인은 세터가 없어 dirty checking의 **자연 트리거가 0**(리플렉션 없인 발동 불가). 게다가 발동돼도 full-column UPDATE. 반면 `@Modifying` bulk JPQL(`updateDateAndTime`/`updateOrderIndex`)은 ⓐ 불변 도메인과 충돌 없고 ⓑ 타깃 컬럼만 갱신 ⓒ managed 상태·tx 없이도 동작. **결론: @Modifying bulk 유지 확정.** (B)
 
 ### ② 1차 캐시
 
 ```
-시도 코드:  같은 트랜잭션에서 findById 두 번
-예측:       두 번째 SELECT 생략?
-실제:
-왜 다른가:
+시도:  같은 @Transactional 안에서 em.find(Theme,1) 두 번
+예측:  두 번째는 SELECT 생략?
+실제:  2번째 SELECT 0. 그리고 t1 == t2 (동일 인스턴스).
+왜:    영속성 컨텍스트가 (엔티티타입,id)로 1차 캐시. 첫 find가 DB→캐시 적재, 둘째는 캐시 반환. 같은 tx 내 동일성(identity) 보장.
 ```
+첫 find만 `select ... from theme where id=?` 1회, 둘째는 무발행. **동일성 보장**은 dirty checking·병합 안전성의 토대.
 
-### ③ 쓰기 지연
+### ③ 쓰기 지연 (write-behind)
 
 ```
-시도 코드:  save 호출 후 flush 전·후 DB 상태 비교
-예측:       INSERT가 flush/commit 시점 일괄? (단 IDENTITY는 즉시?)
-실제:
-왜 다른가:
+시도:  @Transactional 안에서 em.persist(ReservationTime.create(23:00)) 후 즉시 마커
+예측:  INSERT가 flush/commit까지 지연? (단 IDENTITY는 즉시일 것)
+실제:  persist() 호출 "그 순간" 즉시 INSERT.
+왜:    @GeneratedValue(IDENTITY)는 식별자를 DB가 발급 → persist가 엔티티를 managed로 만들려면 id가 필요 → INSERT를 미룰 수 없음.
 ```
+→ **1-1 관찰 ③의 복선 회수** + **1-2 flush 순서 버그의 뿌리 확증**: "IDENTITY save는 즉시 INSERT"가 바로 승급 흐름에서 옛 예약 DELETE(지연)보다 새 예약 INSERT(즉시)가 앞서 UNIQUE 충돌을 낸 원인이었다. SEQUENCE/TABLE 전략이었다면 INSERT도 지연돼 충돌이 안 났을 수도(전략이 동시성·flush 순서까지 바꾼다).
 
 ### ④ flush 시점
 
 ```
-시도 코드:  명시적 flush / 트랜잭션 종료 / JPQL 실행 직전
-예측:       각 트리거에서 동기화?
-실제:
-왜 다른가:
+시도:  @Transactional 안에서 Theme를 dirty로 만든 뒤, JPQL `select count(t) from Theme t` 실행
+예측:  쿼리 실행 전에 변경분 동기화(flush)?
+실제:  JPQL 직전에 UPDATE(auto-flush) → 그 다음 count SELECT.
+왜:    FlushMode.AUTO 기본 — 쿼리가 변경분을 반영한 결과를 보도록 쿼리 실행 전에 flush.
 ```
+발행 순서:
+```sql
+update theme set description=?, name=?, thumbnail_url=? where id=?   -- auto-flush
+select count(t1_0.id) from theme t1_0                                -- 그 다음 쿼리
+```
+→ flush 트리거 3종(commit / 명시적 `flush()` / JPQL 실행 전 auto-flush) 중 **JPQL-before auto-flush**를 실측. 1-2에서 `deleteById` 후 명시적 `flush()`를 넣은 것도 이 flush 통제의 일종.
 
-### ⑤ fetch 기본값 (@ManyToOne vs @OneToMany)
+### ⑤ fetch 기본값 (@ManyToOne)
 
 ```
-시도 코드:  무명시 상태로 조회
-예측:       @ManyToOne EAGER / @OneToMany LAZY 차이?
-실제:
-왜 다른가:
+시도:  em.clear() 후 em.find(Reservation, id) — 기본 fetch로 조회
+예측:  @ManyToOne 기본 EAGER → 처음부터 조인
+실제:  단일 SELECT가 theme + reservation_time 동시 join fetch
+왜:    @ManyToOne 기본값이 EAGER. find(by-id)는 EAGER 연관을 조인으로 한 번에.
 ```
+```sql
+select r1_0.id, r1_0.date, r1_0.name,
+       t1_0.id, t1_0.description, t1_0.name, t1_0.thumbnail_url,
+       t2_0.id, t2_0.start_at
+from reservation r1_0 join theme t1_0 on ... join reservation_time t2_0 on ...
+```
+**단, 이 모델엔 `@OneToMany`가 없다**(단방향 `@ManyToOne`만 — 1-2 결정의 결과) → "@OneToMany는 LAZY 기본"을 직접 대조할 대상이 없음. 대신 1-2의 **"by-id는 join fetch / 파생·HQL 쿼리는 연관별 보조 SELECT(N+1)"** 발견과 함께 봐야 ⑤가 완성된다 — EAGER는 *언제나 조인*이 아니라 *진입 경로에 따라 조인 또는 보조 SELECT*.
 
 ### ⑥ LazyInitializationException
 
 ```
-시도 코드:  트랜잭션 밖에서 LAZY 필드 접근
-예측:       컨텍스트 닫힌 후 프록시 미초기화 예외?
-실제:
-왜 다른가:
+시도 a:  EAGER 연관(reservation.time)을 tx 종료(detach) 후 접근
+시도 b:  em.getReference(Theme,1) 프록시를 tx 밖에서 getName() 접근
+예측:    컨텍스트 닫힌 후 미초기화 프록시 접근 → 예외?
+실제 a:  정상. getStartAt() == 10:00, 추가 SQL 0.
+실제 b:  LazyInitializationException.
+왜:      EAGER는 load 시점에 이미 초기화 완료 → detach 후에도 값이 메모리에 있음. getReference는 미초기화 프록시 → 접근 순간 초기화를 시도하지만 컨텍스트가 닫혀 DB 접근 불가 → 예외.
 ```
+**→ reads 트랜잭션-free 결정과의 연결(이 미션의 핵심 고리)**: 지금은 모든 연관이 EAGER라 **tx 밖 읽기가 안전**(detach된 엔티티의 연관 접근 OK). 그런데 3-1에서 N+1을 잡으려 `@ManyToOne(fetch=LAZY)`로 바꾸는 순간, **트랜잭션-free read는 LazyInit 위험으로 돌변**한다 — 컨트롤러/직렬화 시점에 LAZY 연관을 건드리면 ⑥(b)와 똑같은 예외. 그때 선택지는 fetch join / `@EntityGraph` / (반대편 극단)OSIV. ⑥은 **그 미래 위험의 예고편**이고, "reads를 tx-free로 둔다"는 결정이 LAZY 전환과 충돌할 좌표를 미리 찍어 둔 것.
 
-> 🖊️ reads를 트랜잭션-free로 둔 내 결정이 ⑥의 발생 구간을 어떻게 넓히는지도 함께 기록.
+### 결정 기록 (차원 B)
+
+- **`@Modifying` bulk 유지 확정** — ① 결과. 불변 도메인(세터 0) + 타깃 컬럼 갱신 + tx-독립. dirty checking은 메커니즘으로만 이해하고 채택하지 않음. (B)
+- **reads 트랜잭션-free 유지(현재) + LAZY 전환 시 재검토 예약** — ⑥ 결과. EAGER인 현재는 안전하나, 3-1 LAZY 전환 시 fetch join/`@EntityGraph`로 read 경로를 명시적으로 채워야 함. "지금 안 하는 것"을 좌표와 함께 기록. (B)
+
+### 테스트 변경 사항 (차원 C)
+
+- 관찰 단계라 **프로덕션/테스트 코드 변경 0**(관찰 러너 `_Obs.java`는 푸시 안 함). 1-1·1-2에서 정리된 **134개 green** 그대로 유지.
+
+### 피드백 채널 신호 (차원 C)
+
+- **SQL 로그가 가르친 것**: dirty checking은 full-column UPDATE(@DynamicUpdate 없음) / auto-flush가 JPQL 앞에 UPDATE를 끼워넣음 / IDENTITY persist의 즉시 INSERT가 1-2 flush 버그의 뿌리.
+- **예외가 가르친 것**: `LazyInitializationException`(getReference 프록시, tx 밖) — "초기화 안 된 프록시 + 닫힌 컨텍스트"의 조합. EAGER인 지금은 안 나지만 LAZY 전환 시 read 경로 전체가 후보가 됨.
+
+### 막힌 지점 → 다음 정의
+
+- 막힘: 없음(6개 관찰 모두 예측-검증 성공).
+- 다음 정의: ⑤⑥ → 3-1(N+1 재현·LAZY 전환·fetch join/@EntityGraph) / ③④ → 4단계(flush 순서·자동 승인 트랜잭션 경계) / ① → 갱신은 @Modifying로 일관.
+
+### 얻은 인사이트
+
+- (A) dirty checking은 load 스냅샷↔flush 비교로 UPDATE를 *합성*하며, 기본은 full-column UPDATE. (A)
+- (A) 1차 캐시는 (타입,id) 기준 동일성까지 보장 — 같은 tx 두 번째 조회는 무발행. (A)
+- (A) IDENTITY는 쓰기지연을 무력화(persist=즉시 INSERT) → flush 순서 문제의 근원. (A)
+- (A) auto-flush(FlushMode.AUTO)가 JPQL 앞에 변경분을 밀어넣어 쿼리 일관성을 맞춘다. (A)
+- (B) 불변 도메인에선 dirty checking이 dormant → @Modifying이 자연스러운 갱신 경로. (B)
+- (B) EAGER는 tx-free read를 안전하게 하지만, N+1을 잡으러 LAZY로 가면 같은 read가 위험해진다 — fetch 전략과 트랜잭션 경계는 한 묶음. (B)
+
+### 이 단계가 회수한 차원
+
+- A: dirty checking UPDATE·1차캐시 무발행·IDENTITY 즉시 INSERT·auto-flush 순서·EAGER 조인·LazyInit 실측(6/6).
+- B: @Modifying 유지 확정 / reads tx-free + LAZY 전환 시 재검토.
+- C: full-column UPDATE·auto-flush·LazyInit을 로그/예외가 직접 가르침 / 코드 변경 0·134 green 유지.
 
 ---
 
-## 테스트 변경 사항 (차원 C)
+## 1단계 종합 — 회수 차원 총괄 (1-1 + 1-2 + 1-3)
 
-> 🖊️ 헥사고날 repository slice / 통합 테스트가 JDBC 구현 제거로 깨질 것. 무엇이 왜 깨졌고 어떻게 고쳤나.
+> PR 본문(07)·토론(06)으로 끌어올릴 1단계의 결론을 한자리에.
 
-- 깨진 테스트 / 원인 / 수정: **(C)**
+**차원 A (매핑 정확성 — 어노테이션→발행 SQL)**
+- 엔티티: `@GeneratedValue(IDENTITY)`→`generated by default as identity` + persist 즉시 INSERT / 컬럼 알파벳순·id가 `default`로 INSERT에 포함 / `time(6)`·무명 인라인 unique.
+- 연관: `@ManyToOne @JoinColumn`→FK 컬럼+FK 제약 / `@Table`→복합 UNIQUE 보존 / EAGER는 **by-id 조인 vs 쿼리 보조 SELECT(N+1)**로 갈림.
+- 컨텍스트: dirty checking(full-column UPDATE)·1차캐시(무발행·동일성)·쓰기지연(IDENTITY 무력화)·auto-flush(JPQL 전)·LazyInit(getReference 프록시).
+- JPQL: 안티조인·세타조인·생성자 표현식·`Pageable→fetch first ? rows only`.
 
-## 피드백 채널 신호 (차원 C)
+**차원 B (설계 판단 — 대안·근거·한계)**
+- 도메인 직접 `@Entity`(불변 일부 양보, 팩토리·검증 유지) / 포트 순수 + JPA 어댑터(권고에서 변경) / 단방향 `@ManyToOne`(양방향·cascade 명시적 비결정) / fetch 기본값 유지(기본값→문제→해결 아크) / `@Modifying` bulk 유지(dirty checking 대신) / reads tx-free(LAZY 전환 시 재검토).
 
-- SQL 로그에서 의외였던 것:
-- 예외(LazyInit 등)가 먼저 알려준 것:
+**차원 C (피드백 순환 — 로그·예외·테스트·리뷰)**
+- `ScriptStatementFailedException`이 DDL 소유권 분할 불가를 가르침 / `ConstraintViolation`이 flush 순서 규칙을 가르침 / `LazyInitializationException`이 프록시·컨텍스트 수명을 가르침 / 구 Jdbc 슬라이스 4종 정리·**134 green**.
 
-## 막힌 지점 → 다음 정의
-
-- 막힘:
-- 다음 정의:
-
-## 얻은 인사이트
-
-- _(A/B/C 태그와 함께)_
-
-## 이 단계가 회수한 차원
-
-- A: / B: / C:
+**다음 단계로 넘긴 복선**
+- N+1(findByName/EAGER) → **3-1** fetch join/@EntityGraph
+- flush 순서/IDENTITY 즉시 INSERT → **4단계** 자동 승인 트랜잭션 경계
+- 예약자 `name` String 유지 vs member 도입 → **2단계** 판단
+- reads tx-free + LAZY 전환 위험 → **3-1** read 경로 명시
