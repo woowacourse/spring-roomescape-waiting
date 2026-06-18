@@ -15,7 +15,10 @@ public record ReservationDetailFindResponse(
         ThemeFindResponse theme,
         TimeInformation time,
         ReservationStatus status,
-        Long waitingOrder
+        Long waitingOrder,
+        String orderId,
+        int amount,
+        String paymentKey
 ) {
     public static List<ReservationDetailFindResponse> from(List<ReservationDetailProjection> projections) {
         return projections.stream()
@@ -40,7 +43,10 @@ public record ReservationDetailFindResponse(
                         projection.startAt()
                 ),
                 projection.status(),
-                null
+                null,
+                projection.orderId(),
+                projection.amount(),
+                projection.paymentKey()
         );
     }
 
@@ -61,7 +67,10 @@ public record ReservationDetailFindResponse(
                         projection.startAt()
                 ),
                 ReservationStatus.WAITING,
-                waitingOrder
+                waitingOrder,
+                null,
+                0,
+                null
         );
     }
 

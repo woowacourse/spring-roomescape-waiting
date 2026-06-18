@@ -20,3 +20,5 @@ payment:
     base-url: https://api.tosspayments.com
     secret-key: test_sk_placeholder
     client-key: test_ck_placeholder
+    connect-timeout: 500ms
+    read-timeout: 500ms

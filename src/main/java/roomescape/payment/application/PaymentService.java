@@ -1,5 +1,7 @@
 package roomescape.payment.application;
 
+import java.util.EnumSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +24,18 @@ import roomescape.reservation.domain.ReservationStatus;
 @RequiredArgsConstructor
 public class PaymentService implements ConfirmPaymentUseCase, HandlePaymentFailureUseCase {
 
+    private static final Set<ErrorCode> FAILED_PAYMENT_ERRORS = EnumSet.of(
+            ErrorCode.PAYMENT_INVALID_REQUEST,
+            ErrorCode.PAYMENT_CARD_REJECTED,
+            ErrorCode.PAYMENT_NOT_FOUND,
+            ErrorCode.PAYMENT_INVALID_IDEMPOTENCY_KEY
+    );
+
     private final ReservationRepository reservationRepository;
     private final PaymentGateway paymentGateway;
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = EscapeRoomException.class)
     public PaymentConfirmResponse confirm(PaymentConfirmRequest request, long memberId) {
         Reservation reservation = findReservationByOrderId(request.orderId());
         reservation.validateOwnedBy(memberId);
@@ -37,9 +46,7 @@ public class PaymentService implements ConfirmPaymentUseCase, HandlePaymentFailu
         }
         validatePending(reservation);
 
-        PaymentResult result = paymentGateway.confirm(
-                new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount())
-        );
+        PaymentResult result = confirmPayment(request, reservation);
         validateGatewayResult(request, result);
 
         boolean confirmed = reservationRepository.confirmPayment(
@@ -58,6 +65,45 @@ public class PaymentService implements ConfirmPaymentUseCase, HandlePaymentFailu
                 reservation.getAmount(),
                 ReservationStatus.CONFIRMED
         );
+    }
+
+    private PaymentResult confirmPayment(PaymentConfirmRequest request, Reservation reservation) {
+        try {
+            return paymentGateway.confirm(
+                    new PaymentConfirmation(
+                            request.paymentKey(),
+                            request.orderId(),
+                            reservation.getIdempotencyKey(),
+                            request.amount()
+                    )
+            );
+        } catch (EscapeRoomException exception) {
+            handleGatewayException(request, reservation, exception);
+            throw exception;
+        }
+    }
+
+    private void handleGatewayException(
+            PaymentConfirmRequest request,
+            Reservation reservation,
+            EscapeRoomException exception
+    ) {
+        ErrorCode errorCode = exception.getErrorCode();
+        if (errorCode == ErrorCode.PAYMENT_GATEWAY_TIMEOUT_UNKNOWN) {
+            reservationRepository.markPaymentCheckRequired(
+                    reservation.getId(),
+                    reservation.getOrderId(),
+                    request.paymentKey()
+            );
+            return;
+        }
+        if (FAILED_PAYMENT_ERRORS.contains(errorCode)) {
+            reservationRepository.markPaymentFailed(
+                    reservation.getId(),
+                    reservation.getOrderId(),
+                    request.paymentKey()
+            );
+        }
     }
 
     private Reservation findReservationByOrderId(String orderId) {
@@ -104,6 +150,6 @@ public class PaymentService implements ConfirmPaymentUseCase, HandlePaymentFailu
         if (!StringUtils.hasText(request.orderId())) {
             return;
         }
-        reservationRepository.deletePendingByOrderIdAndMemberId(request.orderId(), memberId);
+        reservationRepository.markPendingPaymentFailedByOrderIdAndMemberId(request.orderId(), memberId);
     }
 }

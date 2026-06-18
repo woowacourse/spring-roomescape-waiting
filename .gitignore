@@ -2,6 +2,7 @@ HELP.md
 .DS_Store
 /네오/
 /docs/feedback.md
+/docs/
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

@@ -2,11 +2,15 @@ package roomescape.payment.adapter.out.toss;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.payment.adapter.out.toss.dto.TossConfirmRequest;
@@ -31,18 +35,25 @@ public class TossPaymentGateway implements PaymentGateway {
                 confirmation.amount()
         );
 
-        TossPaymentResponse response = tossRestClient.post()
-                .uri("/v1/payments/confirm")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(request)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    TossErrorResponse error = parseError(res.getBody());
-                    throw toDomainException(error);
-                })
-                .body(TossPaymentResponse.class);
+        try {
+            TossPaymentResponse response = tossRestClient.post()
+                    .uri("/v1/payments/confirm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.idempotencyKey())
+                    .body(request)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        TossErrorResponse error = parseError(res.getBody());
+                        throw toDomainException(error);
+                    })
+                    .body(TossPaymentResponse.class);
 
-        return toResult(response);
+            return toResult(response);
+        } catch (ResourceAccessException exception) {
+            throw toConnectionException(exception);
+        } catch (RestClientException exception) {
+            throw toConnectionException(exception);
+        }
     }
 
     private TossErrorResponse parseError(java.io.InputStream body) throws IOException {
@@ -58,6 +69,8 @@ public class TossPaymentGateway implements PaymentGateway {
             case "REJECT_CARD_PAYMENT" -> ErrorCode.PAYMENT_CARD_REJECTED;
             case "NOT_FOUND_PAYMENT" -> ErrorCode.PAYMENT_NOT_FOUND;
             case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> ErrorCode.PAYMENT_GATEWAY_RETRYABLE;
+            case "INVALID_IDEMPOTENCY_KEY" -> ErrorCode.PAYMENT_INVALID_IDEMPOTENCY_KEY;
+            case "IDEMPOTENT_REQUEST_PROCESSING" -> ErrorCode.PAYMENT_IDEMPOTENT_REQUEST_PROCESSING;
             default -> ErrorCode.PAYMENT_GATEWAY_ERROR;
         };
 
@@ -65,6 +78,25 @@ public class TossPaymentGateway implements PaymentGateway {
             return new EscapeRoomException(errorCode, error.code());
         }
         return new EscapeRoomException(errorCode);
+    }
+
+    private EscapeRoomException toConnectionException(RestClientException exception) {
+        Throwable rootCause = rootCauseOf(exception);
+        if (rootCause instanceof SocketTimeoutException) {
+            return new EscapeRoomException(ErrorCode.PAYMENT_GATEWAY_TIMEOUT_UNKNOWN);
+        }
+        if (rootCause instanceof ConnectException) {
+            return new EscapeRoomException(ErrorCode.PAYMENT_GATEWAY_UNAVAILABLE);
+        }
+        return new EscapeRoomException(ErrorCode.PAYMENT_GATEWAY_ERROR);
+    }
+
+    private Throwable rootCauseOf(Throwable throwable) {
+        Throwable result = throwable;
+        while (result.getCause() != null && result.getCause() != result) {
+            result = result.getCause();
+        }
+        return result;
     }
 
     private PaymentResult toResult(TossPaymentResponse response) {

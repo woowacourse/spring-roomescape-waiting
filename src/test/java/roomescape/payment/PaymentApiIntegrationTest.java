@@ -14,6 +14,8 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.EscapeRoomException;
 import roomescape.payment.application.port.out.PaymentGateway;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentResult;
@@ -55,7 +57,67 @@ public class PaymentApiIntegrationTest extends ControllerTestSupport {
                 .when().get("/api/user/reservations/me")
                 .then().log().all()
                 .statusCode(200)
-                .body("data.find { it.id == " + reservationId + " }.status", is("CONFIRMED"));
+                .body("data.find { it.id == " + reservationId + " }.status", is("CONFIRMED"))
+                .body("data.find { it.id == " + reservationId + " }.orderId", is(orderId))
+                .body("data.find { it.id == " + reservationId + " }.paymentKey", is("payment-key"))
+                .body("data.find { it.id == " + reservationId + " }.amount", is(amount));
+    }
+
+    @Test
+    @DisplayName("read timeout처럼 결과가 불명확한 승인 실패는 확인 필요 상태로 조회된다.")
+    void timeout_unknown_payment_is_marked_as_check_required() {
+        String accessToken = loginUserToken();
+        Map<String, Object> order = createReservationOrder(accessToken);
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new EscapeRoomException(ErrorCode.PAYMENT_GATEWAY_TIMEOUT_UNKNOWN));
+
+        RestAssured.given().log().all()
+                .header("Authorization", bearer(accessToken))
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "paymentKey", "payment-key",
+                        "orderId", order.get("orderId"),
+                        "amount", order.get("amount")
+                ))
+                .when().post("/api/user/payments/confirm")
+                .then().log().all()
+                .statusCode(502)
+                .body("success", is(false))
+                .body("error.code", is("PAYMENT_502_TIMEOUT_UNKNOWN"));
+
+        RestAssured.given().log().all()
+                .header("Authorization", bearer(accessToken))
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("data.find { it.id == " + order.get("id") + " }.status", is("PAYMENT_CHECK_REQUIRED"))
+                .body("data.find { it.id == " + order.get("id") + " }.paymentKey", is("payment-key"));
+    }
+
+    @Test
+    @DisplayName("결제 실패 콜백은 주문을 실패 상태로 남겨 내 예약에서 확인할 수 있다.")
+    void failure_callback_marks_payment_failed() {
+        String accessToken = loginUserToken();
+        Map<String, Object> order = createReservationOrder(accessToken);
+
+        RestAssured.given().log().all()
+                .header("Authorization", bearer(accessToken))
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "code", "PAY_PROCESS_ABORTED",
+                        "message", "실패",
+                        "orderId", order.get("orderId")
+                ))
+                .when().post("/api/user/payments/fail")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", bearer(accessToken))
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("data.find { it.id == " + order.get("id") + " }.status", is("PAYMENT_FAILED"));
     }
 
     @Test

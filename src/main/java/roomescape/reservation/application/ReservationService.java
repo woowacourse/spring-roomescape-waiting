@@ -68,7 +68,12 @@ public class ReservationService implements CreateReservationUseCase, FindReserva
         Slot slot = slotAssembler.assembleExisting(body.date(), body.timeId(), body.themeId());
         throwIfSlotUnavailableForReservation(slot.getId());
         Reservation reservation = reservationRepository.save(
-                Reservation.createPending(memberId, slot, orderIdGenerator.generate())
+                Reservation.createPending(
+                        memberId,
+                        slot,
+                        orderIdGenerator.generate(),
+                        orderIdGenerator.generateIdempotencyKey()
+                )
         );
 
         return ReservationSaveResponse.from(reservation);
