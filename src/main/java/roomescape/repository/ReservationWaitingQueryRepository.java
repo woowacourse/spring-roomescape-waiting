@@ -10,6 +10,7 @@ import roomescape.domain.projection.ReservationWaitingWithOrder;
 
 public interface ReservationWaitingQueryRepository extends JpaRepository<ReservationWaiting, Long> {
 
+    // JPA 3단계
     @Query("""
             SELECT new roomescape.domain.projection.ReservationWaitingWithOrder(
                 waiting.id,

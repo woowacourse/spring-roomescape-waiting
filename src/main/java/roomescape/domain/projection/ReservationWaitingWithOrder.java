@@ -13,6 +13,7 @@ public record ReservationWaitingWithOrder(
         int order
 ) {
 
+    // JPA 3단계
     public ReservationWaitingWithOrder(
             Long id,
             String name,
