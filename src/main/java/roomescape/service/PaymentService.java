@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.ReservationPaymentResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.payment.Payment;
@@ -14,6 +15,9 @@ import roomescape.global.exception.ErrorCode;
 import roomescape.repository.PaymentRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeSlotRepository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
@@ -80,5 +84,17 @@ public class PaymentService {
             }
             throw e;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationPaymentResponse> getPaymentHistory(String name) {
+        return reservationRepository.findByName(name).stream()
+                .map(reservation -> {
+                    Optional<Payment> payment = paymentRepository.findByReservationId(reservation.getId());
+                    return payment
+                            .map(p -> ReservationPaymentResponse.of(reservation, p))
+                            .orElseGet(() -> ReservationPaymentResponse.withoutPayment(reservation));
+                })
+                .toList();
     }
 }

@@ -27,4 +27,11 @@ public class FakePaymentRepository implements PaymentRepository {
                 .filter(p -> Objects.equals(p.getOrderId(), orderId))
                 .findFirst();
     }
+
+    @Override
+    public Optional<Payment> findByReservationId(Long reservationId) {
+        return storage.values().stream()
+                .filter(p -> Objects.equals(p.getReservationId(), reservationId))
+                .findFirst();
+    }
 }

@@ -43,13 +43,27 @@ public class JdbcPaymentRepository implements PaymentRepository {
                 FROM payment
                 WHERE order_id = ?
                 """;
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Payment(
+        return jdbcTemplate.query(sql, paymentRowMapper(), orderId).stream().findFirst();
+    }
+
+    @Override
+    public Optional<Payment> findByReservationId(Long reservationId) {
+        String sql = """
+                SELECT id, reservation_id, payment_key, order_id, amount, status
+                FROM payment
+                WHERE reservation_id = ?
+                """;
+        return jdbcTemplate.query(sql, paymentRowMapper(), reservationId).stream().findFirst();
+    }
+
+    private org.springframework.jdbc.core.RowMapper<Payment> paymentRowMapper() {
+        return (rs, rowNum) -> new Payment(
                 rs.getLong("id"),
                 rs.getLong("reservation_id"),
                 rs.getString("payment_key"),
                 rs.getString("order_id"),
                 rs.getLong("amount"),
                 PaymentStatus.valueOf(rs.getString("status"))
-        ), orderId).stream().findFirst();
+        );
     }
 }
