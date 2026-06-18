@@ -28,10 +28,6 @@ import roomescape.domain.payment.PaymentStatus;
 import roomescape.exception.PaymentException.PaymentInternalException;
 import roomescape.exception.PaymentException.PaymentResultUnknownException;
 
-/**
- * 실제 프록시 빈(@Retryable/@Recover 활성)을 띄워, MockWebServer로 지연/5xx 응답을 주고
- * 게이트웨이의 recover 동작을 검증한다.
- */
 @SpringBootTest
 class TossPaymentGatewayRecoverTest {
 
@@ -54,15 +50,9 @@ class TossPaymentGatewayRecoverTest {
             String url = server.url("/").toString();
             return url.substring(0, url.length() - 1);
         });
-        // 이 테스트는 @DynamicPropertySource로 별도 컨텍스트라, 공유 인메모리 DB를 다른 @SpringBootTest 컨텍스트와
-        // 동시에 쓰면 schema.sql의 CREATE TABLE이 충돌한다. 독립 인메모리 DB를 써서 격리한다.
         registry.add("spring.datasource.url", () -> "jdbc:h2:mem:toss-recover-test;DB_CLOSE_DELAY=-1");
     }
 
-    /**
-     * 타임아웃 값은 운영 코드에 상수로 박혀 있어(5s) 테스트에서 그대로 쓰면 느리다.
-     * 무응답 시 빠르게 read timeout 나도록, 토스 요청 팩토리를 짧은 타임아웃 빈으로 교체한다.
-     */
     @TestConfiguration
     static class ShortTimeoutConfig {
 
@@ -87,7 +77,7 @@ class TossPaymentGatewayRecoverTest {
             @Override
             public MockResponse dispatch(RecordedRequest request) {
                 if (request.getPath().startsWith("/v1/payments/confirm")) {
-                    return new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE); // 무응답 → read timeout
+                    return new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE);
                 }
                 return jsonResponse(200,
                         "{\"paymentKey\":\"pk_test\",\"orderId\":\"order-1\",\"totalAmount\":10000,"
