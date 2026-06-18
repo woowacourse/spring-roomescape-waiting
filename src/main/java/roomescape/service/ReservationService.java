@@ -3,13 +3,11 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -17,51 +15,35 @@ import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationOrderResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.IdNotFoundException;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
-    private final ReservationRepository reservationDao;
-    private final ReservationTimeRepository reservationTimeDao;
-    private final ThemeRepository themeDao;
+    private ReservationRepository reservationRepository;
+    private ReservationTimeRepository reservationTimeRepository;
+    private ThemeRepository themeRepository;
 
-    public ReservationService(ReservationRepository reservationDao, ReservationTimeRepository reservationTimeDao, ThemeRepository themeDao) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
     }
 
+
     public List<ReservationOrderResponse> findByName(String name) {
-        return reservationDao.findByName(name).stream()
-                .map(reservation -> {
-                    long order = calculateOrder(reservation);
-                    return new ReservationOrderResponse(
-                            reservation.getId(),
-                            reservation.getName(),
-                            reservation.getDate(),
-                            ReservationTimeResponse.from(reservation.getTime()),
-                            ThemeResponse.from(reservation.getTheme()),
-                            order);
-                })
+        return reservationRepository.findByName(name).stream()
+                .map(reservation -> ReservationOrderResponse.from(reservation, calculateOrder(reservation)))
                 .toList();
     }
 
     public List<ReservationOrderResponse> findAll() {
-        return reservationDao.findAll().stream()
-                .map(reservation -> {
-                    long order = calculateOrder(reservation);
-                    return new ReservationOrderResponse(
-                            reservation.getId(),
-                            reservation.getName(),
-                            reservation.getDate(),
-                            ReservationTimeResponse.from(reservation.getTime()),
-                            ThemeResponse.from(reservation.getTheme()),
-                            order);
-                })
+        return reservationRepository.findAll().stream()
+                .map(reservation -> ReservationOrderResponse.from(reservation, calculateOrder(reservation)))
                 .toList();
     }
 
@@ -75,9 +57,9 @@ public class ReservationService {
         Reservation reservation = new Reservation(request.name(), request.date(), time, theme, requestedAt);
 
         try {
-            Reservation saved = reservationDao.save(reservation);
+            Reservation saved = reservationRepository.save(reservation);
             return ReservationResponse.from(saved);
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new DuplicateReservationException("이미 동일한 예약 또는 대기 신청이 존재합니다.");
         }
     }
@@ -89,22 +71,24 @@ public class ReservationService {
 
         validateReservationDateTime(request.date(), time);
 
-        if (reservationDao.existsBy(request.date(), theme, time)) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), time, theme)) {
             throw new IllegalArgumentException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
         }
 
-        Reservation newReservation = reservationDao.update(id, request.date(), request.timeId());
-        return ReservationResponse.from(newReservation);
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IdNotFoundException("요청하신 예약을 찾을 수 없습니다."));
+        reservation.changeSchedule(request.date(), time);   // 변경 감지(dirty checking)로 커밋 시 UPDATE
+        return ReservationResponse.from(reservation);
     }
 
     @Transactional
     public void delete(Long id) {
-        reservationDao.delete(id);
+        reservationRepository.deleteById(id);
     }
 
 
     private long calculateOrder(Reservation reservation) {
-        List<Reservation> sameSlot = reservationDao.findBySlot(
+        List<Reservation> sameSlot = reservationRepository.findByDateAndTime_IdAndTheme_IdOrderByRequestedAt(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId());
@@ -116,7 +100,7 @@ public class ReservationService {
 
     private ReservationTime getValidReservationTime(Long timeId) {
         try {
-            return reservationTimeDao.findTimeById(timeId);
+            return reservationTimeRepository.findReservationTimeById(timeId);
         } catch (EmptyResultDataAccessException e) {
             throw new IdNotFoundException("요청하신 시간 정보를 찾을 수 없습니다.  선택하신 시간이 정확한지 다시 한번 확인해 주세요.");
         }
@@ -124,7 +108,7 @@ public class ReservationService {
 
     private Theme getValidTheme(Long themeId) {
         try {
-            return themeDao.findThemeById(themeId);
+            return themeRepository.findThemeById(themeId);
         } catch (EmptyResultDataAccessException e) {
             throw new IdNotFoundException("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요.");
         }

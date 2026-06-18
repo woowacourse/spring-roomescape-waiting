@@ -1,23 +1,34 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Entity
 public class Reservation {
-    private final Long id;
-    private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final LocalDateTime requestedAt;
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme,
-                       LocalDateTime requestedAt) {
-        this(null, name, date, time, theme, requestedAt);
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private LocalDate date;
+    private LocalDateTime requestedAt;
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    public Reservation() {
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestedAt) {
-        this.id = id;
+    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestedAt) {
         validateName(name);
         validateDate(date);
         validateTime(time);
@@ -72,5 +83,12 @@ public class Reservation {
 
     public boolean isRequestedBefore(Reservation other) {
         return requestedAt.isBefore(other.requestedAt);
+    }
+
+    public void changeSchedule(LocalDate date, ReservationTime time) {
+        validateDate(date);
+        validateTime(time);
+        this.date = date;
+        this.time = time;
     }
 }
