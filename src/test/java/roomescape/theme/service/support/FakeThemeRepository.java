@@ -1,7 +1,7 @@
 package roomescape.theme.service.support;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.exception.ThemeInUseException;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
@@ -85,6 +85,6 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     public void failToDeleteByInUse() {
-        deleteException = new DataIntegrityViolationException("theme in use");
+        deleteException = new ThemeInUseException(new RuntimeException("theme in use"));
     }
 }

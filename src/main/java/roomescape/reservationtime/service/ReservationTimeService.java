@@ -2,11 +2,9 @@ package roomescape.reservationtime.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.reservationtime.service.dto.request.ReservationTimeCreateRequest;
@@ -50,10 +48,6 @@ public class ReservationTimeService {
     }
 
     private boolean deleteReservationTime(final Long timeId) {
-        try {
-            return reservationTimeRepository.delete(timeId);
-        } catch (DataIntegrityViolationException exception) {
-            throw new ReservationTimeInUseException(exception);
-        }
+        return reservationTimeRepository.delete(timeId);
     }
 }

@@ -5,10 +5,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.repository.entity.ThemeEntity;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Profile("jdbc")
 @Repository
 @RequiredArgsConstructor
 public class JdbcThemeRepository implements ThemeRepository {
@@ -52,9 +53,7 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(final Theme themeWithoutId) {
-        final ThemeEntity themeEntity = toEntity(themeWithoutId);
-
-        final long themeId = insertTheme(themeEntity);
+        final long themeId = insertTheme(themeWithoutId);
 
         return Theme.of(
                 themeId,
@@ -108,7 +107,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 .toList();
     }
 
-    private long insertTheme(final ThemeEntity themeEntity) {
+    private long insertTheme(final Theme theme) {
         final String sql = """
                 INSERT INTO theme (name, description, thumbnail_url)
                 VALUES (?, ?, ?)
@@ -122,9 +121,9 @@ public class JdbcThemeRepository implements ThemeRepository {
                     Statement.RETURN_GENERATED_KEYS
             );
 
-            preparedStatement.setString(1, themeEntity.name());
-            preparedStatement.setString(2, themeEntity.description());
-            preparedStatement.setString(3, themeEntity.thumbnailUrl());
+            preparedStatement.setString(1, theme.getName());
+            preparedStatement.setString(2, theme.getDescription());
+            preparedStatement.setString(3, theme.getThumbnailUrl());
 
             return preparedStatement;
         }, keyHolder);
@@ -149,12 +148,4 @@ public class JdbcThemeRepository implements ThemeRepository {
         );
     }
 
-    private ThemeEntity toEntity(final Theme theme) {
-        return new ThemeEntity(
-                theme.getId(),
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailUrl()
-        );
-    }
 }

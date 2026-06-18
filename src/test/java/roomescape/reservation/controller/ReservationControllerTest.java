@@ -79,7 +79,7 @@ class ReservationControllerTest {
     })
     void 전체_날짜와_테마_조회() {
         ReservationOptionResponse responses = RestAssured.given().log().all()
-                .when().get("/reservations/date-and-theme")
+                .when().get("/api/reservations/date-and-theme")
                 .then().log().all()
                 .statusCode(200).extract()
                 .jsonPath().getObject(".", ReservationOptionResponse.class);
@@ -131,7 +131,7 @@ class ReservationControllerTest {
     @Test
     void 예약_가능한_시간_조회시_날짜_형식이_잘못되면_400을_응답한다() {
         RestAssured.given().log().all()
-                .when().get("/reservations/available-times?date=invalid-date&themeId=1")
+                .when().get("/api/reservations/available-times?date=invalid-date&themeId=1")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("잘못된 요청입니다."));
@@ -140,7 +140,7 @@ class ReservationControllerTest {
     @Test
     void 예약_가능한_시간_조회시_테마_id가_없으면_400을_응답한다() {
         RestAssured.given().log().all()
-                .when().get("/reservations/available-times?date=2026-05-05")
+                .when().get("/api/reservations/available-times?date=2026-05-05")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("잘못된 요청입니다."));
@@ -169,7 +169,7 @@ class ReservationControllerTest {
             final Response response = RestAssured
                 .given().log().all()
                 .queryParam("customer-name", customerName)
-                .when().get("/reservations");
+                .when().get("/api/reservations");
 
             // then
             final ReservationsAndWaitingsResponse body = response
@@ -198,7 +198,7 @@ class ReservationControllerTest {
                         "timeId", 1,
                         "themeId", 1
                 ))
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(201);
 
@@ -206,7 +206,7 @@ class ReservationControllerTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when().delete("/api/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
@@ -227,7 +227,7 @@ class ReservationControllerTest {
                         "date", "2026-08-06",
                         "timeId", 2
                 ))
-                .when().put("/reservations/1")
+                .when().put("/api/reservations/1")
                 .then().log().all()
                 .statusCode(200)
                 .body("id", org.hamcrest.Matchers.is(1))
@@ -254,7 +254,7 @@ class ReservationControllerTest {
                         "date", "2026-08-06",
                         "timeId", 1
                 ))
-                .when().put("/reservations/999")
+                .when().put("/api/reservations/999")
                 .then().log().all()
                 .statusCode(404)
                 .body("message", org.hamcrest.Matchers.is("존재하지 않는 예약입니다."));
@@ -272,7 +272,7 @@ class ReservationControllerTest {
                         "date", "2026-08-06",
                         "timeId", 999
                 ))
-                .when().put("/reservations/1")
+                .when().put("/api/reservations/1")
                 .then().log().all()
                 .statusCode(404)
                 .body("message", org.hamcrest.Matchers.is("존재하지 않는 예약 시간입니다."));
@@ -285,7 +285,7 @@ class ReservationControllerTest {
                 .body(Map.of(
                         "timeId", 1
                 ))
-                .when().put("/reservations/1")
+                .when().put("/api/reservations/1")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("예약일을 입력해야 합니다."));
@@ -304,7 +304,7 @@ class ReservationControllerTest {
                         "date", "2026-04-30",
                         "timeId", 2
                 ))
-                .when().put("/reservations/1")
+                .when().put("/api/reservations/1")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("과거 시간으로는 예약할 수 없습니다."));
@@ -324,7 +324,7 @@ class ReservationControllerTest {
                         "date", "2026-08-05",
                         "timeId", 2
                 ))
-                .when().put("/reservations/1")
+                .when().put("/api/reservations/1")
                 .then().log().all()
                 .statusCode(409)
                 .body("message", org.hamcrest.Matchers.is("이미 예약이 있는 슬롯입니다."));
@@ -343,7 +343,7 @@ class ReservationControllerTest {
                         "date", "2026-05-02",
                         "timeId", 2
                 ))
-                .when().put("/reservations/1")
+                .when().put("/api/reservations/1")
                 .then().log().all()
                 .statusCode(409)
                 .body("message", org.hamcrest.Matchers.is("당일 예약은 변경할 수 없습니다."));
@@ -356,7 +356,7 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when().delete("/api/reservations/1")
                 .then().log().all()
                 .statusCode(409)
                 .body("message", org.hamcrest.Matchers.is("당일 예약은 취소할 수 없습니다."));
@@ -374,7 +374,7 @@ class ReservationControllerTest {
                         "timeId", 999,
                         "themeId", 1
                 ))
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(404);
     }
@@ -390,7 +390,7 @@ class ReservationControllerTest {
                         "date", "2026-05-05",
                         "themeId", 1
                 ))
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("예약 시간을 선택해야 합니다."));
@@ -401,7 +401,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body("null")
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("잘못된 요청입니다."));
@@ -419,7 +419,7 @@ class ReservationControllerTest {
                         "timeId", 1,
                         "themeId", 999
                 ))
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(404);
     }
@@ -437,7 +437,7 @@ class ReservationControllerTest {
                         "timeId", 1,
                         "themeId", 1
                 ))
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -456,7 +456,7 @@ class ReservationControllerTest {
 
             // when
             final Response response = RestAssured.given().log().all()
-                .delete("/reservations/{id}", 1L);
+                .delete("/api/reservations/{id}", 1L);
 
             // then
             response.then().log().all()
@@ -479,7 +479,7 @@ class ReservationControllerTest {
 
             // when
             final Response response = RestAssured.given().log().all()
-                .delete("/reservations/{id}", 1L);
+                .delete("/api/reservations/{id}", 1L);
 
             // then
             response.then().log().all()
@@ -509,7 +509,7 @@ class ReservationControllerTest {
                 .body(Map.of(
                     "date", "2026-08-07",
                     "timeId", 1))
-                .put("/reservations/{id}", 1L);
+                .put("/api/reservations/{id}", 1L);
 
             // then
             response.then().log().all()
@@ -538,7 +538,7 @@ class ReservationControllerTest {
                 .body(Map.of(
                     "date", newSlotDate,
                     "timeId", 1))
-                .put("/reservations/{id}", 1L);
+                .put("/api/reservations/{id}", 1L);
 
             // then
             response.then().log().all()
@@ -614,7 +614,7 @@ class ReservationControllerTest {
 
     private static List<ReservationTimesWithStatus> getReservationTimeStatusResponses() {
         return RestAssured.given().log().all()
-            .when().get("/reservations/available-times?date=2026-05-05&themeId=1")
+            .when().get("/api/reservations/available-times?date=2026-05-05&themeId=1")
             .then().log().all()
             .statusCode(200).extract()
             .jsonPath().getList(".", ReservationTimesWithStatus.class);

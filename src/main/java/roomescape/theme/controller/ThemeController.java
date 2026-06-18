@@ -12,7 +12,7 @@ import roomescape.theme.service.dto.response.ThemeResponse;
 import java.util.List;
 
 @RestController
-@RequestMapping("/themes")
+@RequestMapping("/api/themes")
 @RequiredArgsConstructor
 public class ThemeController {
 

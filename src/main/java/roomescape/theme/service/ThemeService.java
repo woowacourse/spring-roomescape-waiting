@@ -4,11 +4,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeInUseException;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.request.ThemeCreateRequest;
@@ -67,10 +65,6 @@ public class ThemeService {
     }
 
     private boolean deleteTheme(final Long themeId) {
-        try {
-            return themeRepository.deleteById(themeId);
-        } catch (DataIntegrityViolationException exception) {
-            throw new ThemeInUseException(exception);
-        }
+        return themeRepository.deleteById(themeId);
     }
 }

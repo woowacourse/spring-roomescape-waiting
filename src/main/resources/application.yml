@@ -1,13 +1,12 @@
 spring:
+  profiles:
+    default: jpa
   h2:
     console:
       enabled: true
   datasource:
     url: jdbc:h2:mem:database;MODE=MySQL;DB_CLOSE_DELAY=-1
   jpa:
-    hibernate:
-      ddl-auto: create-drop
-    defer-datasource-initialization: true
     show-sql: true
     properties:
       hibernate:

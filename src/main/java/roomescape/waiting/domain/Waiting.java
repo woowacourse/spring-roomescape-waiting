@@ -1,6 +1,5 @@
 package roomescape.waiting.domain;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -60,7 +59,7 @@ public class Waiting {
     public static Waiting of(
         final Long id,
         final String customerName,
-        final Date date,
+        final LocalDate date,
         final LocalDateTime createdAt,
         final ReservationTime time,
         final Theme theme
@@ -68,7 +67,7 @@ public class Waiting {
         return new Waiting(
             id,
             new CustomerName(customerName),
-            date.toLocalDate(),
+            date,
             createdAt,
             time,
             theme

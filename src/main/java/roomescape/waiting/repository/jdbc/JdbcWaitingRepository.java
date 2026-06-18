@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -19,6 +20,7 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.repository.dto.WaitingWithRank;
 
+@Profile("jdbc")
 @Repository
 @RequiredArgsConstructor
 public class JdbcWaitingRepository implements WaitingRepository {
@@ -27,7 +29,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         Waiting.of(
             rs.getLong("id"),
             rs.getString("customer_name"),
-            rs.getDate("reservation_date"),
+            rs.getDate("reservation_date").toLocalDate(),
             rs.getTimestamp("created_at").toLocalDateTime(),
             ReservationTime.of(
                 rs.getLong("t_id"),
@@ -46,7 +48,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
             Waiting.of(
                 rs.getLong("id"),
                 rs.getString("customer_name"),
-                rs.getDate("reservation_date"),
+                rs.getDate("reservation_date").toLocalDate(),
                 rs.getTimestamp("created_at").toLocalDateTime(),
                 ReservationTime.of(
                     rs.getLong("t_id"),

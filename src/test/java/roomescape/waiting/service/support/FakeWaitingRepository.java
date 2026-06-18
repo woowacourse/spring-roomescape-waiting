@@ -1,6 +1,5 @@
 package roomescape.waiting.service.support;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class FakeWaitingRepository implements WaitingRepository {
         final Waiting savedWaitingWithId = Waiting.of(
             1L,
             waiting.getCustomerName().name(),
-            Date.valueOf(waiting.getReservationDate()),
+            waiting.getReservationDate(),
             waiting.getCreatedAt(),
             waiting.getTime(),
             waiting.getTheme()

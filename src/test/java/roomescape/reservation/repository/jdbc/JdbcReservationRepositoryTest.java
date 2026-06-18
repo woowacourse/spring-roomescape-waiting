@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
@@ -27,6 +28,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @JdbcTest
+@ActiveProfiles("jdbc")
 @Sql("/clear.sql")
 class JdbcReservationRepositoryTest {
 

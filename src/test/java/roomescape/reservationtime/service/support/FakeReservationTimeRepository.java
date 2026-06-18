@@ -1,7 +1,7 @@
 package roomescape.reservationtime.service.support;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.domain.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 import java.util.ArrayList;
@@ -60,6 +60,6 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     public void failToDeleteByInUse() {
-        deleteException = new DataIntegrityViolationException("time in use");
+        deleteException = new ReservationTimeInUseException(new RuntimeException("time in use"));
     }
 }

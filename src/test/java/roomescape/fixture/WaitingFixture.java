@@ -1,6 +1,5 @@
 package roomescape.fixture;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -20,7 +19,7 @@ public class WaitingFixture {
         final ReservationTime time,
         final Theme theme
     ) {
-        return Waiting.of(id, customerName, Date.valueOf(date), createdAt, time, theme);
+        return Waiting.of(id, customerName, date, createdAt, time, theme);
     }
 
     public static Waiting saved(
@@ -29,6 +28,6 @@ public class WaitingFixture {
         final ReservationTime time,
         final Theme theme
     ) {
-        return Waiting.of(ID, CUSTOMER_NAME, Date.valueOf(reservationDate), createdAt, time, theme);
+        return Waiting.of(ID, CUSTOMER_NAME, reservationDate, createdAt, time, theme);
     }
 }

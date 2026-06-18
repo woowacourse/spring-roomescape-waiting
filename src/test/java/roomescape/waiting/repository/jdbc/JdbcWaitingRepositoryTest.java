@@ -20,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -27,6 +28,7 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.dto.WaitingWithRank;
 
 @JdbcTest
+@ActiveProfiles("jdbc")
 @Sql("/clear.sql")
 class JdbcWaitingRepositoryTest {
 

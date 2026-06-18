@@ -1,12 +1,11 @@
 package roomescape.reservation.service.support;
 
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -97,7 +96,7 @@ public class FakeReservationRepository implements ReservationRepository  {
     }
 
     @Override
-    public Optional<Reservation> findBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
+    public Optional<Reservation> findBySlot(final LocalDate date, final long timeId, final long themeId) {
         return reservations.stream()
             .filter(reservation ->
                 reservation.getDate().isEqual(date)
@@ -115,18 +114,18 @@ public class FakeReservationRepository implements ReservationRepository  {
     }
 
     public void failToSaveByDuplicatedReservation() {
-        saveException = new DuplicateKeyException("duplicated reservation");
+        saveException = new ReservationAlreadyExistsException();
     }
 
     public void failToSaveByChangedOption() {
-        saveException = new DataIntegrityViolationException("changed reservation option");
+        saveException = new ReservationOptionChangedException(new RuntimeException("changed reservation option"));
     }
 
     public void failToUpdateByDuplicatedReservation() {
-        updateException = new DuplicateKeyException("duplicated reservation");
+        updateException = new ReservationAlreadyExistsException();
     }
 
     public void failToUpdateByChangedOption() {
-        updateException = new DataIntegrityViolationException("changed reservation option");
+        updateException = new ReservationOptionChangedException(new RuntimeException("changed reservation option"));
     }
 }
