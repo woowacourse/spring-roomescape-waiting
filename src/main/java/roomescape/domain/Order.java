@@ -9,13 +9,19 @@ public class Order {
     private final Long reservationId;
     private final Long amount = 50000L; // 학습 목적상 고정값 사용
     private final PaymentStatus status;
+    private final String paymentKey;
 
     public Order(Long id, OrderId orderId, Long reservationId, PaymentStatus status) {
+        this(id, orderId, reservationId, status, null);
+    }
+
+    public Order(Long id, OrderId orderId, Long reservationId, PaymentStatus status, String paymentKey) {
         validate(orderId, reservationId, status);
         this.id = id;
         this.orderId = orderId;
         this.reservationId = reservationId;
         this.status = status;
+        this.paymentKey = paymentKey;
     }
 
     public Order(Reservation reservation) {
@@ -45,7 +51,11 @@ public class Order {
     }
 
     public Order withId(Long id) {
-        return new Order(id, orderId, reservationId, status);
+        return new Order(id, orderId, reservationId, status, paymentKey);
+    }
+
+    public Order withPayment(PaymentStatus status, String paymentKey) {
+        return new Order(id, orderId, reservationId, status, paymentKey);
     }
 
     public Long getId() {
@@ -66,5 +76,9 @@ public class Order {
 
     public PaymentStatus getStatus() {
         return status;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
     }
 }

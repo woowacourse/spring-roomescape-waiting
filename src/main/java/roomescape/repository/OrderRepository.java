@@ -15,5 +15,5 @@ public interface OrderRepository {
 
     Optional<Order> findByReservationId(Long reservationId);
 
-    int updateStatus(OrderId orderId, PaymentStatus status);
+    int updatePayment(OrderId orderId, PaymentStatus status, String paymentKey);
 }

@@ -21,7 +21,8 @@ public class OrderJdbcRepository implements OrderRepository {
             resultSet.getLong("id"),
             OrderId.of(resultSet.getString("order_id")),
             resultSet.getLong("reservation_id"),
-            PaymentStatus.valueOf(resultSet.getString("status"))
+            PaymentStatus.valueOf(resultSet.getString("status")),
+            resultSet.getString("payment_key")
     );
 
     public OrderJdbcRepository(JdbcTemplate jdbcTemplate) {
@@ -48,7 +49,7 @@ public class OrderJdbcRepository implements OrderRepository {
     @Override
     public Optional<Order> findById(Long id) {
         String sql = """
-                select id, order_id, reservation_id, amount, status
+                select id, order_id, reservation_id, amount, status, payment_key
                 from orders
                 where id = ?
                 """;
@@ -62,7 +63,7 @@ public class OrderJdbcRepository implements OrderRepository {
     @Override
     public Optional<Order> findByOrderId(OrderId orderId) {
         String sql = """
-                select id, order_id, reservation_id, amount, status
+                select id, order_id, reservation_id, amount, status, payment_key
                 from orders
                 where order_id = ?
                 """;
@@ -76,7 +77,7 @@ public class OrderJdbcRepository implements OrderRepository {
     @Override
     public Optional<Order> findByReservationId(Long reservationId) {
         String sql = """
-                select id, order_id, reservation_id, amount, status
+                select id, order_id, reservation_id, amount, status, payment_key
                 from orders
                 where reservation_id = ?
                 """;
@@ -88,8 +89,8 @@ public class OrderJdbcRepository implements OrderRepository {
     }
 
     @Override
-    public int updateStatus(OrderId orderId, PaymentStatus status) {
-        String sql = "update orders set status = ? where order_id = ?";
-        return jdbcTemplate.update(sql, status.name(), orderId.getValue());
+    public int updatePayment(OrderId orderId, PaymentStatus status, String paymentKey) {
+        String sql = "update orders set status = ?, payment_key = ? where order_id = ?";
+        return jdbcTemplate.update(sql, status.name(), paymentKey, orderId.getValue());
     }
 }

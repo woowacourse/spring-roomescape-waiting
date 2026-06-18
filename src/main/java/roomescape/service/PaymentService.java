@@ -34,7 +34,7 @@ public class PaymentService {
         validateAmount(order, amount);
 
         PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-        orderRepository.updateStatus(order.getOrderId(), result.status());
+        orderRepository.updatePayment(order.getOrderId(), result.status(), result.paymentKey());
         if (result.status() == PaymentStatus.DONE) {
             reservationRepository.updateStatus(order.getReservationId(), ReservationStatus.RESERVED);
         }

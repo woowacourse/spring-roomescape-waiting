@@ -45,8 +45,9 @@ class PaymentServiceTest extends ServiceIntegrationTest {
         PaymentResult result = paymentService.confirm("payment-key", orderId, 50000L);
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
-        assertThat(orderRepository.findByOrderId(order.getOrderId()).orElseThrow().getStatus())
-                .isEqualTo(PaymentStatus.DONE);
+        Order updated = orderRepository.findByOrderId(order.getOrderId()).orElseThrow();
+        assertThat(updated.getStatus()).isEqualTo(PaymentStatus.DONE);
+        assertThat(updated.getPaymentKey()).isEqualTo("payment-key");
     }
 
     @Test
