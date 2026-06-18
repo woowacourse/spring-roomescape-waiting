@@ -3,8 +3,10 @@ package roomescape.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,18 +28,20 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAllThemes() {
-        List<Theme> themes = themeRepository.findAllThemes();
+        List<Theme> themes = themeRepository.findAll();
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
-    /*public List<ThemeResponse> findTopTheme(Long count) {
-        List<Theme> topTheme = themeRepository.findTopThemes(count);
+    public List<ThemeResponse> findTopTheme(Long count) {
+        LocalDate start = LocalDate.now().minusDays(7);
+        LocalDate end = LocalDate.now().minusDays(1);
+        List<Theme> topTheme = themeRepository.findTopThemes(start, end, PageRequest.of(0, count.intValue()));
         return topTheme.stream()
                 .map(ThemeResponse::from)
                 .toList();
-    }*/
+    }
 
     @Transactional
     public ThemeResponse create(ThemeRequest request) {

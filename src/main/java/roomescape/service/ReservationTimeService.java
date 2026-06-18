@@ -1,10 +1,10 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.TempReservationTimeRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.projection.ReservationTimeStatusProjection;
 import roomescape.dto.request.ReservationTimeRequest;
@@ -28,7 +28,8 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeStatusResponse> findAvailableTime(Long id, String date) {
-        List<ReservationTimeStatusProjection> availableTimes = reservationTimeRepository.findAvailableTime(id, date);
+        List<ReservationTimeStatusProjection> availableTimes =
+                reservationTimeRepository.findAvailableTime(id, LocalDate.parse(date));
 
         return availableTimes.stream()
                 .map(ReservationTimeStatusResponse::from)
@@ -37,7 +38,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTimeResponse save(ReservationTimeRequest request) {
-        if (reservationTimeRepository.existsReservationTimeByStartAt(request.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new IllegalArgumentException("이미 존재하는 시간대이므로 추가할 수 없습니다.");
         }
 
@@ -50,7 +51,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(Long id) {
-        if (reservationTimeRepository.existsReservationTimeById(id)) {
+        if (reservationTimeRepository.existsById(id)) {
             throw new IllegalArgumentException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);
