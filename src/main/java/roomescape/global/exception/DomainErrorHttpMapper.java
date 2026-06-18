@@ -24,6 +24,7 @@ public class DomainErrorHttpMapper {
                  PAYMENT_NOT_FOUND
                     -> HttpStatus.NOT_FOUND;
             case PAYMENT_AUTHENTICATION_FAILED -> HttpStatus.INTERNAL_SERVER_ERROR;
+            case PAYMENT_CONFIRM_UNKNOWN -> HttpStatus.ACCEPTED;
             case PAYMENT_RETRYABLE,
                  PAYMENT_GATEWAY_ERROR
                     -> HttpStatus.BAD_GATEWAY;

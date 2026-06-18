@@ -1,6 +1,8 @@
 package roomescape.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,35 +15,44 @@ import roomescape.domain.exception.RoomescapeException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentCheckoutProperties;
 import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentIdempotencyKeyGenerator;
 import roomescape.payment.PaymentOrder;
 import roomescape.payment.PaymentOrderIdGenerator;
 import roomescape.payment.PaymentResult;
 import roomescape.repository.PaymentOrderDao;
+import roomescape.service.dto.PaymentOrderHistory;
 
 @Service
 @Transactional(readOnly = true)
 public class PaymentService {
 
     private final PaymentOrderDao paymentOrderDao;
+    private final PaymentOrderStatusService paymentOrderStatusService;
     private final ScheduleService scheduleService;
     private final ReservationService reservationService;
+
     private final PaymentGateway paymentGateway;
     private final PaymentOrderIdGenerator orderIdGenerator;
+    private final PaymentIdempotencyKeyGenerator idempotencyKeyGenerator;
     private final PaymentCheckoutProperties checkoutProperties;
 
     public PaymentService(
             PaymentOrderDao paymentOrderDao,
+            PaymentOrderStatusService paymentOrderStatusService,
             ScheduleService scheduleService,
             ReservationService reservationService,
             PaymentGateway paymentGateway,
             PaymentOrderIdGenerator orderIdGenerator,
+            PaymentIdempotencyKeyGenerator idempotencyKeyGenerator,
             PaymentCheckoutProperties checkoutProperties
     ) {
         this.paymentOrderDao = paymentOrderDao;
+        this.paymentOrderStatusService = paymentOrderStatusService;
         this.scheduleService = scheduleService;
         this.reservationService = reservationService;
         this.paymentGateway = paymentGateway;
         this.orderIdGenerator = orderIdGenerator;
+        this.idempotencyKeyGenerator = idempotencyKeyGenerator;
         this.checkoutProperties = checkoutProperties;
     }
 
@@ -52,12 +63,18 @@ public class PaymentService {
         Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
         reservationService.validatePaymentOrderCreatable(member, schedule, now);
 
+        Optional<PaymentOrder> reusableOrder = paymentOrderDao.findReusableByMemberIdAndScheduleId(member.getId(), schedule.getId());
+        if (reusableOrder.isPresent()) {
+            return reusableOrder.get();
+        }
+
         int amount = schedule.getTheme().getPrice();
         PaymentOrder order = PaymentOrder.pending(
                 orderIdGenerator.generate(),
                 member.getId(),
                 schedule.getId(),
                 amount,
+                idempotencyKeyGenerator.generate(),
                 now
         );
 
@@ -75,7 +92,20 @@ public class PaymentService {
 
         validateAmount(order, callbackAmount);
         reservationService.validateBeforeConfirm(order.getMemberId(), order.getScheduleId(), LocalDateTime.now());
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, order.getAmount()));
+        PaymentResult result;
+        try {
+            result = paymentGateway.confirm(new PaymentConfirmation(
+                    paymentKey,
+                    orderId,
+                    order.getAmount(),
+                    order.getIdempotencyKey()
+            ));
+        } catch (RoomescapeException e) {
+            if (e.getCode() == DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN) {
+                paymentOrderStatusService.markConfirmUnknown(orderId, e.getCode().name(), e.getMessage());
+            }
+            throw e;
+        }
 
         Long reservationId = reservationService.saveConfirmedReservationByPayment(order.getScheduleId(), order.getMemberId());
         paymentOrderDao.confirm(orderId, result.paymentKey(), reservationId, LocalDateTime.now());
@@ -90,6 +120,10 @@ public class PaymentService {
 
     public String getClientKey() {
         return checkoutProperties.getClientKey();
+    }
+
+    public List<PaymentOrderHistory> findOrdersByMember(Member member) {
+        return paymentOrderDao.findHistoriesByMemberId(member.getId());
     }
 
     private void validateCheckoutConfigured() {

@@ -13,10 +13,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -26,6 +29,8 @@ import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.payment.toss.TossPaymentGateway;
@@ -40,13 +45,14 @@ class TossPaymentGatewayTest {
     void confirmSuccess() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        TossPaymentGateway gateway = newGateway(builder);
+        TossPaymentGateway gateway = newGateway(builder.build(), CONFIRM_URL);
         String authorization = "Basic " + Base64.getEncoder()
                 .encodeToString("test_sk_secret:".getBytes(StandardCharsets.UTF_8));
 
         server.expect(once(), requestTo(CONFIRM_URL))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, authorization))
+                .andExpect(header("Idempotency-Key", "fixed-idempotency-key"))
                 .andExpect(jsonPath("$.paymentKey").value("payment-key"))
                 .andExpect(jsonPath("$.orderId").value("order-123456"))
                 .andExpect(jsonPath("$.amount").value(23000))
@@ -57,7 +63,7 @@ class TossPaymentGatewayTest {
                         MediaType.APPLICATION_JSON
                 ));
 
-        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000));
+        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key"));
 
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.totalAmount()).isEqualTo(23000);
@@ -77,12 +83,12 @@ class TossPaymentGatewayTest {
     private void assertMapped(String tossCode, DomainErrorCode expectedCode) {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        TossPaymentGateway gateway = newGateway(builder);
+        TossPaymentGateway gateway = newGateway(builder.build(), CONFIRM_URL);
 
         server.expect(once(), requestTo(CONFIRM_URL))
                 .andRespond(responseFor(tossCode));
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key")))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(expectedCode);
@@ -102,11 +108,52 @@ class TossPaymentGatewayTest {
         return withBadRequest().body(body).contentType(MediaType.APPLICATION_JSON);
     }
 
-    private TossPaymentGateway newGateway(RestClient.Builder builder) {
+    @DisplayName("Toss 응답 바디가 늦으면 설정된 read timeout으로 호출을 포기한다.")
+    @Test
+    void confirmReadTimeout() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setBodyDelay(1, TimeUnit.SECONDS)
+                    .setBody("""
+                            {"paymentKey":"payment-key","orderId":"order-123456","totalAmount":23000,"status":"DONE"}
+                            """)
+                    .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+            server.start();
+
+            TossPaymentGateway gateway = newGateway(
+                    timeoutRestClient(Duration.ofMillis(500), Duration.ofMillis(150)),
+                    server.url("/v1/payments/confirm").toString()
+            );
+            long startedAt = System.nanoTime();
+
+            assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key")))
+                    .isInstanceOf(RoomescapeException.class)
+                    .extracting("code")
+                    .isEqualTo(DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN);
+
+            long elapsedMillis = Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
+            assertThat(elapsedMillis)
+                    .isGreaterThanOrEqualTo(100)
+                    .isLessThan(900);
+        }
+    }
+
+    private RestClient timeoutRestClient(Duration connectTimeout, Duration readTimeout) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(connectTimeout);
+        requestFactory.setReadTimeout(readTimeout);
+
+        return RestClient.builder()
+                .requestFactory(requestFactory)
+                .build();
+    }
+
+    private TossPaymentGateway newGateway(RestClient restClient, String confirmUrl) {
         return new TossPaymentGateway(
-                builder,
+                restClient,
                 new ObjectMapper(),
-                new TossPaymentProperties("test_sk_secret", CONFIRM_URL)
+                new TossPaymentProperties("test_sk_secret", confirmUrl, Duration.ofSeconds(2), Duration.ofSeconds(5))
         );
     }
 }

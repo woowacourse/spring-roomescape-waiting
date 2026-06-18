@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS payment_order (
     user_id          BIGINT          NOT NULL,
     schedule_id      BIGINT          NOT NULL,
     amount           INT             NOT NULL,
+    idempotency_key  VARCHAR(300)    NOT NULL,
     status           VARCHAR(20)     NOT NULL,
     payment_key      VARCHAR(200),
     reservation_id   BIGINT,
@@ -70,7 +71,7 @@ CREATE TABLE IF NOT EXISTS payment_order (
     updated_at       DATETIME        NOT NULL,
     PRIMARY KEY (id),
 
-    CONSTRAINT check_payment_order_status CHECK (status IN ('PENDING', 'CONFIRMED', 'FAILED')),
+    CONSTRAINT check_payment_order_status CHECK (status IN ('PENDING', 'CONFIRMED', 'FAILED', 'CONFIRM_UNKNOWN')),
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (schedule_id) REFERENCES schedule (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
