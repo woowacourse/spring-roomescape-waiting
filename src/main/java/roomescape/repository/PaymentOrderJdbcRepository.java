@@ -20,7 +20,8 @@ public class PaymentOrderJdbcRepository implements PaymentOrderRepository {
             resultSet.getLong("reservation_id"),
             resultSet.getString("order_id"),
             resultSet.getLong("amount"),
-            resultSet.getString("payment_key")
+            resultSet.getString("payment_key"),
+            resultSet.getString("idempotency_key")
     );
 
     public PaymentOrderJdbcRepository(JdbcTemplate jdbcTemplate) {
@@ -29,7 +30,7 @@ public class PaymentOrderJdbcRepository implements PaymentOrderRepository {
 
     @Override
     public Long save(PaymentOrder paymentOrder) {
-        String sql = "insert into payment_order(reservation_id, order_id, amount, payment_key) values(?, ?, ?, ?)";
+        String sql = "insert into payment_order(reservation_id, order_id, amount, payment_key, idempotency_key) values(?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -38,6 +39,7 @@ public class PaymentOrderJdbcRepository implements PaymentOrderRepository {
             ps.setString(2, paymentOrder.getOrderId());
             ps.setLong(3, paymentOrder.getAmount());
             ps.setString(4, paymentOrder.getPaymentKey());
+            ps.setString(5, paymentOrder.getIdempotencyKey());
             return ps;
         }, keyHolder);
 
@@ -46,7 +48,7 @@ public class PaymentOrderJdbcRepository implements PaymentOrderRepository {
 
     @Override
     public Optional<PaymentOrder> findByOrderId(String orderId) {
-        String sql = "select id, reservation_id, order_id, amount, payment_key from payment_order where order_id = ?";
+        String sql = "select id, reservation_id, order_id, amount, payment_key, idempotency_key from payment_order where order_id = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, orderId));
         } catch (EmptyResultDataAccessException e) {

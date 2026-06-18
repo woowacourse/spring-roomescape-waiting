@@ -28,7 +28,8 @@ class PaymentOrderJdbcRepositoryTest {
         Long reservationId = DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-08", timeId,
                 "PAYMENT_PENDING");
 
-        Long id = repository.save(new PaymentOrder(null, reservationId, "order_123456", 37_000L));
+        Long id = repository.save(new PaymentOrder(null, reservationId, "order_123456", 37_000L, null,
+                "idempotency-key-123"));
 
         PaymentOrder found = repository.findByOrderId("order_123456").orElseThrow();
         assertThat(id).isPositive();
@@ -36,6 +37,7 @@ class PaymentOrderJdbcRepositoryTest {
         assertThat(found.getOrderId()).isEqualTo("order_123456");
         assertThat(found.getAmount()).isEqualTo(37_000L);
         assertThat(found.getPaymentKey()).isNull();
+        assertThat(found.getIdempotencyKey()).isEqualTo("idempotency-key-123");
     }
 
     @Test
@@ -45,7 +47,8 @@ class PaymentOrderJdbcRepositoryTest {
         Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         Long reservationId = DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-08", timeId,
                 "PAYMENT_PENDING");
-        repository.save(new PaymentOrder(null, reservationId, "order_123456", 37_000L));
+        repository.save(new PaymentOrder(null, reservationId, "order_123456", 37_000L, null,
+                "idempotency-key-123"));
 
         int affected = repository.updatePaymentKey("order_123456", "payment_key");
 
@@ -61,7 +64,8 @@ class PaymentOrderJdbcRepositoryTest {
         Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         Long reservationId = DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-08", timeId,
                 "PAYMENT_PENDING");
-        repository.save(new PaymentOrder(null, reservationId, "order_123456", 37_000L));
+        repository.save(new PaymentOrder(null, reservationId, "order_123456", 37_000L, null,
+                "idempotency-key-123"));
 
         int affected = repository.deleteByOrderId("order_123456");
 

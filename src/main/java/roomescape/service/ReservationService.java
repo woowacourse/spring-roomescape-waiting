@@ -31,6 +31,7 @@ import roomescape.repository.StoreRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserRepository;
 import roomescape.repository.PaymentOrderRepository;
+import roomescape.service.payment.IdempotencyKeyGenerator;
 import roomescape.service.payment.OrderIdGenerator;
 
 @Service
@@ -43,6 +44,7 @@ public class ReservationService {
     private final StoreRepository storeRepository;
     private final PaymentOrderRepository paymentOrderRepository;
     private final OrderIdGenerator orderIdGenerator;
+    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final TimeProvider timeProvider;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -52,6 +54,7 @@ public class ReservationService {
                               StoreRepository storeRepository,
                               PaymentOrderRepository paymentOrderRepository,
                               OrderIdGenerator orderIdGenerator,
+                              IdempotencyKeyGenerator idempotencyKeyGenerator,
                               TimeProvider timeProvider) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
@@ -60,6 +63,7 @@ public class ReservationService {
         this.storeRepository = storeRepository;
         this.paymentOrderRepository = paymentOrderRepository;
         this.orderIdGenerator = orderIdGenerator;
+        this.idempotencyKeyGenerator = idempotencyKeyGenerator;
         this.timeProvider = timeProvider;
     }
 
@@ -90,7 +94,9 @@ public class ReservationService {
 
         Long newReservationId = reservationRepository.save(newReservation);
         String orderId = orderIdGenerator.generate();
-        paymentOrderRepository.save(new PaymentOrder(null, newReservationId, orderId, command.amount()));
+        String idempotencyKey = idempotencyKeyGenerator.generate();
+        paymentOrderRepository.save(new PaymentOrder(null, newReservationId, orderId, command.amount(), null,
+                idempotencyKey));
         return new ReservationPaymentResponse(newReservationId, orderId, command.amount());
     }
 

@@ -35,7 +35,7 @@ public class TossPaymentGateway implements PaymentGateway {
             response = restClient.post()
                     .uri(CONFIRM_URI)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("Idempotency-Key", confirmation.orderId())
+                    .header("Idempotency-Key", confirmation.idempotencyKey())
                     .body(new TossConfirmRequest(confirmation.paymentKey(), confirmation.orderId(),
                             confirmation.amount()))
                     .retrieve()

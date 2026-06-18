@@ -36,6 +36,7 @@ import roomescape.repository.fake.FakeStoreRepository;
 import roomescape.repository.fake.FakeThemeRepository;
 import roomescape.repository.fake.FakeUserRepository;
 import roomescape.repository.fake.FakePaymentOrderRepository;
+import roomescape.service.payment.FixedIdempotencyKeyGenerator;
 import roomescape.service.payment.FixedOrderIdGenerator;
 
 class ReservationServiceTest {
@@ -60,6 +61,7 @@ class ReservationServiceTest {
         storeRepository.save(Fixtures.store("매장"));
         service = new ReservationService(reservationRepository, themeRepository, reservationTimeRepository,
                 userRepository, storeRepository, paymentOrderRepository, new FixedOrderIdGenerator("order_123456"),
+                new FixedIdempotencyKeyGenerator("idempotency-key-123"),
                 new TestClockConfig().timeProvider());
         manager = buildUser("매니저");
         storeRepository.assignManager(Fixtures.DEFAULT_STORE_ID, manager.getId());
@@ -98,6 +100,7 @@ class ReservationServiceTest {
         assertThat(paymentOrder.getReservationId()).isEqualTo(created.reservationId());
         assertThat(paymentOrder.getAmount()).isEqualTo(37_000L);
         assertThat(paymentOrder.getOrderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(paymentOrder.getIdempotencyKey()).isEqualTo("idempotency-key-123");
     }
 
     @Test
