@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
@@ -23,6 +25,7 @@ import roomescape.domain.payment.PaymentResult;
 import roomescape.exception.PaymentException.AlreadyProcessedException;
 import roomescape.exception.PaymentException.PaymentConfirmException;
 import roomescape.exception.PaymentException.PaymentInternalException;
+import roomescape.exception.PaymentException.PaymentRateLimitException;
 import roomescape.exception.PaymentException.PaymentResultUnknownException;
 
 @Component
@@ -36,17 +39,19 @@ public class TossPaymentGateway implements PaymentGateway {
     public TossPaymentGateway(RestClient.Builder restClientBuilder,
                               ClientHttpRequestFactory tossClientHttpRequestFactory,
                               ObjectMapper objectMapper,
+                              List<ClientHttpRequestInterceptor> interceptors,
                               @Value("${toss.base-url}") String baseUrl,
                               @Value("${toss.secret-key}") String secretKey) {
         String encodedKey = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
 
-        this.restClient = restClientBuilder
+        RestClient.Builder builder = restClientBuilder
                 .requestFactory(tossClientHttpRequestFactory)
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + encodedKey)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        interceptors.forEach(builder::requestInterceptor);
+        this.restClient = builder.build();
         this.objectMapper = objectMapper;
     }
 
@@ -72,6 +77,9 @@ public class TossPaymentGateway implements PaymentGateway {
     public PaymentResult recoverConfirm(Throwable e, String paymentKey, String orderId, long amount) {
         if (e instanceof PaymentInternalException internal) {
             throw internal;
+        }
+        if (e instanceof PaymentRateLimitException rateLimited) {
+            throw rateLimited;
         }
         try {
             return resolveByStatus(paymentKey, amount);
