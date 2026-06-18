@@ -27,6 +27,8 @@ public interface ReservationRepository {
 
     int updateStatus(Long id, ReservationStatus status);
 
+    int updateWaitingToReserved(Reservation reservation);
+
     List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
 
     boolean existsReservedByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);

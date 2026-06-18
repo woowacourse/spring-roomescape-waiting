@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,11 +32,14 @@ class TossPaymentGatewayTest {
         String secretKey = "test_sk_secret";
         String authorization = "Basic " + Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
-        TossPaymentGateway gateway = new TossPaymentGateway(builder, new ObjectMapper(), "https://api.tosspayments.com",
-                secretKey);
+        RestClient restClient = builder.baseUrl("https://api.tosspayments.com")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, authorization)
+                .build();
+        TossPaymentGateway gateway = new TossPaymentGateway(restClient, new ObjectMapper());
         server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Authorization", authorization))
+                .andExpect(header("Idempotency-Key", "order_123456"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("""
                         {
@@ -105,8 +109,8 @@ class TossPaymentGatewayTest {
                                    Class<? extends RuntimeException> expectedExceptionType) {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        TossPaymentGateway gateway = new TossPaymentGateway(builder, new ObjectMapper(), "https://api.tosspayments.com",
-                "test_sk_secret");
+        RestClient restClient = builder.baseUrl("https://api.tosspayments.com").build();
+        TossPaymentGateway gateway = new TossPaymentGateway(restClient, new ObjectMapper());
         server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andRespond(withStatus(status)
                         .contentType(MediaType.APPLICATION_JSON)
