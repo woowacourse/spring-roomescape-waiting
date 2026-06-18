@@ -14,6 +14,7 @@ import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.repository.OrderRepository;
 import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
 import roomescape.repository.ReservationUpdateDao;
@@ -35,14 +36,20 @@ public class ReservationService {
     private final ThemeQueryDao themeQueryDao;
     private final ReservationWaitingQueryDao reservationWaitingQueryDao;
     private final ReservationWaitingUpdateDao reservationWaitingUpdateDao;
+    private final OrderRepository orderRepository;
 
-    public ReservationService(ReservationQueryDao reservationQueryDao, ReservationUpdateDao reservationUpdateDao, ReservationTimeQueryDao reservationTimeQueryDao, ThemeQueryDao themeQueryDao, ReservationWaitingQueryDao reservationWaitingQueryDao, ReservationWaitingUpdateDao reservationWaitingUpdateDao) {
+    public ReservationService(ReservationQueryDao reservationQueryDao, ReservationUpdateDao reservationUpdateDao,
+                              ReservationTimeQueryDao reservationTimeQueryDao, ThemeQueryDao themeQueryDao,
+                              ReservationWaitingQueryDao reservationWaitingQueryDao,
+                              ReservationWaitingUpdateDao reservationWaitingUpdateDao,
+                              OrderRepository orderRepository) {
         this.reservationQueryDao = reservationQueryDao;
         this.reservationUpdateDao = reservationUpdateDao;
         this.reservationTimeQueryDao = reservationTimeQueryDao;
         this.themeQueryDao = themeQueryDao;
         this.reservationWaitingQueryDao = reservationWaitingQueryDao;
         this.reservationWaitingUpdateDao = reservationWaitingUpdateDao;
+        this.orderRepository = orderRepository;
     }
 
     public ReservationResponse read(Long id) {
@@ -60,7 +67,10 @@ public class ReservationService {
     public List<MyReservationResponse> readMineByName(String name) {
         List<MyReservationResponse> reservations = reservationQueryDao.findAllByName(name)
                 .stream()
-                .map(MyReservationResponse::fromReservation)
+                .map(reservation -> orderRepository
+                        .findByReservation(name, reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
+                        .map(order -> MyReservationResponse.fromReservation(reservation, order))
+                        .orElseGet(() -> MyReservationResponse.fromReservationWithoutOrder(reservation)))
                 .toList();
 
         List<MyReservationResponse> waitings = reservationWaitingQueryDao.findAllByName(name)
