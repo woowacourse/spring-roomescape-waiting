@@ -1,14 +1,14 @@
-# 방탈출 예약 대기 미션
+# JPA 방탈출 예약 대기
 
 ## 기능 명세
 
-- [x] `reservation_waiting` 반정규화 — `reservation` 직접 참조 제거, `date` / `theme_id` / `time_id` 직접 보유
-- [x] 예약 취소 시 첫 번째 대기자를 자동으로 예약으로 승격
-    - [x] 취소 대상 예약의 대기 존재 여부 확인
-    - [x] 첫 번째 대기자를 신규 예약으로 등록
-    - [x] 승격된 대기 데이터 삭제
-    - [x] 대기 순번은 `requested_at` 오름차순으로 결정되며 승격 후 자동 재정렬
-- [x] 취소·승격 과정 중 실패 시 트랜잭션 롤백으로 데이터 일관성 보장
+1단계
+- [X] 매핑 변환
+  - [X] Theme 매핑 변환
+  - [X] ReservationTime 매핑 변환
+- [ ] 연관관계 매핑
+  - [X] Reservation 매핑
+  - [ ] ReservationWaiting 매핑
 
 ## API 명세
 

@@ -9,8 +9,12 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservationtime.ReservationTime;
+import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.reservationwaiting.ReservationWaiting;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
+import roomescape.theme.Theme;
+import roomescape.theme.service.ThemeService;
 
 @Service
 public class ReservationApplicationService {
@@ -18,15 +22,21 @@ public class ReservationApplicationService {
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
     private final WaitingPromotionService waitingPromotionService;
+    private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
 
     public ReservationApplicationService(
             final ReservationService reservationService,
             final ReservationWaitingService reservationWaitingService,
-            final WaitingPromotionService waitingPromotionService
+            final WaitingPromotionService waitingPromotionService,
+            final ThemeService themeService,
+            final ReservationTimeService reservationTimeService
     ) {
         this.reservationService = reservationService;
         this. reservationWaitingService = reservationWaitingService;
         this.waitingPromotionService = waitingPromotionService;
+        this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
     @Transactional
@@ -35,7 +45,10 @@ public class ReservationApplicationService {
         Reservation reservation = reservationService.findByDateAndThemeIdAndTimeId(date, themeId, timeId);
         validateReservationOwner(name, reservation);
 
-        return reservationWaitingService.save(name, date, themeId, timeId);
+        Theme theme = themeService.getById(themeId);
+        ReservationTime time = reservationTimeService.getById(timeId);
+
+        return reservationWaitingService.save(name, date, theme, time);
     }
 
     public void cancelReservation(Long id, String name) {

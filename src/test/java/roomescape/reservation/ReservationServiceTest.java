@@ -1,6 +1,7 @@
 package roomescape.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -12,10 +13,11 @@ import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
@@ -100,18 +102,17 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제한다")
     void deleteById() {
         Fixture fixture = new Fixture();
-        when(fixture.reservationRepository.deleteById(1L)).thenReturn(1);
+        when(fixture.reservationRepository.existsById(1L)).thenReturn(false);
 
-        fixture.reservationService.deleteById(1L);
-
-        verify(fixture.reservationRepository).deleteById(1L);
+        assertThatThrownBy(() -> fixture.reservationService.deleteById(1L))
+            .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
     @DisplayName("존재하지 않는 예약은 삭제할 수 없다")
     void deleteByIdNotFound() {
         Fixture fixture = new Fixture();
-        when(fixture.reservationRepository.deleteById(1L)).thenReturn(0);
+        when(fixture.reservationRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.deleteById(1L));
     }
@@ -146,13 +147,13 @@ class ReservationServiceTest {
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
         when(fixture.reservationTimeService.getById(2L)).thenReturn(secondTime);
-        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeIdExcludingId(
+        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeIdAndIdNot(
                 LocalDate.parse("2026-08-07"),
                 1L,
                 2L,
                 1L
         )).thenReturn(false);
-        when(fixture.reservationRepository.update(any(Reservation.class))).thenReturn(updatedReservation);
+        when(fixture.reservationRepository.save(any(Reservation.class))).thenReturn(updatedReservation);
 
         Reservation updated = fixture.reservationService.updateByIdAndName(
                 1L,
@@ -176,7 +177,7 @@ class ReservationServiceTest {
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
         when(fixture.reservationTimeService.getById(2L)).thenReturn(secondTime);
-        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeIdExcludingId(date, 1L, 2L, 1L))
+        when(fixture.reservationRepository.existsByDateAndThemeIdAndTimeIdAndIdNot(date, 1L, 2L, 1L))
                 .thenReturn(true);
 
         assertThrows(
@@ -209,7 +210,7 @@ class ReservationServiceTest {
     }
 
     private static class Fixture {
-        private final ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        private final JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
         private final ReservationValidator reservationValidator = new ReservationValidator();

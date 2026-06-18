@@ -2,6 +2,7 @@ package roomescape.history.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.history.MyHistory;
 import roomescape.history.repository.MyHistoryRepository;
 
@@ -14,6 +15,7 @@ public class MyHistoryService {
         this.myHistoryRepository = myHistoryRepository;
     }
 
+    @Transactional
     public List<MyHistory> getAllByName(final String name) {
         return myHistoryRepository.findByUserName(name);
     }

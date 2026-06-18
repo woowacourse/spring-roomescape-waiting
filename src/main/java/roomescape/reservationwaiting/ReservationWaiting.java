@@ -1,33 +1,73 @@
 package roomescape.reservationwaiting;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
+import roomescape.reservationtime.ReservationTime;
+import roomescape.theme.Theme;
 
+@Entity
+@Table(name = "reservation_waiting",
+    uniqueConstraints = {
+        @UniqueConstraint(
+                columnNames = {
+                        "date",
+                        "theme_id",
+                        "time_id",
+                        "name"
+                }
+        )
+    }
+)
 public class ReservationWaiting {
-    private final Long id;
-    private final LocalDate date;
-    private final Long themeId;
-    private final Long timeId;
-    private final String name;
-    private final LocalDateTime requestAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public ReservationWaiting(Long id, LocalDate date, Long themeId, Long timeId, String name, LocalDateTime requestAt) {
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
+
+    @ManyToOne
+    @JoinColumn(name = "time_id", nullable = false)
+    private ReservationTime time;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(name = "requested_at", nullable = false)
+    private LocalDateTime requestAt;
+
+    protected ReservationWaiting() {}
+
+    public ReservationWaiting(Long id, LocalDate date, final Theme theme, final ReservationTime time, String name, LocalDateTime requestAt) {
         this.id = id;
         this.date = date;
-        this.themeId = themeId;
-        this.timeId = timeId;
+        this.theme = theme;
+        this.time = time;
         this.name = validateName(name);
         this.requestAt = requestAt;
     }
 
-    public static ReservationWaiting createNew(LocalDate date, Long themeId, Long timeId, String name, LocalDateTime requestAt) {
-        return new ReservationWaiting(null, date, themeId, timeId, name, requestAt);
+    public static ReservationWaiting createNew(LocalDate date, Theme theme, ReservationTime time, String name, LocalDateTime requestAt) {
+        return new ReservationWaiting(null, date, theme, time, name, requestAt);
     }
 
     public ReservationWaiting withId(final Long id) {
-        return new ReservationWaiting(id, this.date, this.themeId, this.timeId, this.name, this.requestAt);
+        return new ReservationWaiting(id, this.date, this.theme, this.time, this.name, this.requestAt);
     }
 
     public Long getId() {
@@ -36,9 +76,9 @@ public class ReservationWaiting {
 
     public LocalDate getDate() { return date; }
 
-    public Long getThemeId() { return themeId; }
+    public Theme getTheme() { return theme; }
 
-    public Long getTimeId() { return timeId; }
+    public ReservationTime getTime() { return time; }
 
     public String getName() {
         return name;
