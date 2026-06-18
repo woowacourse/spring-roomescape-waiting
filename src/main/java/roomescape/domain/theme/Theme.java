@@ -76,4 +76,8 @@ public class Theme {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    public void changeDescription(String description) {
+        this.description = description;
+    }
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import roomescape.domain.DomainErrorCode;
@@ -15,6 +16,8 @@ import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.requireNonNull;
@@ -40,6 +43,14 @@ public class Slot {
     @ManyToOne(optional = false)
     @JoinColumn(name = "theme_id")
     private Theme theme;
+
+    /**
+     * 미션 1 이후 양방향 삭제 고려
+     *
+     * - 테스트를 위한 양방향
+     */
+    @OneToMany(mappedBy = "slot")
+    private List<Reservation> reservations = new ArrayList<>();
 
     protected Slot() {
     }
@@ -73,6 +84,10 @@ public class Slot {
 
     public Long getId() {
         return id;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 
     public ReservationDate getDate() {
