@@ -75,4 +75,16 @@ public class PaymentOrderDao {
                 """;
         return jdbcTemplate.update(sql, reservationId);
     }
+
+    public PaymentOrder update(PaymentOrder paymentOrder) {
+        String sql = """
+                UPDATE payment_order 
+                SET status = ? 
+                WHERE order_id = ? 
+                """;
+
+        jdbcTemplate.update(sql, paymentOrder.getStatus().name(), paymentOrder.getOrderId());
+
+        return selectByOrderId(paymentOrder.getOrderId()).get();
+    }
 }

@@ -30,6 +30,21 @@ public class PaymentOrder {
         return new PaymentOrder(null, orderId, reservationId, amount, PaymentOrderStatus.PENDING, createdAt);
     }
 
+    public PaymentOrder confirm() {
+        if (status != PaymentOrderStatus.PENDING) {
+            throw new IllegalStateException("결제 대기 상태의 주문만 확정할 수 있습니다.");
+        }
+
+        return new PaymentOrder(
+                id,
+                orderId,
+                reservationId,
+                amount,
+                PaymentOrderStatus.CONFIRMED,
+                createdAt
+        );
+    }
+
     public Long getId() {
         return id;
     }

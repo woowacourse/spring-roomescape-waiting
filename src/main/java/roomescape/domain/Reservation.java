@@ -35,6 +35,16 @@ public class Reservation {
         return new Reservation(null, name, slot, ReservationState.PENDING, null);
     }
 
+    public Reservation confirmPayment(String paymentKey) {
+        Objects.requireNonNull(paymentKey, "결제 키는 필수값 입니다.");
+
+        if (state != ReservationState.PENDING) {
+            throw new IllegalStateException("결제 대기 상태의 예약만 확정할 수 있습니다.");
+        }
+
+        return new Reservation(id, name, slot, ReservationState.CONFIRMED, paymentKey);
+    }
+
     public void validateCancelable(LocalDateTime now) {
         Objects.requireNonNull(now, "현재 시간은 필수값 입니다.");
 

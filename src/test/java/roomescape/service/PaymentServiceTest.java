@@ -58,13 +58,13 @@ public class PaymentServiceTest {
     void 저장된_주문이_없으면_예외가_발생한다() {
         assertThatThrownBy(() -> paymentService.confirm("payment-key", "unknown-order-id", 10_000L))
                 .isInstanceOfSatisfying(RoomEscapeException.class, exception ->
-                        assertThat(exception.getErrorCode())).isEqualTo(PaymentErrorCode.ORDER_NOT_FOUND);
+                        assertThat(exception.getErrorCode()).isEqualTo(PaymentErrorCode.ORDER_NOT_FOUND));
 
         verify(paymentGateway, never()).confirm(any());
     }
 
     @Test
-    void 요청_금액이_저장된_금액과_다르면_승인_호출_전에_차단한다() {
+    void 요청_금액이_저장된_금액과_다르면_승인_호출_전에_차단하고_상태를_유지한다() {
         Reservation reservation = saveReservation();
         paymentOrderDao.insert(
                 PaymentOrder.createPendingWithoutId(
@@ -77,9 +77,17 @@ public class PaymentServiceTest {
 
         assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 9_000L))
                 .isInstanceOfSatisfying(RoomEscapeException.class, exception ->
-                        assertThat(exception.getErrorCode())).isEqualTo(PaymentErrorCode.AMOUNT_MISMATCH);
+                        assertThat(exception.getErrorCode()).isEqualTo(PaymentErrorCode.AMOUNT_MISMATCH)
+                );
 
         verify(paymentGateway, never()).confirm(any());
+
+        Reservation pendingReservation = reservationDao.selectById(reservation.getId()).get();
+        assertThat(pendingReservation.getState()).isEqualTo(ReservationState.PENDING);
+        assertThat(pendingReservation.getPaymentKey()).isNull();
+
+        PaymentOrder pendingPaymentOrder = paymentOrderDao.selectByOrderId("order-1").get();
+        assertThat(pendingPaymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.PENDING);
     }
 
     @Test
@@ -108,6 +116,41 @@ public class PaymentServiceTest {
                 .containsExactly("payment-key", "order-1", 10_000L);
 
         verify(paymentGateway).confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L));
+    }
+
+    @Test
+    void 결제_승인에_성공하면_예약과_결제_주문을_확정한다() {
+        Reservation reservation = saveReservation();
+        paymentOrderDao.insert(
+                PaymentOrder.createPendingWithoutId(
+                        "order-1",
+                        reservation.getId(),
+                        10_000L,
+                        LocalDateTime.of(2026, 6, 18, 10, 0)
+                )
+        );
+
+        given(paymentGateway.confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L)))
+                .willReturn(new PaymentResult("payment-key", "order-1", 10_000L));
+
+        PaymentResult result = paymentService.confirm("payment-key", "order-1", 10_000L);
+
+        assertThat(result)
+                .extracting(
+                        PaymentResult::paymentKey,
+                        PaymentResult::orderId,
+                        PaymentResult::approvedAmount
+                )
+                .containsExactly("payment-key", "order-1", 10_000L);
+
+        verify(paymentGateway).confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L));
+
+        Reservation confirmedReservation = reservationDao.selectById(reservation.getId()).get();
+        assertThat(confirmedReservation.getState()).isEqualTo(ReservationState.CONFIRMED);
+        assertThat(confirmedReservation.getPaymentKey()).isEqualTo("payment-key");
+
+        PaymentOrder confirmedPaymentOrder = paymentOrderDao.selectByOrderId("order-1").get();
+        assertThat(confirmedPaymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.CONFIRMED);
     }
 
     private Reservation saveReservation() {

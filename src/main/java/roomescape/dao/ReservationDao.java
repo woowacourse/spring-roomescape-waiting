@@ -161,6 +161,17 @@ public class ReservationDao {
         return jdbcTemplate.update(sql, reservationId);
     }
 
+    public Reservation updatePayment(Reservation reservation) {
+        String sql = """
+                UPDATE reservation 
+                SET status = ?, payment_key = ? 
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(sql, reservation.getState().name(), reservation.getPaymentKey(), reservation.getId());
+        return selectById(reservation.getId()).get();
+    }
+
     private String baseSelectSql() {
         return """
                 SELECT r.id,
