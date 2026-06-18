@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -37,6 +39,9 @@ class ReservationCancellationIntegrationTest {
     private WaitingReservationRepository waitingReservationRepository;
 
     @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private ReservationDateRepository reservationDateRepository;
 
     @Autowired
@@ -54,30 +59,30 @@ class ReservationCancellationIntegrationTest {
 
     @Test
     void 사용자가_본인의_예약을_취소하면_같은_슬롯의_1순위_대기가_예약으로_변경된다() {
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        Member san = memberRepository.save(Member.createWithoutId("이산"));
+        Member whale = memberRepository.save(Member.createWithoutId("고래"));
+        Member otherMember = memberRepository.save(Member.createWithoutId("다른슬롯"));
+
         Reservation cancelledReservation = reservationRepository.save(
-            Reservation.createWithoutId(
-                "테스터",
-                cancelledSlot.date(),
-                cancelledSlot.time(),
-                cancelledSlot.theme()
-            )
+            Reservation.createWithoutId(tester, cancelledSlot.date(), cancelledSlot.time(), cancelledSlot.theme())
         );
         Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
         WaitingReservation otherSlotOldest = waitingReservationRepository.save(
-            waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
+            waiting(otherMember, otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
         );
         WaitingReservation firstWaiting = waitingReservationRepository.save(
-            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+            waiting(san, cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
         );
         WaitingReservation secondWaiting = waitingReservationRepository.save(
-            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+            waiting(whale, cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
         );
 
         reservationService.cancelReservation(cancelledReservation.getId());
 
         assertThat(reservationRepository.findById(cancelledReservation.getId())).isEmpty();
-        assertThat(reservationRepository.findByName("이산")).hasSize(1);
-        assertThat(reservationRepository.findByName("다른슬롯")).isEmpty();
+        assertThat(reservationRepository.findByMemberId(san.getId())).hasSize(1);
+        assertThat(reservationRepository.findByMemberId(otherMember.getId())).isEmpty();
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isEmpty();
         assertThat(waitingReservationRepository.findById(secondWaiting.getId())).isPresent();
         assertThat(waitingReservationRepository.findById(otherSlotOldest.getId())).isPresent();
@@ -85,23 +90,23 @@ class ReservationCancellationIntegrationTest {
 
     @Test
     void 예약_취소_중_1순위_예약_대기_추가가_실패하면_전체가_롤백된다() {
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        Member san = memberRepository.save(Member.createWithoutId("이산"));
+        Member whale = memberRepository.save(Member.createWithoutId("고래"));
+        Member otherMember = memberRepository.save(Member.createWithoutId("다른슬롯"));
+
         Reservation cancelledReservation = reservationRepository.save(
-            Reservation.createWithoutId(
-                "테스터",
-                cancelledSlot.date(),
-                cancelledSlot.time(),
-                cancelledSlot.theme()
-            )
+            Reservation.createWithoutId(tester, cancelledSlot.date(), cancelledSlot.time(), cancelledSlot.theme())
         );
         Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
         waitingReservationRepository.save(
-            waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
+            waiting(otherMember, otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
         );
         WaitingReservation firstWaiting = waitingReservationRepository.save(
-            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+            waiting(san, cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
         );
         waitingReservationRepository.save(
-            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+            waiting(whale, cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
         );
 
         doThrow(new RuntimeException())
@@ -113,28 +118,28 @@ class ReservationCancellationIntegrationTest {
 
         assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
-        assertThat(reservationRepository.findByName("이산")).isEmpty();
+        assertThat(reservationRepository.findByMemberId(san.getId())).isEmpty();
     }
 
     @Test
     void 예약_취소_중_1순위_예약_대기_삭제가_실패하면_전체가_롤백된다() {
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        Member san = memberRepository.save(Member.createWithoutId("이산"));
+        Member whale = memberRepository.save(Member.createWithoutId("고래"));
+        Member otherMember = memberRepository.save(Member.createWithoutId("다른슬롯"));
+
         Reservation cancelledReservation = reservationRepository.save(
-            Reservation.createWithoutId(
-                "테스터",
-                cancelledSlot.date(),
-                cancelledSlot.time(),
-                cancelledSlot.theme()
-            )
+            Reservation.createWithoutId(tester, cancelledSlot.date(), cancelledSlot.time(), cancelledSlot.theme())
         );
         Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
         waitingReservationRepository.save(
-            waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
+            waiting(otherMember, otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
         );
         WaitingReservation firstWaiting = waitingReservationRepository.save(
-            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+            waiting(san, cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
         );
         waitingReservationRepository.save(
-            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+            waiting(whale, cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
         );
 
         doThrow(new RuntimeException()).when(waitingReservationRepository).deleteById(firstWaiting.getId());
@@ -144,28 +149,28 @@ class ReservationCancellationIntegrationTest {
 
         assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
-        assertThat(reservationRepository.findByName("이산")).isEmpty();
+        assertThat(reservationRepository.findByMemberId(san.getId())).isEmpty();
     }
 
     @Test
     void 예약_취소_중_기존_예약_삭제가_실패하면_전체가_롤백된다() {
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        Member san = memberRepository.save(Member.createWithoutId("이산"));
+        Member whale = memberRepository.save(Member.createWithoutId("고래"));
+        Member otherMember = memberRepository.save(Member.createWithoutId("다른슬롯"));
+
         Reservation cancelledReservation = reservationRepository.save(
-            Reservation.createWithoutId(
-                "테스터",
-                cancelledSlot.date(),
-                cancelledSlot.time(),
-                cancelledSlot.theme()
-            )
+            Reservation.createWithoutId(tester, cancelledSlot.date(), cancelledSlot.time(), cancelledSlot.theme())
         );
         Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
         waitingReservationRepository.save(
-            waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
+            waiting(otherMember, otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
         );
         WaitingReservation firstWaiting = waitingReservationRepository.save(
-            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+            waiting(san, cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
         );
         waitingReservationRepository.save(
-            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+            waiting(whale, cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
         );
 
         doThrow(new RuntimeException()).when(reservationRepository).deleteById(cancelledReservation.getId());
@@ -175,11 +180,11 @@ class ReservationCancellationIntegrationTest {
 
         assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
-        assertThat(reservationRepository.findByName("이산")).isEmpty();
+        assertThat(reservationRepository.findByMemberId(san.getId())).isEmpty();
     }
 
-    private WaitingReservation waiting(String name, Slot slot, LocalDateTime createdAt) {
-        return WaitingReservation.createWithoutId(name, slot.date(), slot.time(), slot.theme(), createdAt);
+    private WaitingReservation waiting(Member member, Slot slot, LocalDateTime createdAt) {
+        return WaitingReservation.createWithoutId(member, slot.date(), slot.time(), slot.theme(), createdAt);
     }
 
     private Slot insertSlot(LocalDate playDay, LocalTime startAt, String themeName) {
@@ -189,10 +194,6 @@ class ReservationCancellationIntegrationTest {
         return new Slot(date, time, theme);
     }
 
-    private record Slot(
-        ReservationDate date,
-        ReservationTime time,
-        Theme theme
-    ) {
+    private record Slot(ReservationDate date, ReservationTime time, Theme theme) {
     }
 }

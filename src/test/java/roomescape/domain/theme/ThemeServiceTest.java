@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationdate.ReservationDate;
@@ -41,6 +43,9 @@ class ThemeServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     @Test
     @DisplayName("테마를 생성한다.")
     void createTheme() {
@@ -57,7 +62,8 @@ class ThemeServiceTest {
         Theme theme = createTheme("테마");
         ReservationDate date = reservationDateRepository.save(ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
         ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        reservationRepository.save(Reservation.createWithoutId("테스터", date, time, theme));
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        reservationRepository.save(Reservation.createWithoutId(tester, date, time, theme));
 
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
                 .isInstanceOf(RoomescapeException.class);

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberService;
 import roomescape.domain.reservation.dto.ReservationCreationRequest;
 import roomescape.domain.reservation.dto.ReservationCreationResponse;
 import roomescape.domain.reservation.dto.ReservationResponse;
@@ -29,12 +31,14 @@ import roomescape.support.exception.RoomescapeException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final MemberService memberService;
     private final ReservationDateService reservationDateService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final WaitingReservationRepository waitingReservationRepository;
 
     public ReservationCreationResponse createReservation(ReservationCreationRequest request) {
+        Member member = memberService.findById(request.memberId());
         ReservationDate reservationDate = reservationDateService.findById(request.dateId());
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         validateNotPast(reservationDate, reservationTime);
@@ -42,7 +46,7 @@ public class ReservationService {
         Theme theme = themeService.findById(request.themeId());
         validateNotDuplicated(request.dateId(), request.timeId(), request.themeId());
         Reservation savedReservation = reservationRepository.save(
-            request.toEntity(reservationDate, reservationTime, theme));
+            request.toEntity(member, reservationDate, reservationTime, theme));
         return ReservationCreationResponse.from(savedReservation);
     }
 
@@ -59,8 +63,8 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name)
+    public List<ReservationResponse> getReservationsByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId)
             .stream()
             .map(ReservationResponse::from)
             .toList();
@@ -85,8 +89,7 @@ public class ReservationService {
         ReservationTime newReservationTime = reservationTimeService.findById(request.timeId());
 
         validateNotPast(newReservationDate, newReservationTime);
-        validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme()
-            .getId());
+        validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme().getId());
 
         ReservationDate originalDate = reservation.getDate();
         ReservationTime originalTime = reservation.getTime();
@@ -135,7 +138,7 @@ public class ReservationService {
         if (waitingReservationOpt.isPresent()) {
             WaitingReservation waitingReservation = waitingReservationOpt.get();
             reservationRepository.save(
-                Reservation.createWithoutId(waitingReservation.getName(), waitingReservation.getDate(),
+                Reservation.createWithoutId(waitingReservation.getMember(), waitingReservation.getDate(),
                     waitingReservation.getTime(), waitingReservation.getTheme()));
             waitingReservationRepository.deleteById(waitingReservation.getId());
         }

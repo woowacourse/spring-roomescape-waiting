@@ -18,7 +18,7 @@ public record WaitingReservationWithRankResponse(
         WaitingReservation waitingReservation = waitingReservationWithRank.waitingReservation();
         return new WaitingReservationWithRankResponse(
             waitingReservation.getId(),
-            waitingReservation.getName(),
+            waitingReservation.getMember().getName(),
             waitingReservation.getDate().getPlayDay(),
             ReservationResponse.ReservationTimePayload.from(waitingReservation.getTime()),
             ReservationResponse.ThemePayload.from(waitingReservation.getTheme()),

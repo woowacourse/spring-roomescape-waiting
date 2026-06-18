@@ -1,16 +1,16 @@
 package roomescape.domain.waitingreservation.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.waitingreservation.WaitingReservation;
 
 public record WaitingReservationCreationRequest(
-    @NotBlank(message = "예약자명은 필수입니다")
-    String name,
+    @NotNull(message = "멤버 ID는 필수입니다")
+    Long memberId,
 
     @NotNull(message = "예약 날짜 선택은 필수입니다")
     Long dateId,
@@ -23,11 +23,12 @@ public record WaitingReservationCreationRequest(
 ) {
 
     public WaitingReservation toEntity(
+        Member member,
         ReservationDate date,
         ReservationTime time,
         Theme theme,
         LocalDateTime createdAt
     ) {
-        return WaitingReservation.createWithoutId(name, date, time, theme, createdAt);
+        return WaitingReservation.createWithoutId(member, date, time, theme, createdAt);
     }
 }

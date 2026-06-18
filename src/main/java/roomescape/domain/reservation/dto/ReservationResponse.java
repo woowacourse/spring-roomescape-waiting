@@ -18,7 +18,7 @@ public record ReservationResponse(
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
             reservation.getId(),
-            reservation.getName(),
+            reservation.getMember().getName(),
             reservation.getDate().getPlayDay(),
             ReservationTimePayload.from(reservation.getTime()),
             ThemePayload.from(reservation.getTheme())

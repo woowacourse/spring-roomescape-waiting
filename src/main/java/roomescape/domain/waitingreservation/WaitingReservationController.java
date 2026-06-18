@@ -25,7 +25,8 @@ public class WaitingReservationController {
     private final WaitingReservationService waitingReservationService;
 
     @PostMapping
-    public ResponseEntity<WaitingReservationCreationResponse> createWaitingReservation(@Valid @RequestBody WaitingReservationCreationRequest request) {
+    public ResponseEntity<WaitingReservationCreationResponse> createWaitingReservation(
+        @Valid @RequestBody WaitingReservationCreationRequest request) {
         WaitingReservationCreationResponse response = waitingReservationService.createWaitingReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -37,8 +38,10 @@ public class WaitingReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WaitingReservationWithRankResponse>> getWaitingReservations(@RequestParam String name) {
-        List<WaitingReservationWithRankResponse> response = waitingReservationService.getWaitingReservationsWithRankByName(name);
+    public ResponseEntity<List<WaitingReservationWithRankResponse>> getWaitingReservations(
+        @RequestParam Long memberId) {
+        List<WaitingReservationWithRankResponse> response =
+            waitingReservationService.getWaitingReservationsWithRankByMemberId(memberId);
         return ResponseEntity.ok(response);
     }
 }

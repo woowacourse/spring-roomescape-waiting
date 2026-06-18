@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -44,6 +46,9 @@ class AdminReservationControllerTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     private ReservationDate futureDate;
     private ReservationTime time;
     private Theme theme;
@@ -59,7 +64,8 @@ class AdminReservationControllerTest {
     @Test
     @DisplayName("관리자 권한으로 모든 예약을 조회한다.")
     void getAllReservations() {
-        reservationRepository.save(Reservation.createWithoutId("관리자조회용", futureDate, time, theme));
+        Member member = memberRepository.save(Member.createWithoutId("관리자조회용"));
+        reservationRepository.save(Reservation.createWithoutId(member, futureDate, time, theme));
 
         RestAssured.given().log().all()
                 .header(ADMIN_HEADER, adminToken)
@@ -72,7 +78,8 @@ class AdminReservationControllerTest {
     @Test
     @DisplayName("관리자 권한으로 예약을 삭제한다.")
     void deleteReservation() {
-        Reservation saved = reservationRepository.save(Reservation.createWithoutId("삭제될예약", futureDate, time, theme));
+        Member member = memberRepository.save(Member.createWithoutId("삭제될예약"));
+        Reservation saved = reservationRepository.save(Reservation.createWithoutId(member, futureDate, time, theme));
 
         RestAssured.given().log().all()
                 .header(ADMIN_HEADER, adminToken)

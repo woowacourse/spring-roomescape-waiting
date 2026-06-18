@@ -7,11 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.waitingreservation.dto.RankProjection;
-import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 
 public interface WaitingReservationRepository extends JpaRepository<WaitingReservation, Long> {
 
-    boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, Long dateId, Long timeId, Long themeId);
+    boolean existsByMemberIdAndDateIdAndTimeIdAndThemeId(Long memberId, Long dateId, Long timeId, Long themeId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
@@ -26,7 +25,7 @@ public interface WaitingReservationRepository extends JpaRepository<WaitingReser
     """)
     Optional<WaitingReservation> findOldestBySlot(Long dateId, Long timeId, Long themeId);
 
-    List<WaitingReservation> findAllByName(String name);
+    List<WaitingReservation> findAllByMemberId(Long memberId);
 
     @Query(value = """
         select wr.id, row_number() over (
@@ -37,8 +36,8 @@ public interface WaitingReservationRepository extends JpaRepository<WaitingReser
         join (
             select date_id, time_id, theme_id
             from waiting_reservation
-            where name = :name
+            where member_id = :memberId
         ) slot on wr.date_id = slot.date_id and wr.time_id = slot.time_id and wr.theme_id = slot.theme_id
     """, nativeQuery = true)
-    List<RankProjection> findRankByName(String name);
+    List<RankProjection> findRankByMemberId(Long memberId);
 }

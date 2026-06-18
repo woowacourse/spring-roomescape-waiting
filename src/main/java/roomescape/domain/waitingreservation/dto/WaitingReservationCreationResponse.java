@@ -20,7 +20,7 @@ public record WaitingReservationCreationResponse(
     public static WaitingReservationCreationResponse from(WaitingReservation waitingReservation) {
         return new WaitingReservationCreationResponse(
             waitingReservation.getId(),
-            waitingReservation.getName(),
+            waitingReservation.getMember().getName(),
             waitingReservation.getDate().getPlayDay(),
             waitingReservation.getTime().getStartAt(),
             ThemePayload.from(waitingReservation.getTheme()),

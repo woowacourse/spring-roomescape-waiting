@@ -11,17 +11,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Long countByDateId(Long dateId);
 
     @Query("""
-        select r.time.id 
-        from Reservation r 
+        select r.time.id
+        from Reservation r
         where r.theme.id = :themeId and r.date.id = :dateId
     """)
     List<Long> findReservedTimes(Long themeId, Long dateId);
 
     Long countByThemeId(Long id);
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findByMemberId(Long memberId);
 
     boolean existsByDateIdAndTimeIdAndThemeId(Long dateId, Long timeId, Long themeId);
 
-    boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, Long dateId, Long timeId, Long themeId);
+    boolean existsByMemberIdAndDateIdAndTimeIdAndThemeId(Long memberId, Long dateId, Long timeId, Long themeId);
 }

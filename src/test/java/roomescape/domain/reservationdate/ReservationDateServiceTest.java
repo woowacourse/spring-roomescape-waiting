@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationdate.dto.ReservationDateCreationRequest;
@@ -41,6 +43,9 @@ class ReservationDateServiceTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("예약 날짜를 생성한다.")
@@ -80,7 +85,8 @@ class ReservationDateServiceTest {
         ReservationDate date = createDate(LocalDate.now().plusDays(1));
         ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("테스트테마", "설명", "url"));
-        reservationRepository.save(Reservation.createWithoutId("테스터", date, time, theme));
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        reservationRepository.save(Reservation.createWithoutId(tester, date, time, theme));
 
         assertThatThrownBy(() -> reservationDateService.deleteReservationDate(date.getId()))
                 .isInstanceOf(RoomescapeException.class);

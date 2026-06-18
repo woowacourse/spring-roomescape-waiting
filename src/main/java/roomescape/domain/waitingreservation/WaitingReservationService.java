@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberService;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
@@ -30,11 +32,13 @@ public class WaitingReservationService {
 
     private final WaitingReservationRepository waitingReservationRepository;
     private final ReservationRepository reservationRepository;
+    private final MemberService memberService;
     private final ReservationDateService reservationDateService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
     public WaitingReservationCreationResponse createWaitingReservation(WaitingReservationCreationRequest request) {
+        Member member = memberService.findById(request.memberId());
         ReservationDate date = reservationDateService.findById(request.dateId());
         ReservationTime time = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
@@ -43,19 +47,18 @@ public class WaitingReservationService {
         validateAlreadyReserved(request);
         validateDuplicationOfWaitingReservation(request);
 
-        WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now());
+        WaitingReservation waitingReservation = request.toEntity(member, date, time, theme, LocalDateTime.now());
         WaitingReservation savedWaitingReservation = waitingReservationRepository.save(waitingReservation);
         return WaitingReservationCreationResponse.from(savedWaitingReservation);
     }
 
     public void cancelWaitingReservation(Long id) {
-
         WaitingReservation waitingReservation = waitingReservationRepository
             .findById(id)
             .orElseThrow(() -> new RoomescapeException(WaitingReservationErrorCode.WAITING_RESERVATION_NOT_FOUND));
 
-        if (reservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(
-            waitingReservation.getName(),
+        if (reservationRepository.existsByMemberIdAndDateIdAndTimeIdAndThemeId(
+            waitingReservation.getMember().getId(),
             waitingReservation.getDate().getId(),
             waitingReservation.getTime().getId(),
             waitingReservation.getTheme().getId())) {
@@ -65,10 +68,10 @@ public class WaitingReservationService {
         waitingReservationRepository.deleteById(id);
     }
 
-    public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByName(String name) {
-        List<WaitingReservation> waitingReservations = waitingReservationRepository.findAllByName(name);
+    public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByMemberId(Long memberId) {
+        List<WaitingReservation> waitingReservations = waitingReservationRepository.findAllByMemberId(memberId);
 
-        Map<Long, Long> rankMap = waitingReservationRepository.findRankByName(name)
+        Map<Long, Long> rankMap = waitingReservationRepository.findRankByMemberId(memberId)
             .stream()
             .collect(Collectors.toMap(RankProjection::getId, RankProjection::getRank));
 
@@ -85,8 +88,8 @@ public class WaitingReservationService {
     }
 
     private void validateAlreadyReserved(WaitingReservationCreationRequest request) {
-        if(reservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(
-            request.name(),
+        if (reservationRepository.existsByMemberIdAndDateIdAndTimeIdAndThemeId(
+            request.memberId(),
             request.dateId(),
             request.timeId(),
             request.themeId())) {
@@ -95,8 +98,8 @@ public class WaitingReservationService {
     }
 
     private void validateDuplicationOfWaitingReservation(WaitingReservationCreationRequest request) {
-        if (waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(
-            request.name(),
+        if (waitingReservationRepository.existsByMemberIdAndDateIdAndTimeIdAndThemeId(
+            request.memberId(),
             request.dateId(),
             request.timeId(),
             request.themeId())) {

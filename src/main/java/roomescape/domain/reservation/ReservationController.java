@@ -31,9 +31,9 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> getReservationsByName(@RequestParam String name) {
-        List<ReservationResponse> response = reservationService.getReservationsByName(name);
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<ReservationResponse>> getReservationsByMemberId(@RequestParam Long memberId) {
+        List<ReservationResponse> response = reservationService.getReservationsByMemberId(memberId);
         return ResponseEntity.ok(response);
     }
 
