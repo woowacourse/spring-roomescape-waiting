@@ -34,6 +34,9 @@ CREATE TABLE payment_order (
     amount          BIGINT       NOT NULL,
     reservation_id  BIGINT       NOT NULL,
     idempotency_key VARCHAR(300) NOT NULL,
+    status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    payment_key     VARCHAR(255),
+    approved_amount BIGINT,
 
     PRIMARY KEY (id),
     CONSTRAINT uk_payment_order_order_id UNIQUE (order_id),
