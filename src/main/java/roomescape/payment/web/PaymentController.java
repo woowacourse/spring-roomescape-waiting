@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
+import roomescape.payment.ConfirmOutcome;
 import roomescape.payment.PaymentService;
 
 @RestController
@@ -33,10 +34,11 @@ public class PaymentController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<Void> confirm(@LoginMember Member member,
-                                        @Valid @RequestBody PaymentConfirmRequestDto request) {
-        paymentService.confirm(member, request.paymentKey(), request.orderId(), request.amount());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PaymentConfirmResponse> confirm(@LoginMember Member member,
+                                                          @Valid @RequestBody PaymentConfirmRequestDto request) {
+        ConfirmOutcome outcome = paymentService.confirm(
+                member, request.paymentKey(), request.orderId(), request.amount());
+        return ResponseEntity.ok(new PaymentConfirmResponse(outcome));
     }
 
     @PostMapping("/fail")

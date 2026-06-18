@@ -65,6 +65,11 @@ public class OrderService {
         orderDao.update(order);
     }
 
+    public void markNeedsCheck(Order order) {
+        order.markNeedsCheck();
+        orderDao.update(order);
+    }
+
     /**
      * 결제 신호 없이 방치된(abandonment) 주문 후보. 기준 시각보다 이전에 생성된 PENDING만.
      */

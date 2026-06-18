@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.util.stream.Stream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +22,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentResultUnknownException;
 
 /**
  * 토스 승인 어댑터를 가짜 HTTP 서버(MockWebServer)로 검증한다.
@@ -49,6 +51,9 @@ class TossPaymentGatewayTest {
     static void tossProperties(DynamicPropertyRegistry registry) {
         registry.add("toss.base-url", () -> mockWebServer.url("/").toString());
         registry.add("toss.secret-key", () -> "test_sk_dummy");
+        // 타임아웃 테스트를 빠르게 돌리기 위해 짧게 둔다(즉시 응답하는 다른 테스트엔 영향 없음).
+        registry.add("toss.connect-timeout", () -> "500ms");
+        registry.add("toss.read-timeout", () -> "300ms");
     }
 
     @AfterAll
@@ -94,6 +99,17 @@ class TossPaymentGatewayTest {
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
                 new PaymentConfirmation("test_pk_1", "order-1", 30000L)))
                 .isInstanceOf(TossPaymentException.class);
+    }
+
+    @Test
+    void read_timeout이면_결과를_모르는_예외로_번역한다() {
+        // connect는 성공(서버는 떠 있음)하지만 응답을 보내지 않아 read timeout을 유발한다.
+        // 결과가 불명확하므로 '확실히 안 됨'이 아니라 '모름'(PaymentResultUnknownException)으로 떨어져야 한다.
+        mockWebServer.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L)))
+                .isInstanceOf(PaymentResultUnknownException.class);
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")

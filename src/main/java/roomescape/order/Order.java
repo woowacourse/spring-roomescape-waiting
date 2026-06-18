@@ -62,6 +62,14 @@ public class Order {
         this.status = OrderStatus.FAILED;
     }
 
+    /**
+     * 승인 결과가 불명확한 상태로 표시한다(read timeout 등). 실패가 아니라 '확인 필요' —
+     * reaper가 건드리지 않고, 멱등 재시도로 결과를 확정한다.
+     */
+    public void markNeedsCheck() {
+        this.status = OrderStatus.NEEDS_CHECK;
+    }
+
     public boolean isConfirmed() {
         return status == OrderStatus.CONFIRMED;
     }

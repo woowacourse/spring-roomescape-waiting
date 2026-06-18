@@ -55,18 +55,29 @@ public class PaymentService {
 
     /**
      * successUrl 콜백 처리. 저장된 주문 금액과 대조한 뒤(검증), 통과해야 승인 API를 호출한다.
-     * 승인되면 주문을 확정하고 예약 확정(BOOKED)을 예약 서비스에 위임한다.
+     * 승인되면 주문을 확정(CONFIRMED)하고 예약 확정(BOOKED)을 예약 서비스에 위임한다.
+     * read timeout처럼 결과가 불명확하면 실패로 단정하지 않고 주문을 NEEDS_CHECK로 남긴다(확인 필요).
      */
-    public void confirm(Member member, String paymentKey, String orderId, long amount) {
+    public ConfirmOutcome confirm(Member member, String paymentKey, String orderId, long amount) {
         Order order = orderService.findByOrderId(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 주문입니다."));
         authorizationService.validateMemberCanAccess(member, order.getReservationId());
         order.validateAmount(amount);
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-
+        PaymentResult result;
+        try {
+            result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        } catch (PaymentResultUnknownException e) {
+            // read timeout 등 결과 불명확: 실패로 단정하지 않고 '확인 필요'로 남긴다(사용자가 내역에서 재시도).
+            // 예외를 다시 던지지 않으므로 @Transactional이 이 마크를 커밋한다.
+            orderService.markNeedsCheck(order);
+            return ConfirmOutcome.NEEDS_CHECK;
+        }
+        // connect 실패(PaymentGatewayUnreachableException)·토스 에러(TossPaymentException)는 잡지 않는다
+        // → 에러로 전파(롤백 + advice가 사용자에게 안내).
         orderService.complete(order, result.paymentKey());
         reservationService.confirm(order.getReservationId());
+        return ConfirmOutcome.CONFIRMED;
     }
 
     /**

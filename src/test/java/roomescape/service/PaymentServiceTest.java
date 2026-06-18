@@ -26,6 +26,8 @@ import roomescape.order.OrderDao;
 import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
 import roomescape.order.dao.OrderJdbcDao;
+import roomescape.payment.ConfirmOutcome;
+import roomescape.payment.PaymentGatewayUnreachableException;
 import roomescape.payment.PaymentService;
 import roomescape.payment.web.PaymentReadyResponse;
 import roomescape.promotion.PromotionService;
@@ -114,6 +116,37 @@ class PaymentServiceTest {
                 .isEqualTo(OrderStatus.CONFIRMED);
         assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
                 .isEqualTo(ReservationStatus.BOOKED);
+    }
+
+    @Test
+    @DisplayName("read timeout(결과 불명확)이면 주문은 NEEDS_CHECK, 예약은 PENDING 유지 — 실패로 단정하지 않는다")
+    void confirmReadTimeoutMarksNeedsCheck() {
+        Created created = createReservationWithOrder();
+
+        ConfirmOutcome outcome = paymentService.confirm(member, FakePaymentGateway.READ_TIMEOUT_KEY,
+                created.order().getOrderId(), created.order().getAmount());
+
+        assertThat(outcome).isEqualTo(ConfirmOutcome.NEEDS_CHECK);
+        // 마크가 살아남아야 한다(예외를 다시 안 던지므로 @Transactional이 커밋) — FAILED/CONFIRMED 아님.
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.NEEDS_CHECK);
+        assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.PENDING);
+    }
+
+    @Test
+    @DisplayName("connect 실패(확실히 안 됨)는 예외로 전파되고 주문·예약은 PENDING 그대로(롤백)")
+    void confirmConnectFailurePropagates() {
+        Created created = createReservationWithOrder();
+
+        assertThatThrownBy(() -> paymentService.confirm(member, FakePaymentGateway.CONNECT_FAIL_KEY,
+                created.order().getOrderId(), created.order().getAmount()))
+                .isInstanceOf(PaymentGatewayUnreachableException.class);
+
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.PENDING);
+        assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test
