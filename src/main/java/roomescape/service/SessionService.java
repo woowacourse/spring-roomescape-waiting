@@ -77,11 +77,7 @@ public class SessionService {
     }
 
     public Reservation findReservationById(long id) {
-        Reservation reservation = reservationService.findById(id);
-        System.out.println("-------------------");
-        reservation.getSession().getTimeSlot().getStartAt();
-        System.out.println("-------------------");
-        return reservation;
+        return reservationService.findById(id);
     }
 
     public List<Booking> findReservationByName(String name) {

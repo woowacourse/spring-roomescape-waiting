@@ -30,4 +30,11 @@ public class FakeReservationRepository extends AbstractFakeRepository<Reservatio
                 .filter(r -> r.getSession().getId().equals(session.getId()))
                 .findFirst();
     }
+
+    @Override
+    public Optional<Reservation> findBySessionId(Long sessionId) {
+        return store.values().stream()
+                .filter(r -> r.getSession().getId().equals(sessionId))
+                .findFirst();
+    }
 }
