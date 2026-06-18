@@ -51,7 +51,7 @@ public class TossPaymentException extends RuntimeException {
     /**
      * 400 - 이미 승인된 결제(중복 승인 시도).
      */
-    public static class AlreadyProcessed extends TossPaymentException { // THINK 처리
+    public static class AlreadyProcessed extends TossPaymentException {
 
         public AlreadyProcessed(String message) {
             super(HttpStatus.BAD_REQUEST, "ALREADY_PROCESSED_PAYMENT", message, false);
