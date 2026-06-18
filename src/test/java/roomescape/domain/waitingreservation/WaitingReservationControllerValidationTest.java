@@ -25,26 +25,9 @@ class WaitingReservationControllerValidationTest {
     private AdminRequestValidator adminRequestValidator;
 
     @Test
-    void 예약자명이_없으면_400을_반환한다() throws Exception {
+    void memberId가_없으면_400을_반환한다() throws Exception {
         String requestBody = """
                 {
-                    "dateId": 1,
-                    "timeId": 1,
-                    "themeId": 1
-                }
-                """;
-
-        mockMvc.perform(post("/waiting-reservations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void 예약자명이_공백이면_400을_반환한다() throws Exception {
-        String requestBody = """
-                {
-                    "name": "   ",
                     "dateId": 1,
                     "timeId": 1,
                     "themeId": 1
@@ -61,7 +44,7 @@ class WaitingReservationControllerValidationTest {
     void dateId가_없으면_400을_반환한다() throws Exception {
         String requestBody = """
                 {
-                    "name": "고래",
+                    "memberId": 1,
                     "timeId": 1,
                     "themeId": 1
                 }
@@ -77,7 +60,7 @@ class WaitingReservationControllerValidationTest {
     void timeId가_없으면_400을_반환한다() throws Exception {
         String requestBody = """
                 {
-                    "name": "고래",
+                    "memberId": 1,
                     "dateId": 1,
                     "themeId": 1
                 }
@@ -93,7 +76,7 @@ class WaitingReservationControllerValidationTest {
     void themeId가_없으면_400을_반환한다() throws Exception {
         String requestBody = """
                 {
-                    "name": "고래",
+                    "memberId": 1,
                     "dateId": 1,
                     "timeId": 1
                 }
@@ -106,7 +89,7 @@ class WaitingReservationControllerValidationTest {
     }
 
     @Test
-    void name_파라미터가_없으면_400을_반환한다() throws Exception {
+    void memberId_파라미터가_없으면_400을_반환한다() throws Exception {
         mockMvc.perform(get("/waiting-reservations"))
                 .andExpect(status().isBadRequest());
     }

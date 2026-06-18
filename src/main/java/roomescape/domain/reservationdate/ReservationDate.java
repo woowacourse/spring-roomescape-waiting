@@ -1,5 +1,9 @@
 package roomescape.domain.reservationdate;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -7,11 +11,18 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.RoomescapeException;
 
+@Entity
 @Getter
 public class ReservationDate {
 
-    private final Long id;
-    private final LocalDate playDay;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate playDay;
+
+    protected ReservationDate() {
+
+    }
 
     private ReservationDate(Long id, LocalDate playDay) {
         validate(playDay);

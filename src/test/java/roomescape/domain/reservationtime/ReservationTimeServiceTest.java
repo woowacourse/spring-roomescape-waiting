@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationdate.ReservationDate;
@@ -40,6 +42,9 @@ class ReservationTimeServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     @Test
     void 예약_시간을_생성한다() {
         TimeCreationRequest request = new TimeCreationRequest(LocalTime.of(10, 0));
@@ -64,7 +69,8 @@ class ReservationTimeServiceTest {
         ReservationTime time2 = createTime(LocalTime.of(11, 0));
         ReservationDate date = reservationDateRepository.save(ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
         Theme theme = themeRepository.save(Theme.createWithoutId("테스트테마", "설명", "url"));
-        reservationRepository.save(Reservation.createWithoutId("테스터", date, time1, theme));
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        reservationRepository.save(Reservation.createWithoutId(tester, date, time1, theme));
 
         List<ReservationTimeAvailabilityResponse> responses =
                 reservationTimeService.getReservationTimeAvailability(theme.getId(), date.getId());
@@ -79,7 +85,8 @@ class ReservationTimeServiceTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         ReservationDate date = reservationDateRepository.save(ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
         Theme theme = themeRepository.save(Theme.createWithoutId("테스트테마", "설명", "url"));
-        reservationRepository.save(Reservation.createWithoutId("테스터", date, time, theme));
+        Member tester = memberRepository.save(Member.createWithoutId("테스터"));
+        reservationRepository.save(Reservation.createWithoutId(tester, date, time, theme));
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(time.getId()))
                 .isInstanceOf(RoomescapeException.class);

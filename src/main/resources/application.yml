@@ -5,5 +5,12 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:h2:mem:database
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    ddl-auto: create-drop
+    defer-datasource-initialization: true
 
 token: ${ADMIN_TOKEN:sanwhale0192}

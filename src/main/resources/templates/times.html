@@ -85,10 +85,9 @@
                             <h3>예약 정보 입력</h3>
                             <p id="reservation-form-summary">테마와 날짜를 선택해 주세요.</p>
                         </div>
-                        <label for="reservation-name">예약자 이름 <span class="input-hint">(공백 없이 입력)</span></label>
-                        <input id="reservation-name" name="name" type="text" maxlength="20"
-                               placeholder="공백 없이 이름을 입력하세요" 
-                               pattern="^[^\s]+$" title="공백은 포함될 수 없습니다." required>
+                        <label for="reservation-member-id">멤버 ID</label>
+                        <input id="reservation-member-id" name="memberId" type="number" min="1"
+                               placeholder="멤버 ID를 입력하세요" required>
                         <button type="submit" id="reservation-submit-button" class="primary-button full-width">예약 확정</button>
                         <p id="reservation-message" class="form-message" aria-live="polite"></p>
                     </form>
@@ -102,15 +101,14 @@
                     <div>
                         <span class="section-kicker">CHECK</span>
                         <h2>내 예약 확인</h2>
-                        <p>예약하실 때 입력하신 이름을 검색해 주세요.</p>
+                        <p>멤버 ID로 검색해 주세요.</p>
                     </div>
                 </div>
                 <div class="search-form-layout">
                     <form id="search-form" class="reservation-form search-form-inline">
-                        <label for="search-name">예약자 이름 <span class="input-hint">(공백 없이 입력)</span></label>
-                        <input id="search-name" name="name" type="text" maxlength="20"
-                               placeholder="공백 없이 이름을 입력하세요"
-                               pattern="^[^\s]+$" title="공백은 포함될 수 없습니다." required>
+                        <label for="search-member-id">멤버 ID</label>
+                        <input id="search-member-id" name="memberId" type="number" min="1"
+                               placeholder="멤버 ID를 입력하세요" required>
                         <button type="submit" class="primary-button">검색하기</button>
                     </form>
                 </div>

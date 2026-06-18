@@ -4,6 +4,6 @@ import roomescape.domain.waitingreservation.WaitingReservation;
 
 public record WaitingReservationWithRank(
     WaitingReservation waitingReservation,
-    long rank
+    Long rank
 ) {
 }

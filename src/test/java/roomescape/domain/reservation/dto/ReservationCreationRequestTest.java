@@ -21,59 +21,23 @@ class ReservationCreationRequestTest {
     }
 
     @Test
-    void 이름이_null이면_예외가_발생한다() {
-        // given
-        ReservationCreationRequest request = new ReservationCreationRequest(
-            null,
-            1L,
-            1L,
-            1L
-        );
+    void memberId가_null이면_예외가_발생한다() {
+        ReservationCreationRequest request = new ReservationCreationRequest(null, 1L, 1L, 1L);
 
-        // when
         Set<ConstraintViolation<ReservationCreationRequest>> violations = validator.validate(request);
 
-        // then
         assertThat(violations).hasSize(1);
         assertThat(violations)
             .extracting(ConstraintViolation::getMessage)
-            .contains("예약자명은 필수입니다");
-    }
-
-    @Test
-    void 이름이_공백이면_예외가_발생한다() {
-        // given
-        ReservationCreationRequest request = new ReservationCreationRequest(
-            "   ",
-            1L,
-            1L,
-            1L
-        );
-
-        // when
-        Set<ConstraintViolation<ReservationCreationRequest>> violations = validator.validate(request);
-
-        // then
-        assertThat(violations).hasSize(1);
-        assertThat(violations)
-            .extracting(ConstraintViolation::getMessage)
-            .contains("예약자명은 필수입니다");
+            .contains("멤버 ID는 필수입니다");
     }
 
     @Test
     void 날짜가_null이면_예외가_발생한다() {
-        // given
-        ReservationCreationRequest request = new ReservationCreationRequest(
-            "보예",
-            null,
-            1L,
-            1L
-        );
+        ReservationCreationRequest request = new ReservationCreationRequest(1L, null, 1L, 1L);
 
-        // when
         Set<ConstraintViolation<ReservationCreationRequest>> violations = validator.validate(request);
 
-        // then
         assertThat(violations).hasSize(1);
         assertThat(violations)
             .extracting(ConstraintViolation::getMessage)
@@ -82,18 +46,10 @@ class ReservationCreationRequestTest {
 
     @Test
     void 시간_id가_null이면_예외가_발생한다() {
-        // given
-        ReservationCreationRequest request = new ReservationCreationRequest(
-            "보예",
-            1L,
-            null,
-            1L
-        );
+        ReservationCreationRequest request = new ReservationCreationRequest(1L, 1L, null, 1L);
 
-        // when
         Set<ConstraintViolation<ReservationCreationRequest>> violations = validator.validate(request);
 
-        // then
         assertThat(violations).hasSize(1);
         assertThat(violations)
             .extracting(ConstraintViolation::getMessage)
@@ -102,18 +58,10 @@ class ReservationCreationRequestTest {
 
     @Test
     void 테마_id가_null이면_예외가_발생한다() {
-        // given
-        ReservationCreationRequest request = new ReservationCreationRequest(
-            "보예",
-            1L,
-            1L,
-            null
-        );
+        ReservationCreationRequest request = new ReservationCreationRequest(1L, 1L, 1L, null);
 
-        // when
         Set<ConstraintViolation<ReservationCreationRequest>> violations = validator.validate(request);
 
-        // then
         assertThat(violations).hasSize(1);
         assertThat(violations)
             .extracting(ConstraintViolation::getMessage)

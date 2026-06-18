@@ -298,26 +298,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const reservationForm = document.getElementById("reservation-form");
     const message = document.getElementById("reservation-message");
 
-    const reservationNameInput = document.getElementById("reservation-name");
-    const searchNameInput = document.getElementById("search-name");
-
-    [reservationNameInput, searchNameInput].forEach(input => {
-        if (input) {
-            input.addEventListener("input", (e) => {
-                const value = e.target.value;
-                if (/\s/.test(value)) {
-                    e.target.value = value.replace(/\s/g, "");
-                }
-            });
-        }
-    });
 
     reservationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const formData = new FormData(reservationForm);
         const payload = {
-            name: formData.get("name"),
+            memberId: Number(formData.get("memberId")),
             themeId: Number(formData.get("themeId")),
             dateId: Number(formData.get("dateId")),
             timeId: Number(formData.get("timeId"))
@@ -382,14 +369,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     searchForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const name = document.getElementById("search-name").value;
+        const memberId = document.getElementById("search-member-id").value;
         searchMessage.textContent = "";
         searchMessage.className = "form-message";
 
         try {
             const [reservations, waitingReservations] = await Promise.all([
-                fetchJson(`/reservations?name=${encodeURIComponent(name)}`),
-                fetchJson(`/waiting-reservations?name=${encodeURIComponent(name)}`)
+                fetchJson(`/reservations-mine?memberId=${memberId}`),
+                fetchJson(`/waiting-reservations?memberId=${memberId}`)
             ]);
 
             if (reservations.length === 0 && waitingReservations.length === 0) {
