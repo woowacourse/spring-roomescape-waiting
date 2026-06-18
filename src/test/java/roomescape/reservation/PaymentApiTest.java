@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.net.SocketTimeoutException;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -150,6 +151,28 @@ class PaymentApiTest {
                 .when().post("/payments/success")
                 .then().log().all()
                 .statusCode(502);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("PAYMENT_PENDING");
+            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
+        });
+    }
+
+    @DisplayName("결제 승인 timeout이 발생하면 API는 503을 반환하고 결제 주문과 예약 상태를 확정하지 않습니다.")
+    @Test
+    void confirm_payment_timeout_preserves_pending_status() {
+        PaymentOrder order = preparePaymentOrder();
+        given(paymentGateway.confirm(any()))
+                .willThrow(new RetryablePaymentGatewayException(new SocketTimeoutException()));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(paymentConfirmRequest(order))
+                .when().post("/payments/success")
+                .then().log().all()
+                .statusCode(503)
+                .body("errorMessage", equalTo("결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요."))
+                .body("$", not(hasKey("code")));
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("PAYMENT_PENDING");
