@@ -18,8 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
+import roomescape.global.exception.RetryablePaymentGatewayException;
 import roomescape.reservation.application.port.out.payment.PaymentConfirmation;
 import tools.jackson.databind.ObjectMapper;
 
@@ -79,7 +78,7 @@ class TossClientTimeoutTest {
         long start = System.nanoTime();
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(paymentConfirmation()))
-                .isInstanceOf(RestClientException.class)
+                .isInstanceOf(RetryablePaymentGatewayException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
@@ -109,7 +108,7 @@ class TossClientTimeoutTest {
             try {
                 tossPaymentGateway.confirm(paymentConfirmation());
                 succeeded++;
-            } catch (RestClientException e) {
+            } catch (RetryablePaymentGatewayException e) {
                 // timeout으로 일찍 포기한 호출은 성공 TPS에 세지 않는다.
             }
         }
@@ -133,7 +132,7 @@ class TossClientTimeoutTest {
         long start = System.nanoTime();
 
         assertThatThrownBy(() -> gateway.confirm(paymentConfirmation()))
-                .isInstanceOf(ResourceAccessException.class)
+                .isInstanceOf(RetryablePaymentGatewayException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
