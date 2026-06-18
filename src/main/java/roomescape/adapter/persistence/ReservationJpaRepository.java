@@ -2,6 +2,7 @@ package roomescape.adapter.persistence;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,10 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
+
+    @Override
+    @EntityGraph(attributePaths = {"time", "theme"})
+    List<Reservation> findAll();
 
     boolean existsByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
 
@@ -21,6 +26,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByTheme_Id(Long themeId);
 
+    @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findByNameOrderByDateAscTime_StartAtAsc(String name);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)

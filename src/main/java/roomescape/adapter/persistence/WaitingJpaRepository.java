@@ -2,6 +2,7 @@ package roomescape.adapter.persistence;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,7 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findByDateAndTime_IdAndTheme_IdOrderByOrderIndexAsc(LocalDate date, Long timeId, Long themeId);
 
+    @EntityGraph(attributePaths = {"time", "theme"})
     List<Waiting> findByNameOrderByDateAscTime_StartAtAsc(String name);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)

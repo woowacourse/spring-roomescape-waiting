@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,12 +29,12 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
-    // 단방향 @ManyToOne. fetch 기본값(EAGER) 유지 — 1-3 관찰⑤·3-1 N+1에서 본 뒤 튜닝.
-    @ManyToOne(optional = false)
+    // 단방향 @ManyToOne. 3-1에서 EAGER→LAZY 전환(N+1 제거) + 조회 경로는 @EntityGraph fetch join.
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "time_id")
     private ReservationTime time;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
