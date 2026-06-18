@@ -1,6 +1,6 @@
 package roomescape.controller.client.api.dto.response;
 
-import roomescape.service.result.ThemeRegisterResult;
+import roomescape.application.service.result.ThemeRegisterResult;
 
 public record ThemeResponse(
         long id,

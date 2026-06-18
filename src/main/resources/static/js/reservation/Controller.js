@@ -48,7 +48,12 @@ export default class Controller {
 
     this.views.formView.on("@submit", async () => {
       try {
-        await this.store.submit();
+        const result = await this.store.submit();
+
+        if (!this.store.reservationId) {
+          location.href = `/toss/checkout.html?orderId=${encodeURIComponent(result.orderId)}`;
+          return;
+        }
 
         const submitMode = this.store.submitMode();
         this.views.toastView.show(

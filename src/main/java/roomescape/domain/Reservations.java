@@ -25,6 +25,12 @@ public class Reservations {
         return reservation;
     }
 
+    public Reservation addPending(String name, ReservationStatus status) {
+        Reservation reservation = Reservation.pending(name, status);
+        reservations.add(reservation);
+        return reservation;
+    }
+
     public void promoteFirstWaiting() {
         reservations.stream()
                 .filter(Reservation::isActiveWaiting)
@@ -62,5 +68,11 @@ public class Reservations {
         return reservations.stream()
                 .filter(reservation -> reservation.hasSameActiveName(name))
                 .findFirst();
+    }
+
+    public Optional<Reservation> findLatestPendingEntryByName(String name) {
+        return reservations.stream()
+                .filter(reservation -> reservation.isPendingWithName(name))
+                .max(Comparator.comparing(Reservation::getCreatedAt));
     }
 }

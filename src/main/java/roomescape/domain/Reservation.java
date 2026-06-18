@@ -8,7 +8,7 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
     private ReservationStatus status;
     private ReservationActiveStatus activeStatus;
 
@@ -38,12 +38,27 @@ public class Reservation {
         return new Reservation(null, name, ReservationStatus.WAITING, LocalDateTime.now());
     }
 
+    public static Reservation pending(String name, ReservationStatus status) {
+        return new Reservation(null, name, status, ReservationActiveStatus.PENDING, LocalDateTime.now());
+    }
+
     public void cancel() {
         this.activeStatus = ReservationActiveStatus.CANCELED;
     }
 
     public void promote() {
         this.status = ReservationStatus.RESERVED;
+    }
+
+    public void confirmReserved() {
+        this.status = ReservationStatus.RESERVED;
+        this.activeStatus = ReservationActiveStatus.ACTIVE;
+    }
+
+    public void confirmWaiting() {
+        this.status = ReservationStatus.WAITING;
+        this.activeStatus = ReservationActiveStatus.ACTIVE;
+        this.createdAt = LocalDateTime.now();
     }
 
     public boolean isSameId(long id) {
@@ -59,11 +74,15 @@ public class Reservation {
     }
 
     public boolean isActiveWithId(long id) {
-        return isActive() && isSameId(id);
+        return !isCanceled() && isSameId(id);
     }
 
     public boolean hasSameActiveName(String name) {
         return isActive() && hasSameName(name);
+    }
+
+    public boolean isPendingWithName(String name) {
+        return isActivePending() && hasSameName(name);
     }
 
     private boolean hasSameName(String name) {
@@ -80,5 +99,13 @@ public class Reservation {
 
     private boolean isReserved() {
         return this.status == ReservationStatus.RESERVED;
+    }
+
+    public boolean isActivePending() {
+        return this.activeStatus == ReservationActiveStatus.PENDING;
+    }
+
+    private boolean isCanceled() {
+        return this.activeStatus == ReservationActiveStatus.CANCELED;
     }
 }

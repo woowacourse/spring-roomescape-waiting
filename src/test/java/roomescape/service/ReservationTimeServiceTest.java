@@ -6,12 +6,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import roomescape.application.service.ReservationTimeService;
+import roomescape.application.service.command.ReservationTimeCommand;
+import roomescape.application.service.result.ReservationTimeResult;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.TimeStatus;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.fake.FakeReservationTimeRepository;
-import roomescape.service.result.ReservationTimeResult;
 
 class ReservationTimeServiceTest {
 

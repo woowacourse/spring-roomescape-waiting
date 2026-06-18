@@ -1,7 +1,7 @@
 package roomescape.controller.admin.api.dto.response;
 
 import java.time.LocalDate;
-import roomescape.service.result.ReservationSlotResult;
+import roomescape.application.service.result.ReservationSlotResult;
 
 public record AdminReservationSlotResponse(
         long slotId,

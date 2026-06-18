@@ -13,10 +13,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.application.service.ReservationService;
+import roomescape.application.service.command.ReservationCommand;
+import roomescape.application.service.result.ReservationSlotResult;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.service.ReservationService;
-import roomescape.service.command.ReservationCommand;
-import roomescape.service.result.ReservationSlotResult;
 
 class ReservationServiceIntTest extends BaseIntegrationTest {
 

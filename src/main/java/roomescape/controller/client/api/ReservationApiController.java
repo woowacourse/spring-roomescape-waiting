@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.application.service.ReservationService;
+import roomescape.application.service.result.ReservationSlotResult;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
+import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
-import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
+import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 import roomescape.controller.client.api.dto.response.ReservationSlotResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
-import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
-import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
-import roomescape.service.ReservationService;
-import roomescape.service.result.ReservationSlotResult;
 
 @RestController
 @RequiredArgsConstructor

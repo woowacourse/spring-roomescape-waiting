@@ -3,7 +3,7 @@ package roomescape.controller.admin.api.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import roomescape.service.command.ThemeRegisterCommand;
+import roomescape.application.service.command.ThemeRegisterCommand;
 
 public record AdminThemeRequest(
         @NotBlank(message = "이름은 필수 값입니다.")

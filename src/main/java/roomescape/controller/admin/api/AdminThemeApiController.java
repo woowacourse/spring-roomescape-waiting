@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.application.service.ThemeService;
+import roomescape.application.service.result.ThemeRegisterResult;
 import roomescape.controller.admin.api.dto.request.AdminThemeRequest;
 import roomescape.controller.admin.api.dto.response.AdminThemeResponse;
 import roomescape.controller.admin.api.query.AdminThemeQuery;
-import roomescape.service.ThemeService;
-import roomescape.service.result.ThemeRegisterResult;
 
 @RequestMapping("/api/admin/themes")
 @RestController

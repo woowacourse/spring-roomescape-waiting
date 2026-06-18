@@ -1,7 +1,7 @@
 package roomescape.persistence.dto;
 
 import java.time.LocalDate;
-import roomescape.service.command.ReservationCommand;
+import roomescape.application.service.command.ReservationCommand;
 
 public record ReservationCondition(
        LocalDate date,

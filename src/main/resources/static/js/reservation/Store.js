@@ -3,6 +3,7 @@ import {
   cancelReservation,
   changeReservation,
   createReservation,
+  createPaymentOrder,
   createWaitingReservation,
   fetchReservation,
   fetchThemes,
@@ -128,10 +129,7 @@ export default class Store {
       });
     }
 
-    if (this.submitMode() === "waiting") {
-      return createWaitingReservation(payload);
-    }
-
-    return createReservation(payload);
+    const orderType = this.submitMode() === "waiting" ? "WAITING" : "RESERVATION";
+    return createPaymentOrder({ ...payload, orderType });
   }
 }

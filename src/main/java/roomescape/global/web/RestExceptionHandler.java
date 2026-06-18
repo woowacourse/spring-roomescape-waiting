@@ -13,17 +13,17 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import roomescape.common.BusinessException;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
 import roomescape.exception.ForbiddenException;
-import roomescape.exception.RoomEscapeException;
 
 @RestControllerAdvice
 @Slf4j
 public class RestExceptionHandler {
 
-    @ExceptionHandler(RoomEscapeException.class)
-    public ResponseEntity<String> handleRoomEscapeException(RoomEscapeException ex) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<String> handleBusinessException(BusinessException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());
     }
@@ -90,6 +90,12 @@ public class RestExceptionHandler {
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ex.getParameterName() + " 파라미터가 누락 되었습니다.");
+    }
+
+    @ExceptionHandler(ExternalApiException.class)
+    public ResponseEntity<String> handleExternalApiException(ExternalApiException ex) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(ex.getMessage());
     }
 
     @ExceptionHandler(exception = Exception.class)
