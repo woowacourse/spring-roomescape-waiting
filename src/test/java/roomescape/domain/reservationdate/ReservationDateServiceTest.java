@@ -3,54 +3,54 @@ package roomescape.domain.reservationdate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservationslot.ReservationSlot;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.reservationdate.admin.dto.AdminReservationDateResponse;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateRequest;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateResponse;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
+import roomescape.domain.reservationslot.JpaReservationSlotRepository;
 import roomescape.support.exception.RoomescapeException;
-import roomescape.support.fake.FakeReservationDateRepository;
-import roomescape.support.fake.FakeReservationSlotRepository;
 
+@ExtendWith(MockitoExtension.class)
 class ReservationDateServiceTest {
 
-    private FakeReservationSlotRepository reservationRepository;
-    private FakeReservationDateRepository reservationDateRepository;
+    @Mock
+    private JpaReservationSlotRepository reservationSlotRepository;
 
-    @BeforeEach
-    void setUp() {
-        reservationRepository = new FakeReservationSlotRepository();
-        reservationDateRepository = new FakeReservationDateRepository();
-    }
+    @Mock
+    private JpaReservationDateRepository reservationDateRepository;
+
+    @InjectMocks
+    private ReservationDateService reservationDateService;
 
     @Test
     @DisplayName("예약 날짜를 생성한다.")
     void createReservationDate() {
         // given
-        ReservationDateService reservationDateService = new ReservationDateService(
-            reservationRepository,
-            reservationDateRepository
-        );
+        ReservationDate savedReservationDate = ReservationDate.of(1L, LocalDate.of(2026, 5, 4));
+        given(reservationDateRepository.save(any(ReservationDate.class)))
+            .willReturn(savedReservationDate);
 
         // when
         CreateReservationDateResponse response = reservationDateService.createReservationDate(
             new CreateReservationDateRequest(LocalDate.of(2026, 5, 4))
         );
-        ReservationDate reservationDate = reservationDateRepository.findById(response.id()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
-            assertThat(response.id()).isEqualTo(reservationDate.getId());
+            assertThat(response.id()).isEqualTo(savedReservationDate.getId());
             assertThat(response.reservationDate()).isEqualTo(LocalDate.of(2026, 5, 4));
-            assertThat(reservationDate.getDate()).isEqualTo(LocalDate.of(2026, 5, 4));
         });
     }
 
@@ -58,12 +58,8 @@ class ReservationDateServiceTest {
     @DisplayName("예약 날짜 목록을 조회한다.")
     void getReservationDateList() {
         // given
-        ReservationDate reservationDate = reservationDateRepository.save(
-            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 4)));
-        ReservationDateService reservationDateService = new ReservationDateService(
-            reservationRepository,
-            reservationDateRepository
-        );
+        ReservationDate reservationDate = ReservationDate.of(1L, LocalDate.of(2026, 5, 4));
+        given(reservationDateRepository.findAll()).willReturn(List.of(reservationDate));
 
         // when
         List<AdminReservationDateResponse> responses = reservationDateService.getAllReservationDateForAdmin();
@@ -80,40 +76,27 @@ class ReservationDateServiceTest {
     @DisplayName("이미 예약이 존재하는 날짜는 삭제할 수 없다.")
     void throwExceptionWhenDeletingDateInUse() {
         // given
-        ReservationDate reservationDate = reservationDateRepository.save(
-            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 4)));
-        reservationRepository.save(
-            ReservationSlot.createWithoutId(reservationDate,
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "공포", "무서운 테마", "theme-url")
-            )
-        );
-        ReservationDateService reservationDateService = new ReservationDateService(
-            reservationRepository,
-            reservationDateRepository
-        );
+        Long reservationDateId = 1L;
+        given(reservationSlotRepository.countByDateId(reservationDateId)).willReturn(1);
 
         // when & then
-        assertThatThrownBy(() -> reservationDateService.deleteReservationDate(reservationDate.getId()))
+        assertThatThrownBy(() -> reservationDateService.deleteReservationDate(reservationDateId))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("이미 예약이 존재하는 날짜는 삭제할 수 없습니다.");
+        verify(reservationDateRepository, never()).deleteById(reservationDateId);
     }
 
     @Test
     @DisplayName("예약이 없는 날짜는 삭제한다.")
     void deleteDateWhenNoReservationExists() {
         // given
-        ReservationDate reservationDate = reservationDateRepository.save(
-            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 4)));
-        ReservationDateService reservationDateService = new ReservationDateService(
-            reservationRepository,
-            reservationDateRepository
-        );
+        Long reservationDateId = 1L;
+        given(reservationSlotRepository.countByDateId(reservationDateId)).willReturn(0);
 
         // when
-        reservationDateService.deleteReservationDate(reservationDate.getId());
+        reservationDateService.deleteReservationDate(reservationDateId);
 
         // then
-        assertThat(reservationDateRepository.findById(reservationDate.getId())).isEmpty();
+        verify(reservationDateRepository).deleteById(reservationDateId);
     }
 }

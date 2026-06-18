@@ -72,8 +72,9 @@ public class ReservationService {
     @Transactional
     public void cancelReservationByAdmin(Long id) {
         Reservation reservation = findActiveReservationByIdOrThrow(id);
+        ReservationStatus previousStatus = reservation.getStatus();
         reservationRepository.save(reservation.update(ReservationStatus.CANCELED, clock));
-        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+        if (previousStatus == ReservationStatus.CONFIRMED) {
             promoteFirstWaitingReservation(reservation.getReservationSlot());
         }
     }
@@ -82,8 +83,9 @@ public class ReservationService {
     public void cancelUserReservation(Long id) {
         Reservation reservation = findActiveReservationByIdOrThrow(id);
         validateReservationDeletionAllowed(reservation);
+        ReservationStatus previousStatus = reservation.getStatus();
         reservationRepository.save(reservation.update(ReservationStatus.CANCELED, clock));
-        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+        if (previousStatus == ReservationStatus.CONFIRMED) {
             promoteFirstWaitingReservation(reservation.getReservationSlot());
         }
     }
@@ -147,14 +149,18 @@ public class ReservationService {
             ReservationStatus.CANCELED
         );
         ReservationStatus updatedStatus = decideWaitingStatus(currentReservationCount - 1);
+        ReservationStatus previousStatus = reservation.getStatus();
         reservationRepository.save(reservation.update(currentReservationSlot, updatedStatus, clock));
-        if (shouldPromoteNextWaitingReservation(reservation, updatedStatus)) {
+        if (shouldPromoteNextWaitingReservation(previousStatus, updatedStatus)) {
             promoteFirstWaitingReservation(currentReservationSlot);
         }
     }
 
-    private boolean shouldPromoteNextWaitingReservation(Reservation reservation, ReservationStatus updatedStatus) {
-        return reservation.getStatus() == ReservationStatus.CONFIRMED && updatedStatus == ReservationStatus.WAITING;
+    private boolean shouldPromoteNextWaitingReservation(
+        ReservationStatus previousStatus,
+        ReservationStatus updatedStatus
+    ) {
+        return previousStatus == ReservationStatus.CONFIRMED && updatedStatus == ReservationStatus.WAITING;
     }
 
     private void updateReservationWhenMovingSlot(
@@ -174,8 +180,9 @@ public class ReservationService {
             clock
         );
 
+        ReservationStatus previousStatus = reservation.getStatus();
         reservationRepository.save(reservationToSave);
-        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+        if (previousStatus == ReservationStatus.CONFIRMED) {
             promoteFirstWaitingReservation(currentSlot);
         }
     }
