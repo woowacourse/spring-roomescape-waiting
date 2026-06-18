@@ -77,6 +77,7 @@ CREATE TABLE orders
     created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE (order_id),
+    UNIQUE (reservation_id), -- 한 예약엔 주문 1건만(결제 준비 멱등의 DB 백스톱: 동시 요청 경합도 차단)
     FOREIGN KEY (reservation_id) REFERENCES reservations (id)
 );
 

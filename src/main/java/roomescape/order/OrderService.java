@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.BusinessRuleViolationException;
 
 /**
  * 주문(Order) 생명주기 애플리케이션 서비스. 생성·확정·실패·만료조회를 소유한다.
@@ -34,7 +36,18 @@ public class OrderService {
      */
     public Order getOrCreate(Long reservationId, long amount) {
         return orderDao.findPendingByReservationId(reservationId)
-                .orElseGet(() -> create(reservationId, amount));
+                .orElseGet(() -> createPending(reservationId, amount));
+    }
+
+    private Order createPending(Long reservationId, long amount) {
+        try {
+            return create(reservationId, amount);
+        } catch (DuplicateKeyException e) {
+            // UNIQUE(reservation_id) 백스톱. 동시 결제 준비 경합이면 먼저 만들어진 PENDING 주문을 재사용하고,
+            // 이미 확정/취소된 예약이면(=PENDING 없음) 결제를 새로 시작할 수 없다.
+            return orderDao.findPendingByReservationId(reservationId)
+                    .orElseThrow(() -> new BusinessRuleViolationException("이미 처리된 예약입니다."));
+        }
     }
 
     @Transactional(readOnly = true)

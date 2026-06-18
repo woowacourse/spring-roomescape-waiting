@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.service.ReservationAuthorizationService;
@@ -156,6 +157,17 @@ class PaymentServiceTest {
         Integer orderCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM orders WHERE reservation_id = ?", Integer.class, reservation.getId());
         assertThat(orderCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("한 예약에 주문을 2건 만들려 하면 UNIQUE(reservation_id) 제약으로 막힌다")
+    void rejectsSecondOrderForSameReservation() {
+        Reservation reservation = reservationService.create(member,
+                new ReservationRequestDto(LocalDate.now().plusDays(1), time.getId(), theme.getId(), storeId));
+        orderService.create(reservation.getId(), theme.getPrice());
+
+        assertThatThrownBy(() -> orderService.create(reservation.getId(), theme.getPrice()))
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
