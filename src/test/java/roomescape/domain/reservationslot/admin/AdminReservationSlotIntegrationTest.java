@@ -14,7 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.support.TestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class AdminReservationSlotIntegrationTest {
@@ -23,7 +24,7 @@ class AdminReservationSlotIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TestFixture testFixture;
 
     @Value("${token}")
     private String adminToken;
@@ -31,127 +32,47 @@ class AdminReservationSlotIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_slot");
-        jdbcTemplate.update("DELETE FROM users");
-        jdbcTemplate.update("DELETE FROM reservation_date");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
+        testFixture.clear();
     }
 
     @Test
-    @DisplayName("관리자의 예약 전체 조회를 end-to-end로 확인한다.")
-    void getAllReservation() {
-        saveThemeDateTimeAndReservation("보예");
+    @DisplayName("관리자의 대기 목록 조회를 end-to-end로 확인한다.")
+    void getWaitingReservations() {
+        var theme = testFixture.saveTheme("공포");
+        var date = testFixture.saveDate("2026-06-01");
+        var time = testFixture.saveTime("10:00");
+        var slot = testFixture.saveSlot(date, time, theme);
+        testFixture.saveReservation("보예", slot, ReservationStatus.CONFIRMED);
+        testFixture.saveReservation("수민", slot, ReservationStatus.WAITING);
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().get("/admin/reservations")
+            .when().get("/admin/waitings")
             .then().log().all()
             .statusCode(200)
-            .body("[0].date", is("2026-06-01"))
-            .body("[0].time.startAt", is("10:00"))
-            .body("[0].theme.name", is("공포"));
+            .body("[0].theme.name", is("공포"))
+            .body("[0].userName", is("수민"))
+            .body("[0].waitingNumber", is(1))
+            .body("[0].reservationStatus", is("WAITING"));
     }
 
     @Test
-    @DisplayName("관리자가 토큰을 누락했을 경우 401 예외가 발생한다.")
-    void getAllReservationWithoutToken() {
-        given().log().all()
-            .contentType(ContentType.JSON)
-            .when().get("/admin/reservations")
-            .then().log().all()
-            .statusCode(401);
-    }
-
-    @Test
-    @DisplayName("관리자의 예약 취소를 end-to-end로 확인한다.")
-    void deleteReservation() {
-        Long reservationId = saveThemeDateTimeAndReservation("보예");
+    @DisplayName("관리자의 대기 예약 취소를 end-to-end로 확인한다.")
+    void deleteWaitingReservation() {
+        var theme = testFixture.saveTheme("공포");
+        var date = testFixture.saveDate("2026-06-01");
+        var time = testFixture.saveTime("10:00");
+        var slot = testFixture.saveSlot(date, time, theme);
+        Long reservationId = testFixture.saveReservation("보예", slot, ReservationStatus.WAITING).getId();
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().delete("/admin/reservations/{id}", reservationId)
+            .when().delete("/admin/waitings/{id}", reservationId)
             .then().log().all()
             .statusCode(204);
 
-        String reservationStatus = jdbcTemplate.queryForObject(
-            "SELECT status FROM reservation WHERE id = ?",
-            String.class,
-            reservationId
-        );
-        assertThat(reservationStatus).isEqualTo("CANCELED");
-    }
-
-    private Long saveThemeDateTimeAndReservation(String name) {
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            "공포",
-            "무서운 테마",
-            "theme-url"
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation_date(date) VALUES (?)",
-            "2026-06-01"
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation_time(start_at) VALUES (?)",
-            "10:00"
-        );
-
-
-        Long themeId = jdbcTemplate.queryForObject(
-            "SELECT id FROM theme WHERE name = ?",
-            Long.class,
-            "공포"
-        );
-        Long dateId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_date WHERE date = ?",
-            Long.class,
-            "2026-06-01"
-        );
-        Long timeId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_time WHERE start_at = ?",
-            Long.class,
-            "10:00:00"
-        );
-
-        jdbcTemplate.update(
-                "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
-                dateId,
-                timeId,
-                themeId
-        );
-        Long reservationId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
-            Long.class,
-            dateId,
-            timeId,
-            themeId
-        );
-
-        jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", name);
-
-        Long userId = jdbcTemplate.queryForObject(
-            "SELECT id FROM users WHERE name = ?",
-            Long.class,
-            name
-        );
-
-        jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
-            userId,
-            reservationId,
-            "CONFIRMED"
-        );
-
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation WHERE user_id = ? AND reservation_slot_id = ?",
-            Long.class,
-            userId,
-            reservationId
-        );
+        assertThat(testFixture.findReservationStatus(reservationId)).isEqualTo(ReservationStatus.CANCELED);
     }
 }

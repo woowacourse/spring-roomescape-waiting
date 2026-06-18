@@ -7,7 +7,7 @@ import roomescape.domain.reservationdate.admin.dto.AdminReservationDateResponse;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateRequest;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateResponse;
 import roomescape.domain.reservationdate.dto.ReservationDateResponse;
-import roomescape.domain.reservationslot.ReservationSlotRepository;
+import roomescape.domain.reservationslot.JpaReservationSlotRepository;
 import roomescape.support.exception.ConflictException;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
@@ -16,8 +16,8 @@ import roomescape.support.exception.errors.ReservationDateErrors;
 @RequiredArgsConstructor
 public class ReservationDateService {
 
-    private final ReservationSlotRepository reservationSlotRepository;
-    private final ReservationDateRepository reservationDateRepository;
+    private final JpaReservationSlotRepository reservationSlotRepository;
+    private final JpaReservationDateRepository reservationDateRepository;
 
     public List<AdminReservationDateResponse> getAllReservationDateForAdmin() {
         return reservationDateRepository.findAll().stream()
@@ -31,7 +31,7 @@ public class ReservationDateService {
     }
 
     public void deleteReservationDate(Long id) {
-        if (reservationSlotRepository.countByReservationDateId(id) > 0) {
+        if (reservationSlotRepository.countByDateId(id) > 0) {
             throw new ConflictException(ReservationDateErrors.RESERVATION_DATE_IN_USE);
         }
         reservationDateRepository.deleteById(id);

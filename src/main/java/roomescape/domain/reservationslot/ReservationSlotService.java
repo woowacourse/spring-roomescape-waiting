@@ -1,17 +1,22 @@
 package roomescape.domain.reservationslot;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.JpaReservationRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationCountResult;
 import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationdate.ReservationDateRepository;
+import roomescape.domain.reservationdate.JpaReservationDateRepository;
 import roomescape.domain.reservationslot.dto.ReservationSlotResponse;
+import roomescape.domain.reservationtime.JpaReservationTimeRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.theme.JpaThemeRepository;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
 import roomescape.support.exception.errors.ReservationSlotErrors;
@@ -21,17 +26,42 @@ import roomescape.support.exception.errors.ThemeErrors;
 @RequiredArgsConstructor
 public class ReservationSlotService {
 
-    private final ReservationSlotRepository reservationSlotRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationDateRepository reservationDateRepository;
-    private final ReservationRepository reservationRepository;
+    private final JpaReservationSlotRepository reservationSlotRepository;
+    private final JpaThemeRepository themeRepository;
+    private final JpaReservationDateRepository reservationDateRepository;
+    private final JpaReservationRepository reservationRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
 
     public List<ReservationSlotResponse> getReservationSlots(Long themeId, Long dateId) {
         validateThemeAndDateExists(themeId, dateId);
-        List<ReservationCountResult> reservationCountResults = reservationRepository.countReservation(themeId, dateId);
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAllByOrderByStartAtAsc();
+        List<Reservation> reservations = reservationRepository.findReservationsForSlotAvailability(
+            themeId,
+            dateId,
+            ReservationStatus.CANCELED
+        );
 
-        return reservationCountResults.stream()
+        return createReservationCountResults(reservationTimes, reservations).stream()
             .map(ReservationSlotResponse::from)
+            .toList();
+    }
+
+    private List<ReservationCountResult> createReservationCountResults(
+        List<ReservationTime> reservationTimes,
+        List<Reservation> reservations
+    ) {
+        Map<Long, Long> reservationCountByTimeId = reservations.stream()
+            .collect(Collectors.groupingBy(
+                reservation -> reservation.getReservationSlot().getTime().getId(),
+                Collectors.counting()
+            ));
+
+        return reservationTimes.stream()
+            .map(reservationTime -> ReservationCountResult.of(
+                reservationTime.getId(),
+                reservationTime.getStartAt(),
+                reservationCountByTimeId.getOrDefault(reservationTime.getId(), 0L)
+            ))
             .toList();
     }
 
@@ -41,13 +71,13 @@ public class ReservationSlotService {
         Theme theme
     ) {
         try {
-            return reservationSlotRepository.findByScheduleToUpdate(
+            return reservationSlotRepository.findSlotForCreation(
                 reservationTime.getId(),
                 reservationDate.getId(),
                 theme.getId()
             ).orElseGet(() -> saveReservationSlot(reservationDate, reservationTime, theme));
-        } catch (DuplicateKeyException e) {
-            return reservationSlotRepository.findByScheduleToUpdate(
+        } catch (DataIntegrityViolationException e) {
+            return reservationSlotRepository.findSlotForCreation(
                 reservationTime.getId(),
                 reservationDate.getId(),
                 theme.getId()
@@ -69,9 +99,5 @@ public class ReservationSlotService {
             .orElseThrow(() -> new NotFoundException(ThemeErrors.THEME_NOT_EXIST));
         reservationDateRepository.findById(dateId)
             .orElseThrow(() -> new NotFoundException(ReservationDateErrors.RESERVATION_DATE_NOT_EXIST));
-    }
-
-    public void deleteReservationSlot(Long id) {
-        reservationSlotRepository.deleteById(id);
     }
 }

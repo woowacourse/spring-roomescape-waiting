@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.support.TestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class AdminReservationTimeIntegrationTest {
@@ -24,7 +25,7 @@ class AdminReservationTimeIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TestFixture testFixture;
 
     @Value("${token}")
     private String adminToken;
@@ -32,21 +33,13 @@ class AdminReservationTimeIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_slot");
-        jdbcTemplate.update("DELETE FROM users");
-        jdbcTemplate.update("DELETE FROM reservation_date");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
+        testFixture.clear();
     }
 
     @Test
     @DisplayName("관리자의 예약 시간 전체 조회를 end-to-end로 확인한다.")
     void getAllReservationTime() {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_time(start_at) VALUES (?)",
-            "10:10"
-        );
+        testFixture.saveTime("10:10");
 
         given().log().all()
             .contentType(ContentType.JSON)
@@ -133,21 +126,12 @@ class AdminReservationTimeIntegrationTest {
     @Test
     @DisplayName("관리자의 예약 시간 삭제를 end-to-end로 확인한다.")
     void deleteReservationTime() {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_time(start_at) VALUES (?)",
-            "10:10"
-        );
-
-        Long timeId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_time WHERE start_at = ?",
-            Long.class,
-            "10:10:00"
-        );
+        ReservationTime reservationTime = testFixture.saveTime("10:10");
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().delete("/admin/times/{id}", timeId)
+            .when().delete("/admin/times/{id}", reservationTime.getId())
             .then().log().all()
             .statusCode(200);
 

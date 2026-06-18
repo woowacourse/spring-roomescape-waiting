@@ -13,7 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationdate.ReservationDate;
+import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.support.TestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ThemeIntegrationTest {
@@ -22,28 +26,18 @@ class ThemeIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TestFixture testFixture;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_slot");
-        jdbcTemplate.update("DELETE FROM users");
-        jdbcTemplate.update("DELETE FROM reservation_date");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
+        testFixture.clear();
     }
 
     @Test
     @DisplayName("전체 테마 조회를 end-to-end로 확인한다.")
     void getAllTheme() {
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            "공포", "무서운 테마", "theme-url"
-        );
+        testFixture.saveTheme("공포");
         given().log().all()
             .contentType(ContentType.JSON)
             .when().get("/themes")
@@ -58,58 +52,13 @@ class ThemeIntegrationTest {
     @DisplayName("인기 테마 조회는 예약 슬롯 id와 예약 id가 달라도 실제 예약 슬롯 기준으로 집계한다.")
     void getThemeRankByReservationSlotId() {
         LocalDate reservationDate = LocalDate.now().minusDays(1);
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            "공포", "무서운 테마", "theme-url"
-        );
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            "보예", "보예 테마", "boye-url"
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation_date(date) VALUES (?)",
-            reservationDate
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation_time(start_at) VALUES (?)",
-            "10:00"
-        );
-        Long themeId = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, "공포");
-        Long dummyThemeId = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, "보예");
-        Long dateId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_date WHERE date = ?",
-            Long.class,
-            reservationDate
-        );
-        Long timeId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_time WHERE start_at = ?",
-            Long.class,
-            "10:00:00"
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
-            dateId,
-            timeId,
-            dummyThemeId
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
-            dateId,
-            timeId,
-            themeId
-        );
-        Long targetSlotId = jdbcTemplate.queryForObject(
-            "SELECT MAX(id) FROM reservation_slot",
-            Long.class
-        );
-        jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", "보예");
-        Long userId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE name = ?", Long.class, "보예");
-        jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
-            userId,
-            targetSlotId,
-            "CONFIRMED"
-        );
+        Theme theme = testFixture.saveTheme("공포");
+        Theme dummyTheme = testFixture.saveTheme("보예", "보예 테마", "boye-url");
+        ReservationDate date = testFixture.saveDate(reservationDate.toString());
+        ReservationTime time = testFixture.saveTime("10:00");
+        testFixture.saveSlot(date, time, dummyTheme);
+        ReservationSlot targetSlot = testFixture.saveSlot(date, time, theme);
+        testFixture.saveReservation("보예", targetSlot, ReservationStatus.CONFIRMED);
 
         given().log().all()
             .contentType(ContentType.JSON)

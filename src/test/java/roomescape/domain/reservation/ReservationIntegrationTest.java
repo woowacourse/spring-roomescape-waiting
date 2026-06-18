@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
@@ -25,8 +24,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import roomescape.domain.reservationdate.ReservationDate;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.support.TestFixture;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationIntegrationTest {
@@ -35,10 +37,10 @@ class ReservationIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TestFixture testFixture;
 
     @MockitoSpyBean
-    private ReservationRepository reservationRepository;
+    private JpaReservationRepository reservationRepository;
 
     @TestConfiguration
     static class TestClockConfig {
@@ -59,12 +61,7 @@ class ReservationIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_slot");
-        jdbcTemplate.update("DELETE FROM users");
-        jdbcTemplate.update("DELETE FROM reservation_date");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
+        testFixture.clear();
     }
 
     @Test
@@ -86,7 +83,7 @@ class ReservationIntegrationTest {
         given().log().all()
             .contentType(ContentType.JSON)
             .body(request)
-            .when().post("/reservations")
+            .when().post("/waitings")
             .then().log().all()
             .statusCode(201)
             .body("date", is("2026-06-01"))
@@ -98,7 +95,7 @@ class ReservationIntegrationTest {
         given()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then()
             .statusCode(200)
             .body("username", is("보예"))
@@ -122,7 +119,7 @@ class ReservationIntegrationTest {
         given().log().all()
             .contentType(ContentType.JSON)
             .body(request)
-            .when().post("/reservations")
+            .when().post("/waitings")
             .then().log().all()
             .statusCode(400)
             .body("code", is("INPUT_VALIDATION_ERROR"))
@@ -137,7 +134,7 @@ class ReservationIntegrationTest {
         given().log().all()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then().log().all()
             .statusCode(200)
             .body("username", is("보예"))
@@ -148,11 +145,33 @@ class ReservationIntegrationTest {
     }
 
     @Test
+    @DisplayName("사용자 예약 조회 시 같은 슬롯의 대기 순서를 기준으로 대기번호를 계산한다.")
+    void getUserReservationsWithWaitingNumberInSameSlot() {
+        Long themeId = saveTheme("공포");
+        Long dateId = saveDate("2026-06-01");
+        Long timeId = saveTime("10:00");
+        Long reservationSlotId = saveReservationSlot(dateId, timeId, themeId);
+        saveReservation("보예", reservationSlotId, ReservationStatus.CONFIRMED);
+        saveReservation("수민", reservationSlotId, ReservationStatus.WAITING);
+        saveReservation("말랑", reservationSlotId, ReservationStatus.WAITING);
+
+        given().log().all()
+            .contentType(ContentType.JSON)
+            .param("name", "말랑")
+            .when().get("/reservations-mine")
+            .then().log().all()
+            .statusCode(200)
+            .body("username", is("말랑"))
+            .body("reservations[0].status", is("WAITING"))
+            .body("reservations[0].waitingNumber", is(2));
+    }
+
+    @Test
     @DisplayName("예약 조회 시 이름 파라미터가 누락되었을 경우 400 에러가 발생한다.")
     void getUserReservationsWithoutName() {
         given().log().all()
             .contentType(ContentType.JSON)
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then().log().all()
             .statusCode(400)
             .body("code", is("REQUIRED_PARAMETER_MISSING"))
@@ -166,14 +185,14 @@ class ReservationIntegrationTest {
 
         given().log().all()
             .contentType(ContentType.JSON)
-            .when().delete("/reservations/{id}", reservationId)
+            .when().delete("/waitings/{id}", reservationId)
             .then().log().all()
             .statusCode(204);
 
         given()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then()
             .statusCode(200)
             .body("username", is("보예"))
@@ -200,25 +219,25 @@ class ReservationIntegrationTest {
             reservationSlotId,
             ReservationStatus.WAITING
         );
-        doAnswer(invocationOnMock ->
-            {
-                if (invocationOnMock.getArgument(0).equals(waitingReservationId)) {
+        doAnswer(invocationOnMock -> {
+                Reservation reservation = invocationOnMock.getArgument(0);
+                if (reservation.getId().equals(waitingReservationId)) {
                     throw new IllegalArgumentException("대기 전환에 실패했습니다.");
                 }
                 return invocationOnMock.callRealMethod();
             }
-        ).when(reservationRepository).update(anyLong(), any(Reservation.class));
+        ).when(reservationRepository).save(any(Reservation.class));
 
         // when & then
         given().
             contentType(ContentType.JSON)
-            .when().delete("/reservations/{id}", confirmedReservationId)
+            .when().delete("/waitings/{id}", confirmedReservationId)
             .then()
             .statusCode(500);
 
         assertSoftly(softly -> {
-                assertThat(findReservationStatus(confirmedReservationId)).isEqualTo(ReservationStatus.CONFIRMED.toString());
-                assertThat(findReservationStatus(waitingReservationId)).isEqualTo(ReservationStatus.WAITING.toString());
+                assertThat(findReservationStatus(confirmedReservationId)).isEqualTo(ReservationStatus.CONFIRMED);
+                assertThat(findReservationStatus(waitingReservationId)).isEqualTo(ReservationStatus.WAITING);
             }
         );
     }
@@ -247,7 +266,7 @@ class ReservationIntegrationTest {
         given()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then()
             .statusCode(200)
             .body("reservations[0].reservationSlot.date.startWhen", is("2026-06-02"))
@@ -255,95 +274,33 @@ class ReservationIntegrationTest {
     }
 
     private Long saveReservation(String name, String date, String time, String themeName) {
-        Long themeId = saveTheme(themeName);
-        Long dateId = saveDate(date);
-        Long timeId = saveTime(time);
-
-        Long reservationSlotId = saveReservationSlot(dateId, timeId, themeId);
-        return saveReservation(name, reservationSlotId, ReservationStatus.CONFIRMED);
+        return testFixture.saveReservation(name, date, time, themeName).getId();
     }
 
     private Long saveReservation(String name, Long reservationSlotId, ReservationStatus status) {
-        jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", name);
-        Long userId = jdbcTemplate.queryForObject(
-            "SELECT id FROM users WHERE name = ?",
-            Long.class,
-            name
-        );
-        jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
-            userId,
-            reservationSlotId,
-            status.name()
-        );
-
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation WHERE user_id = ? AND reservation_slot_id = ?",
-            Long.class,
-            userId,
-            reservationSlotId
-        );
+        return testFixture.saveReservation(name, reservationSlotId, status).getId();
     }
 
     private Long saveReservationSlot(Long dateId, Long timeId, Long themeId) {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
-            dateId,
-            timeId,
-            themeId
-        );
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
-            Long.class,
-            dateId,
-            timeId,
-            themeId
-        );
+        return testFixture.saveSlot(dateId, timeId, themeId).getId();
     }
 
-    private String findReservationStatus(Long reservationId) {
-        return jdbcTemplate.queryForObject(
-            "SELECT status FROM reservation WHERE id = ?",
-            String.class,
-            reservationId
-        );
+    private ReservationStatus findReservationStatus(Long reservationId) {
+        return testFixture.findReservationStatus(reservationId);
     }
 
     private Long saveTheme(String themeName) {
-        jdbcTemplate.update(
-            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
-            themeName,
-            "무서운 테마",
-            "theme-url"
-        );
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM theme WHERE name = ?",
-            Long.class,
-            themeName
-        );
+        Theme theme = testFixture.saveTheme(themeName);
+        return theme.getId();
     }
 
     private Long saveDate(String date) {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_date(date) VALUES (?)",
-            date
-        );
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_date WHERE date = ?",
-            Long.class,
-            date
-        );
+        ReservationDate reservationDate = testFixture.saveDate(date);
+        return reservationDate.getId();
     }
 
     private Long saveTime(String time) {
-        jdbcTemplate.update(
-            "INSERT INTO reservation_time(start_at) VALUES (?)",
-            time
-        );
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_time WHERE start_at = ?",
-            Long.class,
-            time + ":00"
-        );
+        ReservationTime reservationTime = testFixture.saveTime(time);
+        return reservationTime.getId();
     }
 }

@@ -1,6 +1,16 @@
 package roomescape.domain.reservationslot;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -9,13 +19,29 @@ import roomescape.support.exception.errors.ReservationSlotErrors;
 import roomescape.support.exception.errors.ReservationTimeErrors;
 import roomescape.support.exception.errors.ThemeErrors;
 
+@Table(
+    uniqueConstraints = @UniqueConstraint(columnNames = {"date_id", "time_id", "theme_id"})
+)
+@Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationSlot {
 
-    private final Long id;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "date_id", nullable = false)
+    private ReservationDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "time_id", nullable = false)
+    private ReservationTime time;
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
 
     private ReservationSlot(
         Long id,
