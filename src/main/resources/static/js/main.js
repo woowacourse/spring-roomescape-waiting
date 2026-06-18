@@ -139,6 +139,17 @@ async function processPaymentRedirect(parsedParams) {
     }
 }
 
+async function retryPaymentApproval() {
+    const params = state.payment.result?.params;
+
+    if (!params) {
+        showToast("다시 시도할 결제 승인 정보를 찾을 수 없습니다.", "error");
+        return;
+    }
+
+    await processPaymentRedirect({ok: true, params});
+}
+
 async function refreshAfterSuccessfulPayment(orderId) {
     let dataRefreshFailed = false;
     let searchReloadResult = {failed: false, partialFailure: false};
@@ -378,6 +389,11 @@ async function handleClick(event) {
 
         if (action === "start-payment") {
             await preparePayment(actionTarget);
+            return;
+        }
+
+        if (action === "retry-payment-approval") {
+            await retryPaymentApproval();
             return;
         }
 

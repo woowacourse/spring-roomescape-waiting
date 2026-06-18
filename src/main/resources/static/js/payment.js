@@ -1,8 +1,9 @@
-import {api} from "./api.js";
+import {api, ApiError} from "./api.js";
 import {state} from "./state.js";
 
 const PAYMENT_SUCCESS_ROUTE = "/#/payment/processing";
 const PAYMENT_FAIL_ROUTE = "/#/payment/fail";
+const RETRYABLE_PAYMENT_APPROVAL_STATUS = 503;
 const DESKTOP_PAYMENT_QUERY = "(pointer: fine) and (min-width: 768px)";
 const processedApprovalKeys = new Set();
 const processedFailureOrderIds = new Set();
@@ -244,9 +245,12 @@ export async function approveTossRedirectPayment(params) {
             return {ok: true, skipped: false, result};
         })
         .catch((error) => {
-            const message = error.message || "결제 승인을 완료하지 못했습니다.";
+            const retryable = isRetryablePaymentApprovalError(error);
+            const message = error.message || (retryable
+                ? "결제 승인 요청이 지연되고 있습니다. 잠시 후 다시 시도해 주세요."
+                : "결제 승인을 완료하지 못했습니다.");
             state.payment.processing = {
-                status: "failed",
+                status: retryable ? "retryable-failed" : "failed",
                 orderId: params.orderId,
                 paymentKey: params.paymentKey,
                 amount: params.amount,
@@ -254,7 +258,9 @@ export async function approveTossRedirectPayment(params) {
             };
             state.payment.result = {
                 status: "failed",
-                message
+                message,
+                retryable,
+                params: retryable ? {...params} : null
             };
             throw error;
         })
@@ -266,6 +272,10 @@ export async function approveTossRedirectPayment(params) {
         });
 
     return approvingPromise;
+}
+
+function isRetryablePaymentApprovalError(error) {
+    return error instanceof ApiError && error.status === RETRYABLE_PAYMENT_APPROVAL_STATUS;
 }
 
 export function formatAmount(amount) {

@@ -150,10 +150,13 @@ function renderPaymentProcessing() {
     const result = state.payment.result;
     const success = result?.status === "success";
     const failed = result?.status === "failed" || processing.status === "failed";
-    const title = success ? "결제 완료" : (failed ? "결제 승인 실패" : "결제 승인 중");
+    const retryable = result?.retryable === true;
+    const title = success ? "결제 완료" : (retryable ? "결제 승인 지연" : (failed ? "결제 승인 실패" : "결제 승인 중"));
     const description = success
         ? "결제가 승인되어 예약이 확정되었습니다."
-        : (failed ? "결제 승인 정보를 확인하지 못했습니다. 예약 조회 후 다시 결제해 주세요." : "결제 승인 결과를 확인하고 있습니다.");
+        : (retryable
+            ? "예약은 결제 대기 상태로 유지됩니다. 같은 결제 승인 정보를 다시 확인할 수 있습니다."
+            : (failed ? "결제 승인 정보를 확인하지 못했습니다. 예약 조회 후 다시 결제해 주세요." : "결제 승인 결과를 확인하고 있습니다."));
     const statusMessage = result?.message || processing.message || "잠시만 기다려 주세요.";
 
     return `
@@ -173,7 +176,10 @@ function renderPaymentProcessing() {
           </div>
         </dl>
         <p class="payment-processing-message ${failed ? "is-error" : ""}">${escapeHtml(statusMessage)}</p>
-        <button class="secondary-button" type="button" data-route="reserve">예약 조회로 돌아가기</button>
+        <div class="payment-fail-actions">
+          ${retryable ? `<button class="primary-button" type="button" data-action="retry-payment-approval">다시 승인 시도</button>` : ""}
+          <button class="secondary-button" type="button" data-route="reserve">예약 조회로 돌아가기</button>
+        </div>
       </section>
     </main>
   `;
