@@ -3,12 +3,19 @@ package roomescape.reservation.application.service;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentStatus;
 import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
@@ -23,13 +30,6 @@ import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.application.dto.ThemeResult;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.payment.PaymentGateway;
-import roomescape.payment.PaymentConfirmation;
-import roomescape.payment.PaymentResult;
-import roomescape.payment.PaymentStatus;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Transactional
