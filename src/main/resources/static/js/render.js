@@ -570,7 +570,7 @@ function renderPaymentHistoryItem(payment) {
         </span>
         <small>${escapeHtml(payment.date || "-")} ${escapeHtml(time.startAt || "")} · ${escapeHtml(payment.name || "-")}</small>
         <span class="payment-history-meta">
-          <span>주문 ${escapeHtml(payment.orderId || "-")}</span>
+          <span class="payment-history-order-id">주문 ${escapeHtml(payment.orderId || "-")}</span>
           <span>${escapeHtml(formatAmount(payment.amount))}</span>
           <span>예약 ${escapeHtml(payment.reservationStatus || "-")}</span>
         </span>

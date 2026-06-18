@@ -1498,6 +1498,7 @@ input:focus-visible {
 }
 
 .payment-history-meta span {
+    max-width: 100%;
     padding: 4px 7px;
     border: 1px solid var(--line);
     color: var(--text);
@@ -1506,10 +1507,20 @@ input:focus-visible {
     font-weight: 900;
 }
 
+.payment-history-order-id {
+    display: block;
+    flex-basis: 100%;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    line-height: 1.35;
+    white-space: normal;
+    word-break: break-all;
+}
+
 .payment-history-key {
     display: block;
     margin-top: 6px;
     color: var(--muted);
+    line-height: 1.35;
 }
 
 .payment-badge {
