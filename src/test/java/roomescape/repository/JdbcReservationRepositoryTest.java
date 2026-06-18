@@ -180,6 +180,21 @@ public class JdbcReservationRepositoryTest {
     }
 
     @Test
+    void markPaymentUnknownTest() {
+        Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
+                theme, "order_test", 50000L);
+        reservationRepository.save(pendingReservation);
+
+        Reservation unknown = reservationRepository.markPaymentUnknown("order_test");
+
+        assertThat(unknown.getStatus()).isEqualTo(ReservationStatus.PAYMENT_UNKNOWN);
+        assertThat(unknown.getOrderId()).isEqualTo("order_test");
+        assertThat(unknown.getAmount()).isEqualTo(50000L);
+        assertThat(reservationRepository.findByOrderId("order_test").get().getStatus())
+                .isEqualTo(ReservationStatus.PAYMENT_UNKNOWN);
+    }
+
+    @Test
     void deletePendingByOrderIdTest() {
         Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
                 theme, "order_test", 50000L);

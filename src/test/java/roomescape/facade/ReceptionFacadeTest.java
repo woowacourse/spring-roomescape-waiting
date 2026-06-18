@@ -29,9 +29,10 @@ import roomescape.domain.Wait;
 import roomescape.domain.Waits;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.domain.exception.DomainErrorCode;
+import roomescape.payment.PaymentConfirmationResult;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.PaymentService;
-import roomescape.payment.PaymentStatus;
+import roomescape.service.PaymentReservationService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -46,6 +47,7 @@ public class ReceptionFacadeTest {
     private ReservationTimeService reservationTimeService;
     private ThemeService themeService;
     private PaymentService paymentService;
+    private PaymentReservationService paymentReservationService;
     private Clock clock;
     private ReceptionFacade receptionFacade;
 
@@ -61,6 +63,7 @@ public class ReceptionFacadeTest {
         reservationTimeService = Mockito.mock(ReservationTimeService.class);
         themeService = Mockito.mock(ThemeService.class);
         paymentService = Mockito.mock(PaymentService.class);
+        paymentReservationService = Mockito.mock(PaymentReservationService.class);
         clock = Clock.fixed(Instant.parse("2026-05-02T00:00:00Z"), ZoneId.of("Asia/Seoul"));
 
         reservationDate = LocalDate.of(2026, 5, 3);
@@ -69,7 +72,7 @@ public class ReceptionFacadeTest {
         now = LocalDateTime.now(clock);
 
         receptionFacade = new ReceptionFacade(reservationService, waitService, reservationTimeService, themeService,
-                paymentService, clock);
+                paymentService, paymentReservationService, clock);
     }
 
     @Test
@@ -90,7 +93,7 @@ public class ReceptionFacadeTest {
                 ReceptionResponse.from(pendingReservation, 0L, ReservationStatus.PENDING.name()));
 
         InOrder inOrder = Mockito.inOrder(reservationService);
-        inOrder.verify(reservationService).deleteStalePendingBefore(now.minusMinutes(10));
+        inOrder.verify(reservationService).deleteExpiredPendingPayments(now);
         inOrder.verify(reservationService).lockBySlot(request.reservationDate(), request.timeId(), request.themeId());
     }
 
@@ -100,20 +103,21 @@ public class ReceptionFacadeTest {
                 ReservationStatus.PENDING, "order_test", 50000L, null);
         Reservation confirmedReservation = pendingReservation.confirmPayment("payment_key");
 
-        doNothing().when(reservationService).lockByOrderId("order_test");
-        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        PaymentResult paymentResult = new PaymentResult("payment_key", "order_test", "DONE", 50000L);
+
+        when(paymentReservationService.preparePaymentConfirmation("order_test", 50000L)).thenReturn(pendingReservation);
         when(paymentService.confirm("payment_key", "order_test", "order_test", 50000L))
-                .thenReturn(new PaymentResult("payment_key", "order_test", "DONE", 50000L));
-        when(reservationService.confirmPayment("order_test", "payment_key")).thenReturn(confirmedReservation);
+                .thenReturn(PaymentConfirmationResult.success(paymentResult));
+        when(paymentReservationService.confirmPayment("order_test", paymentResult, 50000L))
+                .thenReturn(confirmedReservation);
 
         assertThat(receptionFacade.confirmPayment("payment_key", "order_test", 50000L)).isEqualTo(
                 ReceptionResponse.from(confirmedReservation, 0L, ReservationStatus.CONFIRMED.name()));
 
-        InOrder inOrder = Mockito.inOrder(reservationService, paymentService);
-        inOrder.verify(reservationService).lockByOrderId("order_test");
-        inOrder.verify(reservationService).findByOrderId("order_test");
+        InOrder inOrder = Mockito.inOrder(paymentReservationService, paymentService);
+        inOrder.verify(paymentReservationService).preparePaymentConfirmation("order_test", 50000L);
         inOrder.verify(paymentService).confirm("payment_key", "order_test", "order_test", 50000L);
-        inOrder.verify(reservationService).confirmPayment("order_test", "payment_key");
+        inOrder.verify(paymentReservationService).confirmPayment("order_test", paymentResult, 50000L);
     }
 
     @Test
@@ -121,7 +125,8 @@ public class ReceptionFacadeTest {
         Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
                 ReservationStatus.PENDING, "order_test", 50000L, null);
 
-        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        when(paymentReservationService.preparePaymentConfirmation("order_test", 1000L))
+                .thenThrow(new RoomEscapeException(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH));
 
         assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 1000L))
                 .isInstanceOf(RoomEscapeException.class)
@@ -135,9 +140,13 @@ public class ReceptionFacadeTest {
         Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
                 ReservationStatus.PENDING, "order_test", 50000L, null);
 
-        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        PaymentResult paymentResult = new PaymentResult("payment_key", "other_order", "DONE", 50000L);
+
+        when(paymentReservationService.preparePaymentConfirmation("order_test", 50000L)).thenReturn(pendingReservation);
         when(paymentService.confirm("payment_key", "order_test", "order_test", 50000L))
-                .thenReturn(new PaymentResult("payment_key", "other_order", "DONE", 50000L));
+                .thenReturn(PaymentConfirmationResult.success(paymentResult));
+        when(paymentReservationService.confirmPayment("order_test", paymentResult, 50000L))
+                .thenThrow(new RoomEscapeException(DomainErrorCode.PAYMENT_FAILED));
 
         assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 50000L))
                 .isInstanceOf(RoomEscapeException.class)
@@ -151,15 +160,36 @@ public class ReceptionFacadeTest {
         Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
                 ReservationStatus.PENDING, "order_test", 50000L, null);
 
-        when(reservationService.findByOrderId("order_test")).thenReturn(pendingReservation);
+        PaymentResult paymentResult = new PaymentResult("payment_key", "order_test", "ABORTED", 50000L);
+
+        when(paymentReservationService.preparePaymentConfirmation("order_test", 50000L)).thenReturn(pendingReservation);
         when(paymentService.confirm("payment_key", "order_test", "order_test", 50000L))
-                .thenReturn(new PaymentResult("payment_key", "order_test", "ABORTED", 50000L));
+                .thenReturn(PaymentConfirmationResult.success(paymentResult));
+        when(paymentReservationService.confirmPayment("order_test", paymentResult, 50000L))
+                .thenThrow(new RoomEscapeException(DomainErrorCode.PAYMENT_FAILED));
 
         assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 50000L))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(e -> assertThat(((RoomEscapeException) e).code())
                         .isEqualTo(DomainErrorCode.PAYMENT_FAILED));
         verify(reservationService, never()).confirmPayment(any(), any());
+    }
+
+    @Test
+    void confirmPaymentUnknownMarksPaymentUnknownTest() {
+        Reservation pendingReservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme,
+                ReservationStatus.PENDING, "order_test", 50000L, null);
+
+        when(paymentReservationService.preparePaymentConfirmation("order_test", 50000L)).thenReturn(pendingReservation);
+        when(paymentService.confirm("payment_key", "order_test", "order_test", 50000L))
+                .thenReturn(PaymentConfirmationResult.unknownResult());
+
+        assertThatThrownBy(() -> receptionFacade.confirmPayment("payment_key", "order_test", 50000L))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
+                        .isEqualTo(DomainErrorCode.PAYMENT_UNKNOWN));
+        verify(paymentReservationService, times(1)).markPaymentUnknown("order_test");
+        verify(paymentReservationService, never()).confirmPayment(any(), any(), any());
     }
 
     @Test
@@ -196,7 +226,7 @@ public class ReceptionFacadeTest {
         assertThat(receptionFacade.save(request)).isEqualTo(
                 ReceptionResponse.from(savedWait, 1L, ReservationStatus.WAITING.name()));
 
-        verify(reservationService, times(1)).deleteStalePendingBefore(now.minusMinutes(10));
+        verify(reservationService, times(1)).deleteExpiredPendingPayments(now);
     }
 
     @Test

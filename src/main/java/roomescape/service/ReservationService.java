@@ -19,6 +19,7 @@ import roomescape.service.dto.request.ServiceReservationCreateRequest;
 public class ReservationService {
 
     private static final long RESERVATION_AMOUNT = 50_000L;
+    private static final long PENDING_PAYMENT_TTL_MINUTES = 10L;
 
     private final ReservationRepository reservationRepository;
     private final OrderIdGenerator orderIdGenerator;
@@ -98,6 +99,10 @@ public class ReservationService {
 
     public void deleteStalePendingBefore(LocalDateTime expiresBefore) {
         reservationRepository.deleteStalePendingBefore(expiresBefore);
+    }
+
+    public void deleteExpiredPendingPayments(LocalDateTime now) {
+        reservationRepository.deleteStalePendingBefore(now.minusMinutes(PENDING_PAYMENT_TTL_MINUTES));
     }
 
     public void validateReferencedTheme(Long themeId) {

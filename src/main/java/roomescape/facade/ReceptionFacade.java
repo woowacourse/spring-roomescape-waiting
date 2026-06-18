@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.response.ReceptionResponse;
 import roomescape.domain.Reservation;
@@ -15,9 +16,9 @@ import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
-import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentConfirmationResult;
 import roomescape.payment.PaymentService;
-import roomescape.payment.PaymentStatus;
+import roomescape.service.PaymentReservationService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -28,23 +29,24 @@ import roomescape.service.dto.request.ServiceReservationCreateRequest;
 @Transactional(readOnly = true)
 public class ReceptionFacade {
 
-    private static final long PENDING_PAYMENT_TTL_MINUTES = 10L;
-
     private final ReservationService reservationService;
     private final WaitService waitService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final PaymentService paymentService;
+    private final PaymentReservationService paymentReservationService;
     private final Clock clock;
 
     public ReceptionFacade(ReservationService reservationService, WaitService waitService,
-                           ReservationTimeService reservationTimeService, ThemeService themeService,
-                           PaymentService paymentService, Clock clock) {
+                            ReservationTimeService reservationTimeService, ThemeService themeService,
+                            PaymentService paymentService, PaymentReservationService paymentReservationService,
+                            Clock clock) {
         this.reservationService = reservationService;
         this.waitService = waitService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.paymentService = paymentService;
+        this.paymentReservationService = paymentReservationService;
         this.clock = clock;
     }
 
@@ -86,24 +88,19 @@ public class ReceptionFacade {
         return receptions;
     }
 
-    @Transactional(noRollbackFor = RoomEscapeException.class)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public ReceptionResponse confirmPayment(String paymentKey, String orderId, Long amount) {
-        reservationService.lockByOrderId(orderId);
-        Reservation lockedReservation = reservationService.findByOrderId(orderId);
-        validatePaymentRequest(lockedReservation, amount);
+        Reservation reservation = paymentReservationService.preparePaymentConfirmation(orderId, amount);
 
-        PaymentResult result;
-        try {
-            result = paymentService.confirm(paymentKey, orderId, lockedReservation.getIdempotencyKey(), amount);
-        } catch (RoomEscapeException e) {
-            if (e.code() == DomainErrorCode.PAYMENT_UNKNOWN) {
-                reservationService.markPaymentUnknown(orderId);
-            }
-            throw e;
+        PaymentConfirmationResult confirmationResult = paymentService.confirm(paymentKey, orderId,
+                reservation.getIdempotencyKey(), amount);
+        if (confirmationResult.unknown()) {
+            paymentReservationService.markPaymentUnknown(orderId);
+            throw new RoomEscapeException(DomainErrorCode.PAYMENT_UNKNOWN);
         }
-        validatePaymentResult(result, orderId, amount);
 
-        Reservation confirmed = reservationService.confirmPayment(orderId, result.paymentKey());
+        Reservation confirmed = paymentReservationService.confirmPayment(orderId, confirmationResult.paymentResult(),
+                amount);
         return ReceptionResponse.from(confirmed, 0L, ReservationStatus.CONFIRMED.name());
     }
 
@@ -136,7 +133,7 @@ public class ReceptionFacade {
 
     private ReceptionResponse saveReservationOrWait(ServiceReservationCreateRequest request,
                                                     ReservationTime reservationTime, Theme theme) {
-        reservationService.deleteStalePendingBefore(LocalDateTime.now(clock).minusMinutes(PENDING_PAYMENT_TTL_MINUTES));
+        reservationService.deleteExpiredPendingPayments(LocalDateTime.now(clock));
         Optional<Long> lockedId = reservationService.lockBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
         Optional<Reservation> existing = lockedId.map(reservationService::findReservation);
@@ -154,24 +151,6 @@ public class ReceptionFacade {
             Reservation saved = reservationService.savePending(request, reservationTime, theme);
             return ReceptionResponse.from(saved, 0L, ReservationStatus.PENDING.name());
         });
-    }
-
-    private void validatePaymentRequest(Reservation reservation, Long amount) {
-        if (!reservation.needsPaymentConfirmation()) {
-            throw new RoomEscapeException(DomainErrorCode.PAYMENT_ALREADY_PROCESSED);
-        }
-        if (!reservation.getAmount().equals(amount)) {
-            throw new RoomEscapeException(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH);
-        }
-    }
-
-    private void validatePaymentResult(PaymentResult result, String orderId, Long amount) {
-        if (!PaymentStatus.DONE.name().equals(result.status()) || !result.orderId().equals(orderId)) {
-            throw new RoomEscapeException(DomainErrorCode.PAYMENT_FAILED);
-        }
-        if (!result.approvedAmount().equals(amount)) {
-            throw new RoomEscapeException(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH);
-        }
     }
 
     private void confirmFirstWait(Wait firstOrder) {
