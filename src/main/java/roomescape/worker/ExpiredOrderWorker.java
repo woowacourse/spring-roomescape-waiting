@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import roomescape.payment.OrderAbandonmentService;
+import roomescape.payment.service.PaymentAbandonmentService;
 import roomescape.reservation.service.ReservationService;
 
 /**
@@ -24,11 +24,11 @@ public class ExpiredOrderWorker {
 
     private static final Logger log = LoggerFactory.getLogger(ExpiredOrderWorker.class);
 
-    private final OrderAbandonmentService abandonmentService;
+    private final PaymentAbandonmentService abandonmentService;
     private final ReservationService reservationService;
     private final long ttlMinutes;
 
-    public ExpiredOrderWorker(OrderAbandonmentService abandonmentService, ReservationService reservationService,
+    public ExpiredOrderWorker(PaymentAbandonmentService abandonmentService, ReservationService reservationService,
                               @Value("${payment.expiry.ttl-minutes:30}") long ttlMinutes) {
         this.abandonmentService = abandonmentService;
         this.reservationService = reservationService;

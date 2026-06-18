@@ -28,10 +28,10 @@ import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
 import roomescape.order.dao.OrderJdbcDao;
 import roomescape.payment.ConfirmOutcome;
-import roomescape.payment.OrderAbandonmentService;
+import roomescape.payment.service.PaymentAbandonmentService;
 import roomescape.payment.exception.PaymentGatewayUnreachableException;
-import roomescape.payment.PaymentHistoryService;
-import roomescape.payment.PaymentService;
+import roomescape.payment.service.PaymentHistoryService;
+import roomescape.payment.service.PaymentService;
 import roomescape.payment.web.dto.MyOrderResponse;
 import roomescape.payment.web.dto.PaymentReadyResponse;
 import roomescape.promotion.PromotionService;
@@ -57,7 +57,7 @@ import roomescape.waiting.dao.WaitingJdbcDao;
  * 주문·예약은 실제 DAO/서비스로 굴려 *실제 상태 전이*와 와이어링까지 검증한다.
  */
 @JdbcTest
-@Import({PaymentService.class, PaymentHistoryService.class, OrderAbandonmentService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
+@Import({PaymentService.class, PaymentHistoryService.class, PaymentAbandonmentService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
         ReservationAuthorizationService.class, PromotionService.class, FakePaymentGateway.class,
         ReservationJdbcDao.class, OrderJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class,
         MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class})
@@ -69,7 +69,7 @@ class PaymentServiceTest {
     @Autowired
     private PaymentHistoryService paymentHistoryService;
     @Autowired
-    private OrderAbandonmentService abandonmentService;
+    private PaymentAbandonmentService abandonmentService;
     @Autowired
     private ReservationService reservationService;
     @Autowired

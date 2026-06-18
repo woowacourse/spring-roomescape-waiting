@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
 import roomescape.payment.ConfirmOutcome;
-import roomescape.payment.OrderAbandonmentService;
-import roomescape.payment.PaymentHistoryService;
-import roomescape.payment.PaymentService;
+import roomescape.payment.service.PaymentAbandonmentService;
+import roomescape.payment.service.PaymentHistoryService;
+import roomescape.payment.service.PaymentService;
 import roomescape.payment.web.dto.MyOrderResponse;
 import roomescape.payment.web.dto.PaymentClientConfigResponse;
 import roomescape.payment.web.dto.PaymentConfirmRequestDto;
@@ -29,10 +29,10 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final PaymentHistoryService paymentHistoryService;
-    private final OrderAbandonmentService abandonmentService;
+    private final PaymentAbandonmentService abandonmentService;
 
     public PaymentController(PaymentService paymentService, PaymentHistoryService paymentHistoryService,
-                            OrderAbandonmentService abandonmentService) {
+                            PaymentAbandonmentService abandonmentService) {
         this.paymentService = paymentService;
         this.paymentHistoryService = paymentHistoryService;
         this.abandonmentService = abandonmentService;

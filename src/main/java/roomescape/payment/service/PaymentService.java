@@ -1,4 +1,4 @@
-package roomescape.payment;
+package roomescape.payment.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +9,10 @@ import roomescape.member.Member;
 import roomescape.order.Order;
 import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
+import roomescape.payment.ConfirmOutcome;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
 import roomescape.payment.exception.PaymentResultUnknownException;
 import roomescape.payment.web.dto.PaymentReadyResponse;
 import roomescape.reservation.Reservation;

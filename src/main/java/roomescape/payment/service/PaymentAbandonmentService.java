@@ -1,4 +1,4 @@
-package roomescape.payment;
+package roomescape.payment.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,14 +16,14 @@ import roomescape.reservation.service.ReservationService;
  */
 @Service
 @Transactional
-public class OrderAbandonmentService {
+public class PaymentAbandonmentService {
 
     private final OrderService orderService;
     private final ReservationService reservationService;
     private final ReservationAuthorizationService authorizationService;
 
-    public OrderAbandonmentService(OrderService orderService, ReservationService reservationService,
-                                   ReservationAuthorizationService authorizationService) {
+    public PaymentAbandonmentService(OrderService orderService, ReservationService reservationService,
+                                     ReservationAuthorizationService authorizationService) {
         this.orderService = orderService;
         this.reservationService = reservationService;
         this.authorizationService = authorizationService;
