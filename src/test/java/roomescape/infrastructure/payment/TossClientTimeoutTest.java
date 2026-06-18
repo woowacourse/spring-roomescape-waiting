@@ -98,6 +98,6 @@ class TossClientTimeoutTest {
     }
 
     private PaymentConfirmation confirmation() {
-        return new PaymentConfirmation("payment_key", "order_123456", 37_000L, "idempotency-key-123");
+        return new PaymentConfirmation("payment_key", "order_123456", 37_000L);
     }
 }

@@ -19,7 +19,7 @@ try {
     response = restClient.post()
             .uri(CONFIRM_URI)
             .contentType(MediaType.APPLICATION_JSON)
-            .header("Idempotency-Key", confirmation.idempotencyKey())
+            .header("Idempotency-Key", confirmation.orderId())
             .body(new TossConfirmRequest(confirmation.paymentKey(), confirmation.orderId(),
                     confirmation.amount()))
             .retrieve()
@@ -74,7 +74,7 @@ Toss 에러는 Toss가 요청을 처리한 뒤 명확한 결과를 응답한 것
 
 이 메시지는 실패라고 단정하지 않는다. 사용자가 이미 카드 결제를 완료했을 가능성이 있기 때문이다.
 
-## read timeout 처리 흐름
+## read timeout 처리 원칙
 
 read timeout은 다음 상태를 의미할 수 있다.
 
@@ -87,29 +87,15 @@ Toss -> 우리 서버: 성공 응답 전달 실패 또는 지연
 
 따라서 read timeout이 발생하면 예약을 바로 확정해서도 안 되고, 바로 실패로 정리해서도 안 된다.
 
-현재 처리 흐름은 다음과 같다.
-
-```text
-successUrl 콜백
--> amount 검증
--> Toss confirm 호출
--> read timeout 발생
--> TOSS_CONFIRMATION_UNKNOWN 예외
--> payment_order.payment_key 저장
--> 사용자에게 결제 승인 결과를 확인해야 한다는 메시지 응답
-```
-
-이 응답은 결제 실패 확정이 아니다. 승인 결과를 모르는 상태라는 의미다. 저장된 `paymentKey`가 있기 때문에 내 예약 화면에서는 이 주문을 `확인 필요`로 표시한다.
-
-이후 운영 수준에서는 다음 후속 처리가 추가로 필요하다.
+운영 수준에서는 다음 후속 처리가 필요하다.
 
 1. `paymentKey`로 Toss 결제 조회 API 호출
 2. 조회 결과의 `orderId`, `amount`, 결제 상태를 우리 DB의 주문 정보와 비교
-3. 승인 완료 상태면 예약을 `RESERVED`로 확정
-4. 승인되지 않은 상태면 `PAYMENT_PENDING` 유지 또는 실패 처리
-5. 조회도 실패하면 결과 불명확 상태를 저장하고 재확인 대상에 넣음
+3. 승인 완료 상태면 예약을 확정하고 `paymentKey`를 저장
+4. 승인되지 않은 상태면 사용자에게 재시도 안내
+5. 조회도 실패하면 결과 불명확 상태로 남기고 재확인 대상에 넣음
 
-현재 구현은 read timeout을 `TOSS_CONFIRMATION_UNKNOWN`으로 분리한다. 아직 Toss 결제 조회 API를 통한 자동 복구는 구현되어 있지 않다.
+현재 구현은 read timeout을 `TOSS_CONFIRMATION_UNKNOWN`으로 분리해, 상위 계층이 결과 확인 또는 재시도 흐름을 붙일 수 있게 만든다.
 
 ## 테스트
 
