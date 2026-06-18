@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.common.auth.annotation.LoginMember;
@@ -21,6 +22,7 @@ import roomescape.reservation.controller.dto.request.ReservationChangeScheduleDt
 import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.controller.dto.response.ReservationDetailDto;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -32,8 +34,11 @@ public class ReservationAdminController {
 
     @AuthGuard(roles = MANAGER)
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationDetailDto>> getReservations() {
-        List<ReservationDetailDto> responseData = reservationService.readAll().stream()
+    public ResponseEntity<List<ReservationDetailDto>> getReservations(
+        @RequestParam(required = false) ReservationStatus status
+    ) {
+        List<ReservationDetailDto> responseData = reservationService.readAll(status)
+            .stream()
             .map(ReservationDetailDto::from)
             .toList();
         return ResponseEntity.ok(responseData);

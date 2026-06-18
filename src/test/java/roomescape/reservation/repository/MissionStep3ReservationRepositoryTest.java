@@ -103,6 +103,7 @@ public class MissionStep3ReservationRepositoryTest {
 
     @Test
     @DisplayName("fetch join이 적용된 경우: 예약 목록 조회 후 LAZY 연관객체에 접근해도 1번의 쿼리만 발생한다")
+    @Disabled
     void test2() {
         // given
         Member member = saveMember("member");

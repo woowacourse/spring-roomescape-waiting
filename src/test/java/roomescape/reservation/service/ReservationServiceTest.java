@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
@@ -134,7 +133,7 @@ class ReservationServiceTest {
                 reservation(name, reservationDate2, reservationTime1, theme2)
             );
             reservations.forEach(ReservationServiceTest.this::save);
-            List<Reservation> actual = reservationService.readAll();
+            List<Reservation> actual = reservationService.readAll(null);
 
             //then
             assertThat(actual)
@@ -156,7 +155,7 @@ class ReservationServiceTest {
                 ReservationFixture.toCommand(reservationDate1, reservationTime1, theme1));
 
             //then
-            assertThat(reservationService.readAll())
+            assertThat(reservationService.readAll(null))
                 .hasSize(reservations.size() + 1);
         }
 

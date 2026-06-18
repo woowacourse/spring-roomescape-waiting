@@ -121,6 +121,58 @@ class ReservationServiceIntegrationTest {
             waitReservation(member(name), date, time, theme, waitingOrder));
     }
 
+    private Reservation saveCanceledReservation(String name, ReservationDate date,
+        ReservationTime time, Theme theme) {
+        Reservation reservation = saveReservation(name, date, time, theme);
+        reservation.updateStatus(ReservationStatus.CANCELED);
+        return reservationRepository.save(reservation);
+    }
+
+    @Nested
+    @DisplayName("readAll 메서드는")
+    class ReadAllTest {
+
+        @Test
+        @DisplayName("status가 없으면 모든 예약을 조회한다")
+        void 성공1() {
+            // given
+            ReservationTime time = saveTime();
+            ReservationDate date = saveDate();
+            Theme theme = saveTheme("theme1");
+            saveReservation("예약자", date, time, theme);
+            saveWaitReservation("대기자", date, time, theme, 1L);
+            saveCanceledReservation("취소자", date, time, theme);
+
+            // when
+            List<Reservation> actual = reservationService.readAll(null);
+
+            // then
+            assertThat(actual)
+                .hasSize(3);
+        }
+
+        @Test
+        @DisplayName("status가 있으면 해당 상태의 예약만 조회한다")
+        void 성공2() {
+            // given
+            ReservationTime time = saveTime();
+            ReservationDate date = saveDate();
+            Theme theme = saveTheme("theme1");
+            Reservation reserved = saveReservation("예약자", date, time, theme);
+            saveWaitReservation("대기자", date, time, theme, 1L);
+            saveCanceledReservation("취소자", date, time, theme);
+
+            // when
+            List<Reservation> actual = reservationService.readAll(ReservationStatus.RESERVED);
+
+            // then
+            assertAll(
+                () -> assertThat(actual).hasSize(1),
+                () -> assertThat(actual.getFirst().getId()).isEqualTo(reserved.getId()),
+                () -> assertThat(actual.getFirst().getStatus()).isEqualTo(ReservationStatus.RESERVED)
+            );
+        }
+    }
 
     @Nested
     @DisplayName("getMyReservations 메서드는")

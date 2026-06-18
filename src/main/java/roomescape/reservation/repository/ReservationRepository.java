@@ -8,12 +8,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+
+    @Query("""
+            SELECT 
+            r
+            FROM reservation r
+            WHERE (:status is null or r.status = :status)
+            ORDER BY r.id DESC
+        """)
+    List<Reservation> findAllByStatusOptional(@Param("status") ReservationStatus status);
 
     @Query("""
             SELECT
@@ -48,7 +58,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.member.id = :memberId
             ORDER BY r.id DESC
         """)
-    List<ReservationWithWaitingTurn> findAllByMemberIdWithWaitingTurn(@Param("memberId") Long memberId);
+    List<ReservationWithWaitingTurn> findAllByMemberIdWithWaitingTurn(
+        @Param("memberId") Long memberId);
 
     @Query("""
         SELECT coalesce(max(r.waitingOrder), 0) + 1
@@ -77,19 +88,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("theme") Theme theme);
 
     @Query("""
-            SELECT r
-            FROM reservation r
-            WHERE r.status = roomescape.reservation.domain.ReservationStatus.WAITING
-            AND r.date = :date
-            AND r.time = :time
-            AND r.theme = :theme
-            AND (
-                r.date.date > CURRENT_DATE 
-                OR (r.date.date = CURRENT_DATE AND r.time.startAt > CURRENT_TIME)
-            )
-            ORDER BY r.waitingOrder ASC
-            LIMIT 1
-            """)
+        SELECT r
+        FROM reservation r
+        WHERE r.status = roomescape.reservation.domain.ReservationStatus.WAITING
+        AND r.date = :date
+        AND r.time = :time
+        AND r.theme = :theme
+        AND (
+            r.date.date > CURRENT_DATE 
+            OR (r.date.date = CURRENT_DATE AND r.time.startAt > CURRENT_TIME)
+        )
+        ORDER BY r.waitingOrder ASC
+        LIMIT 1
+        """)
     Optional<Reservation> findFirstWaitingByDateAndTimeAndTheme(
         @Param("date") ReservationDate reservationDate,
         @Param("time") ReservationTime reservationTime,

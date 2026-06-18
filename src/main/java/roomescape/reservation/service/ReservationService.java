@@ -41,8 +41,8 @@ public class ReservationService {
     private final ReservationDateRepository reservationDateRepository;
     private final ThemeRepository themeRepository;
 
-    public List<Reservation> readAll() {
-        return reservationRepository.findAll();
+    public List<Reservation> readAll(ReservationStatus status) {
+        return reservationRepository.findAllByStatusOptional(status);
     }
 
     public List<ReservationWithWaitingTurn> readAllByMemberId(Long memberId) {
