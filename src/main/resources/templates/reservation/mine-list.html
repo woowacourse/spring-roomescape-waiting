@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 예약 목록</title>
+    <style>
+        :root {
+            --bg: #f7f3ea;
+            --card: #fffdf8;
+            --line: #d8cbb4;
+            --text: #2f2418;
+            --point: #0e7490;
+            --accent: #efb366;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(239, 179, 102, 0.32), transparent 30%),
+                linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+        .hero {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .eyebrow {
+            display: inline-flex;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        h1 {
+            margin: 0;
+            font-size: clamp(32px, 5vw, 52px);
+            line-height: 1.05;
+        }
+        p {
+            margin: 0;
+            color: rgba(47, 36, 24, 0.72);
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0 28px;
+        }
+        .actions a, button {
+            text-decoration: none;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 10px 14px;
+            font: inherit;
+        }
+        .actions a.primary, button.primary {
+            background: var(--point);
+            color: white;
+            border-color: var(--point);
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 16px 32px rgba(47, 36, 24, 0.08);
+        }
+        form {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: grid;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        input {
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            padding: 12px 14px;
+            font: inherit;
+        }
+        .list {
+            display: grid;
+            gap: 12px;
+        }
+        .item {
+            display: grid;
+            gap: 8px;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(216, 203, 180, 0.9);
+            background: rgba(255, 255, 255, 0.84);
+        }
+        .meta {
+            color: rgba(47, 36, 24, 0.74);
+            font-size: 14px;
+        }
+        .empty {
+            padding: 28px 16px;
+            text-align: center;
+            color: rgba(47, 36, 24, 0.72);
+            border: 1px dashed var(--line);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .hint {
+            margin-top: 16px;
+            color: rgba(47, 36, 24, 0.62);
+            font-size: 14px;
+        }
+        .theme {
+            color: var(--point);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+<main class="wrap">
+    <section class="hero">
+        <span class="eyebrow">GET /reservations-mine</span>
+        <h1>내 예약 목록 조회</h1>
+        <p>이름으로 조회되는 예약만 보여주는 화면입니다. 인증이 붙기 전에는 이름을 대신 입력해서 흐름을 확인할 수 있습니다.</p>
+    </section>
+
+    <div class="actions">
+        <a class="primary" th:href="@{/pages/user/reservations}">예약 홈으로</a>
+        <a th:href="@{/historys/{name}(name=${reservationName})}" th:if="${reservationName != null and !#strings.isBlank(reservationName)}">예약+대기 기록 보기</a>
+    </div>
+
+    <article class="card">
+        <form method="get" th:action="@{/pages/user/reservations-mine}">
+            <label>
+                이름
+                <input type="text" name="name" th:value="${reservationName}" maxlength="9" placeholder="예약자 이름" required>
+            </label>
+            <button type="submit" class="primary">내 예약 조회</button>
+        </form>
+
+        <div class="list" th:if="${!#lists.isEmpty(reservations)}">
+            <div class="item" th:each="reservation : ${reservations}">
+                <strong th:text="${reservation.name}">쿠다</strong>
+                <div class="meta">
+                    <span th:text="${reservation.date}">2026-08-19</span>
+                    <span> / </span>
+                    <span class="theme" th:text="${reservation.theme.name}">미술관의 밤</span>
+                    <span> / </span>
+                    <span th:text="${reservation.time.startAt}">10:00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty" th:if="${reservationName != null and #lists.isEmpty(reservations)}">
+            입력한 이름으로 조회된 예약이 없습니다.
+        </div>
+
+        <div class="hint" th:if="${reservationName == null}">
+            이름을 입력하면 예약만 조회됩니다. 대기 내역은 기존 기록 화면에서 확인할 수 있습니다.
+        </div>
+    </article>
+</main>
+</body>
+</html>
