@@ -42,7 +42,9 @@ public enum ErrorCode {
     PAYMENT_UNAUTHORIZED_KEY(HttpStatus.UNAUTHORIZED, "결제 인증 키가 유효하지 않습니다."),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 정보를 찾을 수 없습니다."),
     PAYMENT_TOSS_INTERNAL_ERROR(HttpStatus.BAD_GATEWAY, "결제 서버 내부 오류입니다. 잠시 후 재시도해 주세요."),
-    PAYMENT_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 알 수 없는 오류가 발생했습니다.");
+    PAYMENT_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 알 수 없는 오류가 발생했습니다."),
+    PAYMENT_CONNECTION_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "결제 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."),
+    PAYMENT_READ_TIMEOUT(HttpStatus.ACCEPTED, "결제 요청을 전송했으나 응답이 없습니다. 결제 내역에서 상태를 확인해 주세요.");
 
     private final HttpStatus httpStatus;
     private final String message;
