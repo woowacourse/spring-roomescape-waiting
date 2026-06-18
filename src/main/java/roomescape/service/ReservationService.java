@@ -3,6 +3,8 @@ package roomescape.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -78,13 +80,20 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public ReservationWithStatusResponses getMyReservations(Long userId) {
         List<Reservation> reservations = reservationRepository.findAllByUserId(userId).stream()
-                .filter(Reservation::isReserved)
+                .filter(reservation -> !reservation.isWaiting())
                 .toList();
+        Map<Long, PaymentOrder> paymentOrdersByReservationId = paymentOrderRepository.findAllByReservationIds(
+                        reservations.stream()
+                                .map(Reservation::getId)
+                                .toList())
+                .stream()
+                .collect(Collectors.toMap(PaymentOrder::getReservationId, Function.identity()));
 
         Map<Reservation, Integer> waitingReservations =
                 reservationRepository.findWaitingReservationsWithOrderByUserId(userId);
 
-        return ReservationWithStatusResponses.of(reservations, waitingReservations, false);
+        return ReservationWithStatusResponses.of(reservations, waitingReservations, paymentOrdersByReservationId,
+                false);
     }
 
     @Transactional

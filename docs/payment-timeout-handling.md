@@ -95,10 +95,11 @@ successUrl 콜백
 -> Toss confirm 호출
 -> read timeout 발생
 -> TOSS_CONFIRMATION_UNKNOWN 예외
+-> payment_order.payment_key 저장
 -> 사용자에게 결제 승인 결과를 확인해야 한다는 메시지 응답
 ```
 
-이 응답은 결제 실패 확정이 아니다. 승인 결과를 모르는 상태라는 의미다.
+이 응답은 결제 실패 확정이 아니다. 승인 결과를 모르는 상태라는 의미다. 저장된 `paymentKey`가 있기 때문에 내 예약 화면에서는 이 주문을 `확인 필요`로 표시한다.
 
 이후 운영 수준에서는 다음 후속 처리가 추가로 필요하다.
 

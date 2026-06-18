@@ -119,7 +119,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
                  where u.id = ?
                  order by case r.status
                               when 'RESERVED' then 0
-                              when 'WAITING' then 1
+                              when 'PAYMENT_PENDING' then 1
+                              when 'PAYMENT_FAILED' then 2
+                              when 'WAITING' then 3
                               else 2
                           end,
                           r.date,
