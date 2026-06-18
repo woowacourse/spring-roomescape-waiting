@@ -1,16 +1,33 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 255)
+    private String name;
+
+    @Column(length = 255)
+    private String description;
+
+    @Column(name = "thumbnail", columnDefinition = "TEXT")
+    private String thumbnail;
+
+    protected Theme() {
+    }
 
     public Theme(Long id, String name, String description, String thumbnail) {
         validateName(name);
         validateDescription(description);
-        validateThumbnail(thumbnail);
 
         this.id = id;
         this.name = name;
@@ -46,12 +63,6 @@ public class Theme {
     private void validateDescription(String description) {
         if (description != null && description.length() > 255) {
             throw new IllegalArgumentException("description은 255자를 넘을 수 없습니다.");
-        }
-    }
-
-    private void validateThumbnail(String thumbnail) {
-        if (thumbnail != null && thumbnail.length() > 255) {
-            throw new IllegalArgumentException("thumbnail은 255자를 넘을 수 없습니다.");
         }
     }
 }

@@ -1,5 +1,11 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -9,31 +15,24 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
 import roomescape.repository.result.ReservationWaitingOrderResult;
 import roomescape.service.result.WaitingResult;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaThemeRepository themeRepository;
     private final ReservationWaitingValidator reservationWaitingValidator;
 
     public ReservationWaitingService(
             ReservationWaitingRepository reservationWaitingRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
+            JpaReservationTimeRepository reservationTimeRepository,
+            JpaThemeRepository themeRepository,
             ReservationWaitingValidator reservationWaitingValidator
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
@@ -108,13 +107,13 @@ public class ReservationWaitingService {
 
     @NonNull
     private Theme findTheme(Long themeId) {
-        return themeRepository.findBy(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
     @NonNull
     private ReservationTime findReservationTime(Long timeId) {
-        return reservationTimeRepository.findBy(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 시간입니다."));
     }
 

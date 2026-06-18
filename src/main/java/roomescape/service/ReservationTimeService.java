@@ -1,26 +1,25 @@
 package roomescape.service;
 
+import java.time.LocalTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
-
-import java.time.LocalTime;
-import java.util.List;
+import roomescape.repository.jpa.JpaReservationTimeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+    public ReservationTimeService(JpaReservationTimeRepository reservationTimeRepository,
                                   ReservationRepository reservationRepository,
                                   ReservationWaitingRepository reservationWaitingRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
@@ -34,15 +33,14 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTime create(LocalTime startAt) {
-        Long id = reservationTimeRepository.insert(new ReservationTime(null, startAt));
-        return reservationTimeRepository.findBy(id)
-                .orElseThrow(() -> new IllegalArgumentException("생성된 예약 시간을 찾을 수 없습니다."));
+        ReservationTime reservationTime = new ReservationTime(null, startAt);
+        return reservationTimeRepository.save(reservationTime);
     }
 
     @Transactional
     public void delete(Long id) {
         validateDeletable(id);
-        reservationTimeRepository.delete(id);
+        reservationTimeRepository.deleteById(id);
     }
 
     private void validateDeletable(Long id) {

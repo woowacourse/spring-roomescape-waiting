@@ -12,25 +12,25 @@ import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ThemeRepository themeRepository;
+    private final JpaThemeRepository themeRepository;
     private final ReservationValidator reservationValidator;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
+            JpaReservationTimeRepository reservationTimeRepository,
             ReservationWaitingRepository reservationWaitingRepository,
-            ThemeRepository themeRepository,
+            JpaThemeRepository themeRepository,
             ReservationValidator reservationValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -139,7 +139,7 @@ public class ReservationService {
     }
 
     private ReservationTime findReservationTime(Long timeId) {
-        return reservationTimeRepository.findBy(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 시간입니다."));
     }
 
@@ -153,7 +153,7 @@ public class ReservationService {
     }
 
     private Theme findTheme(Long themeId) {
-        return themeRepository.findBy(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 

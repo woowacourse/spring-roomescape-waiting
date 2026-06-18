@@ -24,16 +24,16 @@ import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
 
 class ReservationServiceTest {
 
     private final ReservationRepository reservationRepository = mock();
-    private final ReservationTimeRepository reservationTimeRepository = mock();
+    private final JpaReservationTimeRepository reservationTimeRepository = mock();
     private final ReservationWaitingRepository reservationWaitingRepository = mock();
-    private final ThemeRepository themeRepository = mock();
+    private final JpaThemeRepository themeRepository = mock();
     private final ReservationValidator reservationValidator = new ReservationValidator(reservationRepository);
     private final ReservationService service = new ReservationService(
             reservationRepository,
@@ -91,11 +91,11 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.parse("08:00"));
         Theme theme = new Theme(themeId, "테스트 테마", "테마 설명", "썸네일 주소");
         Reservation savedReservation = new Reservation(id, name, date, time, theme);
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
         when(reservationRepository.existsWith(date, timeId, themeId))
                 .thenReturn(false);
-        when(themeRepository.findBy(themeId))
+        when(themeRepository.findById(themeId))
                 .thenReturn(Optional.of(theme));
         when(reservationRepository.insert(any(Reservation.class)))
                 .thenReturn(id);
@@ -129,11 +129,11 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.parse("08:00"));
         Theme theme = new Theme(themeId, "테스트 테마", "테마 설명", "썸네일 주소");
         Reservation savedReservation = new Reservation(id, name, pastDate, time, theme);
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
         when(reservationRepository.existsWith(pastDate, timeId, themeId))
                 .thenReturn(false);
-        when(themeRepository.findBy(themeId))
+        when(themeRepository.findById(themeId))
                 .thenReturn(Optional.of(theme));
         when(reservationRepository.insert(any(Reservation.class)))
                 .thenReturn(id);
@@ -155,7 +155,7 @@ class ReservationServiceTest {
         Long themeId = 1L;
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime time = new ReservationTime(timeId, LocalTime.parse("08:00"));
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
 
         // when & then
@@ -336,7 +336,7 @@ class ReservationServiceTest {
         Reservation promotedReservation = createReservation(2L, "구구", date, originalTime);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation), Optional.of(updatedReservation));
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(updateTime));
         when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
                 .thenReturn(false);
@@ -381,7 +381,7 @@ class ReservationServiceTest {
         Reservation updatedReservation = createReservation(id, name, updateDate, updateTime);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation), Optional.of(updatedReservation));
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(updateTime));
         when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
                 .thenReturn(false);
@@ -414,7 +414,7 @@ class ReservationServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, originalTime, reservation.getTheme());
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(updateTime));
         when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
                 .thenReturn(false);
@@ -500,7 +500,7 @@ class ReservationServiceTest {
         Reservation reservation = createReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.empty());
 
         // when & then

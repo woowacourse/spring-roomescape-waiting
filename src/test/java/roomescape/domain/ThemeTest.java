@@ -1,12 +1,12 @@
 package roomescape.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ThemeTest {
 
@@ -40,17 +40,6 @@ class ThemeTest {
         assertThatThrownBy(() -> new Theme(null, "테마이름", description, "썸네일 경로"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("description은 255자를 넘을 수 없습니다.");
-    }
-
-    @Test
-    void 썸네일_경로가_255자를_초과하면_예외() {
-        // given
-        String thumbnail = "a".repeat(256);
-
-        // when & then
-        assertThatThrownBy(() -> new Theme(null, "테마이름", "설명", thumbnail))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("thumbnail은 255자를 넘을 수 없습니다.");
     }
 
     @Test

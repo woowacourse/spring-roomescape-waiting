@@ -1,18 +1,5 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import roomescape.domain.Theme;
-import roomescape.exception.BusinessException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.result.PopularThemeResult;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -25,13 +12,28 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import roomescape.domain.Theme;
+import roomescape.exception.BusinessException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
+import roomescape.repository.result.PopularThemeResult;
+
 class ThemeServiceTest {
 
-    private final ThemeRepository themeRepository = mock();
+    private final JpaThemeRepository themeRepository = mock();
+    private final ThemeRepository themeQueryRepository = mock();
     private final ReservationRepository reservationRepository = mock();
     private final ReservationWaitingRepository reservationWaitingRepository = mock();
     private final ThemeService service = new ThemeService(
             themeRepository,
+            themeQueryRepository,
             reservationRepository,
             reservationWaitingRepository);
 
@@ -60,9 +62,9 @@ class ThemeServiceTest {
         String thumbnail = "썸네일 주소";
         Theme theme = new Theme(id, name, description, thumbnail);
 
-        when(themeRepository.insert(any(Theme.class)))
-                .thenReturn(id);
-        when(themeRepository.findBy(id))
+        when(themeRepository.save(any(Theme.class)))
+                .thenReturn(theme);
+        when(themeRepository.findById(id))
                 .thenReturn(Optional.of(theme));
 
         // when
@@ -77,7 +79,7 @@ class ThemeServiceTest {
                 () -> assertThat(result.getDescription()).isEqualTo(description),
                 () -> assertThat(result.getThumbnail()).isEqualTo(thumbnail));
 
-        verify(themeRepository, times(1)).insert(captor.capture());
+        verify(themeRepository, times(1)).save(captor.capture());
         Theme captured = captor.getValue();
 
         assertAll(
@@ -100,7 +102,7 @@ class ThemeServiceTest {
         service.delete(id);
 
         // then
-        verify(themeRepository).delete(id);
+        verify(themeRepository).deleteById(id);
     }
 
     @Test
@@ -115,7 +117,7 @@ class ThemeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
 
-        verify(themeRepository, never()).delete(anyLong());
+        verify(themeRepository, never()).deleteById(anyLong());
     }
 
     @Test
@@ -132,7 +134,7 @@ class ThemeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("예약 대기가 존재하는 테마는 삭제할 수 없습니다.");
 
-        verify(themeRepository, never()).delete(anyLong());
+        verify(themeRepository, never()).deleteById(anyLong());
     }
 
     @Test
@@ -141,7 +143,7 @@ class ThemeServiceTest {
         List<PopularThemeResult> popularThemes = List.of(
                 new PopularThemeResult(1L, "테스트 테마1", "테마 설명1", "썸네일 주소1", 2L),
                 new PopularThemeResult(2L, "테스트 테마2", "테마 설명2", "썸네일 주소2", 1L));
-        when(themeRepository.findPopular(any(LocalDate.class), any(LocalDate.class), eq(10)))
+        when(themeQueryRepository.findPopular(any(LocalDate.class), any(LocalDate.class), eq(10)))
                 .thenReturn(popularThemes);
 
         // when

@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
@@ -8,23 +10,24 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
 import roomescape.repository.result.PopularThemeResult;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
 public class ThemeService {
 
-    private final ThemeRepository themeRepository;
+    private final JpaThemeRepository themeRepository;
+    private final ThemeRepository themeQueryRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
 
-    public ThemeService(ThemeRepository themeRepository,
+    public ThemeService(JpaThemeRepository themeRepository,
+                        ThemeRepository themeQueryRepository,
                         ReservationRepository reservationRepository,
                         ReservationWaitingRepository reservationWaitingRepository) {
         this.themeRepository = themeRepository;
+        this.themeQueryRepository = themeQueryRepository;
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
@@ -36,22 +39,21 @@ public class ThemeService {
     @Transactional
     public Theme create(String name, String description, String thumbnail) {
         Theme theme = new Theme(null, name, description, thumbnail);
-        Long id = themeRepository.insert(theme);
-        return themeRepository.findBy(id)
-                .orElseThrow(() -> new IllegalArgumentException("생성된 테마를 찾을 수 없습니다."));
+        return themeRepository.save(theme);
     }
 
     @Transactional
     public void delete(Long id) {
         validateDeletable(id);
-        themeRepository.delete(id);
+        themeRepository.deleteById(id);
     }
 
     public List<PopularThemeResult> findWeeklyTopTen() {
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusWeeks(1);
         LocalDate endDate = today.minusDays(1);
-        return themeRepository.findPopular(startDate, endDate, 10);
+        //todo: 레거시 themeRepository 삭제 예정
+        return themeQueryRepository.findPopular(startDate, endDate, 10);
     }
 
     private void validateDeletable(Long id) {
