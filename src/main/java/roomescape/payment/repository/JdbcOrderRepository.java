@@ -26,7 +26,7 @@ public class JdbcOrderRepository implements OrderRepository {
         this.orderInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("orders")
                 .usingGeneratedKeyColumns("id")
-                .usingColumns("reservation_id", "order_id", "amount", "payment_key", "status");
+                .usingColumns("reservation_id", "order_id", "amount", "payment_key", "idempotency_key", "status");
     }
 
     private static RowMapper<Order> orderRowMapper() {
@@ -36,6 +36,7 @@ public class JdbcOrderRepository implements OrderRepository {
                 rs.getString("order_id"),
                 rs.getLong("amount"),
                 rs.getString("payment_key"),
+                rs.getString("idempotency_key"),
                 PaymentStatus.valueOf(rs.getString("status"))
         );
     }
@@ -47,6 +48,7 @@ public class JdbcOrderRepository implements OrderRepository {
                 .addValue("order_id", order.getOrderId().value())
                 .addValue("amount", order.getAmount())
                 .addValue("payment_key", order.getPaymentKey())
+                .addValue("idempotency_key", order.getIdempotencyKey())
                 .addValue("status", order.getStatus().name());
         long id = orderInsert.executeAndReturnKey(params).longValue();
 
@@ -56,6 +58,7 @@ public class JdbcOrderRepository implements OrderRepository {
                 order.getOrderId().value(),
                 order.getAmount(),
                 order.getPaymentKey(),
+                order.getIdempotencyKey(),
                 order.getStatus()
         );
     }
@@ -63,7 +66,7 @@ public class JdbcOrderRepository implements OrderRepository {
     @Override
     public Optional<Order> findByOrderId(String orderId) {
         String sql = """
-                SELECT id, reservation_id, order_id, amount, payment_key, status
+                SELECT id, reservation_id, order_id, amount, payment_key, idempotency_key, status
                 FROM orders
                 WHERE order_id = :order_id
                 """;
@@ -80,7 +83,7 @@ public class JdbcOrderRepository implements OrderRepository {
     @Override
     public Optional<Order> findByReservationId(Long reservationId) {
         String sql = """
-                SELECT id, reservation_id, order_id, amount, payment_key, status
+                SELECT id, reservation_id, order_id, amount, payment_key, idempotency_key, status
                 FROM orders
                 WHERE reservation_id = :reservation_id
                 """;
@@ -92,6 +95,24 @@ public class JdbcOrderRepository implements OrderRepository {
         );
 
         return results.stream().findFirst();
+    }
+
+    @Override
+    public List<Order> findByReservationIds(List<Long> reservationIds) {
+        if (reservationIds.isEmpty()) {
+            return List.of();
+        }
+        String sql = """
+                SELECT id, reservation_id, order_id, amount, payment_key, idempotency_key, status
+                FROM orders
+                WHERE reservation_id IN (:reservation_ids)
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                new MapSqlParameterSource("reservation_ids", reservationIds),
+                ORDER_ROW_MAPPER
+        );
     }
 
     @Override

@@ -4,6 +4,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,8 +118,14 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public UserReservationsResponse findUserReservations(String name) {
-        List<UserReservationResponse> reservations = reservationRepository.findReservedByName(name).stream()
-                .map(UserReservationResponse::confirmed)
+        List<Reservation> reserved = reservationRepository.findReservedByName(name);
+        Map<Long, Order> ordersByReservationId = orderRepository.findByReservationIds(
+                        reserved.stream().map(Reservation::getId).toList()).stream()
+                .collect(Collectors.toMap(Order::getReservationId, Function.identity()));
+
+        List<UserReservationResponse> reservations = reserved.stream()
+                .map(reservation -> UserReservationResponse.reserved(
+                        reservation, ordersByReservationId.get(reservation.getId())))
                 .toList();
         List<UserReservationResponse> waitings = reservationRepository.findWaitingRanksByName(name).stream()
                 .map(UserReservationResponse::waiting)

@@ -198,6 +198,19 @@
             margin-top: 4px;
         }
 
+        .payment-info {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .payment-detail {
+            font-size: 12px;
+            color: var(--muted);
+            word-break: break-all;
+        }
+
         .reservation-actions {
             display: flex;
             gap: 8px;
@@ -363,6 +376,19 @@
             titleBox.appendChild(title);
             titleBox.appendChild(summary);
 
+            if (reservation.payment) {
+                const payment = document.createElement('p');
+                payment.className = 'payment-info';
+                payment.textContent = `결제 상태: ${paymentStatusLabel(reservation.payment.paymentStatus)} · ${reservation.payment.amount.toLocaleString()}원`;
+                titleBox.appendChild(payment);
+
+                const detail = document.createElement('p');
+                detail.className = 'payment-detail';
+                detail.textContent = `주문번호 ${reservation.payment.orderId}`
+                    + (reservation.payment.paymentKey ? ` · paymentKey ${reservation.payment.paymentKey}` : '');
+                titleBox.appendChild(detail);
+            }
+
             const badge = document.createElement('span');
             badge.className = isPast ? 'badge warning' : 'badge';
             badge.textContent = isPast ? '지난 예약' : '예약 예정';
@@ -449,6 +475,21 @@
                     searchReservations();
                 })
                 .catch(error => showReservationMessage(toErrorMessage(error, '대기 신청을 취소하지 못했습니다.')));
+        }
+
+        function paymentStatusLabel(status) {
+            switch (status) {
+                case 'PENDING':
+                    return '결제 대기';
+                case 'DONE':
+                    return '확정';
+                case 'UNKNOWN':
+                    return '확인 필요';
+                case 'FAILED':
+                    return '결제 실패';
+                default:
+                    return status;
+            }
         }
 
         function isPastReservation(reservation) {

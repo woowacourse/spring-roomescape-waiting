@@ -15,6 +15,8 @@ public enum PaymentErrorCode implements ErrorCode {
     PAYMENT_REJECT_CARD(HttpStatus.PAYMENT_REQUIRED, "한도 초과 또는 잔액 부족으로 결제가 거절되었습니다."),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 결제 정보입니다."),
     PAYMENT_PROVIDER_ERROR(HttpStatus.BAD_GATEWAY, "결제사 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
+    PAYMENT_CONNECTION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요."),
+    PAYMENT_RESULT_UNKNOWN(HttpStatus.GATEWAY_TIMEOUT, "결제 결과를 확인하지 못했습니다. 결제 내역에서 상태를 확인하거나 다시 시도해주세요."),
     PAYMENT_FAILED(HttpStatus.BAD_GATEWAY, "결제에 실패했습니다. 잠시 후 다시 시도해주세요.");
 
     private final HttpStatus httpStatus;

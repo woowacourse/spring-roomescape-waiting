@@ -14,11 +14,15 @@ import roomescape.common.config.TestTimeConfig;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.payment.FakePaymentGateway;
 import roomescape.payment.FakePaymentGatewayConfig;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.dto.PaymentConfirmRequest;
 import roomescape.payment.dto.PaymentConfirmResponse;
 import roomescape.payment.exception.PaymentErrorCode;
+import roomescape.payment.repository.OrderRepository;
 import roomescape.reservation.dto.ReservationCreateResponse;
 import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.UserReservationResponse;
+import roomescape.reservation.dto.UserReservationsResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -42,6 +46,13 @@ class PaymentServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private FakePaymentGateway fakePaymentGateway;
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @org.junit.jupiter.api.BeforeEach
+    void resetGateway() {
+        fakePaymentGateway.reset();
+    }
 
     private ReservationCreateResponse reservePending() {
         Long timeId = reservationTimeRepository.save(ReservationTime.create(LocalTime.parse("10:00"))).getId();
@@ -89,5 +100,81 @@ class PaymentServiceTest {
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(PaymentErrorCode.ORDER_NOT_FOUND);
+    }
+
+    @Test
+    void read_timeout처럼_결과가_불명확하면_주문은_UNKNOWN으로_남고_예약은_확정되지_않는다() {
+        // given
+        ReservationCreateResponse reservation = reservePending();
+        fakePaymentGateway.willFailWith(PaymentErrorCode.PAYMENT_RESULT_UNKNOWN);
+        String orderId = reservation.payment().orderId();
+        PaymentConfirmRequest request = new PaymentConfirmRequest(
+                "test_payment_key", orderId, reservation.payment().amount());
+
+        // when & then : 실패로 단정하지 않고 "확인 필요"로 표면화
+        assertThatThrownBy(() -> paymentService.confirm(request))
+                .isInstanceOf(RoomEscapeException.class)
+                .extracting("errorCode")
+                .isEqualTo(PaymentErrorCode.PAYMENT_RESULT_UNKNOWN);
+        // 결과 불명확 상태가 커밋되어 남는다
+        assertThat(orderRepository.findByOrderId(orderId).orElseThrow().getStatus())
+                .isEqualTo(PaymentStatus.UNKNOWN);
+        assertThat(reservationService.readById(reservation.id()).status()).isEqualTo("PENDING");
+    }
+
+    @Test
+    void UNKNOWN_주문을_같은_멱등키로_재시도하면_확정된다() {
+        // given : 첫 시도는 결과 불명확
+        ReservationCreateResponse reservation = reservePending();
+        String orderId = reservation.payment().orderId();
+        long amount = reservation.payment().amount();
+        fakePaymentGateway.willFailWith(PaymentErrorCode.PAYMENT_RESULT_UNKNOWN);
+        assertThatThrownBy(() -> paymentService.confirm(
+                new PaymentConfirmRequest("test_payment_key", orderId, amount)))
+                .isInstanceOf(RoomEscapeException.class);
+
+        // when : 재시도(이번엔 응답 도착)
+        fakePaymentGateway.willSucceed();
+        paymentService.confirm(new PaymentConfirmRequest("test_payment_key", orderId, amount));
+
+        // then : 확정된다
+        assertThat(reservationService.readById(reservation.id()).status()).isEqualTo("CONFIRMED");
+    }
+
+    @Test
+    void 이미_확정된_주문을_새로고침으로_다시_승인해도_게이트웨이를_재호출하지_않는다() {
+        // given : 한 번 승인 완료
+        ReservationCreateResponse reservation = reservePending();
+        String orderId = reservation.payment().orderId();
+        long amount = reservation.payment().amount();
+        paymentService.confirm(new PaymentConfirmRequest("test_payment_key", orderId, amount));
+        int countAfterFirst = fakePaymentGateway.callCount();
+
+        // when : success 페이지 새로고침으로 동일 confirm 재요청
+        PaymentConfirmResponse response = paymentService.confirm(
+                new PaymentConfirmRequest("test_payment_key", orderId, amount));
+
+        // then : 게이트웨이 추가 호출 없이 기존 결과를 반환한다
+        assertThat(response.status()).isEqualTo("DONE");
+        assertThat(fakePaymentGateway.callCount()).isEqualTo(countAfterFirst);
+    }
+
+    @Test
+    void 내_예약_조회시_결제_상태와_정보가_함께_조회된다() {
+        // given : 결제까지 완료한 예약
+        ReservationCreateResponse reservation = reservePending();
+        paymentService.confirm(new PaymentConfirmRequest(
+                "test_payment_key", reservation.payment().orderId(), reservation.payment().amount()));
+
+        // when
+        UserReservationsResponse mine = reservationService.findUserReservations("브라운");
+
+        // then : 예약 정보와 함께 결제 상태/orderId/paymentKey/금액이 노출된다
+        UserReservationResponse first = mine.reservations().get(0);
+        assertThat(first.payment()).isNotNull();
+        assertThat(first.payment().paymentStatus()).isEqualTo("DONE");
+        assertThat(first.payment().orderId()).isEqualTo(reservation.payment().orderId());
+        assertThat(first.payment().paymentKey()).isNotBlank();
+        assertThat(first.payment().amount()).isEqualTo(reservation.payment().amount());
     }
 }

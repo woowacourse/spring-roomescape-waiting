@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
@@ -17,9 +19,21 @@ public class TossPaymentConfig {
     public RestClient tossRestClient(TossProperties properties) {
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())
+                .requestFactory(timeoutRequestFactory(properties))
                 .defaultHeader(HttpHeaders.AUTHORIZATION, basicAuth(properties.secretKey()))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
+    }
+
+    /**
+     * 느린 토스 응답이 우리 스레드를 무한정 붙잡지 못하도록 connect/read 타임아웃을 건다.
+     * jdk 팩토리는 응답 바디 지연을 read timeout으로 못 잡으므로 simple 팩토리를 쓴다.
+     */
+    private ClientHttpRequestFactory timeoutRequestFactory(TossProperties properties) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(properties.connectTimeout());
+        factory.setReadTimeout(properties.readTimeout());
+        return factory;
     }
 
     /**

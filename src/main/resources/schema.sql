@@ -46,12 +46,13 @@ CREATE TABLE reservation
 
 CREATE TABLE orders
 (
-    id             BIGINT       NOT NULL AUTO_INCREMENT,
-    reservation_id BIGINT       NOT NULL,
-    order_id       VARCHAR(64)  NOT NULL,
-    amount         BIGINT       NOT NULL,
-    payment_key    VARCHAR(210),
-    status         VARCHAR(20)  NOT NULL,
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id  BIGINT       NOT NULL,
+    order_id        VARCHAR(64)  NOT NULL,
+    amount          BIGINT       NOT NULL,
+    payment_key     VARCHAR(210),
+    idempotency_key VARCHAR(300) NOT NULL,
+    status          VARCHAR(20)  NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
     CONSTRAINT uq_order_id UNIQUE (order_id)

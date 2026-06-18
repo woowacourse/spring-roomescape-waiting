@@ -65,6 +65,19 @@
             font-weight: 700;
             text-decoration: none;
         }
+
+        #retry-btn {
+            display: inline-block;
+            margin: 18px 8px 0;
+            padding: 12px 20px;
+            border: 0;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 800;
+            background: var(--accent);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -72,10 +85,14 @@
     <h1 id="title">결제를 확인하고 있습니다</h1>
     <p>잠시만 기다려주세요. 결제 승인을 처리하고 있습니다.</p>
     <p aria-live="polite" class="message" id="message" role="status"></p>
+    <button id="retry-btn" style="display: none;">다시 시도</button>
     <a href="/" id="home-link" style="display: none;">홈으로 이동</a>
 </main>
 
 <script>
+    // 결과 불명확(타임아웃)·연결 실패는 같은 멱등키로 재시도해도 이중 승인되지 않으므로 재시도를 허용한다.
+    const RETRYABLE_CODES = ['PAYMENT_RESULT_UNKNOWN', 'PAYMENT_CONNECTION_FAILED'];
+
     document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
         const paymentKey = params.get('paymentKey');
@@ -85,6 +102,7 @@
         const title = document.getElementById('title');
         const message = document.getElementById('message');
         const homeLink = document.getElementById('home-link');
+        const retryBtn = document.getElementById('retry-btn');
 
         if (!paymentKey || !orderId || !amount) {
             title.textContent = '결제 정보가 올바르지 않습니다';
@@ -93,23 +111,41 @@
             return;
         }
 
-        fetch('/api/payments/confirm', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({paymentKey, orderId, amount: Number(amount)})
-        })
-            .then(handleResponse)
-            .then(() => {
-                title.textContent = '예약이 확정되었습니다';
-                message.textContent = '결제가 완료되어 예약이 확정되었습니다.';
-                message.classList.add('success');
-                setTimeout(() => window.location.href = '/', 1500);
+        retryBtn.addEventListener('click', confirmPayment);
+        confirmPayment();
+
+        function confirmPayment() {
+            retryBtn.style.display = 'none';
+            homeLink.style.display = 'none';
+            title.textContent = '결제를 확인하고 있습니다';
+            message.textContent = '';
+            message.classList.remove('success');
+
+            fetch('/api/payments/confirm', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({paymentKey, orderId, amount: Number(amount)})
             })
-            .catch(error => {
-                title.textContent = '결제 승인에 실패했습니다';
-                message.textContent = toErrorMessage(error, '결제 승인 중 오류가 발생했습니다.');
-                homeLink.style.display = 'inline-block';
-            });
+                .then(handleResponse)
+                .then(() => {
+                    title.textContent = '예약이 확정되었습니다';
+                    message.textContent = '결제가 완료되어 예약이 확정되었습니다.';
+                    message.classList.add('success');
+                    setTimeout(() => window.location.href = '/', 1500);
+                })
+                .catch(error => {
+                    if (error && RETRYABLE_CODES.includes(error.code)) {
+                        title.textContent = '결제 결과를 확인하지 못했습니다';
+                        message.textContent = toErrorMessage(error, '잠시 후 다시 시도해주세요.');
+                        retryBtn.style.display = 'inline-block';
+                        homeLink.style.display = 'inline-block';
+                        return;
+                    }
+                    title.textContent = '결제 승인에 실패했습니다';
+                    message.textContent = toErrorMessage(error, '결제 승인 중 오류가 발생했습니다.');
+                    homeLink.style.display = 'inline-block';
+                });
+        }
     });
 
     function handleResponse(res) {
