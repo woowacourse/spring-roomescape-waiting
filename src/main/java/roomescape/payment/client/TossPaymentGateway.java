@@ -2,7 +2,9 @@ package roomescape.payment.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import roomescape.payment.*;
 import roomescape.payment.client.dto.TossConfirmRequest;
@@ -30,8 +32,15 @@ public class TossPaymentGateway implements PaymentGateway {
                     .body(TossPaymentResponse.class);
             return response.toResult();
         } catch (RestClientResponseException e) {
+            // 토스가 HTTP 에러 + {code, message} 로 명확히 거절한 경우 ("거절")
             TossErrorResponse error = parseError(e.getResponseBodyAsString());
             throw new TossPaymentException(error.message());
+        } catch (ResourceAccessException e) {
+            // 연결 단계 실패(연결 거부/연결 타임아웃). 요청이 토스에 닿지 못함 → 재시도 가능 ("답 없음")
+            throw new PaymentConnectionException("결제 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.", e);
+        } catch (RestClientException e) {
+            // read timeout 등. 요청은 닿았으나 응답만 유실 → 승인 여부 불명 ("확인 필요")
+            throw new PaymentResultUnknownException("결제 결과를 확인하지 못했습니다. 결제 내역에서 결과를 확인해주세요.", e);
         }
     }
 
