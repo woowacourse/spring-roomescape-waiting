@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import roomescape.domain.theme.dto.command.ThemeCreateCommand;
 import roomescape.domain.theme.dto.response.ThemeResponseDto;
 import roomescape.domain.theme.entity.Theme;
@@ -76,7 +77,7 @@ class ThemeServiceTest {
             LocalDate startDate = today.minusDays(7);
             LocalDate endDate = today.minusDays(1);
             Theme popular = Theme.reconstruct(1L, "인기 테마", "설명", "https://example.com/popular.png", null);
-            when(themeRepository.findPopularThemesDateBetween(startDate, endDate, 10))
+            when(themeRepository.findPopularThemesDateBetween(startDate, endDate, PageRequest.of(0, 10)))
                 .thenReturn(List.of(popular));
 
             // when
@@ -91,7 +92,8 @@ class ThemeServiceTest {
         void 인기_테마가_없으면_빈_목록을_반환한다() {
             // given
             LocalDate today = LocalDate.now(fixedClock);
-            when(themeRepository.findPopularThemesDateBetween(today.minusDays(7), today.minusDays(1), 10))
+            when(themeRepository.findPopularThemesDateBetween(today.minusDays(7), today.minusDays(1),
+                PageRequest.of(0, 10)))
                 .thenReturn(List.of());
 
             // when & then

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
+import roomescape.domain.reservation.dto.response.ReservationTimeStartAtResponseDto;
 import roomescape.domain.reservation.service.ReservationService;
 
 @RestController
@@ -26,6 +27,13 @@ public class AdminReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationResponseDto>> getReservations() {
         return ResponseEntity.ok(reservationService.getReservations());
+    }
+
+    @GetMapping("/{id}/time-start-at")
+    public ResponseEntity<ReservationTimeStartAtResponseDto> getReservationTimeStartAt(
+        @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id
+    ) {
+        return ResponseEntity.ok(reservationService.getReservationTimeStartAtForSqlObservation(id));
     }
 
     @DeleteMapping("/{id}")

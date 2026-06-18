@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.dto.command.ThemeCreateCommand;
@@ -44,7 +45,7 @@ public class ThemeService {
         LocalDate endDate = today.minusDays(1);
 
         return convertThemesToDto(
-            themeRepository.findPopularThemesDateBetween(startDate, endDate, 10));
+            themeRepository.findPopularThemesDateBetween(startDate, endDate, PageRequest.of(0, 10)));
     }
 
     @Transactional

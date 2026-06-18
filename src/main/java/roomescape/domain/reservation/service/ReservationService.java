@@ -3,10 +3,13 @@ package roomescape.domain.reservation.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.dao.DuplicateKeyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.command.ReservationCreateCommand;
@@ -14,13 +17,13 @@ import roomescape.domain.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
+import roomescape.domain.reservation.dto.response.ReservationTimeStartAtResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.repository.ReservationWithWaitingNumber;
-import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -32,6 +35,8 @@ import roomescape.global.error.exception.GeneralParametersException;
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
 
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
@@ -60,6 +65,18 @@ public class ReservationService {
         return convertReservationsToDto(reservationsWithWaitingNumber);
     }
 
+    public ReservationTimeStartAtResponseDto getReservationTimeStartAtForSqlObservation(Long reservationId) {
+        log.info("=== SQL observation: findById({}) ===", reservationId);
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+
+        log.info("=== SQL observation: getTime().getStartAt() ===");
+        LocalTime startAt = reservation.getTime().getStartAt();
+        log.info("=== SQL observation: startAt={} ===", startAt);
+
+        return new ReservationTimeStartAtResponseDto(reservationId, startAt);
+    }
+
     private List<ReservationResponseDto> convertReservationsToDto(List<ReservationWithWaitingNumber> reservations) {
         return reservations.stream()
             .map(reservationWithWaitingNumber -> {
@@ -78,8 +95,10 @@ public class ReservationService {
         Reservation reservation = createReservation(command);
 
         try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
-        } catch (DuplicateKeyException e) {
+            Reservation savedReservation = reservationRepository.save(reservation);
+            reservationRepository.flush();
+            return reservationMapper.toCreateResponseDto(savedReservation);
+        } catch (DataIntegrityViolationException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
     }
@@ -111,7 +130,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCreateResponseDto updateReservation(Long id, ReserverName name,
+    public ReservationCreateResponseDto updateReservation(Long id, String name,
         ReservationUpdateCommand command) {
         Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
@@ -128,12 +147,12 @@ public class ReservationService {
             }
 
             return responseDto;
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
     }
 
-    private void validateReservationCanBeUpdated(Reservation existingReservation, ReserverName name) {
+    private void validateReservationCanBeUpdated(Reservation existingReservation, String name) {
         if (!existingReservation.isReservedBy(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
         }
@@ -203,7 +222,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
+    public ReservationCancelResponseDto cancelReservation(Long id, String name) {
         Reservation reservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
@@ -217,7 +236,7 @@ public class ReservationService {
         return cancelResponseDto;
     }
 
-    private void validateReservationCanBeCanceled(Reservation reservation, ReserverName name) {
+    private void validateReservationCanBeCanceled(Reservation reservation, String name) {
         if (!reservation.isReservedBy(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
@@ -248,8 +267,10 @@ public class ReservationService {
         validateWaitingReservationCreationAllowed(waitingReservation);
 
         try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
-        } catch (DuplicateKeyException e) {
+            Reservation savedReservation = reservationRepository.save(waitingReservation);
+            reservationRepository.flush();
+            return reservationMapper.toCreateResponseDto(savedReservation);
+        } catch (DataIntegrityViolationException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
         }
     }
@@ -267,7 +288,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
+    public ReservationCancelResponseDto cancelWaitingReservation(Long id, String name) {
         Reservation reservation = reservationRepository.lockReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
@@ -276,7 +297,7 @@ public class ReservationService {
         return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
     }
 
-    private void validateWaitingReservationCanBeCanceled(Reservation reservation, ReserverName name) {
+    private void validateWaitingReservationCanBeCanceled(Reservation reservation, String name) {
         if (!reservation.isReservedBy(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }

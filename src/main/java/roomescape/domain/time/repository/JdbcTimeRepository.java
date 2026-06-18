@@ -10,13 +10,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.time.entity.Time;
 import roomescape.domain.time.error.type.TimeErrorType;
 import roomescape.global.error.exception.GeneralException;
 
-@Repository
-public class JdbcTimeRepository implements TimeRepository {
+public class JdbcTimeRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -29,7 +27,7 @@ public class JdbcTimeRepository implements TimeRepository {
             .usingGeneratedKeyColumns("id");
     }
 
-    @Override
+
     public Time save(Time time) {
         Map<String, Object> args = Map.of("start_at", time.getStartAt());
 
@@ -38,7 +36,7 @@ public class JdbcTimeRepository implements TimeRepository {
         return Time.reconstruct(generatedKey, time.getStartAt(), null);
     }
 
-    @Override
+
     public List<Time> findAllByDeletedAtIsNull() {
         String sql = "SELECT id, start_at FROM reservation_time WHERE deleted_at IS NULL";
         return jdbcTemplate.query(
@@ -51,7 +49,7 @@ public class JdbcTimeRepository implements TimeRepository {
         );
     }
 
-    @Override
+
     public Optional<Time> findTimeByIdAndDeletedAtIsNull(Long id) {
         String sql = "SELECT id, start_at FROM reservation_time WHERE id = :id AND deleted_at IS NULL";
         SqlParameterSource parameters = new MapSqlParameterSource("id", id);
@@ -71,7 +69,7 @@ public class JdbcTimeRepository implements TimeRepository {
         }
     }
 
-    @Override
+
     public boolean existsTimeByIdAndDeletedAtIsNull(Long id) {
         String sql = """
             SELECT EXISTS (
@@ -87,7 +85,7 @@ public class JdbcTimeRepository implements TimeRepository {
         return Boolean.TRUE.equals(exists);
     }
 
-    @Override
+
     public boolean existsTimeByStartAtAndDeletedAtIsNull(LocalTime startAt) {
         String sql = """
             SELECT EXISTS (
@@ -103,7 +101,7 @@ public class JdbcTimeRepository implements TimeRepository {
         return Boolean.TRUE.equals(exists);
     }
 
-    @Override
+
     public void deleteTimeById(Long id) {
         final String sql = """
             UPDATE reservation_time

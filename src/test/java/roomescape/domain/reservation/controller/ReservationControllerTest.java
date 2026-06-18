@@ -28,7 +28,6 @@ import roomescape.domain.reservation.entity.ReservationEditableStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.service.ReservationService;
-import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.dto.response.ReservationThemeResponseDto;
 import roomescape.domain.time.dto.response.ReservationTimeResponseDto;
 import roomescape.fixture.ReservationFixture;
@@ -52,7 +51,7 @@ class ReservationControllerTest {
 
     private ReservationCreateCommand sampleCreateCommand() {
         return new ReservationCreateCommand(
-            new ReserverName(ReservationFixture.FUTURE.getName()),
+            ReservationFixture.FUTURE.getName(),
             ReservationFixture.FUTURE.getDate(), 1L, 1L
         );
     }
@@ -126,9 +125,9 @@ class ReservationControllerTest {
                           "themeId": 1
                         }
                         """.formatted(
-                            ReservationFixture.FUTURE.getName(),
-                            ReservationFixture.FUTURE.getDate()
-                        )))
+                        ReservationFixture.FUTURE.getName(),
+                        ReservationFixture.FUTURE.getDate()
+                    )))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", equalTo(ReservationFixture.FUTURE.getName())))
                 .andExpect(jsonPath("$.date", equalTo(ReservationFixture.FUTURE.getDate().toString())));
@@ -160,16 +159,16 @@ class ReservationControllerTest {
                           "themeId": 1
                         }
                         """.formatted(
-                            ReservationFixture.PAST.getName(),
-                            ReservationFixture.PAST.getDate()
-                        )))
+                        ReservationFixture.PAST.getName(),
+                        ReservationFixture.PAST.getDate()
+                    )))
                 .andExpect(status().is4xxClientError());
         }
 
         @Test
         void 존재하지_않는_timeId와_themeId이면_4xx를_반환한다() throws Exception {
             when(reservationMapper.toCreateCommand(any())).thenReturn(
-                new ReservationCreateCommand(new ReserverName("예약자"), ReservationFixture.FUTURE.getDate(), 999L, 999L)
+                new ReservationCreateCommand("예약자", ReservationFixture.FUTURE.getDate(), 999L, 999L)
             );
             when(reservationService.saveReservation(any())).thenThrow(new GeneralParametersException(
                 ReservationErrorType.FIELD_RESOURCE_NOT_FOUND,
@@ -208,9 +207,9 @@ class ReservationControllerTest {
                           "themeId": 1
                         }
                         """.formatted(
-                            ReservationFixture.FUTURE.getName(),
-                            ReservationFixture.FUTURE.getDate()
-                        )))
+                        ReservationFixture.FUTURE.getName(),
+                        ReservationFixture.FUTURE.getDate()
+                    )))
                 .andExpect(status().is4xxClientError());
         }
     }
@@ -223,7 +222,7 @@ class ReservationControllerTest {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
                 new ReservationUpdateCommand(null, 2L, null, 0L)
             );
-            when(reservationService.updateReservation(eq(1L), eq(new ReserverName("예약자")), any())).thenReturn(
+            when(reservationService.updateReservation(eq(1L), eq("예약자"), any())).thenReturn(
                 new ReservationCreateResponseDto(1L, "예약자", ReservationFixture.FUTURE.getDate(), 2L, 1L)
             );
 
@@ -248,7 +247,7 @@ class ReservationControllerTest {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
                 new ReservationUpdateCommand(null, null, null, 0L)
             );
-            when(reservationService.updateReservation(eq(999L), eq(new ReserverName("예약자")), any()))
+            when(reservationService.updateReservation(eq(999L), eq("예약자"), any()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
             mockMvc.perform(patch("/api/reservations/999")
@@ -263,7 +262,7 @@ class ReservationControllerTest {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
                 new ReservationUpdateCommand(null, null, null, 0L)
             );
-            when(reservationService.updateReservation(eq(1L), eq(new ReserverName("다른예약자")), any()))
+            when(reservationService.updateReservation(eq(1L), eq("다른예약자"), any()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN));
 
             mockMvc.perform(patch("/api/reservations/1")
@@ -289,7 +288,7 @@ class ReservationControllerTest {
         @Test
         void 예약을_취소한다() throws Exception {
             when(reservationService.cancelReservation(
-                1L, new ReserverName(ReservationFixture.FUTURE.getName())))
+                1L, ReservationFixture.FUTURE.getName()))
                 .thenReturn(sampleCancelResponse());
 
             mockMvc.perform(patch("/api/reservations/1/cancel")
@@ -307,7 +306,7 @@ class ReservationControllerTest {
         @Test
         void 존재하지_않는_예약_ID이면_4xx를_반환한다() throws Exception {
             when(reservationService.cancelReservation(
-                999L, new ReserverName(ReservationFixture.FUTURE.getName())))
+                999L, ReservationFixture.FUTURE.getName()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
             mockMvc.perform(patch("/api/reservations/999/cancel")
@@ -317,7 +316,7 @@ class ReservationControllerTest {
 
         @Test
         void 예약자명이_일치하지_않으면_4xx를_반환한다() throws Exception {
-            when(reservationService.cancelReservation(1L, new ReserverName("다른예약자")))
+            when(reservationService.cancelReservation(1L, "다른예약자"))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN));
 
             mockMvc.perform(patch("/api/reservations/1/cancel")
@@ -344,9 +343,9 @@ class ReservationControllerTest {
                           "themeId": 1
                         }
                         """.formatted(
-                            ReservationFixture.FUTURE.getName(),
-                            ReservationFixture.FUTURE.getDate()
-                        )))
+                        ReservationFixture.FUTURE.getName(),
+                        ReservationFixture.FUTURE.getDate()
+                    )))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", equalTo(ReservationFixture.FUTURE.getName())));
         }
@@ -367,9 +366,9 @@ class ReservationControllerTest {
                           "themeId": 1
                         }
                         """.formatted(
-                            ReservationFixture.FUTURE.getName(),
-                            ReservationFixture.FUTURE.getDate()
-                        )))
+                        ReservationFixture.FUTURE.getName(),
+                        ReservationFixture.FUTURE.getDate()
+                    )))
                 .andExpect(status().is4xxClientError());
         }
     }
@@ -380,7 +379,7 @@ class ReservationControllerTest {
         @Test
         void 예약_대기를_취소한다() throws Exception {
             when(reservationService.cancelWaitingReservation(
-                1L, new ReserverName(ReservationFixture.FUTURE.getName())))
+                1L, ReservationFixture.FUTURE.getName()))
                 .thenReturn(sampleCancelResponse());
 
             mockMvc.perform(patch("/api/reservations/1/waitings/cancel")
@@ -392,7 +391,7 @@ class ReservationControllerTest {
         @Test
         void 존재하지_않는_예약_ID이면_4xx를_반환한다() throws Exception {
             when(reservationService.cancelWaitingReservation(
-                999L, new ReserverName(ReservationFixture.FUTURE.getName())))
+                999L, ReservationFixture.FUTURE.getName()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
             mockMvc.perform(patch("/api/reservations/999/waitings/cancel")
@@ -402,7 +401,7 @@ class ReservationControllerTest {
 
         @Test
         void 예약자명이_일치하지_않으면_4xx를_반환한다() throws Exception {
-            when(reservationService.cancelWaitingReservation(1L, new ReserverName("다른예약자")))
+            when(reservationService.cancelWaitingReservation(1L, "다른예약자"))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN));
 
             mockMvc.perform(patch("/api/reservations/1/waitings/cancel")
@@ -413,7 +412,7 @@ class ReservationControllerTest {
         @Test
         void 대기_예약이_아닌_일반_예약에_대기_취소를_시도하면_4xx를_반환한다() throws Exception {
             when(reservationService.cancelWaitingReservation(
-                1L, new ReserverName(ReservationFixture.FUTURE.getName())))
+                1L, ReservationFixture.FUTURE.getName()))
                 .thenThrow(new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION));
 
             mockMvc.perform(patch("/api/reservations/1/waitings/cancel")
