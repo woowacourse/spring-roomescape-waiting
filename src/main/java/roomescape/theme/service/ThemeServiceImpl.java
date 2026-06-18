@@ -64,9 +64,10 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        if(!themeRepository.deleteById(id)) {
+        if(!themeRepository.existsById(id)) {
             throw new ThemeNotFoundException(id);
         }
+        themeRepository.deleteById(id);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ThemeServiceImpl implements ThemeService {
             return List.of();
         }
 
-        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findTimeIdsByThemeIdAndDate(themeId, date));
+        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findAvailableTimeIds(themeId, date.atStartOfDay(), date.plusDays(1).atStartOfDay()));
         return timeService.findByDate(date)
                 .stream()
                 .filter(time -> !reservedTimeIds.contains(time.getId()))

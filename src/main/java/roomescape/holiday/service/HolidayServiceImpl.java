@@ -34,10 +34,10 @@ public class HolidayServiceImpl implements HolidayService {
     @Override
     @Transactional
     public void delete(Long id) {
-        boolean deleted = holidayRepository.deleteById(id);
-        if (!deleted) {
+        if (!holidayRepository.existsById(id)) {
             throw new HolidayNotFoundException(id);
         }
+        holidayRepository.deleteById(id);
     }
 
     @Override

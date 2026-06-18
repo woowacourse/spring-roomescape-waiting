@@ -8,8 +8,8 @@ public record HolidayResponse(Long id, LocalDate date) {
 
     public static HolidayResponse from(Holiday holiday) {
         return new HolidayResponse(
-                holiday.id(),
-                holiday.date()
+                holiday.getId(),
+                holiday.getDate()
         );
     }
 }

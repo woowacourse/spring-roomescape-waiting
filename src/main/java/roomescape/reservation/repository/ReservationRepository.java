@@ -1,33 +1,50 @@
 package roomescape.reservation.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.dto.ReservationWithRank;
 import roomescape.time.domain.ReservationTime;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
-public interface ReservationRepository {
-    List<Reservation> findAll();
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Optional<Reservation> findById(Long id);
+    boolean existsByNameAndTheme_IdAndTime(String name, Long themeId, ReservationTime time);
 
+    boolean existsByTheme_IdAndTime(Long themeId, ReservationTime time);
+
+    List<Reservation> findAllByTime_IdAndTheme_Id(Long timeId, Long themeId);
+
+    List<Reservation> findAllByTime_IdAndTheme_IdAndStatus(Long timeId, Long themeId, Status status);
+
+    @EntityGraph(attributePaths = {"theme", "time"})
+    List<Reservation> findAllByStatus(Status status);
+
+    @EntityGraph(attributePaths = {"theme","time"})
     List<Reservation> findByName(String name);
 
-    List<Reservation> findAllWaitingBy(Long timeId, Long themeId);
+    @Query("SELECT r.time.id FROM Reservation r " +
+            "WHERE r.theme.id = :themeId " +
+            "AND r.time.startAt >= :start AND r.time.startAt < :end")
+    List<Long> findAvailableTimeIds(Long themeId, LocalDateTime start, LocalDateTime end);
 
-    List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
-
-    Reservation save(Reservation reservation);
-
-    Reservation update(Reservation reservation);
-
-    boolean deleteById(Long id);
-
-    boolean existsByTimeId(Long timeId);
-
-    boolean isDuplicated(Long themeId, ReservationTime time);
-
-    boolean isDuplicatedWithName(String name, Long themeId, ReservationTime time);
-
+    @Query("""
+            SELECT new roomescape.reservation.repository.dto.ReservationWithRank(
+                r,
+                (SELECT COUNT(w) FROM Reservation w
+                 WHERE w.theme = r.theme
+                   AND w.time = r.time
+                   AND w.status = roomescape.reservation.domain.Status.WAITING
+                   AND w.createdAt < r.createdAt))
+            FROM Reservation r
+            JOIN FETCH r.theme
+            JOIN FETCH r.time
+            WHERE r.name = :name
+            ORDER BY r.id
+            """)
+    List<ReservationWithRank> findMineWithRank(String name);
 }

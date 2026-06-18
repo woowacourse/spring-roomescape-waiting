@@ -1,10 +1,10 @@
 package roomescape.time.service;
 
+import roomescape.time.domain.ReservationTime;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import roomescape.time.domain.ReservationTime;
 
 public interface TimeService {
     ReservationTime create(LocalDateTime startAt, LocalDateTime endAt);
@@ -16,4 +16,9 @@ public interface TimeService {
     ReservationTime findById(Long id);
 
     void deleteById(Long id);
+
+    void writeBehindInsert();
+    void writeBehindUpdate();
+
+    void explicitFlush();
 }

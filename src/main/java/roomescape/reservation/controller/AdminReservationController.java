@@ -34,6 +34,11 @@ public class AdminReservationController {
         return ResponseEntity.ok(body);
     }
 
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationResponse>> getWaitings() {
+        return ResponseEntity.ok(reservationService.getWaitings());
+    }
+
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid ReservationSaveRequest reservationRequest) {
