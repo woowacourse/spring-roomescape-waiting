@@ -50,7 +50,7 @@ public class TokenBucketRateLimiter {
     private void refill() {
         // TODO: 경과 시간(nanoClock - lastRefillNanos)에 비례해 토큰을 보충하고(상한 capacity), lastRefillNanos 를 갱신한다.
         long now = nanoClock.getAsLong();
-        double elapsedSec = (now - lastRefillNanos) / 1_000_000_000.0;
+        double elapsedSec = (now - lastRefillNanos) / 1_000_000_000.0; // (현재 시간 - 마지막 충전 시간)
         availableTokens = Math.min(capacity, availableTokens + elapsedSec * refillPerSec);
         lastRefillNanos = now;
     }

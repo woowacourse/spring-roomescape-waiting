@@ -14,7 +14,8 @@ import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.IllegalDateTimeException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
-import roomescape.payment.infra.client.exception.OutboundRateLimitException;
+import roomescape.payment.infra.client.exception.TossBusinessException;
+import roomescape.payment.infra.client.exception.TossInfrastructureException;
 
 @Slf4j
 @RestControllerAdvice
@@ -75,10 +76,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 
-    @ExceptionHandler(OutboundRateLimitException.class)
-    public ResponseEntity<String> handleOutboundRateLimit(OutboundRateLimitException e) {
-        log.warn("토스 결제망 보호를 위해 자체 한도 초과 차단됨: {}", e.getMessage());
+    @ExceptionHandler(TossInfrastructureException.class)
+    public ResponseEntity<String> handleTossInfrastructureException(TossInfrastructureException e) {
+        log.warn("결제 인프라 통신 오류 (또는 Rate Limit 차단): {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
+    }
+
+    @ExceptionHandler(TossBusinessException.class)
+    public ResponseEntity<String> handleTossBusinessException(TossBusinessException e) {
+        log.warn("결제 비즈니스 로직 오류: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
     private ResponseEntity<String> getStringResponseEntity(final BindingResult e) {

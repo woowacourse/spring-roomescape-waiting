@@ -31,4 +31,10 @@ public abstract class TossInfrastructureException extends TossPaymentException {
             super(HttpStatus.SERVICE_UNAVAILABLE, "CONNECTION_ERROR", message);
         }
     }
+
+    public static class OutboundRateLimitException extends TossInfrastructureException {
+        public OutboundRateLimitException(HttpStatusCode status, String code, String message) {
+            super(status, code, message);
+        }
+    }
 }
