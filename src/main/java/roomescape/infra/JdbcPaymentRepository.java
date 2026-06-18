@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.payment.Payment;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.repository.PaymentRepository;
 
 import java.util.HashMap;
@@ -30,14 +31,15 @@ public class JdbcPaymentRepository implements PaymentRepository {
         params.put("payment_key", payment.getPaymentKey());
         params.put("order_id", payment.getOrderId());
         params.put("amount", payment.getAmount());
+        params.put("status", payment.getStatus().name());
         long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        return new Payment(id, payment.getReservationId(), payment.getPaymentKey(), payment.getOrderId(), payment.getAmount());
+        return new Payment(id, payment.getReservationId(), payment.getPaymentKey(), payment.getOrderId(), payment.getAmount(), payment.getStatus());
     }
 
     @Override
     public Optional<Payment> findByOrderId(String orderId) {
         String sql = """
-                SELECT id, reservation_id, payment_key, order_id, amount
+                SELECT id, reservation_id, payment_key, order_id, amount, status
                 FROM payment
                 WHERE order_id = ?
                 """;
@@ -46,7 +48,8 @@ public class JdbcPaymentRepository implements PaymentRepository {
                 rs.getLong("reservation_id"),
                 rs.getString("payment_key"),
                 rs.getString("order_id"),
-                rs.getLong("amount")
+                rs.getLong("amount"),
+                PaymentStatus.valueOf(rs.getString("status"))
         ), orderId).stream().findFirst();
     }
 }

@@ -50,9 +50,10 @@ CREATE TABLE IF NOT EXISTS payment
 (
     id             BIGINT       NOT NULL AUTO_INCREMENT,
     reservation_id BIGINT       NOT NULL,
-    payment_key    VARCHAR(200) NOT NULL,
+    payment_key    VARCHAR(200) NULL,
     order_id       VARCHAR(64)  NOT NULL,
     amount         BIGINT       NOT NULL,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
