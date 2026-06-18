@@ -9,21 +9,21 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.slot.adapter.out.persistence.JdbcSlotRepository;
+import roomescape.slot.adapter.out.persistence.JpaSlotRepository;
 import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
 
-@JdbcTest
+@DataJpaTest
 @ActiveProfiles("test")
-@Import(JdbcSlotRepository.class)
-class JdbcSlotRepositoryTest {
+@Import(JpaSlotRepository.class)
+class JpaSlotRepositoryTest {
 
     @Autowired
-    private JdbcSlotRepository repository;
+    private JpaSlotRepository repository;
 
     @Test
     @DisplayName("슬롯을 저장할 수 있다.")

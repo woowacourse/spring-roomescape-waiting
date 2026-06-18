@@ -33,6 +33,24 @@ public class WaitingApiIntegrationTest extends ControllerTestSupport {
                 .body("data.waitingOrder", is(1));
     }
 
+    @Test
+    @DisplayName("미션 원문 경로로도 이미 예약된 슬롯에 대기를 신청할 수 있다.")
+    void creates_waiting_with_mission_path_successfully() {
+        String accessToken = loginWaitingUserToken();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.memberId", is(2))
+                .body("data.slotId", is(1))
+                .body("data.waitingOrder", is(1));
+    }
+
     private Map<String, Object> waitingRequest() {
         return waitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
     }
@@ -152,6 +170,84 @@ public class WaitingApiIntegrationTest extends ControllerTestSupport {
                 .when().delete("/api/user/waitings/{id}")
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("대기를 취소하면 목록에서 사라지고 남은 대기 순번이 재계산된다.")
+    void canceling_waiting_removes_it_and_reorders_remaining_waitings() {
+        String firstAccessToken = loginWaitingUserToken();
+        String secondAccessToken = loginOtherUserToken();
+
+        Integer firstWaitingId = createWaiting(firstAccessToken);
+        createWaiting(secondAccessToken);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + firstAccessToken)
+                .contentType(ContentType.JSON)
+                .pathParam("id", firstWaitingId)
+                .when().delete("/api/user/waitings/{id}")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + firstAccessToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(0));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + secondAccessToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(1))
+                .body("data[0].status", is("WAITING"))
+                .body("data[0].waitingOrder", is(1));
+    }
+
+    @Test
+    @DisplayName("매니저는 대기 목록을 조회할 수 있다.")
+    void manager_finds_waiting_list_successfully() {
+        createWaiting(loginWaitingUserToken());
+        createWaiting(loginOtherUserToken());
+        String managerAccessToken = loginManagerToken();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + managerAccessToken)
+                .when().get("/api/manager/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(2))
+                .body("data[0].waitingOrder", is(1))
+                .body("data[1].waitingOrder", is(2));
+    }
+
+    @Test
+    @DisplayName("매니저는 대기를 취소할 수 있다.")
+    void manager_cancels_waiting_successfully() {
+        String waitingUserToken = loginWaitingUserToken();
+        Integer waitingId = createWaiting(waitingUserToken);
+        String managerAccessToken = loginManagerToken();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + managerAccessToken)
+                .contentType(ContentType.JSON)
+                .pathParam("id", waitingId)
+                .when().delete("/api/manager/waitings/{id}")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + waitingUserToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(0));
     }
 
     @Test

@@ -65,7 +65,7 @@
 3. 이미 예약 또는 대기가 있는 슬롯에는 직접 예약할 수 없다.
 4. 예약 또는 슬롯에서 사용 중인 시간/테마 삭제는 제한된다.
 5. 본인 소유가 아닌 예약 또는 대기 취소는 거부된다.
-6. 없는 예약 또는 대기 취소 요청은 기존 정책에 따라 성공 처리한다.
+6. 없는 예약 취소 요청은 성공 처리한다. 없는 대기 취소 요청은 `404 Not Found`와 `WAITING_404`로 실패 처리한다.
 
 ## 2. API 명세
 
@@ -415,7 +415,55 @@ DELETE /api/manager/slots/{slotId}
 
 이를 막기 위해 예약 취소의 승격 대상 대기열 조회와 대기 취소의 단건 대기 조회에 `SELECT ... FOR UPDATE`를 사용한다.
 
-## 4. 테스트 전략
+## 4. JPA 연결 미션 이해 가이드
+
+### 현재 구조 요약
+
+이 프로젝트는 기존 방탈출 예약/대기 도메인을 JPA 기반 영속성으로 연결한 상태다. 읽을 때는 다음 순서로 보면 이해가 쉽다.
+
+1. **도메인 엔티티**: `member`, `theme`, `reservationtime`, `slot`, `reservation`, `waiting` 패키지의 `domain` 클래스가 JPA `@Entity`다.
+2. **애플리케이션 포트**: 각 기능의 `application.port.out` 저장소 인터페이스가 서비스가 의존하는 추상화다.
+3. **JPA 어댑터**: `adapter.out.persistence.Jpa*Repository`가 포트를 구현하고, 내부에서 `SpringData*Repository`를 호출한다.
+4. **유스케이스 서비스**: `ReservationService`, `WaitingService`, `SlotService` 등이 트랜잭션과 도메인 규칙 흐름을 조율한다.
+5. **검증 테스트**: `Jpa*RepositoryTest`, API 통합 테스트, 동시성 통합 테스트가 JPA 매핑과 요구사항을 함께 검증한다.
+
+### 주요 JPA 매핑 결정
+
+- `Reservation`, `Waiting`, `Slot`은 모두 `Member`, `Slot`, `Theme`, `ReservationTime`을 식별자 필드가 아니라 객체 연관으로 가진다.
+- 다대일 연관은 기본적으로 `FetchType.LAZY`를 사용해 서비스 흐름에서 필요한 데이터만 조회한다.
+- 한 슬롯에는 하나의 예약만 존재해야 하므로 `reservation.slot_id`에 `uk_reservation_slot` 유니크 제약을 둔다.
+- 같은 사용자는 같은 슬롯에 한 번만 대기할 수 있으므로 `waiting(member_id, slot_id)`에 `uk_waiting_member_slot` 유니크 제약을 둔다.
+- 슬롯은 `date`, `time_id`, `theme_id` 조합으로 유일해야 하므로 `uk_slot_date_time_theme` 제약을 둔다.
+- 대기 순번은 별도 컬럼으로 저장하지 않고, 같은 슬롯의 `waiting.id` 오름차순으로 조회 시 계산한다.
+
+### 트랜잭션/락 정책
+
+- 예약 취소와 첫 번째 대기 승격은 하나의 트랜잭션에서 처리한다.
+- 승격 대상 대기열 조회와 대기 취소 단건 조회는 명령 흐름에서만 `PESSIMISTIC_WRITE` 락을 사용한다.
+- 조회용 메서드와 락 조회 메서드를 분리해, 일반 화면 조회가 불필요하게 row lock을 잡지 않도록 했다.
+- 대기 취소 요청에서 대상 대기가 없으면 성공 처리하지 않고 `WAITING_404`로 실패시킨다. 이는 승격된 대기를 뒤늦게 취소 성공으로 오해하는 상황을 막기 위한 정책이다.
+
+### 코드 리뷰 체크리스트
+
+JPA 연결 이후 변경을 검토할 때는 다음을 우선 확인한다.
+
+- 엔티티 연관관계와 DB 제약이 도메인 규칙과 같은 방향인지 확인한다.
+- 서비스가 Spring Data 구현체에 직접 의존하지 않고 `application.port.out` 포트에만 의존하는지 확인한다.
+- `@Transactional`이 데이터 변경 유스케이스와 `FOR UPDATE` 조회를 포함하는 메서드에 걸려 있는지 확인한다.
+- JPQL projection이 응답 DTO 조립을 단순화하는지, 반대로 애플리케이션 계층을 영속성 세부사항에 과하게 묶지는 않는지 확인한다.
+- 대기 순번 계산, 예약 취소/승격, 없는 대기 취소 실패 정책이 테스트 이름과 문서에 함께 드러나는지 확인한다.
+
+### 남은 개선 후보
+
+- 운영 DB가 H2가 아닐 경우 `SELECT ... FOR UPDATE`와 `ORDER BY` 조합의 실제 락 범위를 다시 확인해야 한다.
+- `findMyReservations()`는 예약 목록과 대기 목록을 합친 뒤 정렬 정책이 명확하지 않다. 화면 요구가 생기면 날짜/시간/id 기준 정렬을 명시해야 한다.
+- 관리자 예약 취소에서 없는 예약을 성공 처리하는 정책은 현재 유지되지만, 대기 취소 정책과 다르므로 API 문서와 테스트에서 의도를 계속 분리해야 한다.
+- `theme.name`, `reservation_time.start_at`처럼 서비스에서 중복을 검증하는 값은 동시 요청까지 막으려면 DB unique constraint와 예외 매핑을 추가로 검토해야 한다.
+- 요청 DTO의 필수값/문자열 길이 검증은 API 계약과 함께 관리해야 한다. 누락 시 도메인 생성 또는 DB 제약 오류로 늦게 드러날 수 있다.
+- `ddl-auto: create-drop`과 `data.sql` 초기화는 로컬/미션 검증용 설정이다. 운영 환경을 가정한다면 마이그레이션 도구와 프로파일 분리가 필요하다.
+- ADR 일부의 예전 `Jdbc*Repository` 명칭은 현재 JPA 어댑터 명칭과 맞지 않을 수 있다. 새 ADR을 작성할 때는 `Jpa*Repository`/`SpringData*Repository` 기준으로 기록한다.
+
+## 5. 테스트 전략
 
 ### 단위 테스트
 

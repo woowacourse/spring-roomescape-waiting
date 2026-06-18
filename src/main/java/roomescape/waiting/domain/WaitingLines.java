@@ -21,10 +21,14 @@ public class WaitingLines {
     }
 
     public long orderOf(Waiting waiting) {
-        WaitingLine waitingLine = linesBySlotId.get(waiting.getSlotId());
+        return orderOf(waiting.getSlotId(), waiting.getId());
+    }
+
+    public long orderOf(Long slotId, Long waitingId) {
+        WaitingLine waitingLine = linesBySlotId.get(slotId);
         if (waitingLine == null) {
             throw new IllegalArgumentException("대기열에 존재하지 않는 대기입니다.");
         }
-        return waitingLine.orderOf(waiting);
+        return waitingLine.orderOf(waitingId);
     }
 }

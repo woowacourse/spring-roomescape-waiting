@@ -11,6 +11,6 @@ public class WaitingPromotionPolicy {
         if (!waiting.isFor(slot)) {
             throw new IllegalArgumentException("대기 슬롯과 예약 슬롯이 일치하지 않습니다.");
         }
-        return Reservation.create(waiting.getMemberId(), slot);
+        return Reservation.create(waiting.getMember(), slot);
     }
 }

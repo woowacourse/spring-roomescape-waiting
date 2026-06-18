@@ -26,6 +26,8 @@ public interface WaitingRepository {
 
     List<Waiting> findAllBySlotIds(List<Long> slotIds);
 
+    List<WaitingDetailProjection> findAllWaitingDetails();
+
     List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);
 
     void deleteById(long waitingId);

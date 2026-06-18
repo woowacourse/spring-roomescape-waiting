@@ -98,7 +98,7 @@ public class ReservationTransactionIntegrationTest extends ControllerTestSupport
 
                     Waiting waiting = invocation.getArgument(0);
                     Slot slot = invocation.getArgument(1);
-                    return Reservation.create(waiting.getMemberId(), slot);
+                    return Reservation.create(waiting.getMember(), slot);
                 });
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);

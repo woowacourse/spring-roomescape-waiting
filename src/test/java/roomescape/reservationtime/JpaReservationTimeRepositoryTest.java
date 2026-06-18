@@ -8,18 +8,18 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.reservationtime.adapter.out.persistence.JdbcReservationTimeRepository;
+import roomescape.reservationtime.adapter.out.persistence.JpaReservationTimeRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 
-@JdbcTest
+@DataJpaTest
 @ActiveProfiles("test")
-@Import(JdbcReservationTimeRepository.class)
-public class JdbcReservationTimeRepositoryTest {
+@Import(JpaReservationTimeRepository.class)
+public class JpaReservationTimeRepositoryTest {
     @Autowired
-    private JdbcReservationTimeRepository repository;
+    private JpaReservationTimeRepository repository;
 
     @Test
     @DisplayName("시간을 저장할 수 있다.")

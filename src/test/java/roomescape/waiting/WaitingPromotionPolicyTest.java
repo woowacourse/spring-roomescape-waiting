@@ -21,7 +21,7 @@ class WaitingPromotionPolicyTest {
     @Test
     @DisplayName("대기를 같은 슬롯의 예약으로 전환한다.")
     void promotes_waiting_to_reservation_in_same_slot() {
-        Waiting waiting = Waiting.of(1L, 2L, 10L);
+        Waiting waiting = roomescape.TestFixtures.waiting(1L, 2L, 10L);
         Slot slot = slot(10L);
 
         Reservation reservation = policy.promote(waiting, slot);
@@ -43,7 +43,7 @@ class WaitingPromotionPolicyTest {
     @Test
     @DisplayName("대기 슬롯과 예약 슬롯이 다르면 전환에 실패한다.")
     void promotion_fails_for_different_waiting_and_reservation_slots() {
-        Waiting waiting = Waiting.of(1L, 2L, 10L);
+        Waiting waiting = roomescape.TestFixtures.waiting(1L, 2L, 10L);
         Slot otherSlot = slot(20L);
 
         assertThatThrownBy(() -> policy.promote(waiting, otherSlot))

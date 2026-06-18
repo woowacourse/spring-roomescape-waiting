@@ -39,7 +39,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authenticationInterceptor)
-                .addPathPatterns("/api/**")
+                .addPathPatterns("/api/**", "/reservations-mine", "/waitings", "/waitings/**")
                 .excludePathPatterns("/api/login", "/api/logout", "/api/themes/popular");
 
         registry.addInterceptor(managerInterceptor)
