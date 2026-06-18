@@ -55,4 +55,8 @@ public class Theme {
     public String getThumbnailImageUrl() {
         return thumbnailImageUrl;
     }
+
+    public void changeName(String name) {
+        this.name = name;
+    }
 }
