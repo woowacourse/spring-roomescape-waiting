@@ -40,8 +40,9 @@ import roomescape.fixture.TimeFixture;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
+import roomescape.support.WebMvcControllerTest;
 
-@WebMvcTest(ReservationController.class)
+@WebMvcControllerTest(controllers = ReservationController.class)
 class ReservationControllerTest {
 
     @Autowired

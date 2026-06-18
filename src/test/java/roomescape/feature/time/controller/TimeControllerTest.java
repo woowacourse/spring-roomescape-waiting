@@ -13,7 +13,6 @@ import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.feature.time.dto.response.TimeAvailabilityResponseDto;
@@ -21,8 +20,9 @@ import roomescape.feature.time.error.type.TimeErrorType;
 import roomescape.feature.time.service.TimeService;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.exception.GeneralParametersException;
+import roomescape.support.WebMvcControllerTest;
 
-@WebMvcTest(TimeController.class)
+@WebMvcControllerTest(controllers = TimeController.class)
 class TimeControllerTest {
 
     @Autowired
