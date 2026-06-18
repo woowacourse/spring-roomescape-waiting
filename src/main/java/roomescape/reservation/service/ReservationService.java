@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Limit;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -98,12 +99,13 @@ public class ReservationService {
         }
         reservationTimeRepository.lockById(reservation.getTime().getId());
         reservationRepository.deleteById(id);
+        reservationRepository.flush();
         promoteFirstWaiting(reservation);
     }
 
     private void promoteFirstWaiting(Reservation canceled) {
         reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
-                        canceled.getDate(), canceled.getTime().getId(), canceled.getTheme().getId())
+                        canceled.getDate(), canceled.getTime().getId(), canceled.getTheme().getId(), Limit.of(1))
                 .ifPresent(waiting -> {
                     reservationWaitingRepository.deleteById(waiting.getId());
                     reservationRepository.save(Reservation.of(

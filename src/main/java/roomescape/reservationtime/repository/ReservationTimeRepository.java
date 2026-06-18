@@ -19,15 +19,15 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
     @Query("SELECT t FROM ReservationTime t WHERE t.id = :id")
     void lockById(@Param("id") Long id);
 
-    @Query(value = """
-            SELECT rt.*
-            FROM reservation_time rt
-            LEFT JOIN reservation r ON rt.id = r.time_id AND r.date = :date AND r.theme_id = :themeId
-            WHERE r.id IS NULL
-            ORDER BY rt.start_at ASC
-            """, nativeQuery = true)
+    @Query("""
+            SELECT t FROM ReservationTime t
+            WHERE t.id NOT IN (
+                SELECT r.time.id FROM Reservation r
+                WHERE r.date = :date AND r.theme.id = :themeId)
+            ORDER BY t.startAt ASC
+            """)
     List<ReservationTime> findAvailableByDateAndThemeId(@Param("date") LocalDate date, @Param("themeId") Long themeId);
 
-    @Query(value = "SELECT EXISTS(SELECT 1 FROM reservation WHERE time_id = :timeId)", nativeQuery = true)
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.time.id = :timeId")
     boolean existsReservationByTimeId(@Param("timeId") Long timeId);
 }

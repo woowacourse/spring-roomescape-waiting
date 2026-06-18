@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class ThemeService {
         LocalDate startDate = LocalDate.now().minusDays(7);
         LocalDate endDate = LocalDate.now();
 
-        List<Long> themeIds = themeRepository.findTopThemeIds(startDate, endDate, limit);
+        List<Long> themeIds = themeRepository.findTopThemeIds(startDate, endDate, PageRequest.of(0, limit));
         Map<Long, Theme> themeMap = themeRepository.findAllByIds(themeIds).stream()
                 .collect(Collectors.toMap(Theme::getId, theme -> theme));
         return themeIds.stream()
