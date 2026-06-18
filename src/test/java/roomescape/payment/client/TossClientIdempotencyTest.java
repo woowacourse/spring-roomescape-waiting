@@ -21,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.RestClientException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.exception.PaymentTimedOutException;
 import roomescape.payment.PaymentStatus;
 
 /**
@@ -71,7 +71,7 @@ class TossClientIdempotencyTest {
 
         // 1차: 서버는 결제를 처리하지만 응답이 느려 read timeout(500ms)으로 끊긴다.
         assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation))
-                .isInstanceOf(RestClientException.class);
+                .isInstanceOf(PaymentTimedOutException.class);
 
         // 2차(재시도): 같은 Idempotency-Key 라 서버가 중복을 인지해 재처리 없이 첫 결과를 즉시 돌려준다.
         var result = tossPaymentGateway.confirm(confirmation);

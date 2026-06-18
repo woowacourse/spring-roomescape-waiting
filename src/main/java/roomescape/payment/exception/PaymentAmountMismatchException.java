@@ -1,4 +1,4 @@
-package roomescape.payment;
+package roomescape.payment.exception;
 
 /**
  * 주문 저장 금액과 요청 금액이 다를 때, confirm 호출 '전에' 차단하는 예외.

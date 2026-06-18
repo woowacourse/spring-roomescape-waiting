@@ -15,25 +15,25 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class TossClientConfig {
 
-  @Bean
-  public RestClient tossRestClient(
-      @Value("${toss.base-url}") String baseUrl,
-      @Value("${toss.secret-key}") String secretKey,
-      @Value("${toss.connect-timeout-ms}") int connectTimeoutMs,
-      @Value("${toss.read-timeout-ms}") int readTimeoutMs
-  ) {
-    var basic = Base64.getEncoder()
-        .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+    @Bean
+    public RestClient tossRestClient(
+            @Value("${toss.base-url}") String baseUrl,
+            @Value("${toss.secret-key}") String secretKey,
+            @Value("${toss.connect-timeout-ms}") int connectTimeoutMs,
+            @Value("${toss.read-timeout-ms}") int readTimeoutMs
+    ) {
+        var basic = Base64.getEncoder()
+                .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
 
-    var factory = new SimpleClientHttpRequestFactory();
-    factory.setConnectTimeout(connectTimeoutMs);
-    factory.setReadTimeout(readTimeoutMs);
+        var factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(connectTimeoutMs);
+        factory.setReadTimeout(readTimeoutMs);
 
-    return RestClient.builder()
-        .baseUrl(baseUrl)
-        .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
-            .requestFactory(factory)
-        .build();
-  }
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
+                .requestFactory(factory)
+                .build();
+    }
 
 }

@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.HttpClientErrorException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.exception.PaymentGatewayException;
 import roomescape.payment.PaymentStatus;
 
 
@@ -84,7 +84,7 @@ class TossPaymentGatewayTest {
 
     assertThatThrownBy(() -> tossPaymentGateway.confirm(
         new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
-        .isInstanceOf(HttpClientErrorException.class);
+        .isInstanceOf(PaymentGatewayException.class);
   }
 
 }

@@ -17,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.exception.PaymentConnectionFailedException;
+import roomescape.payment.exception.PaymentTimedOutException;
 
 @SpringBootTest
 class TossClientTimeoutTest {
@@ -72,7 +72,7 @@ class TossClientTimeoutTest {
 
         var start = System.nanoTime();
         assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation()))
-                .isInstanceOf(RestClientException.class)
+                .isInstanceOf(PaymentTimedOutException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         var elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
@@ -100,7 +100,7 @@ class TossClientTimeoutTest {
             try {
                 tossPaymentGateway.confirm(confirmation());
                 succeeded++;
-            } catch (RestClientException e) {
+            } catch (PaymentTimedOutException e) {
                 // 타임아웃으로 일찍 포기한 호출
             }
         }
@@ -118,8 +118,8 @@ class TossClientTimeoutTest {
 
         var start = System.nanoTime();
         assertThatThrownBy(() -> gateway.confirm(confirmation()))
-                .isInstanceOf(ResourceAccessException.class)
-                .hasCauseInstanceOf(SocketTimeoutException.class);
+                .isInstanceOf(PaymentConnectionFailedException.class)
+                .hasRootCauseInstanceOf(SocketTimeoutException.class);
         var elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
         assertThat(elapsedMs).isBetween(300L, 2500L);

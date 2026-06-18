@@ -2,11 +2,17 @@ package roomescape.payment.client;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.exception.PaymentConnectionFailedException;
 import roomescape.payment.PaymentGateway;
+import roomescape.payment.exception.PaymentGatewayException;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.PaymentStatus;
+import roomescape.payment.exception.PaymentTimedOutException;
 import roomescape.payment.client.dto.ConfirmRequest;
 import roomescape.payment.client.dto.TossPaymentResponse;
 
@@ -16,33 +22,41 @@ import roomescape.payment.client.dto.TossPaymentResponse;
 @Component
 public class TossPaymentGateway implements PaymentGateway {
 
-  private final RestClient tossRestClient;
+    private final RestClient tossRestClient;
 
-  public TossPaymentGateway(RestClient tossRestClient) {
-    this.tossRestClient = tossRestClient;
-  }
+    public TossPaymentGateway(RestClient tossRestClient) {
+        this.tossRestClient = tossRestClient;
+    }
 
-  @Override
-  public PaymentResult confirm(PaymentConfirmation confirmation) {
-    var request = new ConfirmRequest(
-        confirmation.paymentKey(), confirmation.orderId(), confirmation.amount());
-    var response = tossRestClient.post()
-        .uri("/v1/payments/confirm")
-        .contentType(MediaType.APPLICATION_JSON)
-        .header("Idempotency-Key", confirmation.orderId())
-        .body(request)
-        .retrieve()
-        .body(TossPaymentResponse.class);
-    return toResult(response);
-  }
+    @Override
+    public PaymentResult confirm(PaymentConfirmation confirmation) {
+        var request = new ConfirmRequest(
+                confirmation.paymentKey(), confirmation.orderId(), confirmation.amount());
+        try {
+            TossPaymentResponse response = tossRestClient.post()
+                    .uri("/v1/payments/confirm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.orderId())
+                    .body(request)
+                    .retrieve()
+                    .body(TossPaymentResponse.class);
+            return toResult(response);
+        } catch (RestClientResponseException e) {
+            throw new PaymentGatewayException(e);
+        } catch (ResourceAccessException e) {
+            throw new PaymentConnectionFailedException(e);
+        } catch (RestClientException e) {
+            throw new PaymentTimedOutException(e);
+        }
+    }
 
-  private PaymentResult toResult(TossPaymentResponse response) {
-    return new PaymentResult(
-        response.paymentKey(),
-        response.orderId(),
-        PaymentStatus.from(response.status()),
-        response.totalAmount()
-    );
-  }
+    private PaymentResult toResult(TossPaymentResponse response) {
+        return new PaymentResult(
+                response.paymentKey(),
+                response.orderId(),
+                PaymentStatus.from(response.status()),
+                response.totalAmount()
+        );
+    }
 
 }
