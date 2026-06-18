@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.Timeout.ThreadMode;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import roomescape.payment.domain.PaymentConfirmation;
 
@@ -45,8 +46,9 @@ class TossClientTimeoutTest {
     }
 
     private TossPaymentGateway gatewayWithTimeouts(String baseUrl, int connectTimeoutMs, int readTimeoutMs) {
-        TossProperties properties = new TossProperties(baseUrl, "", "test_gsk_dummy", connectTimeoutMs, readTimeoutMs);
-        return new TossPaymentGateway(new TossClientConfig().tossRestClient(properties), new ObjectMapper());
+        TossProperties properties = new TossProperties(baseUrl, "", "test_gsk_dummy", connectTimeoutMs, readTimeoutMs, 3);
+        RestClient restClient = new TossClientConfig().tossRestClient(properties, 1000, 1000);
+        return new TossPaymentGateway(restClient, new ObjectMapper());
     }
 
     @Test

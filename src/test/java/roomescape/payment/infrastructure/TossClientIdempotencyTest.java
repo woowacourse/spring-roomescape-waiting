@@ -18,6 +18,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentStatus;
@@ -46,8 +47,9 @@ class TossClientIdempotencyTest {
     }
 
     private TossPaymentGateway gateway() {
-        TossProperties properties = new TossProperties(mockWebServer.url("/").toString(), "", "test_gsk_dummy", 500, 500);
-        return new TossPaymentGateway(new TossClientConfig().tossRestClient(properties), new ObjectMapper());
+        TossProperties properties = new TossProperties(mockWebServer.url("/").toString(), "", "test_gsk_dummy", 500, 500, 3);
+        RestClient restClient = new TossClientConfig().tossRestClient(properties, 1000, 1000);
+        return new TossPaymentGateway(restClient, new ObjectMapper());
     }
 
     @Test
