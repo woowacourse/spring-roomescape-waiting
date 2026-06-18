@@ -593,7 +593,14 @@ a { color: inherit; }
 }
 
 .payment-history-item {
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr auto;
+}
+
+.compact-button {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .reservation-summary {
@@ -1132,6 +1139,10 @@ a { color: inherit; }
   .reservation-item {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .payment-history-item {
+    grid-template-columns: 1fr;
   }
 
   .reservation-actions {

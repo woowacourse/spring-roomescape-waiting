@@ -94,7 +94,16 @@ public class ReservationServiceTest {
 
         reservationService.deleteExpiredPendingPayments(now);
 
-        verify(reservationRepository, times(1)).deleteStalePendingBefore(LocalDateTime.of(2026, 5, 2, 8, 50));
+        verify(reservationRepository, times(1)).deleteStalePendingBefore(LocalDateTime.of(2026, 5, 2, 8, 0));
+    }
+
+    @Test
+    void findExpiredPendingPaymentsTest() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 2, 9, 0);
+
+        reservationService.findExpiredPendingPayments(now);
+
+        verify(reservationRepository, times(1)).findStalePendingBefore(LocalDateTime.of(2026, 5, 2, 8, 0));
     }
 
     @Test
