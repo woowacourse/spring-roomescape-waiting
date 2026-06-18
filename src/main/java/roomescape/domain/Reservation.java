@@ -66,6 +66,13 @@ public class Reservation {
         return status.equals(ReservationStatus.WAITING);
     }
 
+    public Reservation confirm() {
+        if (!isWaiting()) {
+            throw new InvalidDomainException("예약 대기 상태만 확정할 수 있습니다.");
+        }
+        return withStatus(ReservationStatus.RESERVED);
+    }
+
     public Reservation withId(Long id) {
         if (this.id != null) {
             throw new InvalidDomainException("이미 id가 존재하는 도메인입니다. 도메인 id는 생성 이후 수정될 수 없습니다.");
