@@ -1,25 +1,26 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.WaitingRequest;
-import roomescape.domain.*;
+import roomescape.domain.Reservation;
+import roomescape.domain.Session;
+import roomescape.domain.Theme;
+import roomescape.domain.TimeSlot;
+import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateSessionException;
-import roomescape.exception.InvalidWaitingPrerequisiteException;
 import roomescape.exception.SessionNotFoundException;
 import roomescape.repository.SessionRepository;
 import roomescape.service.dto.AvailableTimeSlot;
-
-import java.util.Objects;
 import roomescape.service.dto.Booking;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -76,7 +77,11 @@ public class SessionService {
     }
 
     public Reservation findReservationById(long id) {
-        return reservationService.findById(id);
+        Reservation reservation = reservationService.findById(id);
+        System.out.println("-------------------");
+        reservation.getSession().getTimeSlot().getStartAt();
+        System.out.println("-------------------");
+        return reservation;
     }
 
     public List<Booking> findReservationByName(String name) {
