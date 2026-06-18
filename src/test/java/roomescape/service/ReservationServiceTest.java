@@ -16,6 +16,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.domain.payment.PaymentOrder;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.dto.response.ReservationResponses;
 import roomescape.dto.response.ReservationWithStatusResponses;
@@ -101,6 +102,27 @@ class ReservationServiceTest {
         assertThat(paymentOrder.getAmount()).isEqualTo(37_000L);
         assertThat(paymentOrder.getOrderId()).matches("[A-Za-z0-9_-]{6,64}");
         assertThat(paymentOrder.getIdempotencyKey()).isEqualTo("idempotency-key-123");
+    }
+
+    @Test
+    void getMyReservations_예약_정보와_결제_정보를_함께_응답한다() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        ReservationPaymentResponse created = service.createReservation(
+                Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 8), timeId, 37_000L));
+
+        ReservationWithStatusResponses response = service.getMyReservations(brown.getId());
+
+        assertThat(response.reservations()).hasSize(1);
+        var reservation = response.reservations().getFirst();
+        assertThat(reservation.id()).isEqualTo(created.reservationId());
+        assertThat(reservation.themeName()).isEqualTo("공포");
+        assertThat(reservation.date()).isEqualTo(LocalDate.of(2026, 5, 8));
+        assertThat(reservation.paymentStatus()).isEqualTo(PaymentStatus.PAYMENT_PENDING);
+        assertThat(reservation.orderId()).isEqualTo(created.orderId());
+        assertThat(reservation.paymentKey()).isNull();
+        assertThat(reservation.amount()).isEqualTo(37_000L);
     }
 
     @Test

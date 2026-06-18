@@ -1,6 +1,8 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,6 +56,17 @@ public class PaymentOrderJdbcRepository implements PaymentOrderRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<PaymentOrder> findAllByReservationIds(List<Long> reservationIds) {
+        if (reservationIds.isEmpty()) {
+            return List.of();
+        }
+        String placeholders = String.join(", ", Collections.nCopies(reservationIds.size(), "?"));
+        String sql = "select id, reservation_id, order_id, amount, payment_key, idempotency_key "
+                + "from payment_order where reservation_id in (" + placeholders + ")";
+        return jdbcTemplate.query(sql, rowMapper, reservationIds.toArray());
     }
 
     @Override
