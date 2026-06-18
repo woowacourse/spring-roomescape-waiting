@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -42,6 +43,15 @@ public class GlobalExceptionHandler {
     public ProblemDetail httpRequestMethodNotSupportedExceptionHandle(HttpRequestMethodNotSupportedException e) {
         log.info("지원하지 않는 HTTP 메서드입니다.", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+    public ProblemDetail invalidDataAccessApiUsageExceptionHandle(InvalidDataAccessApiUsageException e) {
+        if (e.getCause() instanceof RoomEscapeException roomEscapeException) {
+            return roomEscapeExceptionHandle(roomEscapeException);
+        }
+        log.error("데이터베이스 관련 오류가 발생했습니다", e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, DATABASE_ERROR);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

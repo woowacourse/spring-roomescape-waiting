@@ -1,13 +1,22 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.requireNonNull;
 
+@Embeddable
 public class ReservationDate {
-    private final LocalDate date;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    protected ReservationDate() {
+    }
 
     public ReservationDate(LocalDate date) {
         this.date = requireNonNull(date, INVALID_INPUT, "예약 날짜는 비어있을 수 없습니다.");

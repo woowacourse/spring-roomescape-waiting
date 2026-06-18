@@ -1,5 +1,14 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
 import roomescape.domain.theme.Theme;
@@ -10,11 +19,30 @@ import java.time.LocalDateTime;
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.requireNonNull;
 
+@Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(name = "uq_slot",
+        columnNames = {"date", "time_id", "theme_id"}
+        ))
 public class Slot {
-    private final Long id;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private ReservationDate date;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    protected Slot() {
+    }
 
     public Slot(Long id, ReservationDate date, ReservationTime time, Theme theme) {
         this.id = id;
@@ -37,10 +65,6 @@ public class Slot {
         if (isPast(now)) {
             throw new RoomEscapeException(DomainErrorCode.PAST_DATE, "지나간 날짜/시간에는 예약할 수 없습니다: " + date.getDate() + " " + time.getStartAt());
         }
-    }
-
-    public Slot withId(Long generatedKey) {
-        return new Slot(generatedKey, date, time, theme);
     }
 
     public boolean isPast(LocalDateTime now) {

@@ -1,15 +1,23 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.require;
 import static roomescape.domain.DomainPreconditions.requireNonBlank;
 
+@Embeddable
 public class ReservationName {
     private static final int MAX_NAME_LENGTH = 20;
 
-    private final String value;
+    @Column(name = "name", nullable = false)
+    private String value;
+
+    protected ReservationName() {
+    }
 
     public ReservationName(String value) {
         requireNonBlank(value, INVALID_INPUT, "예약자 이름은 비어있을 수 없습니다.");

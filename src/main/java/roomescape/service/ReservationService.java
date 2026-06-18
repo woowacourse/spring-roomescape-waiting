@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
@@ -33,37 +34,42 @@ public class ReservationService {
         Reservation assembled = assembler.from(command);
         Slot slot = assembled.getSlot();
 
-        Reservations existing = reservationRepository.findBySlotId(slot.getId());
+        Reservations existing = new Reservations(reservationRepository.findBySlot_Id(slot.getId()));
         Reservation join = existing.join(assembled);
         return reservationRepository.save(join);
     }
 
     public Reservation find(long id) {
         Reservation reservation = reservationRepository.getById(id);
-        Reservations slotReservations = reservationRepository.findBySlotId(reservation.getSlotId());
+        Reservations slotReservations = new Reservations(reservationRepository.findBySlot_Id(reservation.getSlotId()));
         return reservation.withRank(slotReservations.rankOf(reservation));
     }
 
     public Reservations findAll(String name) {
         if (name == null) {
-            return reservationRepository.findAll();
+            return new Reservations(reservationRepository.findAll());
         }
-        return reservationRepository.findByName(name);
+        return new Reservations(reservationRepository.findAllByName(new ReservationName(name)));
     }
 
     @Transactional
     public Reservation update(ReservationUpdateCommand command, long id) {
         Reservation existing = reservationRepository.getById(id);
         Reservation assembled = assembler.from(command);
+
         Slot newSlot = assembled.getSlot();
+        Long oldSlotId = existing.getSlotId();
 
-        Reservations slotReservations = reservationRepository.findBySlotId(newSlot.getId()).excluding(id);
-        Reservation updated = slotReservations.join(assembled);
-        reservationRepository.update(id, updated);
+        Reservations slotReservations = new Reservations(reservationRepository.findBySlot_Id(newSlot.getId())).excluding(id);
+        Reservation template = slotReservations.join(assembled);
 
-        boolean slotChanged = !existing.getSlotId().equals(newSlot.getId());
-        if (slotChanged && existing.isApproved()) {
-            promoteFirstWaiting(existing.getSlotId());
+        boolean wasApproved = existing.isApproved();
+        existing.changeSlot(template.getSlot());
+        existing.changeStatus(template.getStatus());
+
+        boolean slotChanged = !oldSlotId.equals(newSlot.getId());
+        if (slotChanged && wasApproved) {
+            promoteFirstWaiting(oldSlotId);
         }
 
         return find(id);
@@ -85,8 +91,8 @@ public class ReservationService {
     }
 
     private void promoteFirstWaiting(Long slotId) {
-        reservationRepository.findBySlotId(slotId)
+        new Reservations(reservationRepository.findBySlot_Id(slotId))
                 .firstWaiting()
-                .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
+                .ifPresent(waiting -> waiting.changeStatus(Status.APPROVED));
     }
 }

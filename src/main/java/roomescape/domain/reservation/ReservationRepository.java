@@ -1,30 +1,17 @@
 package roomescape.domain.reservation;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.RoomEscapeException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
 
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+    List<Reservation> findAllByName(ReservationName name);
 
-public interface ReservationRepository {
-    Reservations findAll();
-
-    Optional<Reservation> findById(Long id);
-
-    Reservations findByName(String name);
-
-    Reservations findBySlotId(Long slotId);
-
-    Reservation save(Reservation reservation);
-
-    Reservation update(Long id, Reservation reservation);
-
-    void updateStatusById(Long id, Status status);
-
-    void deleteById(Long id);
-
-    boolean existsById(Long id);
+    List<Reservation> findBySlot_Id(Long slotId);
 
     default Reservation getById(Long id) {
         return findById(id)

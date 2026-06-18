@@ -1,5 +1,8 @@
 package roomescape.domain.reservation;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.RoomEscapeException;
 import roomescape.domain.theme.Theme;
 
@@ -9,26 +12,19 @@ import java.util.Optional;
 
 import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
 
-public interface SlotRepository {
-    List<Slot> findAll();
-
-    List<Slot> findAllByName(String name);
-
-    Optional<Slot> findById(long slotId);
-
+public interface SlotRepository extends JpaRepository<Slot, Long> {
     Optional<Slot> findByDateAndTimeAndTheme(ReservationDate date, ReservationTime time, Theme theme);
 
-    Slot save(Slot slot);
+    List<Slot> findByDateAndThemeId(ReservationDate date, Long themeId);
 
-    Slot update(long id, Slot target);
+    @Query("SELECT r.slot FROM Reservation r WHERE r.name.value = :name")
+    List<Slot> findAllByName(@Param("name") String name);
 
-    void deleteById(long id);
+    boolean existsByTimeId(Long timeId);
 
-    boolean existsByTimeId(long timeId);
+    boolean existsByThemeId(Long themeId);
 
-    boolean existsByThemeId(long themeId);
-
-    default Slot getById(long id) {
+    default Slot getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 예약 슬롯을 찾을 수 없습니다. : " + id));
     }

@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ThemeCreateRequest;
@@ -42,7 +43,7 @@ public class ThemeService {
         return themeRepository.save(theme);
     }
 
-    public Theme find(long themeId) {
+    public Theme find(Long themeId) {
         return themeRepository.getById(themeId);
     }
 
@@ -51,7 +52,9 @@ public class ThemeService {
     }
 
     public List<Theme> findFamous(int limit, int days, LocalDate date) {
-        return themeRepository.findFamous(days, date, limit);
+        LocalDate to = date != null ? date : LocalDate.now();
+        LocalDate fromDate = to.minusDays(days);
+        return themeRepository.findFamous(fromDate, to, PageRequest.of(0, limit));
     }
 
     @Transactional

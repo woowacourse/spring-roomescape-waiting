@@ -12,6 +12,7 @@ import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
@@ -26,9 +27,9 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -45,7 +46,6 @@ class ReservationServiceTest {
             Theme.load(1L, "any", "any", URL)
     );
     private static final Reservation DUMMY = Reservation.load(1L, NAME, "APPROVED", DUMMY_SLOT);
-    private static final Reservations DUMMIES = new Reservations(List.of(DUMMY));
 
     private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
     private static final long EXISTS_ID = 1L;
@@ -68,7 +68,7 @@ class ReservationServiceTest {
     void 예약_취소_성공() {
         givenNow(LocalDateTime.of(2026, 1, 1, 0, 0));
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of());
         reservationService.cancel(1L, NAME);
         verify(reservationRepository).deleteById(1L);
     }
@@ -100,7 +100,7 @@ class ReservationServiceTest {
     void 미래로_예약하면_성공해야_한다() {
         Reservation assembled = Reservation.create(NAME, DUMMY_SLOT);
         given(assembler.from(any(ReservationCreateCommand.class))).willReturn(assembled);
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of());
         given(reservationRepository.save(any())).willReturn(DUMMY);
         Assertions.assertThatNoException().isThrownBy(() -> reservationService.reserve(
                 ReservationCreateCommand.from(new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L))));
@@ -111,7 +111,7 @@ class ReservationServiceTest {
         Reservation assembled = Reservation.create("zeze", DUMMY_SLOT);
         given(assembler.from(any(ReservationCreateCommand.class))).willReturn(assembled);
         Reservation existingReservation = Reservation.load(1L, "zeze", "APPROVED", DUMMY_SLOT);
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(existingReservation)));
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of(existingReservation));
 
         Assertions.assertThatThrownBy(() -> reservationService.reserve(
                         ReservationCreateCommand.from(new ReservationCreateRequest("zeze", LocalDate.parse("2099-04-05"), 1L, 1L))))
@@ -155,7 +155,7 @@ class ReservationServiceTest {
         given(reservationRepository.getById(1L)).willReturn(DUMMY);
         given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create("zeze", newSlot));
         Reservation conflicting = Reservation.load(2L, "zeze", "APPROVED", newSlot);
-        given(reservationRepository.findBySlotId(2L)).willReturn(new Reservations(List.of(conflicting)));
+        given(reservationRepository.findBySlot_Id(2L)).willReturn(List.of(conflicting));
 
         Assertions.assertThatThrownBy(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .isInstanceOf(RoomEscapeException.class);
@@ -176,10 +176,9 @@ class ReservationServiceTest {
 
         given(reservationRepository.getById(1L)).willReturn(existing);
         given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create(name, slot));
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(existing)));
-        given(reservationRepository.update(eq(1L), any())).willReturn(existing);
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of(existing));
 
-        Assertions.assertThatCode(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
+        assertThatCode(() -> reservationService.update(ReservationUpdateCommand.from(request), 1L))
                 .doesNotThrowAnyException();
     }
 
@@ -204,7 +203,7 @@ class ReservationServiceTest {
         givenNow(LocalDateTime.of(2026, 1, 1, 0, 0));
         Reservation reservation = RoomEscapeFixture.reservation();
         given(reservationRepository.getById(EXISTS_ID)).willReturn(reservation);
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of()));
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of());
         assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue()))
                 .doesNotThrowAnyException();
     }
@@ -216,11 +215,11 @@ class ReservationServiceTest {
         Reservation waiting = Reservation.load(2L, "대기자", "WAITING", DUMMY_SLOT);
 
         given(reservationRepository.getById(1L)).willReturn(approved);
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(waiting)));
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of(waiting));
 
         reservationService.cancel(1L, NAME);
 
-        verify(reservationRepository).updateStatusById(2L, Status.APPROVED);
+        assertThat(waiting.getStatus()).isEqualTo(Status.APPROVED);
     }
 
     @Test
@@ -231,7 +230,7 @@ class ReservationServiceTest {
 
         reservationService.cancel(1L, NAME);
 
-        verify(reservationRepository, never()).updateStatusById(any(), any());
+        verify(reservationRepository, never()).findBySlot_Id(any());
     }
 
     @Test
@@ -242,12 +241,12 @@ class ReservationServiceTest {
 
         given(reservationRepository.getById(1L)).willReturn(existing);
         given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create(NAME, newSlot));
-        given(reservationRepository.findBySlotId(2L)).willReturn(new Reservations(List.of()));
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(waitingInOldSlot)));
+        given(reservationRepository.findBySlot_Id(2L)).willReturn(List.of());
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of(waitingInOldSlot));
 
         reservationService.update(ReservationUpdateCommand.from(new ReservationUpdateRequest(NAME, LocalDate.of(2099, 6, 1), 1L, 1L)), 1L);
 
-        verify(reservationRepository).updateStatusById(3L, Status.APPROVED);
+        assertThat(waitingInOldSlot.getStatus()).isEqualTo(Status.APPROVED);
     }
 
     @Test
@@ -256,17 +255,17 @@ class ReservationServiceTest {
 
         given(reservationRepository.getById(1L)).willReturn(existing);
         given(assembler.from(any(ReservationUpdateCommand.class))).willReturn(Reservation.create(NAME, DUMMY_SLOT));
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(existing)));
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of(existing));
 
-        reservationService.update(ReservationUpdateCommand.from(new ReservationUpdateRequest(NAME, LocalDate.of(2099, 1, 1), 1L, 1L)), 1L);
-
-        verify(reservationRepository, never()).updateStatusById(any(), any());
+        assertThatCode(() -> reservationService.update(
+                ReservationUpdateCommand.from(new ReservationUpdateRequest(NAME, LocalDate.of(2099, 1, 1), 1L, 1L)), 1L))
+                .doesNotThrowAnyException();
     }
 
     @Test
     void 단건_조회시_존재하는_ID면_결과를_반환한다() {
         given(reservationRepository.getById(EXISTS_ID)).willReturn(DUMMY);
-        given(reservationRepository.findBySlotId(EXISTS_ID)).willReturn(DUMMIES);
+        given(reservationRepository.findBySlot_Id(EXISTS_ID)).willReturn(List.of(DUMMY));
         Reservation result = reservationService.find(EXISTS_ID);
 
         Assertions.assertThat(result.getId()).isEqualTo(EXISTS_ID);
@@ -281,7 +280,7 @@ class ReservationServiceTest {
 
     @Test
     void 이름_없이_목록_조회시_전체_예약을_반환한다() {
-        given(reservationRepository.findAll()).willReturn(new Reservations(List.of(DUMMY)));
+        given(reservationRepository.findAll()).willReturn(List.of(DUMMY));
 
         Reservations results = reservationService.findAll(null);
 
@@ -291,7 +290,7 @@ class ReservationServiceTest {
 
     @Test
     void 이름으로_목록_조회시_해당_이름의_예약만_반환한다() {
-        given(reservationRepository.findByName(NAME)).willReturn(new Reservations(List.of(DUMMY)));
+        given(reservationRepository.findAllByName(new ReservationName(NAME))).willReturn(List.of(DUMMY));
 
         Reservations results = reservationService.findAll(NAME);
 
@@ -302,7 +301,7 @@ class ReservationServiceTest {
     @Test
     void 첫번째_예약은_승인_상태이다() {
         given(reservationRepository.getById(EXISTS_ID)).willReturn(DUMMY);
-        given(reservationRepository.findBySlotId(EXISTS_ID)).willReturn(DUMMIES);
+        given(reservationRepository.findBySlot_Id(EXISTS_ID)).willReturn(List.of(DUMMY));
         Reservation result = reservationService.find(EXISTS_ID);
 
         Assertions.assertThat(result.getStatus()).isEqualTo(Status.APPROVED);
@@ -319,7 +318,7 @@ class ReservationServiceTest {
         Reservation approved = Reservation.load(1L, NAME, "APPROVED", waitingSlot);
         Reservation waiting = Reservation.load(2L, "대기자", "WAITING", waitingSlot);
         given(reservationRepository.getById(2L)).willReturn(waiting);
-        given(reservationRepository.findBySlotId(1L)).willReturn(new Reservations(List.of(approved, waiting)));
+        given(reservationRepository.findBySlot_Id(1L)).willReturn(List.of(approved, waiting));
 
         Reservation result = reservationService.find(2L);
 

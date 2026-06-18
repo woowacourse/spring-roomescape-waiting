@@ -3,8 +3,7 @@ package roomescape.repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
@@ -30,13 +29,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-@JdbcTest
-@Import(value = {
-        JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class,
-        JdbcSlotRepository.class,
-        JdbcReservationRepository.class
-})
+@DataJpaTest
 class SlotRepositoryTest {
     private final static Clock FIXED_CLOCK = Clock.fixed(
             Instant.parse("2026-05-10T03:00:00Z"),
@@ -152,23 +145,6 @@ class SlotRepositoryTest {
         slotRepository.deleteById(saved.getId());
 
         assertThat(slotRepository.findById(saved.getId())).isEmpty();
-    }
-
-    @Test
-    @DisplayName("수정 후 조회")
-    void update() {
-        ReservationTime time = givenTime(14);
-        ReservationTime newTime = givenTime(16);
-        Theme theme = givenTheme("테스트 테마");
-        Slot saved = givenSlot(new ReservationDate(TODAY), time, theme);
-
-        Slot target = Slot.load(saved.getId(), TODAY, newTime, theme);
-        Slot updated = slotRepository.update(saved.getId(), target);
-
-        assertSoftly(softly -> {
-            softly.assertThat(updated.getId()).isEqualTo(saved.getId());
-            softly.assertThat(updated.getTime().getStartAt()).isEqualTo(LocalTime.of(16, 0));
-        });
     }
 
     @Test
