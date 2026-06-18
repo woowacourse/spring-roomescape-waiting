@@ -369,7 +369,7 @@
         const willBeWaiting = currentSlot && currentSlot.status === "CONFIRMED";
 
         try {
-            const saved = await fetchJson("/reservations", {
+            const saved = await fetchJson(willBeWaiting ? "/waitings" : "/reservations", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
@@ -475,9 +475,7 @@
 
             const badge = document.createElement("div");
             badge.className = "my-card__badge " + (isWaiting ? "my-card__badge--waiting" : "my-card__badge--confirmed");
-            badge.textContent = isWaiting
-                ? `대기 ${r.order ?? "?"}번`
-                : "예약 확정";
+            badge.textContent = r.status ?? (isWaiting ? `대기 ${r.order ?? "?"}번` : "예약 확정");
 
             const grid = document.createElement("div");
             grid.className = "my-card__grid";
@@ -539,7 +537,7 @@
         myEditPanel.classList.add("is-hidden");
         editingReservation = null;
         try {
-            const data = await fetchJson(`/reservations/my-reservation?name=${encodeURIComponent(name)}`);
+            const data = await fetchJson(`/reservations-mine?name=${encodeURIComponent(name)}`);
             myReservations = Array.isArray(data) ? data : (data ? [data] : []);
             myResultArea.classList.remove("is-hidden");
             renderMyList();
@@ -567,7 +565,8 @@
             : "예약을 취소하시겠습니까?";
         if (!confirm(confirmMsg)) return;
         try {
-            await fetchJson(`/reservations/${r.id}`, {method: "DELETE"});
+            const endpoint = isWaiting ? `/waitings/${r.id}` : `/reservations/${r.id}`;
+            await fetchJson(endpoint, {method: "DELETE"});
             setMyMsg(
                 mySearchMsg,
                 isWaiting ? "대기 신청이 취소되었습니다." : "예약이 취소되었습니다.",

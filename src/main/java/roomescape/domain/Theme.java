@@ -1,13 +1,22 @@
 package roomescape.domain;
 
-public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String url;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-    public Theme(Long id, String name, String description, String url) {
-        this.id = id;
+@Entity
+public class Theme {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String url;
+
+    public Theme() {
+    }
+
+    public Theme(String name, String description, String url) {
         validateName(name);
         validateDescription(description);
         validateUrl(url);
