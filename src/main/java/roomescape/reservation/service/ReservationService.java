@@ -6,15 +6,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.exception.ReservationNotFoundException;
-import roomescape.reservation.domain.exception.ReservationOptionChangedException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -29,7 +25,9 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllReservations() {
-        return reservationRepository.findAll();
+        reservationRepository.findById(1L).get().getTime().getStartAt();
+        return null;
+//        return reservationRepository.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -50,9 +48,9 @@ public class ReservationService {
         return reservationRepository.existsBySlot(date, reservationTimeId, themeId);
     }
 
-    @Transactional
-    public Optional<Reservation> findBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
-        return reservationRepository.findBySlotForUpdate(date, timeId, themeId);
+    @Transactional(readOnly = true)
+    public Optional<Reservation> findBySlot(final LocalDate date, final long timeId, final long themeId) {
+        return reservationRepository.findBySlot(date, timeId, themeId);
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +73,7 @@ public class ReservationService {
             theme,
             LocalDateTime.now(clock)
         );
-        return saveReservation(reservation);
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
@@ -91,7 +89,7 @@ public class ReservationService {
             time,
             theme
         );
-        saveReservation(promotedReservation);
+        reservationRepository.save(promotedReservation);
     }
 
     @Transactional
@@ -126,45 +124,29 @@ public class ReservationService {
         deleteReservation(reservationId);
     }
 
-    private Reservation updateSchedule(final LocalDate date, final ReservationTime time,
-                                       final Reservation originReservation) {
+    private Reservation updateSchedule(
+        final LocalDate date,
+        final ReservationTime time,
+        final Reservation originReservation
+    ) {
         final Reservation updatedReservation = originReservation.changeSchedule(
             date,
             time,
             LocalDateTime.now(clock)
         );
-
         return updateReservation(updatedReservation);
     }
 
-    private Reservation saveReservation(final Reservation reservation) {
-        try {
-            return reservationRepository.save(reservation);
-        } catch (DuplicateKeyException exception) {
-            throw new ReservationAlreadyExistsException();
-        } catch (DataIntegrityViolationException exception) {
-            throw new ReservationOptionChangedException(exception);
-        }
-    }
-
     private Reservation updateReservation(final Reservation reservation) {
-        try {
-            final boolean updated = reservationRepository.update(reservation);
-
-            if (!updated) {
-                throw new ReservationNotFoundException();
-            }
-            return reservation;
-        } catch (DuplicateKeyException exception) {
-            throw new ReservationAlreadyExistsException();
-        } catch (DataIntegrityViolationException exception) {
-            throw new ReservationOptionChangedException(exception);
+        final boolean updated = reservationRepository.update(reservation);
+        if (!updated) {
+            throw new ReservationNotFoundException();
         }
+        return reservation;
     }
 
     private void deleteReservation(final Long reservationId) {
         final boolean deleted = reservationRepository.deleteById(reservationId);
-
         if (!deleted) {
             throw new ReservationNotFoundException();
         }

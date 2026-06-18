@@ -5,10 +5,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.reservationtime.repository.entity.ReservationTimeEntity;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +18,7 @@ import java.sql.Time;
 import java.util.List;
 import java.util.Optional;
 
+@Profile("jdbc")
 @Repository
 @RequiredArgsConstructor
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
@@ -60,9 +61,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public ReservationTime save(final ReservationTime newReservationTime) {
-        final ReservationTimeEntity reservationTimeEntity = toEntity(newReservationTime);
-
-        final long newTimeId = insertReservationTime(reservationTimeEntity);
+        final long newTimeId = insertReservationTime(newReservationTime);
 
         return ReservationTime.of(
                 newTimeId,
@@ -80,7 +79,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         return jdbcTemplate.update(sql, timeId) > 0;
     }
 
-    private long insertReservationTime(final ReservationTimeEntity reservationTimeEntity) {
+    private long insertReservationTime(final ReservationTime reservationTime) {
         final String sql = """
                 INSERT INTO reservation_time (start_at)
                 VALUES (?)
@@ -94,7 +93,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                     Statement.RETURN_GENERATED_KEYS
             );
 
-            preparedStatement.setTime(1, reservationTimeEntity.startAt());
+            preparedStatement.setTime(1, Time.valueOf(reservationTime.getStartAt()));
 
             return preparedStatement;
         }, keyHolder);
@@ -117,10 +116,4 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         );
     }
 
-    private ReservationTimeEntity toEntity(final ReservationTime reservationTime) {
-        return new ReservationTimeEntity(
-                reservationTime.getId(),
-                Time.valueOf(reservationTime.getStartAt())
-        );
-    }
 }

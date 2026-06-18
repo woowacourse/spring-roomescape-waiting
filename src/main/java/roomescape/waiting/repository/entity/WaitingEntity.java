@@ -1,4 +1,4 @@
-package roomescape.reservation.repository.entity;
+package roomescape.waiting.repository.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,33 +11,38 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.reservation.domain.Reservation;
+import org.hibernate.annotations.CreationTimestamp;
 import roomescape.reservationtime.repository.entity.ReservationTimeEntity;
 import roomescape.theme.repository.entity.ThemeEntity;
+import roomescape.waiting.domain.Waiting;
 
 @Entity
 @Table(
-    name = "reservation",
+    name = "waiting",
     uniqueConstraints = @UniqueConstraint(
-        name = "unique_reservation_date_time_theme",
-        columnNames = {"date", "time_id", "theme_id"}
+        name = "unique_reservation_date_time_theme_name",
+        columnNames = {"reservation_date", "time_id", "theme_id", "customer_name"}
     )
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class ReservationEntity {
+public class WaitingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
     private String customerName;
 
-    private LocalDate date;
+    private LocalDate reservationDate;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "time_id")
     private Long timeId;
@@ -45,41 +50,36 @@ public class ReservationEntity {
     @Column(name = "theme_id")
     private Long themeId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id", insertable = false, updatable = false)
     private ReservationTimeEntity time;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id", insertable = false, updatable = false)
     private ThemeEntity theme;
 
-    private ReservationEntity(
+    private WaitingEntity(
         final String customerName,
-        final LocalDate date,
+        final LocalDate reservationDate,
         final Long timeId,
         final Long themeId
     ) {
         this.customerName = customerName;
-        this.date = date;
+        this.reservationDate = reservationDate;
         this.timeId = timeId;
         this.themeId = themeId;
     }
 
-    public static ReservationEntity from(final Reservation reservation) {
-        return new ReservationEntity(
-            reservation.getCustomerName(),
-            reservation.getDate(),
-            reservation.getTimeId(),
-            reservation.getThemeId()
+    public static WaitingEntity from(final Waiting waiting) {
+        return new WaitingEntity(
+            waiting.getCustomerNameValue(),
+            waiting.getReservationDate(),
+            waiting.getTimeId(),
+            waiting.getThemeId()
         );
     }
 
-    public void updateSchedule(final LocalDate date, final Long timeId) {
-        this.date = date;
-        this.timeId = timeId;
-    }
-
-    public Reservation toDomain() {
-        return Reservation.of(id, customerName, date, time.toDomain(), theme.toDomain());
+    public Waiting toDomain() {
+        return Waiting.of(id, customerName, reservationDate, createdAt, time.toDomain(), theme.toDomain());
     }
 }

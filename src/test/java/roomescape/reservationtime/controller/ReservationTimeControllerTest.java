@@ -32,7 +32,7 @@ class ReservationTimeControllerTest {
     @Sql("/clear.sql")
     void 존재하지_않는_예약_시간을_삭제하면_404를_응답한다() {
         RestAssured.given().log().all()
-                .when().delete("/times/0")
+                .when().delete("/api/times/0")
                 .then().log().all()
                 .statusCode(404);
     }
@@ -45,12 +45,12 @@ class ReservationTimeControllerTest {
                 .body(Map.of(
                         "startAt", "10:00"
                 ))
-                .when().post("/times")
+                .when().post("/api/times")
                 .then().log().all()
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times")
+                .when().get("/api/times")
                 .then().log().all()
                 .statusCode(200);
 
@@ -58,7 +58,7 @@ class ReservationTimeControllerTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
-                .when().delete("/times/1")
+                .when().delete("/api/times/1")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -69,7 +69,7 @@ class ReservationTimeControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(Map.of())
-                .when().post("/times")
+                .when().post("/api/times")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("예약 시작 시간을 입력해야 합니다."));
@@ -83,7 +83,7 @@ class ReservationTimeControllerTest {
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         RestAssured.given().log().all()
-                .when().delete("/times/1")
+                .when().delete("/api/times/1")
                 .then().log().all()
                 .statusCode(409);
     }

@@ -3,7 +3,6 @@ package roomescape.reservation.repository;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,5 +26,5 @@ public interface ReservationRepository {
 
     boolean existsBySlot(LocalDate date, long reservationTimeId, long themeId);
 
-    Optional<Reservation> findBySlotForUpdate(LocalDate date, long timeId, long themeId);
+    Optional<Reservation> findBySlot(LocalDate date, long timeId, long themeId);
 }

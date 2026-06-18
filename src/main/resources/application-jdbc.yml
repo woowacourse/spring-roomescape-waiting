@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+logging:
+  level:
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG

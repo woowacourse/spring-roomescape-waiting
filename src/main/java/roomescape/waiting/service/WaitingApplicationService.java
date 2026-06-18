@@ -1,11 +1,9 @@
 package roomescape.waiting.service;
 
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
@@ -31,14 +29,11 @@ public class WaitingApplicationService {
         ReservationTime reservationTime = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
 
-        final Optional<Reservation> reservation = reservationService.findBySlotForUpdate(
-            request.date(),
-            reservationTime.getId(),
-            theme.getId()
-        );
-        if (reservation.isEmpty()) {
-            throw new NoReservationForWaitingException();
-        }
+        reservationService.findBySlot(
+                request.date(),
+                reservationTime.getId(),
+                theme.getId())
+            .orElseThrow(NoReservationForWaitingException::new);
 
         final Waiting saved = waitingService.create(
             request.name(),

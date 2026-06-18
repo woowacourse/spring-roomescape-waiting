@@ -108,7 +108,7 @@ class AdminReservationControllerTest {
                         "timeId", 1,
                         "themeId", 1
                 ))
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(201);
 

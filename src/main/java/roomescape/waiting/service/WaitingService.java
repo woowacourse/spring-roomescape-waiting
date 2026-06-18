@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -14,7 +13,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.waiting.domain.exception.WaitingNotFoundException;
-import roomescape.waiting.domain.exception.WaitingAlreadyExistsException;
 import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.repository.dto.WaitingWithRank;
 
@@ -40,7 +38,7 @@ public class WaitingService {
             LocalDateTime.now(clock)
         );
 
-        return saveWaiting(waiting);
+        return waitingRepository.save(waiting);
     }
 
     @Transactional
@@ -97,14 +95,6 @@ public class WaitingService {
         final long themeId
     ) {
         return waitingRepository.existsBySlot(reservationDate, timeId, themeId);
-    }
-
-    private Waiting saveWaiting(final Waiting waiting) {
-        try {
-            return waitingRepository.save(waiting);
-        } catch (DuplicateKeyException exception) {
-            throw new WaitingAlreadyExistsException();
-        }
     }
 
     private void deleteWaiting(final long waitingId) {

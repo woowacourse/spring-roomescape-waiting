@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -20,10 +21,10 @@ import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-import roomescape.reservation.repository.entity.ReservationEntity;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+@Profile("jdbc")
 @Repository
 @RequiredArgsConstructor
 public class JdbcReservationRepository implements ReservationRepository {
@@ -135,9 +136,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation newReservation) {
-        final ReservationEntity reservationEntity = toEntity(newReservation);
-
-        final long newReservationId = insertReservation(reservationEntity);
+        final long newReservationId = insertReservation(newReservation);
 
         return Reservation.of(
                 newReservationId,
@@ -209,7 +208,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
 
     @Override
-    public Optional<Reservation> findBySlotForUpdate(final LocalDate date, final long timeId, final long themeId) {
+    public Optional<Reservation> findBySlot(final LocalDate date, final long timeId, final long themeId) {
         final String sql = """
                 SELECT
                     r.id AS reservation_id,
@@ -232,7 +231,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             .findFirst();
     }
 
-    private long insertReservation(final ReservationEntity reservationEntity) {
+    private long insertReservation(final Reservation reservation) {
         final String sql = """
                 INSERT INTO reservation (name, date, time_id, theme_id)
                 VALUES (?, ?, ?, ?)
@@ -246,10 +245,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     Statement.RETURN_GENERATED_KEYS
             );
 
-            preparedStatement.setString(1, reservationEntity.name());
-            preparedStatement.setDate(2, reservationEntity.date());
-            preparedStatement.setLong(3, reservationEntity.timeId());
-            preparedStatement.setLong(4, reservationEntity.themeId());
+            preparedStatement.setString(1, reservation.getCustomerName());
+            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
+            preparedStatement.setLong(3, reservation.getTime().getId());
+            preparedStatement.setLong(4, reservation.getTheme().getId());
 
             return preparedStatement;
         }, keyHolder);
@@ -286,16 +285,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getDate("reservation_date").toLocalDate(),
                 reservationTime,
                 theme
-        );
-    }
-
-    private ReservationEntity toEntity(final Reservation reservation) {
-        return new ReservationEntity(
-                reservation.getId(),
-                reservation.getCustomerName(),
-                Date.valueOf(reservation.getDate()),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
         );
     }
 

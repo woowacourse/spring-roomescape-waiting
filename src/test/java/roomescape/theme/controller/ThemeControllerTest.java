@@ -64,7 +64,7 @@ class ThemeControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/themes")
+                .when().post("/api/themes")
                 .then().log().all()
                 .statusCode(201);
 
@@ -72,7 +72,7 @@ class ThemeControllerTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
-                .when().delete("/themes/1")
+                .when().delete("/api/themes/1")
                 .then().log().all()
                 .statusCode(204);
 
@@ -90,7 +90,7 @@ class ThemeControllerTest {
                         "description", "",
                         "thumbnailUrl", "https://~"
                 ))
-                .when().post("/themes")
+                .when().post("/api/themes")
                 .then().log().all()
                 .statusCode(400)
                 .body("message", org.hamcrest.Matchers.is("테마 설명을 입력해야 합니다."));
@@ -103,7 +103,7 @@ class ThemeControllerTest {
     })
     void 최근_일주일간_예약이_많은_상위_10개_테마_조회() {
         List<ThemeResponse> popularThemes = RestAssured.given().log().all()
-                .when().get("/themes/popular")
+                .when().get("/api/themes/popular")
                 .then().log().all()
                 .statusCode(200).extract()
                 .jsonPath().getList(".", ThemeResponse.class);
@@ -119,7 +119,7 @@ class ThemeControllerTest {
     @Sql("/clear.sql")
     void 존재하지_않는_테마를_삭제하면_404를_응답한다() {
         RestAssured.given().log().all()
-                .when().delete("/themes/999")
+                .when().delete("/api/themes/999")
                 .then().log().all()
                 .statusCode(404);
     }
@@ -132,7 +132,7 @@ class ThemeControllerTest {
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         RestAssured.given().log().all()
-                .when().delete("/themes/1")
+                .when().delete("/api/themes/1")
                 .then().log().all()
                 .statusCode(409)
                 .body("message", org.hamcrest.Matchers.is("해당 테마에 예약이 존재하여 삭제할 수 없습니다."));
