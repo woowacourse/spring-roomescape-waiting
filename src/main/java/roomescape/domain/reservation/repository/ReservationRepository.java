@@ -1,13 +1,13 @@
 package roomescape.domain.reservation.repository;
 
 import jakarta.persistence.LockModeType;
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,8 +20,6 @@ import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.vo.ReservationSchedule;
-import roomescape.domain.theme.entity.Theme;
-import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
 
 @Repository
@@ -29,6 +27,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findAllByDeletedAtIsNullOrderByIdAsc();
+
+    List<Reservation> findReservationByName(@NotBlank String name);
 
     default List<ReservationWithWaitingNumber> findReservationsByNotDeletedWithWaitingNumber() {
         return toReservationsWithWaitingNumber(findAllByDeletedAtIsNullOrderByIdAsc());
@@ -65,10 +65,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"time", "theme"})
     Optional<Reservation> findByIdAndDeletedAtIsNull(Long id);
 
-    default Optional<Reservation> findReservationByIdAndNotDeleted(Long id) {
-        return findByIdAndDeletedAtIsNull(id);
-    }
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         SELECT r
@@ -97,29 +93,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("themeId") Long themeId
     );
 
-    default boolean existsActiveReservationBySchedule(ReservationSchedule schedule) {
-        return existsActiveReservationBySchedule(schedule.date(), schedule.themeId(), schedule.timeId());
-    }
-
-    @Query("""
-        SELECT COUNT(r) > 0
-        FROM Reservation r
-        JOIN r.time rt
-        JOIN r.theme t
-        WHERE r.date = :date
-          AND t.id = :themeId
-          AND rt.id = :timeId
-          AND r.status = roomescape.domain.reservation.entity.ReservationStatus.ACTIVE
-          AND r.deletedAt IS NULL
-          AND rt.deletedAt IS NULL
-          AND t.deletedAt IS NULL
-        """)
-    boolean existsActiveReservationBySchedule(
-        @Param("date") LocalDate date,
-        @Param("themeId") Long themeId,
-        @Param("timeId") Long timeId
-    );
-
     default Optional<Long> lockActiveReservationBySchedule(ReservationSchedule schedule) {
         return lockActiveReservationBySchedule(schedule.date(), schedule.themeId(), schedule.timeId())
             .map(Reservation::getId);
@@ -145,13 +118,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("timeId") Long timeId
     );
 
-    default Optional<Reservation> lockFirstWaitingReservationBySchedule(ReservationSchedule schedule) {
-        return lockWaitingReservationsBySchedule(
-                schedule.date(), schedule.themeId(), schedule.timeId(), PageRequest.of(0, 1))
-            .stream()
-            .findFirst();
-    }
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         SELECT r
@@ -174,62 +140,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         Pageable pageable
     );
 
-    default Reservation update(Reservation reservation) {
-        int updatedRowCount = updateByIdAndVersion(
-            reservation.getId(),
-            reservation.getName(),
-            reservation.getDate(),
-            reservation.getTime(),
-            reservation.getTheme(),
-            reservation.getStatus(),
-            reservation.getVersion()
-        );
-
-        if (updatedRowCount == 0) {
-            if (!existsReservationByIdAndNotDeleted(reservation.getId())) {
-                throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
-            }
-            if (existsByIdAndStatusAndDeletedAtIsNull(reservation.getId(), ReservationStatus.CANCELED)) {
-                throw new GeneralException(ReservationErrorType.ALREADY_CANCELED);
-            }
-            throw new GeneralException(ReservationErrorType.RESERVATION_ALREADY_UPDATED);
-        }
-
-        return Reservation.reconstruct(
-            reservation.getId(),
-            reservation.getName(),
-            reservation.getDate(),
-            reservation.getTime(),
-            reservation.getTheme(),
-            reservation.getStatus(),
-            reservation.getVersion() + 1
-        );
-    }
-
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("""
-        UPDATE Reservation r
-        SET r.name = :name,
-            r.date = :date,
-            r.time = :time,
-            r.theme = :theme,
-            r.status = :status,
-            r.version = r.version + 1
-        WHERE r.id = :id
-          AND r.deletedAt IS NULL
-          AND r.status <> roomescape.domain.reservation.entity.ReservationStatus.CANCELED
-          AND r.version = :version
-        """)
-    int updateByIdAndVersion(
-        @Param("id") Long id,
-        @Param("name") String name,
-        @Param("date") LocalDate date,
-        @Param("time") Time time,
-        @Param("theme") Theme theme,
-        @Param("status") ReservationStatus status,
-        @Param("version") Long version
-    );
-
     default void deleteReservationById(Long id) {
         int updatedRowCount = softDeleteById(id);
         if (updatedRowCount == 0) {
@@ -245,14 +155,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
           AND r.deletedAt IS NULL
         """)
     int softDeleteById(@Param("id") Long id);
-
-    boolean existsByIdAndDeletedAtIsNull(Long id);
-
-    default boolean existsReservationByIdAndNotDeleted(Long id) {
-        return existsByIdAndDeletedAtIsNull(id);
-    }
-
-    boolean existsByIdAndStatusAndDeletedAtIsNull(Long id, ReservationStatus status);
 
     default boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status) {
         return existsByDateAndNameAndTimeIdAndThemeIdAndStatusAndDeletedAtIsNull(

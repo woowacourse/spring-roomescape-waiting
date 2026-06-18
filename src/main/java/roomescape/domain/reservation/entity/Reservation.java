@@ -11,10 +11,12 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.domain.reservation.vo.ReservationSchedule;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
@@ -57,6 +59,7 @@ public class Reservation {
     private ReservationStatus status;
 
     @NotNull
+    @Version
     @Column(name = "version", nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private Long version;
 
@@ -137,17 +140,24 @@ public class Reservation {
     }
 
     public Reservation cancel() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.CANCELED,
-            version);
+        this.status = ReservationStatus.CANCELED;
+        return this;
     }
 
     public Reservation toWaiting() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.WAITING,
-            version);
+        this.status = ReservationStatus.WAITING;
+        return this;
     }
 
     public Reservation toActive() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.ACTIVE, version);
+        this.status = ReservationStatus.ACTIVE;
+        return this;
+    }
+
+    public void update(LocalDate date, Time time, Theme theme) {
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
 
     public ReservationEditableStatus getEditableStatus(LocalDateTime now) {
@@ -192,6 +202,10 @@ public class Reservation {
 
     public boolean isScheduleChanged(Reservation reservation) {
         return !getSchedule().equals(reservation.getSchedule());
+    }
+
+    public boolean hasVersion(Long version) {
+        return Objects.equals(this.version, version);
     }
 
     public boolean isPast(LocalDateTime now) {
