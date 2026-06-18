@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Limit;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
@@ -28,17 +30,20 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeService themeService;
     private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
+            ReservationTimeRepository reservationTimeRepository,
             ThemeService themeService,
             ReservationWaitingRepository reservationWaitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
+        this.reservationTimeRepository = reservationTimeRepository;
         this.themeService = themeService;
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
@@ -49,7 +54,7 @@ public class ReservationService {
         Theme theme = themeService.getById(request.themeId());
         LocalDate date = request.date();
 
-        reservationRepository.lockSlot(date, time.getId(), theme.getId());
+        reservationTimeRepository.lockById(time.getId());
         validateNotAlreadyBooked(member.getId(), date, time.getId(), theme.getId());
 
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())) {
@@ -92,15 +97,15 @@ public class ReservationService {
         if (reservation.isPast()) {
             throw new PastTimeCancelException();
         }
-        reservationRepository.lockSlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId());
+        reservationTimeRepository.lockById(reservation.getTime().getId());
         reservationRepository.deleteById(id);
+        reservationRepository.flush();
         promoteFirstWaiting(reservation);
     }
 
     private void promoteFirstWaiting(Reservation canceled) {
         reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
-                        canceled.getDate(), canceled.getTime().getId(), canceled.getTheme().getId())
+                        canceled.getDate(), canceled.getTime().getId(), canceled.getTheme().getId(), Limit.of(1))
                 .ifPresent(waiting -> {
                     reservationWaitingRepository.deleteById(waiting.getId());
                     reservationRepository.save(Reservation.of(
@@ -121,14 +126,13 @@ public class ReservationService {
         ReservationTime newTime = reservationTimeService.getById(request.timeId());
         LocalDate newDate = request.date();
 
-        Reservation changed = reservation.reschedule(newDate, newTime);
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, request.timeId(),
                 reservation.getTheme().getId())) {
             throw new DuplicateReservationException();
         }
 
-        reservationRepository.update(id, newDate, request.timeId());
-        return changed;
+        reservation.reschedule(newDate, newTime);
+        return reservation;
     }
 
     @NonNull

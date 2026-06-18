@@ -27,6 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/reservation").setViewName("reservation");
         registry.addViewController("/time").setViewName("time");
         registry.addViewController("/theme").setViewName("theme");
+        registry.addViewController("/waiting").setViewName("waiting");
         registry.addViewController("/popular").setViewName("popular");
         registry.addViewController("/my-reservations").setViewName("my-reservations");
     }
@@ -34,7 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AuthInterceptor())
-                .addPathPatterns("/bookings/**", "/waitings/**", "/member/**");
+                .addPathPatterns("/bookings/**", "/reservations-mine", "/waitings/**", "/member/**");
         registry.addInterceptor(new AdminInterceptor(memberService))
                 .addPathPatterns("/admin/**");
     }

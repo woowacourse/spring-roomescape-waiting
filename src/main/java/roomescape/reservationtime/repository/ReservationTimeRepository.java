@@ -1,21 +1,33 @@
 package roomescape.reservationtime.repository;
 
+import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.reservationtime.domain.ReservationTime;
 
-public interface ReservationTimeRepository {
+public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    ReservationTime save(ReservationTime time);
-
+    @Override
+    @Query("SELECT t FROM ReservationTime t ORDER BY t.startAt ASC")
     List<ReservationTime> findAll();
 
-    Optional<ReservationTime> findById(Long id);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT t FROM ReservationTime t WHERE t.id = :id")
+    void lockById(@Param("id") Long id);
 
-    List<ReservationTime> findAvailableByDateAndThemeId(LocalDate date, Long themeId);
+    @Query("""
+            SELECT t FROM ReservationTime t
+            WHERE t.id NOT IN (
+                SELECT r.time.id FROM Reservation r
+                WHERE r.date = :date AND r.theme.id = :themeId)
+            ORDER BY t.startAt ASC
+            """)
+    List<ReservationTime> findAvailableByDateAndThemeId(@Param("date") LocalDate date, @Param("themeId") Long themeId);
 
-    boolean existsReservationByTimeId(Long timeId);
-
-    void deleteById(Long id);
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.time.id = :timeId")
+    boolean existsReservationByTimeId(@Param("timeId") Long timeId);
 }

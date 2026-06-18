@@ -35,4 +35,16 @@ public class ReservationWaitingService {
     public List<WaitingWithTurn> getWaitingByMemberId(Long memberId) {
         return reservationWaitingRepository.findWithTurnByMemberId(memberId);
     }
+
+    public List<ReservationWaiting> getAllWaitings() {
+        return reservationWaitingRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteWaitingByAdmin(Long id) {
+        if (!reservationWaitingRepository.existsById(id)) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "존재하지 않는 대기입니다.");
+        }
+        reservationWaitingRepository.deleteById(id);
+    }
 }

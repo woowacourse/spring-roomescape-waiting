@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function loadMyReservations() {
   Promise.all([
-    fetch('/bookings').then(r => {
+    fetch('/reservations-mine').then(r => {
       if (r.status === 401) {
         showToast('로그인이 필요합니다.');
         setTimeout(() => { window.location.href = '/login'; }, 1000);

@@ -1,23 +1,34 @@
 package roomescape.theme.repository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.theme.domain.Theme;
 
-public interface ThemeRepository {
+import java.time.LocalDate;
+import java.util.List;
 
-    Theme save(Theme theme);
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    Optional<Theme> findById(Long id);
-
+    @Override
+    @Query("SELECT t FROM Theme t ORDER BY t.id ASC")
     List<Theme> findAll();
 
-    boolean existsReservationByThemeId(Long themeId);
+    @Query("SELECT t FROM Theme t WHERE t.id IN :ids ORDER BY t.id ASC")
+    List<Theme> findAllByIds(@Param("ids") List<Long> ids);
 
-    void deleteById(Long id);
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.theme.id = :themeId")
+    boolean existsReservationByThemeId(@Param("themeId") Long themeId);
 
-    List<Long> findTopThemeIds(LocalDate startDate, LocalDate endDate, int limit);
-
-    List<Theme> findAllByIds(List<Long> ids);
+    @Query("""
+            SELECT r.theme.id
+            FROM Reservation r
+            WHERE r.date BETWEEN :startDate AND :endDate
+            GROUP BY r.theme.id
+            ORDER BY COUNT(r.id) DESC
+            """)
+    List<Long> findTopThemeIds(@Param("startDate") LocalDate startDate,
+                               @Param("endDate") LocalDate endDate,
+                               Pageable pageable);
 }

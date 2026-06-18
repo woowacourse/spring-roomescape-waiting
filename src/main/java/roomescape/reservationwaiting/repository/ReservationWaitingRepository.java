@@ -3,21 +3,39 @@ package roomescape.reservationwaiting.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 
-public interface ReservationWaitingRepository {
-
-    ReservationWaiting save(ReservationWaiting reservationWaiting);
-
-    void deleteById(Long id);
+public interface ReservationWaitingRepository extends JpaRepository<ReservationWaiting, Long> {
 
     List<ReservationWaiting> findByMemberId(Long memberId);
 
-    List<WaitingWithTurn> findWithTurnByMemberId(Long memberId);
-
-    Optional<ReservationWaiting> findById(Long id);
-
     boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 
-    Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    @Query("""
+            SELECT w FROM ReservationWaiting w
+            WHERE w.date = :date AND w.time.id = :timeId AND w.theme.id = :themeId
+            ORDER BY w.createdAt, w.id
+            """)
+    Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(@Param("date") LocalDate date,
+                                                                    @Param("timeId") Long timeId,
+                                                                    @Param("themeId") Long themeId,
+                                                                    Limit limit);
+
+    @Query("""
+            SELECT new roomescape.reservationwaiting.repository.WaitingWithTurn(
+                w,
+                (SELECT COUNT(w2) FROM ReservationWaiting w2
+                 WHERE w2.theme = w.theme
+                   AND w2.date = w.date
+                   AND w2.time = w.time
+                   AND w2.id < w.id) + 1)
+            FROM ReservationWaiting w
+            WHERE w.member.id = :memberId
+            ORDER BY w.id
+            """)
+    List<WaitingWithTurn> findWithTurnByMemberId(@Param("memberId") Long memberId);
 }

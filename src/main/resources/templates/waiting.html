@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>시간 관리 — ESCAPE ROOM ADMIN</title>
+  <title>대기 관리 — ESCAPE ROOM ADMIN</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
@@ -20,38 +20,37 @@
     <button type="button" class="nav-toggle" aria-label="메뉴"><i class="fas fa-bars"></i></button>
     <nav class="nav">
       <a href="/theme">테마 관리</a>
-      <a href="/time" class="active">시간 관리</a>
-      <a href="/waiting">대기 관리</a>
+      <a href="/time">시간 관리</a>
+      <a href="/waiting" class="active">대기 관리</a>
       <a href="/">사용자 페이지</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
-  <h1 class="page-title"><i class="fas fa-hourglass-half" style="color:var(--accent);margin-right:10px;"></i>시간 관리</h1>
-  <p class="page-subtitle">예약 가능한 시간대를 추가하거나 삭제할 수 있습니다.</p>
-
-  <div class="table-header">
-    <div></div>
-    <button id="add-time" class="btn btn-primary"><i class="fas fa-plus"></i> 시간 추가</button>
-  </div>
+  <h1 class="page-title"><i class="fas fa-hourglass-half" style="color:var(--accent);margin-right:10px;"></i>대기 관리</h1>
+  <p class="page-subtitle">전체 예약 대기를 확인하고 취소할 수 있습니다.</p>
 
   <div class="table-container">
     <table class="table">
       <thead>
         <tr>
-          <th style="width:80px;">번호</th>
-          <th>시작 시간</th>
-          <th style="width:160px;text-align:right;">관리</th>
+          <th>번호</th>
+          <th>예약자</th>
+          <th>테마</th>
+          <th>날짜</th>
+          <th>시간</th>
+          <th style="width:120px;text-align:right;">관리</th>
         </tr>
       </thead>
-      <tbody id="time-table-body"></tbody>
+      <tbody id="waiting-tbody"></tbody>
     </table>
   </div>
+  <div id="waiting-empty" class="empty d-none" style="margin-top:16px;">대기 중인 예약이 없습니다.</div>
 </main>
 
 <script src="/js/scripts.js"></script>
 <script src="/js/nav.js"></script>
-<script src="/js/time.js"></script>
+<script src="/js/waiting.js"></script>
 </body>
 </html>
