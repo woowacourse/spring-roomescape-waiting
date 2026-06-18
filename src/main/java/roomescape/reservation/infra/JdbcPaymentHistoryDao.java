@@ -27,16 +27,16 @@ public class JdbcPaymentHistoryDao implements PaymentHistoryDao {
                                t.thumbnail_img_url,
                                rt.id AS time_id,
                                rt.start_at,
-                               po.order_id,
-                               po.amount,
-                               po.payment_key,
-                               po.status AS payment_status
-                        FROM payment_order po
-                        JOIN reservation r ON po.reservation_id = r.id
+                               p.order_id,
+                               p.amount,
+                               p.payment_key,
+                               p.status AS payment_status
+                        FROM payment p
+                        JOIN reservation r ON p.reservation_id = r.id
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
                         WHERE r.name = ?
-                        ORDER BY r.date ASC, rt.start_at ASC, po.id ASC
+                        ORDER BY r.date ASC, rt.start_at ASC, p.id ASC
                         """,
                 (rs, rowNum) -> new PaymentHistoryDetail(
                         rs.getLong("reservation_id"),

@@ -13,9 +13,9 @@ import roomescape.reservation.application.port.out.payment.PaymentConfirmation;
 import roomescape.reservation.application.port.out.payment.PaymentGateway;
 import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.application.port.out.payment.PaymentStatus;
-import roomescape.reservation.domain.PaymentOrder;
+import roomescape.reservation.domain.Payment;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.repository.PaymentRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 
 @RequiredArgsConstructor
@@ -25,44 +25,44 @@ public class PaymentCommandService {
 
     private static final Long DEFAULT_AMOUNT = 50_000L;
 
-    private final PaymentOrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
     private final PaymentGateway paymentGateway;
 
-    public PaymentOrder prepare(Long reservationId) {
+    public Payment prepare(Long reservationId) {
         try {
-            PaymentOrder order = PaymentOrder.create(reservationId, DEFAULT_AMOUNT);
-            return orderRepository.save(order);
+            Payment payment = Payment.create(reservationId, DEFAULT_AMOUNT);
+            return paymentRepository.save(payment);
         } catch (UniqueConstraintViolationException e) {
             throw new ConflictException("결제 주문 생성에 실패했습니다. 다시 시도해주세요.");
         }
     }
 
     public PaymentResult confirm(PaymentConfirmCommand command) {
-        PaymentOrder order = orderRepository.findByOrderId(command.orderId())
+        Payment payment = paymentRepository.findByOrderId(command.orderId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 결제 주문입니다."));
 
-        validateAmount(order, command.amount());
-        validatePending(order);
+        validateAmount(payment, command.amount());
+        validatePending(payment);
 
         PaymentResult result = paymentGateway.confirm(
                 new PaymentConfirmation(command.paymentKey(), command.orderId(), command.amount()));
         validateApproved(result);
-        confirmPaymentOrder(order.confirm(command.paymentKey()));
-        confirmReservation(order);
+        confirmPayment(payment.confirm(command.paymentKey()));
+        confirmReservation(payment);
 
         return result;
     }
 
-    private void validateAmount(PaymentOrder order, Long amount) {
-        Long expectedAmount = order.getAmount().value();
+    private void validateAmount(Payment payment, Long amount) {
+        Long expectedAmount = payment.getAmount().value();
         if (!expectedAmount.equals(amount)) {
             throw new PaymentAmountMismatchException(expectedAmount, amount);
         }
     }
 
-    private void validatePending(PaymentOrder order) {
-        if (!order.isPending()) {
+    private void validatePending(Payment payment) {
+        if (!payment.isPending()) {
             throw new ConflictException("이미 처리된 결제입니다.");
         }
     }
@@ -73,9 +73,9 @@ public class PaymentCommandService {
         }
     }
 
-    private void confirmPaymentOrder(PaymentOrder order) {
+    private void confirmPayment(Payment payment) {
         try {
-            if (orderRepository.confirm(order) == 0) {
+            if (paymentRepository.confirm(payment) == 0) {
                 throw new ConflictException("이미 처리된 결제입니다.");
             }
         } catch (UniqueConstraintViolationException e) {
@@ -83,8 +83,8 @@ public class PaymentCommandService {
         }
     }
 
-    private void confirmReservation(PaymentOrder order) {
-        if (reservationRepository.updateStatus(order.getReservationId(), ReservationStatus.CONFIRMED) == 0) {
+    private void confirmReservation(Payment payment) {
+        if (reservationRepository.updateStatus(payment.getReservationId(), ReservationStatus.CONFIRMED) == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
     }

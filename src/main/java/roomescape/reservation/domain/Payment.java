@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.With;
 
 @Getter
-public class PaymentOrder {
+public class Payment {
 
     @With
     private final Long id;
@@ -14,11 +14,11 @@ public class PaymentOrder {
     private final Long reservationId;
     private final PaymentAmount amount;
     private final String paymentKey;
-    private final PaymentOrderStatus status;
+    private final PaymentStatus status;
 
     @Builder
-    public PaymentOrder(Long id, OrderId orderId, Long reservationId, PaymentAmount amount, String paymentKey,
-                        PaymentOrderStatus status) {
+    public Payment(Long id, OrderId orderId, Long reservationId, PaymentAmount amount, String paymentKey,
+                   PaymentStatus status) {
         this.id = id;
         this.orderId = Objects.requireNonNull(orderId);
         this.reservationId = Objects.requireNonNull(reservationId);
@@ -27,29 +27,29 @@ public class PaymentOrder {
         this.status = Objects.requireNonNull(status);
     }
 
-    public static PaymentOrder create(Long reservationId, Long amount) {
-        return PaymentOrder.builder()
+    public static Payment create(Long reservationId, Long amount) {
+        return Payment.builder()
                 .orderId(OrderId.generate())
                 .reservationId(reservationId)
                 .amount(PaymentAmount.builder()
                         .value(amount)
                         .build())
-                .status(PaymentOrderStatus.PENDING)
+                .status(PaymentStatus.PENDING)
                 .build();
     }
 
-    public PaymentOrder confirm(String paymentKey) {
-        return PaymentOrder.builder()
+    public Payment confirm(String paymentKey) {
+        return Payment.builder()
                 .id(id)
                 .orderId(orderId)
                 .reservationId(reservationId)
                 .amount(amount)
                 .paymentKey(paymentKey)
-                .status(PaymentOrderStatus.CONFIRMED)
+                .status(PaymentStatus.CONFIRMED)
                 .build();
     }
 
     public boolean isPending() {
-        return status == PaymentOrderStatus.PENDING && paymentKey == null;
+        return status == PaymentStatus.PENDING && paymentKey == null;
     }
 }

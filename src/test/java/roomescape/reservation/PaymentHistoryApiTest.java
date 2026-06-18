@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.reservation.application.port.out.payment.PaymentGateway;
 import roomescape.reservation.application.service.PaymentCommandService;
-import roomescape.reservation.domain.PaymentOrder;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.Payment;
+import roomescape.reservation.domain.repository.PaymentRepository;
 import roomescape.support.ApiTest;
 import roomescape.support.TestDataHelper;
 
@@ -28,7 +28,7 @@ class PaymentHistoryApiTest {
     private TestDataHelper testHelper;
 
     @Autowired
-    private PaymentOrderRepository paymentOrderRepository;
+    private PaymentRepository paymentRepository;
 
     @Autowired
     private PaymentCommandService paymentCommandService;
@@ -48,8 +48,8 @@ class PaymentHistoryApiTest {
     @DisplayName("결제 내역 조회 API는 확정된 결제 주문과 예약 정보를 함께 반환합니다.")
     @Test
     void find_confirmed_payment_history() {
-        PaymentOrder order = paymentOrderRepository.save(PaymentOrder.create(confirmedReservationId(), 50_000L));
-        testHelper.confirmPaymentOrder(order, "payment-key-confirmed");
+        Payment payment = paymentRepository.save(Payment.create(confirmedReservationId(), 50_000L));
+        testHelper.confirmPayment(payment, "payment-key-confirmed");
 
         RestAssured.given()
                 .queryParam("username", USERNAME)
@@ -57,7 +57,7 @@ class PaymentHistoryApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("$", hasSize(1))
-                .body("[0].reservationId", equalTo(order.getReservationId().intValue()))
+                .body("[0].reservationId", equalTo(payment.getReservationId().intValue()))
                 .body("[0].name", equalTo(USERNAME))
                 .body("[0].date", equalTo("2099-12-31"))
                 .body("[0].theme.id", equalTo(themeId.intValue()))
@@ -65,7 +65,7 @@ class PaymentHistoryApiTest {
                 .body("[0].time.id", equalTo(tenTimeId.intValue()))
                 .body("[0].time.startAt", equalTo("10:00"))
                 .body("[0].reservationStatus", equalTo("CONFIRMED"))
-                .body("[0].orderId", equalTo(order.getOrderId().value()))
+                .body("[0].orderId", equalTo(payment.getOrderId().value()))
                 .body("[0].amount", equalTo(50_000))
                 .body("[0].paymentKey", equalTo("payment-key-confirmed"))
                 .body("[0].paymentStatus", equalTo("CONFIRMED"));
@@ -74,7 +74,7 @@ class PaymentHistoryApiTest {
     @DisplayName("결제 내역 조회 API는 대기 중인 결제 주문의 paymentKey를 null로 반환합니다.")
     @Test
     void find_pending_payment_history() {
-        PaymentOrder order = paymentCommandService.prepare(pendingReservationId());
+        Payment payment = paymentCommandService.prepare(pendingReservationId());
 
         RestAssured.given()
                 .queryParam("username", USERNAME)
@@ -83,7 +83,7 @@ class PaymentHistoryApiTest {
                 .statusCode(200)
                 .body("$", hasSize(1))
                 .body("[0].reservationStatus", equalTo("PAYMENT_PENDING"))
-                .body("[0].orderId", equalTo(order.getOrderId().value()))
+                .body("[0].orderId", equalTo(payment.getOrderId().value()))
                 .body("[0].amount", equalTo(50_000))
                 .body("[0].paymentKey", nullValue())
                 .body("[0].paymentStatus", equalTo("PENDING"));

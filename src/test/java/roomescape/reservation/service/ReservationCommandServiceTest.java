@@ -24,11 +24,11 @@ import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
-import roomescape.reservation.domain.PaymentOrder;
+import roomescape.reservation.domain.Payment;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.repository.PaymentRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
@@ -50,7 +50,7 @@ class ReservationCommandServiceTest {
     private WaitingRepository waitingRepository;
 
     @MockitoSpyBean
-    private PaymentOrderRepository orderRepository;
+    private PaymentRepository paymentRepository;
 
     @Autowired
     private TestDataHelper testHelper;
@@ -107,15 +107,15 @@ class ReservationCommandServiceTest {
 
     @DisplayName("결제 주문이 있는 예약 삭제 시 연결된 주문도 함께 삭제합니다.")
     @Test
-    void delete_reservation_with_payment_order() {
-        PaymentOrder order = preparePaymentOrder("스타크");
-        testHelper.confirmPaymentOrder(order, "confirmed-payment-key");
+    void delete_reservation_with_payment() {
+        Payment payment = preparePayment("스타크");
+        testHelper.confirmPayment(payment, "confirmed-payment-key");
 
-        reservationCommandService.delete(order.getReservationId(), NOW);
+        reservationCommandService.delete(payment.getReservationId(), NOW);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
-            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isFalse();
+            softly.assertThat(testHelper.findOptionalPaymentStatus(payment.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.existsReservation(payment.getReservationId())).isFalse();
         });
     }
 
@@ -293,13 +293,13 @@ class ReservationCommandServiceTest {
 
     @DisplayName("결제 주문 저장 중 유니크 제약 위반 시 예약 생성 예외를 테스트합니다.")
     @Test
-    void save_reservation_payment_order_unique_constraint_exception() {
+    void save_reservation_payment_unique_constraint_exception() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         ReservationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
 
         doThrow(new UniqueConstraintViolationException(new RuntimeException()))
-                .when(orderRepository)
+                .when(paymentRepository)
                 .save(any());
 
         assertThatThrownBy(() -> reservationCommandService.save(request))
@@ -446,13 +446,13 @@ class ReservationCommandServiceTest {
     @DisplayName("결제 실패 정리는 대기 중인 주문과 연결 예약을 삭제한다.")
     @Test
     void cleanup_pending_payment_failure() {
-        PaymentOrder order = preparePaymentOrder("스타크");
+        Payment payment = preparePayment("스타크");
 
-        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(payment));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
-            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isFalse();
+            softly.assertThat(testHelper.findOptionalPaymentStatus(payment.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.existsReservation(payment.getReservationId())).isFalse();
         });
     }
 
@@ -467,7 +467,7 @@ class ReservationCommandServiceTest {
                 themeId,
                 timeId
         );
-        PaymentOrder order = orderRepository.save(PaymentOrder.create(reservationId, 50_000L));
+        Payment payment = paymentRepository.save(Payment.create(reservationId, 50_000L));
         testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
         testHelper.insertWaiting("네오", ReservationFixture.futureReservationDate(), themeId, timeId);
         ReservationSlot slot = ReservationSlot.builder()
@@ -477,10 +477,10 @@ class ReservationCommandServiceTest {
                 .startAt(LocalTime.of(10, 0))
                 .build();
 
-        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(payment));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.findOptionalPaymentStatus(payment.getOrderId().value())).isEmpty();
             softly.assertThat(testHelper.findReservationNameBySlot(slot)).contains("스타크");
             softly.assertThat(testHelper.findWaitingRank("네오", slot)).isEqualTo(1);
         });
@@ -489,30 +489,30 @@ class ReservationCommandServiceTest {
     @DisplayName("결제 실패 정리는 이미 확정된 주문과 예약을 삭제하지 않는다.")
     @Test
     void cleanup_confirmed_payment_failure_no_op() {
-        PaymentOrder order = preparePaymentOrder("스타크");
-        testHelper.confirmPaymentOrder(order, "confirmed-payment-key");
+        Payment payment = preparePayment("스타크");
+        testHelper.confirmPayment(payment, "confirmed-payment-key");
 
-        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(payment));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("CONFIRMED");
-            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isTrue();
-            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.existsReservation(payment.getReservationId())).isTrue();
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("CONFIRMED");
         });
     }
 
     @DisplayName("결제 실패 정리는 대기 중인 주문이 확정 예약을 가리켜도 예약을 삭제하지 않는다.")
     @Test
     void cleanup_pending_payment_failure_does_not_delete_confirmed_reservation() {
-        PaymentOrder order = preparePaymentOrder("스타크");
-        testHelper.confirmReservation(order.getReservationId());
+        Payment payment = preparePayment("스타크");
+        testHelper.confirmReservation(payment.getReservationId());
 
-        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(order));
+        reservationCommandService.cleanupPendingPaymentFailure(paymentFailCommand(payment));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
-            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isTrue();
-            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("PENDING");
+            softly.assertThat(testHelper.existsReservation(payment.getReservationId())).isTrue();
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("CONFIRMED");
         });
     }
 
@@ -524,7 +524,7 @@ class ReservationCommandServiceTest {
         );
     }
 
-    private PaymentOrder preparePaymentOrder(String name) {
+    private Payment preparePayment(String name) {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long reservationId = testHelper.insertReservation(
@@ -533,10 +533,10 @@ class ReservationCommandServiceTest {
                 themeId,
                 timeId
         );
-        return orderRepository.save(PaymentOrder.create(reservationId, 50_000L));
+        return paymentRepository.save(Payment.create(reservationId, 50_000L));
     }
 
-    private PaymentFailCommand paymentFailCommand(PaymentOrder order) {
-        return new PaymentFailCommand(order.getOrderId().value(), NOW);
+    private PaymentFailCommand paymentFailCommand(Payment payment) {
+        return new PaymentFailCommand(payment.getOrderId().value(), NOW);
     }
 }

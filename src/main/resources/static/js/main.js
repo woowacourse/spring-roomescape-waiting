@@ -174,7 +174,7 @@ async function refreshAfterSuccessfulPayment(orderId) {
 }
 
 function reconcileSuccessfulPayment(orderId) {
-    if (isMatchingPendingPaymentOrder(state.payment.pendingContext?.reservation, orderId)) {
+    if (isMatchingPendingPayment(state.payment.pendingContext?.reservation, orderId)) {
         state.payment.pendingContext = null;
     }
 
@@ -183,7 +183,7 @@ function reconcileSuccessfulPayment(orderId) {
 }
 
 function reconcilePaidReservation(reservation, orderId) {
-    if (!isMatchingPendingPaymentOrder(reservation, orderId)) {
+    if (!isMatchingPendingPayment(reservation, orderId)) {
         return reservation;
     }
 
@@ -194,7 +194,7 @@ function reconcilePaidReservation(reservation, orderId) {
     };
 }
 
-function isMatchingPendingPaymentOrder(reservation, orderId) {
+function isMatchingPendingPayment(reservation, orderId) {
     return isPaymentPendingReservation(reservation) && reservation.payment?.orderId === orderId;
 }
 
@@ -252,12 +252,12 @@ function reconcileFailedPaymentCleanup(orderId) {
         return;
     }
 
-    if (isMatchingPendingPaymentOrder(state.payment.pendingContext?.reservation, orderId)) {
+    if (isMatchingPendingPayment(state.payment.pendingContext?.reservation, orderId)) {
         state.payment.pendingContext = null;
     }
 
-    state.reservations = state.reservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
-    state.searchedReservations = state.searchedReservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
+    state.reservations = state.reservations.filter((reservation) => !isMatchingPendingPayment(reservation, orderId));
+    state.searchedReservations = state.searchedReservations.filter((reservation) => !isMatchingPendingPayment(reservation, orderId));
 }
 
 async function handleClick(event) {

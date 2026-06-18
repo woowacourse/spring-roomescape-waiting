@@ -18,12 +18,12 @@ public class JdbcReservationDao implements ReservationDetailDao {
     public List<ReservationDetail> findAllByPage(int limit, long offset) {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status, po.order_id, po.amount
+                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status, p.order_id, p.amount
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
-                        LEFT JOIN payment_order po ON po.reservation_id = r.id
-                            AND po.status = 'PENDING'
+                        LEFT JOIN payment p ON p.reservation_id = r.id
+                            AND p.status = 'PENDING'
                         ORDER BY r.date ASC, rt.start_at ASC, r.id ASC
                         LIMIT ? OFFSET ?
                         """,
@@ -62,12 +62,12 @@ public class JdbcReservationDao implements ReservationDetailDao {
     public List<ReservationDetail> findByName(String username) {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status, po.order_id, po.amount
+                        SELECT r.id, r.name, r.date, r.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, r.time_id, rt.start_at, r.status, p.order_id, p.amount
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
-                        LEFT JOIN payment_order po ON po.reservation_id = r.id
-                            AND po.status = 'PENDING'
+                        LEFT JOIN payment p ON p.reservation_id = r.id
+                            AND p.status = 'PENDING'
                         WHERE r.name = ?
                         ORDER BY r.date ASC
                         """,

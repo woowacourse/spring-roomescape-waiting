@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import roomescape.reservation.domain.PaymentOrder;
+import roomescape.reservation.domain.Payment;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
@@ -105,13 +105,13 @@ public class TestDataHelper {
                 slot.timeId());
     }
 
-    public void confirmPaymentOrder(PaymentOrder order, String paymentKey) {
+    public void confirmPayment(Payment payment, String paymentKey) {
         jdbcTemplate.update(
-                "UPDATE payment_order SET payment_key = ?, status = 'CONFIRMED' WHERE order_id = ?",
+                "UPDATE payment SET payment_key = ?, status = 'CONFIRMED' WHERE order_id = ?",
                 paymentKey,
-                order.getOrderId().value()
+                payment.getOrderId().value()
         );
-        confirmReservation(order.getReservationId());
+        confirmReservation(payment.getReservationId());
     }
 
     public void confirmReservation(Long reservationId) {
@@ -121,17 +121,17 @@ public class TestDataHelper {
         );
     }
 
-    public String findPaymentOrderStatus(String orderId) {
+    public String findPaymentStatus(String orderId) {
         return jdbcTemplate.queryForObject(
-                "SELECT status FROM payment_order WHERE order_id = ?",
+                "SELECT status FROM payment WHERE order_id = ?",
                 String.class,
                 orderId
         );
     }
 
-    public Optional<String> findOptionalPaymentOrderStatus(String orderId) {
+    public Optional<String> findOptionalPaymentStatus(String orderId) {
         return jdbcTemplate.query(
-                "SELECT status FROM payment_order WHERE order_id = ?",
+                "SELECT status FROM payment WHERE order_id = ?",
                 (rs, rowNum) -> rs.getString("status"),
                 orderId
         ).stream().findFirst();
@@ -162,7 +162,7 @@ public class TestDataHelper {
 
     public String findPaymentKey(String orderId) {
         return jdbcTemplate.queryForObject(
-                "SELECT payment_key FROM payment_order WHERE order_id = ?",
+                "SELECT payment_key FROM payment WHERE order_id = ?",
                 String.class,
                 orderId
         );

@@ -9,47 +9,47 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.domain.OrderId;
+import roomescape.reservation.domain.Payment;
 import roomescape.reservation.domain.PaymentAmount;
-import roomescape.reservation.domain.PaymentOrder;
-import roomescape.reservation.domain.PaymentOrderStatus;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.PaymentStatus;
+import roomescape.reservation.domain.repository.PaymentRepository;
 
 @Repository
-public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
+public class JdbcPaymentRepository implements PaymentRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
-    public JdbcPaymentOrderRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcPaymentRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("payment_order")
+                .withTableName("payment")
                 .usingGeneratedKeyColumns("id");
     }
 
     @Override
-    public PaymentOrder save(PaymentOrder paymentOrder) {
+    public Payment save(Payment payment) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("reservation_id", paymentOrder.getReservationId())
-                .addValue("order_id", paymentOrder.getOrderId().value())
-                .addValue("amount", paymentOrder.getAmount().value())
-                .addValue("status", paymentOrder.getStatus().name());
+                .addValue("reservation_id", payment.getReservationId())
+                .addValue("order_id", payment.getOrderId().value())
+                .addValue("amount", payment.getAmount().value())
+                .addValue("status", payment.getStatus().name());
         try {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-            return paymentOrder.withId(id);
+            return payment.withId(id);
         } catch (DuplicateKeyException e) {
             throw new UniqueConstraintViolationException(e);
         }
     }
 
     @Override
-    public Optional<PaymentOrder> findByOrderId(String orderId) {
+    public Optional<Payment> findByOrderId(String orderId) {
         return jdbcTemplate.query("""
                             SELECT id, reservation_id, order_id, amount, payment_key, status
-                            FROM payment_order
+                            FROM payment
                             WHERE order_id = ?
                         """,
-                (rs, rowNum) -> PaymentOrder.builder()
+                (rs, rowNum) -> Payment.builder()
                         .id(rs.getLong("id"))
                         .reservationId(rs.getLong("reservation_id"))
                         .orderId(OrderId.builder()
@@ -59,26 +59,26 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                                 .value(rs.getLong("amount"))
                                 .build())
                         .paymentKey(rs.getString("payment_key"))
-                        .status(PaymentOrderStatus.valueOf(rs.getString("status")))
+                        .status(PaymentStatus.valueOf(rs.getString("status")))
                         .build(),
                 orderId).stream().findFirst();
     }
 
     @Override
-    public Integer confirm(PaymentOrder paymentOrder) {
+    public Integer confirm(Payment payment) {
         try {
             return jdbcTemplate.update(
                     """
-                            UPDATE payment_order
+                            UPDATE payment
                             SET payment_key = ?, status = ?
                             WHERE order_id = ?
                                 AND status = ?
                                 AND payment_key IS NULL
                             """,
-                    paymentOrder.getPaymentKey(),
-                    paymentOrder.getStatus().name(),
-                    paymentOrder.getOrderId().value(),
-                    PaymentOrderStatus.PENDING.name()
+                    payment.getPaymentKey(),
+                    payment.getStatus().name(),
+                    payment.getOrderId().value(),
+                    PaymentStatus.PENDING.name()
             );
         } catch (DuplicateKeyException e) {
             throw new UniqueConstraintViolationException(e);
@@ -89,20 +89,20 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     public Integer deletePendingByOrderId(String orderId) {
         return jdbcTemplate.update(
                 """
-                        DELETE FROM payment_order
+                        DELETE FROM payment
                         WHERE order_id = ?
                             AND status = ?
                             AND payment_key IS NULL
                         """,
                 orderId,
-                PaymentOrderStatus.PENDING.name()
+                PaymentStatus.PENDING.name()
         );
     }
 
     @Override
     public Integer deleteByReservationId(Long reservationId) {
         return jdbcTemplate.update(
-                "DELETE FROM payment_order WHERE reservation_id = ?",
+                "DELETE FROM payment WHERE reservation_id = ?",
                 reservationId
         );
     }

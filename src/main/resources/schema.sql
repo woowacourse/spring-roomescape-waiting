@@ -25,7 +25,7 @@ CREATE TABLE reservation (
     CONSTRAINT uk_reservation_date_theme_time UNIQUE (date, theme_id, time_id)
 );
 
-CREATE TABLE payment_order (
+CREATE TABLE payment (
     id             BIGINT      NOT NULL AUTO_INCREMENT,
     reservation_id BIGINT      NOT NULL,
     order_id       VARCHAR(64) NOT NULL,
@@ -34,8 +34,8 @@ CREATE TABLE payment_order (
     status         VARCHAR(32) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
-    CONSTRAINT uk_payment_order_order_id UNIQUE (order_id),
-    CONSTRAINT uk_payment_order_payment_key UNIQUE (payment_key)
+    CONSTRAINT uk_payment_external_order_id UNIQUE (order_id),
+    CONSTRAINT uk_payment_payment_key UNIQUE (payment_key)
 );
 
 CREATE TABLE waiting (

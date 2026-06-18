@@ -18,8 +18,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
-import roomescape.reservation.domain.PaymentOrder;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.Payment;
+import roomescape.reservation.domain.repository.PaymentRepository;
 import roomescape.support.ApiTest;
 import roomescape.support.TestDataHelper;
 
@@ -30,7 +30,7 @@ class ReservationApiTest {
     private TestDataHelper testHelper;
 
     @Autowired
-    private PaymentOrderRepository orderRepository;
+    private PaymentRepository paymentRepository;
 
     @DisplayName("방탈출 예약 추가 API를 테스트합니다.")
     @Test
@@ -78,7 +78,7 @@ class ReservationApiTest {
 
     @DisplayName("결제 주문이 있는 예약 삭제 API는 연결된 주문도 함께 삭제합니다.")
     @Test
-    void delete_reservation_with_payment_order() {
+    void delete_reservation_with_payment() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long reservationId = testHelper.insertReservation(
@@ -87,8 +87,8 @@ class ReservationApiTest {
                 themeId,
                 timeId
         );
-        PaymentOrder order = orderRepository.save(PaymentOrder.create(reservationId, 50_000L));
-        testHelper.confirmPaymentOrder(order, "confirmed-payment-key");
+        Payment payment = paymentRepository.save(Payment.create(reservationId, 50_000L));
+        testHelper.confirmPayment(payment, "confirmed-payment-key");
 
         RestAssured.given()
                 .when().delete("/reservations/{id}", reservationId)
@@ -96,7 +96,7 @@ class ReservationApiTest {
                 .statusCode(204);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.findOptionalPaymentStatus(payment.getOrderId().value())).isEmpty();
             softly.assertThat(testHelper.existsReservation(reservationId)).isFalse();
         });
     }

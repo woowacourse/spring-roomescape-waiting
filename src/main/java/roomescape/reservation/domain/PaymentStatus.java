@@ -1,6 +1,6 @@
 package roomescape.reservation.domain;
 
-public enum PaymentOrderStatus {
+public enum PaymentStatus {
     PENDING,
     CONFIRMED,
     FAILED,

@@ -13,12 +13,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.application.dao.PaymentHistoryDao;
 import roomescape.reservation.application.dto.PaymentHistoryDetail;
-import roomescape.reservation.domain.PaymentOrder;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.Payment;
+import roomescape.reservation.domain.repository.PaymentRepository;
 import roomescape.support.TestDataHelper;
 
 @JdbcTest
-@Import({JdbcPaymentHistoryDao.class, JdbcPaymentOrderRepository.class})
+@Import({JdbcPaymentHistoryDao.class, JdbcPaymentRepository.class})
 class JdbcPaymentHistoryDaoTest {
 
     private static final String USERNAME = "스타크";
@@ -30,7 +30,7 @@ class JdbcPaymentHistoryDaoTest {
     private PaymentHistoryDao paymentHistoryDao;
 
     @Autowired
-    private PaymentOrderRepository paymentOrderRepository;
+    private PaymentRepository paymentRepository;
 
     private TestDataHelper testHelper;
     private Long themeId;
@@ -48,16 +48,16 @@ class JdbcPaymentHistoryDaoTest {
     @DisplayName("사용자 이름으로 확정 결제와 대기 결제 내역을 조회합니다.")
     @Test
     void find_by_name() {
-        PaymentOrder confirmedOrder = paymentOrderRepository.save(PaymentOrder.create(
+        Payment confirmedPayment = paymentRepository.save(Payment.create(
                 insertReservation(USERNAME, LocalDate.of(2099, 12, 31), tenTimeId),
                 50_000L
         ));
-        testHelper.confirmPaymentOrder(confirmedOrder, "payment-key-confirmed");
-        PaymentOrder pendingOrder = paymentOrderRepository.save(PaymentOrder.create(
+        testHelper.confirmPayment(confirmedPayment, "payment-key-confirmed");
+        Payment pendingPayment = paymentRepository.save(Payment.create(
                 insertReservation(USERNAME, LocalDate.of(2100, 1, 1), elevenTimeId),
                 50_000L
         ));
-        paymentOrderRepository.save(PaymentOrder.create(
+        paymentRepository.save(Payment.create(
                 insertReservation("비밥", LocalDate.of(2100, 1, 2), tenTimeId),
                 50_000L
         ));
@@ -69,7 +69,7 @@ class JdbcPaymentHistoryDaoTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(histories).hasSize(2);
             softly.assertThat(first.username()).isEqualTo(USERNAME);
-            softly.assertThat(first.orderId()).isEqualTo(confirmedOrder.getOrderId().value());
+            softly.assertThat(first.orderId()).isEqualTo(confirmedPayment.getOrderId().value());
             softly.assertThat(first.paymentKey()).isEqualTo("payment-key-confirmed");
             softly.assertThat(first.paymentStatus()).isEqualTo("CONFIRMED");
             softly.assertThat(first.reservationStatus()).isEqualTo("CONFIRMED");
@@ -77,7 +77,7 @@ class JdbcPaymentHistoryDaoTest {
             softly.assertThat(first.timeId()).isEqualTo(tenTimeId);
             softly.assertThat(first.startAt()).isEqualTo(LocalTime.of(10, 0));
             softly.assertThat(second.username()).isEqualTo(USERNAME);
-            softly.assertThat(second.orderId()).isEqualTo(pendingOrder.getOrderId().value());
+            softly.assertThat(second.orderId()).isEqualTo(pendingPayment.getOrderId().value());
             softly.assertThat(second.paymentKey()).isNull();
             softly.assertThat(second.paymentStatus()).isEqualTo("PENDING");
             softly.assertThat(second.reservationStatus()).isEqualTo("PAYMENT_PENDING");
