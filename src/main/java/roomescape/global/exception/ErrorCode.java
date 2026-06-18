@@ -45,7 +45,12 @@ public enum ErrorCode {
     PAYMENT_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 알 수 없는 오류가 발생했습니다."),
     PAYMENT_CONNECTION_TIMEOUT(HttpStatus.SERVICE_UNAVAILABLE, "결제 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."),
     PAYMENT_READ_TIMEOUT(HttpStatus.ACCEPTED, "결제 요청을 전송했으나 응답이 없습니다. 결제 내역에서 상태를 확인해 주세요."),
-    PAYMENT_SLOT_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "이미 다른 사용자가 해당 슬롯을 결제 완료했습니다. 대기 순서에 따라 자동 승격됩니다.");
+    PAYMENT_SLOT_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "이미 다른 사용자가 해당 슬롯을 결제 완료했습니다. 대기 순서에 따라 자동 승격됩니다."),
+
+    // rate limit
+    RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요."),
+    OUTBOUND_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "외부 API 호출 한도를 초과했습니다."),
+    TOSS_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "결제 서버의 요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.");
 
     private final HttpStatus httpStatus;
     private final String message;
