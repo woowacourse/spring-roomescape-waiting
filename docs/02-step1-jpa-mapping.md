@@ -1,53 +1,170 @@
 # 02 · 1단계 — JPA 전환 (매핑 / 연관관계 / 영속성 컨텍스트)
 
 > 이 미션에서 **분량 최대** 단계. 1-1 매핑 → 1-2 연관관계 → 1-3 관찰의 3중 구조.
-> 커밋: `[1단계] ...` / 모델:시작 전 `01-concepts §3`(코드 다시 읽기) 펴기.
+> 커밋: `[1단계] ...` / 모델: 시작 전 `01-concepts §3`(코드 다시 읽기) 펴기.
+> ✅ **1-1 완료** (Theme · ReservationTime). 발행 SQL은 Boot 3.4.4 / Hibernate 6 / H2 격리 실측.
 
 ---
 
-## 들어가기 전 자기진단
+## 들어가기 전 자기진단 (진입 시점 가설)
 
 **Q. 본인 코드의 Repository에서 가장 자주 등장하는 SQL 패턴은?**
-> 🖊️ (가설) `01-concepts §3①` 참고 — SELECT+3중 조인이 조회 핵심. _(여기 작성)_
+> (가설) 코드베이스 전체의 시그니처 패턴은 **SELECT + 3중 조인**(reservation·waiting 조회 핵심 경로)이고, 그 위에 모든 `save`가 **INSERT + KeyHolder**로 통일돼 있다. EXISTS는 `Reservation`에 5개 몰려 있다(`01-concepts §3①`). 다만 1-1에서 먼저 만지는 `Theme`·`ReservationTime`은 조인이 없는 **단일 테이블 SELECT + INSERT(KeyHolder)** 서브셋이라, 조인 노이즈 없이 기본 CRUD의 어노테이션→SQL 매핑부터 본다.
 
 **Q. 객체 참조로 옮겼을 때 더 자연스러워지는 곳은?**
-> 🖊️ (가설) RowMapper의 손수 조립 → `reservation.getTime().getStartAt()`. _(여기 작성)_
+> (가설) 가장 큰 자연스러움은 **조인 조립부** — RowMapper가 조인된 행을 `ReservationTime.withId(...)`·`Theme.withId(...)`로 손수 조립하던 자리가 `reservation.getTime().getStartAt()` 참조로 바뀐다(본격 등장은 연관관계가 생기는 1-2). 1-1의 독립 클래스에서도 작게는 `save()`의 `KeyHolder→getKey()→withId(...)` 재조립이 **`save()`가 영속 엔티티를 그대로 반환**하는 형태로 사라지고, 단순 ROW_MAPPER도 소멸한다.
 
 ---
 
-## 1-1. 매핑 변환 (독립 클래스부터: Theme, ReservationTime)
+## 1-1. 매핑 변환 (독립 클래스: Theme, ReservationTime)
 
 ### 요구사항 (LMS)
 
 - `build.gradle`: `spring-boot-starter-jdbc` → `spring-boot-starter-data-jpa`
 - `@Entity`·`@Id`·`@GeneratedValue(strategy = IDENTITY)`
 - `JpaRepository<T, Long>` 작성, Jdbc 기반 Repository 제거, `KeyHolder`/`SimpleJdbcInsert` 잔재 제거
-- `application.properties`: `show-sql` / `hibernate.format_sql` / `ddl-auto=create-drop` /
-  `defer-datasource-initialization=true`
+- `application.properties`: `show-sql` / `hibernate.format_sql` / `ddl-auto` / 바인딩 로깅
 
 ### 전환 전 (JDBC)
 
-> 🖊️ `JdbcThemeRepository.save` INSERT + KeyHolder 블록 발췌 _(붙여넣기)_
+`JdbcThemeRepository.save` — 직접 INSERT + KeyHolder로 생성 키 회수 후 객체 재조립:
+```java
+String sql = "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)";
+KeyHolder keyHolder = new GeneratedKeyHolder();
+jdbcTemplate.update(connection -> {
+    PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+    ps.setString(1, theme.getName());
+    ps.setString(2, theme.getDescription());
+    ps.setString(3, theme.getThumbnailUrl());
+    return ps;
+}, keyHolder);
+Long id = keyHolder.getKey().longValue();
+return Theme.withId(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
+```
+- ROW_MAPPER: `rs.getLong("id")`/`rs.getString(...)` → `Theme.withId(...)` 손수 조립.
+- `ReservationTime.save`도 동형: `INSERT INTO reservation_time (start_at) VALUES (?)` + KeyHolder, `ps.setTime(1, Time.valueOf(...))`.
+- 도메인은 불변(`final` 필드) + private 생성자 + 검증 + `create`(id=null)/`withId` 정적 팩토리.
 
 ### 전환 후 (JPA)
 
-> 🖊️ `@Entity` Theme + `ThemeRepository extends JpaRepository` _(작성)_
-> 🖊️ 막힘 예상: 기존 도메인이 `withId` 정적 팩토리·불변 → protected 기본 생성자 추가, id 할당 방식.
+**엔티티** — `final` 제거, protected 기본 생성자 추가, 팩토리·검증은 유지:
+```java
+@Entity
+public class ReservationTime {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-### 비교 관찰 포인트 (LMS — 이 셋 안 보이면 "그냥 양쪽 돌려본 것")
+    @Column(nullable = false, unique = true)   // 컬럼명은 네이밍 전략에 위임: startAt -> start_at
+    private LocalTime startAt;
 
-| 관찰                                         | 예측 | 실제 |
-|--------------------------------------------|----|----|
-| ① 시작 시 발행 DDL 차이 (schema.sql vs JPA 자동 생성) |    |    |
-| ② 재시작 시 데이터 보존 여부                          |    |    |
-| ③ 컬럼명·타입을 entity로만 제어 가능한지                 |    |    |
+    protected ReservationTime() {}             // JPA 전용(리플렉션 진입로)
+    private ReservationTime(Long id, LocalTime startAt) { validate(startAt); ... }
+    public static ReservationTime create(LocalTime startAt) { return new ReservationTime(null, startAt); }
+    public static ReservationTime withId(Long id, LocalTime startAt) { ... } // Jdbc(예약/대기) RowMapper가 아직 사용
+}
+```
+`Theme`도 동형 — `@Column(nullable=false, length=30)`(name), `@Column(nullable=false)`(description/thumbnailUrl, 컬럼명은 전략에 위임).
+
+**왜 이렇게 되나**
+- **protected 기본 생성자**: JPA는 행을 객체로 되살릴 때 리플렉션으로 빈 객체를 만든 뒤 필드를 채운다. 인자 없는 생성자가 필수, `protected`로 외부 오용 차단.
+- **`final` 제거**: JPA가 리플렉션으로 필드(특히 `id`)를 나중에 써넣어야 한다. 매핑 필드의 불변을 포기 — 이것이 "도메인 직접 매핑"의 대가.
+- **`@GeneratedValue(IDENTITY)`**: H2 `AUTO_INCREMENT`에 위임. IDENTITY는 생성 키를 알아야 하므로 **INSERT를 즉시 발행**(쓰기 지연이 부분 무력화) → 1-3 관찰 ③의 복선.
+- **컬럼명 전략 위임**: `CamelCaseToUnderscoresNamingStrategy`로 `startAt→start_at`, `thumbnailUrl→thumbnail_url`(실측 검증). `@Column`은 제약(nullable/length/unique)만 명시.
+
+**Repository — 포트 순수 유지 + JPA 어댑터 (설계 결정, 아래 결정 기록 참조)**
+- 도메인 포트 `ThemeRepository`·`ReservationTimeRepository`는 **Spring import 0**로 유지.
+- `*JpaRepository extends JpaRepository<T, Long>`(Spring Data) 신설 → CRUD 자동.
+- `*RepositoryAdapter`가 포트를 구현, CRUD는 Spring Data에 위임. `JdbcThemeRepository`·`JdbcReservationTimeRepository`(+슬라이스 테스트 2) 삭제.
+
+### 발행 SQL 실측 (Boot 3.4.4 / Hibernate 6 / H2)
+
+**Hibernate 생성 DDL** (`ddl-auto=create-drop` 격리 관찰):
+```sql
+create table reservation_time (
+    start_at time(6) not null unique,
+    id bigint generated by default as identity,
+    primary key (id)
+);
+create table theme (
+    id bigint generated by default as identity,
+    name varchar(30) not null,
+    description varchar(255) not null,
+    thumbnail_url varchar(255) not null,
+    primary key (id)
+);
+```
+**save() INSERT + 바인딩**:
+```
+insert into reservation_time (start_at, id) values (?, default)
+  binding parameter (1:TIME) <- [16:00]                          -> id 회수
+
+insert into theme (description, name, thumbnail_url, id) values (?, ?, ?, default)
+  binding parameter (1:VARCHAR) <- [설명입니다]
+  binding parameter (2:VARCHAR) <- [탈출]
+  binding parameter (3:VARCHAR) <- [https://img/x.jpg]           -> id 회수
+```
+
+### 비교 관찰 포인트 (관찰 ①②③)
+
+| 관찰 | 예측 | 실제 |
+|---|---|---|
+| ① 시작 시 발행 DDL 차이 (schema.sql vs JPA 자동) | identity 구문·unique 이름·thumbnail_url 네이밍이 다를 수 있다 | 구조(컬럼·PK·NOT NULL)는 손글씨와 동일. 차이 4가지: ⓐ `id bigint **generated by default as identity**`(AUTO_INCREMENT 아님, SQL 표준 구문), ⓑ `start_at **time(6)** not null **unique**` — `TIME`→`time(6)`(소수초 정밀도), unique는 **인라인·무명**(예측한 자동 생성 이름이 DDL 표면엔 없음), ⓒ `thumbnail_url`(네이밍 전략 적중), ⓓ `varchar(30)`/`varchar(255)`·nullable 일치 |
+| ② 재시작 데이터 보존 | create-drop+mem이라 비보존 | 비보존. 부팅마다 drop→create→(data.sql) 재적재, id 시퀀스도 리셋 |
+| ③ 컬럼명·타입을 entity로만 제어 | 대부분 가능 | name·type·length·nullable·unique·컬럼명까지 어노테이션만으로 제어 확인. **단 제약 이름·INSERT 컬럼 순서·`time(6)` 정밀도는 제어 밖**(Hibernate가 결정) |
 
 ### 확인 과제
 
-**Q. 예약 생성 시 콘솔 INSERT SQL이 방탈출 미션과 어떻게 같고 다른가?**
-> 🖊️ (예측) 컬럼·VALUES 동일, 단 JPA는 바인딩 로깅·생성 키 회수 방식 다름. (실제) _(작성)_
+**Q. 예약 생성 시 콘솔 INSERT SQL이 방탈출 미션(JDBC)과 어떻게 같고 다른가?** (1-1 Theme/ReservationTime 실측 근거; 예약 자체는 연관관계라 1-2에서 재확인)
+> (예측) 컬럼·VALUES 동일, id는 생략, 바인딩 로깅만 다름.
+> (실제) 대상 테이블·값의 의미는 같으나 **세 가지가 다르다**.
+> ① **id가 컬럼 목록에 포함**되어 `default`로 발행 — `insert into theme (description, name, thumbnail_url, id) values (?,?,?,default)`. JDBC는 id를 안 적고 `KeyHolder`로 회수했지만 Hibernate 6은 id를 컬럼에 넣고 `default` 키워드로 DB identity에 위임한다(Hibernate 5는 생략했음). "내가 안 쓴 컬럼이 SQL에 등장" — 감춰진 SQL의 대표 사례.
+> ② **컬럼 순서가 알파벳순(id 마지막)** — JDBC 손글씨는 `(name, description, thumbnail_url)`, JPA는 `(description, name, thumbnail_url, id)`. 선언 순서도 손글씨 순서도 아니다. (DDL의 컬럼 순서는 또 선언 순서라 DDL≠DML 정렬.)
+> ③ **IDENTITY라 save 시점 즉시 INSERT**(쓰기 지연 무력화) + `binding parameter (1:VARCHAR) <- [값]`로 각 `?`가 타입과 함께 따로 로깅. JDBC에선 내가 안 찍으면 SQL·바인딩이 안 보였다.
 
----
+### 예측 vs 실제 — 갭 분석
+
+- **적중**: `generated by default as identity`(AUTO_INCREMENT 아님), `thumbnail_url`(네이밍 전략), `varchar(30)`/`varchar(255)`·nullable, IDENTITY 즉시 INSERT, 바인딩이 `(n:TYPE) <- [값]`로 분리 로깅, 재시작 비보존. (A)
+- **빗나감/놓침** — 진짜 학습 신호 3개:
+  1. **id가 INSERT에 포함**된다(예측: 생략). Hibernate 6 동작. (A)
+  2. **INSERT 컬럼 순서 = 알파벳순(id 마지막)**, 선언/손글씨 순서 아님. (A)
+  3. **unique 제약이 인라인 무명**(예측: 자동 생성 이름). 제약 이름·컬럼 순서·`time(6)` 정밀도는 어노테이션 제어 밖 — "entity로 다 제어"엔 경계가 있다. (A)
+
+### 결정 기록 (차원 B)
+
+- **도메인 객체에 직접 `@Entity`** (0단계 확정) — 순수 도메인 + 별도 JPA 엔티티 분리 대신 직접 매핑. 근거: 1-3 영속성 컨텍스트 관찰(dirty checking·LAZY)을 살리려면 entity가 managed 상태로 살아 있어야 함. 대가: 매핑 필드 `final` 포기 + protected 생성자. **양보의 범위 한정** — 팩토리(`create`/`withId`)·생성자 검증은 유지해 "불변을 통째로 버린 게 아니라 JPA 진입로 하나를 추가로 연 것". (B)
+- **포트 순수 유지 + JPA 어댑터** (← 지난 안내의 "포트를 JpaRepository로 확장" 권고에서 **변경**). 변경 근거: `findPopularBetween`(theme+reservation 집계)·`findAvailable`(reservation 안티조인)이 **아직 엔티티가 아닌 `reservation`을 참조**해 JPQL 불가. 포트를 Spring Data로 확장하면 이 둘을 native+projection 꼼수로 욱여넣어야 한다. 포트를 순수하게 두고 어댑터가 CRUD는 JPA에 위임, 교차 테이블 쿼리는 검증된 기존 SQL을 **과도기로 유지**하면 헥사고날 순수성을 지키며 컴파일도 유지. 한계: 어댑터 위임 보일러플레이트 + 과도기 SQL 잔존. 다음 정의: 1-2에서 `reservation`이 엔티티가 되면 두 쿼리를 JPQL로 승격. (B)
+- **`findAvailable`은 native, `findPopularBetween`은 JdbcTemplate** (둘 다 과도기). native는 엔티티(`ReservationTime`) 매핑으로 결과를 받지만 projection 생성자는 native가 못 만들어서 인기 테마는 기존 `POPULAR_ROW_MAPPER`를 유지. (B)
+- **`ddl-auto=none` + schema.sql 전체 권위** (과도기) — 요구사항은 `create-drop`이지만, reservation·waiting이 아직 비-JPA `@JdbcTest` 슬라이스에서 schema.sql 테이블을 필요로 한다. DDL 소유권을 Hibernate(theme·reservation_time)와 schema.sql(reservation·waiting)로 쪼개면 **Hibernate가 없는 슬라이스가 깨진다**(아래 차원 C). 그래서 부분 마이그레이션 동안엔 schema.sql을 단일 권위로 두고 `ddl-auto=none`, Hibernate 생성 DDL은 격리 관찰로 확보. 4개 테이블이 모두 엔티티가 되는 **1-2 종료 시 create-drop으로 전환**. (B)
+
+### 테스트 변경 사항 (차원 C)
+
+- **삭제**: `JdbcThemeRepositoryTest`·`JdbcReservationTimeRepositoryTest`(@JdbcTest 슬라이스) — 대상 클래스(Jdbc 구현)가 제거되어 더 이상 컴파일 대상이 아님. JPA 어댑터 슬라이스 테스트는 `reservation`이 엔티티가 되어 `findAvailable`/`findPopular`를 슬라이스에서 검증 가능한 1-2 이후로 미룸.
+- **그대로 통과**: `ThemeServiceTest`·`ReservationTimeServiceTest`는 포트(인터페이스)에 `@Autowired`라 구현 교체에 영향 없음. 인수·통합·예약/대기 슬라이스 포함 **144개 전부 green**.
+- **깨졌다 고친 것**: 처음에 "Hibernate가 theme·reservation_time DDL 생성 + schema.sql은 reservation·waiting만" 구성으로 시도 → `@JdbcTest`(Hibernate 없음)와 `@SpringBootTest`(schema.sql이 Hibernate보다 먼저 실행, defer 기본 false)에서 `reservation`의 FK가 아직 없는 `reservation_time`을 참조 → `ScriptStatementFailedException`(63개 실패). 원인: **DDL 소유권 분할이 비-JPA 슬라이스와 양립 불가**. 수정: schema.sql 전체 복구 + `ddl-auto=none`(main·test 양쪽). (C)
+
+### 피드백 채널 신호 (차원 C)
+
+- **SQL 로그에서 의외였던 것**: INSERT에 `id ... default`가 등장(안 쓴 컬럼), 컬럼이 알파벳순, DDL의 unique가 무명 인라인.
+- **예외가 먼저 알려준 것**: `ScriptStatementFailedException` — "schema.sql과 Hibernate DDL은 별개 메커니즘이고, 소유권을 쪼개면 Hibernate 없는 슬라이스가 깨진다"를 컴파일/부팅 실패가 먼저 가르쳐 줌. DDL 스크립트 추출 옵션(`jakarta…scripts.action`)도 실제 스키마 생성을 가로채 data.sql을 빈 DB에 떨어뜨림(관찰 도구 세팅 교훈).
+
+### 막힌 지점 → 다음 정의
+
+- 막힘: 교차 테이블 쿼리(`findPopularBetween`·`findAvailable`)가 미엔티티 `reservation`을 참조 → JPQL 불가, DDL 소유권 분할 → 슬라이스 붕괴.
+- 다음 정의: 1-2에서 `Reservation`(+`Waiting`)을 `@Entity`로 전환 → ① 두 쿼리를 JPQL로 승격, ② schema.sql 제거 + `ddl-auto=create-drop` 전환, ③ JPA 어댑터 슬라이스 테스트(@DataJpaTest) 도입.
+
+### 얻은 인사이트
+
+- (A) "id는 INSERT에서 빠진다"는 직관이 틀렸다 — Hibernate 6은 id를 `default`로 넣는다. 안 쓴 컬럼이 SQL에 나타나는 게 자동화의 비용.
+- (A) 제약 이름·INSERT 컬럼 순서·`time(6)` 정밀도는 어노테이션 제어 밖 — "entity로 다 제어"의 경계.
+- (B) 직접 매핑은 불변(`final`)을 포기시키지만, 팩토리·검증을 남겨 양보 범위를 한정할 수 있다.
+- (B) 포트 설계는 "엔티티화가 어디까지 됐나"에 종속된다 — 미엔티티 테이블을 참조하는 쿼리가 포트의 결합 방식(확장 vs 어댑터)을 좌우했다.
+- (C) `ddl-auto`(Hibernate)와 schema.sql(Boot SQL init)은 별개 메커니즘. 부분 마이그레이션에선 한쪽을 단일 권위로 두지 않으면 슬라이스가 깨진다.
+
+### 이 단계가 회수한 차원
+
+- A: DDL/INSERT 실측으로 어노테이션→SQL 추적(id default·알파벳 순서·무명 unique·time(6) 발견).
+- B: 직접 @Entity 양보 한정 / 포트 순수+어댑터(권고 변경 근거) / ddl-auto=none 과도기 / native·JdbcTemplate 과도기.
+- C: 슬라이스 붕괴 예외가 DDL 소유권 원칙을 가르침 / 슬라이스 테스트 삭제·144 green.
 
 ## 1-2. 연관관계 매핑 (Reservation → Theme, ReservationTime)
 
