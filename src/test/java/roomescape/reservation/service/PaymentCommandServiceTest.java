@@ -23,18 +23,18 @@ import roomescape.reservation.application.port.out.payment.PaymentConfirmation;
 import roomescape.reservation.application.port.out.payment.PaymentGateway;
 import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.application.port.out.payment.PaymentStatus;
-import roomescape.reservation.application.service.PaymentService;
+import roomescape.reservation.application.service.PaymentCommandService;
 import roomescape.reservation.domain.PaymentOrder;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 
 @ServiceTest
-class PaymentServiceTest {
+class PaymentCommandServiceTest {
 
     private static final String PAYMENT_KEY = "test_payment_key";
 
     @Autowired
-    private PaymentService paymentService;
+    private PaymentCommandService paymentCommandService;
 
     @Autowired
     private TestDataHelper testHelper;
@@ -50,7 +50,7 @@ class PaymentServiceTest {
                 .willReturn(new PaymentResult(PAYMENT_KEY, order.getOrderId().value(), PaymentStatus.DONE,
                         order.getAmount().value()));
 
-        PaymentResult result = paymentService.confirm(paymentConfirmCommand(order));
+        PaymentResult result = paymentCommandService.confirm(paymentConfirmCommand(order));
 
         ArgumentCaptor<PaymentConfirmation> confirmationCaptor = ArgumentCaptor.forClass(PaymentConfirmation.class);
         verify(paymentGateway).confirm(confirmationCaptor.capture());
@@ -75,7 +75,7 @@ class PaymentServiceTest {
                 .willReturn(new PaymentResult(PAYMENT_KEY, order.getOrderId().value(), PaymentStatus.ABORTED,
                         order.getAmount().value()));
 
-        assertThatThrownBy(() -> paymentService.confirm(paymentConfirmCommand(order)))
+        assertThatThrownBy(() -> paymentCommandService.confirm(paymentConfirmCommand(order)))
                 .isInstanceOf(RoomEscapeException.class);
 
         SoftAssertions.assertSoftly(softly -> {
@@ -91,7 +91,7 @@ class PaymentServiceTest {
         given(paymentGateway.confirm(any()))
                 .willThrow(new RuntimeException("gateway error"));
 
-        assertThatThrownBy(() -> paymentService.confirm(paymentConfirmCommand(order)))
+        assertThatThrownBy(() -> paymentCommandService.confirm(paymentConfirmCommand(order)))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("gateway error");
 
@@ -106,7 +106,7 @@ class PaymentServiceTest {
     void confirm_payment_amount_mismatch() {
         PaymentOrder order = preparePaymentOrder();
 
-        assertThatThrownBy(() -> paymentService.confirm(paymentConfirmCommand(order, 1_000L)))
+        assertThatThrownBy(() -> paymentCommandService.confirm(paymentConfirmCommand(order, 1_000L)))
                 .isInstanceOf(PaymentAmountMismatchException.class);
 
         verify(paymentGateway, never()).confirm(any());
@@ -123,7 +123,7 @@ class PaymentServiceTest {
         String savedPaymentKey = "already_confirmed_payment_key";
         testHelper.confirmPaymentOrder(order, savedPaymentKey);
 
-        assertThatThrownBy(() -> paymentService.confirm(paymentConfirmCommand(order)))
+        assertThatThrownBy(() -> paymentCommandService.confirm(paymentConfirmCommand(order)))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("이미 처리된 결제입니다.");
 
@@ -145,7 +145,7 @@ class PaymentServiceTest {
                 timeId
         );
 
-        return paymentService.prepare(reservationId);
+        return paymentCommandService.prepare(reservationId);
     }
 
     private PaymentConfirmCommand paymentConfirmCommand(PaymentOrder order) {

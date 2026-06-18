@@ -38,7 +38,7 @@ public class ReservationCommandService {
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
     private final PaymentOrderRepository orderRepository;
-    private final PaymentService paymentService;
+    private final PaymentCommandService paymentCommandService;
 
     public ReservationResult save(ReservationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
@@ -51,7 +51,7 @@ public class ReservationCommandService {
         Reservation reservation = request.toReservation(slot);
 
         Reservation savedReservation = saveReservation(reservation);
-        PaymentOrder savedOrder = paymentService.prepare(savedReservation.getId());
+        PaymentOrder savedOrder = paymentCommandService.prepare(savedReservation.getId());
 
         return ReservationResult.paymentPending(
                 savedReservation,
@@ -154,7 +154,7 @@ public class ReservationCommandService {
             Reservation promotedReservation = saveReservation(
                     Reservation.create(waiting.getUser(), waiting.getSlot(), now)
             );
-            paymentService.prepare(promotedReservation.getId());
+            paymentCommandService.prepare(promotedReservation.getId());
         });
     }
 

@@ -35,7 +35,7 @@ import roomescape.global.exception.RetryablePaymentGatewayException;
 import roomescape.reservation.application.port.out.payment.PaymentGateway;
 import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.application.port.out.payment.PaymentStatus;
-import roomescape.reservation.application.service.PaymentService;
+import roomescape.reservation.application.service.PaymentCommandService;
 import roomescape.reservation.domain.PaymentOrder;
 import roomescape.support.ApiTest;
 import roomescape.support.TestDataHelper;
@@ -49,7 +49,7 @@ class PaymentApiTest {
     private TestDataHelper testHelper;
 
     @Autowired
-    private PaymentService paymentService;
+    private PaymentCommandService paymentCommandService;
 
     @Value("${toss.client-key}")
     private String tossClientKey;
@@ -302,7 +302,7 @@ class PaymentApiTest {
                 timeId
         );
 
-        return paymentService.prepare(reservationId);
+        return paymentCommandService.prepare(reservationId);
     }
 
     private Map<String, Object> paymentConfirmRequest(PaymentOrder order) {

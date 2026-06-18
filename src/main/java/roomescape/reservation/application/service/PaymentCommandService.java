@@ -21,7 +21,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 @RequiredArgsConstructor
 @Transactional
 @Service
-public class PaymentService {
+public class PaymentCommandService {
 
     private static final Long DEFAULT_AMOUNT = 50_000L;
 
