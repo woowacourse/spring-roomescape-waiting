@@ -100,4 +100,15 @@ public class OrderJdbcDao implements OrderDao {
                 .addValue("threshold", threshold);
         return jdbcTemplate.query(sql, params, ROW_MAPPER);
     }
+
+    @Override
+    public List<Order> findByReservationIds(List<Long> reservationIds) {
+        String sql = """
+                SELECT id, order_id, idempotency_key, reservation_id, amount, payment_key, status
+                FROM orders
+                WHERE reservation_id IN (:reservationIds)
+                """;
+        SqlParameterSource params = new MapSqlParameterSource("reservationIds", reservationIds);
+        return jdbcTemplate.query(sql, params, ROW_MAPPER);
+    }
 }

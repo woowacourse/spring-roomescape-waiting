@@ -114,9 +114,10 @@ async function loadReservations() {
   const area = document.getElementById('list-area');
   area.innerHTML = '<p class="msg">불러오는 중...</p>';
   try {
-    const [resR, waitR] = await Promise.all([
+    const [resR, waitR, payR] = await Promise.all([
       fetch('/reservations'),
-      fetch('/waitings')
+      fetch('/waitings'),
+      fetch('/payments/my')
     ]);
     if (resR.status === 401 || waitR.status === 401) {
       location.href = '/login?redirect=/my-reservations';
@@ -125,9 +126,12 @@ async function loadReservations() {
     if (!resR.ok || !waitR.ok) throw new Error();
     const reservations = await resR.json();
     const waitings = await waitR.json();
+    const payments = payR.ok ? await payR.json() : [];
+    const orderByRes = {};
+    payments.forEach(p => { orderByRes[p.reservationId] = p; });
 
     const items = [
-      ...reservations.map(r => ({ kind: 'reservation', ...r })),
+      ...reservations.map(r => ({ kind: 'reservation', ...r, order: orderByRes[r.id] })),
       ...waitings.map(w => ({ kind: 'waiting', ...w }))
     ];
     items.sort((a, b) => {
@@ -176,10 +180,22 @@ function mkItem(it) {
     statusClass = 'canceled';
     statusText = '취소됨';
   }
+  let payHtml = '';
+  if (it.order) {
+    const o = it.order;
+    const PAY = { PENDING: '결제 대기', CONFIRMED: '결제 확정', FAILED: '결제 실패', NEEDS_CHECK: '확인 필요' };
+    const label = PAY[o.status] || o.status;
+    const amt = (o.amount ?? 0).toLocaleString();
+    const checkStyle = o.status === 'NEEDS_CHECK' ? ';color:#e5b34a' : '';
+    payHtml = `
+      <p class="res-detail" style="margin-top:.5rem${checkStyle}">결제 ${label} · ${amt}원</p>
+      <p class="res-detail" style="font-size:.7rem;color:#777">주문 ${o.orderId}${o.paymentKey ? ' · ' + o.paymentKey : ''}</p>`;
+  }
   el.innerHTML = `
     <div>
       <p class="res-theme">${it.theme?.name || '—'}</p>
       <p class="res-detail">${it.date} · ${fmt(it.time?.startAt)}</p>
+      ${payHtml}
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
       <span class="res-status ${statusClass}">${statusText}</span>

@@ -1,6 +1,7 @@
 package roomescape.payment.web;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
 import roomescape.payment.ConfirmOutcome;
+import roomescape.payment.PaymentHistoryService;
 import roomescape.payment.PaymentService;
 
 @RestController
@@ -17,14 +19,21 @@ import roomescape.payment.PaymentService;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final PaymentHistoryService paymentHistoryService;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, PaymentHistoryService paymentHistoryService) {
         this.paymentService = paymentService;
+        this.paymentHistoryService = paymentHistoryService;
     }
 
     @GetMapping("/config")
     public ResponseEntity<PaymentClientConfigResponse> config() {
         return ResponseEntity.ok(new PaymentClientConfigResponse(paymentService.clientKey()));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<MyOrderResponse>> myOrders(@LoginMember Member member) {
+        return ResponseEntity.ok(paymentHistoryService.findMyOrders(member.getId()));
     }
 
     @PostMapping("/ready")

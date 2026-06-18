@@ -14,4 +14,6 @@ public interface OrderDao {
     Order update(Order order);
 
     List<Order> findExpiredPending(LocalDateTime threshold);
+
+    List<Order> findByReservationIds(List<Long> reservationIds);
 }

@@ -56,6 +56,11 @@ public class OrderService {
         return orderDao.findByOrderId(orderId);
     }
 
+    @Transactional(readOnly = true)
+    public List<Order> findByReservationIds(List<Long> reservationIds) {
+        return orderDao.findByReservationIds(reservationIds);
+    }
+
     public void complete(Order order, String paymentKey) {
         order.complete(paymentKey);
         orderDao.update(order);

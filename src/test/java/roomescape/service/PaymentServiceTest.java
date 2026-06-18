@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,9 @@ import roomescape.order.OrderStatus;
 import roomescape.order.dao.OrderJdbcDao;
 import roomescape.payment.ConfirmOutcome;
 import roomescape.payment.PaymentGatewayUnreachableException;
+import roomescape.payment.PaymentHistoryService;
 import roomescape.payment.PaymentService;
+import roomescape.payment.web.MyOrderResponse;
 import roomescape.payment.web.PaymentReadyResponse;
 import roomescape.promotion.PromotionService;
 import roomescape.promotion.dao.PromotionOutboxJdbcDao;
@@ -53,7 +56,7 @@ import roomescape.waiting.dao.WaitingJdbcDao;
  * 주문·예약은 실제 DAO/서비스로 굴려 *실제 상태 전이*와 와이어링까지 검증한다.
  */
 @JdbcTest
-@Import({PaymentService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
+@Import({PaymentService.class, PaymentHistoryService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
         ReservationAuthorizationService.class, PromotionService.class, FakePaymentGateway.class,
         ReservationJdbcDao.class, OrderJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class,
         MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class})
@@ -62,6 +65,8 @@ class PaymentServiceTest {
 
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private PaymentHistoryService paymentHistoryService;
     @Autowired
     private ReservationService reservationService;
     @Autowired
@@ -215,5 +220,33 @@ class PaymentServiceTest {
                 .isEqualTo(OrderStatus.CONFIRMED);
         assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
                 .isEqualTo(ReservationStatus.BOOKED);
+    }
+
+    @Test
+    @DisplayName("내 결제 내역은 내 예약에 묶인 주문을 상태와 함께 돌려준다")
+    void findMyOrders() {
+        Created created = createReservationWithOrder();
+
+        List<MyOrderResponse> myOrders = paymentHistoryService.findMyOrders(member.getId());
+
+        assertThat(myOrders).hasSize(1);
+        MyOrderResponse response = myOrders.get(0);
+        assertThat(response.reservationId()).isEqualTo(created.reservation().getId());
+        assertThat(response.orderId()).isEqualTo(created.order().getOrderId());
+        assertThat(response.status()).isEqualTo("PENDING");
+        assertThat(response.amount()).isEqualTo(created.order().getAmount());
+    }
+
+    @Test
+    @DisplayName("read timeout 후 내 결제 내역은 그 주문을 NEEDS_CHECK(확인 필요)로 보여준다")
+    void findMyOrdersShowsNeedsCheck() {
+        Created created = createReservationWithOrder();
+        paymentService.confirm(member, FakePaymentGateway.READ_TIMEOUT_KEY,
+                created.order().getOrderId(), created.order().getAmount());
+
+        List<MyOrderResponse> myOrders = paymentHistoryService.findMyOrders(member.getId());
+
+        assertThat(myOrders).hasSize(1);
+        assertThat(myOrders.get(0).status()).isEqualTo("NEEDS_CHECK");
     }
 }
