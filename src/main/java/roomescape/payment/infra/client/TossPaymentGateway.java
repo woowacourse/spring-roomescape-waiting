@@ -2,6 +2,7 @@ package roomescape.payment.infra.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -38,7 +39,7 @@ public class TossPaymentGateway implements PaymentGateway {
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     public PaymentResult confirm(final PaymentConfirmation confirmation) {
-        try {
+        return executeWithHandling(() -> {
             TossPaymentResponse response = tossRestClient.post()
                     .uri("/v1/payments/confirm")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -49,47 +50,41 @@ public class TossPaymentGateway implements PaymentGateway {
                             .amount(confirmation.amount())
                             .build())
                     .retrieve()
-                    .onStatus(HttpStatusCode::isError, (req, res) -> {
-                        TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
-                        throw TossExceptionFactory.create(res.getStatusCode(), error);
-                    }).body(TossPaymentResponse.class);
+                    .onStatus(HttpStatusCode::isError, (req, res) -> handleTossError(res.getStatusCode(), res.getBody()))
+                    .body(TossPaymentResponse.class);
             return toResult(response);
-        } catch (ResourceAccessException e) {
-            throw new TossConnectionException("토스 서버 연결 실패");
-        } catch (RestClientException e) {
-            throw new TossTimeoutException("토스 서버 응답 대기 시간 초과");
-        }
+        }, "결제 승인");
     }
 
     @Override
     public PaymentResult cancel(PaymentCancel cancel) {
-        CancelRequest request = CancelRequest.builder()
-                .cancelReason(cancel.cancelReason())
-                .cancelAmount(cancel.cancelAmount())
-                .refundReceiveAccount(cancel.refundReceiveAccount())
-                .taxFreeAmount(cancel.taxFreeAmount())
-                .currency(cancel.currency())
-                .build();
-
-        TossPaymentResponse response = tossRestClient.post()
-                .uri("/v1/payments/{paymentKey}/cancel", cancel.paymentKey())
-                .body(request)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
-                    throw TossExceptionFactory.create(res.getStatusCode(), error);
-                })
-                .body(TossPaymentResponse.class);
-        return toResult(response);
+        return executeWithHandling(() -> {
+            TossPaymentResponse response = tossRestClient.post()
+                    .uri("/v1/payments/{paymentKey}/cancel", cancel.paymentKey())
+                    .body(CancelRequest.builder()
+                            .cancelReason(cancel.cancelReason())
+                            .cancelAmount(cancel.cancelAmount())
+                            .refundReceiveAccount(cancel.refundReceiveAccount())
+                            .taxFreeAmount(cancel.taxFreeAmount())
+                            .currency(cancel.currency())
+                            .build())
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> handleTossError(res.getStatusCode(), res.getBody()))
+                    .body(TossPaymentResponse.class);
+            return toResult(response);
+        }, "결제 취소");
     }
 
     @Override
     public PaymentResult getStatus(String orderId) {
-        TossPaymentResponse response = tossRestClient.get()
-                .uri("/v1/payments/orders/{orderId}", orderId)
-                .retrieve()
-                .body(TossPaymentResponse.class);
-        return toResult(response);
+        return executeWithHandling(() -> {
+            TossPaymentResponse response = tossRestClient.get()
+                    .uri("/v1/payments/orders/{orderId}", orderId)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> handleTossError(res.getStatusCode(), res.getBody()))
+                    .body(TossPaymentResponse.class);
+            return toResult(response);
+        }, "상태 조회");
     }
 
     private PaymentResult toResult(final TossPaymentResponse response) {
@@ -99,5 +94,23 @@ public class TossPaymentGateway implements PaymentGateway {
                 .approvedAmount(response.totalAmount())
                 .createdAt(OffsetDateTime.parse(response.approvedAt()).toLocalDateTime())
                 .build();
+    }
+
+    private PaymentResult executeWithHandling(Supplier<PaymentResult> action, String operationName) {
+        try {
+            return action.get();
+        } catch (ResourceAccessException e) {
+            throw new TossConnectionException(operationName + " 중 토스 서버 연결 실패");
+        } catch (RestClientException e) {
+            throw new TossTimeoutException(operationName + " 중 토스 서버 응답 대기 시간 초과");
+        }
+    }
+
+    private void handleTossError(HttpStatusCode statusCode, java.io.InputStream body) throws java.io.IOException {
+        if (statusCode.value() == org.springframework.http.HttpStatus.TOO_MANY_REQUESTS.value()) {
+            throw new TossTimeoutException("토스 서버 트래픽 한도 초과로 응답이 지연되었습니다.");
+        }
+        TossErrorResponse error = objectMapper.readValue(body, TossErrorResponse.class);
+        throw TossExceptionFactory.create(statusCode, error);
     }
 }
