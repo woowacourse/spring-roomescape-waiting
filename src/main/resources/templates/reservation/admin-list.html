@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약 관리</title>
+    <style>
+        :root {
+            --bg: #f3efe6;
+            --card: #fffdf8;
+            --line: #d9ccb6;
+            --text: #2b2117;
+            --point: #1d6f5f;
+            --warn: #c44536;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+            background: linear-gradient(135deg, #f4efe7 0%, #ece5d8 100%);
+            color: var(--text);
+        }
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+        .nav {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--line);
+            padding: 10px 14px;
+            border-radius: 999px;
+        }
+        .user-link {
+            margin-left: auto;
+            color: var(--point) !important;
+            border-color: rgba(29, 111, 95, 0.24) !important;
+            background: rgba(29, 111, 95, 0.08) !important;
+            font-weight: 700;
+        }
+        .eyebrow {
+            display: inline-flex;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.75);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .hero h1 { margin: 0 0 8px; font-size: 42px; }
+        .hero p { margin: 0 0 24px; color: rgba(43, 33, 23, 0.72); }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 20px;
+        }
+        .list {
+            display: grid;
+            gap: 14px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.78);
+        }
+        .item strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        .item span {
+            display: block;
+            color: rgba(43, 33, 23, 0.72);
+            font-size: 14px;
+        }
+        button {
+            border: 0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: var(--warn);
+            color: white;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+        }
+        .feedback {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(196, 69, 54, 0.18);
+            background: rgba(255, 248, 246, 0.96);
+        }
+        .feedback.hidden { display: none; }
+        .feedback p,
+        .feedback small { margin: 0; }
+        @media (max-width: 760px) {
+            .item { align-items: stretch; flex-direction: column; }
+            .user-link { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav class="nav">
+        <a th:href="@{/pages/admin/themes}">관리자 홈</a>
+        <a th:href="@{/pages/admin/themes}">테마 관리</a>
+        <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
+        <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
+        <a th:href="@{/pages/admin/reservations}">예약 관리</a>
+        <a th:href="@{/pages/admin/waitings}">대기 관리</a>
+        <a th:href="@{/pages/user/reservations}" class="user-link">사용자 예약 페이지</a>
+    </nav>
+
+    <section class="hero">
+        <span class="eyebrow">ADMIN PAGE</span>
+        <h1>예약 관리</h1>
+        <p>현재 등록된 예약을 확인하고 관리자 권한으로 삭제할 수 있습니다.</p>
+    </section>
+
+    <section id="page-feedback"
+             class="feedback hidden"
+             th:attr="data-error-code=${errorCode}">
+        <strong id="feedback-title"></strong>
+        <p id="feedback-message"></p>
+        <small id="feedback-hint"></small>
+    </section>
+
+    <article class="card">
+        <h2>예약 목록</h2>
+        <div class="list" th:if="${!#lists.isEmpty(reservations)}">
+            <div class="item" th:each="reservation : ${reservations}">
+                <div>
+                    <strong th:text="${reservation.name}">브라운</strong>
+                    <span th:text="${reservation.date + ' / ' + reservation.theme.name + ' / ' + reservation.time.startAt}">
+                        2026-08-06 / 미술관의 밤 / 10:00
+                    </span>
+                </div>
+                <form method="post" th:action="@{/pages/admin/reservations/{id}/delete(id=${reservation.id})}">
+                    <button type="submit">삭제</button>
+                </form>
+            </div>
+        </div>
+        <p th:if="${#lists.isEmpty(reservations)}">등록된 예약이 없습니다.</p>
+    </article>
+</div>
+<script>
+    const reservationAdminMessages = {
+        INTERNAL_SERVER_ERROR: {
+            title: "예약 관리 작업을 처리하지 못했어요",
+            message: "서버에서 예상하지 못한 문제가 발생했습니다.",
+            hint: "잠시 후 다시 시도해 주세요."
+        },
+        INVALID_INPUT: {
+            title: "요청을 처리하지 못했어요",
+            message: "요청 값이 올바르지 않습니다.",
+            hint: "목록을 새로고침한 뒤 다시 시도해 주세요."
+        }
+    };
+
+    function applyFeedback() {
+        const feedback = document.getElementById("page-feedback");
+        const errorCode = feedback.dataset.errorCode;
+
+        if (!errorCode) {
+            return;
+        }
+
+        const message = reservationAdminMessages[errorCode] || reservationAdminMessages.INTERNAL_SERVER_ERROR;
+        document.getElementById("feedback-title").textContent = message.title;
+        document.getElementById("feedback-message").textContent = message.message;
+        document.getElementById("feedback-hint").textContent = message.hint;
+        feedback.classList.remove("hidden");
+    }
+
+    applyFeedback();
+</script>
+</body>
+</html>

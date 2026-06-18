@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테마 관리</title>
+    <style>
+        :root {
+            --bg: #f3efe6;
+            --card: #fffdf8;
+            --line: #d9ccb6;
+            --text: #2b2117;
+            --point: #1d6f5f;
+            --warn: #c44536;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+            background: linear-gradient(135deg, #f4efe7 0%, #ece5d8 100%);
+            color: var(--text);
+        }
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+        .eyebrow {
+            display: inline-flex;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.75);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 14px;
+        }
+        .nav {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--line);
+            padding: 10px 14px;
+            border-radius: 999px;
+        }
+        .user-link {
+            margin-left: auto;
+            color: var(--point) !important;
+            border-color: rgba(29, 111, 95, 0.24) !important;
+            background: rgba(29, 111, 95, 0.08) !important;
+            font-weight: 700;
+        }
+        .hero h1 { margin: 0 0 8px; font-size: 42px; }
+        .hero p { margin: 0 0 24px; color: rgba(43, 33, 23, 0.72); }
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(320px, 380px) 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 20px;
+        }
+        form { display: grid; gap: 12px; }
+        label { display: grid; gap: 6px; font-weight: 600; }
+        input, textarea, button {
+            font: inherit;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            padding: 12px 14px;
+        }
+        textarea { min-height: 120px; resize: vertical; }
+        button {
+            border: 0;
+            background: var(--point);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        button.delete { background: var(--warn); }
+        .list { display: grid; gap: 14px; }
+        .theme {
+            display: grid;
+            gap: 12px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255,255,255,0.78);
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .feedback {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(196, 69, 54, 0.18);
+            background: rgba(255, 248, 246, 0.96);
+        }
+        .feedback.hidden {
+            display: none;
+        }
+        .feedback p,
+        .feedback small {
+            margin: 0;
+        }
+        .feedback small {
+            color: rgba(43, 33, 23, 0.7);
+        }
+        .actions a {
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid var(--line);
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: white;
+        }
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav class="nav">
+        <a th:href="@{/pages/admin/themes}">관리자 홈</a>
+        <a th:href="@{/pages/admin/reservations}">예약 관리</a>
+        <a th:href="@{/pages/admin/waitings}">대기 관리</a>
+        <a th:href="@{/pages/user/reservations}" class="user-link">사용자 예약 페이지</a>
+        <a th:href="@{/pages/admin/themes}">테마 관리</a>
+        <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
+    </nav>
+
+    <section class="hero">
+        <span class="eyebrow">ADMIN PAGE</span>
+        <h1>테마 관리</h1>
+        <p>관리자 영역입니다. 테마 생성과 삭제, 그리고 각 테마의 예약 시간 슬롯 관리로 이어지는 작업을 이 화면에서 시작할 수 있습니다.</p>
+    </section>
+
+    <section id="page-feedback"
+             class="feedback hidden"
+             th:attr="data-error-code=${errorCode}">
+        <strong id="feedback-title"></strong>
+        <p id="feedback-message"></p>
+        <small id="feedback-hint"></small>
+    </section>
+
+    <section class="layout">
+        <article class="card">
+            <h2>새 테마 추가</h2>
+            <form id="theme-create-form" method="post" th:action="@{/pages/admin/themes}">
+                <label>
+                    테마 이름
+                    <input type="text" id="theme-name" name="name" maxlength="255" required>
+                </label>
+                <label>
+                    설명
+                    <textarea id="theme-description" name="description" required></textarea>
+                </label>
+                <label>
+                    썸네일 URL
+                    <input type="url" id="theme-thumbnail-url" name="thumbnailUrl" required>
+                </label>
+                <button type="submit">테마 저장</button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>테마 목록</h2>
+            <div class="list" th:if="${!#lists.isEmpty(themes)}">
+                <div class="theme" th:each="theme : ${themes}">
+                    <div>
+                        <strong th:text="${theme.name}">미술관의 밤</strong>
+                        <p th:text="${theme.description}">설명</p>
+                        <small th:text="${theme.thumbnailUrl}">썸네일</small>
+                    </div>
+                    <div class="actions">
+                        <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
+                        <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
+                        <form method="post" th:action="@{/pages/admin/themes/{id}/delete(id=${theme.id})}">
+                            <button type="submit" class="delete">삭제</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(themes)}">등록된 테마가 없습니다.</p>
+        </article>
+    </section>
+</div>
+<script>
+    const themeServerMessages = {
+        THEME_NAME_DUPLICATED: {
+            title: "같은 이름의 테마가 이미 있어요",
+            message: "운영 중인 테마와 이름이 겹치면 목록에서 헷갈릴 수 있어 다른 이름으로 저장하는 편이 좋아요.",
+            hint: "비슷한 테마라면 설명이나 이름에 차이를 조금 더 넣어보세요."
+        },
+        THEME_IN_USE: {
+            title: "이 테마는 아직 예약에서 사용 중이에요",
+            message: "이미 예약이 연결된 테마는 바로 지우지 않고, 예약 정리 후에 삭제하는 편이 안전해요.",
+            hint: "현재 예약을 먼저 확인한 뒤, 더 이상 쓰지 않을 때 삭제할 수 있어요."
+        },
+        INTERNAL_SERVER_ERROR: {
+            title: "지금은 관리자 작업을 잠시 멈출게요",
+            message: "입력 문제보다는 시스템 상태 때문에 요청을 바로 반영하지 못했어요.",
+            hint: "잠시 후 다시 시도해보고, 계속 반복되면 서버 상태를 함께 확인하는 편이 좋아요."
+        },
+        INVALID_INPUT: {
+            title: "요청을 처리하지 못했어요",
+            message: "입력값 자체보다는 요청 흐름에서 예상하지 못한 문제가 있었어요.",
+            hint: "같은 문제가 반복되면 입력값과 서버 검증 로직을 함께 확인해보는 편이 좋아요."
+        }
+    };
+
+    function showFeedback(title, message, hint) {
+        const feedback = document.getElementById("page-feedback");
+        document.getElementById("feedback-title").textContent = title;
+        document.getElementById("feedback-message").textContent = message;
+        document.getElementById("feedback-hint").textContent = hint;
+        feedback.classList.remove("hidden");
+    }
+
+    function applyThemeFeedback() {
+        const feedback = document.getElementById("page-feedback");
+        const errorCode = feedback.dataset.errorCode;
+
+        if (!errorCode) {
+            return;
+        }
+
+        const message = themeServerMessages[errorCode] || themeServerMessages.INVALID_INPUT;
+        showFeedback(message.title, message.message, message.hint);
+    }
+
+    function validateThemeCreateForm(event) {
+        const name = document.getElementById("theme-name").value.trim();
+        const description = document.getElementById("theme-description").value.trim();
+        const thumbnailUrl = document.getElementById("theme-thumbnail-url").value.trim();
+
+        if (!name) {
+            event.preventDefault();
+            showFeedback(
+                "테마 이름을 입력해 주세요",
+                "이 화면에서 바로 확인할 수 있는 값이라 서버 요청 전에 먼저 체크했어요.",
+                "테마를 구분할 수 있는 이름을 입력한 뒤 다시 저장해 주세요."
+            );
+            return;
+        }
+
+        if (!description) {
+            event.preventDefault();
+            showFeedback(
+                "테마 설명을 입력해 주세요",
+                "설명이 비어 있으면 목록에서 테마를 구분하기 어려워요.",
+                "사용자가 이해하기 쉬운 한두 문장으로 설명을 적어 주세요."
+            );
+            return;
+        }
+
+        if (!thumbnailUrl) {
+            event.preventDefault();
+            showFeedback(
+                "썸네일 주소를 입력해 주세요",
+                "이미지 주소가 없으면 테마 정보를 완성할 수 없어요.",
+                "브라우저가 인식할 수 있는 URL 형식으로 입력해 주세요."
+            );
+            return;
+        }
+
+        try {
+            new URL(thumbnailUrl);
+        } catch (error) {
+            event.preventDefault();
+            showFeedback(
+                "썸네일 주소 형식을 확인해 주세요",
+                "이 값은 브라우저에서 바로 확인 가능한 URL 형식이라 먼저 안내드렸어요.",
+                "예: https://example.com/thumbnail.png"
+            );
+        }
+    }
+
+    document.getElementById("theme-create-form").addEventListener("submit", validateThemeCreateForm);
+    applyThemeFeedback();
+</script>
+</body>
+</html>

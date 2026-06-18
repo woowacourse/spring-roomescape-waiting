@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약 시간 관리</title>
+    <style>
+        :root {
+            --bg: #eef4f3;
+            --card: #ffffff;
+            --line: #c8d7d5;
+            --text: #20302f;
+            --point: #0f766e;
+            --danger: #d62828;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+            background:
+                linear-gradient(160deg, rgba(15,118,110,0.12), transparent 35%),
+                linear-gradient(180deg, #f5faf9 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+        .wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+        .eyebrow {
+            display: inline-flex;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.75);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 14px;
+        }
+        .nav {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            background: rgba(255,255,255,0.84);
+            border: 1px solid var(--line);
+            padding: 10px 14px;
+            border-radius: 999px;
+        }
+        .user-link {
+            margin-left: auto;
+            color: var(--point) !important;
+            border-color: rgba(15,118,110,0.24) !important;
+            background: rgba(15,118,110,0.08) !important;
+            font-weight: 700;
+        }
+        .hero h1 { margin: 0 0 8px; font-size: 38px; }
+        .hero p { margin: 0 0 24px; color: rgba(32, 48, 47, 0.76); }
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(280px, 340px) 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(15, 118, 110, 0.08);
+        }
+        form { display: grid; gap: 12px; }
+        label { display: grid; gap: 6px; font-weight: 600; }
+        input, button, select {
+            font: inherit;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            padding: 12px 14px;
+        }
+        button {
+            border: 0;
+            background: var(--point);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        button.delete { background: var(--danger); }
+        .list {
+            display: grid;
+            gap: 12px;
+        }
+        .feedback {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(214, 40, 40, 0.14);
+            background: rgba(250, 255, 255, 0.96);
+        }
+        .feedback.hidden {
+            display: none;
+        }
+        .feedback p,
+        .feedback small {
+            margin: 0;
+        }
+        .feedback small {
+            color: rgba(32, 48, 47, 0.7);
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+            background: rgba(250,255,255,0.9);
+        }
+        @media (max-width: 860px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav class="nav">
+        <a th:href="@{/pages/admin/themes}">관리자 홈</a>
+        <a th:href="@{/pages/admin/themes}">테마 관리</a>
+        <a th:href="@{/pages/admin/reservations}">예약 관리</a>
+        <a th:href="@{/pages/admin/waitings}">대기 관리</a>
+        <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
+        <a th:href="@{/pages/admin/reservation-slots}">슬롯 관리</a>
+        <a th:href="@{/pages/user/reservations}" class="user-link">사용자 예약 페이지</a>
+    </nav>
+
+    <section class="hero">
+        <span class="eyebrow">ADMIN PAGE</span>
+        <h1>예약 시간 관리</h1>
+        <p>모든 테마가 공통으로 사용하는 전역 시간 슬롯을 추가하고 제거합니다.</p>
+    </section>
+
+    <section id="page-feedback"
+             class="feedback hidden"
+             th:attr="data-error-code=${errorCode}">
+        <strong id="feedback-title"></strong>
+        <p id="feedback-message"></p>
+        <small id="feedback-hint"></small>
+    </section>
+
+    <section class="layout">
+        <article class="card">
+            <h2>시간 슬롯 추가</h2>
+            <form id="reservation-time-create-form" method="post" th:action="@{/pages/admin/reservation-times}">
+                <label>
+                    시작 시간
+                    <input type="time" id="reservation-time-start-at" name="startAt" required>
+                </label>
+                <button type="submit">시간 추가</button>
+            </form>
+        </article>
+
+        <article class="card">
+            <h2>등록된 시간</h2>
+            <div class="list" th:if="${!#lists.isEmpty(reservationTimes)}">
+                <div class="item" th:each="time : ${reservationTimes}">
+                    <div>
+                        <strong th:text="${time.startAt}">10:00</strong>
+                        <span>공통 시간 슬롯</span>
+                    </div>
+                    <form method="post"
+                          th:action="@{/pages/admin/reservation-times/{timeId}/delete(timeId=${time.id})}">
+                        <button type="submit" class="delete">삭제</button>
+                    </form>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(reservationTimes)}">등록된 시간이 없습니다.</p>
+        </article>
+    </section>
+</div>
+<script>
+    const reservationTimeServerMessages = {
+        RESERVATION_TIME_DUPLICATED: {
+            title: "같은 시간 슬롯이 이미 있어요",
+            message: "모든 테마가 공통으로 쓰는 시간이기 때문에, 같은 시작 시간을 두 번 만들 필요는 없어요.",
+            hint: "목록에 없는 다른 시간대로 추가해보세요."
+        },
+        RESERVATION_TIME_IN_USE: {
+            title: "이 시간은 아직 예약에서 사용 중이에요",
+            message: "이미 예약에 연결된 시간은 바로 삭제하지 않고, 예약을 먼저 정리한 뒤 삭제하는 편이 안전해요.",
+            hint: "예약 현황을 먼저 보고 정리한 다음 다시 삭제를 시도할 수 있어요."
+        },
+        INTERNAL_SERVER_ERROR: {
+            title: "지금은 시간 관리 작업을 바로 끝내지 못했어요",
+            message: "입력값보다는 시스템 상태 때문에 요청을 즉시 처리하지 못한 상황이에요.",
+            hint: "잠시 후 다시 시도하거나, 같은 현상이 반복되면 서버 상태를 먼저 확인해보세요."
+        },
+        INVALID_INPUT: {
+            title: "요청을 처리하지 못했어요",
+            message: "브라우저에서 미리 확인하기 어려운 흐름 문제가 있었어요.",
+            hint: "같은 문제가 반복되면 입력값과 서버 검증 로직을 함께 확인해보세요."
+        }
+    };
+
+    function showReservationTimeFeedback(title, message, hint) {
+        const feedback = document.getElementById("page-feedback");
+        document.getElementById("feedback-title").textContent = title;
+        document.getElementById("feedback-message").textContent = message;
+        document.getElementById("feedback-hint").textContent = hint;
+        feedback.classList.remove("hidden");
+    }
+
+    function applyReservationTimeFeedback() {
+        const feedback = document.getElementById("page-feedback");
+        const errorCode = feedback.dataset.errorCode;
+
+        if (!errorCode) {
+            return;
+        }
+
+        const message = reservationTimeServerMessages[errorCode] || reservationTimeServerMessages.INVALID_INPUT;
+        showReservationTimeFeedback(message.title, message.message, message.hint);
+    }
+
+    function validateReservationTimeCreateForm(event) {
+        const startAt = document.getElementById("reservation-time-start-at").value.trim();
+
+        if (!startAt) {
+            event.preventDefault();
+            showReservationTimeFeedback(
+                "시간을 먼저 선택해 주세요",
+                "비어 있는 시간 값은 브라우저에서 바로 확인할 수 있어서 서버 요청 전에 막았어요.",
+                "입력 칸에서 시작 시간을 선택한 뒤 다시 추가해 주세요."
+            );
+        }
+    }
+
+    document.getElementById("reservation-time-create-form").addEventListener("submit", validateReservationTimeCreateForm);
+    applyReservationTimeFeedback();
+</script>
+</body>
+</html>
