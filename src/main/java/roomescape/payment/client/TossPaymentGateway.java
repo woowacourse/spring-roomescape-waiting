@@ -33,7 +33,7 @@ public class TossPaymentGateway implements PaymentGateway {
     @Retryable(
             exceptionExpression = "#root.retryable",
             maxAttempts = 3,
-            backoff = @Backoff(delay = 3000, multiplier = 2) // TODO 기준 공부 후 적용
+            backoff = @Backoff(delay = 2000, multiplier = 2) // TODO 기준 공부 후 적용
     )
     public PaymentResult confirm(PaymentConfirmation confirmation) {
         System.out.println(confirmation.toString());
