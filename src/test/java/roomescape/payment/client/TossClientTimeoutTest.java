@@ -18,10 +18,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 import roomescape.client.TossClientConfig;
 import roomescape.client.TossPaymentGateway;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentResultUnknownException;
 
 @SpringBootTest
 class TossClientTimeoutTest {
@@ -65,7 +65,7 @@ class TossClientTimeoutTest {
     }
 
     @Test
-    void 읽기타임아웃이면_readTimeout만큼만_기다렸다가_RestClient예외로_실패한다() {
+    void 읽기타임아웃이면_readTimeout만큼만_기다렸다가_결과불명확_예외로_실패한다() {
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
@@ -73,8 +73,9 @@ class TossClientTimeoutTest {
                 .setHeadersDelay(2, TimeUnit.SECONDS));
 
         var start = System.nanoTime();
+        // 응답을 못 받았을 뿐 토스는 이미 처리했을 수 있다 — "실패"가 아니라 PaymentResultUnknownException(확인 필요)로 떨어진다.
         assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation()))
-                .isInstanceOf(RestClientException.class)
+                .isInstanceOf(PaymentResultUnknownException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         var elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
@@ -103,7 +104,7 @@ class TossClientTimeoutTest {
             try {
                 tossPaymentGateway.confirm(confirmation());
                 succeeded++;
-            } catch (RestClientException e) {
+            } catch (PaymentResultUnknownException e) {
                 // 타임아웃으로 일찍 포기한 호출 — 성공 TPS 에 세지 않는다.
             }
         }
