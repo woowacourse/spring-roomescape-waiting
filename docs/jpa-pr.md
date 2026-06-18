@@ -208,3 +208,22 @@ LAZY 연관 객체는 실제 접근 시점에 DB 조회가 필요하다.
 그런데 실제 접근 시점에는 이미 트랜잭션과 영속성 컨텍스트가 종료되어 있다.  
 그래서 Hibernate가 추가 조회를 할 수 없어 LazyInitializationException이 발생한다.
 ```
+
+### 3단계 - 예약 대기
+
+#### 관찰 과제 2: N+1과 fetch join 비교
+
+```
+1. 시도한 코드
+// standard join
+List<Reservation> findAllByMemberIdOrderByIdDesc(Long id);
+
+// fetch join (@EntityGraph 사용)
+@EntityGraph(attributePaths = {"date", "time", "theme"})
+List<Reservation> findAllByMemberIdOrderByIdDesc(Long id);
+2. 예측 SQL: 두 메서드 이름 쿼리 모두가 결과를 한번에 가져올 것이라고 예측했다.
+3. 실제 SQL: 일반 메서드 이름 쿼리에서는 트랜잭션 밖에서 재조회를 하면 예외가 발생했지만, 객체 그래프의 경우에는 예외가 발생하지 않았다.
+4. 왜 다른가
+일반 메서드 이름 쿼리에서는 LAZY 연관 객체의 조회가 발생하면 추가 쿼리를 발생시키지만,
+ 객체 그래프가 사용되었으면 지정한 연관 객체를 함께 로딩하도록 fetch plan을 변경한다.
+```

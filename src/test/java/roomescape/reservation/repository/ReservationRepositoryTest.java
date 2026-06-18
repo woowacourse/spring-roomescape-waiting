@@ -100,11 +100,6 @@ class ReservationRepositoryTest {
         return reservationDateRepository.saveAndFlush(pastDate);
     }
 
-    private void updateStatus(Reservation beforeReservation) {
-        beforeReservation.updateStatus(ReservationStatus.CANCELED);
-        reservationRepository.save(beforeReservation);
-    }
-
     @Nested
     @DisplayName("findFirstWaitingByDateTimeAndThemeId 메서드는")
     class FindFirstWaitingByDateTimeAndThemeId {

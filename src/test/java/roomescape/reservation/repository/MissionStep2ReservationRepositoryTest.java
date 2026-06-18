@@ -37,7 +37,7 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
 @DataJpaTest(showSql = false)
-class MissionReservationRepositoryTest {
+class MissionStep2ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
