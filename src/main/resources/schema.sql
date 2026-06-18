@@ -55,6 +55,7 @@ CREATE TABLE reservation_order
     amount         BIGINT       NOT NULL,
     payment_key    VARCHAR(255),
     reservation_id BIGINT       NOT NULL,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
     PRIMARY KEY (id),
     UNIQUE (reservation_id)
 );
