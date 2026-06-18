@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
+import roomescape.common.exception.OutboundRateLimitException;
 import roomescape.controller.dto.response.ConfirmResponse;
 import roomescape.controller.dto.response.PaymentResponse;
 import roomescape.domain.history.PaymentHistory;
@@ -25,6 +27,7 @@ import roomescape.service.dto.result.PaymentResult;
 public class PaymentController {
     private static final long DEFAULT_AMOUNT = 50_000L;
     private static final String ORDER_NAME = "방탈출 예약 — 우아한 비밀의 방";
+    private static final int MAX_BURST = 20;
 
     private final OrderRepository orderRepository;
     private final PaymentHistoryRepository historyRepository;
@@ -45,8 +48,7 @@ public class PaymentController {
 
     @GetMapping
     public ResponseEntity<PaymentResponse> checkout(@RequestParam Long reservationId) {
-        String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
-
+        String orderId = newId("order");
         orderRepository.save(new Order(orderId, DEFAULT_AMOUNT, reservationId));
 
         PaymentResponse response = new PaymentResponse(
@@ -95,8 +97,44 @@ public class PaymentController {
         throw TossPaymentException.of(HttpStatus.BAD_REQUEST, response);
     }
 
+    @GetMapping("/burst")
+    public ResponseEntity<List<PaymentHistory>> burst(@RequestParam(defaultValue = "10") int count) {
+        int n = Math.max(1, Math.min(count, MAX_BURST));
+        // 더미 예약을 위한 임의의 reservationId (실제 서비스에서는 유효한 ID가 필요할 수 있음)
+        long dummyReservationId = 999L;
+        for (int i = 0; i < n; i++) {
+            String orderId = newId("order-burst");
+            String paymentKey = newId("burst-pk");
+
+            orderRepository.save(new Order(orderId, DEFAULT_AMOUNT, dummyReservationId));
+            try {
+                PaymentResult result = paymentReservationFacade.confirmPaymentAndReservation(paymentKey, orderId,
+                        DEFAULT_AMOUNT);
+
+                historyRepository.save(PaymentHistory.of(
+                        true, orderId, result.approvedAmount(), paymentKey, result.status().name(), "게이트웨이로 나가 승인"
+                ));
+            } catch (OutboundRateLimitException e) {
+                historyRepository.save(PaymentHistory.of(
+                        false, orderId, DEFAULT_AMOUNT, paymentKey, "나가는 한도 차단", "외부로 보내지 않음"
+                ));
+            } catch (RestClientException e) {
+                historyRepository.save(PaymentHistory.of(
+                        false, orderId, DEFAULT_AMOUNT, paymentKey, "게이트웨이 거부", e.getClass().getSimpleName()
+                ));
+            }
+        }
+
+        return ResponseEntity.ok().body(historyRepository.findAll());
+    }
+
     @GetMapping("/history")
     public ResponseEntity<List<PaymentHistory>> history() {
         return ResponseEntity.ok().body(historyRepository.findAll());
     }
+
+    private String newId(String prefix) {
+        return prefix + "-" + UUID.randomUUID().toString().replace("-", "");
+    }
+
 }

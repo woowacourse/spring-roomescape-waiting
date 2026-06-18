@@ -1,0 +1,33 @@
+package roomescape.common.config.web;
+
+import java.io.IOException;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import roomescape.common.exception.OutboundRateLimitException;
+import roomescape.infrastructure.ratelimit.TokenBucketRateLimiter;
+
+
+/**
+ * 나가는(outbound) 호출에 거는 Rate Limit 인터셉터. 외부 호출 '전에' 토큰을 소비해, 한도를 넘으면 보내지 않고 {@link OutboundRateLimitException} 으로 거부한다.
+ */
+public class OutboundRateLimitInterceptor implements ClientHttpRequestInterceptor {
+
+    private final TokenBucketRateLimiter rateLimiter;
+
+    public OutboundRateLimitInterceptor(TokenBucketRateLimiter rateLimiter) {
+        this.rateLimiter = rateLimiter;
+    }
+
+    @Override
+    public ClientHttpResponse intercept(
+            HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+        // TODO: tryConsume() 이 false 면 execution 을 호출하지 말고 OutboundRateLimitException 을 던진다.
+        if (!rateLimiter.tryConsume()) {
+            throw new OutboundRateLimitException("나가는 호출이 자체 Rate Limit 을 초과해 외부로 보내지 않았습니다.");
+        }
+        return execution.execute(request, body);
+    }
+
+}

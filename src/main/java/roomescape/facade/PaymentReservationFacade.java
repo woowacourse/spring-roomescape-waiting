@@ -2,7 +2,9 @@ package roomescape.facade;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.PaymentGatewayException;
 import roomescape.domain.order.Order;
 import roomescape.domain.order.OrderRepository;
 import roomescape.service.PaymentService;
@@ -29,13 +31,17 @@ public class PaymentReservationFacade {
 
     @Transactional(rollbackFor = Exception.class)
     public PaymentResult confirmPaymentAndReservation(String paymentKey, String orderId, Long amount) {
-        PaymentResult paymentResult = paymentService.confirm(paymentKey, orderId, amount);
+        try {
+            PaymentResult paymentResult = paymentService.confirm(paymentKey, orderId, amount);
 
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("주문을 찾을 수 없습니다."));
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException("주문을 찾을 수 없습니다."));
 
-        reservationService.confirmReservation(order.reservation_id());
+            reservationService.confirmReservation(order.reservation_id());
 
-        return paymentResult;
+            return paymentResult;
+        } catch (RestClientException e) {
+            throw new PaymentGatewayException("게이트웨이 결제 승인 실패", orderId, amount, paymentKey, e);
+        }
     }
 }

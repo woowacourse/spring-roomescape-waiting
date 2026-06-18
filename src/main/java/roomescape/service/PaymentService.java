@@ -24,7 +24,7 @@ public class PaymentService {
                 .orElseThrow(() -> new NotFoundException("주문을 찾을 수 없습니다."));
 
         if (order.amount().compareTo(amount) != 0) {
-            throw new PaymentAmountMismatchException(order.amount(), amount);
+            throw new PaymentAmountMismatchException(order.amount(), amount, orderId, amount, paymentKey);
         }
 
         var confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
