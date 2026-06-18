@@ -1,19 +1,11 @@
 package roomescape.repository;
 
 import java.util.Optional;
-import roomescape.domain.Member;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Slot;
 
-public interface ReservationWaitingRepository {
+public interface ReservationWaitingRepository extends JpaRepository<ReservationWaiting, Long> {
 
-    ReservationWaiting save(ReservationWaiting reservationWaiting);
-
-    boolean existsBy(Member member, Slot slot);
-
-    Optional<ReservationWaiting> findById(Long id);
-
-    Optional<ReservationWaiting> findFirstBySlot(Slot slot);
-
-    void deleteById(Long id);
+    Optional<ReservationWaiting> findFirstBySlotOrderByIdAsc(Slot slot);
 }

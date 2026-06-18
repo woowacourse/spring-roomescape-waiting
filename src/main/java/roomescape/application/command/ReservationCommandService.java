@@ -52,16 +52,17 @@ public class ReservationCommandService {
                 now()
         );
 
-        return reservationRepository.update(updated);
+        return reservationRepository.saveAndFlush(updated);
     }
 
     public Reservation getByIdForUpdate(Long id) {
-        return reservationRepository.findByIdForUpdate(id)
+        return reservationRepository.findWithLockById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지않는 예약입니다. Id: " + id));
     }
 
     public void delete(Reservation reservation) {
         reservationRepository.deleteById(reservation.getId());
+        reservationRepository.flush();
     }
 
     public void deleteMine(Reservation reservation, Member requester) {
@@ -71,6 +72,7 @@ public class ReservationCommandService {
         );
 
         reservationRepository.deleteById(reservation.getId());
+        reservationRepository.flush();
     }
 
     private LocalDateTime now() {

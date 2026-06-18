@@ -8,22 +8,20 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Theme;
-import roomescape.domain.exception.ConflictException;
-import roomescape.repository.ThemeJdbcRepository;
+import roomescape.repository.ThemeRepository;
 
-@JdbcTest
-@Import(ThemeJdbcRepository.class)
-class ThemeJdbcRepositoryTest {
+@DataJpaTest
+class ThemeRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ThemeJdbcRepository repository;
+    private ThemeRepository repository;
 
     private Long timeId;
 
@@ -44,13 +42,14 @@ class ThemeJdbcRepositoryTest {
     }
 
     @Test
-    void 예약에서_사용_중인_테마를_삭제하면_ConflictException을_던진다() {
+    void 예약에서_사용_중인_테마를_삭제하면_DataIntegrityViolationException을_던진다() {
         Theme saved = repository.save(new Theme(null, "공포", "무서운 테마", "https://example.com/horror.jpg"));
         insertReservation("브라운", LocalDate.of(2026, 8, 5), saved.getId());
 
-        assertThatThrownBy(() -> repository.deleteById(saved.getId()))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("사용 중인 예약");
+        repository.deleteById(saved.getId());
+
+        assertThatThrownBy(repository::flush)
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test

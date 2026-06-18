@@ -12,22 +12,21 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
-import roomescape.domain.exception.ConflictException;
-import roomescape.repository.ReservationJdbcRepository;
+import roomescape.repository.ReservationRepository;
 
-@JdbcTest
-@Import(ReservationJdbcRepository.class)
-class ReservationJdbcRepositoryTest {
+@DataJpaTest
+class ReservationRepositoryTest {
 
     private static final String THEME_NAME = "공포";
     private static final String THEME_DESCRIPTION = "무서운 테마";
@@ -42,7 +41,7 @@ class ReservationJdbcRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ReservationJdbcRepository repository;
+    private ReservationRepository repository;
 
     private Long timeId;
     private Long themeId;
@@ -72,19 +71,18 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void 같은_날짜_시간_테마로_저장하면_ConflictException을_던진다() {
+    void 같은_날짜_시간_테마로_저장하면_DataIntegrityViolationException을_던진다() {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
         LocalDate date = RESERVATION_DATE;
-        repository.save(reservation("브라운", date, time, theme));
+        repository.saveAndFlush(reservation("브라운", date, time, theme));
 
-        assertThatThrownBy(() -> repository.save(reservation("티뉴", date, time, theme)))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("이미 예약이 존재합니다");
+        assertThatThrownBy(() -> repository.saveAndFlush(reservation("티뉴", date, time, theme)))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
-    void 같은_날짜_시간_테마로_수정하면_ConflictException을_던진다() {
+    void 같은_날짜_시간_테마로_수정하면_DataIntegrityViolationException을_던진다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES ('11:00')");
         Long otherTimeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM reservation_time WHERE start_at = '11:00'",
@@ -100,9 +98,8 @@ class ReservationJdbcRepositoryTest {
 
         Reservation updated = reservation(saved.getId(), saved.getName(), date, time, theme);
 
-        assertThatThrownBy(() -> repository.update(updated))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("이미 예약이 존재합니다");
+        assertThatThrownBy(() -> repository.saveAndFlush(updated))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -113,7 +110,10 @@ class ReservationJdbcRepositoryTest {
         repository.save(reservation("브라운", targetDate, time, theme));
         repository.save(reservation("티뉴", OTHER_RESERVATION_DATE, time, theme));
 
-        List<Long> result = repository.findReservedTimeIdsByDateAndTheme(targetDate, theme);
+        List<Long> result = repository.findBySlot_DateAndSlot_Theme(targetDate, theme)
+                .stream()
+                .map(reservation -> reservation.getTime().getId())
+                .collect(Collectors.toList());
 
         assertThat(result).containsExactly(timeId);
     }
@@ -132,28 +132,14 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findByIdForUpdate는_해당_id의_예약을_반환한다() {
+    void findWithLockById는_해당_id의_예약을_반환한다() {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
         Reservation saved = repository.save(reservation("브라운", RESERVATION_DATE, time, theme));
 
-        Optional<Reservation> result = repository.findByIdForUpdate(saved.getId());
+        Optional<Reservation> result = repository.findWithLockById(saved.getId());
 
         assertThat(result).contains(saved);
-    }
-
-    @Test
-    void existsByTimeId는_예약이_없으면_false를_반환한다() {
-        assertThat(repository.existsByTimeId(timeId)).isFalse();
-    }
-
-    @Test
-    void existsByTimeId는_예약이_있으면_true를_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
-        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
-        repository.save(reservation("브라운", RESERVATION_DATE, time, theme));
-
-        assertThat(repository.existsByTimeId(timeId)).isTrue();
     }
 
     @Test
@@ -191,7 +177,7 @@ class ReservationJdbcRepositoryTest {
         repository.save(reservation("민욱", RESERVATION_DATE, time, theme));
         repository.save(reservation("티뉴", OTHER_RESERVATION_DATE, time, theme));
 
-        assertThat(repository.findByMember(member("민욱")))
+        assertThat(repository.findByReserver(member("민욱")))
                 .hasSize(1)
                 .first()
                 .extracting(Reservation::getName)

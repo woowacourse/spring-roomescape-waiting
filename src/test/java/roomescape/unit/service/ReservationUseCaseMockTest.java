@@ -15,6 +15,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.api.dto.ReservationRequest;
@@ -119,11 +122,18 @@ class ReservationUseCaseMockTest {
 
     @Test
     void findPage는_page와_size로_offset을_계산해_조회한다() {
-        given(reservationRepository.findAll(10, 5)).willReturn(List.of());
-        given(reservationRepository.count()).willReturn(0L);
+        PageRequest pageRequest = PageRequest.of(
+                2,
+                5,
+                Sort.by(
+                        Sort.Order.desc("slot.date"),
+                        Sort.Order.asc("slot.time.startAt")
+                )
+        );
+        given(reservationRepository.findAll(pageRequest)).willReturn(new PageImpl<>(List.of(), pageRequest, 0));
 
         reservationQueryService.findPage(2, 5);
 
-        verify(reservationRepository).findAll(10, 5);
+        verify(reservationRepository).findAll(pageRequest);
     }
 }

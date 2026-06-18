@@ -25,6 +25,6 @@ public class ReservationTimeQueryService {
     }
 
     public List<ReservationTime> findAll() {
-        return timeRepository.findAll();
+        return timeRepository.findAllByOrderByStartAtAsc();
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
@@ -34,12 +34,8 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.ForbiddenException;
-import roomescape.repository.ReservationJdbcRepository;
-import roomescape.repository.ReservationTimeJdbcRepository;
-import roomescape.repository.ReservationWaitingJdbcRepository;
-import roomescape.repository.ReservationWaitingQueryJdbcRepository;
 
-@JdbcTest
+@DataJpaTest
 @Import({
         ReservationModificationUseCase.class,
         ReservationCommandService.class,
@@ -47,10 +43,6 @@ import roomescape.repository.ReservationWaitingQueryJdbcRepository;
         ReservationQueryService.class,
         ReservationTimeQueryService.class,
         ReservationWaitingQueryService.class,
-        ReservationJdbcRepository.class,
-        ReservationTimeJdbcRepository.class,
-        ReservationWaitingJdbcRepository.class,
-        ReservationWaitingQueryJdbcRepository.class,
         FixedClockConfig.class
 })
 class ReservationModificationUseCaseIntegrationTest {

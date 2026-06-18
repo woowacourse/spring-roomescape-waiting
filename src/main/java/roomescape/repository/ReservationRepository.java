@@ -1,34 +1,32 @@
 package roomescape.repository;
 
+import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Reservation save(Reservation reservation);
-
-    Reservation update(Reservation reservation);
-
-    boolean existsByTimeId(Long timeId);
-
-    Optional<Reservation> findById(Long id);
-
-    Optional<Reservation> findByIdForUpdate(Long id);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Reservation> findWithLockById(Long id);
 
     Optional<Reservation> findBySlot(Slot slot);
 
-    List<Long> findReservedTimeIdsByDateAndTheme(LocalDate date, Theme theme);
+    List<Reservation> findBySlot_DateAndSlot_Theme(LocalDate date, Theme theme);
 
-    List<Reservation> findByMember(Member member);
+    // JPA 2단계
+    List<Reservation> findByReserver(Member reserver);
 
-    List<Reservation> findAll(int offset, int limit);
-
-    long count();
-
-    void deleteById(Long id);
+    @EntityGraph(attributePaths = {
+            "slot.time",
+            "slot.theme"
+    })
+    List<Reservation> findAllByReserver(Member reserver);
 }

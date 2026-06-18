@@ -15,25 +15,19 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.domain.exception.ConflictException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
-import roomescape.repository.ReservationWaitingJdbcRepository;
-import roomescape.repository.ReservationWaitingQueryJdbcRepository;
 import roomescape.repository.ReservationWaitingQueryRepository;
+import roomescape.repository.ReservationWaitingRepository;
 
-@JdbcTest
-@Import({
-        ReservationWaitingJdbcRepository.class,
-        ReservationWaitingQueryJdbcRepository.class
-})
-class ReservationWaitingJdbcRepositoryTest {
+@DataJpaTest
+class ReservationWaitingRepositoryTest {
 
     private static final String THEME_NAME = "공포";
     private static final String THEME_DESCRIPTION = "무서운 테마";
@@ -46,7 +40,7 @@ class ReservationWaitingJdbcRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ReservationWaitingJdbcRepository repository;
+    private ReservationWaitingRepository repository;
 
     @Autowired
     private ReservationWaitingQueryRepository queryRepository;
@@ -85,14 +79,13 @@ class ReservationWaitingJdbcRepositoryTest {
     }
 
     @Test
-    void 같은_예약에_같은_이름으로_대기를_저장하면_ConflictException을_던진다() {
-        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
+    void 같은_예약에_같은_이름으로_대기를_저장하면_DataIntegrityViolationException을_던진다() {
+        repository.saveAndFlush(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         ReservationWaiting duplicated = waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusSeconds(1));
 
-        assertThatThrownBy(() -> repository.save(duplicated))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("이미 대기");
+        assertThatThrownBy(() -> repository.saveAndFlush(duplicated))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -100,21 +93,9 @@ class ReservationWaitingJdbcRepositoryTest {
         repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         ReservationWaiting second = repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT));
-        ReservationWaitingWithOrder found = queryRepository.findById(second.getId()).orElseThrow();
+        ReservationWaitingWithOrder found = queryRepository.findWithOrderById(second.getId()).orElseThrow();
 
         assertThat(found.order()).isEqualTo(2);
-    }
-
-    @Test
-    void existsBy는_같은_이름과_슬롯의_대기가_있으면_true를_반환한다() {
-        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
-
-        assertThat(repository.existsBy(member("민욱"), reservation.getSlot())).isTrue();
-    }
-
-    @Test
-    void existsBy는_일치하는_대기가_없으면_false를_반환한다() {
-        assertThat(repository.existsBy(member("민욱"), reservation.getSlot())).isFalse();
     }
 
     @Test
@@ -138,7 +119,7 @@ class ReservationWaitingJdbcRepositoryTest {
         repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)));
         repository.save(waiting("밀란", reservation.getSlot(), WAITING_CREATED_AT));
 
-        Optional<ReservationWaiting> found = repository.findFirstBySlot(reservation.getSlot());
+        Optional<ReservationWaiting> found = repository.findFirstBySlotOrderByIdAsc(reservation.getSlot());
 
         assertThat(found).isPresent();
         assertThat(found.get().getWaiter()).isEqualTo(member("브라운"));
@@ -149,7 +130,7 @@ class ReservationWaitingJdbcRepositoryTest {
         repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT));
         repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)));
 
-        List<ReservationWaitingWithOrder> found = queryRepository.findByMember(member("민욱"));
+        List<ReservationWaitingWithOrder> found = queryRepository.findByName("민욱");
 
         assertThat(found).hasSize(1);
         assertThat(found.getFirst().order()).isEqualTo(2);

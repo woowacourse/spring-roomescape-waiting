@@ -12,4 +12,16 @@ public record ReservationWaitingWithOrder(
         Theme theme,
         int order
 ) {
+
+    // JPA 3단계
+    public ReservationWaitingWithOrder(
+            Long id,
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            Long order
+    ) {
+        this(id, name, date, time, theme, Math.toIntExact(order));
+    }
 }
