@@ -105,6 +105,20 @@ class ReservationCommandServiceTest {
         assertThatNoException().isThrownBy(() -> reservationCommandService.delete(reservationId, NOW));
     }
 
+    @DisplayName("결제 주문이 있는 예약 삭제 시 연결된 주문도 함께 삭제합니다.")
+    @Test
+    void delete_reservation_with_payment_order() {
+        PaymentOrder order = preparePaymentOrder("스타크");
+        testHelper.confirmPaymentOrder(order, "confirmed-payment-key");
+
+        reservationCommandService.delete(order.getReservationId(), NOW);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isFalse();
+        });
+    }
+
     @DisplayName("삭제할 예약이 없을 시 예외 발생을 테스트합니다.")
     @Test
     void delete_not_found_reservation_exception() {

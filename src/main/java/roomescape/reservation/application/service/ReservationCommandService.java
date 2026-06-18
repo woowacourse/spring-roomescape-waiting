@@ -87,6 +87,8 @@ public class ReservationCommandService {
 
         slot.validateDeletable(now);
 
+        orderRepository.deleteByReservationId(reservationId);
+
         if (reservationRepository.delete(reservationId) == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }

@@ -11,4 +11,6 @@ public interface PaymentOrderRepository {
     Integer confirm(PaymentOrder paymentOrder);
 
     Integer deletePendingByOrderId(String orderId);
+
+    Integer deleteByReservationId(Long reservationId);
 }

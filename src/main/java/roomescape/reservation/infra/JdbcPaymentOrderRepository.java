@@ -98,4 +98,12 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 PaymentOrderStatus.PENDING.name()
         );
     }
+
+    @Override
+    public Integer deleteByReservationId(Long reservationId) {
+        return jdbcTemplate.update(
+                "DELETE FROM payment_order WHERE reservation_id = ?",
+                reservationId
+        );
+    }
 }
