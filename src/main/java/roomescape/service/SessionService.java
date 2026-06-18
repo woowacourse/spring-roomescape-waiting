@@ -53,7 +53,7 @@ public class SessionService {
     public Session createSession(LocalDate date, Long timeId, Long themeId) {
         TimeSlot timeSlot = timeSlotService.findTimeSlotById(timeId);
         Theme theme = themeService.findThemeById(themeId);
-        if (sessionRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isPresent()) {
+        if (sessionRepository.findByDateAndTimeSlotIdAndThemeId(date, timeId, themeId).isPresent()) {
             throw new DuplicateSessionException(date, timeId, themeId);
         }
         return sessionRepository.save(Session.transientOf(date, timeSlot, theme));
@@ -65,7 +65,7 @@ public class SessionService {
         List<Theme> themes = themeService.allTheme();
         return timeSlots.stream()
                 .flatMap(timeSlot -> themes.stream()
-                        .map(theme -> sessionRepository.findByDateAndTimeIdAndThemeId(
+                        .map(theme -> sessionRepository.findByDateAndTimeSlotIdAndThemeId(
                                         date, timeSlot.getId(), theme.getId())
                                 .orElseGet(() -> sessionRepository.save(Session.transientOf(date, timeSlot, theme)))))
                 .toList();
@@ -111,7 +111,7 @@ public class SessionService {
         existing.validateModifiable(userName, LocalDateTime.now());
         Session newSession = findSessionOrThrow(request.date(), request.timeId(), request.themeId());
         reservationService.checkDuplicateForUpdate(newSession, id);
-        Reservation updated = reservationService.update(existing.reschedule(newSession, LocalDateTime.now()));
+        Reservation updated = reservationService.save(existing.reschedule(newSession, LocalDateTime.now()));
         if (!existing.getSession().getId().equals(newSession.getId())) {
             promoteWaitingIfExists(existing.getSession());
         }
@@ -127,7 +127,7 @@ public class SessionService {
         Long themeId = Objects.requireNonNullElse(request.themeId(), existing.getSession().getTheme().getId());
         Session targetSession = findSessionOrThrow(date, timeId, themeId);
         reservationService.checkDuplicateForUpdate(targetSession, id);
-        Reservation updated = reservationService.update(existing.reschedule(targetSession, LocalDateTime.now()));
+        Reservation updated = reservationService.save(existing.reschedule(targetSession, LocalDateTime.now()));
         if (!existing.getSession().getId().equals(targetSession.getId())) {
             promoteWaitingIfExists(existing.getSession());
         }
@@ -136,9 +136,7 @@ public class SessionService {
 
     @Transactional
     public Waiting addWaiting(WaitingRequest request) {
-        Session session = sessionRepository.findByDateAndTimeIdAndThemeId(
-                        request.date(), request.timeId(), request.themeId())
-                .orElseThrow(InvalidWaitingPrerequisiteException::new);
+        Session session = findSessionOrThrow(request.date(), request.timeId(), request.themeId());
         Reservation reservation = reservationService.findBySessionOrThrow(session);
         if (reservation.isReservedBy(request.name())) {
             throw new DuplicateReservationException(
@@ -158,15 +156,15 @@ public class SessionService {
     }
 
     private Session findSessionOrThrow(LocalDate date, Long timeId, Long themeId) {
-        return sessionRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+        return sessionRepository.findByDateAndTimeSlotIdAndThemeId(date, timeId, themeId)
                 .orElseThrow(SessionNotFoundException::new);
     }
 
     private void promoteWaitingIfExists(Session session) {
-        if (waitingService.isExistsBySessionId(session.getId())) {
-            Waiting first = waitingService.findFirstBySessionId(session.getId());
-            waitingService.deleteById(first.getId());
-            reservationService.save(first.getName(), session);
-        }
+        List<Waiting> waitings = waitingService.findBySession(session);
+        session.promoteCandidate(waitings).ifPresent(candidate -> {
+            waitingService.deleteById(candidate.getId());
+            reservationService.save(candidate.getName(), session);
+        });
     }
 }

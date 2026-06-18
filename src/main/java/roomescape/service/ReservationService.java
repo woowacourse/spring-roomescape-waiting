@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Session;
 import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.InvalidWaitingPrerequisiteException;
+import roomescape.exception.ReservationNotFoundException;
 import roomescape.repository.ReservationRepository;
 
 @Service
@@ -36,8 +36,7 @@ public class ReservationService {
     }
 
     public Optional<Reservation> findBySession(Session session) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(
-                session.getDate(), session.getTimeSlot().getId(), session.getTheme().getId());
+        return reservationRepository.findBySession(session);
     }
 
     public Reservation findBySessionOrThrow(Session session) {
@@ -53,13 +52,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void delete(long id) {
-        reservationRepository.deleteById(id);
+    public Reservation save(Reservation reservation) {
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
-    public Reservation update(Reservation reservation) {
-        return reservationRepository.update(reservation);
+    public void delete(long id) {
+        reservationRepository.deleteById(id);
     }
 
     public void checkDuplicateForSave(Session session) {

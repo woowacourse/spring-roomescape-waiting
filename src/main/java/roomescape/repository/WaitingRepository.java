@@ -1,27 +1,19 @@
 package roomescape.repository;
 
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import roomescape.domain.Session;
 import roomescape.domain.Waiting;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface WaitingRepository {
-
-    int calculateWaitingNumber(Waiting waiting);
-
-    Waiting save(Waiting waiting);
-
-    void deleteById(Long id);
-
-    boolean isExists(Waiting waiting);
-
-    boolean isExistsBySessionId(long sessionId);
+public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findByName(String name);
 
-    Optional<Waiting> findById(long id);
+    boolean existsByNameAndSession(String name, Session session);
 
-    Waiting findFirstBySessionId(long sessionId);
+    boolean existsBySession(Session session);
 
-    List<Waiting> findAllBySessionId(long sessionId);
+    Waiting findFirstBySessionOrderByIdAsc(Session session);
+
+    List<Waiting> findBySessionOrderByIdAsc(Session session);
 }

@@ -64,9 +64,9 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("세션 ID로 대기 존재 여부를 확인한다.")
-    void isExistsBySessionId() {
+    @DisplayName("세션으로 대기 목록을 조회한다.")
+    void findBySession() {
         waitingService.save(Waiting.transientOf("브라운", session));
-        assertThat(waitingService.isExistsBySessionId(session.getId())).isTrue();
+        assertThat(waitingService.findBySession(session)).hasSize(1);
     }
 }

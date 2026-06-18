@@ -1,16 +1,36 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Formula;
 import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.PastSessionControlException;
 import roomescape.exception.PastTimeException;
 
+@Entity
 public class Waiting implements Comparable<Waiting> {
 
-    private final Long id;
-    private final String name;
-    private final Session session;
-    private final Integer waitingNumber;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id")
+    private Session session;
+
+    @Formula("(SELECT COUNT(*) FROM waiting w2 WHERE w2.session_id = session_id AND w2.id <= id)")
+    private Integer waitingNumber;
+
+    protected Waiting() {
+    }
 
     public Waiting(Long id, String name, Session session, Integer waitingNumber) {
         validateFields(name, session);
@@ -41,7 +61,7 @@ public class Waiting implements Comparable<Waiting> {
 
     @Override
     public int compareTo(Waiting other) {
-        return Integer.compare(this.waitingNumber, other.waitingNumber);
+        return Long.compare(this.id, other.id);
     }
 
     private void validateFields(String name, Session session) {

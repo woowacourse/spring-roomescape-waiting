@@ -1,68 +1,33 @@
 package roomescape.repository;
 
+import java.util.List;
+import java.util.Optional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Session;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-public class FakeReservationRepository implements ReservationRepository {
-
-    private final Map<Long, Reservation> storage = new HashMap<>();
-    private long sequence = 1L;
+public class FakeReservationRepository extends AbstractFakeRepository<Reservation, Long> implements ReservationRepository {
 
     @Override
-    public List<Reservation> findAll() {
-        return List.copyOf(storage.values());
+    protected Long getId(Reservation entity) {
+        return entity.getId();
     }
 
     @Override
-    public Optional<Reservation> findById(long id) {
-        return Optional.ofNullable(storage.get(id));
+    protected Reservation withId(Reservation entity, Long id) {
+        return new Reservation(id, entity.getName(), entity.getSession());
     }
 
     @Override
     public List<Reservation> findByName(String name) {
-        return storage.values().stream()
-                .filter(reservation -> reservation.getName().equals(name))
+        return store.values().stream()
+                .filter(r -> r.getName().equals(name))
                 .toList();
     }
 
     @Override
-    public Reservation save(Reservation reservation) {
-        long id = sequence++;
-        Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getSession());
-        storage.put(id, savedReservation);
-        return savedReservation;
-    }
-
-    @Override
-    public void deleteById(long id) {
-        storage.remove(id);
-    }
-
-    @Override
-    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return storage.values().stream()
-                .filter(reservation -> matchSlot(reservation.getSession(), date, timeId, themeId))
-                .findAny();
-    }
-
-    @Override
-    public Reservation update(Reservation reservation) {
-        if (!storage.containsKey(reservation.getId())) {
-            return null;
-        }
-        storage.put(reservation.getId(), reservation);
-        return reservation;
-    }
-
-    private boolean matchSlot(Session session, LocalDate date, Long timeId, Long themeId) {
-        return session.getDate().equals(date)
-                && session.getTimeSlot().getId().equals(timeId)
-                && session.getTheme().getId().equals(themeId);
+    public Optional<Reservation> findBySession(Session session) {
+        return store.values().stream()
+                .filter(r -> r.getSession().getId().equals(session.getId()))
+                .findFirst();
     }
 }

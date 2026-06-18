@@ -1,51 +1,27 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import roomescape.domain.Session;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-public class FakeSessionRepository implements SessionRepository {
-
-    private final Map<Long, Session> storage = new HashMap<>();
-    private long sequence = 1L;
+public class FakeSessionRepository extends AbstractFakeRepository<Session, Long> implements SessionRepository {
 
     @Override
-    public Session save(Session session) {
-        long id = sequence++;
-        Session savedSession = new Session(id, session.getDate(), session.getTimeSlot(), session.getTheme());
-        storage.put(id, savedSession);
-        return savedSession;
+    protected Long getId(Session entity) {
+        return entity.getId();
     }
 
     @Override
-    public Optional<Session> findById(long id) {
-        return Optional.ofNullable(storage.get(id));
+    protected Session withId(Session entity, Long id) {
+        return new Session(id, entity.getDate(), entity.getTimeSlot(), entity.getTheme());
     }
 
     @Override
-    public Optional<Session> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return storage.values().stream()
-                .filter(session -> matchCondition(session, date, timeId, themeId))
-                .findAny();
-    }
-
-    @Override
-    public void deleteById(long id) {
-        storage.remove(id);
-    }
-
-    @Override
-    public List<Session> findAll() {
-        return List.copyOf(storage.values());
-    }
-
-    private boolean matchCondition(Session session, LocalDate date, Long timeId, Long themeId) {
-        return session.getDate().equals(date)
-                && session.getTimeSlot().getId().equals(timeId)
-                && session.getTheme().getId().equals(themeId);
+    public Optional<Session> findByDateAndTimeSlotIdAndThemeId(LocalDate date, Long timeSlotId, Long themeId) {
+        return store.values().stream()
+                .filter(s -> s.getDate().equals(date)
+                        && s.getTimeSlot().getId().equals(timeSlotId)
+                        && s.getTheme().getId().equals(themeId))
+                .findFirst();
     }
 }

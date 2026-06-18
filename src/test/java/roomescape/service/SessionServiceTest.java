@@ -211,7 +211,7 @@ class SessionServiceTest {
         Waiting waiting = sessionService.addWaiting(
                 new WaitingRequest("네오", futureDate, savedTimeSlot.getId(), savedTheme.getId()));
         sessionService.cancelWaiting(waiting.getId(), "네오");
-        assertThat(waitingRepository.isExistsBySessionId(savedSession.getId())).isFalse();
+        assertThat(waitingRepository.existsBySession(savedSession)).isFalse();
     }
 
     @Test

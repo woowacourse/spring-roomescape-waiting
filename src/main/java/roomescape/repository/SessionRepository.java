@@ -1,20 +1,11 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Session;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+public interface SessionRepository extends JpaRepository<Session, Long> {
 
-public interface SessionRepository {
-
-    List<Session> findAll();
-
-    Optional<Session> findById(long id);
-
-    Session save(Session session);
-
-    Optional<Session> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
-
-    void deleteById(long id);
+    Optional<Session> findByDateAndTimeSlotIdAndThemeId(LocalDate date, Long timeSlotId, Long themeId);
 }

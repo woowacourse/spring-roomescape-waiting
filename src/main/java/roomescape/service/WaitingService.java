@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Session;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateWaitingException;
 import roomescape.exception.WaitingNotFoundException;
@@ -27,20 +28,12 @@ public class WaitingService {
         return waitingRepository.findByName(name);
     }
 
-    public boolean isExistsBySessionId(long sessionId) {
-        return waitingRepository.isExistsBySessionId(sessionId);
-    }
-
-    public Waiting findFirstBySessionId(long sessionId) {
-        return waitingRepository.findFirstBySessionId(sessionId);
-    }
-
-    public List<Waiting> findAllBySessionId(long sessionId) {
-        return waitingRepository.findAllBySessionId(sessionId);
+    public List<Waiting> findBySession(Session session) {
+        return waitingRepository.findBySessionOrderByIdAsc(session);
     }
 
     public void validateNotDuplicate(Waiting waiting) {
-        if (waitingRepository.isExists(waiting)) {
+        if (waitingRepository.existsByNameAndSession(waiting.getName(), waiting.getSession())) {
             throw new DuplicateWaitingException(waiting);
         }
     }
