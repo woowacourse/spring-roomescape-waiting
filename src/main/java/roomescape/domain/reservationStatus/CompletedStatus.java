@@ -27,11 +27,6 @@ public class CompletedStatus implements ReservationStatus {
     }
 
     @Override
-    public void waiting(Reservation reservation) {
-        throw new CustomException(ErrorCode.INVALID_COMPLETED_COMMAND);
-    }
-
-    @Override
     public void cancel(Reservation reservation) {
         throw new CustomException(ErrorCode.INVALID_CANCELLED_COMMAND);
     }

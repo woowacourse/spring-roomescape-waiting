@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS waiting;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS theme_slot;
 DROP TABLE IF EXISTS time;
@@ -44,4 +45,16 @@ CREATE TABLE IF NOT EXISTS reservation
     PRIMARY KEY (id),
     FOREIGN KEY (theme_slot_id) REFERENCES theme_slot (id),
     UNIQUE (confirmed_theme_slot_id)
+);
+
+CREATE TABLE IF NOT EXISTS waiting
+(
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    member_name VARCHAR(255) NOT NULL,
+    date        DATE         NOT NULL,
+    time_id     BIGINT       NOT NULL,
+    theme_id    BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

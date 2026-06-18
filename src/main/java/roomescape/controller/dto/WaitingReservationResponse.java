@@ -1,7 +1,8 @@
 package roomescape.controller.dto;
 
 import java.time.LocalDate;
-import roomescape.domain.WaitingReservation;
+import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 
 public record WaitingReservationResponse(
         long id,
@@ -12,15 +13,18 @@ public record WaitingReservationResponse(
         String status,
         int waitingOrder
 ) {
-    public static WaitingReservationResponse from(WaitingReservation waitingReservation) {
+    public static WaitingReservationResponse from(WaitingWithRank waitingWithRank) {
+        Waiting waiting = waitingWithRank.waiting();
+        int waitingOrder = waitingWithRank.rank().intValue();
         return new WaitingReservationResponse(
-                waitingReservation.id(),
-                waitingReservation.name(),
-                waitingReservation.date(),
-                TimeResponse.from(waitingReservation.time()),
-                ThemeResponse.from(waitingReservation.theme()),
-                waitingReservation.status(),
-                waitingReservation.waitingOrder()
+                waiting.getId(),
+                waiting.getMemberName(),
+                waiting.getDate(),
+                TimeResponse.from(waiting.getTime()),
+                ThemeResponse.from(waiting.getTheme()),
+                waitingOrder + "번째 예약대기",
+                waitingOrder
         );
     }
+
 }

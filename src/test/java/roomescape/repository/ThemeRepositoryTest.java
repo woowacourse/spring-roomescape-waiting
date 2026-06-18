@@ -31,7 +31,7 @@ class ThemeRepositoryTest {
 
         saveReservation("브라운", "CONFIRMED", theme1SlotId);
         saveReservation("김완료", "COMPLETED", theme1SlotId);
-        saveReservation("김대기", "PENDING", theme2SlotId);
+        saveWaiting("김대기", theme2SlotId);
         saveReservation("김취소", "CANCELLED", theme2SlotId);
 
         List<Theme> popularThemes = themeRepository.findPopularThemes(10L, date.minusDays(1), date.plusDays(1));
@@ -63,6 +63,18 @@ class ThemeRepositoryTest {
                 "INSERT INTO reservation (name, status, theme_slot_id) VALUES (?, ?, ?)",
                 name,
                 status,
+                themeSlotId
+        );
+    }
+
+    private void saveWaiting(String name, long themeSlotId) {
+        jdbcTemplate.update("""
+                        INSERT INTO waiting (member_name, date, time_id, theme_id)
+                        SELECT ?, date, time_id, theme_id
+                        FROM theme_slot
+                        WHERE id = ?
+                        """,
+                name,
                 themeSlotId
         );
     }

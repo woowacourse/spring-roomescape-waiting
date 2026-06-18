@@ -18,6 +18,10 @@ public enum ErrorCode {
     RESERVATION_STATUS_CONFLICT(HttpStatus.CONFLICT, "예약 상태가 이미 변경되었습니다."),
     INVALID_MODIFY_COMMAND(HttpStatus.UNPROCESSABLE_ENTITY, "변경할 수 없는 예약입니다."),
 
+    // waiting
+    WAITING_NOT_FOUND(HttpStatus.NOT_FOUND, "예약 대기가 존재하지 않습니다."),
+    WAITING_NOT_ALLOWED(HttpStatus.FORBIDDEN, "자신의 예약 대기만 접근할 수 있습니다."),
+
     // reservation status
     INVALID_PENDING_COMMAND(HttpStatus.UNPROCESSABLE_ENTITY, "대기 중인 예약은 취소나 확인만 가능합니다."),
     INVALID_CONFIRMED_COMMAND(HttpStatus.UNPROCESSABLE_ENTITY, "확인된 예약은 취소나 완료만 가능합니다."),

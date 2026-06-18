@@ -3,22 +3,22 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
-import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 
@@ -31,6 +31,9 @@ class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Theme THEME_1 = new Theme(1L, "테스트테마1", "테스트용 첫 번째 테마 설명", "https://test.com/thumb1.jpg");
     private static final Theme THEME_2 = new Theme(2L, "테스트테마2", "테스트용 두 번째 테마 설명", "https://test.com/thumb2.jpg");
@@ -113,41 +116,6 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("같은 테마 슬롯 조건의 PENDING 예약을 ID순으로 가장 먼저 조회한다.")
-    void findFirstPendingReservationByThemeSlotOrderByIdAsc() {
-        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
-        reservationRepository.save(confirmedReservation("브라운", themeSlot));
-        reservationRepository.save(new Reservation("브라운1", themeSlot));
-        reservationRepository.save(new Reservation("브라운2", themeSlot));
-        reservationRepository.save(new Reservation("브라운3", themeSlot));
-
-        Optional<Reservation> reservation = reservationRepository.findFirstPendingByThemeSlotId(
-                themeSlot.getId());
-        assertThat(reservation).isNotEmpty();
-        assertThat(reservation.get().getName()).isEqualTo("브라운1");
-
-    }
-
-    @Test
-    @DisplayName("사용자의 PENDING 예약을 슬롯별 대기 순번과 함께 조회한다.")
-    void findWaitingReservationsWithOrderByName() {
-        ThemeSlot firstThemeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
-        ThemeSlot secondThemeSlot = saveThemeSlot(THEME_2, LocalDate.now().plusDays(1), TIME_14, false);
-        reservationRepository.save(confirmedReservation("브라운", firstThemeSlot));
-        reservationRepository.save(new Reservation("김대기1", firstThemeSlot));
-        reservationRepository.save(new Reservation("김대기2", firstThemeSlot));
-        reservationRepository.save(confirmedReservation("브라운", secondThemeSlot));
-        reservationRepository.save(new Reservation("김대기2", secondThemeSlot));
-        reservationRepository.save(new Reservation("김대기1", secondThemeSlot));
-
-        List<WaitingReservation> waitingReservations = reservationRepository.findWaitingReservationsWithOrderByName("김대기2");
-
-        assertThat(waitingReservations)
-                .extracting(WaitingReservation::waitingOrder)
-                .containsExactly(2, 1);
-    }
-
-    @Test
     @DisplayName("기대 상태와 현재 상태가 같을 때만 상태를 변경한다.")
     void updateStatus() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
@@ -186,6 +154,95 @@ class ReservationRepositoryTest {
         assertThat(updated).isFalse();
         assertThat(foundReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
     }
+
+    @Test
+    @Commit
+    @DisplayName("dirty checking 관찰")
+    void dirtyCheckingObservation() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+
+        Reservation savedReservation = reservationRepository.save(new Reservation("관찰자", themeSlot));
+        entityManager.flush();
+        entityManager.clear();
+
+        Reservation reservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+
+        reservation.confirm();
+
+        // save 호출하지 않기
+        // reservationRepository.save(reservation); 금지
+    }
+
+    @Test
+    @Commit
+    @DisplayName("1차 캐시")
+    public void checkfirstCache(){
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+
+        Reservation savedReservation = reservationRepository.save(new Reservation("관찰자", themeSlot));
+        entityManager.flush();
+        entityManager.clear();
+
+        Reservation reservation1 = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+        System.out.println("======== first find end ========");
+
+        Reservation reservation2 = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+        System.out.println("======== second find end ========");
+
+        assertThat(reservation1).isSameAs(reservation2);
+
+    }
+
+    @Test
+    @Commit
+    @DisplayName("쓰기 지연 관찰")
+    public void checkWriteDelay(){
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+
+        Reservation savedReservation = reservationRepository.save(new Reservation("관찰자", themeSlot));
+        entityManager.flush();
+        entityManager.clear();
+
+        Reservation reservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+
+        reservation.confirm();
+
+        Integer beforeFlush = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE id = ? AND status = 'CONFIRMED'",
+                Integer.class,
+                savedReservation.getId()
+        );
+
+        System.out.println("flush 전 CONFIRMED row count = " + beforeFlush);
+
+        entityManager.flush();
+
+        Integer afterFlush = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE id = ? AND status = 'CONFIRMED'",
+                Integer.class,
+                savedReservation.getId()
+        );
+
+        System.out.println("flush 후 CONFIRMED row count = " + afterFlush);
+    }
+
+    @Test
+    @Commit
+    @DisplayName("flush 시점 - 트랜잭션 종료")
+    void flushWhenTransactionCommit() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+
+        Reservation savedReservation = reservationRepository.save(new Reservation("관찰자", themeSlot));
+        entityManager.flush();
+        entityManager.clear();
+
+        Reservation reservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+
+        reservation.confirm();
+
+        System.out.println("======== test method end, no explicit flush ========");
+    }
+
 
     private Reservation confirmedReservation(String name, ThemeSlot themeSlot) {
         Reservation reservation = new Reservation(name, themeSlot);

@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
@@ -56,14 +55,15 @@ class ReservationServiceTransactionTest {
         long previousThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(30), true);
         long targetThemeSlotId = insertThemeSlot(LocalDate.now().plusDays(31), false);
         long confirmedReservationId = insertReservation("브라운", "CONFIRMED", previousThemeSlotId);
-        long pendingReservationId = insertReservation("김대기", "PENDING", previousThemeSlotId);
+        insertWaiting("김대기", previousThemeSlotId);
 
         reservationService.modifyReservation(confirmedReservationId, targetThemeSlotId);
 
         assertThat(findThemeSlotId(confirmedReservationId)).isEqualTo(targetThemeSlotId);
         assertThat(findStatus(confirmedReservationId)).isEqualTo("CONFIRMED");
-        assertThat(findThemeSlotId(pendingReservationId)).isEqualTo(previousThemeSlotId);
-        assertThat(findStatus(pendingReservationId)).isEqualTo("CONFIRMED");
+        assertThat(findThemeSlotId(findReservationIdByName("김대기"))).isEqualTo(previousThemeSlotId);
+        assertThat(findStatus(findReservationIdByName("김대기"))).isEqualTo("CONFIRMED");
+        assertThat(countWaitings(previousThemeSlotId)).isZero();
         assertThat(countConfirmedReservations(previousThemeSlotId)).isEqualTo(1);
         assertThat(countConfirmedReservations(targetThemeSlotId)).isEqualTo(1);
     }
@@ -73,17 +73,17 @@ class ReservationServiceTransactionTest {
     void rollbackCancelledReservationWhenPromotingWaitingReservationFails() {
         long themeSlotId = insertThemeSlot(LocalDate.now().plusDays(30), true);
         long confirmedReservationId = insertReservation("브라운", "CONFIRMED", themeSlotId);
-        long pendingReservationId = insertReservation("김대기", "PENDING", themeSlotId);
+        insertWaiting("김대기", themeSlotId);
         doThrow(new RuntimeException("대기 승격 실패"))
                 .when(reservationRepository)
-                .updateStatus(any(Reservation.class), eq("PENDING"));
+                .save(any(Reservation.class));
 
         assertThatThrownBy(() -> reservationService.cancelReservation(confirmedReservationId, "브라운"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("대기 승격 실패");
 
         assertThat(findStatus(confirmedReservationId)).isEqualTo("CONFIRMED");
-        assertThat(findStatus(pendingReservationId)).isEqualTo("PENDING");
+        assertThat(countWaitings(themeSlotId)).isEqualTo(1);
         assertThat(findThemeSlotReserved(themeSlotId)).isTrue();
     }
 
@@ -122,6 +122,22 @@ class ReservationServiceTransactionTest {
         return keyHolder.getKey().longValue();
     }
 
+    private long insertWaiting(String name, long themeSlotId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement("""
+                    INSERT INTO waiting (member_name, date, time_id, theme_id)
+                    SELECT ?, date, time_id, theme_id
+                    FROM theme_slot
+                    WHERE id = ?
+                    """, new String[]{"id"});
+            ps.setString(1, name);
+            ps.setLong(2, themeSlotId);
+            return ps;
+        }, keyHolder);
+        return keyHolder.getKey().longValue();
+    }
+
     private boolean findThemeSlotReserved(long themeSlotId) {
         return jdbcTemplate.queryForObject("""
                         SELECT is_reserved
@@ -155,12 +171,38 @@ class ReservationServiceTransactionTest {
         );
     }
 
+    private long findReservationIdByName(String name) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT id
+                        FROM reservation
+                        WHERE name = ?
+                        """,
+                Long.class,
+                name
+        );
+    }
+
     private int countConfirmedReservations(long themeSlotId) {
         return jdbcTemplate.queryForObject("""
                         SELECT COUNT(*)
                         FROM reservation
                         WHERE theme_slot_id = ?
                         AND status = 'CONFIRMED'
+                        """,
+                Integer.class,
+                themeSlotId
+        );
+    }
+
+    private int countWaitings(long themeSlotId) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT COUNT(*)
+                        FROM waiting w
+                        INNER JOIN theme_slot ts
+                        ON ts.theme_id = w.theme_id
+                        AND ts.date = w.date
+                        AND ts.time_id = w.time_id
+                        WHERE ts.id = ?
                         """,
                 Integer.class,
                 themeSlotId

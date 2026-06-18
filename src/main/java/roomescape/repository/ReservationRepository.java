@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import roomescape.domain.Reservation;
-import roomescape.domain.WaitingReservation;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,13 +15,13 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
+    void flush();
+
     void deleteById(long id);
 
     boolean existsConfirmedByThemeSlotId(long themeSlotId);
 
     List<Reservation> findByName(String name);
-
-    List<WaitingReservation> findWaitingReservationsWithOrderByName(String name);
 
     boolean updateStatus(Reservation reservation, String expectedStatus);
 
@@ -33,8 +32,4 @@ public interface ReservationRepository {
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId);
-
-    Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId);
-
-    Optional<Reservation> findFirstPendingByThemeSlotIdForUpdate(Long themeSlotId);
 }

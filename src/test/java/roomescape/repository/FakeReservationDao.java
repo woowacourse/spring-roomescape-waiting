@@ -3,8 +3,6 @@ package roomescape.repository;
 import java.util.*;
 
 import roomescape.domain.Reservation;
-import roomescape.domain.WaitingReservation;
-import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 
@@ -48,6 +46,10 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
+    public void flush() {
+    }
+
+    @Override
     public void deleteById(long id) {
         storage.remove(id);
     }
@@ -67,38 +69,6 @@ public class FakeReservationDao implements ReservationRepository {
                 .filter(reservation -> Objects.equals(reservation.getName(), name))
                 .map(this::copy)
                 .toList();
-    }
-
-    @Override
-    public List<WaitingReservation> findWaitingReservationsWithOrderByName(String name) {
-        return storage.values().stream()
-                .filter(reservation -> "PENDING".equals(reservation.getReservationStatusName()))
-                .collect(java.util.stream.Collectors.groupingBy(Reservation::getThemeSlotId))
-                .values()
-                .stream()
-                .flatMap(reservations -> createWaitingReservations(reservations.stream()
-                        .sorted(Comparator.comparing(Reservation::getId))
-                        .toList()).stream())
-                .filter(waitingReservation -> waitingReservation.name().equals(name))
-                .sorted(Comparator.comparing(WaitingReservation::id))
-                .toList();
-    }
-
-    private List<WaitingReservation> createWaitingReservations(List<Reservation> reservations) {
-        List<WaitingReservation> waitingReservations = new ArrayList<>();
-        for (int index = 0; index < reservations.size(); index++) {
-            Reservation reservation = reservations.get(index);
-            waitingReservations.add(new WaitingReservation(
-                    reservation.getId(),
-                    reservation.getName(),
-                    reservation.getDate(),
-                    reservation.getTime(),
-                    reservation.getTheme(),
-                    reservation.getReservationStatusName(),
-                    index + 1
-            ));
-        }
-        return waitingReservations;
     }
 
     @Override
@@ -158,21 +128,6 @@ public class FakeReservationDao implements ReservationRepository {
                                 && Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
                                 && !"CANCELLED".equals(reservation.getReservationStatusName())
                 );
-    }
-
-    @Override
-    public Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId) {
-        return storage.values().stream()
-                .filter(reservation -> reservation.getThemeSlot().getId().equals(themeSlotId) && reservation.getReservationStatus().equals(
-                        PendingStatus.getInstance()))
-                .sorted(Comparator.comparing(Reservation::getId))
-                .map(this::copy)
-                .findFirst();
-    }
-
-    @Override
-    public Optional<Reservation> findFirstPendingByThemeSlotIdForUpdate(Long themeSlotId) {
-        return findFirstPendingByThemeSlotId(themeSlotId);
     }
 
     private Reservation copy(Reservation reservation) {

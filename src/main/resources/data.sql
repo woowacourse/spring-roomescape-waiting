@@ -108,6 +108,17 @@ FROM reservation_seed rs
                     ON ts.theme_id = rs.theme_id
                         AND ts.date = rs.date
                         AND ts.time_id = rs.time_id
+WHERE rs.status != 'PENDING'
 ORDER BY rs.id;
+
+INSERT INTO waiting (member_name, date, time_id, theme_id)
+SELECT
+    name,
+    date,
+    time_id,
+    theme_id
+FROM reservation_seed
+WHERE status = 'PENDING'
+ORDER BY id;
 
 DROP TABLE reservation_seed;

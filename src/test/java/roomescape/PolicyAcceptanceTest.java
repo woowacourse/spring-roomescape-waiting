@@ -218,73 +218,66 @@ public class PolicyAcceptanceTest {
     // ── 대기 규칙: 대기 신청/취소/조회 ───────────────────────────────────────────
 
     @Test
-    @DisplayName("[대기] 예약된 슬롯에 새 사용자가 예약하면 대기 예약으로 생성된다.")
+    @DisplayName("[대기] 예약된 슬롯에 새 사용자가 대기를 신청하면 대기 예약으로 생성된다.")
     void 예약된_슬롯에_예약_등록시_대기_예약으로_생성된다() {
         long themeSlotId = createReservedThemeSlotWithConfirmedReservation("포비");
-        Map<String, Object> body = Map.of(
-                "name", "새대기",
-                "themeSlotId", themeSlotId
-        );
+        Map<String, Object> body = Map.of("themeSlotId", themeSlotId);
 
         RestAssured.given().log().all()
+                .header("X-Member-Name", "new-waiting")
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201)
-                .body("name", equalTo("새대기"))
-                .body("status", equalTo("PENDING"));
+                .body("name", equalTo("new-waiting"))
+                .body("status", equalTo("1번째 예약대기"));
     }
 
     @Test
     @DisplayName("[대기] 같은 사용자가 같은 슬롯에 중복 대기하면 409를 반환한다.")
     void 같은_사용자가_중복_대기_등록시_409() {
         long themeSlotId = createReservedThemeSlotWithConfirmedReservation("포비");
-        insertReservation("브라운", "PENDING", themeSlotId);
-        Map<String, Object> body = Map.of(
-                "name", "브라운",
-                "themeSlotId", themeSlotId
-        );
+        insertWaiting("brown", themeSlotId);
+        Map<String, Object> body = Map.of("themeSlotId", themeSlotId);
 
         RestAssured.given().log().all()
+                .header("X-Member-Name", "brown")
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(409);
     }
 
     @Test
-    @DisplayName("[대기] 대기 예약을 취소하면 내 예약 조회에서 취소 예약으로 조회된다.")
+    @DisplayName("[대기] 대기 예약을 취소하면 내 예약 조회에서 대기 목록이 사라진다.")
     void 대기_예약_취소시_내_예약_조회에서_취소_예약으로_조회된다() {
         long themeSlotId = createReservedThemeSlotWithConfirmedReservation("포비");
-        Map<String, Object> body = Map.of(
-                "name", "취소대기",
-                "themeSlotId", themeSlotId
-        );
+        Map<String, Object> body = Map.of("themeSlotId", themeSlotId);
 
-        Number reservationId = RestAssured.given().log().all()
+        Number waitingId = RestAssured.given().log().all()
+                .header("X-Member-Name", "cancel-waiting")
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201)
-                .body("status", equalTo("PENDING"))
+                .body("status", equalTo("1번째 예약대기"))
                 .extract()
                 .path("id");
 
         RestAssured.given().log().all()
-                .queryParam("name", "취소대기")
-                .when().patch("/reservations/{reservationId}/cancel", reservationId.longValue())
+                .header("X-Member-Name", "cancel-waiting")
+                .when().delete("/waitings/{waitingId}", waitingId.longValue())
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .queryParam("name", "취소대기")
-                .when().get("/reservations")
+                .header("X-Member-Name", "cancel-waiting")
+                .when().get("/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservationResponses[0].status", equalTo("CANCELLED"))
                 .body("waitingReservationResponses", empty());
     }
 
@@ -296,8 +289,23 @@ public class PolicyAcceptanceTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("waitingReservationResponses.status", everyItem(equalTo("PENDING")))
+                .body("waitingReservationResponses.status", everyItem(equalTo("1번째 예약대기")))
                 .body("waitingReservationResponses.waitingOrder", containsInAnyOrder(1, 1));
+    }
+
+    @Test
+    @DisplayName("[내 예약] 인증된 사용자 이름 헤더로 내 예약을 조회한다.")
+    void 인증된_사용자_이름_헤더로_내_예약을_조회한다() {
+        long themeSlotId = createReservedThemeSlotWithConfirmedReservation("confirmed-user");
+        insertWaiting("brown", themeSlotId);
+
+        RestAssured.given().log().all()
+                .header("X-Member-Name", "brown")
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingReservationResponses.status", everyItem(equalTo("1번째 예약대기")))
+                .body("waitingReservationResponses[0].waitingOrder", equalTo(1));
     }
 
     @Test
@@ -305,8 +313,8 @@ public class PolicyAcceptanceTest {
     void 확정_예약_취소시_첫번째_대기가_확정되고_남은_대기_순번이_재정렬된다() {
         long themeSlotId = createReservedThemeSlotWithConfirmedReservation("확정자");
         long confirmedReservationId = findReservationId("확정자", themeSlotId);
-        insertReservation("첫대기", "PENDING", themeSlotId);
-        insertReservation("둘대기", "PENDING", themeSlotId);
+        insertWaiting("첫대기", themeSlotId);
+        insertWaiting("둘대기", themeSlotId);
 
         RestAssured.given().log().all()
                 .queryParam("name", "확정자")
@@ -329,7 +337,7 @@ public class PolicyAcceptanceTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("waitingReservationResponses", hasSize(1))
-                .body("waitingReservationResponses[0].status", equalTo("PENDING"))
+                .body("waitingReservationResponses[0].status", equalTo("1번째 예약대기"))
                 .body("waitingReservationResponses[0].waitingOrder", equalTo(1));
     }
 
@@ -337,17 +345,17 @@ public class PolicyAcceptanceTest {
     @DisplayName("[대기] 앞 순번 대기를 취소하면 뒤 순번 대기가 1번으로 재정렬된다.")
     void 앞순번_대기_취소시_뒤순번_대기가_첫번째로_재정렬된다() {
         long themeSlotId = createReservedThemeSlotWithConfirmedReservation("확정자");
-        long firstWaitingId = insertReservationAndReturnId("첫대기", "PENDING", themeSlotId);
-        insertReservation("둘대기", "PENDING", themeSlotId);
+        long firstWaitingId = insertWaitingAndReturnId("first-waiting", themeSlotId);
+        insertWaiting("second-waiting", themeSlotId);
 
         RestAssured.given().log().all()
-                .queryParam("name", "첫대기")
-                .when().patch("/reservations/{reservationId}/cancel", firstWaitingId)
+                .header("X-Member-Name", "first-waiting")
+                .when().delete("/waitings/{waitingId}", firstWaitingId)
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .queryParam("name", "둘대기")
+                .queryParam("name", "second-waiting")
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
@@ -400,16 +408,21 @@ public class PolicyAcceptanceTest {
         );
     }
 
-    private long insertReservationAndReturnId(String name, String status, long themeSlotId) {
+    private void insertWaiting(String name, long themeSlotId) {
+        insertWaitingAndReturnId(name, themeSlotId);
+    }
+
+    private long insertWaitingAndReturnId(String name, long themeSlotId) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("""
-                    INSERT INTO reservation (name, status, theme_slot_id)
-                    VALUES (?, ?, ?)
+                    INSERT INTO waiting (member_name, date, time_id, theme_id)
+                    SELECT ?, date, time_id, theme_id
+                    FROM theme_slot
+                    WHERE id = ?
                     """, new String[]{"id"});
             ps.setString(1, name);
-            ps.setString(2, status);
-            ps.setLong(3, themeSlotId);
+            ps.setLong(2, themeSlotId);
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();

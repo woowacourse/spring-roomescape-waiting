@@ -1,13 +1,10 @@
 package roomescape.repository;
-
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
 import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
-import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.domain.reservationStatus.ReservationStatus;
 
 public interface JpaReservationRepository extends
@@ -53,16 +50,4 @@ public interface JpaReservationRepository extends
             ReservationStatus reservationStatus
     );
 
-    @Override
-    default Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId) {
-        return findFirstByThemeSlot_IdAndReservationStatusOrderByIdAsc(
-                themeSlotId,
-                PendingStatus.getInstance()
-        );
-    }
-
-    Optional<Reservation> findFirstByThemeSlot_IdAndReservationStatusOrderByIdAsc(
-            Long themeSlotId,
-            ReservationStatus reservationStatus
-    );
 }

@@ -145,10 +145,6 @@ public class Reservation {
         reservationStatus.confirm(this);
     }
 
-    public void waiting() {
-        reservationStatus.waiting(this);
-    }
-
     public void cancel() {
         reservationStatus.cancel(this);
     }
@@ -166,7 +162,7 @@ public class Reservation {
     }
 
     public boolean isModifiableStatus() {
-        return isPendingStatus() || isConfirmedStatus();
+        return isConfirmedStatus();
     }
 
     public boolean hasDifferentThemeSlot(Long themeSlotId) {

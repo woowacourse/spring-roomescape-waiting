@@ -7,10 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservationStatus.CancelledStatus;
-import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
-import roomescape.global.exception.CustomException;
 
 class ReservationTest {
 
@@ -60,27 +57,4 @@ class ReservationTest {
         assertThat(reservation.hasDifferentThemeSlot(1L)).isFalse();
     }
 
-    @Test
-    @DisplayName("확정 예약을 대기 상태로 변경한다.")
-    void waiting() {
-        Reservation reservation = new Reservation(1L, "브라운", createThemeSlot(), ConfirmedStatus.getInstance());
-
-        reservation.waiting();
-
-        assertThat(reservation.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
-    }
-
-    @Test
-    @DisplayName("취소된 예약은 대기 상태로 변경할 수 없다.")
-    void waitingWhenCancelled() {
-        Reservation reservation = new Reservation(1L, "브라운", createThemeSlot(), CancelledStatus.getInstance());
-
-        assertThatThrownBy(reservation::waiting)
-                .isInstanceOf(CustomException.class);
-    }
-
-    private ThemeSlot createThemeSlot() {
-        return new ThemeSlot(1L, new Theme(1L, null, null, null), LocalDate.now().plusDays(1),
-                new Time(1L, LocalTime.of(10, 0)), false);
-    }
 }
