@@ -1,11 +1,26 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import roomescape.domain.exception.InvalidDomainException;
 
+@Entity
 public class ReservationTime {
-    private final Long id;
-    private final LocalTime startAt;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // 컬럼명은 네이밍 전략에 위임: startAt -> start_at. UNIQUE(start_at) 유지.
+    @Column(nullable = false, unique = true)
+    private LocalTime startAt;
+
+    protected ReservationTime() {
+    }
 
     private ReservationTime(Long id, LocalTime startAt) {
         validate(startAt);

@@ -1,3 +1,7 @@
+-- [1단계 메모] theme · reservation_time 은 @Entity 로 매핑됐으나, reservation · waiting 이 아직
+-- 비-JPA(@JdbcTest 슬라이스)라 schema.sql 을 전체 DDL 권위로 유지한다(ddl-auto=none).
+-- Hibernate 자동 생성 DDL 은 격리 관찰로 기록(02 문서). 4개 테이블이 모두 엔티티가 되는 1-2 종료 시 create-drop 으로 전환.
+
 drop table if exists waiting;
 drop table if exists reservation;
 drop table if exists reservation_time;

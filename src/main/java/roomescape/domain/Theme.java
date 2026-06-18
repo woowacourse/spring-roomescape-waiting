@@ -1,16 +1,33 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.domain.exception.InvalidDomainException;
 
+@Entity
 public class Theme {
 
     private static final int MAX_NAME_LENGTH = 30;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnailUrl;
+    @Column(nullable = false, length = MAX_NAME_LENGTH)
+    private String name;
+
+    @Column(nullable = false)
+    private String description;
+
+    // 컬럼명은 CamelCaseToUnderscoresNamingStrategy 에 위임: thumbnailUrl -> thumbnail_url (관찰로 검증)
+    @Column(nullable = false)
+    private String thumbnailUrl;
+
+    protected Theme() {
+    }
 
     private Theme(Long id, String name, String description, String thumbnailUrl) {
         validate(name, description, thumbnailUrl);
@@ -72,5 +89,4 @@ public class Theme {
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
-
 }
