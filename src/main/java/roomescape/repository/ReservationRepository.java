@@ -4,6 +4,7 @@ import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,15 +18,32 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
         SELECT r
         FROM Reservation r
-        ORDER BY r.slot.date DESC, r.slot.time.startAt ASC
+        JOIN FETCH r.slot s
+        JOIN FETCH s.time t
+        JOIN FETCH s.theme
+        ORDER BY s.date DESC, t.startAt ASC
         """)
     List<Reservation> findAll();
+
+    @Override
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        JOIN FETCH r.slot s
+        JOIN FETCH s.time
+        JOIN FETCH s.theme
+        WHERE r.id = :id
+        """)
+    Optional<Reservation> findById(@Param("id") Long id);
 
     @Query("""
         SELECT r
         FROM Reservation r
+        JOIN FETCH r.slot s
+        JOIN FETCH s.time t
+        JOIN FETCH s.theme
         WHERE r.name = :name
-        ORDER BY r.slot.date DESC, r.slot.time.startAt ASC
+        ORDER BY s.date DESC, t.startAt ASC
         """)
     List<Reservation> findByName(@Param("name") String name);
 

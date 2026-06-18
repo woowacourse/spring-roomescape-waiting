@@ -4,11 +4,12 @@ import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.UNAUTHORIZED_RESERVATION;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class Reservation {
     private Long id;
     private String name;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id", unique = true)
     private Slot slot;
 

@@ -12,6 +12,8 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
     @Query("""
         SELECT s
         FROM Slot s
+        JOIN FETCH s.time
+        JOIN FETCH s.theme
         WHERE s.date = :date
           AND s.time.id = :timeId
           AND s.theme.id = :themeId
