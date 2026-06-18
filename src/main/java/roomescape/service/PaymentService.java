@@ -28,7 +28,6 @@ public class PaymentService {
         this.paymentGateway = paymentGateway;
     }
 
-    @Transactional
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         Order order = findOrder(orderId);
         validateAmount(order, amount);
