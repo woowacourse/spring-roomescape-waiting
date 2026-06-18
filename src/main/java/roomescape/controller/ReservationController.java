@@ -63,8 +63,8 @@ public class ReservationController {
             @LoginUser User loginUser,
             @Valid @RequestBody CreateReservationRequest request) {
         Reservation createdReservation = reservationService.create(
-                CreateReservationCommand.of(loginUser, request), ReservationStatus.RESERVED);
-        Order createdOrder = orderService.create(createdReservation);
+                CreateReservationCommand.of(loginUser, request), ReservationStatus.PAYMENT_WAITING);
+        orderService.create(createdReservation);
         URI location = URI.create("/reservations/" + createdReservation.getId());
         return ResponseEntity.created(location).body(ReservationResponse.from(createdReservation));
     }

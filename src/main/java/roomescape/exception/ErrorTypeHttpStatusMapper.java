@@ -15,7 +15,7 @@ public class ErrorTypeHttpStatusMapper {
             case PAST_DATE_TIME_RESERVATION, PAST_RESERVATION_MODIFICATION, NON_PAST_RESERVATION_DELETION ->
                     HttpStatus.UNPROCESSABLE_ENTITY;
             case INVALID_LOGIN, UNAUTHENTICATED -> HttpStatus.UNAUTHORIZED;
-            case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
+            case INVALID_REQUEST, PAYMENT_AMOUNT_MISMATCH -> HttpStatus.BAD_REQUEST;
         };
     }
 }

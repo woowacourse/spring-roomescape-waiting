@@ -12,3 +12,7 @@ security:
     token:
       secret-key: "/BWxvVt/eMsTVSq+RI9kRCrZKK38KNGIWi7ilxCg9So="
       expire-length: 3600000
+
+toss:
+  base-url: "https://api.tosspayments.com"
+  secret-key: "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
