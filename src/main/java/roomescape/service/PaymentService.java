@@ -45,4 +45,17 @@ public class PaymentService {
 
         return result;
     }
+
+    @Transactional
+    public void fail(String orderId) {
+        if (orderId == null || orderId.isBlank()) {
+            return;
+        }
+
+        PaymentOrder paymentOrder = paymentOrderDao.selectByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(PaymentErrorCode.ORDER_NOT_FOUND));
+
+        paymentOrderDao.deleteByReservationId(paymentOrder.getReservationId());
+        reservationDao.delete(paymentOrder.getReservationId());
+    }
 }
