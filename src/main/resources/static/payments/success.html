@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomescape — 결제 진행 중</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .result-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 50vh;
+      text-align: center;
+    }
+    .result-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .result-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .result-message {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    .result-actions {
+      display: flex;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <a class="logo" href="/">Room<span>escape</span></a>
+      <nav class="nav-tabs">
+        <a class="nav-tab" href="/">홈</a>
+        <a class="nav-tab active" href="/page/reservations">예약</a>
+        <a class="nav-tab" href="/page/my-reservations">내 예약</a>
+        <a class="nav-tab" href="/page/admin">관리자</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="app-container">
+    <div class="result-container">
+      <div class="result-icon" id="result-icon">⏳</div>
+      <h2 class="result-title" id="result-title">결제 승인 중입니다</h2>
+      <p class="result-message" id="result-message">창을 닫지 말고 잠시만 기다려주세요.</p>
+
+      <div class="result-actions">
+        <a href="/page/my-reservations" class="btn-primary" id="btn-success" style="display: none;">내 예약 확인하기</a>
+        <a href="/page/reservations" class="btn-ghost" id="btn-fail" style="display: none;">다시 예약하기</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentKey = urlParams.get('paymentKey');
+    const orderId = urlParams.get('orderId');
+    const amount = urlParams.get('amount');
+
+    const $icon = document.getElementById('result-icon');
+    const $title = document.getElementById('result-title');
+    const $message = document.getElementById('result-message');
+    const $btnSuccess = document.getElementById('btn-success');
+    const $btnFail = document.getElementById('btn-fail');
+
+    if (!paymentKey || !orderId || !amount) {
+      showError('잘못된 접근입니다. 결제 정보가 누락되었습니다.');
+      return;
+    }
+
+    try {
+      // 백엔드의 결제 승인 API 호출
+      const response = await fetch('/payments/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentKey, orderId, amount })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '결제 승인 과정에서 문제가 발생했습니다.');
+      }
+
+      // 승인 성공 UI 업데이트
+      document.title = 'Roomescape — 예약 완료';
+      $icon.textContent = '🎉';
+      $title.textContent = '결제 및 예약이 완료되었습니다!';
+      $message.textContent = '방탈출 예약이 성공적으로 확정되었습니다. 이용해 주셔서 감사합니다.';
+      $btnSuccess.style.display = 'inline-flex';
+
+    } catch (error) {
+      showError(error.message);
+    }
+
+    function showError(errorMessage) {
+      document.title = 'Roomescape — 결제 실패';
+      $icon.textContent = '⚠️';
+      $title.textContent = '결제 승인에 실패했습니다';
+      $message.textContent = errorMessage;
+      $btnFail.style.display = 'inline-flex';
+    }
+  });
+</script>
+</body>
+</html>

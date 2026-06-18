@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomescape — 결제 실패</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .result-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 50vh;
+      text-align: center;
+    }
+    .result-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .result-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .result-message {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      word-break: keep-all;
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <a class="logo" href="/">Room<span>escape</span></a>
+      <nav class="nav-tabs">
+        <a class="nav-tab" href="/">홈</a>
+        <a class="nav-tab active" href="/page/reservations">예약</a>
+        <a class="nav-tab" href="/page/my-reservations">내 예약</a>
+        <a class="nav-tab" href="/page/admin">관리자</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="app-container">
+    <div class="result-container">
+      <div class="result-icon">❌</div>
+      <h2 class="result-title">결제를 완료하지 못했습니다</h2>
+      <p class="result-message" id="fail-message">결제 처리 중 알 수 없는 오류가 발생했습니다.</p>
+
+      <div>
+        <a href="/page/reservations" class="btn-primary">다시 예약하기</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const message = urlParams.get('message');
+    const orderId = urlParams.get('orderId');
+
+    const $failMessage = document.getElementById('fail-message');
+
+    if (message) {
+      $failMessage.textContent = message;
+    } else if (code === 'USER_CANCEL') {
+      $failMessage.textContent = '사용자가 결제를 취소했습니다.';
+    }
+
+    // 실패한 예약(PENDING 상태)을 즉시 삭제하거나 취소 처리
+    // orderId를 기반으로 서버에 취소 API를 호출하는 로직을 추가
+    // fetch(`/payments/fail?orderId=${orderId}`, { method: 'POST' });
+  });
+</script>
+</body>
+</html>

@@ -1,15 +1,18 @@
 // ===== reservations.js — 예약 페이지 전용 =====
 
 const state = {
+  userName: null,
   selectedDate: null,
   selectedThemeId: null,
   selectedThemeName: null,
+  selectedThemePrice: null,
   selectedTimeId: null,
   selectedTimeLabel: null,
   themes: [],
   availableDates: [],
   currentCalendarYear: new Date().getFullYear(),
   currentCalendarMonth: new Date().getMonth(),
+  reservationId: null,
 };
 
 const $ = id => document.getElementById(id);
@@ -167,6 +170,7 @@ function renderThemes() {
 function selectTheme(theme, card) {
   state.selectedThemeId = theme.id;
   state.selectedThemeName = theme.name;
+  state.selectedThemePrice = theme.price;
   document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -257,7 +261,7 @@ function updateCTAInfo() {
 }
 
 // ===== Booking Modal =====
-function openModal() {
+function openBookingModal() {
   $('modal-date').textContent  = state.selectedDate;
   $('modal-theme').textContent = state.selectedThemeName;
   $('modal-time').textContent  = state.selectedTimeLabel;
@@ -265,7 +269,7 @@ function openModal() {
   $('booking-modal').classList.add('open');
   setTimeout(() => $('booking-name').focus(), 50);
 }
-function closeModal() { $('booking-modal').classList.remove('open'); }
+function closeBookingModal() { $('booking-modal').classList.remove('open'); }
 
 async function submitBooking() {
   const name = $('booking-name').value.trim();
@@ -274,21 +278,68 @@ async function submitBooking() {
     return;
   }
 
+  state.userName = name;
+
   const btn = $('confirm-booking-btn');
   btn.disabled = true; btn.textContent = '예약 중...';
   try {
-    await api.post('/reservations', {
+    const result = await api.post('/reservations', {
       name, date: state.selectedDate,
       timeId: state.selectedTimeId, themeId: state.selectedThemeId,
     });
-    closeModal();
-    showToast('예약이 완료되었습니다! 🎉', 'success');
-    state.selectedTimeId = null; state.selectedTimeLabel = null;
+    closeBookingModal();
+    state.reservationId = result.id;
+    state.selectedTimeId = result.time.id; state.selectedTimeLabel = formatTime(result.time.startAt);
     loadTimeSlots(); updateCTAInfo();
+    openPrePaymentModal();
   } catch (e) {
     showToast(e.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = '예약하기';
+  }
+}
+
+// ===== Pre-Payment Modal =====
+function openPrePaymentModal() {
+  $('pre-payment-modal-date').textContent  = state.selectedDate;
+  $('pre-payment-modal-theme').textContent = state.selectedThemeName;
+  $('pre-payment-modal-time').textContent  = state.selectedTimeLabel;
+  $('pre-payment-booking-name').textContent = state.userName;
+  $('pre-payment-price').textContent = state.selectedThemePrice;
+  $('pre-payment-modal').classList.add('open');
+}
+async function closePrePaymentModal() {
+  try {
+    await api.delete(`/reservations/${state.reservationId}`, {
+      name : state.userName
+    });
+  } catch (e) {
+    showToast(e.message, 'error');
+  } finally {
+    $('pre-payment-modal').classList.remove('open');
+  }
+}
+
+async function submitPrePayment() {
+  const btn = $('confirm-pre-payment-btn');
+  btn.disabled = true; btn.textContent = '결제 화면 불러오는 중...';
+
+  try {
+    const result = await api.post('/payments', {
+      reservationId: state.reservationId,
+      price: state.selectedThemePrice
+    });
+    closeBookingModal();
+    showToast('예약이 접수되었습니다. 결제 페이지로 이동합니다.', 'success');
+    state.selectedTimeId = null; state.selectedTimeLabel = null;
+
+    setTimeout(() => {
+      window.location.href = `/page/payments/checkout?orderId=${result.orderId}&reservationId=${result.reservationId}&amount=${result.amount}`;
+    }, 1000);
+  } catch (e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '결제하기';
   }
 }
 
@@ -353,11 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Booking Modal
-  $('book-btn').addEventListener('click', openModal);
-  $('modal-close-btn').addEventListener('click', closeModal);
-  $('modal-cancel-btn').addEventListener('click', closeModal);
-  $('booking-modal').addEventListener('click', e => { if (e.target === $('booking-modal')) closeModal(); });
+  $('book-btn').addEventListener('click', openBookingModal);
+  $('modal-close-btn').addEventListener('click', closeBookingModal);
+  $('modal-cancel-btn').addEventListener('click', closeBookingModal);
+  $('booking-modal').addEventListener('click', e => { if (e.target === $('booking-modal')) closeBookingModal(); });
   $('confirm-booking-btn').addEventListener('click', submitBooking);
+
+  // Pre-Payment Modal
+  $('pre-payment-modal-close-btn').addEventListener('click', closePrePaymentModal);
+  $('pre-payment-modal-cancel-btn').addEventListener('click', closePrePaymentModal);
+  $('pre-payment-modal').addEventListener('click', e => { if (e.target === $('pre-payment-modal')) closePrePaymentModal(); });
+  $('confirm-pre-payment-btn').addEventListener('click', submitPrePayment);
 
   // Waiting List Modal
   $('waiting-list-modal-close-btn').addEventListener('click', closeWaitingListModal);
