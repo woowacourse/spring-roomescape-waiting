@@ -2,28 +2,59 @@ package roomescape.repository;
 
 import static roomescape.domain.exception.DomainErrorCode.WAITLIST_NOT_FOUND;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
-import roomescape.domain.Reservation;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.Waitlist;
 import roomescape.domain.exception.RoomEscapeException;
 
-public interface WaitlistRepository {
+public interface WaitlistRepository extends JpaRepository<Waitlist, Long> {
 
-    Optional<Waitlist> findById(Long id);
+    List<Waitlist> findByName(String name);
 
-    int countBefore(Waitlist waitlist);
+    @Query("""
+            select count(w)
+            from Waitlist w
+            where w.date = :date
+              and w.time.id = :timeId
+              and w.theme.id = :themeId
+              and (
+                  w.createdAt < :createdAt
+                  or (
+                      w.createdAt = :createdAt
+                      and w.id < :id
+                  )
+              )
+            """)
+    int countBefore(
+            @Param("date") LocalDate date,
+            @Param("timeId") Long timeId,
+            @Param("themeId") Long themeId,
+            @Param("createdAt") LocalDateTime createdAt,
+            @Param("id") Long id
+    );
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTime_Id(Long timeId);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByTheme_Id(Long themeId);
 
-    boolean existsBySameUser(Reservation reservation);
+    boolean existsByNameAndDateAndTime_IdAndTheme_Id(
+            String name,
+            LocalDate date,
+            Long timeId,
+            Long themeId
+    );
 
-    Optional<Waitlist> findFirstWaitlistByReservationSlot(Reservation reservation);
-
-    Long save(Reservation reservation);
-
-    void deleteById(Long id);
+    @EntityGraph(attributePaths = {"time", "theme"})
+    Optional<Waitlist> findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
+            LocalDate date,
+            Long timeId,
+            Long themeId);
 
     default Waitlist getById(Long id, String message) {
         return findById(id).orElseThrow(() -> new RoomEscapeException(WAITLIST_NOT_FOUND, message));

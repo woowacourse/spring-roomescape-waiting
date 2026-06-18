@@ -2,18 +2,49 @@ package roomescape.domain;
 
 import static roomescape.domain.exception.DomainErrorCode.UNAUTHORIZED_RESERVATION;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.domain.exception.RoomEscapeException;
 
+@Entity
+@Table(
+        name = "waitlist",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"name", "date", "time_id", "theme_id"}
+                )
+        }
+)
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Waitlist {
 
-    private final Long id;
-    private final String name;
-    private final LocalDate date;
-    private final LocalDateTime createdAt;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private LocalDate date;
+    private LocalDateTime createdAt;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "time_id", nullable = false)
+    private ReservationTime time;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
 
     public Waitlist(
             Long id,
@@ -52,30 +83,7 @@ public class Waitlist {
     }
 
     public Reservation toReservation() {
-        return new Reservation(id, name, date, time, theme);
+        return new Reservation(name, date, time, theme);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
 }

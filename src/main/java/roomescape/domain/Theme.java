@@ -1,11 +1,26 @@
 package roomescape.domain;
 
+import static lombok.AccessLevel.PROTECTED;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = PROTECTED)
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnailImageUrl;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private String description;
+    private String thumbnailImageUrl;
 
     public Theme(
             Long id,
@@ -27,19 +42,4 @@ public class Theme {
         this(null, name, description, thumbnailImageUrl);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnailImageUrl() {
-        return thumbnailImageUrl;
-    }
 }

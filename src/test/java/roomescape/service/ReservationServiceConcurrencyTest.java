@@ -196,19 +196,12 @@ class ReservationServiceConcurrencyTest {
 
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
-        Long id = timeRepository.save(reservationTime);
-        return new ReservationTime(id, reservationTime.getStartAt());
+        return timeRepository.save(reservationTime);
     }
 
     private Theme createTheme() {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
-        Long id = themeRepository.save(theme);
-        return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailImageUrl()
-        );
+        return themeRepository.save(theme);
     }
 
     private ReservationRequest createReservationRequest(String name, ReservationTime time, Theme theme) {

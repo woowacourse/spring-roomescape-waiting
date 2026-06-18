@@ -90,7 +90,7 @@ class ReservationTest {
         LocalDate newDate = LocalDate.now().plusDays(1);
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
-        reservation = reservation.changeBy(NAME, NOW, newDate, newTime);
+        reservation.changeDateAndTime(NAME, NOW, newDate, newTime);
 
         assertThat(reservation.getDate()).isEqualTo(newDate);
         assertThat(reservation.getTime()).isEqualTo(newTime);
@@ -105,7 +105,7 @@ class ReservationTest {
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservation.changeBy(other, NOW, newDate, newTime),
+                () -> reservation.changeDateAndTime(other, NOW, newDate, newTime),
                 UNAUTHORIZED_RESERVATION
         );
     }
@@ -119,7 +119,7 @@ class ReservationTest {
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservation.changeBy(NAME, NOW, newDate, newTime),
+                () -> reservation.changeDateAndTime(NAME, NOW, newDate, newTime),
                 PAST_RESERVATION
         );
     }
@@ -131,7 +131,7 @@ class ReservationTest {
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
         assertThatRoomEscapeExceptionCode(
-                () -> reservation.changeBy(NAME, NOW, newDate, newTime),
+                () -> reservation.changeDateAndTime(NAME, NOW, newDate, newTime),
                 PAST_RESERVATION
         );
     }
