@@ -75,7 +75,7 @@ public class ReservationControllerTest extends ControllerTestSupport {
         createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId2, themeId).statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/reservations?name=" + name)
+                .when().get("/reservations-mine?name=" + name)
                 .then().log().all()
                 .statusCode(200)
                 .body("name", hasItem("브라운"))

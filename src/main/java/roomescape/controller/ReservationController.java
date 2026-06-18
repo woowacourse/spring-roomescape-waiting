@@ -1,8 +1,18 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.request.ReservationRequest;
@@ -11,12 +21,7 @@ import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
-import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.List;
-
 @RestController
-@RequestMapping("/reservations")
 public class ReservationController {
     private static final String LOCATION_DEFAULT_VALUE = "/reservations/";
 
@@ -26,7 +31,7 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationRequest request) {
         CreateReservationCommand command = new CreateReservationCommand(
@@ -37,13 +42,13 @@ public class ReservationController {
                 .body(response);
     }
 
-    @GetMapping
+    @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@RequestParam(name = "name") String name) {
         List<MyReservationResponse> responses = reservationService.getMyReservations(name);
         return ResponseEntity.ok(responses);
     }
 
-    @PatchMapping("/{reservationId}")
+    @PatchMapping("/reservations/{reservationId}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable("reservationId") Long reservationId,
             @RequestBody UpdateReservationRequest request) {
@@ -54,7 +59,7 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{reservationId}")
+    @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> deleteReservation(
             @PathVariable("reservationId") Long reservationId) {
         reservationService.delete(reservationId);
