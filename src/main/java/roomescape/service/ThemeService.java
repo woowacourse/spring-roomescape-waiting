@@ -44,17 +44,16 @@ public class ThemeService {
 
     @Transactional
     public Theme addTheme(ThemeRequest request) {
-        Long id = themeRepository.save(
+        return themeRepository.save(
                 new Theme(
                         request.name(),
                         request.description(),
                         request.thumbnailImageUrl()));
-        return getTheme(id);
     }
 
     @Transactional
     public void deleteTheme(Long id) {
-        if (reservationRepository.existsByThemeId(id) || waitlistRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByTheme_Id(id) || waitlistRepository.existsByTheme_Id(id)) {
             throw new RoomEscapeException(REFERENTIAL_INTEGRITY, "해당 테마를 사용 중인 예약이 존재하여 삭제할 수 없습니다.");
         }
 
