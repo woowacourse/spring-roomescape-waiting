@@ -8,9 +8,13 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.junit.jupiter.api.Test;
@@ -105,6 +109,27 @@ class TossPaymentGatewayTest {
         assertErrorMapped("UNKNOWN_CODE", HttpStatus.BAD_GATEWAY, TossPaymentException.class);
     }
 
+    @Test
+    void confirm_연결_실패는_결제_연결_실패_예외로_변환한다() {
+        assertNetworkFailureMapped(new ConnectException("Connection refused"),
+                TossPaymentException.ConnectionFailed.class,
+                "TOSS_CONNECTION_FAILED");
+    }
+
+    @Test
+    void confirm_연결_타임아웃은_결제_연결_실패_예외로_변환한다() {
+        assertNetworkFailureMapped(new SocketTimeoutException("Connect timed out"),
+                TossPaymentException.ConnectionFailed.class,
+                "TOSS_CONNECTION_FAILED");
+    }
+
+    @Test
+    void confirm_응답_읽기_타임아웃은_승인_결과_불명확_예외로_변환한다() {
+        assertNetworkFailureMapped(new SocketTimeoutException("Read timed out"),
+                TossPaymentException.ConfirmationUnknown.class,
+                "TOSS_CONFIRMATION_UNKNOWN");
+    }
+
     private void assertErrorMapped(String code, HttpStatus status,
                                    Class<? extends RuntimeException> expectedExceptionType) {
         RestClient.Builder builder = RestClient.builder();
@@ -123,6 +148,23 @@ class TossPaymentGatewayTest {
 
         assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L)))
                 .isInstanceOf(expectedExceptionType);
+        server.verify();
+    }
+
+    private void assertNetworkFailureMapped(IOException exception,
+                                            Class<? extends TossPaymentException> expectedExceptionType,
+                                            String expectedCode) {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        RestClient restClient = builder.baseUrl("https://api.tosspayments.com").build();
+        TossPaymentGateway gateway = new TossPaymentGateway(restClient, new ObjectMapper());
+        server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andRespond(withException(exception));
+
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L)))
+                .isInstanceOf(expectedExceptionType)
+                .extracting("code")
+                .isEqualTo(expectedCode);
         server.verify();
     }
 }
