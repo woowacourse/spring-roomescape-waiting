@@ -27,3 +27,13 @@ payment:
     client-key: ${TOSS_CLIENT_KEY:test_ck_placeholder}
     connect-timeout: 500ms
     read-timeout: 2s
+
+rate-limit:
+  capacity: 50
+  refill-per-second: 50
+
+outbound-rate-limit:
+  capacity: 20
+  refill-per-second: 20
+  max-attempts: 3
+  fallback-retry-after: 1s

@@ -22,3 +22,13 @@ payment:
     client-key: test_ck_placeholder
     connect-timeout: 500ms
     read-timeout: 500ms
+
+rate-limit:
+  capacity: 1000
+  refill-per-second: 1000
+
+outbound-rate-limit:
+  capacity: 1000
+  refill-per-second: 1000
+  max-attempts: 3
+  fallback-retry-after: 10ms
