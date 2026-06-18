@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 결과 확인 필요</title>
+    <style>
+        body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f6f7fb; color: #1f2937; }
+        .page { width: min(600px, calc(100% - 32px)); margin: 60px auto; }
+        .card { background: #fff; border: 1px solid #dde3f0; border-radius: 18px; padding: 32px; }
+        h2 { margin-top: 0; color: #b45309; }
+        .notice { background: #fef9ec; border: 1px solid #fcd34d; border-radius: 12px; padding: 16px; margin: 16px 0; }
+        p { line-height: 1.6; }
+        .order-id { font-family: monospace; background: #f3f4f6; padding: 2px 8px; border-radius: 6px; }
+        a { display: inline-block; margin-top: 16px; padding: 12px 24px; background: #4f46e5;
+            color: white; text-decoration: none; border-radius: 12px; font-weight: 700; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="card">
+        <h2>결제 결과를 확인할 수 없습니다</h2>
+        <div class="notice">
+            <p><strong>결제 서버 응답 대기 시간을 초과했습니다.</strong></p>
+            <p>결제가 승인됐는지 알 수 없는 상태입니다. 아직 결제가 완료된 것이 아니며, 예약 내역 페이지에서 상태를 확인하고 재시도할 수 있습니다.</p>
+            <p>같은 주문으로 다시 시도해도 중복 결제가 발생하지 않으므로 안전하게 재시도할 수 있습니다.</p>
+        </div>
+        <p>주문 ID: <span class="order-id" th:text="${orderId}"></span></p>
+        <a href="/page/reservations">예약 내역에서 확인하기</a>
+    </div>
+</div>
+</body>
+</html>

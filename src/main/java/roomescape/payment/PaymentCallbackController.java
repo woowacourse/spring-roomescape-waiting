@@ -5,6 +5,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.payment.client.PaymentNetworkException;
+import roomescape.payment.client.PaymentReadTimeoutException;
 import roomescape.payment.client.TossPaymentException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
@@ -38,6 +40,11 @@ public class PaymentCallbackController {
             return failView(model, e.getCode(), e.getMessage(), orderId);
         } catch (ReservationNotFoundException e) {
             return failView(model, "NOT_FOUND_RESERVATION", e.getMessage(), orderId);
+        } catch (PaymentReadTimeoutException e) {
+            return uncertainView(model, orderId);
+        } catch (PaymentNetworkException e) {
+            reservationService.cancelByOrderId(orderId);
+            return failView(model, "CONNECTION_FAILED", "결제 서버에 연결할 수 없습니다.", orderId);
         }
     }
 
@@ -59,5 +66,10 @@ public class PaymentCallbackController {
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
         return "payment/fail";
+    }
+
+    private String uncertainView(Model model, String orderId) {
+        model.addAttribute("orderId", orderId);
+        return "payment/uncertain";
     }
 }

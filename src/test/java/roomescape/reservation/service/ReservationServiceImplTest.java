@@ -249,9 +249,9 @@ class ReservationServiceImplTest {
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         List<ReservationWithWaitingOrder> reservationWithWaitingOrders = List.of(
                 new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme), Status.RESERVED, null),
+                        ThemeResponse.from(theme), Status.RESERVED, null, null, null, null),
                 new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme2), Status.WAITING, 3)
+                        ThemeResponse.from(theme2), Status.WAITING, 3, null, null, null)
         );
         when(reservationRepository.findAllByName("라이")).thenReturn(reservationWithWaitingOrders);
 

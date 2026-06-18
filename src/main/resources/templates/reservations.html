@@ -123,6 +123,27 @@
             color: #b45309;
         }
 
+        .badge.pending {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .badge.uncertain {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .payment-info {
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: #4b5563;
+        }
+
+        .payment-info span {
+            display: inline-block;
+            margin-right: 12px;
+        }
+
         .empty {
             color: #667085;
             font-style: italic;
@@ -215,8 +236,9 @@
                 <div class="head">
                     <div>
                         <strong th:text="${r.theme().name()}"></strong>
-                        <span th:class="${r.status().name() == 'RESERVED'} ? 'badge reserved' : 'badge waiting'"
-                              th:text="${r.status().name() == 'RESERVED'} ? '예약' : |대기 ${r.waitingOrder()}번|"></span>
+                        <span th:with="s=${r.status().name()}"
+                              th:class="${s == 'CONFIRMED'} ? 'badge reserved' : (${s == 'WAITING'} ? 'badge waiting' : (${s == 'PAYMENT_UNCERTAIN'} ? 'badge uncertain' : 'badge pending'))"
+                              th:text="${s == 'CONFIRMED'} ? '결제 완료' : (${s == 'WAITING'} ? |대기 ${r.waitingOrder()}번| : (${s == 'PAYMENT_UNCERTAIN'} ? '확인 필요' : (${s == 'PAYMENT_PENDING'} ? '결제 대기' : '예약')))"></span>
                         <p class="meta" th:text="|${r.time().startAt()} ~ ${r.time().endAt()}|"></p>
                     </div>
                     <form class="inline-form" method="post"
@@ -225,6 +247,15 @@
                         <input type="hidden" name="status" th:value="${r.status().name()}">
                         <button type="submit" class="danger">취소</button>
                     </form>
+                </div>
+                <div class="payment-info" th:if="${r.orderId() != null}">
+                    <span>주문 ID: <code th:text="${r.orderId()}"></code></span>
+                    <span th:if="${r.amount() != null}">금액: <strong th:text="${r.amount()}">0</strong>원</span>
+                    <span th:if="${r.paymentKey() != null}">결제 키: <code th:text="${r.paymentKey()}"></code></span>
+                    <span th:if="${r.status().name() == 'PAYMENT_UNCERTAIN'}">
+                        ⚠ 결제 결과를 확인할 수 없습니다.
+                        <a th:href="@{/page/payment(orderId=${r.orderId()}, amount=${r.amount()}, orderName='방탈출 예약')}">재시도</a>
+                    </span>
                 </div>
                 <form class="update-row" method="post"
                       th:action="@{|/page/reservations/${r.id()}/update|}">

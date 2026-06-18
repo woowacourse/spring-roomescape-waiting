@@ -10,7 +10,10 @@ public record ReservationWithWaitingOrderResponse(
         ReservationTimeResponse time,
         ThemeResponse theme,
         Status status,
-        Integer waitingOrder
+        Integer waitingOrder,
+        String orderId,
+        Long amount,
+        String paymentKey
 ) {
     public static ReservationWithWaitingOrderResponse from(ReservationWithWaitingOrder reservation) {
         return new ReservationWithWaitingOrderResponse(
@@ -19,7 +22,10 @@ public record ReservationWithWaitingOrderResponse(
                 reservation.time(),
                 reservation.theme(),
                 reservation.status(),
-                reservation.waitingOrder()
+                reservation.waitingOrder(),
+                reservation.orderId(),
+                reservation.amount(),
+                reservation.paymentKey()
         );
     }
 }

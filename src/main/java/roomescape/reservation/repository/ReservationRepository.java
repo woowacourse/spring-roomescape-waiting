@@ -34,6 +34,8 @@ public interface ReservationRepository {
 
     boolean confirmPayment(Long reservationId, String paymentKey);
 
+    boolean markAsUncertain(Long reservationId);
+
     java.util.Optional<Reservation> findByOrderId(String orderId);
 
     List<ReservationWithWaitingOrder> findAllByName(String name);
