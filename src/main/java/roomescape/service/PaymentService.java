@@ -59,6 +59,13 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
+        ThemeSlot themeSlot = themeSlotRepository.findById(reservation.getThemeSlotId())
+                .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+
+        if (themeSlot.isReserved()) {
+            throw new CustomException(ErrorCode.PAYMENT_SLOT_ALREADY_CONFIRMED);
+        }
+
         try {
             PaymentResult result = paymentGateway.confirm(confirmation);
 

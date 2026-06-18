@@ -120,6 +120,38 @@ class PaymentServiceTest {
     }
 
     @Test
+    @DisplayName("슬롯이 이미 다른 사용자에 의해 결제 완료된 경우 PAYMENT_SLOT_ALREADY_CONFIRMED 예외가 발생한다.")
+    void confirmPayment_slotAlreadyReserved_throwsException() {
+        // 슬롯을 is_reserved=true 상태로 갱신
+        fakeThemeSlotRepository.update(new ThemeSlot(THEME, DATE, TIME, true));
+        pendingReservation("브라운", "order-123", 10000L);
+        PaymentConfirmation confirmation = new PaymentConfirmation("pay-key", "order-123", 10000L);
+
+        assertThatThrownBy(() -> paymentService.confirmPayment(confirmation))
+                .isInstanceOf(CustomException.class)
+                .extracting(e -> ((CustomException) e).getErrorCode())
+                .isEqualTo(ErrorCode.PAYMENT_SLOT_ALREADY_CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("슬롯이 이미 선점된 경우 토스 결제 승인 API는 호출되지 않는다.")
+    void confirmPayment_slotAlreadyReserved_gatewayNotCalled() {
+        List<PaymentConfirmation> called = new ArrayList<>();
+        PaymentGateway trackingGateway = confirmation -> {
+            called.add(confirmation);
+            return new PaymentResult(confirmation.paymentKey(), confirmation.orderId(), confirmation.amount());
+        };
+        paymentService = new PaymentService(trackingGateway, fakeReservationRepository, fakePaymentRepository, fakeThemeSlotRepository);
+
+        fakeThemeSlotRepository.update(new ThemeSlot(THEME, DATE, TIME, true));
+        pendingReservation("브라운", "order-123", 10000L);
+
+        assertThatThrownBy(() -> paymentService.confirmPayment(new PaymentConfirmation("pay-key", "order-123", 10000L)))
+                .isInstanceOf(CustomException.class);
+        assertThat(called).isEmpty();
+    }
+
+    @Test
     @DisplayName("read timeout 발생 시 예약은 PENDING을 유지하고 UNCERTAIN Payment가 저장된다.")
     void confirmPayment_readTimeout_savesUncertainPaymentAndKeepsPending() {
         PaymentGateway timeoutGateway = confirmation -> {
