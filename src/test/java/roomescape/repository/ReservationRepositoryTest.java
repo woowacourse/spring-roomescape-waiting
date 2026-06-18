@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -28,10 +29,14 @@ public class ReservationRepositoryTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     private ReservationTime reservationTime1;
     private ReservationTime reservationTime2;
     private ReservationTime reservationTime3;
     private Theme theme;
+    private Member member;
 
     @BeforeEach
     void beforeEach() {
@@ -39,11 +44,12 @@ public class ReservationRepositoryTest {
         reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         reservationTime3 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         theme = themeRepository.save(new Theme("방탈출1", "방탈출1 설명", "url.jpg"));
+        member = memberRepository.save(new Member("fizz"));
     }
 
     @Test
     void saveTest() {
-        Reservation reservationWithoutId = new Reservation("fizz",
+        Reservation reservationWithoutId = new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime1, theme));
 
         Reservation reservation = reservationRepository.save(reservationWithoutId);
@@ -53,7 +59,7 @@ public class ReservationRepositoryTest {
 
     @Test
     void findByIdTest() {
-        Reservation saved = reservationRepository.save(new Reservation("fizz",
+        Reservation saved = reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime1, theme)));
 
         Reservation reservation = reservationRepository.findById(saved.getId()).get();
@@ -66,27 +72,29 @@ public class ReservationRepositoryTest {
 
     @Test
     void findByNameTest() {
-        reservationRepository.save(new Reservation("fizz",
+        Member tree = memberRepository.save(new Member("tree"));
+
+        reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime1, theme)));
-        reservationRepository.save(new Reservation("tree",
+        reservationRepository.save(new Reservation(tree,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime2, theme)));
-        reservationRepository.save(new Reservation("fizz",
+        reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime3, theme)));
 
-        List<Reservation> reservations = reservationRepository.findByName("fizz");
+        List<Reservation> reservations = reservationRepository.findByMember_Name("fizz");
 
         assertThat(reservations.size()).isEqualTo(2);
         assertThat(reservations.get(0).getName()).isEqualTo("fizz");
         assertThat(reservations.get(1).getName()).isEqualTo("fizz");
 
-        assertThat(reservationRepository.findByName("user").size()).isEqualTo(0);
+        assertThat(reservationRepository.findByMember_Name("user").size()).isEqualTo(0);
     }
 
     @Test
     void findAllTest() {
-        reservationRepository.save(new Reservation("fizz",
+        reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime1, theme)));
-        reservationRepository.save(new Reservation("fizz",
+        reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime2, theme)));
 
         List<Reservation> reservations = reservationRepository.findAll();
@@ -96,7 +104,7 @@ public class ReservationRepositoryTest {
 
     @Test
     void deleteByIdTest() {
-        Reservation saved = reservationRepository.save(new Reservation("fizz",
+        Reservation saved = reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime1, theme)));
 
         reservationRepository.deleteById(saved.getId());
@@ -111,7 +119,7 @@ public class ReservationRepositoryTest {
         boolean exist = reservationRepository.existsBySlot_Time_Id(extraTime.getId());
         assertThat(exist).isFalse();
 
-        reservationRepository.save(new Reservation("fizz",
+        reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), extraTime, theme)));
 
         exist = reservationRepository.existsBySlot_Time_Id(extraTime.getId());
@@ -125,7 +133,7 @@ public class ReservationRepositoryTest {
         boolean exist = reservationRepository.existsBySlot_Theme_Id(extraTheme.getId());
         assertThat(exist).isFalse();
 
-        reservationRepository.save(new Reservation("fizz",
+        reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime1, extraTheme)));
 
         exist = reservationRepository.existsBySlot_Theme_Id(extraTheme.getId());
@@ -134,7 +142,7 @@ public class ReservationRepositoryTest {
 
     @Test
     void findByDateAndTimeIdAndThemeIdTest() {
-        reservationRepository.save(new Reservation("fizz",
+        reservationRepository.save(new Reservation(member,
                 new Slot(LocalDate.of(2026, 5, 2), reservationTime1, theme)));
 
         Optional<Reservation> slot = reservationRepository.findBySlot(

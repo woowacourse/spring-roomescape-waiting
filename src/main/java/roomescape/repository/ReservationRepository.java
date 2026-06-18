@@ -22,7 +22,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("timeId") Long timeId,
             @Param("themeId") Long themeId);
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findByMemberId(Long memberId);
+
+    List<Reservation> findByMember_Name(String name);
 
     boolean existsBySlot_Time_Id(Long timeId);
 

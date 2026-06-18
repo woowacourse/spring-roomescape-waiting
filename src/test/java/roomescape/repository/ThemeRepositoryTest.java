@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -25,6 +26,9 @@ public class ThemeRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void saveTest() {
@@ -58,10 +62,13 @@ public class ThemeRepositoryTest {
         ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Theme theme1 = themeRepository.save(new Theme("방탈출1", "방탈출1 설명", "url.jpg"));
         Theme theme2 = themeRepository.save(new Theme("방탈출2", "방탈출2 설명", "url.jpg"));
+        Member member1 = memberRepository.save(new Member("fizz"));
+        Member member2 = memberRepository.save(new Member("tree"));
+        Member member3 = memberRepository.save(new Member("neo"));
 
-        reservationRepository.save(new Reservation("fizz", new Slot(LocalDate.of(2026, 5, 2), time1, theme1)));
-        reservationRepository.save(new Reservation("fizz", new Slot(LocalDate.of(2026, 5, 2), time2, theme1)));
-        reservationRepository.save(new Reservation("fizz", new Slot(LocalDate.of(2026, 5, 2), time1, theme2)));
+        reservationRepository.save(new Reservation(member1, new Slot(LocalDate.of(2026, 5, 2), time1, theme1)));
+        reservationRepository.save(new Reservation(member2, new Slot(LocalDate.of(2026, 5, 2), time2, theme1)));
+        reservationRepository.save(new Reservation(member3, new Slot(LocalDate.of(2026, 5, 2), time1, theme2)));
 
         List<Theme> themes = themeRepository.findRanking(LocalDate.of(2026, 5, 2), LocalDate.of(2026, 5, 3), 2);
 

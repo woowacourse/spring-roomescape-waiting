@@ -25,7 +25,9 @@ public interface WaitRepository extends JpaRepository<Wait, Long> {
             @Param("themeId") Long themeId
     );
 
-    List<Wait> findByName(String name);
+    List<Wait> findByMemberId(Long memberId);
+
+    List<Wait> findByMember_Name(String name);
 
     @Query(
             value = """

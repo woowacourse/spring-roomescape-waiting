@@ -19,8 +19,8 @@ public class Waits {
         this.waits = waits;
     }
 
-    public void validateCreate(String name, Slot slot) {
-        validateNotDuplicated(name, slot);
+    public void validateCreate(Member member, Slot slot) {
+        validateNotDuplicated(member, slot);
         validateWaitsIsNotFull(slot);
     }
 
@@ -71,9 +71,9 @@ public class Waits {
                 .count() + 1;
     }
 
-    private void validateNotDuplicated(String name, Slot slot) {
+    private void validateNotDuplicated(Member member, Slot slot) {
         boolean isDuplicated = waits.stream()
-                .anyMatch(wait -> wait.isSameUser(name) && wait.isSameSlot(slot));
+                .anyMatch(wait -> wait.isSameUser(member) && wait.isSameSlot(slot));
         if (isDuplicated) {
             throw new AlreadyWaitingException();
         }

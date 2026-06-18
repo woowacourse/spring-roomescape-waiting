@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -25,6 +26,9 @@ public class ReservationTimeRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void saveTest() {
@@ -59,9 +63,10 @@ public class ReservationTimeRepositoryTest {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
 
         Theme theme = themeRepository.save(new Theme("방탈출1", "방탈출1 설명", "url.jpg"));
+        Member fizz = memberRepository.save(new Member("fizz"));
 
-        reservationRepository.save(new Reservation("fizz", new Slot(LocalDate.of(2026, 5, 2), time1, theme)));
-        reservationRepository.save(new Reservation("fizz", new Slot(LocalDate.of(2026, 5, 2), time2, theme)));
+        reservationRepository.save(new Reservation(fizz, new Slot(LocalDate.of(2026, 5, 2), time1, theme)));
+        reservationRepository.save(new Reservation(fizz, new Slot(LocalDate.of(2026, 5, 2), time2, theme)));
 
         List<ReservationTime> reservedTimes = reservationTimeRepository.findReservedTimesByDateAndTheme_Id(
                 LocalDate.of(2026, 5, 2), theme.getId());

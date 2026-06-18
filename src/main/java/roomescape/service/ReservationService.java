@@ -34,8 +34,12 @@ public class ReservationService {
         return reservationRepository.save(reservationWithoutId);
     }
 
+    public List<Reservation> findByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId);
+    }
+
     public List<Reservation> findByName(String name) {
-        return reservationRepository.findByName(name);
+        return reservationRepository.findByMember_Name(name);
     }
 
     public List<Reservation> findAll() {

@@ -19,7 +19,7 @@ public class ThemeAcceptanceTest extends AcceptanceTest {
         ReservationTimeSteps.createReservationTime(FUTURE_TIME);
 
         // 4. 예약 추가
-        ReservationSteps.saveReservation("예약자", NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(1L, NOW_DATE, 1L, 1L);
 
         // 5. 특정 기간 내의 테마 랭킹 조회
         ThemeSteps.checkThemeRanking("2026-04-20", "2026-05-01", 1);

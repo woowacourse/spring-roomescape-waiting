@@ -16,7 +16,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import roomescape.controller.dto.request.ReservationCreateRequest;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -36,6 +36,8 @@ public class ReservationServiceTest {
     private Theme theme;
     private Slot slot;
     private Slot otherSlot;
+    private Member fizz;
+    private Member luke;
 
     @BeforeEach
     void beforeEach() {
@@ -49,14 +51,13 @@ public class ReservationServiceTest {
 
         slot = new Slot(LocalDate.of(2026, 5, 2), reservationTime, theme);
         otherSlot = new Slot(LocalDate.of(2026, 5, 3), reservationTime, theme);
+        fizz = new Member(1L, "fizz");
+        luke = new Member(2L, "luke");
     }
 
     @Test
     void saveTest() {
-        ReservationCreateRequest request = new ReservationCreateRequest("fizz", LocalDate.of(2026, 5, 2),
-                reservationTime.getId(), theme.getId());
-
-        Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
+        Reservation reservationWithoutId = new Reservation(fizz, slot);
         Reservation reservation = reservationWithoutId.withId(1L);
 
         when(reservationRepository.save(reservationWithoutId)).thenReturn(reservation);
@@ -67,11 +68,11 @@ public class ReservationServiceTest {
     @Test
     void findByNameTest() {
         List<Reservation> reservations = List.of(
-                new Reservation(1L, "fizz", slot),
-                new Reservation(2L, "fizz", otherSlot)
+                new Reservation(1L, fizz, slot),
+                new Reservation(2L, fizz, otherSlot)
         );
 
-        when(reservationRepository.findByName("fizz")).thenReturn(reservations);
+        when(reservationRepository.findByMember_Name("fizz")).thenReturn(reservations);
         List<Reservation> results = reservationService.findByName("fizz");
 
         assertThat(results.get(0)).isEqualTo(reservations.get(0));
@@ -81,8 +82,8 @@ public class ReservationServiceTest {
     @Test
     void findAllTest() {
         List<Reservation> reservations = List.of(
-                new Reservation(1L, "fizz", slot),
-                new Reservation(2L, "luke", otherSlot)
+                new Reservation(1L, fizz, slot),
+                new Reservation(2L, luke, otherSlot)
         );
 
         when(reservationRepository.findAll()).thenReturn(reservations);
@@ -94,7 +95,7 @@ public class ReservationServiceTest {
 
     @Test
     void findReservationTest() {
-        Reservation reservation = new Reservation(1L, "fizz", slot);
+        Reservation reservation = new Reservation(1L, fizz, slot);
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
@@ -111,7 +112,7 @@ public class ReservationServiceTest {
 
     @Test
     void deleteTest() {
-        Reservation reservation = new Reservation(1L, "fizz", slot);
+        Reservation reservation = new Reservation(1L, fizz, slot);
         reservationService.delete(reservation, false);
 
         verify(reservationRepository, times(1)).deleteById(1L);
@@ -119,7 +120,7 @@ public class ReservationServiceTest {
 
     @Test
     void findBySlotTest() {
-        Reservation reservation = new Reservation(1L, "fizz", slot);
+        Reservation reservation = new Reservation(1L, fizz, slot);
 
         when(reservationRepository.findBySlot(
                 reservation.getDate(),

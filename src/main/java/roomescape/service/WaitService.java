@@ -32,13 +32,17 @@ public class WaitService {
                 waitRepository.findBySlot(waitWithoutId.getReservationDate(), waitWithoutId.getTimeId(),
                         waitWithoutId.getThemeId())
         );
-        waits.validateCreate(waitWithoutId.getName(), waitWithoutId.getSlot());
+        waits.validateCreate(waitWithoutId.getMember(), waitWithoutId.getSlot());
 
         return waitRepository.save(waitWithoutId);
     }
 
+    public Waits findByMemberId(Long memberId) {
+        return new Waits(waitRepository.findByMemberId(memberId));
+    }
+
     public Waits findByName(String name) {
-        return new Waits(waitRepository.findByName(name));
+        return new Waits(waitRepository.findByMember_Name(name));
     }
 
     public Waits findAll() {

@@ -17,6 +17,7 @@ import roomescape.controller.dto.response.ReservationTimeAvailabilityListRespons
 import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
 import roomescape.controller.dto.response.ReservationTimeListResponse;
 import roomescape.controller.dto.response.ReservationTimeResponse;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationAvailability;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -93,9 +94,9 @@ public class ReservationTimeFacadeTest {
 
         Slot thirdSlot = new Slot(reservationDate, thirdTime, theme);
         Waits thirdTimeWaits = new Waits(List.of(
-                new Wait(1L, LocalDateTime.of(2026, 5, 3, 10, 0), "fizz", thirdSlot),
-                new Wait(2L, LocalDateTime.of(2026, 5, 3, 10, 1), "luke", thirdSlot),
-                new Wait(3L, LocalDateTime.of(2026, 5, 3, 10, 2), "neo", thirdSlot)
+                new Wait(1L, LocalDateTime.of(2026, 5, 3, 10, 0), new Member(1L, "fizz"), thirdSlot),
+                new Wait(2L, LocalDateTime.of(2026, 5, 3, 10, 1), new Member(2L, "luke"), thirdSlot),
+                new Wait(3L, LocalDateTime.of(2026, 5, 3, 10, 2), new Member(3L, "neo"), thirdSlot)
         ));
 
         List<ReservationTimeAvailabilityResponse> availabilityResponses = List.of(

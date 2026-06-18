@@ -2,9 +2,12 @@ package roomescape.domain;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -19,7 +22,9 @@ public class Wait {
 
     private LocalDateTime createdAt;
 
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Embedded
     private Slot slot;
@@ -27,24 +32,28 @@ public class Wait {
     public Wait() {
     }
 
-    public Wait(Long id, LocalDateTime createdAt, String name, Slot slot) {
-        validate(createdAt, name, slot);
+    public Wait(Long id, LocalDateTime createdAt, Member member, Slot slot) {
+        validate(createdAt, member, slot);
         this.id = id;
         this.createdAt = createdAt;
-        this.name = name;
+        this.member = member;
         this.slot = slot;
     }
 
-    public Wait(LocalDateTime createdAt, String name, Slot slot) {
-        this(null, createdAt, name, slot);
+    public Wait(LocalDateTime createdAt, Member member, Slot slot) {
+        this(null, createdAt, member, slot);
     }
 
     public Wait withId(Long id) {
-        return new Wait(id, createdAt, name, slot);
+        return new Wait(id, createdAt, member, slot);
+    }
+
+    public boolean isSameUser(Member other) {
+        return this.member.getId().equals(other.getId());
     }
 
     public boolean isSameUser(String name) {
-        return this.name.equals(name);
+        return this.member.getName().equals(name);
     }
 
     public boolean isSameSlot(Slot otherSlot) {
@@ -67,8 +76,12 @@ public class Wait {
         return createdAt;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
     public String getName() {
-        return name;
+        return member.getName();
     }
 
     public Slot getSlot() {
@@ -101,21 +114,21 @@ public class Wait {
             return false;
         }
         Wait wait = (Wait) object;
-        return Objects.equals(createdAt, wait.createdAt) && Objects.equals(name, wait.name)
+        return Objects.equals(createdAt, wait.createdAt) && Objects.equals(member, wait.member)
                 && Objects.equals(slot, wait.slot);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(createdAt, name, slot);
+        return Objects.hash(createdAt, member, slot);
     }
 
-    private void validate(LocalDateTime createdAt, String name, Slot slot) {
+    private void validate(LocalDateTime createdAt, Member member, Slot slot) {
         if (createdAt == null) {
             throw new InvalidDomainValueException("대기 신청 시간은 비어 있을 수 없습니다.");
         }
-        if (name == null || name.isBlank()) {
-            throw new InvalidDomainValueException("대기자 이름은 비어 있을 수 없습니다.");
+        if (member == null) {
+            throw new InvalidDomainValueException("대기자는 비어 있을 수 없습니다.");
         }
         if (slot == null) {
             throw new InvalidDomainValueException("예약 슬롯은 비어 있을 수 없습니다.");

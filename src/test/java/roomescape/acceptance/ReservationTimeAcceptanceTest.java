@@ -23,15 +23,15 @@ public class ReservationTimeAcceptanceTest extends AcceptanceTest {
         ReservationTimeSteps.checkAvailableReservation(NOW_DATE, 1L, ReservationAvailability.RESERVATION_AVAILABLE);
 
         // 5. 예약 추가
-        ReservationSteps.saveReservation("예약자", NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(1L, NOW_DATE, 1L, 1L);
 
         // 6. 예약 추가 후 해당 날짜, 테마의 시간 예약 가능 상태 변경 조회
         ReservationTimeSteps.checkAvailableReservation(NOW_DATE, 1L, ReservationAvailability.WAITING_AVAILABLE);
 
         // 7. 대기 추가
-        ReservationSteps.saveReservation("예약자2", NOW_DATE, 1L, 1L);
-        ReservationSteps.saveReservation("예약자3", NOW_DATE, 1L, 1L);
-        ReservationSteps.saveReservation("예약자4", NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(2L, NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(3L, NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(4L, NOW_DATE, 1L, 1L);
 
         // 8. 대기 추가 후, 해당 날짜, 테마의 시간 예약 가능 상태 변경 조회
         ReservationTimeSteps.checkAvailableReservation(NOW_DATE, 1L, ReservationAvailability.NOTHING_AVAILABLE);
