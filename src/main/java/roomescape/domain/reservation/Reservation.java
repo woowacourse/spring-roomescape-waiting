@@ -1,19 +1,40 @@
 package roomescape.domain.reservation;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.domain.theme.Theme;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
+@NoArgsConstructor
+@Getter
 public class Reservation {
-    private final long id;
-    private final ReservationName name;
-    private final Slot slot;
-    private final Status status;
-    private final LocalDateTime createdAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Embedded
+    private ReservationName name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "slot_id", nullable = false)
+    private Slot slot;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 
-    private Reservation(long id, ReservationName name, Slot slot, Status status, LocalDateTime createdAt) {
+    private Reservation(Long id, ReservationName name, Slot slot, Status status, LocalDateTime createdAt) {
         this.id = id;
         this.name = Objects.requireNonNull(name);
         this.slot = Objects.requireNonNull(slot);
@@ -21,22 +42,33 @@ public class Reservation {
         this.createdAt = Objects.requireNonNull(createdAt);
     }
 
-    public static Reservation load(long id, ReservationName reservationName, Slot slot, Status status,
+    public static Reservation load(Long id, ReservationName reservationName, Slot slot, Status status,
                                    LocalDateTime createdAt) {
         return new Reservation(id, reservationName, slot, status, createdAt);
     }
 
     public static Reservation create(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
         Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(0L, reservationName, slot, status, now);
-        reservation.isPastFrom(now);
-        return reservation;
+        return new Reservation(null, reservationName, slot, status, now);
     }
 
-    public void isPastFrom(LocalDateTime now) {
-        if (slot.isBefore(now)) {
-            throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
-        }
+    public boolean isPastThan(LocalDateTime now) {
+        return slot.isBefore(now);
+    }
+
+    public void changeTo(Reservation target) {
+        this.name = target.name;
+        this.slot = target.slot;
+        this.status = target.status;
+        this.createdAt = target.createdAt;
+    }
+
+    public void approve() {
+        this.status = Status.APPROVED;
+    }
+
+    public boolean isApproved() {
+        return status == Status.APPROVED;
     }
 
     public boolean isEarlierThan(Reservation target) {
@@ -47,47 +79,16 @@ public class Reservation {
         return id < target.getId();
     }
 
-    public boolean isSameSlot(Slot target) {
+    public boolean hasSameSlot(Reservation target) {
+        return slot.isSame(target.slot);
+    }
+
+    public boolean hasSameSlot(Slot target) {
         return slot.isSame(target);
     }
 
-    public boolean isApproved() {
-        return status.isApproved();
-    }
-
-    public Reservation withId(long id) {
-        return new Reservation(id, name, slot, status, createdAt);
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public ReservationName getName() {
-        return name;
-    }
-
-    public Slot getSlot() {
-        return slot;
-    }
-
-    public ReservationDate getDate() {
-        return slot.getDate();
-    }
-
-    public ReservationTime getTime() {
-        return slot.getTime();
-    }
-
-    public Theme getTheme() {
-        return slot.getTheme();
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public boolean hasSameName(ReservationName target) {
+        return name.equals(target);
     }
 }
+

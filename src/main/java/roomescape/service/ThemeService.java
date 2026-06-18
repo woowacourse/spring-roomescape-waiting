@@ -4,6 +4,9 @@ import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ThemeCreateRequest;
@@ -12,19 +15,15 @@ import roomescape.domain.theme.FamousThemeCondition;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class ThemeService {
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
-
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-    }
+    private final SlotRepository slotRepository;
 
     @Transactional
     public Theme create(ThemeCreateRequest request) {
@@ -34,7 +33,8 @@ public class ThemeService {
     }
 
     public Theme find(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
     }
 
     public List<Theme> findAll() {
@@ -45,18 +45,18 @@ public class ThemeService {
         FamousThemeCondition condition = new FamousThemeCondition(request.getRecentDays(), request.getBaseDate(),
                 request.getLimit(), now);
 
-        return themeRepository.findFamous(condition);
+        Pageable pageable = PageRequest.of(0, condition.getLimit().intValue());
+        return themeRepository.findFamous(condition.startDate(), condition.endDate(), pageable);
     }
 
     @Transactional
     public void delete(long themeId) {
-        if (!themeRepository.existsById(themeId)) {
-            throw new RoomEscapeException(ErrorCode.THEME_NOT_FOUND);
-        }
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
 
-        if (reservationRepository.existsByThemeId(themeId)) {
+        slotRepository.findByTheme(theme).ifPresent(slot -> {
             throw new RoomEscapeException(ErrorCode.THEME_IN_USE);
-        }
+        });
 
         themeRepository.deleteById(themeId);
     }

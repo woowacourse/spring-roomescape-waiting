@@ -1,7 +1,11 @@
 package common.exception;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+@RequiredArgsConstructor
+@Getter
 public enum ErrorCode {
     // 요청 형식 및 필수값 위반 (BAD REQUEST)
     INVALID_NAME_LENGTH("이름 길이는 1자 ~ 20자 사이여야 합니다.", HttpStatus.BAD_REQUEST),
@@ -28,17 +32,4 @@ public enum ErrorCode {
 
     private final String message;
     private final HttpStatus httpStatus;
-
-    ErrorCode(String message, HttpStatus httpStatus) {
-        this.message = message;
-        this.httpStatus = httpStatus;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
 }

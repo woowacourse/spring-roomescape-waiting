@@ -22,37 +22,43 @@ public class Reservations {
     }
 
     private void validateNoDuplicate(ReservationName reservationName, Slot slot) {
-        if (reservations.stream()
-                .filter(reservation -> reservation.getSlot().equals(slot))
-                .anyMatch(reservation -> reservation.getName().equals(reservationName))) {
+        if (hasNameAndSlot(reservationName, slot)) {
             throw new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
+    private boolean hasNameAndSlot(ReservationName reservationName, Slot slot) {
+        return reservations.stream()
+                .filter(reservation -> reservation.hasSameSlot(slot))
+                .anyMatch(reservation -> reservation.hasSameName(reservationName));
+    }
+
     private Status decideStatusFor(Slot slot) {
         if (reservations.stream()
-                .filter(reservation -> reservation.isSameSlot(slot))
-                .anyMatch(reservation -> reservation.getStatus().equals(Status.APPROVED))) {
+                .filter(reservation -> reservation.hasSameSlot(slot))
+                .anyMatch(reservation -> reservation.isApproved())) {
             return Status.WAITING;
         }
         return Status.APPROVED;
     }
 
-    public List<RankedReservation> rankedReservationsOf(String name) {
-        List<Reservation> listByName = findByName(name);
+    private List<Reservation> findByName(String name) {
+        return reservations.stream()
+                .filter(reservation -> reservation.hasSameName(new ReservationName(name)))
+                .toList();
+    }
 
-        return listByName.stream()
+    public List<RankedReservation> rankedReservationsOf(String name) {
+        List<Reservation> target = reservations;
+        if (name != null) {
+            target = findByName(name);
+        }
+        return target.stream()
                 .map(this::toRankedReservation)
                 .toList();
     }
 
-    private List<Reservation> findByName(String name) {
-        return reservations.stream()
-                .filter(reservation -> reservation.getName().equals(new ReservationName(name)))
-                .toList();
-    }
-
-    public List<RankedReservation> allRankedReservationsOf() {
+    public List<RankedReservation> rankedReservationsOf() {
         return reservations.stream()
                 .map(this::toRankedReservation)
                 .toList();
@@ -60,7 +66,7 @@ public class Reservations {
 
     private RankedReservation toRankedReservation(Reservation target) {
         List<Reservation> sameSlots = reservations.stream()
-                .filter(reservation -> reservation.isSameSlot(target.getSlot()))
+                .filter(reservation -> reservation.hasSameSlot(target))
                 .toList();
 
         return RankedReservation.decideRankFrom(target, sameSlots);

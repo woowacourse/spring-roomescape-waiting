@@ -15,7 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
-import roomescape.repository.ReservationRepository;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,7 +27,7 @@ class ThemeServiceTest {
     private ThemeRepository themeRepository;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private SlotRepository slotRepository;
 
     @InjectMocks
     private ThemeService themeService;
@@ -42,7 +44,7 @@ class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마_삭제_시_예외가_발생한다() {
         // given
-        given(themeRepository.existsById(999L)).willReturn(false);
+        given(themeRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
         Assertions.assertThatThrownBy(() -> themeService.delete(999L)).isInstanceOf(RoomEscapeException.class);
@@ -57,13 +59,16 @@ class ThemeServiceTest {
         themeService.findFamous(request, LocalDate.now());
 
         // then
-        verify(themeRepository).findFamous(any());
+        verify(themeRepository).findFamous(any(), any(), any());
     }
 
     @Test
-    void 삭제시_테마를_사용하는_예외가_있으면_예외가_발생한다() {
-        given(themeRepository.existsById(1L)).willReturn(true);
-        given(reservationRepository.existsByThemeId(1L)).willReturn(true);
+    void 삭제시_테마를_사용하는_예약이_있으면_예외가_발생한다() {
+        Theme theme = RoomEscapeFixture.theme();
+        Slot slot = RoomEscapeFixture.slot().build();
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(slotRepository.findByTheme(theme)).willReturn(Optional.of(slot));
+
         Assertions.assertThatThrownBy(() -> themeService.delete(1L)).isInstanceOf(RoomEscapeException.class);
     }
 }
