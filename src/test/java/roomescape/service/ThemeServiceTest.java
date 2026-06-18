@@ -14,7 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.repository.ReservationTimeRepository;
@@ -41,6 +43,9 @@ class ThemeServiceTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -94,10 +99,11 @@ class ThemeServiceTest {
         LocalDate today = LocalDate.now();
         ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 
-        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, popularTheme)));
-        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(2), time, popularTheme)));
-        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(3), time, popularTheme)));
-        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, normalTheme)));
+        Member member = saveMember("예약자");
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(1), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(2), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(3), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(1), time, normalTheme)));
 
         List<ThemeResponse> responses = themeService.getPopularThemes(today);
 
@@ -126,13 +132,17 @@ class ThemeServiceTest {
         // given
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        reservationRepository.save(Reservation.createWithoutId("브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
+        reservationRepository.save(Reservation.createWithoutId(saveMember("브라운"), new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.CONFLICT));
+    }
+
+    private Member saveMember(String name) {
+        return memberRepository.save(Member.createWithoutId(name));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {

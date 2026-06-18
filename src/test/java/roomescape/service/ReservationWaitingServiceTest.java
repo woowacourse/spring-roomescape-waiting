@@ -13,10 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -24,6 +21,11 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -36,6 +38,9 @@ class ReservationWaitingServiceTest {
     private ThemeRepository themeRepository;
 
     @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private ReservationWaitingService waitingService;
 
     @Autowired
@@ -46,19 +51,18 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 예약_대기를_추가한다() {
-        // given
+        Member roji = saveMember("로지");
+        Member max = saveMember("맥스");
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.save(Reservation.createWithoutId("로지",
+        reservationRepository.save(Reservation.createWithoutId(roji,
                 new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
+                max.getId(), LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
 
-        // when
         ReservationWaitingResponse response = waitingService.createReservationWaiting(command, LocalDateTime.now());
 
-        // then
         assertThat(response)
                 .extracting(ReservationWaitingResponse::name, ReservationWaitingResponse::reservationDate,
                         r -> r.time().id(), r -> r.theme().id())
@@ -67,14 +71,13 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 예약이_없는_슬롯에_대기를_신청하면_404를_반환한다() {
-        // given
+        Member max = saveMember("맥스");
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
+                max.getId(), LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
 
-        // when & then
         assertThatThrownBy(() -> waitingService.createReservationWaiting(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
@@ -83,16 +86,15 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 동일한_슬롯에_동일한_사용자의_예약이_존재하면_409를_반환한다() {
-        // given
+        Member roji = saveMember("로지");
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.save(Reservation.createWithoutId("로지",
+        reservationRepository.save(Reservation.createWithoutId(roji,
                 new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "로지", LocalDate.now().plusDays(10), time.getId(), theme.getId()
+                roji.getId(), LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
 
-        // when & then
         assertThatThrownBy(() -> waitingService.createReservationWaiting(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
@@ -101,17 +103,17 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 동일한_슬롯에_중복_대기를_신청하면_409를_반환한다() {
-        // given
+        Member roji = saveMember("로지");
+        Member max = saveMember("맥스");
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.save(Reservation.createWithoutId("로지",
+        reservationRepository.save(Reservation.createWithoutId(roji,
                 new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
-                "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
+                max.getId(), LocalDate.now().plusDays(10), time.getId(), theme.getId()
         );
         waitingService.createReservationWaiting(command, LocalDateTime.now());
 
-        // when & then
         assertThatThrownBy(() -> waitingService.createReservationWaiting(command, LocalDateTime.now()))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
@@ -120,37 +122,36 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 대기_순번이_올바르게_계산된다() {
-        // given
+        Member roji = saveMember("로지");
+        Member brown = saveMember("브라운");
+        Member max = saveMember("맥스");
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationRepository.save(Reservation.createWithoutId("로지",
+        reservationRepository.save(Reservation.createWithoutId(roji,
                 new ReservationSlot(LocalDate.now().plusDays(10), time, theme)));
 
         waitingService.createReservationWaiting(new CreateReservationWaitingCommand(
-                "브라운", LocalDate.now().plusDays(10), time.getId(), theme.getId()
+                brown.getId(), LocalDate.now().plusDays(10), time.getId(), theme.getId()
         ), LocalDateTime.now());
 
-        // when
         ReservationWaitingResponse response = waitingService.createReservationWaiting(
                 new CreateReservationWaitingCommand(
-                        "맥스", LocalDate.now().plusDays(10), time.getId(), theme.getId()
+                        max.getId(), LocalDate.now().plusDays(10), time.getId(), theme.getId()
                 ), LocalDateTime.now());
 
-        // then
         assertThat(response.order()).isEqualTo(2);
     }
 
     @Test
     void 예약_대기를_취소한다() {
-        // given
+        Member member = saveMember("브라운");
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         ReservationWaiting saved = reservationWaitingRepository.save(
-                ReservationWaiting.createWithoutId("브라운", LocalDateTime.now(),
+                ReservationWaiting.createWithoutId(member, LocalDateTime.now(),
                         new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme))
         );
 
-        // when & then
         assertThatNoException().isThrownBy(() -> waitingService.delete(saved.getId()));
     }
 
@@ -160,6 +161,10 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
                         .isEqualTo(HttpStatus.NOT_FOUND));
+    }
+
+    private Member saveMember(String name) {
+        return memberRepository.save(Member.createWithoutId(name));
     }
 
     private ReservationTime saveTime(int hour, int minute) {

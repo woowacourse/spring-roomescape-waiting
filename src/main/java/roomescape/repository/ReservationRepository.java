@@ -8,12 +8,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findByMember_Id(Long memberId);
 
     List<Reservation> findBySlot_Theme_IdAndSlot_Date(Long themeId, LocalDate date);
 
@@ -21,7 +22,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsBySlotAndIdNot(ReservationSlot slot, Long id);
 
-    boolean existsByNameAndSlot(String name, ReservationSlot slot);
+    boolean existsByMemberAndSlot(Member member, ReservationSlot slot);
 
     @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.slot.time.id = :timeId")
     boolean existsByTimeId(@Param("timeId") long timeId);

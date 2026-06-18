@@ -54,7 +54,7 @@ public class AdminReservationTimeControllerTest extends ControllerTestSupport {
     void 예약이_존재하는_시간을_삭제하면_409를_반환한다() {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-        createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId, themeId).statusCode(201);
+        createReservation(createMember("브라운"), LocalDate.now().plusDays(1).toString(), timeId, themeId).statusCode(201);
 
         RestAssured.given().log().all()
                 .when().delete("/admin/times/" + timeId)

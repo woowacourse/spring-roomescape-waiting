@@ -25,19 +25,24 @@ class ReservationConcurrencyControllerTest extends ControllerTestSupport {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
         String date = LocalDate.now().plusDays(1).toString();
-        createReservation("예약자", date, timeId, themeId).statusCode(201);
+        createReservation(createMember("예약자"), date, timeId, themeId).statusCode(201);
 
         int threadCount = 10;
+        int[] memberIds = new int[threadCount];
+        for (int i = 0; i < threadCount; i++) {
+            memberIds[i] = createMember("대기자" + i);
+        }
+
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
         for (int index = 0; index < threadCount; index++) {
-            final String name = "대기자" + index;
+            final int memberId = memberIds[index];
             executorService.submit(() -> {
                 try {
                     RestAssured.given()
                             .contentType(ContentType.JSON)
-                            .body(Map.of("name", name, "reservationDate", LocalDate.now().plusDays(1).toString(),
+                            .body(Map.of("memberId", memberId, "reservationDate", LocalDate.now().plusDays(1).toString(),
                                     "timeId", timeId, "themeId", themeId))
                             .when().post("/waitings");
                 } finally {

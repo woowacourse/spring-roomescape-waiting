@@ -22,6 +22,15 @@ public abstract class ControllerTestSupport {
         databaseInitializer.clear();
     }
 
+    protected int createMember(String name) {
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", name))
+                .when().post("/members")
+                .then().statusCode(201)
+                .extract().jsonPath().getInt("id");
+    }
+
     protected int createTime(String startAt) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -40,18 +49,18 @@ public abstract class ControllerTestSupport {
                 .extract().jsonPath().getInt("id");
     }
 
-    protected ValidatableResponse createReservation(String name, String date, int timeId, int themeId) {
+    protected ValidatableResponse createReservation(int memberId, String date, int timeId, int themeId) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", name, "date", date, "timeId", timeId, "themeId", themeId))
+                .body(Map.of("memberId", memberId, "date", date, "timeId", timeId, "themeId", themeId))
                 .when().post("/reservations")
                 .then().log().all();
     }
 
-    protected ValidatableResponse createReservationWaiting(String name, LocalDate date, int timeId, int themeId) {
+    protected ValidatableResponse createReservationWaiting(int memberId, LocalDate date, int timeId, int themeId) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", name, "reservationDate", date.toString(), "timeId", timeId, "themeId", themeId))
+                .body(Map.of("memberId", memberId, "reservationDate", date.toString(), "timeId", timeId, "themeId", themeId))
                 .when().post("/waitings")
                 .then().log().all();
     }

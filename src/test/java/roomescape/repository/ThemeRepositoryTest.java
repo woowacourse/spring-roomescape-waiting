@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -26,6 +27,9 @@ class ThemeRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void 테마를_등록한다() {
@@ -261,6 +265,7 @@ class ThemeRepositoryTest {
     }
 
     private void saveReservation(LocalDate date, ReservationTime time, Theme theme) {
-        reservationRepository.save(Reservation.createWithoutId("예약자", new ReservationSlot(date, time, theme)));
+        Member member = memberRepository.save(Member.createWithoutId("예약자"));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(date, time, theme)));
     }
 }

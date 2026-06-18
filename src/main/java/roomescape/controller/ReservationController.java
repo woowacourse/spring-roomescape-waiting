@@ -35,7 +35,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationRequest request) {
         CreateReservationCommand command = new CreateReservationCommand(
-                request.name(), request.date(), request.timeId(), request.themeId()
+                request.memberId(), request.date(), request.timeId(), request.themeId()
         );
         ReservationResponse response = reservationService.createReservation(command, LocalDateTime.now());
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
@@ -43,8 +43,8 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@RequestParam(name = "name") String name) {
-        List<MyReservationResponse> responses = reservationService.getMyReservations(name);
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@RequestParam Long memberId) {
+        List<MyReservationResponse> responses = reservationService.getMyReservations(memberId);
         return ResponseEntity.ok(responses);
     }
 

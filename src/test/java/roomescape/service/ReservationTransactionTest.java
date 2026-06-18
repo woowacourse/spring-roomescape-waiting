@@ -15,10 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.DatabaseInitializer;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -49,6 +51,9 @@ public class ReservationTransactionTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     @BeforeEach
     void setUp() {
         databaseInitializer.clear();
@@ -60,10 +65,12 @@ public class ReservationTransactionTest {
         ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("방탈출1", "설명", "https://thumb.com"));
         LocalDate date = LocalDate.now().plusDays(1);
+        Member brown = memberRepository.save(Member.createWithoutId("브라운"));
+        Member roji = memberRepository.save(Member.createWithoutId("로지"));
         Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId("브라운", new ReservationSlot(date, time, theme)));
+                Reservation.createWithoutId(brown, new ReservationSlot(date, time, theme)));
         waitingDao.save(
-                ReservationWaiting.createWithoutId("로지", LocalDateTime.now(),
+                ReservationWaiting.createWithoutId(roji, LocalDateTime.now(),
                         new ReservationSlot(date, time, theme)));
 
         doThrow(new RuntimeException("승격 실패 강제 주입"))

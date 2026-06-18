@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.repository.ReservationTimeRepository;
@@ -44,6 +46,9 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -142,6 +147,7 @@ class ReservationTimeServiceTest {
     }
 
     private void saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        reservationRepository.save(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
+        Member member = memberRepository.save(Member.createWithoutId(name));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(date, time, theme)));
     }
 }
