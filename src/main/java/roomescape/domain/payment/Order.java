@@ -10,14 +10,16 @@ public class Order {
     private final LocalDate date;
     private final Long timeId;
     private final Long themeId;
+    private final String idempotencyKey;
 
-    public Order(String orderId, Long amount, String name, LocalDate date, Long timeId, Long themeId) {
+    public Order(String orderId, Long amount, String name, LocalDate date, Long timeId, Long themeId, String idempotencyKey) {
         this.orderId = orderId;
         this.amount = amount;
         this.name = name;
         this.date = date;
         this.timeId = timeId;
         this.themeId = themeId;
+        this.idempotencyKey = idempotencyKey;
     }
 
     public String getOrderId() {
@@ -42,5 +44,9 @@ public class Order {
 
     public Long getThemeId() {
         return themeId;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 }
