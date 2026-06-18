@@ -92,13 +92,15 @@ public class ReservationFacade {
     @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = reservationService.findReservation(id);
-        reservationService.delete(reservation, false);
 
         Slot slot = new Slot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
         Waits waits = waitService.findBySlot(slot);
+
         if (waits.isEmptyWaitsBySlot(slot)) {
+            reservationService.delete(reservation, false);
             return;
         }
+        reservationService.deleteAndFlush(reservation, false);
         confirmFirstWait(waits.firstWaitBySlot(slot));
     }
 

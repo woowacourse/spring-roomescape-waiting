@@ -58,6 +58,11 @@ public class ReservationService {
         reservationRepository.deleteById(reservation.getId());
     }
 
+    public void deleteAndFlush(Reservation reservation, boolean isAdmin) {
+        delete(reservation, isAdmin);
+        reservationRepository.flush();
+    }
+
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
         return reservationRepository.findBySlot(date, timeId, themeId);
     }

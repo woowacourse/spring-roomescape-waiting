@@ -220,7 +220,7 @@ public class ReservationFacadeTest {
         reservationFacade.deleteReservation(reservation.getId());
 
         verify(reservationService, times(1)).save(newReservationWithoutId, true);
-        verify(reservationService, times(1)).delete(reservation, false);
+        verify(reservationService, times(1)).deleteAndFlush(reservation, false);
         verify(waitService, times(1)).delete(firstWait.getId(), true);
     }
 
@@ -230,6 +230,7 @@ public class ReservationFacadeTest {
         Reservation reservation = new Reservation(1L, fizz, new Slot(pastReservationDate, reservationTime, theme));
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
+        when(waitService.findBySlot(reservation.getSlot())).thenReturn(new Waits(List.of()));
         doThrow(new CannotDeletePastReservationException()).when(reservationService).delete(reservation, false);
 
         assertThatThrownBy(() -> reservationFacade.deleteReservation(reservation.getId()))
