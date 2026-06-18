@@ -17,7 +17,8 @@ public class TossClientConfig {
             @Value("${payment.toss.base-url:https://api.tosspayments.com}") String baseUrl,
             @Value("${payment.toss.secret-key}") String secretKey,
             @Value("${payment.toss.connect-timeout-ms}") int connectTimeoutMs,
-            @Value("${payment.toss.read-timeout-ms}") int readTimeoutMs) {
+            @Value("${payment.toss.read-timeout-ms}") int readTimeoutMs,
+            @Value("${payment.toss.max-attempts:3}") int maxAttempts) {
 
         String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
@@ -30,6 +31,7 @@ public class TossClientConfig {
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .requestFactory(factory)
+                .requestInterceptor(new TossRetryInterceptor(maxAttempts))
                 .build();
     }
 }
