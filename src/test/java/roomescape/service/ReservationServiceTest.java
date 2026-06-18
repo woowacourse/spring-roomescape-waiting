@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import roomescape.controller.dto.AdminReservationRequest;
+import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -129,6 +130,48 @@ class ReservationServiceTest {
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.PAST_RESERVATION);
+    }
+
+    @DisplayName("사용자는 이미 확정 예약이 있는 슬롯에 대기를 등록한다.")
+    @Test
+    void saveWaitingReservationByUser() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Member member = member(2L, "현미밥");
+        UserReservationRequest request = new UserReservationRequest(schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(1);
+        given(reservationDao.save(any(Reservation.class))).willReturn(2L);
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+
+        Long reservationId = reservationService.saveWaitingReservation(request, member);
+
+        assertThat(reservationId).isEqualTo(2L);
+        verify(reservationDao).save(reservationCaptor.capture());
+        Reservation saved = reservationCaptor.getValue();
+        assertThat(saved.getMember()).isEqualTo(member);
+        assertThat(saved.getSchedule()).isEqualTo(schedule);
+        assertThat(saved.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @DisplayName("사용자는 빈 슬롯에 대기를 등록해 결제를 우회할 수 없다.")
+    @Test
+    void saveWaitingReservationOnEmptySlot() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Member member = member(1L, "러로");
+        UserReservationRequest request = new UserReservationRequest(schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
+
+        assertThatThrownBy(() -> reservationService.saveWaitingReservation(request, member))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.INVALID_INPUT);
+
+        verify(reservationDao, never()).save(any());
     }
 
     @DisplayName("RESERVED 예약을 취소하면 취소 시각을 기록하고 첫 번째 대기를 승격한다.")

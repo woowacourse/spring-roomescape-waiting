@@ -11,7 +11,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.domain.exception.RoomescapeException;
 
 @RestControllerAdvice
@@ -73,6 +75,28 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(
                         "INVALID_REQUEST",
                         "잘못된 요청 형식입니다."
+                ));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException e
+    ) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ErrorResponse(
+                        "METHOD_NOT_ALLOWED",
+                        "지원하지 않는 요청 메서드입니다."
+                ));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(
+            NoResourceFoundException e
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        "NOT_FOUND",
+                        "요청한 리소스를 찾을 수 없습니다."
                 ));
     }
 

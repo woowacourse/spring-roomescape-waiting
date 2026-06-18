@@ -1,9 +1,12 @@
 package roomescape.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,9 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
+import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -49,6 +54,29 @@ class UserReservationControllerTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @DisplayName("사용자는 결제가 필요한 빈 슬롯 대신 이미 예약된 슬롯에 대기를 등록한다.")
+    @Test
+    void createWaiting() throws Exception {
+        Member member = member();
+        given(authService.getLoginMember(1L)).willReturn(member);
+        given(reservationService.saveWaitingReservation(any(UserReservationRequest.class), any(Member.class))).willReturn(2L);
+
+        mockMvc.perform(post("/reservations")
+                        .session(loginSession())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "date": "2026-07-01",
+                                  "timeId": 1,
+                                  "themeId": 1
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/reservations/2"));
+
+        verify(reservationService).saveWaitingReservation(any(UserReservationRequest.class), any(Member.class));
+    }
 
     @DisplayName("사용자 예약 목록을 JSON으로 반환한다.")
     @Test
