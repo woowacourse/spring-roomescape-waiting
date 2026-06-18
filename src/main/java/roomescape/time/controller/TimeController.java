@@ -1,24 +1,17 @@
 package roomescape.time.controller;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.controller.dto.TimeResponse;
 import roomescape.time.controller.dto.TimeSaveRequest;
 import roomescape.time.service.TimeService;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class TimeController {
@@ -60,5 +53,11 @@ public class TimeController {
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         timeService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<Void> test() {
+        timeService.explicitFlush();
+        return ResponseEntity.ok().build();
     }
 }

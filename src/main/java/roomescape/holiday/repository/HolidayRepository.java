@@ -1,15 +1,11 @@
 package roomescape.holiday.repository;
 
-import java.time.LocalDate;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.holiday.domain.Holiday;
 
-import java.util.List;
+import java.time.LocalDate;
 
-public interface HolidayRepository {
-    Holiday save(Holiday holiday);
-    List<Holiday> findAll();
+public interface HolidayRepository extends JpaRepository<Holiday, Long> {
 
     boolean existsByDate(LocalDate date);
-
-    boolean deleteById(Long id);
 }
