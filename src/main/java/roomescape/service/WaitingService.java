@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.List;
 import java.util.Objects;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,14 @@ public class WaitingService {
         this.themeSlotRepository = themeSlotRepository;
     }
 
+    @Transactional(readOnly = true)
+    public List<WaitingReservationResponse> findAllWaitings() {
+        return waitingRepository.findAllWithRank()
+                .stream()
+                .map(WaitingReservationResponse::from)
+                .toList();
+    }
+
     @Transactional
     public WaitingReservationResponse saveWaiting(String memberName, Long themeSlotId) {
         ThemeSlot themeSlot = getThemeSlotForUpdateOrElseThrow(themeSlotId);
@@ -55,6 +64,13 @@ public class WaitingService {
         if (!waiting.isOwnedBy(memberName)) {
             throw new CustomException(ErrorCode.WAITING_NOT_ALLOWED);
         }
+        waitingRepository.delete(waiting);
+    }
+
+    @Transactional
+    public void deleteWaitingByAdmin(Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WAITING_NOT_FOUND));
         waitingRepository.delete(waiting);
     }
 

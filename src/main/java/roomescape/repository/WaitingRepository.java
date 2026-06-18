@@ -28,6 +28,21 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                  AND w2.id < w.id)
             )
             FROM Waiting w
+            ORDER BY w.id
+            """)
+    List<WaitingWithRank> findAllWithRank();
+
+    @Query("""
+            SELECT new roomescape.domain.WaitingWithRank(
+                w,
+                (SELECT COUNT(w2) + 1
+                 FROM Waiting w2
+                 WHERE w2.theme = w.theme
+                 AND w2.date = w.date
+                 AND w2.time = w.time
+                 AND w2.id < w.id)
+            )
+            FROM Waiting w
             WHERE w.memberName = :memberName
             ORDER BY w.id
             """)
