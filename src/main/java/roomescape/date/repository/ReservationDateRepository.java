@@ -2,23 +2,14 @@ package roomescape.date.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import roomescape.date.domain.ReservationDate;
 
 @Repository
-public interface ReservationDateRepository {
+public interface ReservationDateRepository extends JpaRepository<ReservationDate, Long> {
 
-    Optional<ReservationDate> findById(Long id);
-
-    List<ReservationDate> findAll();
-
-    List<ReservationDate> findAllAfterToday();
-
-    ReservationDate save(ReservationDate reservationDate);
-
-    boolean updateStatus(ReservationDate reservationDate);
+    List<ReservationDate> findAllByDateAfter(LocalDate date);
 
     boolean existsByDate(LocalDate date);
-
 }

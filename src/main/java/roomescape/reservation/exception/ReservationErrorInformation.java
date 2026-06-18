@@ -10,7 +10,7 @@ import roomescape.common.exception.ErrorInformation;
 public enum ReservationErrorInformation implements ErrorInformation {
 
     RESERVATION_ID_IS_NULL(HttpStatus.BAD_REQUEST, "RES_001", "예약 ID가 누락되었습니다."),
-    RESERVATION_NAME_IS_NULL(HttpStatus.BAD_REQUEST, "RES_002", "예약자 이름이 누락되었습니다."),
+    RESERVATION_MEMBER_IS_NULL(HttpStatus.BAD_REQUEST, "RES_002", "예약자가 누락되었습니다."),
     RESERVATION_DATE_IS_NULL(HttpStatus.BAD_REQUEST, "RES_003", "예약 날짜가 누락되었습니다."),
     RESERVATION_TIME_IS_NULL(HttpStatus.BAD_REQUEST, "RES_004", "예약 시간이 누락되었습니다."),
     RESERVATION_THEME_IS_NULL(HttpStatus.BAD_REQUEST, "RES_005", "예약 테마가 누락되었습니다."),

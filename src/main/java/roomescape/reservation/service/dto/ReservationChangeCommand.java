@@ -1,8 +1,10 @@
 package roomescape.reservation.service.dto;
 
+import roomescape.member.domain.Member;
+
 public record ReservationChangeCommand(
     Long id,
-    String requesterName,
+    Member requester,
     Long dateId,
     Long timeId
 ) {

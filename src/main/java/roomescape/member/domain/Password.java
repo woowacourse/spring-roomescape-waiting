@@ -3,18 +3,24 @@ package roomescape.member.domain;
 import static roomescape.common.auth.exception.AuthExceptionInformation.INTERNAL_SERVER_CRYPTO_ERROR;
 import static roomescape.member.exception.MemberExceptionInformation.PASSWORD_NOT_MATCH;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.common.auth.exception.AuthException;
 import roomescape.member.exception.MemberException;
 
+@Embeddable
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class Password {
 
+    @Column(name = "password")
     private String value;
 
     public static Password from(String password) {

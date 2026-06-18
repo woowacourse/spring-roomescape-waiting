@@ -2,7 +2,6 @@ package roomescape.date.service;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_ALREADY_EXISTS;
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
-import static roomescape.date.exception.ReservationDateErrorInformation.DATE_STATUS_UPDATE_FAILED;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,7 +28,8 @@ public class ReservationDateService {
     }
 
     public List<ReservationDate> readDatesAfterToday() {
-        return reservationDateRepository.findAllAfterToday();
+        LocalDate today = LocalDate.now();
+        return reservationDateRepository.findAllByDateAfter(today);
     }
 
     @Transactional
@@ -42,15 +42,7 @@ public class ReservationDateService {
     public ReservationDate updateStatus(Long dateId, boolean isActive) {
         ReservationDate reservationDate = getReservationDate(dateId);
         reservationDate.updateStatus(isActive);
-        boolean isUpdated = reservationDateRepository.updateStatus(reservationDate);
-        validateIsUpdated(isUpdated);
         return reservationDate;
-    }
-
-    private void validateIsUpdated(boolean isUpdated) {
-        if (!isUpdated) {
-            throw new ReservationDateException(DATE_STATUS_UPDATE_FAILED);
-        }
     }
 
     private ReservationDate getReservationDate(Long id) {

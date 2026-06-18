@@ -5,28 +5,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 
-@JdbcTest
+@DataJpaTest(showSql = false)
 class ReservationDateRepositoryTest {
 
-    private JdbcReservationDateRepository reservationDateRepository;
-
     @Autowired
-    private NamedParameterJdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void setup() {
-        reservationDateRepository = new JdbcReservationDateRepository(jdbcTemplate);
-    }
+    private ReservationDateRepository reservationDateRepository;
 
     private List<ReservationDate> saveAll(List<ReservationDate> reservationDates) {
         List<ReservationDate> savedReservationDates = new ArrayList<>();
@@ -134,7 +125,7 @@ class ReservationDateRepositoryTest {
             saved.updateStatus(true);
 
             // when
-            reservationDateRepository.updateStatus(saved);
+            reservationDateRepository.saveAndFlush(saved);
 
             // then
             assertThat(reservationDateRepository.findById(saved.getId()).get().isActive())
@@ -150,7 +141,7 @@ class ReservationDateRepositoryTest {
             saved.updateStatus(false);
 
             // when
-            reservationDateRepository.updateStatus(saved);
+            reservationDateRepository.saveAndFlush(saved);
 
             // then
             assertThat(

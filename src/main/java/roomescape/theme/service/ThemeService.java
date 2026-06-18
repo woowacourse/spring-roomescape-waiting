@@ -32,7 +32,7 @@ public class ThemeService {
     }
 
     public List<Theme> readActiveThemes() {
-        return themeRepository.findByIsActive(true);
+        return themeRepository.findAllByIsActiveOrderByNameAsc(true);
     }
 
     public List<PopularThemeResult> readPopularThemes(int top) {
@@ -51,9 +51,7 @@ public class ThemeService {
     public Theme updateStatus(Long id, boolean isActive) {
         Theme theme = getTheme(id);
         theme.updateStatus(isActive);
-        boolean isUpdated = themeRepository.updateStatus(theme);
-        validateIsUpdated(isUpdated);
-        return theme;
+        return themeRepository.save(theme);
     }
 
     private Theme getTheme(Long id) {

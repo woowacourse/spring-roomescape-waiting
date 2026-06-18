@@ -6,7 +6,7 @@ import roomescape.reservation.domain.ReservationStatus;
 
 public record ReservationWithWaitingTurn(
     Long id,
-    String name,
+    Long memberId,
     LocalDate date,
     LocalTime startAt,
     Long themeId,

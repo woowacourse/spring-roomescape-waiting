@@ -1,6 +1,8 @@
 package roomescape.reservation.fixture;
 
 import roomescape.date.domain.ReservationDate;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -10,13 +12,26 @@ import roomescape.time.domain.ReservationTime;
 
 public class ReservationFixture {
 
+    public static Member member(String name) {
+        return Member.register(name, "password");
+    }
+
     public static Reservation reservation(
         String name,
         ReservationDate date,
         ReservationTime time,
         Theme theme
     ) {
-        return Reservation.reserved(name, date, time, theme);
+        return reservation(member(name), date, time, theme);
+    }
+
+    public static Reservation reservation(
+        Member member,
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme
+    ) {
+        return Reservation.reserved(member, date, time, theme);
     }
 
     public static Reservation waitReservation(
@@ -26,7 +41,17 @@ public class ReservationFixture {
         Theme theme,
         Long waitingOrder
     ) {
-        return Reservation.wait(name, date, time, theme, waitingOrder);
+        return waitReservation(member(name), date, time, theme, waitingOrder);
+    }
+
+    public static Reservation waitReservation(
+        Member member,
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme,
+        Long waitingOrder
+    ) {
+        return Reservation.wait(member, date, time, theme, waitingOrder);
     }
 
     public static Reservation waitReservation(
@@ -44,7 +69,7 @@ public class ReservationFixture {
         ReservationTime time,
         Theme theme
     ) {
-        Reservation reservation = Reservation.reserved(name, date, time, theme);
+        Reservation reservation = Reservation.reserved(member(name), date, time, theme);
         reservation.updateStatus(ReservationStatus.CANCELED);
         return reservation;
     }

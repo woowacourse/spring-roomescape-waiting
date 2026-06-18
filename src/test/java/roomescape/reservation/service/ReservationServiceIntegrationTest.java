@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -18,9 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -29,59 +28,61 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
-import roomescape.date.repository.JdbcReservationDateRepository;
+import roomescape.date.repository.ReservationDateRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationErrorInformation;
 import roomescape.reservation.exception.ReservationException;
-import roomescape.reservation.repository.JdbcReservationRepository;
-import roomescape.reservation.repository.JdbcReservationSlotRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
-import roomescape.theme.repository.JdbcThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
-import roomescape.time.repository.JdbcReservationTimeRepository;
+import roomescape.time.repository.ReservationTimeRepository;
 
-@JdbcTest
-@Import({ReservationService.class, JdbcReservationSlotRepository.class,
-    JdbcReservationRepository.class,
-    JdbcReservationTimeRepository.class,
-    JdbcReservationDateRepository.class, JdbcThemeRepository.class})
+@DataJpaTest(showSql = false)
 class ReservationServiceIntegrationTest {
 
     @Autowired
-    private JdbcReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private JdbcReservationSlotRepository reservationSlotRepository;
+    private ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
-    private JdbcReservationDateRepository reservationDateRepository;
+    private ReservationDateRepository reservationDateRepository;
 
     @Autowired
-    private JdbcReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JdbcThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
+    private MemberRepository memberRepository;
+
     private ReservationService reservationService;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private TransactionTemplate transactionTemplate;
 
     @BeforeEach
     void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
+        reservationService = new ReservationService(entityManager, reservationSlotRepository, reservationRepository,
+            reservationTimeRepository, reservationDateRepository, themeRepository);
     }
 
     private ReservationTime saveTime() {
@@ -104,6 +105,74 @@ class ReservationServiceIntegrationTest {
         return reservationTimeRepository.save(ReservationTimeFixture.activeTime16());
     }
 
+    private Member member(String name) {
+        return memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(Member.register(name, "password")));
+    }
+
+    private Reservation saveReservation(String name, ReservationDate date, ReservationTime time,
+        Theme theme) {
+        return reservationRepository.save(reservation(member(name), date, time, theme));
+    }
+
+    private Reservation saveWaitReservation(String name, ReservationDate date, ReservationTime time,
+        Theme theme, Long waitingOrder) {
+        return reservationRepository.save(
+            waitReservation(member(name), date, time, theme, waitingOrder));
+    }
+
+    private Reservation saveCanceledReservation(String name, ReservationDate date,
+        ReservationTime time, Theme theme) {
+        Reservation reservation = saveReservation(name, date, time, theme);
+        reservation.updateStatus(ReservationStatus.CANCELED);
+        return reservationRepository.save(reservation);
+    }
+
+    @Nested
+    @DisplayName("readAll 메서드는")
+    class ReadAllTest {
+
+        @Test
+        @DisplayName("status가 없으면 모든 예약을 조회한다")
+        void 성공1() {
+            // given
+            ReservationTime time = saveTime();
+            ReservationDate date = saveDate();
+            Theme theme = saveTheme("theme1");
+            saveReservation("예약자", date, time, theme);
+            saveWaitReservation("대기자", date, time, theme, 1L);
+            saveCanceledReservation("취소자", date, time, theme);
+
+            // when
+            List<Reservation> actual = reservationService.readAll(null);
+
+            // then
+            assertThat(actual)
+                .hasSize(3);
+        }
+
+        @Test
+        @DisplayName("status가 있으면 해당 상태의 예약만 조회한다")
+        void 성공2() {
+            // given
+            ReservationTime time = saveTime();
+            ReservationDate date = saveDate();
+            Theme theme = saveTheme("theme1");
+            Reservation reserved = saveReservation("예약자", date, time, theme);
+            saveWaitReservation("대기자", date, time, theme, 1L);
+            saveCanceledReservation("취소자", date, time, theme);
+
+            // when
+            List<Reservation> actual = reservationService.readAll(ReservationStatus.RESERVED);
+
+            // then
+            assertAll(
+                () -> assertThat(actual).hasSize(1),
+                () -> assertThat(actual.getFirst().getId()).isEqualTo(reserved.getId()),
+                () -> assertThat(actual.getFirst().getStatus()).isEqualTo(ReservationStatus.RESERVED)
+            );
+        }
+    }
 
     @Nested
     @DisplayName("getMyReservations 메서드는")
@@ -123,14 +192,12 @@ class ReservationServiceIntegrationTest {
             ReservationDate date = saveDate();
             Theme theme = saveTheme(themeName);
 
-            reservationRepository.save(reservation(name1, date, time, theme));
-            reservationRepository.save(
-                waitReservation(name2, date, time, theme, 1L));
-            reservationRepository.save(
-                waitReservation(name3, date, time, theme, 2L));
+            saveReservation(name1, date, time, theme);
+            saveWaitReservation(name2, date, time, theme, 1L);
+            saveWaitReservation(name3, date, time, theme, 2L);
 
             // when
-            List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(name3);
+            List<ReservationWithWaitingTurn> actual = reservationService.readAllByMemberId(member(name3).getId());
 
             // then
             assertThat(actual.getFirst().waitingTurn())
@@ -149,10 +216,10 @@ class ReservationServiceIntegrationTest {
             ReservationDate date = saveDate();
             Theme theme = saveTheme(themeName);
 
-            reservationRepository.save(reservation(name1, date, time, theme));
+            saveReservation(name1, date, time, theme);
 
             // when
-            List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(name1);
+            List<ReservationWithWaitingTurn> actual = reservationService.readAllByMemberId(member(name1).getId());
 
             // then
             assertThat(actual.getFirst().waitingTurn())
@@ -171,19 +238,17 @@ class ReservationServiceIntegrationTest {
             ReservationDate date = saveDate();
             Theme theme = saveTheme("theme1");
 
-            Reservation reserved = reservationRepository.save(
-                reservation(name1, date, time, theme));
-            Reservation firstWaiting = reservationRepository.save(
-                waitReservation(name2, date, time, theme, 1L));
-            reservationRepository.save(waitReservation(name3, date, time, theme, 2L));
+            Reservation reserved = saveReservation(name1, date, time, theme);
+            Reservation firstWaiting = saveWaitReservation(name2, date, time, theme, 1L);
+            saveWaitReservation(name3, date, time, theme, 2L);
 
-            Long beforeWaitingTurn = reservationService.readAllByName(name3)
+            Long beforeWaitingTurn = reservationService.readAllByMemberId(member(name3).getId())
                 .getFirst()
                 .waitingTurn();
 
             // when
-            reservationService.cancel(reserved.getId(), name1);
-            List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(name3);
+            reservationService.cancel(reserved.getId(), member(name1));
+            List<ReservationWithWaitingTurn> actual = reservationService.readAllByMemberId(member(name3).getId());
             Reservation promoted = reservationRepository.findById(firstWaiting.getId()).get();
 
             // then
@@ -212,12 +277,10 @@ class ReservationServiceIntegrationTest {
             ReservationDate newDate = saveSecondDate();
             Theme theme = saveTheme("theme1");
 
-            Reservation reserved = reservationRepository.save(
-                reservation(reservedName, previousDate, previousTime, theme));
-            Reservation waiting = reservationRepository.save(
-                waitReservation(waitingName, previousDate, previousTime, theme, 1L));
+            Reservation reserved = saveReservation(reservedName, previousDate, previousTime, theme);
+            Reservation waiting = saveWaitReservation(waitingName, previousDate, previousTime, theme, 1L);
             ReservationChangeCommand command = new ReservationChangeCommand(
-                reserved.getId(), reservedName, newDate.getId(), newTime.getId());
+                reserved.getId(), member(reservedName), newDate.getId(), newTime.getId());
 
             // when
             Reservation changed = reservationService.changeSchedule(command);
@@ -248,12 +311,11 @@ class ReservationServiceIntegrationTest {
             ReservationDate newDate = saveSecondDate();
             Theme theme = saveTheme("theme1");
 
-            Reservation reserved = reservationRepository.save(
-                reservation(reservedName, previousDate, previousTime, theme));
-            reservationRepository.save(reservation(otherName, newDate, newTime, theme));
-            reservationRepository.save(waitReservation(waitingName, newDate, newTime, theme, 1L));
+            Reservation reserved = saveReservation(reservedName, previousDate, previousTime, theme);
+            saveReservation(otherName, newDate, newTime, theme);
+            saveWaitReservation(waitingName, newDate, newTime, theme, 1L);
             ReservationChangeCommand command = new ReservationChangeCommand(
-                reserved.getId(), reservedName, newDate.getId(), newTime.getId());
+                reserved.getId(), member(reservedName), newDate.getId(), newTime.getId());
 
             // when
             Reservation changed = reservationService.changeSchedule(command);
@@ -283,10 +345,8 @@ class ReservationServiceIntegrationTest {
             ReservationDate newDate = saveSecondDate();
             Theme theme = saveTheme("theme1");
 
-            Reservation reserved = reservationRepository.save(
-                reservation(reservedName, previousDate, previousTime, theme));
-            Reservation waiting = reservationRepository.save(
-                waitReservation(waitingName, previousDate, previousTime, theme, 1L));
+            Reservation reserved = saveReservation(reservedName, previousDate, previousTime, theme);
+            Reservation waiting = saveWaitReservation(waitingName, previousDate, previousTime, theme, 1L);
             ReservationChangeCommand command = new ReservationChangeCommand(
                 reserved.getId(), null, newDate.getId(), newTime.getId());
 
@@ -319,10 +379,9 @@ class ReservationServiceIntegrationTest {
             ReservationDate newDate = saveSecondDate();
             Theme theme = saveTheme("theme1");
 
-            Reservation reserved = reservationRepository.save(
-                reservation(reservedName, previousDate, previousTime, theme));
-            reservationRepository.save(reservation(otherName, newDate, newTime, theme));
-            reservationRepository.save(waitReservation(waitingName, newDate, newTime, theme, 1L));
+            Reservation reserved = saveReservation(reservedName, previousDate, previousTime, theme);
+            saveReservation(otherName, newDate, newTime, theme);
+            saveWaitReservation(waitingName, newDate, newTime, theme, 1L);
             ReservationChangeCommand command = new ReservationChangeCommand(
                 reserved.getId(), null, newDate.getId(), newTime.getId());
 
@@ -354,10 +413,8 @@ class ReservationServiceIntegrationTest {
             ReservationDate date = saveDate();
             Theme theme = saveTheme("theme1");
 
-            Reservation reserved = reservationRepository.save(
-                reservation(reservedName, date, time, theme));
-            Reservation firstWaiting = reservationRepository.save(
-                waitReservation(waitingName, date, time, theme, 1L));
+            Reservation reserved = saveReservation(reservedName, date, time, theme);
+            Reservation firstWaiting = saveWaitReservation(waitingName, date, time, theme, 1L);
 
             CountDownLatch reservedCancelLocked = new CountDownLatch(1);
             CountDownLatch completeReservedCancel = new CountDownLatch(1);
@@ -370,7 +427,8 @@ class ReservationServiceIntegrationTest {
                 assertThat(reservedCancelLocked.await(1, TimeUnit.SECONDS)).isTrue();
 
                 Future<Reservation> waitingCancel = executorService.submit(
-                    () -> reservationService.cancel(firstWaiting.getId(), waitingName));
+                    () -> transactionTemplate.execute(
+                        status -> reservationService.cancel(firstWaiting.getId(), member(waitingName))));
                 assertThatThrownBy(() -> waitingCancel.get(300, TimeUnit.MILLISECONDS))
                     .isInstanceOf(TimeoutException.class);
 
@@ -407,12 +465,12 @@ class ReservationServiceIntegrationTest {
             ReservationDate date = saveDate();
             Theme theme = saveTheme(themeName);
 
-            reservationRepository.save(reservation(name1, date, time, theme));
+            saveReservation(name1, date, time, theme);
             ReservationSaveCommand command = new ReservationSaveCommand(date.getId(), time.getId(),
                 theme.getId());
 
             // when & then
-            assertThatThrownBy(() -> reservationService.reserve(name1, command))
+            assertThatThrownBy(() -> reservationService.reserve(member(name1), command))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_BOOKED.getMessage());
         }
@@ -447,8 +505,8 @@ class ReservationServiceIntegrationTest {
                 }
 
                 // then
-                List<Reservation> actual = reservationRepository.findAllActiveByDateTimeAndThemeId(
-                    date.getId(), time.getId(), theme.getId());
+                List<Reservation> actual = reservationRepository.findAllActiveByDateAndTimeAndTheme(
+                    date, time, theme);
 
                 assertAll(
                     () -> assertThat(actual).hasSize(names.size()),
@@ -471,35 +529,35 @@ class ReservationServiceIntegrationTest {
         CountDownLatch ready, CountDownLatch start) {
         ready.countDown();
         await(start);
-        return reservationService.reserve(name, command);
+        return transactionTemplate.execute(status -> reservationService.reserve(member(name), command));
     }
 
     private void cancelReservedAndPromoteWaiting(Reservation reserved,
         CountDownLatch reservedCancelLocked, CountDownLatch completeReservedCancel) {
         transactionTemplate.executeWithoutResult(status -> {
-            lockSlot(reserved.getDate().getId(), reserved.getTime().getId(),
-                reserved.getTheme().getId());
+            lockSlot(reserved.getDate(), reserved.getTime(), reserved.getTheme());
             reservedCancelLocked.countDown();
             await(completeReservedCancel);
 
             Reservation reservationToCancel = reservationRepository.findById(reserved.getId())
                 .get();
-            reservationToCancel.cancel(reservationToCancel.getName());
-            reservationRepository.updateStatusAndWaitingOrder(reservationToCancel);
-            reservationRepository.findFirstWaitingByDateTimeAndThemeId(
-                    reservationToCancel.getDate().getId(),
-                    reservationToCancel.getTime().getId(),
-                    reservationToCancel.getTheme().getId())
+            reservationToCancel.cancel(reservationToCancel.getMember());
+            reservationRepository.findFirstWaitingByDateAndTimeAndTheme(
+                    reservationToCancel.getDate(),
+                    reservationToCancel.getTime(),
+                    reservationToCancel.getTheme())
                 .ifPresent(waiting -> {
                     waiting.changeToReserved();
-                    reservationRepository.updateStatusAndWaitingOrder(waiting);
+                    reservationRepository.save(waiting);
                 });
         });
     }
 
-    private void lockSlot(Long dateId, Long timeId, Long themeId) {
-        reservationSlotRepository.saveIfAbsent(ReservationSlot.create(dateId, timeId, themeId));
-        reservationSlotRepository.lockByDateTimeAndThemeId(dateId, timeId, themeId);
+    private void lockSlot(ReservationDate reservationDate, ReservationTime reservationTime,
+        Theme theme) {
+        reservationSlotRepository.saveIfAbsent(reservationDate, reservationTime, theme);
+        reservationSlotRepository.findByDateAndTimeAndThemeForUpdate(reservationDate, reservationTime,
+            theme);
     }
 
     private void await(CountDownLatch latch) {

@@ -8,7 +8,7 @@ import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
 public record ReservationDetailDto(
     Long id,
-    String name,
+    Long memberId,
     LocalDate date,
     LocalTime time,
     Long themeId,
@@ -21,7 +21,7 @@ public record ReservationDetailDto(
     public static ReservationDetailDto from(Reservation reservation) {
         return new ReservationDetailDto(
             reservation.getId(),
-            reservation.getName(),
+            reservation.getMember().getId(),
             reservation.getDate().getDate(),
             reservation.getTime().getStartAt(),
             reservation.getTheme().getId(),
@@ -35,7 +35,7 @@ public record ReservationDetailDto(
     public static ReservationDetailDto from(ReservationWithWaitingTurn reservation) {
         return new ReservationDetailDto(
             reservation.id(),
-            reservation.name(),
+            reservation.memberId(),
             reservation.date(),
             reservation.startAt(),
             reservation.themeId(),

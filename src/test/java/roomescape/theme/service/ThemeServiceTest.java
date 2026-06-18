@@ -13,23 +13,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeException;
-import roomescape.theme.fixture.FakeThemeRepository;
 import roomescape.theme.fixture.ThemeFixture;
+import roomescape.theme.repository.ThemeRepository;
 
+@DataJpaTest(showSql = false)
 class ThemeServiceTest {
 
     private final String name = "테마1";
     private final String description = "테마1 설명";
     private final String thumbnail = "테마1 썸네일";
 
+    @Autowired
+    private ThemeRepository themeRepository;
     private ThemeService themeService;
-    private FakeThemeRepository themeRepository;
 
     @BeforeEach
     void setup() {
-        this.themeRepository = new FakeThemeRepository();
         this.themeService = new ThemeService(themeRepository);
     }
 

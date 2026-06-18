@@ -47,9 +47,35 @@ WHERE NOT EXISTS (SELECT 1
                   FROM theme t
                   WHERE t.name = v.name);
 
+INSERT INTO member (name, password, role)
+SELECT v.name, v.password, v.role
+FROM (VALUES ('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MANAGER'),
+             ('member', 'e606e38b0d8c19b24cf0ee3802e858abc6f393291503e30128a158bda25d1109', 'MEMBER'),
+             ('다른사람', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MEMBER'),
+             ('송송', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MEMBER'),
+             ('pine', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'MEMBER'),
+             ('김민준', 'password', 'MEMBER'),
+             ('이서연', 'password', 'MEMBER'),
+             ('박지후', 'password', 'MEMBER'),
+             ('최하은', 'password', 'MEMBER'),
+             ('정도윤', 'password', 'MEMBER'),
+             ('한지민', 'password', 'MEMBER'),
+             ('윤서준', 'password', 'MEMBER'),
+             ('오지아', 'password', 'MEMBER'),
+             ('강민재', 'password', 'MEMBER'),
+             ('신예린', 'password', 'MEMBER'),
+             ('송우석', 'password', 'MEMBER'),
+             ('장하준', 'password', 'MEMBER'),
+             ('임수아', 'password', 'MEMBER'),
+             ('문지호', 'password', 'MEMBER'),
+             ('백서윤', 'password', 'MEMBER')) AS v(name, password, role)
+WHERE NOT EXISTS (SELECT 1
+                  FROM member m
+                  WHERE m.name = v.name);
+
 -- Reservation Dummy Data
-INSERT INTO reservation (name, date_id, time_id, theme_id, waiting_order, status)
-SELECT v.name,
+INSERT INTO reservation (member_id, date_id, time_id, theme_id, waiting_order, status)
+SELECT m.id AS member_id,
        rd.id AS date_id,
        rt.id AS time_id,
        t.id  AS theme_id,
@@ -89,20 +115,10 @@ FROM (VALUES ('김민준', DATEADD('DAY', 0, CURRENT_DATE), '11:00:00', '잠겨�
          JOIN reservation_date rd ON rd.date = v.reservation_date
          JOIN reservation_time rt ON rt.start_at = v.start_at
          JOIN theme t ON t.name = v.theme_name
+         JOIN member m ON m.name = v.name
 WHERE NOT EXISTS (SELECT 1
                   FROM reservation r
-                  WHERE r.name = v.name
+                  WHERE r.member_id = m.id
                     AND r.date_id = rd.id
                     AND r.time_id = rt.id
                     AND r.theme_id = t.id);
-
-INSERT INTO member (name, password, role)
-VALUES ('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MANAGER');
-INSERT INTO member (name, password, role)
-VALUES ('member', 'e606e38b0d8c19b24cf0ee3802e858abc6f393291503e30128a158bda25d1109', 'MEMBER');
-INSERT INTO member (name, password, role)
-VALUES ('다른사람', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MEMBER');
-INSERT INTO member (name, password, role)
-VALUES ('송송', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'MEMBER');
-INSERT INTO member (name, password, role)
-VALUES ('pine', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'MEMBER');
