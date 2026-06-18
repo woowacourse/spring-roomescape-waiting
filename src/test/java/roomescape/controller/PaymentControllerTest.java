@@ -22,6 +22,7 @@ import roomescape.exception.RoomescapeException;
 import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.WebConfig;
+import roomescape.infrastructure.payment.TossPaymentException;
 import roomescape.service.PaymentService;
 
 @WebMvcTest(controllers = PaymentController.class,
@@ -64,6 +65,21 @@ class PaymentControllerTest {
                         .param("amount", "9999"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PAYMENT_AMOUNT_MISMATCH"));
+    }
+
+    @Test
+    @DisplayName("POST /payments/success - 게이트웨이가 카드 거절 예외를 던지면 403과 코드를 반환한다")
+    void successReturns403WhenCardRejected() throws Exception {
+        given(paymentService.confirm(anyString(), anyString(), anyLong()))
+                .willThrow(new TossPaymentException.CardRejected("카드가 거절되었습니다."));
+
+        mockMvc.perform(post("/payments/success")
+                        .param("paymentKey", "payment-key")
+                        .param("orderId", "order-12345")
+                        .param("amount", "50000"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("REJECT_CARD_PAYMENT"))
+                .andExpect(jsonPath("$.message").value("카드가 거절되었습니다."));
     }
 
     @Test
