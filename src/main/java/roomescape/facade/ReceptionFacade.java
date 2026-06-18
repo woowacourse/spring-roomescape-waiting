@@ -98,9 +98,12 @@ public class ReceptionFacade {
             paymentReservationService.markPaymentUnknown(orderId);
             throw new RoomEscapeException(DomainErrorCode.PAYMENT_UNKNOWN);
         }
+        if (confirmationResult.failed()) {
+            paymentReservationService.releasePaymentConfirmation(orderId);
+            throw new RoomEscapeException(confirmationResult.failureCode());
+        }
 
-        Reservation confirmed = paymentReservationService.confirmPayment(orderId, confirmationResult.paymentResult(),
-                amount);
+        Reservation confirmed = paymentReservationService.confirmPayment(orderId, confirmationResult.paymentResult());
         return ReceptionResponse.from(confirmed, 0L, ReservationStatus.CONFIRMED.name());
     }
 

@@ -164,15 +164,49 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Reservation startPaymentConfirmation(String orderId) {
+        String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE order_id = ? AND status IN (?, ?)
+                """;
+
+        int updated = jdbcTemplate.update(sql, ReservationStatus.PAYMENT_CONFIRMING.name(), orderId,
+                ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
+        if (updated == 0) {
+            throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
+        }
+        return findByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
+    }
+
+    @Override
+    public Reservation releasePaymentConfirmation(String orderId) {
+        String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE order_id = ? AND status = ?
+                """;
+
+        int updated = jdbcTemplate.update(sql, ReservationStatus.PENDING.name(), orderId,
+                ReservationStatus.PAYMENT_CONFIRMING.name());
+        if (updated == 0) {
+            throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
+        }
+        return findByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
+    }
+
+    @Override
     public Reservation confirmPayment(String orderId, String paymentKey) {
         String sql = """
                 UPDATE reservation
                 SET status = ?, payment_key = ?
-                WHERE order_id = ? AND status IN (?, ?)
+                WHERE order_id = ? AND status = ?
                 """;
 
         int updated = jdbcTemplate.update(sql, ReservationStatus.CONFIRMED.name(), paymentKey,
-                orderId, ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
+                orderId, ReservationStatus.PAYMENT_CONFIRMING.name());
         if (updated == 0) {
             throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
         }
@@ -185,11 +219,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 UPDATE reservation
                 SET status = ?
-                WHERE order_id = ? AND status IN (?, ?)
+                WHERE order_id = ? AND status = ?
                 """;
 
         int updated = jdbcTemplate.update(sql, ReservationStatus.PAYMENT_UNKNOWN.name(), orderId,
-                ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
+                ReservationStatus.PAYMENT_CONFIRMING.name());
         if (updated == 0) {
             throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
         }

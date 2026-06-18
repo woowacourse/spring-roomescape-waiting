@@ -151,6 +151,7 @@ public class JdbcReservationRepositoryTest {
         Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
                 theme, "order_test", 50000L);
         reservationRepository.save(pendingReservation);
+        reservationRepository.startPaymentConfirmation("order_test");
         reservationRepository.confirmPayment("order_test", "payment_key");
 
         ReservationTime otherReservationTime = new ReservationTime(2L, LocalTime.of(11, 0));
@@ -170,6 +171,7 @@ public class JdbcReservationRepositoryTest {
         Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
                 theme, "order_test", 50000L);
         reservationRepository.save(pendingReservation);
+        reservationRepository.startPaymentConfirmation("order_test");
 
         Reservation confirmed = reservationRepository.confirmPayment("order_test", "payment_key");
 
@@ -184,6 +186,7 @@ public class JdbcReservationRepositoryTest {
         Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
                 theme, "order_test", 50000L);
         reservationRepository.save(pendingReservation);
+        reservationRepository.startPaymentConfirmation("order_test");
 
         Reservation unknown = reservationRepository.markPaymentUnknown("order_test");
 
@@ -192,6 +195,33 @@ public class JdbcReservationRepositoryTest {
         assertThat(unknown.getAmount()).isEqualTo(50000L);
         assertThat(reservationRepository.findByOrderId("order_test").get().getStatus())
                 .isEqualTo(ReservationStatus.PAYMENT_UNKNOWN);
+    }
+
+    @Test
+    void startPaymentConfirmationTest() {
+        Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
+                theme, "order_test", 50000L);
+        reservationRepository.save(pendingReservation);
+
+        Reservation confirming = reservationRepository.startPaymentConfirmation("order_test");
+
+        assertThat(confirming.getStatus()).isEqualTo(ReservationStatus.PAYMENT_CONFIRMING);
+        assertThat(reservationRepository.findByOrderId("order_test").get().getStatus())
+                .isEqualTo(ReservationStatus.PAYMENT_CONFIRMING);
+    }
+
+    @Test
+    void releasePaymentConfirmationTest() {
+        Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
+                theme, "order_test", 50000L);
+        reservationRepository.save(pendingReservation);
+        reservationRepository.startPaymentConfirmation("order_test");
+
+        Reservation pending = reservationRepository.releasePaymentConfirmation("order_test");
+
+        assertThat(pending.getStatus()).isEqualTo(ReservationStatus.PENDING);
+        assertThat(reservationRepository.findByOrderId("order_test").get().getStatus())
+                .isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test

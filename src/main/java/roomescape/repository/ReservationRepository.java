@@ -22,6 +22,10 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByOrderId(String orderId);
 
+    Reservation startPaymentConfirmation(String orderId);
+
+    Reservation releasePaymentConfirmation(String orderId);
+
     Reservation confirmPayment(String orderId, String paymentKey);
 
     Reservation markPaymentUnknown(String orderId);
