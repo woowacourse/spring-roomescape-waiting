@@ -12,18 +12,15 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.vo.ReservationSchedule;
-import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
 
-@Repository
-public class JdbcReservationRepository implements ReservationRepository {
+public class JdbcReservationRepository {
 
     private static final String WAITING_NUMBER_EXPRESSION = """
         CASE
@@ -48,7 +45,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             .usingGeneratedKeyColumns("id");
     }
 
-    @Override
+
     public List<ReservationWithWaitingNumber> findReservationsByNotDeletedWithWaitingNumber() {
         String sql = """
             SELECT r.id, r.name, r.date, r.status, r.version,
@@ -73,7 +70,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private Reservation mapReservation(ResultSet rs) throws SQLException {
         return Reservation.reconstruct(
             rs.getLong("id"),
-            new ReserverName(rs.getString("name")),
+            rs.getString("name"),
             rs.getDate("date").toLocalDate(),
             Time.reconstruct(
                 rs.getLong("time_id"),
@@ -109,7 +106,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return timestamp.toLocalDateTime();
     }
 
-    @Override
+
     public List<ReservationWithWaitingNumber> findReservationsByNameAndNotDeletedWithWaitingNumber(String name) {
         String sql = """
             SELECT ranked.id, ranked.name, ranked.date, ranked.status, ranked.version,
@@ -135,7 +132,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(sql, parameters, (rs, rowNum) -> mapReservationWithWaitingNumber(rs));
     }
 
-    @Override
+
     public Optional<Reservation> findReservationByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status, r.version,
@@ -158,7 +155,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return reservations.stream().findFirst();
     }
 
-    @Override
+
     public Optional<Reservation> lockReservationByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status, r.version,
@@ -182,7 +179,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return reservations.stream().findFirst();
     }
 
-    @Override
+
     public List<Long> findTimeIdsByDateAndThemeIdAndNotDeleted(LocalDate date, Long themeId) {
         String sql = """
             SELECT r.time_id
@@ -207,7 +204,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             (resultSet, rowNum) -> resultSet.getLong("time_id"));
     }
 
-    @Override
+
     public boolean existsActiveReservationBySchedule(ReservationSchedule schedule) {
         String sql = """
             SELECT EXISTS (
@@ -230,7 +227,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Boolean.TRUE.equals(exists);
     }
 
-    @Override
+
     public Optional<Long> lockActiveReservationBySchedule(ReservationSchedule schedule) {
         String sql = """
             SELECT r.id
@@ -265,7 +262,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return reservationIds.stream().findFirst();
     }
 
-    @Override
+
     public Optional<Reservation> lockFirstWaitingReservationBySchedule(ReservationSchedule schedule) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status, r.version,
@@ -305,10 +302,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         ));
     }
 
-    @Override
+
     public Reservation save(Reservation reservation) {
         Map<String, Object> args = Map.of(
-            "name", reservation.getName().value(),
+            "name", reservation.getName(),
             "date", reservation.getDate(),
             "time_id", reservation.getTime().getId(),
             "theme_id", reservation.getTheme().getId(),
@@ -320,7 +317,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             reservation.getTime(), reservation.getTheme(), reservation.getStatus());
     }
 
-    @Override
+
     public Reservation update(Reservation reservation) {
         String sql = """
             UPDATE reservation
@@ -337,7 +334,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
         SqlParameterSource parameters = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
-            .addValue("name", reservation.getName().value())
+            .addValue("name", reservation.getName())
             .addValue("date", reservation.getDate())
             .addValue("timeId", reservation.getTime().getId())
             .addValue("themeId", reservation.getTheme().getId())
@@ -375,7 +372,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Boolean.TRUE.equals(exists);
     }
 
-    @Override
+
     public void deleteReservationById(Long id) {
         String sql = "UPDATE reservation SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id AND deleted_at IS NULL";
         SqlParameterSource parameters = new MapSqlParameterSource("id", id);
@@ -385,7 +382,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         }
     }
 
-    @Override
+
     public boolean existsReservationByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT EXISTS (
@@ -401,7 +398,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Boolean.TRUE.equals(exists);
     }
 
-    @Override
+
     public boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status) {
         String sql = """
             SELECT EXISTS (
@@ -418,7 +415,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
             "date", reservation.getDate(),
-            "name", reservation.getName().value(),
+            "name", reservation.getName(),
             "timeId", reservation.getTime().getId(),
             "themeId", reservation.getTheme().getId(),
             "status", status.name()

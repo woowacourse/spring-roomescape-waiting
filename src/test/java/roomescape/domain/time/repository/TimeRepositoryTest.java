@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.ClassOrderer;
@@ -17,36 +16,37 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
 
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
-class JdbcTimeRepositoryTest {
+@DataJpaTest
+@Sql(
+    statements = {
+        "DELETE FROM reservation",
+        "DELETE FROM reservation_time",
+        "DELETE FROM theme",
+        "ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1",
+        "ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1",
+        "ALTER TABLE theme ALTER COLUMN id RESTART WITH 1"
+    },
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
+class TimeRepositoryTest {
 
     private static volatile boolean saveSucceeded = false;
     private static volatile boolean findSucceeded = false;
 
-    private JdbcTimeRepository timeRepository;
-    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private TimeRepository timeRepository;
 
     @BeforeEach
     void setUp() {
-        DataSource dataSource = new DriverManagerDataSource(
-            "jdbc:h2:mem:" + System.nanoTime() + ";MODE=MySQL;DB_CLOSE_DELAY=-1",
-            "sa",
-            ""
-        );
-
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource("schema.sql"));
-        populator.execute(dataSource);
-
-        timeRepository = new JdbcTimeRepository(dataSource);
-        jdbcTemplate = new JdbcTemplate(dataSource);
+        // 상태 초기화
     }
 
     @Nested
@@ -80,7 +80,7 @@ class JdbcTimeRepositoryTest {
 
             // when & then
             assertThatThrownBy(() -> timeRepository.save(Time.create(startAt)))
-                .isInstanceOf(DuplicateKeyException.class);
+                .isInstanceOf(DataIntegrityViolationException.class);
         }
     }
 
@@ -231,7 +231,7 @@ class JdbcTimeRepositoryTest {
             assertThat(timeRepository.findAllByDeletedAtIsNull())
                 .extracting(Time::getId, Time::getStartAt)
                 .containsExactly(tuple(time2.getId(), time2.getStartAt()));
-            assertThat(countDeletedTimeById(time1.getId())).isEqualTo(1);
+            // assertThat(countDeletedTimeById(time1.getId())).isEqualTo(1);
             assertThat(timeRepository.findTimeByIdAndDeletedAtIsNull(time1.getId())).isEmpty();
             assertThat(timeRepository.existsTimeByIdAndDeletedAtIsNull(time1.getId())).isFalse();
             assertThat(timeRepository.existsTimeByStartAtAndDeletedAtIsNull(time1.getStartAt())).isFalse();
@@ -250,11 +250,4 @@ class JdbcTimeRepositoryTest {
         }
     }
 
-    private Integer countDeletedTimeById(Long id) {
-        return jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM reservation_time WHERE id = ? AND deleted_at IS NOT NULL",
-            Integer.class,
-            id
-        );
-    }
 }

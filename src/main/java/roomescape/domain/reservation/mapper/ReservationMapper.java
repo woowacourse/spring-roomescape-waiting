@@ -10,7 +10,6 @@ import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationEditableStatus;
-import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.mapper.ThemeMapper;
 import roomescape.domain.time.mapper.TimeMapper;
 
@@ -26,7 +25,7 @@ public final class ReservationMapper {
     }
 
     public ReservationCreateCommand toCreateCommand(ReservationCreateRequestDto requestDto) {
-        return new ReservationCreateCommand(new ReserverName(requestDto.name()), requestDto.date(), requestDto.timeId(),
+        return new ReservationCreateCommand(requestDto.name(), requestDto.date(), requestDto.timeId(),
             requestDto.themeId());
     }
 
@@ -40,19 +39,19 @@ public final class ReservationMapper {
         ReservationEditableStatus status,
         Integer waitingNumber
     ) {
-        return new ReservationResponseDto(reservation.getId(), reservation.getName().value(), reservation.getDate(),
+        return new ReservationResponseDto(reservation.getId(), reservation.getName(), reservation.getDate(),
             timeMapper.toReservationResponseDto(reservation.getTime()),
             themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber,
             reservation.getVersion());
     }
 
     public ReservationCreateResponseDto toCreateResponseDto(Reservation reservation) {
-        return new ReservationCreateResponseDto(reservation.getId(), reservation.getName().value(),
+        return new ReservationCreateResponseDto(reservation.getId(), reservation.getName(),
             reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
     }
 
     public ReservationCancelResponseDto toCancelResponseDto(Reservation reservation) {
-        return new ReservationCancelResponseDto(reservation.getId(), reservation.getName().value(),
+        return new ReservationCancelResponseDto(reservation.getId(), reservation.getName(),
             reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
     }
 }

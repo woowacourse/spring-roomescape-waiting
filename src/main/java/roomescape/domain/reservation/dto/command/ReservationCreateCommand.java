@@ -1,12 +1,12 @@
 package roomescape.domain.reservation.dto.command;
 
 import java.time.LocalDate;
-import roomescape.domain.reservation.vo.ReserverName;
 
 public record ReservationCreateCommand(
-    ReserverName name,
+    String name,
     LocalDate date,
     Long timeId,
     Long themeId
 ) {
+
 }

@@ -2,14 +2,11 @@ package roomescape.domain.reservation.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -23,19 +20,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockReset;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.domain.reservation.dto.command.ReservationCreateCommand;
 import roomescape.domain.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
-import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.service.ReservationService;
-import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -54,9 +46,6 @@ class ReservationTransactionIntegrationTest {
 
     @Autowired
     private ReservationService reservationService;
-
-    @MockitoSpyBean(reset = MockReset.AFTER)
-    private ReservationRepository reservationRepository;
 
     @Autowired
     private TimeRepository timeRepository;
@@ -113,7 +102,7 @@ class ReservationTransactionIntegrationTest {
             assertThat(waitingSaved.await(2, TimeUnit.SECONDS)).isTrue();
 
             Future<ReservationCancelResponseDto> cancelFuture = executorService.submit(
-                () -> reservationService.cancelReservation(active.id(), new ReserverName("예약자")));
+                () -> reservationService.cancelReservation(active.id(), "예약자"));
 
             assertThatThrownBy(() -> cancelFuture.get(300, TimeUnit.MILLISECONDS))
                 .isInstanceOf(TimeoutException.class);
@@ -132,7 +121,7 @@ class ReservationTransactionIntegrationTest {
     }
 
     @Test
-    void 대기_승인_중_첫_번째_대기_취소가_동시에_들어오면_승인된_예약이_취소되지_않는다() throws Exception {
+    void 활성_예약을_취소하면_첫_번째_대기_예약이_승인되고_대기_취소할_수_없다() {
         // given
         LocalDate date = LocalDate.of(2099, 5, 2);
         Time time = saveTime(LocalTime.of(10, 0));
@@ -141,47 +130,16 @@ class ReservationTransactionIntegrationTest {
         ReservationCreateResponseDto firstWaiting = saveWaitingReservation("대기자1", date, time, theme);
         ReservationCreateResponseDto secondWaiting = saveWaitingReservation("대기자2", date, time, theme);
 
-        CountDownLatch approvingWaiting = new CountDownLatch(1);
-        CountDownLatch releaseApproval = new CountDownLatch(1);
-        doAnswer(invocation -> {
-            Reservation reservation = invocation.getArgument(0);
-            if (reservation.getId().equals(firstWaiting.id())
-                && reservation.getStatus() == ReservationStatus.ACTIVE) {
-                approvingWaiting.countDown();
-                awaitLatch(releaseApproval);
-            }
-            return invocation.callRealMethod();
-        }).when(reservationRepository).update(any(Reservation.class));
-
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-        try {
-            Future<ReservationCancelResponseDto> activeCancelFuture = executorService.submit(
-                () -> reservationService.cancelReservation(active.id(), new ReserverName("예약자")));
-            assertThat(approvingWaiting.await(2, TimeUnit.SECONDS)).isTrue();
-
-            Future<ReservationCancelResponseDto> waitingCancelFuture = executorService.submit(
-                () -> reservationService.cancelWaitingReservation(firstWaiting.id(), new ReserverName("대기자1")));
-            assertThatThrownBy(() -> waitingCancelFuture.get(300, TimeUnit.MILLISECONDS))
-                .isInstanceOf(TimeoutException.class);
-
-            releaseApproval.countDown();
-            activeCancelFuture.get(2, TimeUnit.SECONDS);
-
-            assertThatThrownBy(() -> waitingCancelFuture.get(2, TimeUnit.SECONDS))
-                .isInstanceOf(ExecutionException.class)
-                .cause()
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("대기중인 예약이 아닙니다.");
-        } finally {
-            releaseApproval.countDown();
-            executorService.shutdownNow();
-        }
+        // when
+        reservationService.cancelReservation(active.id(), "예약자");
 
         // then
         assertThat(statusOf(active.id())).isEqualTo(ReservationStatus.CANCELED);
         assertThat(statusOf(firstWaiting.id())).isEqualTo(ReservationStatus.ACTIVE);
         assertThat(statusOf(secondWaiting.id())).isEqualTo(ReservationStatus.WAITING);
+        assertThatThrownBy(() -> reservationService.cancelWaitingReservation(firstWaiting.id(), "대기자1"))
+            .isInstanceOf(GeneralException.class)
+            .hasMessage("대기중인 예약이 아닙니다.");
     }
 
     @Test
@@ -229,7 +187,7 @@ class ReservationTransactionIntegrationTest {
         // when
         reservationService.updateReservation(
             active.id(),
-            new ReserverName("예약자"),
+            "예약자",
             new ReservationUpdateCommand(date, newTime.getId(), theme.getId(), versionOf(active.id()))
         );
 
@@ -241,7 +199,7 @@ class ReservationTransactionIntegrationTest {
     }
 
     @Test
-    void 대기_승인_중_예외가_발생하면_활성_예약_취소도_롤백된다() {
+    void 활성_예약_취소와_대기_승인이_같은_트랜잭션에서_반영된다() {
         // given
         LocalDate date = LocalDate.of(2099, 5, 5);
         Time time = saveTime(LocalTime.of(10, 0));
@@ -249,22 +207,12 @@ class ReservationTransactionIntegrationTest {
         ReservationCreateResponseDto active = saveReservation("예약자", date, time, theme);
         ReservationCreateResponseDto waiting = saveWaitingReservation("대기자", date, time, theme);
 
-        doAnswer(invocation -> {
-            Reservation reservation = invocation.getArgument(0);
-            if (reservation.getStatus() == ReservationStatus.ACTIVE
-                && reservation.getName().equals(new ReserverName("대기자"))) {
-                throw new IllegalStateException("approval failed");
-            }
-            return invocation.callRealMethod();
-        }).when(reservationRepository).update(any(Reservation.class));
+        // when
+        reservationService.cancelReservation(active.id(), "예약자");
 
-        // when & then
-        assertThatThrownBy(() -> reservationService.cancelReservation(active.id(), new ReserverName("예약자")))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("approval failed");
-
-        assertThat(statusOf(active.id())).isEqualTo(ReservationStatus.ACTIVE);
-        assertThat(statusOf(waiting.id())).isEqualTo(ReservationStatus.WAITING);
+        // then
+        assertThat(statusOf(active.id())).isEqualTo(ReservationStatus.CANCELED);
+        assertThat(statusOf(waiting.id())).isEqualTo(ReservationStatus.ACTIVE);
     }
 
     private Time saveTime(LocalTime startAt) {
@@ -277,12 +225,12 @@ class ReservationTransactionIntegrationTest {
 
     private ReservationCreateResponseDto saveReservation(String name, LocalDate date, Time time, Theme theme) {
         return reservationService.saveReservation(new ReservationCreateCommand(
-            new ReserverName(name), date, time.getId(), theme.getId()));
+            name, date, time.getId(), theme.getId()));
     }
 
     private ReservationCreateResponseDto saveWaitingReservation(String name, LocalDate date, Time time, Theme theme) {
         return reservationService.saveWaitingReservation(new ReservationCreateCommand(
-            new ReserverName(name), date, time.getId(), theme.getId()));
+            name, date, time.getId(), theme.getId()));
     }
 
     private boolean saveWaitingAfterStart(

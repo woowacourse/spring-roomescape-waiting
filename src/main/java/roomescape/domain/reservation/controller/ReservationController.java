@@ -23,7 +23,6 @@ import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.service.ReservationService;
-import roomescape.domain.reservation.vo.ReserverName;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -64,7 +63,7 @@ public class ReservationController {
         String name,
         @Valid @RequestBody ReservationUpdateRequestDto requestDto) {
         return ResponseEntity.ok(
-            reservationService.updateReservation(id, new ReserverName(name),
+            reservationService.updateReservation(id, name,
                 reservationMapper.toUpdateCommand(requestDto)));
     }
 
@@ -76,7 +75,7 @@ public class ReservationController {
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
         String name
     ) {
-        return ResponseEntity.ok(reservationService.cancelReservation(id, new ReserverName(name)));
+        return ResponseEntity.ok(reservationService.cancelReservation(id, name));
     }
 
     @PostMapping("/waitings")
@@ -94,6 +93,6 @@ public class ReservationController {
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
         String name
     ) {
-        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, new ReserverName(name)));
+        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, name));
     }
 }
