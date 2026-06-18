@@ -1,33 +1,52 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.custom.InvalidDomainValueException;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final String name;
-    private final Slot slot;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public Reservation(Long id, String name, Slot slot) {
-        validate(name, slot);
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Embedded
+    private Slot slot;
+
+    public Reservation() {
+    }
+
+    public Reservation(Long id, Member member, Slot slot) {
+        validate(member, slot);
         this.id = id;
-        this.name = name;
+        this.member = member;
         this.slot = slot;
     }
 
-    public Reservation(String name, Slot slot) {
-        this(null, name, slot);
+    public Reservation(Member member, Slot slot) {
+        this(null, member, slot);
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, name, slot);
+        return new Reservation(id, member, slot);
     }
 
-    public boolean isSameUser(String name) {
-        return this.name.equals(name);
+    public boolean isSameUser(Member other) {
+        return this.member.getId().equals(other.getId());
     }
 
     public boolean isPast(LocalDateTime now) {
@@ -38,8 +57,12 @@ public class Reservation {
         return id;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
     public String getName() {
-        return name;
+        return member.getName();
     }
 
     public Slot getSlot() {
@@ -47,7 +70,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return slot.getDate();
+        return slot.getReservationDate();
     }
 
     public ReservationTime getTime() {
@@ -64,17 +87,17 @@ public class Reservation {
             return false;
         }
         Reservation that = (Reservation) object;
-        return Objects.equals(name, that.name) && Objects.equals(slot, that.slot);
+        return Objects.equals(member, that.member) && Objects.equals(slot, that.slot);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, slot);
+        return Objects.hash(member, slot);
     }
 
-    private void validate(String name, Slot slot) {
-        if (name == null || name.isBlank()) {
-            throw new InvalidDomainValueException("예약자 이름은 비어 있을 수 없습니다.");
+    private void validate(Member member, Slot slot) {
+        if (member == null) {
+            throw new InvalidDomainValueException("예약자는 비어 있을 수 없습니다.");
         }
         if (slot == null) {
             throw new InvalidDomainValueException("예약 슬롯은 비어 있을 수 없습니다.");

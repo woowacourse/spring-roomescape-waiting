@@ -21,6 +21,7 @@ const elements = {
   searchForm: document.querySelector("#reservation-search-form"),
   searchNameInput: document.querySelector("#reservation-search-name"),
   searchResult: document.querySelector("#reservation-search-result"),
+  myReservationList: document.querySelector("#mine-reservation-list"),
   toast: document.querySelector("#toast"),
 };
 
@@ -33,6 +34,7 @@ async function initialize() {
   await loadThemes();
   await loadRankingThemes();
   await loadAvailableTimes();
+  await loadMyReservations();
 }
 
 function bindEvents() {
@@ -211,6 +213,27 @@ async function handleReservationSubmit(event) {
   await loadAvailableTimes();
 }
 
+async function loadMyReservations() {
+  renderLoading(elements.myReservationList, "내 예약을 불러오는 중입니다.");
+  const response = await requestJson("/reservations/mine", {headers: {"Member-Id": "1"}});
+  renderMyReservations(response);
+}
+
+function renderMyReservations(response) {
+  elements.myReservationList.innerHTML = "";
+  const reservations = response.reservations.items;
+  const waits = response.waits.items;
+  const all = [...reservations, ...waits];
+
+  if (all.length === 0) {
+    renderEmpty(elements.myReservationList, "예약 내역이 없습니다.");
+    return;
+  }
+  all.forEach((item) => {
+    elements.myReservationList.appendChild(createReservationItem(item));
+  });
+}
+
 async function handleReservationSearch(event) {
   event.preventDefault();
   renderLoading(elements.searchResult, "예약을 조회하는 중입니다.");
@@ -245,7 +268,7 @@ function createReservationSummary(item) {
   const summary = document.createElement("div");
   summary.className = "reservation-summary";
   summary.append(createTextElement("strong", item.theme.name));
-  summary.append(createMetaText("예약자", item.name));
+  summary.append(createMetaText("예약자", item.member.name));
   summary.append(createMetaText("날짜", item.date));
   summary.append(createMetaText("시간", formatStartAt(item.time.startAt)));
   if (item.status === "WAITING") {
@@ -308,6 +331,7 @@ async function cancelReservation(item) {
   await request(url, {method: "DELETE"});
   const message = item.status === "WAITING" ? "대기가 취소되었습니다." : "예약이 취소되었습니다.";
   showToast(message);
+  await loadMyReservations();
   await refreshReservationSearch();
   await loadAvailableTimes();
 }
@@ -324,7 +348,6 @@ async function refreshReservationSearch() {
 
 async function createReservation() {
   const payload = {
-    name: elements.nameInput.value.trim(),
     date: state.selectedDate,
     timeId: state.selectedTimeId,
     themeId: state.selectedThemeId,
@@ -335,7 +358,7 @@ async function createReservation() {
 function createPostOption(payload) {
   return {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type": "application/json", "Member-Id": "1"},
     body: JSON.stringify(payload),
   };
 }
@@ -345,7 +368,7 @@ function renderReservationResult(result) {
   const statusText = result.status === "WAITING" ? `대기 (순번: ${result.order}번)` : "예약 확정";
   elements.result.innerHTML = `
     <h3>${result.status === "WAITING" ? "대기 신청 완료" : "예약 완료"}</h3>
-    <p>예약자: ${escapeHtml(result.name)}</p>
+    <p>예약자: ${escapeHtml(result.member.name)}</p>
     <p>날짜: ${result.date}</p>
     <p>시간: ${formatStartAt(result.time.startAt)}</p>
     <p>테마: ${escapeHtml(result.theme.name)}</p>

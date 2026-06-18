@@ -197,10 +197,10 @@
 - 예약/대기 추가
     - Http Method: POST
     - URL: /reservations
-    - Request
+    - Request Header: `Member-Id: {memberId}`
+    - Request Body
         ```text
         {
-            "name": "fizz",
             "date": "2026-05-02",
             "timeId": 1,
             "themeId": 1
@@ -211,7 +211,10 @@
           ```text
           {
               "id": 1,
-              "name": "fizz",
+              "member": {
+                  "id": 1,
+                  "name": "fizz"
+              },
               "date": "2026-05-02",
               "time": {
                   "id": 1,
@@ -231,7 +234,10 @@
           ```text
           {
               "id": 1,
-              "name": "fizz",
+              "member": {
+                  "id": 1,
+                  "name": "fizz"
+              },
               "date": "2026-05-02",
               "time": {
                   "id": 1,
@@ -303,9 +309,10 @@
           }
           ```
 
-- 사용자 이름으로 예약/대기 조회
+- 내 예약/대기 조회
     - Http Method: GET
-    - URL: /reservations?name={name}
+    - URL: /reservations/mine
+    - Request Header: `Member-Id: {memberId}`
     - Response
         - [x] 정상적으로 조회된 경우: `Http Status: 200 OK`
           ```text
@@ -314,7 +321,10 @@
                   "items": [
                       {
                           "id": 1,
-                          "name": "예약자01",
+                          "member": {
+                              "id": 1,
+                              "name": "예약자01"
+                          },
                           "date": "2026-05-01",
                           "time": {
                               "id": 1,
@@ -334,7 +344,68 @@
                   "items": [
                       {
                           "id": 1,
-                          "name": "예약자01",
+                          "member": {
+                              "id": 1,
+                              "name": "예약자01"
+                          },
+                          "date": "2026-05-02",
+                          "time": {
+                              "id": 2,
+                              "startAt": "11:00:00"
+                          },
+                          "theme": {
+                              "id": 1,
+                              "name": "잃어버린 왕국",
+                              "description": "사라진 고대 왕국의 비밀을 추적하는 모험 테마",
+                              "thumbnailUrl": "https://example.com/images/lost-kingdom.jpg"
+                          },
+                          "status": "WAITING",
+                          "order": 1,
+                          "createdAt": "2026-05-01T09:00:00"
+                      }
+                  ]
+              }
+          }
+          ```
+
+- 사용자 이름으로 예약/대기 조회
+    - Http Method: GET
+    - URL: /reservations?name={name}
+    - Response
+        - [x] 정상적으로 조회된 경우: `Http Status: 200 OK`
+          ```text
+          {
+              "reservations": {
+                  "items": [
+                      {
+                          "id": 1,
+                          "member": {
+                              "id": 1,
+                              "name": "예약자01"
+                          },
+                          "date": "2026-05-01",
+                          "time": {
+                              "id": 1,
+                              "startAt": "10:00:00"
+                          },
+                          "theme": {
+                              "id": 1,
+                              "name": "잃어버린 왕국",
+                              "description": "사라진 고대 왕국의 비밀을 추적하는 모험 테마",
+                              "thumbnailUrl": "https://example.com/images/lost-kingdom.jpg"
+                          },
+                          "status": "CONFIRMED"
+                      }
+                  ]
+              },
+              "waits": {
+                  "items": [
+                      {
+                          "id": 1,
+                          "member": {
+                              "id": 1,
+                              "name": "예약자01"
+                          },
                           "date": "2026-05-02",
                           "time": {
                               "id": 2,
@@ -366,7 +437,10 @@
                   "items": [
                       {
                           "id": 1,
-                          "name": "예약자01",
+                          "member": {
+                              "id": 1,
+                              "name": "예약자01"
+                          },
                           "date": "2026-05-01",
                           "time": {
                               "id": 1,
@@ -386,7 +460,10 @@
                   "items": [
                       {
                           "id": 1,
-                          "name": "예약자02",
+                          "member": {
+                              "id": 2,
+                              "name": "예약자02"
+                          },
                           "date": "2026-05-02",
                           "time": {
                               "id": 2,

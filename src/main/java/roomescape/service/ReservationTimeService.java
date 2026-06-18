@@ -44,7 +44,7 @@ public class ReservationTimeService {
     public List<ReservationTime> findReservedTimesByDateAndTheme(LocalDate date, Long themeId) {
         validateNotPastDate(date);
 
-        return reservationTimeRepository.findReservedTimesByDateAndTheme(date, themeId);
+        return reservationTimeRepository.findReservedTimesByDateAndTheme_Id(date, themeId);
     }
 
     private void validateNotPastDate(LocalDate date) {
@@ -55,7 +55,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(Long id) {
-        reservationTimeRepository.delete(id);
+        reservationTimeRepository.deleteById(id);
     }
 
     public ReservationTime findReservationTime(Long timeId) {

@@ -3,20 +3,24 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.ReservationTime;
 
-public interface ReservationTimeRepository {
+public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    ReservationTime save(ReservationTime reservationTimeWithoutId);
-
-    Optional<ReservationTime> findById(Long id);
-
-    List<ReservationTime> findReservedTimesByDateAndTheme(LocalDate date, Long themeId);
-
-    List<ReservationTime> findAll();
-
-    void delete(Long id);
+    @Query(
+            value = """
+                    SELECT t FROM ReservationTime t
+                    INNER JOIN Reservation r ON r.slot.time.id = t.id
+                    WHERE r.slot.reservationDate = :reservationDate 
+                      AND r.slot.theme.id = :themeId
+                    """)
+    List<ReservationTime> findReservedTimesByDateAndTheme_Id(
+            @Param("reservationDate") LocalDate reservationDate,
+            @Param("themeId") Long themeId
+    );
 
     boolean existsByStartAt(LocalTime startAt);
 }

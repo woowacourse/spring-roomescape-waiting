@@ -7,7 +7,7 @@ import roomescape.domain.Wait;
 
 public record WaitResponse(
         Long id,
-        String name,
+        MemberResponse member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
@@ -19,7 +19,7 @@ public record WaitResponse(
     public static WaitResponse of(Wait wait, Long order) {
         return new WaitResponse(
                 wait.getId(),
-                wait.getName(),
+                MemberResponse.from(wait.getMember()),
                 wait.getReservationDate(),
                 ReservationTimeResponse.from(wait.getTime()),
                 ThemeResponse.from(wait.getTheme()),

@@ -14,6 +14,7 @@ import roomescape.domain.ReservationAvailability;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+import roomescape.domain.Waits;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -75,7 +76,8 @@ public class ReservationTimeFacade {
         }
         Theme theme = themeService.findTheme(themeId);
         Slot slot = new Slot(date, reservationTime, theme);
-        if (waitService.findBySlot(slot).isFullWaitsBySlot(slot)) {
+        Waits waits = waitService.findBySlot(slot);
+        if (waits.isFullWaitsBySlot(slot)) {
             return ReservationAvailability.NOTHING_AVAILABLE;
         }
         return ReservationAvailability.WAITING_AVAILABLE;

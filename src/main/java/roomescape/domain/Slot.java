@@ -1,20 +1,34 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.exception.custom.InvalidDomainValueException;
 
+@Embeddable
 public class Slot {
 
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private LocalDate reservationDate;
 
-    public Slot(LocalDate date, ReservationTime time, Theme theme) {
-        validate(date, time, theme);
-        this.date = date;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    public Slot() {
+    }
+
+    public Slot(LocalDate reservationDate, ReservationTime time, Theme theme) {
+        validate(reservationDate, time, theme);
+        this.reservationDate = reservationDate;
         this.time = time;
         this.theme = theme;
     }
@@ -23,25 +37,33 @@ public class Slot {
         LocalDate nowDate = now.toLocalDate();
         LocalTime nowTime = now.toLocalTime();
 
-        if (date.isBefore(nowDate)) {
+        if (reservationDate.isBefore(nowDate)) {
             return true;
         }
-        if (date.isAfter(nowDate)) {
+        if (reservationDate.isAfter(nowDate)) {
             return false;
         }
         return time.isPast(nowTime);
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getReservationDate() {
+        return reservationDate;
     }
 
     public ReservationTime getTime() {
         return time;
     }
 
+    public Long getTimeId() {
+        return time.getId();
+    }
+
     public Theme getTheme() {
         return theme;
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme) {
@@ -62,12 +84,12 @@ public class Slot {
             return false;
         }
         Slot slot = (Slot) object;
-        return Objects.equals(date, slot.date) && Objects.equals(time, slot.time)
+        return Objects.equals(reservationDate, slot.reservationDate) && Objects.equals(time, slot.time)
                 && Objects.equals(theme, slot.theme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, time, theme);
+        return Objects.hash(reservationDate, time, theme);
     }
 }

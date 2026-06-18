@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,11 +28,20 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationWaitResponse> save(
+            @RequestHeader("Member-Id") Long memberId,
             @RequestBody ReservationCreateRequest request) {
-        ReservationWaitResponse response = reservationFacade.save(request);
+        ReservationWaitResponse response = reservationFacade.save(request, memberId);
         return ResponseEntity.
                 status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<ReservationWaitListResponse> findByMemberId(
+            @RequestHeader("Member-Id") Long memberId
+    ) {
+        ReservationWaitListResponse response = reservationFacade.findByMemberId(memberId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(params = "name")

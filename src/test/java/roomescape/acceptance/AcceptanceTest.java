@@ -2,6 +2,7 @@ package roomescape.acceptance;
 
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -19,8 +20,21 @@ public class AcceptanceTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @BeforeEach
+    void setUp() {
+        cleanDatabase();
+        jdbcTemplate.update("INSERT INTO member (name) VALUES ('예약자')");
+        jdbcTemplate.update("INSERT INTO member (name) VALUES ('예약자2')");
+        jdbcTemplate.update("INSERT INTO member (name) VALUES ('예약자3')");
+        jdbcTemplate.update("INSERT INTO member (name) VALUES ('예약자4')");
+    }
+
     @AfterEach
     void afterEach() {
+        cleanDatabase();
+    }
+
+    private void cleanDatabase() {
         String sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC'";
         List<String> tableNames = jdbcTemplate.queryForList(sql, String.class);
 

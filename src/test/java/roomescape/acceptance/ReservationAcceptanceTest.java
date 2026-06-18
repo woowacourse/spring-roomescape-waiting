@@ -17,11 +17,11 @@ public class ReservationAcceptanceTest extends AcceptanceTest {
         ThemeSteps.createTheme("방탈출1", "방탈출1 설명", "theme/url.png");
 
         // 3. 예약 추가
-        ReservationSteps.saveReservation("예약자", NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(1L, NOW_DATE, 1L, 1L);
 
         // 4. 대기 추가
-        ReservationSteps.saveReservation("예약자2", NOW_DATE, 1L, 1L);
-        ReservationSteps.saveReservation("예약자3", NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(2L, NOW_DATE, 1L, 1L);
+        ReservationSteps.saveReservation(3L, NOW_DATE, 1L, 1L);
 
         // 5. 이름 조회로 대기 추가 확인
         ReservationSteps.findByName("예약자2", 1, ReservationStatus.WAITING);

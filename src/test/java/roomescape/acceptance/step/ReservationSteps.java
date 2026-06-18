@@ -10,14 +10,14 @@ import roomescape.domain.ReservationStatus;
 
 public class ReservationSteps {
 
-    public static void saveReservation(String name, String date, Long timeId, Long themeId) {
+    public static void saveReservation(Long memberId, String date, Long timeId, Long themeId) {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", name);
         params.put("date", date);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
+                .header("Member-Id", memberId)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")

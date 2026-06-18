@@ -34,8 +34,12 @@ public class ReservationService {
         return reservationRepository.save(reservationWithoutId);
     }
 
+    public List<Reservation> findByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId);
+    }
+
     public List<Reservation> findByName(String name) {
-        return reservationRepository.findByName(name);
+        return reservationRepository.findByMember_Name(name);
     }
 
     public List<Reservation> findAll() {
@@ -51,7 +55,12 @@ public class ReservationService {
     public void delete(Reservation reservation, boolean isAdmin) {
         ReservationValidator reservationValidator = ReservationValidatorFactory.getValidator(isAdmin);
         reservationValidator.validateDelete(reservation, LocalDateTime.now(clock));
-        reservationRepository.delete(reservation.getId());
+        reservationRepository.deleteById(reservation.getId());
+    }
+
+    public void deleteAndFlush(Reservation reservation, boolean isAdmin) {
+        delete(reservation, isAdmin);
+        reservationRepository.flush();
     }
 
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
@@ -59,13 +68,13 @@ public class ReservationService {
     }
 
     public void validateReferencedTheme(Long themeId) {
-        if (reservationRepository.existsByThemeId(themeId)) {
+        if (reservationRepository.existsBySlot_Theme_Id(themeId)) {
             throw new CannotDeleteThemeInUseException();
         }
     }
 
-    public void validateReferencedTime(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+    public void validateReferencedTime(Long timeId) {
+        if (reservationRepository.existsBySlot_Time_Id(timeId)) {
             throw new CannotDeleteReservationTimeInUseException();
         }
     }
