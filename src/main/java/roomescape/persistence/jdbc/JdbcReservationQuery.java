@@ -63,9 +63,11 @@ public class JdbcReservationQuery implements ReservationQuery {
 
         String joinClause = """
             FROM reservation_slot r
-            JOIN reservation re ON re.slot_id = r.id AND re.active_status = 'ACTIVE'
+            JOIN reservation re ON re.slot_id = r.id AND re.active_status <> 'CANCELED'
             JOIN theme t ON r.theme_id = t.id
             JOIN reservation_time rt ON r.time_id = rt.id
+            LEFT JOIN orders o ON o.target_id = re.id
+            LEFT JOIN payment_history ph ON ph.order_id = o.order_id
             """;
 
         String countSql = "SELECT COUNT(*) " + joinClause + whereClause;
@@ -79,12 +81,17 @@ public class JdbcReservationQuery implements ReservationQuery {
                        t.name AS theme_name,
                        t.price AS theme_price,
                        re.status AS res_status,
+                       o.order_id AS order_id,
+                       o.status AS order_status,
+                       ph.payment_key AS payment_key,
+                       ph.amount AS payment_amount,
+                       ph.status AS payment_status,
                        CASE WHEN re.status = 'WAITING'
                             THEN (SELECT COUNT(*) + 1
                                   FROM reservation re2
                                   WHERE re2.slot_id = re.slot_id
                                     AND re2.status = 'WAITING'
-                                    AND re2.active_status = 'ACTIVE'
+                                    AND re2.active_status <> 'CANCELED'
                                     AND re2.created_at < re.created_at)
                             ELSE NULL
                        END AS waiting_rank

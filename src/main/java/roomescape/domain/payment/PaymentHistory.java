@@ -25,7 +25,9 @@ public class PaymentHistory extends BaseDomain {
             LocalDateTime createdAt
     ) {
         validateRequired(orderId, "주문 ID는 필수 값입니다.");
-        validateRequired(paymentKey, "결제 키 정보는 필수 값입니다.");
+        if (status == PaymentStatus.DONE) {
+            validateRequired(paymentKey, "결제 키 정보는 필수 값입니다.");
+        }
         validateAmount(amount);
         validateStatus(status);
         validateCreatedAt(createdAt);
@@ -38,7 +40,7 @@ public class PaymentHistory extends BaseDomain {
         this.createdAt = createdAt;
     }
 
-    public static PaymentHistory approved(
+    public static PaymentHistory record(
             String orderId,
             String paymentKey,
             Long amount,
@@ -52,7 +54,9 @@ public class PaymentHistory extends BaseDomain {
                 status,
                 LocalDateTime.now()
         );
-        paymentHistory.addEvent(new PaymentApprovedEvent(orderId, paymentKey, amount, status));
+        if (status == PaymentStatus.DONE) {
+            paymentHistory.addEvent(new PaymentApprovedEvent(orderId, paymentKey, amount, status));
+        }
         return paymentHistory;
     }
 
