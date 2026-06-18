@@ -10,8 +10,4 @@ import java.lang.annotation.Target;
 public @interface RateLimit {
 
     String key() default "DEFAULT_RATE_LIMIT";
-
-    int capacity() default 100;
-
-    double refillPerSecond() default 1;
 }

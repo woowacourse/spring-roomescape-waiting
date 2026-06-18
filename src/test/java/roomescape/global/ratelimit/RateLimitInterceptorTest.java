@@ -21,10 +21,18 @@ class RateLimitInterceptorTest {
 
     @BeforeEach
     void setUp() {
+        int capacity = 1;
+        double refillPerSecond = 1.0;
+
         NanoClock mockClock = mock(NanoClock.class);
         when(mockClock.currentNanoseconds()).thenReturn(0L); // 초기 시간 0으로 고정
+        RateLimitBuckets buckets = new RateLimitBuckets(
+                capacity,
+                refillPerSecond,
+                mockClock
+        );
 
-        interceptor = new RateLimitInterceptor(mockClock);
+        interceptor = new RateLimitInterceptor(buckets);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
     }
@@ -92,7 +100,7 @@ class RateLimitInterceptorTest {
     // --- 테스트를 위한 더미(Dummy) 컨트롤러 클래스들 ---
 
     static class DummyController {
-        @RateLimit(key = "method-limit", capacity = 1, refillPerSecond = 1.0)
+        @RateLimit(key = "method-limit")
         public void methodLevelLimit() {
         }
 
@@ -100,7 +108,7 @@ class RateLimitInterceptorTest {
         }
     }
 
-    @RateLimit(key = "class-limit", capacity = 1, refillPerSecond = 1.0)
+    @RateLimit(key = "class-limit")
     static class DummyClassLevelController {
         public void classLevelLimit() {
         }

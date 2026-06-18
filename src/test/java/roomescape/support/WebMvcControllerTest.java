@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
 import roomescape.global.ratelimit.NanoClockConfig;
+import roomescape.global.ratelimit.RateLimitBuckets;
 import roomescape.global.ratelimit.RateLimitInterceptor;
 
 @Target(ElementType.TYPE)
@@ -15,6 +16,7 @@ import roomescape.global.ratelimit.RateLimitInterceptor;
 @WebMvcTest
 @Import({
         RateLimitInterceptor.class,
+        RateLimitBuckets.class,
         NanoClockConfig.class
 })
 public @interface WebMvcControllerTest {

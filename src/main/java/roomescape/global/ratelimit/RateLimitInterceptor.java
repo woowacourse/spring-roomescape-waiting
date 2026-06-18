@@ -16,8 +16,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @RequiredArgsConstructor
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-    private final NanoClock nanoClock;
-    private final Map<String, RateLimitBucket> buckets = new ConcurrentHashMap<>();
+    private final RateLimitBuckets buckets;
 
     @Override
     public boolean preHandle(
@@ -30,7 +29,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             if (rateLimit == null) {
                 return true;
             }
-            RateLimitBucket bucket = findOrCreateBucket(rateLimit);
+            RateLimitBucket bucket = buckets.getOrCreateByKey(rateLimit.key());
 
             if (!bucket.tryConsume()) {
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
@@ -49,15 +48,5 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
 
         return handler.getBeanType().getAnnotation(RateLimit.class);
-    }
-
-    private RateLimitBucket findOrCreateBucket(RateLimit rateLimit) {
-        return buckets.computeIfAbsent(rateLimit.key(), key -> {
-            return new RateLimitBucket(
-                    rateLimit.capacity(),
-                    rateLimit.refillPerSecond(),
-                    nanoClock
-            );
-        });
     }
 }
