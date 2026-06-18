@@ -34,7 +34,8 @@ public class PaymentService {
 
         validateAmount(amount, paymentOrder);
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount,
+                paymentOrder.getIdempotencyKey()));
         paymentOrderRepository.updatePaymentKey(orderId, result.paymentKey());
         reservationRepository.updateStatus(paymentOrder.getReservationId(), ReservationStatus.RESERVED);
         return result;

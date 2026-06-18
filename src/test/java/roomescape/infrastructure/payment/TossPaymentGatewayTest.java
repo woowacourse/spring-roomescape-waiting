@@ -43,7 +43,7 @@ class TossPaymentGatewayTest {
         server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Authorization", authorization))
-                .andExpect(header("Idempotency-Key", "order_123456"))
+                .andExpect(header("Idempotency-Key", "idempotency-key-123"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("""
                         {
@@ -60,7 +60,8 @@ class TossPaymentGatewayTest {
                         }
                         """, MediaType.APPLICATION_JSON));
 
-        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L));
+        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L,
+                "idempotency-key-123"));
 
         assertThat(result.paymentKey()).isEqualTo("payment_key");
         assertThat(result.orderId()).isEqualTo("order_123456");
@@ -146,7 +147,8 @@ class TossPaymentGatewayTest {
                                 }
                                 """.formatted(code)));
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L,
+                "idempotency-key-123")))
                 .isInstanceOf(expectedExceptionType);
         server.verify();
     }
@@ -161,7 +163,8 @@ class TossPaymentGatewayTest {
         server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andRespond(withException(exception));
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L,
+                "idempotency-key-123")))
                 .isInstanceOf(expectedExceptionType)
                 .extracting("code")
                 .isEqualTo(expectedCode);
