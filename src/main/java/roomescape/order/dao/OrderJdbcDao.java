@@ -137,4 +137,15 @@ public class OrderJdbcDao implements OrderDao {
         SqlParameterSource params = new MapSqlParameterSource("status", OrderStatus.NEEDS_CHECK.name());
         return jdbcTemplate.query(sql, params, ROW_MAPPER);
     }
+
+    @Override
+    public List<Order> findNeedsRefund() {
+        String sql = """
+                SELECT id, order_id, idempotency_key, reservation_id, amount, payment_key, status
+                FROM orders
+                WHERE status = :status
+                """;
+        SqlParameterSource params = new MapSqlParameterSource("status", OrderStatus.NEEDS_REFUND.name());
+        return jdbcTemplate.query(sql, params, ROW_MAPPER);
+    }
 }

@@ -25,4 +25,6 @@ public interface OrderDao {
     List<Order> findByReservationIds(List<Long> reservationIds);
 
     List<Order> findNeedsCheck();
+
+    List<Order> findNeedsRefund();
 }

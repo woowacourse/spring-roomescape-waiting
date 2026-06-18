@@ -76,6 +76,15 @@ public class Order {
         this.status = OrderStatus.NEEDS_CHECK;
     }
 
+    /**
+     * 결제는 승인됐지만 예약 확정에 실패한 상태로 표시한다(보상 필요). 돈이 이미 나갔으므로
+     * 실패가 아니라 '환불 대기' — RefundWorker가 게이트웨이 취소 후 FAILED로 수렴시킨다.
+     * paymentKey는 승인 때 이미 합류했으므로 그대로 둔다(취소 호출에 쓴다).
+     */
+    public void markNeedsRefund() {
+        this.status = OrderStatus.NEEDS_REFUND;
+    }
+
     public boolean isConfirmed() {
         return status == OrderStatus.CONFIRMED;
     }

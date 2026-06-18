@@ -18,6 +18,7 @@ import roomescape.payment.PaymentGateway;
 import roomescape.payment.exception.PaymentGatewayUnreachableException;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.exception.PaymentResultUnknownException;
+import roomescape.payment.toss.dto.TossCancelRequest;
 import roomescape.payment.toss.dto.TossConfirmRequest;
 import roomescape.payment.toss.dto.TossErrorResponse;
 import roomescape.payment.toss.dto.TossPaymentResponse;
@@ -81,6 +82,22 @@ public class TossPaymentGateway implements PaymentGateway {
         }
         return response != null && "DONE".equals(response.status())
                 ? PaymentApprovalStatus.APPROVED : PaymentApprovalStatus.NOT_APPROVED;
+    }
+
+    @Override
+    public void cancel(String paymentKey, String idempotencyKey) {
+        try {
+            restClient.post()
+                    .uri(properties.cancelUrl(), paymentKey)
+                    .header("Idempotency-Key", idempotencyKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new TossCancelRequest("예약 확정 실패로 인한 자동 환불"))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::translateErrorStatus)
+                    .toBodilessEntity();
+        } catch (RestClientException e) {
+            throw translateTransportFailure(e);
+        }
     }
 
     @Override

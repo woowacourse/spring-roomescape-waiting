@@ -3,6 +3,8 @@ package roomescape.payment.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.common.exception.EntityNotFoundException;
 import roomescape.order.Order;
 import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
@@ -45,12 +47,25 @@ public class PaymentReconciliationService {
         // 여러 인스턴스의 워커가 동시에 와도) DB가 한쪽만 이기게 직렬화한다(낙관, status가 곧 version).
         if (status == PaymentApprovalStatus.APPROVED) {
             if (orderService.complete(order, order.getPaymentKey())) {
-                reservationService.confirm(order.getReservationId());
+                secureReservationOrScheduleRefund(order);
             }
         } else {
             if (orderService.markFailed(order)) {
                 reservationService.cancelPending(order.getReservationId());
             }
+        }
+    }
+
+    /**
+     * 승인 확인된 주문의 예약을 확정한다. 예약이 이미 사라졌으면(영구 실패) 돈을 되돌려야 하므로
+     * NEEDS_REFUND로 남긴다(예외를 안 던져 커밋) — 같은 예약 확정을 무한 재시도하지 않고,
+     * RefundWorker가 토스 취소로 환불(보상)하게 넘긴다.
+     */
+    private void secureReservationOrScheduleRefund(Order order) {
+        try {
+            reservationService.confirm(order.getReservationId());
+        } catch (BusinessRuleViolationException | EntityNotFoundException e) {
+            orderService.markNeedsRefund(order);
         }
     }
 }

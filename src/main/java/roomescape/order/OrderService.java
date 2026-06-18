@@ -66,6 +66,11 @@ public class OrderService {
         return orderDao.findNeedsCheck().stream().map(Order::getOrderId).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<String> findNeedsRefundOrderIds() {
+        return orderDao.findNeedsRefund().stream().map(Order::getOrderId).toList();
+    }
+
     /**
      * 주문을 확정한다. 전이 전 상태(expected)를 기억해 CAS로 갱신 — 동시에 다른 곳(recheck·reconcile·워커)이
      * 이미 수렴시켰으면 0행이 돌아오고 false를 반환한다(졌음). 이긴 호출만 예약 확정 같은 후속을 진행해야 한다.
@@ -79,6 +84,16 @@ public class OrderService {
     public boolean markFailed(Order order) {
         OrderStatus expected = order.getStatus();
         order.markFailed();
+        return orderDao.compareAndUpdate(order, expected) == 1;
+    }
+
+    /**
+     * 결제는 됐는데 예약 확정에 실패한 주문을 환불 대기(NEEDS_REFUND)로 표시한다(보상 예약).
+     * 전이 전 상태를 기억해 CAS로 선점한 쪽만 true — 동시 수렴 시 한쪽만 이긴다.
+     */
+    public boolean markNeedsRefund(Order order) {
+        OrderStatus expected = order.getStatus();
+        order.markNeedsRefund();
         return orderDao.compareAndUpdate(order, expected) == 1;
     }
 

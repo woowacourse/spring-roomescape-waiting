@@ -31,8 +31,10 @@ import roomescape.payment.ConfirmOutcome;
 import roomescape.payment.PaymentApprovalStatus;
 import roomescape.payment.service.PaymentAbandonmentService;
 import roomescape.payment.exception.PaymentGatewayUnreachableException;
+import roomescape.payment.exception.PaymentResultUnknownException;
 import roomescape.payment.service.PaymentHistoryService;
 import roomescape.payment.service.PaymentReconciliationService;
+import roomescape.payment.service.PaymentRefundService;
 import roomescape.payment.service.PaymentService;
 import roomescape.payment.web.dto.MyOrderResponse;
 import roomescape.payment.web.dto.PaymentReadyResponse;
@@ -59,7 +61,7 @@ import roomescape.waiting.dao.WaitingJdbcDao;
  * 주문·예약은 실제 DAO/서비스로 굴려 *실제 상태 전이*와 와이어링까지 검증한다.
  */
 @JdbcTest
-@Import({PaymentService.class, PaymentHistoryService.class, PaymentAbandonmentService.class, PaymentReconciliationService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
+@Import({PaymentService.class, PaymentHistoryService.class, PaymentAbandonmentService.class, PaymentReconciliationService.class, PaymentRefundService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
         ReservationAuthorizationService.class, PromotionService.class, FakePaymentGateway.class,
         ReservationJdbcDao.class, OrderJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class,
         MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class})
@@ -74,6 +76,8 @@ class PaymentServiceTest {
     private PaymentAbandonmentService abandonmentService;
     @Autowired
     private PaymentReconciliationService reconciliationService;
+    @Autowired
+    private PaymentRefundService refundService;
     @Autowired
     private FakePaymentGateway fakeGateway;
     @Autowired
@@ -100,6 +104,7 @@ class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
+        fakeGateway.reset();
         jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
         storeId = jdbcTemplate.queryForObject("SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
         jdbcTemplate.update("INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
@@ -320,5 +325,68 @@ class PaymentServiceTest {
         assertThat(secondWon).isFalse();  // 0행 — 이미 CONFIRMED라 졌음(status 가드가 DB에서 막음)
         assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
                 .isEqualTo(OrderStatus.CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("결제는 됐는데 예약이 사라졌으면(영구 실패) 주문은 NEEDS_REFUND — 결제 흔적이 살아남는다")
+    void confirmSchedulesRefundWhenReservationGone() {
+        Created created = createReservationWithOrder();
+        reservationService.cancelPending(created.reservation().getId()); // 결제 직전 예약이 만료/취소된 상황
+
+        ConfirmOutcome outcome = paymentService.confirm(member, "pk-1",
+                created.order().getOrderId(), created.order().getAmount());
+
+        assertThat(outcome).isEqualTo(ConfirmOutcome.NEEDS_REFUND);
+        // 예외를 다시 안 던져 커밋 — 롤백으로 결제 흔적이 사라지지 않는다(PENDING/FAILED 아님).
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.NEEDS_REFUND);
+        assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName("환불(보상): NEEDS_REFUND 주문을 게이트웨이 취소로 환불하고 FAILED로 수렴시킨다")
+    void refundCompensatesNeedsRefundOrder() {
+        Created created = createReservationWithOrder();
+        reservationService.cancelPending(created.reservation().getId());
+        paymentService.confirm(member, "pk-1", created.order().getOrderId(), created.order().getAmount());
+
+        refundService.refund(created.order().getOrderId());
+
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.FAILED);
+        assertThat(fakeGateway.canceledPaymentKeys()).contains("pk-1");
+    }
+
+    @Test
+    @DisplayName("환불(보상): 취소 결과가 불명확하면 NEEDS_REFUND를 유지해 다음 주기에 재시도한다")
+    void refundKeepsStateWhenCancelUnknown() {
+        Created created = createReservationWithOrder();
+        reservationService.cancelPending(created.reservation().getId());
+        paymentService.confirm(member, FakePaymentGateway.REFUND_UNKNOWN_KEY,
+                created.order().getOrderId(), created.order().getAmount());
+
+        assertThatThrownBy(() -> refundService.refund(created.order().getOrderId()))
+                .isInstanceOf(PaymentResultUnknownException.class);
+
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.NEEDS_REFUND);
+        assertThat(fakeGateway.canceledPaymentKeys()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("reconciliation: 승인됐지만 예약이 사라졌으면 무한 재시도 대신 NEEDS_REFUND로 보낸다(보상 위임)")
+    void reconcileSchedulesRefundWhenApprovedButReservationGone() {
+        Created created = createReservationWithOrder();
+        orderService.markNeedsCheck(created.order(), "pk-1");
+        reservationService.cancelPending(created.reservation().getId());
+        fakeGateway.setReconcileStatus(PaymentApprovalStatus.APPROVED);
+
+        reconciliationService.reconcile(created.order().getOrderId());
+
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.NEEDS_REFUND);
+        assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
     }
 }

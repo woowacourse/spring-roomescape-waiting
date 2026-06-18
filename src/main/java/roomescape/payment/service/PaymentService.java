@@ -100,8 +100,23 @@ public class PaymentService {
         }
         // CAS로 상태를 선점한 쪽만 예약 확정을 진행한다(동시 수렴 시 한쪽만 이김).
         if (orderService.complete(order, result.paymentKey())) {
-            reservationService.confirm(order.getReservationId());
+            return secureReservationOrScheduleRefund(order);
         }
         return ConfirmOutcome.CONFIRMED;
+    }
+
+    /**
+     * 결제 승인(돈 나감) 뒤 예약을 확정한다. 예약이 이미 사라졌으면(취소·만료) 확정은 *영구* 실패다 —
+     * 돈은 못 되돌리니 실패로 단정하지 않고 NEEDS_REFUND로 남긴다(증거 생존: 예외를 다시 안 던져 커밋).
+     * 환불(보상)은 RefundWorker가 게이트웨이 취소로 처리한다. 일시적 인프라 예외는 잡지 않아 전파된다(롤백 → 재시도).
+     */
+    private ConfirmOutcome secureReservationOrScheduleRefund(Order order) {
+        try {
+            reservationService.confirm(order.getReservationId());
+            return ConfirmOutcome.CONFIRMED;
+        } catch (BusinessRuleViolationException | EntityNotFoundException e) {
+            orderService.markNeedsRefund(order);
+            return ConfirmOutcome.NEEDS_REFUND;
+        }
     }
 }

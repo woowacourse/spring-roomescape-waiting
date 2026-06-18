@@ -6,5 +6,7 @@ package roomescape.payment;
  */
 public enum ConfirmOutcome {
     CONFIRMED,
-    NEEDS_CHECK
+    NEEDS_CHECK,
+    // 결제는 승인됐지만 예약을 확정하지 못함 — 환불(보상)이 예약돼 RefundWorker가 처리한다.
+    NEEDS_REFUND
 }

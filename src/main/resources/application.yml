@@ -20,6 +20,8 @@ toss:
   confirm-url: ${TOSS_CONFIRM_URL:/v1/payments/confirm}
   # find-url: 주문별 결제 상태 조회(GET {find-url}/{orderId}). reconciliation이 진실 확인에 쓴다.
   find-url: ${TOSS_FIND_URL:/v1/payments/orders}
+  # cancel-url: 승인된 결제 취소(환불). POST {cancel-url}({paymentKey} 치환). 보상(RefundWorker)이 쓴다.
+  cancel-url: ${TOSS_CANCEL_URL:/v1/payments/{paymentKey}/cancel}
   # connect: 연결 맺기까지, read: 연결 후 응답 읽기까지 최대 대기. 느린 호출을 일찍 포기해 스레드 보호.
   connect-timeout: ${TOSS_CONNECT_TIMEOUT:2s}
   read-timeout: ${TOSS_READ_TIMEOUT:5s}
@@ -34,3 +36,6 @@ payment:
   # 결과 불명확(NEEDS_CHECK) 주문을 토스에 조회해 확정/실패로 자동 수렴(reconciliation).
   reconciliation:
     poll-interval-ms: ${PAYMENT_RECONCILIATION_POLL_INTERVAL_MS:60000}
+  # 결제는 됐는데 예약 확정에 실패한(NEEDS_REFUND) 주문을 토스 취소로 환불(보상)하는 스케줄러.
+  refund:
+    poll-interval-ms: ${PAYMENT_REFUND_POLL_INTERVAL_MS:60000}

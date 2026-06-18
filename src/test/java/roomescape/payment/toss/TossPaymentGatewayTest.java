@@ -115,6 +115,21 @@ class TossPaymentGatewayTest {
     }
 
     @Test
+    void cancel_요청을_paymentKey_취소경로로_보내고_멱등키를_헤더로_싣는다() throws InterruptedException {
+        drainRecordedRequests();
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "CANCELED", "totalAmount": 30000}
+                """);
+
+        tossPaymentGateway.cancel("test_pk_1", "refund-idem-7");
+
+        RecordedRequest recorded = mockWebServer.takeRequest(1, TimeUnit.SECONDS);
+        assertThat(recorded).isNotNull();
+        assertThat(recorded.getPath()).isEqualTo("/v1/payments/test_pk_1/cancel");
+        assertThat(recorded.getHeader("Idempotency-Key")).isEqualTo("refund-idem-7");
+    }
+
+    @Test
     void 에러_상태인데_본문이_비어있어도_부서지지_않고_TossPaymentException으로_변환한다() {
         // 실제로 겪은 케이스: confirm-url 오설정 등으로 에러 status + 빈 본문이 올 때 핸들러가 터지면 안 된다.
         enqueue(404, "");
