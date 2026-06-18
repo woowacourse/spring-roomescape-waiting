@@ -19,6 +19,7 @@ import roomescape.exception.RoomescapeException;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.OrderRepository;
+import roomescape.repository.ReservationRepository;
 
 class PaymentServiceTest extends ServiceIntegrationTest {
 
@@ -30,6 +31,9 @@ class PaymentServiceTest extends ServiceIntegrationTest {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @MockitoBean
     private PaymentGateway paymentGateway;
@@ -65,6 +69,39 @@ class PaymentServiceTest extends ServiceIntegrationTest {
     void confirmThrowsWhenOrderNotFound() {
         assertThatThrownBy(() -> paymentService.confirm("payment-key", "non-existent-order", 50000L))
                 .isInstanceOf(RoomescapeException.class);
+    }
+
+    @Test
+    @DisplayName("결제 대기 주문을 정리하면 주문과 예약이 함께 삭제된다")
+    void cancelPendingOrderDeletesOrderAndReservation() {
+        Order order = createOrder();
+
+        paymentService.cancelPendingOrder(order.getOrderId().getValue());
+
+        assertThat(orderRepository.findByOrderId(order.getOrderId())).isEmpty();
+        assertThat(reservationRepository.findById(order.getReservationId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("이미 승인된(READY 아님) 주문은 정리 대상에서 제외한다")
+    void cancelPendingOrderKeepsConfirmedOrder() {
+        Order order = createOrder();
+        String orderId = order.getOrderId().getValue();
+        given(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .willReturn(new PaymentResult("payment-key", orderId, PaymentStatus.DONE, 50000L));
+        paymentService.confirm("payment-key", orderId, 50000L);
+
+        paymentService.cancelPendingOrder(orderId);
+
+        assertThat(orderRepository.findByOrderId(order.getOrderId())).isPresent();
+        assertThat(reservationRepository.findById(order.getReservationId())).isPresent();
+    }
+
+    @Test
+    @DisplayName("orderId가 없으면(사용자 취소) 아무것도 하지 않는다")
+    void cancelPendingOrderIgnoresNullOrderId() {
+        paymentService.cancelPendingOrder(null);
+        paymentService.cancelPendingOrder("  ");
     }
 
     private Order createOrder() {

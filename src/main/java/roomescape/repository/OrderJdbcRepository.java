@@ -93,4 +93,10 @@ public class OrderJdbcRepository implements OrderRepository {
         String sql = "update orders set status = ?, payment_key = ? where order_id = ?";
         return jdbcTemplate.update(sql, status.name(), paymentKey, orderId.getValue());
     }
+
+    @Override
+    public int deleteByOrderId(OrderId orderId) {
+        String sql = "delete from orders where order_id = ?";
+        return jdbcTemplate.update(sql, orderId.getValue());
+    }
 }

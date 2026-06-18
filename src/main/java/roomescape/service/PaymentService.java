@@ -41,6 +41,20 @@ public class PaymentService {
         return result;
     }
 
+    @Transactional
+    public void cancelPendingOrder(String orderId) {
+        if (orderId == null || orderId.isBlank()) {
+            // 사용자가 결제창에서 취소(PAY_PROCESS_CANCELED)하면 orderId가 없을 수 있다.
+            return;
+        }
+        orderRepository.findByOrderId(OrderId.of(orderId))
+                .filter(order -> order.getStatus() == PaymentStatus.READY)
+                .ifPresent(order -> {
+                    orderRepository.deleteByOrderId(order.getOrderId());
+                    reservationRepository.deleteById(order.getReservationId());
+                });
+    }
+
     private Order findOrder(String orderId) {
         return orderRepository.findByOrderId(OrderId.of(orderId))
                 .orElseThrow(() -> new RoomescapeException(

@@ -3,6 +3,7 @@ package roomescape.controller;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,5 +91,24 @@ class PaymentControllerTest {
                         .param("amount", "50000"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    @DisplayName("POST /payments/fail - orderId로 결제 대기 주문 정리를 요청한다")
+    void failCancelsPendingOrder() throws Exception {
+        mockMvc.perform(post("/payments/fail")
+                        .param("orderId", "order-12345"))
+                .andExpect(status().isOk());
+
+        then(paymentService).should().cancelPendingOrder("order-12345");
+    }
+
+    @Test
+    @DisplayName("POST /payments/fail - orderId가 없어도(사용자 취소) 200을 반환한다")
+    void failWithoutOrderIdReturnsOk() throws Exception {
+        mockMvc.perform(post("/payments/fail"))
+                .andExpect(status().isOk());
+
+        then(paymentService).should().cancelPendingOrder(null);
     }
 }

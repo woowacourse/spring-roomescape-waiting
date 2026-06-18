@@ -29,4 +29,10 @@ public class PaymentController {
         PaymentResult paymentResult = paymentService.confirm(paymentKey, orderId, amount);
         return ResponseEntity.ok(paymentResult);
     }
+
+    @PostMapping("/fail")
+    public ResponseEntity<Void> fail(@RequestParam(required = false) String orderId) {
+        paymentService.cancelPendingOrder(orderId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -559,8 +559,19 @@
                 R.toast(`결제 승인 실패: ${e.message}`, 'error');
             }
         } else if (payment === 'fail') {
+            const orderId = params.get('orderId');
             const message = params.get('message') || '결제가 취소되었거나 실패했습니다.';
             R.toast(`결제 실패: ${message}`, 'error');
+            // 사용자 취소(PAY_PROCESS_CANCELED)는 orderId가 없을 수 있으므로 null 가드 후 정리한다.
+            if (orderId) {
+                try {
+                    await R.api('POST', `/payments/fail?orderId=${encodeURIComponent(orderId)}`,
+                        {token: R.auth.getMemberToken()});
+                } catch (e) {
+                    // 정리 실패는 사용자에게 이미 실패를 안내했으므로 조용히 무시한다.
+                }
+                await loadMyReservations();
+            }
         }
     }
 
