@@ -14,10 +14,17 @@ import roomescape.exception.PaymentException.PaymentAuthException;
 import roomescape.exception.PaymentException.PaymentConfirmException;
 import roomescape.exception.PaymentException.PaymentInternalException;
 import roomescape.exception.PaymentException.PaymentNotFoundException;
+import roomescape.exception.PaymentException.PaymentResultUnknownException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 public class PaymentExceptionHandler {
+
+    @ExceptionHandler(PaymentResultUnknownException.class)
+    public ResponseEntity<ErrorResponse> handle(PaymentResultUnknownException e) {
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
+                .body(new ErrorResponse("PAYMENT_RESULT_UNKNOWN", e.getMessage()));
+    }
 
     @ExceptionHandler(PaymentAmountMismatchException.class)
     public ResponseEntity<ErrorResponse> handle(PaymentAmountMismatchException e) {
