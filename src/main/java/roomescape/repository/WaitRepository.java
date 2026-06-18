@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,14 +20,17 @@ public interface WaitRepository extends JpaRepository<Wait, Long> {
                       AND w.slot.time.id = :timeId 
                       AND w.slot.theme.id = :themeId
                     """)
+    @EntityGraph(attributePaths = {"member", "slot.time", "slot.theme"})
     List<Wait> findBySlot(
             @Param("reservationDate") LocalDate reservationDate,
             @Param("timeId") Long timeId,
             @Param("themeId") Long themeId
     );
 
+    @EntityGraph(attributePaths = {"member", "slot.time", "slot.theme"})
     List<Wait> findByMemberId(Long memberId);
 
+    @EntityGraph(attributePaths = {"member", "slot.time", "slot.theme"})
     List<Wait> findByMember_Name(String name);
 
     @Query(

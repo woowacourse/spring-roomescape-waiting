@@ -268,7 +268,7 @@ function createReservationSummary(item) {
   const summary = document.createElement("div");
   summary.className = "reservation-summary";
   summary.append(createTextElement("strong", item.theme.name));
-  summary.append(createMetaText("예약자", item.name));
+  summary.append(createMetaText("예약자", item.member.name));
   summary.append(createMetaText("날짜", item.date));
   summary.append(createMetaText("시간", formatStartAt(item.time.startAt)));
   if (item.status === "WAITING") {
@@ -368,7 +368,7 @@ function renderReservationResult(result) {
   const statusText = result.status === "WAITING" ? `대기 (순번: ${result.order}번)` : "예약 확정";
   elements.result.innerHTML = `
     <h3>${result.status === "WAITING" ? "대기 신청 완료" : "예약 완료"}</h3>
-    <p>예약자: ${escapeHtml(result.name)}</p>
+    <p>예약자: ${escapeHtml(result.member.name)}</p>
     <p>날짜: ${result.date}</p>
     <p>시간: ${formatStartAt(result.time.startAt)}</p>
     <p>테마: ${escapeHtml(result.theme.name)}</p>
