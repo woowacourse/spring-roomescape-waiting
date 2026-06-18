@@ -2,10 +2,12 @@ package roomescape.payment.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.InvalidRequestException;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentOrder;
+import roomescape.payment.domain.PaymentOrderDetails;
 import roomescape.payment.domain.PaymentResult;
 import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
@@ -17,6 +19,7 @@ import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -150,6 +153,15 @@ public class PaymentService {
                 .filter(PaymentOrder::isReady)
                 .map(paymentOrder -> paymentOrder.fail(code, message, LocalDateTime.now()))
                 .ifPresent(paymentOrderRepository::update);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentOrderDetails> findOrdersByName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidRequestException("조회할 이름을 입력해 주세요.");
+        }
+
+        return paymentOrderRepository.findDetailsByName(name.trim());
     }
 
     private PaymentOrder findOrder(String orderId) {

@@ -605,6 +605,28 @@ h2 {
     justify-content: flex-end;
 }
 
+.payment-order-card {
+    grid-template-columns: 1fr;
+}
+
+.payment-order-code {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.payment-failure {
+    padding: 10px 12px;
+    border: 1px solid rgba(229, 72, 77, 0.18);
+    border-radius: var(--radius);
+    background: #fff2f3;
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.5;
+}
+
 .payment-page {
     display: grid;
     min-height: calc(100vh - 84px);

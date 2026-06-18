@@ -8,9 +8,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.InvalidRequestException;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentOrder;
+import roomescape.payment.domain.PaymentOrderDetails;
 import roomescape.payment.domain.PaymentOrderStatus;
 import roomescape.payment.domain.PaymentResult;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
@@ -28,6 +30,7 @@ import roomescape.theme.repository.ThemeRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -42,6 +45,7 @@ import static org.mockito.Mockito.when;
 @Transactional
 class PaymentServiceTest {
     private static final String NAME = "브라운";
+    private static final String OTHER_NAME = "샐리";
     private static final LocalDate FUTURE_DATE = LocalDate.now().plusDays(1);
 
     @Autowired
@@ -341,6 +345,49 @@ class PaymentServiceTest {
         assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.FAILED);
         assertThat(paymentOrder.getFailureCode()).isEqualTo("REJECT_CARD_PAYMENT");
         assertThat(countAllReservations()).isZero();
+    }
+
+    @Test
+    @DisplayName("이름으로 결제 주문 내역을 조회한다.")
+    void findOrdersByName_success() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder failedOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+        PaymentReadyOrder confirmedOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+        paymentService.prepare(OTHER_NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        paymentService.fail(failedOrder.orderId(), "REJECT_CARD_PAYMENT", "카드 결제가 거절되었습니다.");
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenAnswer(invocation -> {
+                    PaymentConfirmation confirmation = invocation.getArgument(0);
+                    return new PaymentResult(
+                            confirmation.paymentKey(),
+                            confirmation.orderId(),
+                            confirmation.amount()
+                    );
+                });
+        paymentService.confirm("payment-key-123", confirmedOrder.orderId(), confirmedOrder.amount());
+
+        List<PaymentOrderDetails> orders = paymentService.findOrdersByName(NAME);
+
+        assertThat(orders).hasSize(2);
+        assertThat(orders)
+                .extracting(PaymentOrderDetails::orderId)
+                .containsExactly(confirmedOrder.orderId(), failedOrder.orderId());
+        assertThat(orders)
+                .extracting(PaymentOrderDetails::status)
+                .containsExactly(PaymentOrderStatus.CONFIRMED, PaymentOrderStatus.FAILED);
+        assertThat(orders.get(0).theme().getName()).isEqualTo("결제 탈출");
+        assertThat(orders.get(0).time().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(orders.get(1).failureMessage()).isEqualTo("카드 결제가 거절되었습니다.");
+    }
+
+    @Test
+    @DisplayName("결제 주문 내역 조회 이름은 비어 있을 수 없다.")
+    void findOrdersByName_fail_whenNameIsBlank() {
+        assertThatThrownBy(() -> paymentService.findOrdersByName(" "))
+                .isInstanceOf(InvalidRequestException.class)
+                .hasMessage("조회할 이름을 입력해 주세요.");
     }
 
     private ReservationTime saveReservationTime(int hour) {

@@ -9,7 +9,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.InfrastructureException;
 import roomescape.payment.domain.PaymentOrder;
+import roomescape.payment.domain.PaymentOrderDetails;
 import roomescape.payment.domain.PaymentOrderStatus;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -38,6 +41,35 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
             resultSet.getTimestamp("updated_at").toLocalDateTime(),
             toLocalDateTimeOrNull(resultSet.getTimestamp("confirmed_at"))
     );
+
+    private final RowMapper<PaymentOrderDetails> paymentOrderDetailsRowMapper = (resultSet, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                resultSet.getLong("time_id"),
+                resultSet.getTime("start_at").toLocalTime()
+        );
+        Theme theme = new Theme(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("theme_description"),
+                resultSet.getString("theme_thumbnail")
+        );
+
+        return new PaymentOrderDetails(
+                resultSet.getString("order_id"),
+                resultSet.getLong("amount"),
+                PaymentOrderStatus.valueOf(resultSet.getString("status")),
+                resultSet.getString("name"),
+                resultSet.getDate("date").toLocalDate(),
+                time,
+                theme,
+                resultSet.getObject("reservation_id", Long.class),
+                resultSet.getString("failure_code"),
+                resultSet.getString("failure_message"),
+                resultSet.getTimestamp("created_at").toLocalDateTime(),
+                resultSet.getTimestamp("updated_at").toLocalDateTime(),
+                toLocalDateTimeOrNull(resultSet.getTimestamp("confirmed_at"))
+        );
+    };
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -118,6 +150,37 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         return jdbcTemplate.query(sql, paymentOrderRowMapper, orderId)
                 .stream()
                 .findFirst();
+    }
+
+    @Override
+    public List<PaymentOrderDetails> findDetailsByName(String name) {
+        String sql = """
+                SELECT po.order_id,
+                       po.amount,
+                       po.status,
+                       po.name,
+                       po.date,
+                       po.time_id,
+                       rt.start_at,
+                       po.theme_id,
+                       t.name AS theme_name,
+                       t.description AS theme_description,
+                       t.thumbnail AS theme_thumbnail,
+                       po.reservation_id,
+                       po.failure_code,
+                       po.failure_message,
+                       po.created_at,
+                       po.updated_at,
+                       po.confirmed_at
+                FROM payment_order po
+                JOIN reservation_time rt ON po.time_id = rt.id
+                JOIN theme t ON po.theme_id = t.id
+                WHERE po.name = ?
+                ORDER BY po.created_at DESC,
+                         po.id DESC
+                """;
+
+        return jdbcTemplate.query(sql, paymentOrderDetailsRowMapper, name);
     }
 
     private int insert(PaymentOrder paymentOrder, KeyHolder keyHolder) {

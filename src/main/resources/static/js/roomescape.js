@@ -6,6 +6,8 @@ const state = {
     selectedTimeId: null,
     myReservations: [],
     myFilter: "active",
+    paymentOrders: [],
+    paymentFilter: "all",
     activeName: "",
     adminReservations: []
 };
@@ -22,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (page === "my") {
         initMyPage();
+    }
+    if (page === "payments") {
+        initPaymentOrdersPage();
     }
     if (page === "admin") {
         initAdmin();
@@ -94,6 +99,36 @@ async function initMyPage() {
         await loadMyReservations();
     } else {
         renderMyReservations([]);
+    }
+}
+
+async function initPaymentOrdersPage() {
+    const params = new URLSearchParams(window.location.search);
+    const filter = params.get("filter");
+    if (["ready", "confirmed", "failed"].includes(filter)) {
+        state.paymentFilter = filter;
+    }
+
+    $("#paymentLookupForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        state.activeName = $("#paymentLookupName").value.trim();
+        localStorage.setItem("roomflow.name", state.activeName);
+        loadPaymentOrders();
+    });
+    $$("[data-payment-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+            state.paymentFilter = button.dataset.paymentFilter;
+            renderPaymentOrders(state.paymentOrders);
+        });
+    });
+
+    const savedName = params.get("name") || localStorage.getItem("roomflow.name") || "";
+    $("#paymentLookupName").value = savedName;
+    state.activeName = savedName;
+    if (savedName) {
+        await loadPaymentOrders();
+    } else {
+        renderPaymentOrders([]);
     }
 }
 
@@ -349,6 +384,7 @@ function renderPaymentSuccess(reservation) {
         </div>
         <div class="hero-actions">
             <a class="button primary" href="/my.html?name=${encodeURIComponent(reservation.name)}">내 예약 보기</a>
+            <a class="button ghost" href="/payments.html?name=${encodeURIComponent(reservation.name)}">결제 내역</a>
             <a class="button ghost" href="/">다른 예약하기</a>
         </div>
     `;
@@ -370,7 +406,7 @@ function renderPaymentFailure(message, code) {
         </div>
         <div class="hero-actions">
             <a class="button primary" href="/">다시 예약하기</a>
-            <a class="button ghost" href="/my.html">내 예약 보기</a>
+            <a class="button ghost" href="/payments.html">결제 내역</a>
         </div>
     `;
 }
@@ -416,6 +452,95 @@ function renderMyReservations(reservations) {
     }
 
     root.innerHTML = visibleReservations.map((reservation) => reservationCard(reservation)).join("");
+}
+
+async function loadPaymentOrders() {
+    const name = state.activeName || $("#paymentLookupName").value.trim();
+    if (!name) {
+        renderPaymentOrders([]);
+        return;
+    }
+
+    try {
+        const response = await api(`/payments/orders?name=${encodeURIComponent(name)}`);
+        state.paymentOrders = response.orders || [];
+        renderPaymentOrders(state.paymentOrders);
+    } catch (error) {
+        state.paymentOrders = [];
+        renderPaymentOrders([]);
+        showToast(error.message, "error");
+    }
+}
+
+function renderPaymentOrders(orders) {
+    const visibleOrders = orders.filter((order) => {
+        if (state.paymentFilter === "ready") {
+            return order.status === "READY";
+        }
+        if (state.paymentFilter === "confirmed") {
+            return order.status === "CONFIRMED";
+        }
+        if (state.paymentFilter === "failed") {
+            return order.status === "FAILED";
+        }
+        return true;
+    });
+
+    $("#paymentTotalCount").textContent = orders.length;
+    $("#paymentReadyCount").textContent = orders.filter((order) => order.status === "READY").length;
+    $("#paymentConfirmedCount").textContent = orders.filter((order) => order.status === "CONFIRMED").length;
+    $("#paymentFailedCount").textContent = orders.filter((order) => order.status === "FAILED").length;
+
+    $$("[data-payment-filter]").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.paymentFilter === state.paymentFilter);
+    });
+
+    const root = $("#paymentOrders");
+    if (visibleOrders.length === 0) {
+        root.innerHTML = emptyState(paymentEmptyMessage());
+        return;
+    }
+
+    root.innerHTML = visibleOrders.map(paymentOrderCard).join("");
+}
+
+function paymentEmptyMessage() {
+    const messages = {
+        ready: "결제 대기 내역이 없습니다.",
+        confirmed: "결제 완료 내역이 없습니다.",
+        failed: "결제 실패 내역이 없습니다."
+    };
+
+    return messages[state.paymentFilter] || "결제 내역이 없습니다.";
+}
+
+function paymentOrderCard(order) {
+    const failure = order.status === "FAILED" && (order.failureMessage || order.failureCode)
+        ? `<div class="payment-failure">${escapeHtml(order.failureMessage || order.failureCode)}</div>`
+        : "";
+    const reservation = order.reservationId == null
+        ? ""
+        : `<span>예약 ID ${order.reservationId}</span>`;
+
+    return `
+        <article class="reservation-card payment-order-card">
+            <div class="reservation-main">
+                <div class="reservation-title">
+                    <h3>${escapeHtml(order.theme.name)}</h3>
+                    ${paymentStatusChip(order.status)}
+                </div>
+                <div class="reservation-meta">
+                    <span>${escapeHtml(order.name)}</span>
+                    <span>${escapeHtml(order.date)}</span>
+                    <span>${displayTime(order.time.startAt)}</span>
+                    <span>${formatCurrency(order.amount)}</span>
+                    ${reservation}
+                </div>
+                <div class="payment-order-code">${escapeHtml(order.orderId)}</div>
+                ${failure}
+            </div>
+        </article>
+    `;
 }
 
 function reservationCard(reservation) {
@@ -772,6 +897,19 @@ function statusChip(reservation) {
     return `<span class="status-chip muted">상태 확인 필요</span>`;
 }
 
+function paymentStatusChip(status) {
+    if (status === "READY") {
+        return `<span class="status-chip waiting">결제 대기</span>`;
+    }
+    if (status === "CONFIRMED") {
+        return `<span class="status-chip reserved">결제 완료</span>`;
+    }
+    if (status === "FAILED") {
+        return `<span class="status-chip canceled">결제 실패</span>`;
+    }
+    return `<span class="status-chip muted">상태 확인 필요</span>`;
+}
+
 function isActiveReservation(reservation) {
     return reservation.status === "RESERVED" || reservation.status === "WAITING";
 }
@@ -809,6 +947,10 @@ function displayTime(value) {
         return `${pad(value[0])}:${pad(value[1])}`;
     }
     return String(value).slice(0, 5);
+}
+
+function formatCurrency(value) {
+    return `${Number(value).toLocaleString("ko-KR")}원`;
 }
 
 function toDateInputValue(date) {
