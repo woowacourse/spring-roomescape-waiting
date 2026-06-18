@@ -1188,7 +1188,7 @@
     );
     return new Set(
       current
-        .filter(item => item.reservationStatus === 'RESERVED')
+        .filter(item => item.reservationStatus === 'CONFIRMED')
         .map(reservationSlotKey)
         .filter(key => previousWaitingSlots.has(key))
     );
@@ -1226,7 +1226,7 @@
 
   function openEditModal(id) {
     editingReservationId = id;
-    editingReservation = lastMyReservations?.find(item => item.id === id && item.reservationStatus === 'RESERVED');
+    editingReservation = lastMyReservations?.find(item => item.id === id && item.reservationStatus === 'CONFIRMED');
     document.getElementById('edit-date').value = '';
     document.getElementById('edit-time').innerHTML = '<option value="">날짜를 먼저 선택하세요</option>';
     document.getElementById('edit-time-help').textContent = '예약 변경은 예약 가능한 시간으로만 가능합니다.';

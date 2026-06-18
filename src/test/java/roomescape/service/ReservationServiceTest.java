@@ -413,7 +413,7 @@ class ReservationServiceTest {
         assertThat(myReservations).hasSize(2);
         assertThat(myReservations)
                 .extracting(MyReservation::reservationType)
-                .containsExactly(ReservationType.WAITING, ReservationType.RESERVED);
+                .containsExactly(ReservationType.WAITING, ReservationType.CONFIRMED);
         assertThat(myReservations.getFirst().waitingNumber()).isEqualTo(1);
         assertThat(myReservations.getLast().waitingNumber()).isNull();
     }

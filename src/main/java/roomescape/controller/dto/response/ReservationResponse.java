@@ -29,7 +29,7 @@ public record ReservationResponse(
     }
 
     public static ReservationResponse fromReserved(Reservation reservation, Theme theme) {
-        return from(reservation, theme, ReservationStatus.RESERVED);
+        return from(reservation, theme, ReservationStatus.CONFIRMED);
     }
 
     public static ReservationResponse fromWaiting(Reservation reservation, Theme theme) {

@@ -28,7 +28,7 @@ class ReservationControllerTest extends ControllerTest {
                 .body("date", equalTo(date))
                 .body("time", equalTo("10:00"))
                 .body("themeName", equalTo("공포의 저택"))
-                .body("reservationStatus", equalTo("RESERVED"));
+                .body("reservationStatus", equalTo("CONFIRMED"));
     }
 
     @DisplayName("예약 결제 대기 주문 생성")
@@ -120,7 +120,7 @@ class ReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations[0].date", equalTo(date))
-                .body("reservations[0].reservationStatus", equalTo("RESERVED"));
+                .body("reservations[0].reservationStatus", equalTo("CONFIRMED"));
     }
 
     @DisplayName("존재하지 않는 시간으로 예약하면 404")
@@ -229,7 +229,7 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(200)
                 .body("date", equalTo(updateDate))
                 .body("time", equalTo("11:00"))
-                .body("reservationStatus", equalTo("RESERVED"));
+                .body("reservationStatus", equalTo("CONFIRMED"));
     }
 
     @DisplayName("존재하지 않는 예약 변경하면 404")
@@ -527,7 +527,7 @@ class ReservationControllerTest extends ControllerTest {
                 .body("reservations[0].waitingNumber", equalTo(1))
                 .body("reservations[1].date", equalTo(futureDate))
                 .body("reservations[1].time", equalTo("16:00"))
-                .body("reservations[1].reservationStatus", equalTo("RESERVED"))
+                .body("reservations[1].reservationStatus", equalTo("CONFIRMED"))
                 .body("reservations[1].waitingNumber", nullValue());
     }
 
