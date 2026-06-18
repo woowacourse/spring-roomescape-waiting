@@ -1,17 +1,48 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import roomescape.domain.exception.InvalidDomainException;
 
+@Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"date", "time_id", "theme_id", "order_index"}),
+        @UniqueConstraint(columnNames = {"date", "time_id", "theme_id", "name"})
+})
 public class Waiting {
     private static final int MAX_NAME_LENGTH = 30;
 
-    private final Long id;
-    private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final int orderIndex;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = MAX_NAME_LENGTH)
+    private String name;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    @Column(name = "order_index", nullable = false)
+    private int orderIndex;
+
+    protected Waiting() {
+    }
 
     private Waiting(Long id, String name, LocalDate date,
                     ReservationTime time, Theme theme, int orderIndex) {
