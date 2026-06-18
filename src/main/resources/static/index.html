@@ -537,21 +537,31 @@
     }
 
     // successUrl/failUrl 리다이렉트 복귀 처리
-    function handlePaymentRedirect(params) {
+    async function handlePaymentRedirect(params) {
         const payment = params.get('payment');
         if (!payment) return;
+        history.replaceState(null, '', '/');
         if (payment === 'success') {
             const paymentKey = params.get('paymentKey');
             const orderId = params.get('orderId');
             const amount = params.get('amount');
-            // TODO(결제 승인 단계): POST /payments/confirm {paymentKey, orderId, amount} 로 서버 최종 승인
-            console.info('Toss 결제 인증 결과', {paymentKey, orderId, amount});
-            R.toast('결제 인증이 완료되었습니다.', 'success');
+            try {
+                // 서버 최종 승인: 주문을 승인하고 예약을 PAYMENT_WAITING -> RESERVED 로 확정한다.
+                const query = `paymentKey=${encodeURIComponent(paymentKey)}`
+                    + `&orderId=${encodeURIComponent(orderId)}`
+                    + `&amount=${encodeURIComponent(amount)}`;
+                await R.api('POST', `/payments/success?${query}`, {token: R.auth.getMemberToken()});
+                R.toast('결제가 완료되어 예약이 확정되었습니다.', 'success');
+                await loadMyReservations();
+            } catch (e) {
+                if (e.status === 401) R.auth.clearMemberToken();
+                updateAuthUi();
+                R.toast(`결제 승인 실패: ${e.message}`, 'error');
+            }
         } else if (payment === 'fail') {
             const message = params.get('message') || '결제가 취소되었거나 실패했습니다.';
             R.toast(`결제 실패: ${message}`, 'error');
         }
-        history.replaceState(null, '', '/');
     }
 
     function requireLogin() {
