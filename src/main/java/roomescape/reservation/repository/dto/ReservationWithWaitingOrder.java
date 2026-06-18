@@ -10,6 +10,9 @@ public record ReservationWithWaitingOrder(
         ReservationTimeResponse time,
         ThemeResponse theme,
         Status status,
-        Integer waitingOrder
+        Integer waitingOrder,
+        String orderId,
+        Long amount,
+        String paymentKey
 ) {
 }

@@ -50,9 +50,9 @@ class ReservationControllerTest {
         Theme theme2 = new Theme("테마", "설명", "https://img.test/a.png").withId(2L);
         List<ReservationWithWaitingOrderResponse> reservationWithWaitingOrders = List.of(
                 new ReservationWithWaitingOrderResponse(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme), Status.RESERVED, 0),
+                        ThemeResponse.from(theme), Status.RESERVED, 0, null, null, null),
                 new ReservationWithWaitingOrderResponse(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme2), Status.WAITING, 3)
+                        ThemeResponse.from(theme2), Status.WAITING, 3, null, null, null)
         );
         when(reservationService.getAllByName("라이")).thenReturn(reservationWithWaitingOrders);
 

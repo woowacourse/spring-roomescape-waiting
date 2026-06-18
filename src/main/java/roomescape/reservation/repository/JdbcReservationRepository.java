@@ -119,6 +119,15 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean markAsUncertain(Long reservationId) {
+        int affected = jdbcTemplate.update(
+                "UPDATE reservation SET status = ? WHERE id = ?",
+                Status.PAYMENT_UNCERTAIN.name(), reservationId
+        );
+        return affected > 0;
+    }
+
+    @Override
     public boolean hasConfirmedReservation(Long themeId, ReservationTime time) {
         Integer exists = jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM reservation WHERE theme_id = ? AND time_id = ? AND status IN (?, ?, ?))",
@@ -233,6 +242,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id,
                        r.name,
                        r.status,
+                       r.order_id,
+                       r.amount,
+                       r.payment_key,
                        t.id AS theme_id,
                        t.name AS theme_name,
                        t.description AS theme_description,
@@ -266,13 +278,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rs.getString("theme_description"),
                     rs.getString("theme_image_url")
             ).withId(rs.getLong("theme_id"));
+            long amountVal = rs.getLong("amount");
+            Long amount = rs.wasNull() ? null : amountVal;
             return new ReservationWithWaitingOrder(
                     rs.getLong("id"),
                     rs.getString("name"),
                     ReservationTimeResponse.from(time),
                     ThemeResponse.from(theme),
                     Status.valueOf(rs.getString("status")),
-                    rs.getObject("orderWaiting", Integer.class)
+                    rs.getObject("orderWaiting", Integer.class),
+                    rs.getString("order_id"),
+                    amount,
+                    rs.getString("payment_key")
             );
         }, Status.WAITING.name(), name);
     }

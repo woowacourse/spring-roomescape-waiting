@@ -2,6 +2,7 @@ package roomescape.payment;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.client.PaymentReadTimeoutException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -26,8 +27,13 @@ public class PaymentService {
             throw new PaymentAmountMismatchException(reservation.getAmount(), amount);
         }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-        reservationRepository.confirmPayment(reservation.getId(), result.paymentKey());
-        return result;
+        try {
+            PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+            reservationRepository.confirmPayment(reservation.getId(), result.paymentKey());
+            return result;
+        } catch (PaymentReadTimeoutException e) {
+            reservationRepository.markAsUncertain(reservation.getId());
+            throw e;
+        }
     }
 }
