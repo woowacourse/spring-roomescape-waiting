@@ -3,6 +3,7 @@ package roomescape.reservation.infra.toss;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
@@ -59,6 +60,7 @@ class TossPaymentGatewayTest {
     void confirm_maps_success_response_to_payment_result() {
         server.expect(once(), requestTo(TOSS_CONFIRM_URL))
                 .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "order-id"))
                 .andRespond(withStatus(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("""
