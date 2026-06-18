@@ -18,8 +18,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentStatus;
-import roomescape.dto.payment.PaymentConfirmation;
-import roomescape.dto.payment.PaymentResult;
+import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.PaymentResult;
 import roomescape.fixture.Fixtures;
 import roomescape.fixture.Scenario;
 

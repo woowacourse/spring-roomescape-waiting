@@ -17,7 +17,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.PaymentStatus;
-import roomescape.dto.payment.PaymentResult;
+import roomescape.domain.PaymentResult;
 import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
 import roomescape.infrastructure.AuthInterceptor;
