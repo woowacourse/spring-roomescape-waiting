@@ -2,15 +2,18 @@ package roomescape.infrastructure.ratelimiter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
+@ConditionalOnBean(name = "tokenBucket")
 public class RateLimitInterceptor implements HandlerInterceptor {
     private final TokenBucket tokenBucket;
 
-    public RateLimitInterceptor(TokenBucket tokenBucket) {
+    public RateLimitInterceptor(@Qualifier("tokenBucket") TokenBucket tokenBucket) {
         this.tokenBucket = tokenBucket;
     }
 

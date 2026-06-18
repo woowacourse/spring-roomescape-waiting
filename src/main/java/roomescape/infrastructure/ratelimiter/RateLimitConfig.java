@@ -14,4 +14,13 @@ public class RateLimitConfig {
                 System::nanoTime
         );
     }
+
+    @Bean
+    public TokenBucket outboundTokenBucket(OutboundRateLimitProperties properties) {
+        return new TokenBucket(
+                properties.getCapacity(),
+                properties.getRefillPerSec(),
+                System::nanoTime
+        );
+    }
 }
