@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.payment.client.inbound.annotation.RateLimit;
 import roomescape.payment.exception.PaymentAmountMismatchException;
 import roomescape.payment.exception.TossPaymentException;
 import roomescape.payment.service.PaymentService;
@@ -17,6 +18,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    @RateLimit
     @GetMapping("/success")
     public String success(
             @RequestParam String paymentKey,
