@@ -38,19 +38,15 @@ public class PaymentService {
     }
 
     public Payment findLatestOrderByReservationId(Long reservationId) {
-        Payment payment = paymentDao.selectByReservationId(reservationId);
-        if (payment == null) {
-            throw new RoomescapeException(ErrorCode.PAYMENT_NOT_FOUND);
-        }
-        return payment;
+        return paymentDao.selectByReservationId(reservationId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
     @Transactional
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
-        var payment = paymentDao.selectByOrderId(orderId);
-        if (payment == null) {
-            throw new RoomescapeException(ErrorCode.PAYMENT_NOT_FOUND);
-        }
+        Payment payment = paymentDao.selectByOrderId(orderId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.PAYMENT_NOT_FOUND));
+
         if (!payment.getAmount().equals(amount)) {
             throw new PaymentAmountMismatchException(payment.getAmount(), amount);
         }
@@ -63,5 +59,4 @@ public class PaymentService {
         reservationDao.updateStatusById(payment.getReservationId(), ReservationStatus.CONFIRMED);
         return result;
     }
-
 }

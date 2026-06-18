@@ -1,5 +1,6 @@
 package roomescape.payment.dao;
 
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -44,22 +45,18 @@ public class PaymentDao {
                 payment.getStatus(), payment.getAmount());
     }
 
-    public Payment selectByOrderId(String orderId) {
+    public Optional<Payment> selectByOrderId(String orderId) {
         String sql = """
                 select * from payment where order_id = ?;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, orderId).stream()
-                .findFirst()
-                .orElse(null);
+        return jdbcTemplate.query(sql, rowMapper, orderId).stream().findFirst();
     }
 
-    public Payment selectByReservationId(Long reservationId) {
+    public Optional<Payment> selectByReservationId(Long reservationId) {
         String sql = """
                 select * from payment where reservation_id = ? order by id desc limit 1;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, reservationId).stream()
-                .findFirst()
-                .orElse(null);
+        return jdbcTemplate.query(sql, rowMapper, reservationId).stream().findFirst();
     }
 
     public void updateApproved(String orderId, String paymentKey, PaymentStatus status) {
