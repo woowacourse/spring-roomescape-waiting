@@ -122,8 +122,8 @@ public class PaymentService {
         return checkoutProperties.getClientKey();
     }
 
-    public List<PaymentOrderHistory> findOrdersByMember(Member member) {
-        return paymentOrderDao.findHistoriesByMemberId(member.getId());
+    public List<PaymentOrderHistory> findAllOrders() {
+        return paymentOrderDao.findAllHistories();
     }
 
     private void validateCheckoutConfigured() {

@@ -126,7 +126,7 @@ public class PaymentOrderDao {
         return results.stream().findFirst();
     }
 
-    public List<PaymentOrderHistory> findHistoriesByMemberId(Long memberId) {
+    public List<PaymentOrderHistory> findAllHistories() {
         String sql = """
                 SELECT po.order_id,
                        po.reservation_id,
@@ -144,10 +144,9 @@ public class PaymentOrderDao {
                 INNER JOIN schedule AS s ON po.schedule_id = s.id
                 INNER JOIN reservation_time AS rt ON s.time_id = rt.id
                 INNER JOIN theme AS th ON s.theme_id = th.id
-                WHERE po.user_id = ?
                 ORDER BY po.created_at DESC, po.id DESC
                 """;
-        return jdbcTemplate.query(sql, paymentOrderHistoryRowMapper, memberId);
+        return jdbcTemplate.query(sql, paymentOrderHistoryRowMapper);
     }
 
     public void confirm(String orderId, String paymentKey, Long reservationId, LocalDateTime updatedAt) {

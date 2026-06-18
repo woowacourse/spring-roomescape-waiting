@@ -1287,7 +1287,7 @@
 
     try {
       const reservations = await fetchJson(
-        `${API}/payments/orders`,
+        `${API}/reservations`,
         {},
         '예약 목록을 불러올 수 없습니다.'
       );
@@ -1301,12 +1301,11 @@
 
       const list = document.getElementById('my-list');
       list.innerHTML = reservations.map(r => `
-        <div class="reservationSlot-item status-${reservationState(r)}" id="res-${r.orderId}">
+        <div class="reservationSlot-item status-${reservationState(r)}" id="res-${r.reservationId}">
           <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
           <div class="reservationSlot-info">
             <div class="reservationSlot-theme">${r.themeName}</div>
-            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time} &nbsp; ${formatMoney(r.amount)}</div>
-            <div class="reservationSlot-meta">주문 ${r.orderId}${paymentKeyMeta(r)}</div>
+            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
           </div>
           <div class="reservationSlot-actions">${reservationActions(r)}</div>
         </div>
@@ -1323,10 +1322,6 @@
     return order > 0 ? ` &nbsp; 대기 ${order}번` : '';
   }
 
-  function paymentKeyMeta(r) {
-    return r.paymentKey ? ` &nbsp; 승인 ${r.paymentKey}` : '';
-  }
-
   function isCanceledReservation(r) {
     return String(r.status ?? '').toUpperCase() === 'CANCELED';
   }
@@ -1341,23 +1336,19 @@
 
   function reservationState(r) {
     const status = String(r.status ?? '').toUpperCase();
-    if (status === 'PENDING') return 'waiting';
-    if (status === 'FAILED') return 'canceled';
-    if (status === 'CONFIRM_UNKNOWN') return 'expired';
-    if (status === 'CONFIRMED') return 'confirmed';
     if (isCanceledReservation(r)) return 'canceled';
     if (isExpiredReservation(r)) return 'expired';
     if (isCompletedReservation(r)) return 'confirmed';
+    if (status === 'WAITING') return 'waiting';
     return Number(r.order ?? 0) > 0 ? 'waiting' : 'confirmed';
   }
 
   function reservationStatusLabel(r) {
-    if (r.statusLabel) return r.statusLabel;
     const state = reservationState(r);
     if (isCompletedReservation(r)) return '이용 완료';
     if (isExpiredReservation(r)) return '대기 만료';
     if (state === 'canceled') return '예약 취소';
-    if (state === 'waiting') return '대기';
+    if (state === 'waiting') return `대기 ${r.order ?? 0}번`;
     return '예약 확정';
   }
 
@@ -1367,10 +1358,6 @@
   }
 
   function reservationActions(r) {
-    const status = String(r.status ?? '').toUpperCase();
-    if (status !== 'CONFIRMED') {
-      return reservationStatusBadge(r);
-    }
     if (isCanceledReservation(r) || isCompletedReservation(r) || isExpiredReservation(r)) {
       return reservationStatusBadge(r);
     }

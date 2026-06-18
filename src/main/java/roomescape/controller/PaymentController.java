@@ -1,8 +1,6 @@
 package roomescape.controller;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -17,7 +15,6 @@ import org.springframework.web.util.UriUtils;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import roomescape.controller.dto.payment.PaymentFailResponse;
-import roomescape.controller.dto.payment.PaymentOrderHistoryResponse;
 import roomescape.controller.dto.payment.PaymentOrderRequest;
 import roomescape.controller.dto.payment.PaymentOrderResponse;
 import roomescape.domain.Member;
@@ -52,14 +49,6 @@ public class PaymentController {
                 baseUrl + "/payments/success",
                 baseUrl + "/payments/fail"
         ));
-    }
-
-    @GetMapping("/orders")
-    public ResponseEntity<List<PaymentOrderHistoryResponse>> findOrders(@LoginMember Member member) {
-        List<PaymentOrderHistoryResponse> responses = paymentService.findOrdersByMember(member).stream()
-                .map(PaymentOrderHistoryResponse::from)
-                .toList();
-        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/success")

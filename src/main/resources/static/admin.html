@@ -426,6 +426,9 @@
   <button class="tab-btn active" onclick="switchTab('reservations')" id="tab-reservations">
     📋 전체 예약
   </button>
+  <button class="tab-btn" onclick="switchTab('payments')" id="tab-payments">
+    💳 결제 주문
+  </button>
   <button class="tab-btn" onclick="switchTab('themes')" id="tab-themes">
     🎭 테마 관리
   </button>
@@ -491,6 +494,42 @@
   <div class="empty-state" id="res-empty" style="display:none">
     <div class="icon">📭</div>
     <p>예약 내역이 없습니다.</p>
+  </div>
+</div>
+
+<!-- Payment orders tab -->
+<div class="tab-content" id="content-payments">
+  <div class="content-header">
+    <div>
+      <div class="content-title">결제 주문 기록</div>
+      <div class="content-desc">결제 대기, 확정, 실패, 확인 필요 상태의 주문을 확인합니다.</div>
+    </div>
+    <button class="btn btn-ghost" onclick="loadPaymentOrders()">↻ 새로고침</button>
+  </div>
+
+  <div class="loading-center" id="payment-loading"><div class="spinner"></div></div>
+
+  <div class="table-wrap" id="payment-table-wrap" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th>주문 ID</th>
+          <th>예약 #</th>
+          <th>테마</th>
+          <th>상태</th>
+          <th>날짜</th>
+          <th>시간</th>
+          <th>금액</th>
+          <th>승인 키</th>
+        </tr>
+      </thead>
+      <tbody id="payment-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" id="payment-empty" style="display:none">
+    <div class="icon">📭</div>
+    <p>결제 주문 기록이 없습니다.</p>
   </div>
 </div>
 
@@ -625,6 +664,7 @@
     document.getElementById(`tab-${name}`).classList.add('active');
 
     if (name === 'reservations') loadReservations();
+    else if (name === 'payments') loadPaymentOrders();
     else if (name === 'themes') loadThemes();
     else if (name === 'times') loadTimes();
   }
@@ -789,6 +829,55 @@
     } catch (e) {
       showToast(e.message, 'error');
     }
+  }
+
+  // ── Payment orders ───────────────────────────────────────────
+
+  async function loadPaymentOrders() {
+    document.getElementById('payment-loading').style.display = 'flex';
+    document.getElementById('payment-table-wrap').style.display = 'none';
+    document.getElementById('payment-empty').style.display = 'none';
+
+    try {
+      const orders = await fetchJson(`${API}/admin/payments/orders`, {}, '결제 주문 기록을 불러올 수 없습니다.');
+
+      document.getElementById('payment-loading').style.display = 'none';
+
+      if (!orders.length) {
+        document.getElementById('payment-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('payment-tbody').innerHTML = orders.map(order => `
+        <tr>
+          <td class="muted">${order.orderId}</td>
+          <td class="muted">${order.reservationId ?? '-'}</td>
+          <td>${order.themeName}</td>
+          <td>${paymentStatusBadge(order)}</td>
+          <td class="muted">${order.date}</td>
+          <td class="muted">${order.time}</td>
+          <td>${formatMoney(order.amount)}</td>
+          <td class="muted">${order.paymentKey ?? '-'}</td>
+        </tr>
+      `).join('');
+      document.getElementById('payment-table-wrap').style.display = 'block';
+    } catch (e) {
+      document.getElementById('payment-loading').style.display = 'none';
+      showToast(e.message, 'error');
+    }
+  }
+
+  function paymentStatusBadge(order) {
+    const status = String(order.status ?? '').toUpperCase();
+    let state = 'waiting';
+    if (status === 'CONFIRMED') state = 'confirmed';
+    if (status === 'FAILED') state = 'canceled';
+    if (status === 'CONFIRM_UNKNOWN') state = 'expired';
+    return `<span class="reservation-status ${state}">${order.statusLabel ?? status}</span>`;
+  }
+
+  function formatMoney(amount) {
+    return Number(amount ?? 0).toLocaleString('ko-KR') + '원';
   }
 
   // ── Themes ────────────────────────────────────────────────────
