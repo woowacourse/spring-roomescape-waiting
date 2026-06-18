@@ -470,7 +470,7 @@ function renderMyReservations() {
 }
 
 function renderMyReservationResults() {
-    if (state.loading.searchedReservations) {
+    if (state.loading.searchedReservations || state.loading.searchedPayments) {
         return `<div class="my-reservation-list">${Array.from({length: 2}, () => `<span class="my-reservation-skeleton"></span>`).join("")}</div>`;
     }
 
@@ -478,14 +478,11 @@ function renderMyReservationResults() {
         return renderEmpty("조회한 예약이 여기에 표시됩니다.");
     }
 
-    if (state.searchedReservations.length === 0 && state.searchedWaitings.length === 0) {
-        return renderEmpty("예약 내역이 없습니다.");
-    }
-
     return `
     <div class="my-reservation-results">
       ${renderApplicationGroup("예약 목록", "결제 대기와 확정 예약입니다.", state.searchedReservations, renderMyReservationItem)}
       ${renderApplicationGroup("대기 목록", "예약 취소가 발생하면 순서대로 확정됩니다.", state.searchedWaitings, renderMyWaitingItem)}
+      ${renderApplicationGroup("주문/결제 내역", "예약 문맥과 결제 상태를 함께 확인합니다.", state.searchedPayments, renderPaymentHistoryItem)}
     </div>
   `;
 }
@@ -555,6 +552,87 @@ function renderReservationStatusBadge(reservation, past) {
     }
 
     return `<em class="open-badge">변경 가능</em>`;
+}
+
+function renderPaymentHistoryItem(payment) {
+    const theme = payment.theme || {};
+    const time = payment.time || {};
+    const retryReservation = findPaymentHistoryReservation(payment);
+    const paymentKey = payment.paymentKey || "";
+
+    return `
+    <article class="my-reservation-item payment-history-item ${paymentHistoryItemClass(payment)}">
+      <span class="row-thumb"><img src="${escapeAttr(theme.thumbnailImgUrl || "")}" alt="" loading="lazy" data-cover></span>
+      <span class="row-main">
+        <span class="reservation-card-heading">
+          <strong>${escapeHtml(theme.name || "-")}</strong>
+          ${renderPaymentHistoryStatusBadge(payment)}
+        </span>
+        <small>${escapeHtml(payment.date || "-")} ${escapeHtml(time.startAt || "")} · ${escapeHtml(payment.name || "-")}</small>
+        <span class="payment-history-meta">
+          <span>주문 ${escapeHtml(payment.orderId || "-")}</span>
+          <span>${escapeHtml(formatAmount(payment.amount))}</span>
+          <span>예약 ${escapeHtml(payment.reservationStatus || "-")}</span>
+        </span>
+        <small class="payment-history-key">결제키 ${escapeHtml(paymentKey || "-")}</small>
+      </span>
+      ${retryReservation ? `
+        <span class="reservation-card-actions">
+          <button class="primary-button compact" type="button" data-action="start-payment" data-reservation-id="${retryReservation.id}">
+            결제하기
+          </button>
+        </span>
+      ` : ""}
+    </article>
+  `;
+}
+
+function paymentHistoryItemClass(payment) {
+    const status = String(payment.paymentStatus || "").toUpperCase();
+
+    if (status === "PENDING") {
+        return "is-payment-pending";
+    }
+
+    if (status === "CONFIRMED") {
+        return "is-payment-confirmed";
+    }
+
+    return "is-payment-closed";
+}
+
+function renderPaymentHistoryStatusBadge(payment) {
+    const status = String(payment.paymentStatus || "").toUpperCase();
+
+    if (status === "PENDING") {
+        return `<em class="payment-badge">결제 대기</em>`;
+    }
+
+    if (status === "CONFIRMED") {
+        return `<em class="open-badge">결제 완료</em>`;
+    }
+
+    if (status === "CANCELED") {
+        return `<em class="lock-badge">결제 취소</em>`;
+    }
+
+    if (status === "FAILED") {
+        return `<em class="lock-badge">결제 실패</em>`;
+    }
+
+    return `<em class="lock-badge">${escapeHtml(status || "상태 없음")}</em>`;
+}
+
+function findPaymentHistoryReservation(payment) {
+    const status = String(payment.paymentStatus || "").toUpperCase();
+    const orderId = payment.orderId;
+
+    if (status !== "PENDING" || !orderId) {
+        return null;
+    }
+
+    return state.searchedReservations
+        .find((reservation) => isMatchingPendingPaymentReservation(reservation, orderId)) || null;
 }
 
 function renderPaymentPanel(reservation, options = {}) {

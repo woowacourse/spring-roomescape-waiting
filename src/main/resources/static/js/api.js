@@ -40,6 +40,11 @@ export async function api(path, options = {}) {
   return data;
 }
 
+export function findPaymentHistories(username) {
+  const query = new URLSearchParams({username}).toString();
+  return api(`/payments?${query}`);
+}
+
 function readJson(text) {
   if (!text) {
     return null;

@@ -1,4 +1,4 @@
-import {api} from "./api.js";
+import {api, findPaymentHistories} from "./api.js";
 import {appEl} from "./dom.js";
 import {ADMIN_TABS, canSubmitReservation, isPastReservation, selectedTheme, selectedTime, state} from "./state.js";
 import {render, syncThemeFilter} from "./render.js";
@@ -979,6 +979,7 @@ async function loadSearchedReservations(options = {}) {
     if (!username) {
         state.searchedReservations = [];
         state.searchedWaitings = [];
+        state.searchedPayments = [];
         state.reservationSearchSubmitted = false;
         state.reservationSearchSubmittedName = "";
         render();
@@ -986,20 +987,25 @@ async function loadSearchedReservations(options = {}) {
     }
 
     state.loading.searchedReservations = true;
+    state.loading.searchedPayments = true;
     if (!options.silent) {
         render();
     }
 
     try {
         const query = new URLSearchParams({username}).toString();
-        const [reservationResult, waitingResult] = await Promise.allSettled([
+        const [reservationResult, waitingResult, paymentResult] = await Promise.allSettled([
             api(`/reservations?${query}`),
-            api(`/waitings?${query}`)
+            api(`/waitings?${query}`),
+            findPaymentHistories(username)
         ]);
-        const failedResults = [reservationResult, waitingResult].filter((result) => result.status === "rejected");
+        const applicationResults = [reservationResult, waitingResult];
+        const failedApplicationResults = applicationResults.filter((result) => result.status === "rejected");
+        const failedResults = [reservationResult, waitingResult, paymentResult]
+            .filter((result) => result.status === "rejected");
 
-        if (failedResults.length === 2) {
-            throw failedResults[0].reason;
+        if (failedApplicationResults.length === applicationResults.length) {
+            throw failedApplicationResults[0].reason;
         }
 
         state.searchedReservations = reservationResult.status === "fulfilled"
@@ -1008,6 +1014,9 @@ async function loadSearchedReservations(options = {}) {
         state.searchedWaitings = waitingResult.status === "fulfilled"
             ? waitingResult.value
             : (options.silent ? state.searchedWaitings : []);
+        state.searchedPayments = paymentResult.status === "fulfilled"
+            ? paymentResult.value
+            : (options.silent ? state.searchedPayments : []);
         state.reservationSearchSubmitted = true;
         state.reservationSearchSubmittedName = username;
         syncReservationEditWithSearchResults();
@@ -1022,6 +1031,7 @@ async function loadSearchedReservations(options = {}) {
         if (!options.silent) {
             state.searchedReservations = [];
             state.searchedWaitings = [];
+            state.searchedPayments = [];
             state.reservationSearchSubmitted = false;
             state.reservationSearchSubmittedName = "";
             clearReservationEdit();
@@ -1031,6 +1041,7 @@ async function loadSearchedReservations(options = {}) {
         return {failed: true, partialFailure: false};
     } finally {
         state.loading.searchedReservations = false;
+        state.loading.searchedPayments = false;
         render();
     }
 }
@@ -1058,9 +1069,11 @@ function clearReservationSearch() {
     state.reservationSearchName = "";
     state.searchedReservations = [];
     state.searchedWaitings = [];
+    state.searchedPayments = [];
     state.reservationSearchSubmitted = false;
     state.reservationSearchSubmittedName = "";
     state.loading.searchedReservations = false;
+    state.loading.searchedPayments = false;
     clearReservationEdit();
     render();
 }

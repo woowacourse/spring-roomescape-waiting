@@ -9,6 +9,7 @@ export const state = {
     reservations: [],
     searchedReservations: [],
     searchedWaitings: [],
+    searchedPayments: [],
     availableTimes: [],
     selectedThemeId: null,
     selectedDate: tomorrowString(),
@@ -30,7 +31,8 @@ export const state = {
         themes: false,
         times: false,
         reservations: false,
-        searchedReservations: false
+        searchedReservations: false,
+        searchedPayments: false
     },
     submitting: false,
     payment: {
