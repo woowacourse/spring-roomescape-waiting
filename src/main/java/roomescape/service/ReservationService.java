@@ -96,6 +96,7 @@ public class ReservationService {
     public void delete(Long reservationId) {
         Reservation reservation = getReservation(reservationId);
         reservationRepository.deleteById(reservationId);
+        reservationRepository.flush();
         waitingService.promoteFirstWaiting(reservation.getSlot());
     }
 
