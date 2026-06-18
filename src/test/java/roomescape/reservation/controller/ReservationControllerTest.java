@@ -146,7 +146,7 @@ class ReservationControllerTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         List<ReservationWithStatusResult> results = List.of(
                 new ReservationWithStatusResult(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme,
-                        roomescape.reservation.domain.ReservationStatus.RESERVED, 0L, null)
+                        roomescape.reservation.domain.ReservationStatus.RESERVED, 0L, null, null, null, null)
         );
 
         given(reservationQueryService.findAllByName(anyString())).willReturn(results);

@@ -13,7 +13,10 @@ public record ReservationWithStatusResponse(
         Theme theme,
         String status,
         Long waitingOrder,
-        String orderId
+        String orderId,
+        String paymentStatus,
+        String paymentKey,
+        Long amount
 ) {
 
     public static ReservationWithStatusResponse from(ReservationWithStatusResult result) {
@@ -25,7 +28,10 @@ public record ReservationWithStatusResponse(
                 result.theme(),
                 result.status().name().toLowerCase(),
                 result.waitingOrder(),
-                result.orderId()
+                result.orderId(),
+                result.paymentStatus() != null ? result.paymentStatus().toLowerCase() : null,
+                result.paymentKey(),
+                result.amount()
         );
     }
 }

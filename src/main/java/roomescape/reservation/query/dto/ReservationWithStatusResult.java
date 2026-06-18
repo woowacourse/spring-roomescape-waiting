@@ -1,6 +1,7 @@
 package roomescape.reservation.query.dto;
 
 import java.time.LocalDate;
+import roomescape.payment.domain.Payment;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
@@ -15,14 +16,17 @@ public record ReservationWithStatusResult(
         Theme theme,
         ReservationStatus status,
         Long waitingOrder,
-        String orderId
+        String orderId,
+        String paymentStatus,
+        String paymentKey,
+        Long amount
 ) {
 
     public static ReservationWithStatusResult from(Reservation reservation) {
         return from(reservation, null);
     }
 
-    public static ReservationWithStatusResult from(Reservation reservation, String orderId) {
+    public static ReservationWithStatusResult from(Reservation reservation, Payment payment) {
         return new ReservationWithStatusResult(
                 reservation.getId(),
                 reservation.getName(),
@@ -31,7 +35,10 @@ public record ReservationWithStatusResult(
                 reservation.getTheme(),
                 ReservationStatus.RESERVED,
                 0L,
-                orderId
+                payment != null ? payment.getOrderId() : null,
+                payment != null ? payment.getState().name() : null,
+                payment != null ? payment.getPaymentKey() : null,
+                payment != null ? payment.getAmount() : null
         );
     }
 
@@ -44,6 +51,9 @@ public record ReservationWithStatusResult(
                 waiting.getTheme(),
                 ReservationStatus.WAITING,
                 rank,
+                null,
+                null,
+                null,
                 null
         );
     }

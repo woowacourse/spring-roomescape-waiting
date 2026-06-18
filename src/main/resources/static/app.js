@@ -69,6 +69,16 @@ function renderAvailableTimes() {
   });
 }
 
+function paymentStatusLabel(paymentStatus) {
+  switch (paymentStatus) {
+    case "pending": return "결제대기";
+    case "confirmed": return "결제확정";
+    case "uncertain": return "결제확인필요";
+    case "canceled": return "결제취소";
+    default: return null;
+  }
+}
+
 function renderReservations(reservations) {
   const root = $("#reservations");
   if (!reservations.length) {
@@ -83,11 +93,15 @@ function renderReservations(reservations) {
     row.className = "reservation-row";
     const isWaiting = reservation.status === "waiting";
     const waitingText = isWaiting && reservation.waitingOrder ? `(대기 ${reservation.waitingOrder}번째)` : (isWaiting ? '(대기)' : '');
-    const needsPayment = !isWaiting && reservation.orderId;
+    const label = paymentStatusLabel(reservation.paymentStatus);
+    const paymentText = label
+      ? ` [${label}${reservation.amount ? ` ${reservation.amount.toLocaleString()}원` : ''}${reservation.paymentKey ? ` / ${reservation.paymentKey}` : ''}]`
+      : '';
     row.innerHTML = `
-      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name} ${waitingText}${needsPayment ? ' (결제 대기)' : ''}</span>
+      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name} ${waitingText}${paymentText}</span>
       <div class="reservation-actions">
-        ${needsPayment ? `<button class="ghost reservation-pay" data-order-id="${reservation.orderId}" type="button">결제하기</button>` : ''}
+        ${reservation.paymentStatus === "pending" ? `<button class="ghost reservation-pay" data-order-id="${reservation.orderId}" type="button">결제하기</button>` : ''}
+        ${reservation.paymentStatus === "uncertain" ? `<button class="ghost reservation-retry-confirm" data-order-id="${reservation.orderId}" type="button">결제 확인</button>` : ''}
         ${!isWaiting ? `<button class="ghost reservation-update" data-id="${reservation.id}" data-theme-id="${reservation.theme?.id ?? ""}" type="button">변경</button>` : ''}
         <button class="danger reservation-delete" data-id="${reservation.id}" data-status="${reservation.status || 'reserved'}" type="button">삭제</button>
       </div>
@@ -223,6 +237,19 @@ $("#reservations").addEventListener("click", async (event) => {
   const payButton = event.target.closest("button.reservation-pay");
   if (payButton) {
     window.location.href = `/payments/checkout?orderId=${encodeURIComponent(payButton.dataset.orderId)}`;
+    return;
+  }
+
+  const retryButton = event.target.closest("button.reservation-retry-confirm");
+  if (retryButton) {
+    try {
+      await api(`/payments/${encodeURIComponent(retryButton.dataset.orderId)}/retry`, { method: "POST" });
+      setMessage("결제 확인이 완료되었습니다.");
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      await loadReservations();
+    }
     return;
   }
 

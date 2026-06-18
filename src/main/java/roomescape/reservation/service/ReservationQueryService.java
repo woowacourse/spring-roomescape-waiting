@@ -67,18 +67,13 @@ public class ReservationQueryService {
 
     private List<ReservationWithStatusResult> getReservationResults(String name) {
         return reservationRepository.findAllByName(name).stream()
-                .map(this::toResultWithOrderId)
+                .map(this::toResultWithPayment)
                 .toList();
     }
 
-    private ReservationWithStatusResult toResultWithOrderId(Reservation reservation) {
-        if (reservation.isConfirmed()) {
-            return ReservationWithStatusResult.from(reservation);
-        }
-        String orderId = paymentRepository.findByReservationId(reservation.getId())
-                .map(Payment::getOrderId)
-                .orElse(null);
-        return ReservationWithStatusResult.from(reservation, orderId);
+    private ReservationWithStatusResult toResultWithPayment(Reservation reservation) {
+        Payment payment = paymentRepository.findByReservationId(reservation.getId()).orElse(null);
+        return ReservationWithStatusResult.from(reservation, payment);
     }
 
     private List<ReservationWithStatusResult> getReservationWaitingResults(List<ReservationWaiting> waitings) {
