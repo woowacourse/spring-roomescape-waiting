@@ -10,12 +10,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.domain.theme.Theme;
 
 @Entity
+@NoArgsConstructor
+@Getter
 public class Slot {
-    private static final Long TRANSIENT = 0L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,9 +29,6 @@ public class Slot {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
-
-    protected Slot() {
-    }
 
     private Slot(Long id, ReservationDate date, ReservationTime time, Theme theme) {
         this.id = id;
@@ -43,11 +42,7 @@ public class Slot {
     }
 
     public static Slot create(ReservationDate date, ReservationTime time, Theme theme) {
-        return new Slot(TRANSIENT, date, time, theme);
-    }
-
-    public Slot withId(long id) {
-        return new Slot(id, date, time, theme);
+        return new Slot(null, date, time, theme);
     }
 
     public boolean isSame(Slot target) {
@@ -58,21 +53,5 @@ public class Slot {
         LocalDateTime reservationDateTime = LocalDateTime.of(date.getValue(), time.getStartAt());
 
         return reservationDateTime.isBefore(now);
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public ReservationDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
     }
 }

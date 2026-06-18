@@ -2,7 +2,6 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import common.exception.RoomEscapeException;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
@@ -47,22 +46,5 @@ class ReservationTest {
                 .build();
 
         Assertions.assertThat(id1WithSameDate.isEarlierThan(id2WithSameDate)).isFalse();
-    }
-
-    @Test
-    void 예약_일정이_제공된_시점보다_과거라면_예외가_발생한다() {
-        Slot slot = RoomEscapeFixture.slot().date(RoomEscapeFixture.PAST_DATE).build();
-        Reservation past = RoomEscapeFixture.reservation().slot(slot).build();
-
-        Assertions.assertThatThrownBy(() -> past.ensureNotPast(LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
-    }
-
-    @Test
-    void 예약_일정이_제공된_시점보다_미래라면_예외가_발생하지_않는다() {
-        Slot slot = RoomEscapeFixture.slot().date(RoomEscapeFixture.FUTURE_DATE).build();
-        Reservation future = RoomEscapeFixture.reservation().slot(slot).build();
-
-        Assertions.assertThatCode(() -> future.ensureNotPast(LocalDateTime.now()));
     }
 }

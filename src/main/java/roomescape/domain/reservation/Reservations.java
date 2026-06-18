@@ -35,19 +35,11 @@ public class Reservations {
 
     private Status decideStatusFor(Slot slot) {
         if (reservations.stream()
-                .filter(reservation -> reservation.isSameSlot(slot))
+                .filter(reservation -> reservation.hasSameSlot(slot))
                 .anyMatch(reservation -> reservation.isApproved())) {
             return Status.WAITING;
         }
         return Status.APPROVED;
-    }
-
-    public List<RankedReservation> rankedReservationsOf(String name) {
-        List<Reservation> listByName = findByName(name);
-
-        return listByName.stream()
-                .map(this::toRankedReservation)
-                .toList();
     }
 
     private List<Reservation> findByName(String name) {
@@ -56,7 +48,17 @@ public class Reservations {
                 .toList();
     }
 
-    public List<RankedReservation> allRankedReservationsOf() {
+    public List<RankedReservation> rankedReservationsOf(String name) {
+        List<Reservation> target = reservations;
+        if (name != null) {
+            target = findByName(name);
+        }
+        return target.stream()
+                .map(this::toRankedReservation)
+                .toList();
+    }
+
+    public List<RankedReservation> rankedReservationsOf() {
         return reservations.stream()
                 .map(this::toRankedReservation)
                 .toList();

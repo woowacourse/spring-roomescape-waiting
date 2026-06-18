@@ -1,7 +1,5 @@
 package roomescape.domain.reservation;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -15,12 +13,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.domain.theme.Theme;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
+@Getter
 public class Reservation {
-    private static final long TRANSIENT = 0L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,9 +33,6 @@ public class Reservation {
     private Status status;
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
-    protected Reservation() {
-    }
 
     private Reservation(Long id, ReservationName name, Slot slot, Status status, LocalDateTime createdAt) {
         this.id = id;
@@ -53,15 +49,26 @@ public class Reservation {
 
     public static Reservation create(ReservationName reservationName, Slot slot, Status status, LocalDateTime now) {
         Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(TRANSIENT, reservationName, slot, status, now);
-        reservation.ensureNotPast(now);
-        return reservation;
+        return new Reservation(null, reservationName, slot, status, now);
     }
 
-    public void ensureNotPast(LocalDateTime now) {
-        if (slot.isBefore(now)) {
-            throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
-        }
+    public boolean isPastThan(LocalDateTime now) {
+        return slot.isBefore(now);
+    }
+
+    public void changeTo(Reservation target) {
+        this.name = target.name;
+        this.slot = target.slot;
+        this.status = target.status;
+        this.createdAt = target.createdAt;
+    }
+
+    public void approve() {
+        this.status = Status.APPROVED;
+    }
+
+    public boolean isApproved() {
+        return status == Status.APPROVED;
     }
 
     public boolean isEarlierThan(Reservation target) {
@@ -80,51 +87,8 @@ public class Reservation {
         return slot.isSame(target);
     }
 
-    public boolean isSameSlot(Slot target) {
-        return slot.isSame(target);
-    }
-
-    public boolean isApproved() {
-        return status == Status.APPROVED;
-    }
-
-    public boolean hasSameName(ReservationName name) {
-        return this.name.equals(name);
-    }
-
-    public Reservation withId(long id) {
-        return new Reservation(id, name, slot, status, createdAt);
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public ReservationName getName() {
-        return name;
-    }
-
-    public Slot getSlot() {
-        return slot;
-    }
-
-    public ReservationDate getDate() {
-        return slot.getDate();
-    }
-
-    public ReservationTime getTime() {
-        return slot.getTime();
-    }
-
-    public Theme getTheme() {
-        return slot.getTheme();
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public boolean hasSameName(ReservationName target) {
+        return name.equals(target);
     }
 }
+

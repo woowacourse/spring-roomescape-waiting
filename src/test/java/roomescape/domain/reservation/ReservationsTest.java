@@ -77,7 +77,7 @@ class ReservationsTest {
                 .id(2L).name("달수").status(Status.WAITING).createdAt(LocalDateTime.of(2099, 1, 1, 9, 1)).build();
 
         Reservations rankedReservations = new Reservations(List.of(first, second));
-        List<RankedReservation> results = rankedReservations.allRankedReservationsOf();
+        List<RankedReservation> results = rankedReservations.rankedReservationsOf();
 
         assertThat(results.get(0).getRank().getValue()).isEqualTo(0);
         assertThat(results.get(1).getRank().getValue()).isEqualTo(1);

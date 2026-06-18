@@ -4,6 +4,7 @@ import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationCreateRequest;
@@ -13,32 +14,24 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
-import roomescape.repository.ReservationJpaRepository;
+import roomescape.domain.reservation.Status;
+import roomescape.repository.ReservationRepository;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class ReservationService {
     private final SlotService slotService;
-    private final ReservationJpaRepository reservationRepository;
-
-//    public ReservationService(SlotService slotService, ReservationRepository reservationRepository) {
-//        this.slotService = slotService;
-//        this.reservationRepository = reservationRepository;
-//    }
-
-
-    public ReservationService(SlotService slotService, ReservationJpaRepository reservationRepository) {
-        this.slotService = slotService;
-        this.reservationRepository = reservationRepository;
-    }
+    private final ReservationRepository reservationRepository;
 
     @Transactional
     public RankedReservation reserve(ReservationCreateRequest request, LocalDateTime now) {
         Slot foundSlot = slotService.findOrCreate(request.getDate(), request.getTimeId(), request.getThemeId());
-        slotService.lockSlot(foundSlot);
 
         Reservations reservations = new Reservations(reservationRepository.findAllBySlot(foundSlot));
         Reservation reservation = reservations.reserve(new ReservationName(request.getName()), foundSlot, now);
+
+        validateIsPastReservation(reservation, now);
 
         return getRankedReservation(reservationRepository.save(reservation));
     }
@@ -52,49 +45,55 @@ public class ReservationService {
     }
 
     public List<RankedReservation> findList(String name) {
-        Reservations rankedReservations = new Reservations(reservationRepository.findAll());
+        Reservations reservations = new Reservations(reservationRepository.findAll());
 
-        if (name == null) {
-            return rankedReservations.allRankedReservationsOf();
-        }
-        return rankedReservations.rankedReservationsOf(name);
+        return reservations.rankedReservationsOf(name);
     }
 
     @Transactional
     public RankedReservation update(ReservationUpdateRequest request, long id, LocalDateTime now) {
         Reservation originReservation = findReservationById(id);
-        originReservation.ensureNotPast(now);
+
+        validateIsPastReservation(originReservation, now);
+
+        Slot originSlot = originReservation.getSlot();
+        boolean wasApproved = originReservation.isApproved();
 
         Slot updateSlot = slotService.findOrCreate(request.getDate(), request.getTimeId(), request.getThemeId());
-        slotService.lockSlot(updateSlot);
 
         Reservations reservations = new Reservations(reservationRepository.findAllBySlot(updateSlot));
         Reservation reserved = reservations.reserve(new ReservationName(request.getName()), updateSlot, now);
 
-//        Reservation updated = reservationRepository.update(id, reserved);
-        Reservation updated = null;
+        originReservation.changeTo(reserved);
 
-        if (originReservation.isApproved()) {
-            findFirstWaitingAndUpdateStatus(originReservation);
+        if (wasApproved) {
+            promoteFirstWaiting(originSlot);
         }
 
-        return getRankedReservation(updated);
+        return getRankedReservation(originReservation);
     }
 
-    private void findFirstWaitingAndUpdateStatus(Reservation reservation) {
-//        reservationRepository.findFirstWaitingBySlot(reservation.getSlot())
-//                .ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
+    private void validateIsPastReservation(Reservation reservation, LocalDateTime now) {
+        if (reservation.isPastThan(now)) {
+            throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
+        }
+    }
+
+    private void promoteFirstWaiting(Slot slot) {
+        reservationRepository.findFirstBySlotAndStatusOrderByCreatedAtAscIdAsc(slot, Status.WAITING)
+                .ifPresent(Reservation::approve);
     }
 
     @Transactional
     public void cancel(long reservationId, LocalDateTime now) {
         Reservation reservation = findReservationById(reservationId);
-        reservation.ensureNotPast(now);
+
+        validateIsPastReservation(reservation, now);
 
         reservationRepository.deleteById(reservationId);
 
         if (reservation.isApproved()) {
-            findFirstWaitingAndUpdateStatus(reservation);
+            promoteFirstWaiting(reservation.getSlot());
         }
     }
 

@@ -7,8 +7,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
+@Getter
 public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +23,6 @@ public class Theme {
     private String description;
     @Embedded
     private ThumbnailUrl thumbnailUrl;
-
-    protected Theme() {
-    }
 
     private Theme(Long id, ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
         this.id = id;
@@ -36,25 +37,5 @@ public class Theme {
 
     public static Theme create(ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
         return new Theme(null, name, description, thumbnailUrl);
-    }
-
-    public Theme withId(long id) {
-        return new Theme(id, name, description, thumbnailUrl);
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public ThemeName getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public ThumbnailUrl getThumbnailUrl() {
-        return thumbnailUrl;
     }
 }

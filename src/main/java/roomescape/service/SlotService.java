@@ -3,6 +3,7 @@ package roomescape.service;
 import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
 import java.time.LocalDate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,23 +11,17 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.theme.Theme;
-import roomescape.repository.ReservationTimeJpaRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
-import roomescape.repository.ThemeJpaRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class SlotService {
     private final SlotRepository slotRepository;
-    private final ReservationTimeJpaRepository reservationTimeRepository;
-    private final ThemeJpaRepository themeRepository;
-
-    public SlotService(SlotRepository slotRepository, ReservationTimeJpaRepository reservationTimeRepository,
-                       ThemeJpaRepository themeRepository) {
-        this.slotRepository = slotRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-    }
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
 
     @Transactional
     public Slot findOrCreate(LocalDate date, long timeId, long themeId) {
@@ -35,7 +30,7 @@ public class SlotService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
 
-        return slotRepository.findByDateAndTimeAndTheme(date, time, theme)
+        return slotRepository.findByDateAndTimeAndTheme(new ReservationDate(date), time, theme)
                 .orElseGet(() -> saveOrReread(date, time, theme));
     }
 
@@ -43,14 +38,8 @@ public class SlotService {
         try {
             return slotRepository.save(Slot.create(new ReservationDate(date), time, theme));
         } catch (DataIntegrityViolationException e) {
-            return slotRepository.findByDateAndTimeAndTheme(date, time, theme)
+            return slotRepository.findByDateAndTimeAndTheme(new ReservationDate(date), time, theme)
                     .orElseThrow(() -> new RoomEscapeException(ErrorCode.SLOT_NOT_FOUND));
-        }
-    }
-
-    public void lockSlot(Slot foundSlot) {
-        if (!slotRepository.lockSlot(foundSlot)) {
-            throw new RoomEscapeException(ErrorCode.SLOT_NOT_FOUND);
         }
     }
 }

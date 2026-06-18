@@ -2,7 +2,9 @@ package roomescape.domain.theme;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import lombok.Getter;
 
+@Getter
 public class FamousThemeCondition {
     private static final long DEFAULT_DAYS = 7;
     private static final long DEFAULT_LIMIT = 10;
@@ -25,17 +27,5 @@ public class FamousThemeCondition {
 
     public LocalDate endDate() {
         return baseDate.minusDays(DEFAULT_GAP_DATE);
-    }
-
-    public Long getRecentDays() {
-        return recentDays;
-    }
-
-    public LocalDate getBaseDate() {
-        return baseDate;
-    }
-
-    public Long getLimit() {
-        return limit;
     }
 }

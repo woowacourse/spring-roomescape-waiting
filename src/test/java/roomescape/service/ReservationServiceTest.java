@@ -24,9 +24,9 @@ import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeJpaRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
-import roomescape.repository.ThemeJpaRepository;
+import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Transactional
@@ -37,9 +37,9 @@ public class ReservationServiceTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
-    private ThemeJpaRepository themeRepository;
+    private ThemeRepository themeRepository;
     @Autowired
-    private ReservationTimeJpaRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private SlotRepository slotRepository;
 
@@ -265,13 +265,14 @@ public class ReservationServiceTest {
 
     private Reservation saveReservation(Slot slot, String name, Status status) {
         return reservationRepository.save(
-                RoomEscapeFixture.reservation().name(name).slot(slot).status(status).build());
+                RoomEscapeFixture.reservation().name(name).slot(slot).status(status).asNew().build());
     }
 
     private Slot saveSlot(Theme theme, ReservationTime time, ReservationDate date) {
-        Theme targetTheme = themeRepository.save(theme);
-        ReservationTime targetTime = reservationTimeRepository.save(time);
+        Theme targetTheme = themeRepository.save(
+                Theme.create(theme.getName(), theme.getDescription(), theme.getThumbnailUrl()));
+        ReservationTime targetTime = reservationTimeRepository.save(ReservationTime.of(time.getStartAt()));
         return slotRepository.save(
-                RoomEscapeFixture.slot().time(targetTime).theme(targetTheme).date(date).build());
+                RoomEscapeFixture.slot().time(targetTime).theme(targetTheme).date(date).asNew().build());
     }
 }

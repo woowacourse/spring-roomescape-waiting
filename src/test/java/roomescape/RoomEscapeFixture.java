@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.reservation.Reservation;
@@ -48,22 +47,23 @@ public class RoomEscapeFixture {
         return new ThemeFamousFindRequest(7L, FUTURE_DATE.getValue(), 10L);
     }
 
-    public static ReservationCreateRequest reservationCreateRequestWithName(ReservationName name) {
-        return new ReservationCreateRequest(name.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
-    }
-
     public static ReservationUpdateRequest reservationUpdateRequest() {
         return new ReservationUpdateRequest(NAME.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
     }
 
     public static class SlotBuilder {
-        private long id = 1L;
+        private Long id = 1L;
         private ReservationDate date = FUTURE_DATE;
         private ReservationTime time = TIME;
         private Theme theme = THEME;
 
         public SlotBuilder id(long id) {
             this.id = id;
+            return this;
+        }
+
+        public SlotBuilder asNew() {
+            this.id = null;
             return this;
         }
 
@@ -88,7 +88,7 @@ public class RoomEscapeFixture {
     }
 
     public static class ReservationBuilder {
-        private long id = 1L;
+        private Long id = 1L;
         private ReservationName name = NAME;
         private Slot slot = RoomEscapeFixture.slot().build();
         private Status status = Status.APPROVED;
@@ -96,6 +96,11 @@ public class RoomEscapeFixture {
 
         public ReservationBuilder id(long id) {
             this.id = id;
+            return this;
+        }
+
+        public ReservationBuilder asNew() {
+            this.id = null;
             return this;
         }
 
