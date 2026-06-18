@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.ReservationDateRepository;
@@ -29,7 +31,11 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 import roomescape.time.repository.ReservationTimeRepository;
 
-@DataJpaTest(showSql = false)
+@DataJpaTest
+@TestPropertySource(properties = {
+    "logging.level.org.hibernate.SQL=DEBUG",
+    "logging.level.org.hibernate.orm.jdbc.bind=TRACE"
+})
 class ReservationRepositoryTest {
 
     private final String name = "한다";
@@ -51,6 +57,8 @@ class ReservationRepositoryTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private EntityManager entityManager;
 
     @BeforeEach
     void setup() {
@@ -64,40 +72,29 @@ class ReservationRepositoryTest {
         theme = themeRepository.save(Theme.create("테마", "설명", "썸네일"));
     }
 
-    private List<Reservation> saveAll(List<Reservation> reservations) {
-        List<Reservation> savedReservations = new ArrayList<>();
-        for (Reservation reservation : reservations) {
-            savedReservations.add(save(reservation));
+    @Nested
+    @DisplayName("findByMemberIdWithWaitingTurn 메서드는")
+    class FindByMemberIdWithWaitingTurn {
+
+        @Test
+        @DisplayName("대기 순번을 포함한 나의 예약 목록을 조회한다")
+        void 성공1() {
+            // given
+            Member member = saveMember("member1");
+            save(Reservation.reserved(member, reservationDate1, reservationTime1, theme))
+                .getId();
+            int expectedSize = 1;
+
+            // when
+            List<ReservationWithWaitingTurn> actual =
+                reservationRepository.findAllByMemberIdWithWaitingTurn(member.getId());
+            entityManager.flush();
+            entityManager.clear();
+
+            // then
+            assertThat(actual)
+                .hasSize(expectedSize);
         }
-        return savedReservations;
-    }
-
-    private Reservation save(Reservation reservation) {
-        Member member = saveMember(reservation.getMember().getName());
-        ReflectionTestUtils.setField(reservation, "member", member);
-        return reservationRepository.save(reservation);
-    }
-
-    private Member saveMember(String name) {
-        return memberRepository.findByName(name)
-            .orElseGet(() -> memberRepository.save(Member.register(name, "password")));
-    }
-
-    private Reservation saveReservation(String name, ReservationDate date, ReservationTime time,
-        Theme theme) {
-        return save(reservation(saveMember(name), date, time, theme));
-    }
-
-    private Reservation saveWaitReservation(String name, ReservationDate date,
-        ReservationTime time, Theme theme, Long waitingOrder) {
-        return save(waitReservation(saveMember(name), date, time, theme, waitingOrder));
-    }
-
-    private ReservationDate savePastDate() {
-        ReservationDate pastDate = reservationDateRepository.saveAndFlush(
-            ReservationDate.create(LocalDate.now().plusYears(100)));
-        ReflectionTestUtils.setField(pastDate, "date", LocalDate.now().minusDays(1));
-        return reservationDateRepository.saveAndFlush(pastDate);
     }
 
     @Nested
@@ -240,5 +237,41 @@ class ReservationRepositoryTest {
                 .extracting("status", "waitingTurn")
                 .containsExactly(ReservationStatus.WAITING, null);
         }
+    }
+
+    private List<Reservation> saveAll(List<Reservation> reservations) {
+        List<Reservation> savedReservations = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            savedReservations.add(save(reservation));
+        }
+        return savedReservations;
+    }
+
+    private Reservation save(Reservation reservation) {
+        Member member = saveMember(reservation.getMember().getName());
+        ReflectionTestUtils.setField(reservation, "member", member);
+        return reservationRepository.save(reservation);
+    }
+
+    private Member saveMember(String name) {
+        return memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(Member.register(name, "password")));
+    }
+
+    private Reservation saveReservation(String name, ReservationDate date, ReservationTime time,
+        Theme theme) {
+        return save(reservation(saveMember(name), date, time, theme));
+    }
+
+    private Reservation saveWaitReservation(String name, ReservationDate date,
+        ReservationTime time, Theme theme, Long waitingOrder) {
+        return save(waitReservation(saveMember(name), date, time, theme, waitingOrder));
+    }
+
+    private ReservationDate savePastDate() {
+        ReservationDate pastDate = reservationDateRepository.saveAndFlush(
+            ReservationDate.create(LocalDate.now().plusYears(100)));
+        ReflectionTestUtils.setField(pastDate, "date", LocalDate.now().minusDays(1));
+        return reservationDateRepository.saveAndFlush(pastDate);
     }
 }
