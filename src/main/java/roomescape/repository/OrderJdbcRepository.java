@@ -21,6 +21,7 @@ public class OrderJdbcRepository implements OrderRepository {
             resultSet.getLong("id"),
             OrderId.of(resultSet.getString("order_id")),
             resultSet.getLong("reservation_id"),
+            resultSet.getLong("amount"),
             PaymentStatus.valueOf(resultSet.getString("status")),
             resultSet.getString("payment_key")
     );

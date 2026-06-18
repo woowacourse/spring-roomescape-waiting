@@ -39,7 +39,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("GET /order - reservationId로 주문 단건을 응답한다")
     void getOrderByReservationIdRespondsWithSingleOrder() throws Exception {
-        Order order = new Order(10L, OrderId.of("order-12345"), 1L, PaymentStatus.READY);
+        Order order = new Order(10L, OrderId.of("order-12345"), 1L, 50000L, PaymentStatus.READY, null);
         given(orderService.getByReservationId(1L)).willReturn(order);
 
         mockMvc.perform(get("/order").param("reservationId", "1"))

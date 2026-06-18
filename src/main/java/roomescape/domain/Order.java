@@ -4,28 +4,27 @@ import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
 
 public class Order {
+    private static final long DEFAULT_AMOUNT = 50000L; // 학습 목적상 고정값 사용
+
     private final Long id;
     private final OrderId orderId;
     private final Long reservationId;
-    private final Long amount = 50000L; // 학습 목적상 고정값 사용
+    private final Long amount;
     private final PaymentStatus status;
     private final String paymentKey;
 
-    public Order(Long id, OrderId orderId, Long reservationId, PaymentStatus status) {
-        this(id, orderId, reservationId, status, null);
-    }
-
-    public Order(Long id, OrderId orderId, Long reservationId, PaymentStatus status, String paymentKey) {
+    public Order(Long id, OrderId orderId, Long reservationId, Long amount, PaymentStatus status, String paymentKey) {
         validate(orderId, reservationId, status);
         this.id = id;
         this.orderId = orderId;
         this.reservationId = reservationId;
+        this.amount = amount;
         this.status = status;
         this.paymentKey = paymentKey;
     }
 
     public Order(Reservation reservation) {
-        this(null, OrderId.generate(), extractReservationId(reservation), PaymentStatus.READY);
+        this(null, OrderId.generate(), extractReservationId(reservation), DEFAULT_AMOUNT, PaymentStatus.READY, null);
     }
 
     private static Long extractReservationId(Reservation reservation) {
@@ -51,11 +50,11 @@ public class Order {
     }
 
     public Order withId(Long id) {
-        return new Order(id, orderId, reservationId, status, paymentKey);
+        return new Order(id, orderId, reservationId, amount, status, paymentKey);
     }
 
     public Order withPayment(PaymentStatus status, String paymentKey) {
-        return new Order(id, orderId, reservationId, status, paymentKey);
+        return new Order(id, orderId, reservationId, amount, status, paymentKey);
     }
 
     public Long getId() {
