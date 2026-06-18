@@ -1,6 +1,7 @@
 package roomescape.payment.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import roomescape.payment.PaymentConfirmation;
 
@@ -25,6 +26,9 @@ import java.util.concurrent.TimeoutException;
  * ③ 닫힌 포트 + connect timeout 500ms      → ~2ms 즉시 거부(timeout 재현 안 됨)
  * </pre>
  */
+// 블랙홀 connect 대기로 매 실행 ~3.5초가 걸리는 학습용 실험이라, 평소 빌드에서는 제외한다.
+// 직접 측정하려면 @Disabled 를 제거하고 단독 실행한다.
+@Disabled("학습용 실측 실험 - 필요할 때만 수동 실행")
 class ConnectTimeoutExperiment {
 
     private static final String BLACKHOLE_URL = "http://10.255.255.1:81";
