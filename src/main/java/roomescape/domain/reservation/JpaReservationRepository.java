@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.domain.reservation.dto.ReservationWithWaitingNumber;
 import roomescape.domain.theme.Theme;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
@@ -38,55 +39,93 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     );
 
     @Query("""
-        select reservation
+        select new roomescape.domain.reservation.dto.ReservationWithWaitingNumber(
+            reservation,
+            case
+                when reservation.status = :waitingStatus then (
+                    select count(waitingReservation) + 1
+                    from Reservation waitingReservation
+                    where waitingReservation.reservationSlot = slot
+                      and waitingReservation.status = :waitingStatus
+                      and (
+                          waitingReservation.updatedAt < reservation.updatedAt
+                          or (
+                              waitingReservation.updatedAt = reservation.updatedAt
+                              and waitingReservation.id < reservation.id
+                          )
+                      )
+                )
+                else null
+            end
+        )
         from Reservation reservation
-        join fetch reservation.user
-        join fetch reservation.reservationSlot slot
-        join fetch slot.date date
-        join fetch slot.time time
-        join fetch slot.theme
+        join reservation.user
+        join reservation.reservationSlot slot
+        join slot.date date
+        join slot.time time
+        join slot.theme
         order by date.date desc, time.startAt desc, reservation.id
         """)
-    List<Reservation> findReservationsForAdmin();
+    List<ReservationWithWaitingNumber> findReservationsForAdmin(ReservationStatus waitingStatus);
 
     @Query("""
-        select reservation
+        select new roomescape.domain.reservation.dto.ReservationWithWaitingNumber(
+            reservation,
+            (
+                select count(waitingReservation) + 1
+                from Reservation waitingReservation
+                where waitingReservation.reservationSlot = slot
+                  and waitingReservation.status = :status
+                  and (
+                      waitingReservation.updatedAt < reservation.updatedAt
+                      or (
+                          waitingReservation.updatedAt = reservation.updatedAt
+                          and waitingReservation.id < reservation.id
+                      )
+                  )
+            )
+        )
         from Reservation reservation
-        join fetch reservation.user
-        join fetch reservation.reservationSlot slot
-        join fetch slot.date date
-        join fetch slot.time time
-        join fetch slot.theme
+        join reservation.user
+        join reservation.reservationSlot slot
+        join slot.date date
+        join slot.time time
+        join slot.theme
         where reservation.status = :status
         order by date.date desc, time.startAt desc, reservation.id
         """)
-    List<Reservation> findWaitingReservationsForAdmin(ReservationStatus status);
+    List<ReservationWithWaitingNumber> findWaitingReservationsForAdmin(ReservationStatus status);
 
     @Query("""
-        select reservation
+        select new roomescape.domain.reservation.dto.ReservationWithWaitingNumber(
+            reservation,
+            case
+                when reservation.status = :waitingStatus then (
+                    select count(waitingReservation) + 1
+                    from Reservation waitingReservation
+                    where waitingReservation.reservationSlot = slot
+                      and waitingReservation.status = :waitingStatus
+                      and (
+                          waitingReservation.updatedAt < reservation.updatedAt
+                          or (
+                              waitingReservation.updatedAt = reservation.updatedAt
+                              and waitingReservation.id < reservation.id
+                          )
+                      )
+                )
+                else null
+            end
+        )
         from Reservation reservation
-        join fetch reservation.user user
-        join fetch reservation.reservationSlot slot
-        join fetch slot.date date
-        join fetch slot.time time
-        join fetch slot.theme
+        join reservation.user user
+        join reservation.reservationSlot slot
+        join slot.date date
+        join slot.time time
+        join slot.theme
         where user.name = :username
         order by date.date desc, time.startAt desc, reservation.id
         """)
-    List<Reservation> findUserReservations(String username);
-
-    @Query("""
-        select reservation
-        from Reservation reservation
-        join fetch reservation.reservationSlot slot
-        where slot.id in :reservationSlotIds
-          and reservation.status = :status
-        order by slot.id, reservation.updatedAt, reservation.id
-        """)
-    List<Reservation> findWaitingReservationsInSlots(
-        List<Long> reservationSlotIds,
-        ReservationStatus status
-    );
+    List<ReservationWithWaitingNumber> findUserReservations(String username, ReservationStatus waitingStatus);
 
     @Query("""
         select reservation

@@ -4,10 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,82 +58,23 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getAllReservations() {
-        return findAllWithWaitingNumber().stream()
+        return reservationRepository.findReservationsForAdmin(ReservationStatus.WAITING).stream()
             .map(ReservationResponse::from)
             .toList();
     }
 
     public List<ReservationResponse> getWaitingReservations() {
-        List<Reservation> reservations = reservationRepository.findWaitingReservationsForAdmin(
-            ReservationStatus.WAITING
-        );
-        Map<Long, Long> waitingNumberByReservationId = calculateWaitingNumbers(reservations);
-        return reservations.stream()
-            .map(reservation -> new ReservationWithWaitingNumber(
-                reservation,
-                waitingNumberByReservationId.get(reservation.getId())
-            ))
+        return reservationRepository.findWaitingReservationsForAdmin(ReservationStatus.WAITING).stream()
             .map(ReservationResponse::from)
             .toList();
     }
 
     public UserReservationsResponse getUserReservations(String username) {
-        List<Reservation> reservations = reservationRepository.findUserReservations(username);
-        Map<Long, Long> waitingNumberByReservationId = calculateWaitingNumbersInSameSlots(reservations);
-        List<ReservationWithWaitingNumber> userReservations = reservations.stream()
-            .map(reservation -> new ReservationWithWaitingNumber(
-                reservation,
-                waitingNumberByReservationId.get(reservation.getId())
-            ))
-            .toList();
-        return UserReservationsResponse.of(username, userReservations);
-    }
-
-    private List<ReservationWithWaitingNumber> findAllWithWaitingNumber() {
-        List<Reservation> reservations = reservationRepository.findReservationsForAdmin();
-        Map<Long, Long> waitingNumberByReservationId = calculateWaitingNumbers(reservations);
-        return reservations.stream()
-            .map(reservation -> new ReservationWithWaitingNumber(
-                reservation,
-                waitingNumberByReservationId.get(reservation.getId())
-            ))
-            .toList();
-    }
-
-    private Map<Long, Long> calculateWaitingNumbers(List<Reservation> reservations) {
-        Map<Long, Long> waitingNumberByReservationId = new HashMap<>();
-        Map<Long, Long> nextWaitingNumberBySlotId = new HashMap<>();
-
-        reservations.stream()
-            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
-            .sorted(Comparator
-                .comparing((Reservation reservation) -> reservation.getReservationSlot().getId())
-                .thenComparing(Reservation::getUpdatedAt)
-                .thenComparing(Reservation::getId))
-            .forEach(reservation -> {
-                Long slotId = reservation.getReservationSlot().getId();
-                Long waitingNumber = nextWaitingNumberBySlotId.merge(slotId, 1L, Long::sum);
-                waitingNumberByReservationId.put(reservation.getId(), waitingNumber);
-            });
-
-        return waitingNumberByReservationId;
-    }
-
-    private Map<Long, Long> calculateWaitingNumbersInSameSlots(List<Reservation> reservations) {
-        List<Long> reservationSlotIds = reservations.stream()
-            .map(reservation -> reservation.getReservationSlot().getId())
-            .distinct()
-            .toList();
-
-        if (reservationSlotIds.isEmpty()) {
-            return Map.of();
-        }
-
-        List<Reservation> waitingReservations = reservationRepository.findWaitingReservationsInSlots(
-            reservationSlotIds,
+        List<ReservationWithWaitingNumber> userReservations = reservationRepository.findUserReservations(
+            username,
             ReservationStatus.WAITING
         );
-        return calculateWaitingNumbers(waitingReservations);
+        return UserReservationsResponse.of(username, userReservations);
     }
 
     @Transactional
