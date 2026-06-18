@@ -1,7 +1,7 @@
 package roomescape.apitest.member;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.config.FixedClockConfig.TODAY;
+import static roomescape.common.config.FixedClockConfig.TODAY;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;

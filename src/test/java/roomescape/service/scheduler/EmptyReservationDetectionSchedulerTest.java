@@ -3,9 +3,9 @@ package roomescape.service.scheduler;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
-import static roomescape.config.FixedClockConfig.FUTURE_DATE;
-import static roomescape.config.FixedClockConfig.NOW_TIME;
-import static roomescape.config.FixedClockConfig.TODAY;
+import static roomescape.common.config.FixedClockConfig.FUTURE_DATE;
+import static roomescape.common.config.FixedClockConfig.NOW_TIME;
+import static roomescape.common.config.FixedClockConfig.TODAY;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
 package roomescape.apitest.member;
 
-import static roomescape.config.FixedClockConfig.FUTURE_DATE;
+import static roomescape.common.config.FixedClockConfig.FUTURE_DATE;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

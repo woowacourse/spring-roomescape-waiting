@@ -2,7 +2,7 @@ package roomescape.apitest.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static roomescape.config.FixedClockConfig.FUTURE_DATE;
+import static roomescape.common.config.FixedClockConfig.FUTURE_DATE;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -47,7 +47,7 @@ class ReservationApiTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        
+
         initialTotalSize = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         initialConfirmedSize = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation WHERE status = 'CONFIRMED'", Integer.class);
