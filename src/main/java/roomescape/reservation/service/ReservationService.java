@@ -126,6 +126,6 @@ public class ReservationService {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
-        return jpaReservationRepository.update(updatedReservation);
+        return jpaReservationRepository.save(updatedReservation);
     }
 }

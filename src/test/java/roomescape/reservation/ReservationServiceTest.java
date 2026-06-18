@@ -1,6 +1,7 @@
 package roomescape.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -12,6 +13,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
@@ -102,9 +104,8 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         when(fixture.reservationRepository.existsById(1L)).thenReturn(false);
 
-        fixture.reservationService.deleteById(1L);
-
-        verify(fixture.reservationRepository).deleteById(1L);
+        assertThatThrownBy(() -> fixture.reservationService.deleteById(1L))
+            .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -152,7 +153,7 @@ class ReservationServiceTest {
                 2L,
                 1L
         )).thenReturn(false);
-        when(fixture.reservationRepository.update(any(Reservation.class))).thenReturn(updatedReservation);
+        when(fixture.reservationRepository.save(any(Reservation.class))).thenReturn(updatedReservation);
 
         Reservation updated = fixture.reservationService.updateByIdAndName(
                 1L,

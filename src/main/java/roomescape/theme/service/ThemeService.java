@@ -1,11 +1,13 @@
 package roomescape.theme.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.Theme;
 import roomescape.theme.repository.JpaThemeRepository;
@@ -15,17 +17,14 @@ import roomescape.theme.repository.ThemeRepository;
 public class ThemeService {
 
     private final JpaThemeRepository jpaThemeRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final JpaReservationRepository jpaReservationRepository;
 
     public ThemeService(
             final JpaThemeRepository jpaThemeRepository,
-            final ThemeRepository themeRepository,
-            final ReservationRepository reservationRepository
+            final JpaReservationRepository jpaReservationRepository
     ) {
         this.jpaThemeRepository = jpaThemeRepository;
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
+        this.jpaReservationRepository = jpaReservationRepository;
     }
 
     public Theme save(final String name, final String description, final String thumbnailUrl) {
@@ -53,18 +52,19 @@ public class ThemeService {
     }
 
     public void deleteById(final long themeId) {
-        if (reservationRepository.existsByThemeId(themeId)) {
+        if (!jpaThemeRepository.existsById(themeId)) {
+            throw new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND, "존재하지 않는 테마입니다.");
+        }
+        if (jpaReservationRepository.existsByThemeId(themeId)) {
             throw new ConflictException(ErrorCode.THEME_IN_USE, "이미 예약된 테마는 삭제할 수 없습니다.");
         }
 
-        int affectedRowCount = jpaThemeRepository.deleteById(themeId);
-
-        if(affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND, "삭제된 테마 데이터가 없습니다.");
-        }
+        jpaThemeRepository.deleteById(themeId);
     }
 
     public List<Theme> getPopularThemes(final int period, final int limit) {
-        return themeRepository.findPopularThemes(period, limit);
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusDays(period);
+        return jpaThemeRepository.findPopularThemes(start, end, limit);
     }
 }

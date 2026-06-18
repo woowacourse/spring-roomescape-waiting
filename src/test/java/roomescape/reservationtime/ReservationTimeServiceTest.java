@@ -161,7 +161,7 @@ class ReservationTimeServiceTest {
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
-
+        when(reservationTimeRepository.existsById(1L)).thenReturn(true);
         assertThrows(ConflictException.class, () -> reservationTimeService.deleteById(1L));
     }
 
@@ -178,8 +178,8 @@ class ReservationTimeServiceTest {
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
-        when(reservationTimeRepository.deleteById(1L)).thenReturn(1);
-
+//        when(reservationTimeRepository.deleteById(1L)).thenReturn(1);
+        when(reservationTimeRepository.existsById(1L)).thenReturn(true);
         reservationTimeService.deleteById(1L);
 
         verify(reservationTimeRepository).deleteById(1L);
@@ -198,7 +198,7 @@ class ReservationTimeServiceTest {
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
-        when(reservationTimeRepository.deleteById(1L)).thenReturn(0);
+//        when(reservationTimeRepository.deleteById(1L)).thenReturn(0);
 
         assertThrows(ResourceNotFoundException.class, () -> reservationTimeService.deleteById(1L));
     }

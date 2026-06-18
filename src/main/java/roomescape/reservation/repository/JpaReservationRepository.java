@@ -9,21 +9,9 @@ import org.springframework.data.repository.query.Param;
 import roomescape.reservation.Reservation;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
-
-    List<Reservation> findAll();
-
-    Optional<Reservation> findById(long id);
-
     Optional<Reservation> findByIdAndName(long id, String name);
 
     Optional<Reservation> findByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
-
-    void deleteById(long id);
-
-    Reservation save(Reservation reservation);
-
-    Reservation update(Reservation reservation);
-
 
     boolean existsByTimeId(long timeId);
 
@@ -37,7 +25,4 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     @Query("SELECT r.time.id FROM Reservation r WHERE r.date = :date AND r.theme.id = :themeId")
     List<Long> findReservedTimeIdsByDateAndThemeId(@Param("date") LocalDate date, @Param("themeId") long themeId);
-
-
-
 }

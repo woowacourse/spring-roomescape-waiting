@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -58,14 +59,13 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final long timeId) {
+        if (!jpaReservationTimeRepository.existsById(timeId)) {
+            throw new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "존재하지 않는 시간입니다.");
+        }
         if (jpaReservationRepository.existsByTimeId(timeId)) {
             throw new ConflictException(ErrorCode.RESERVATION_TIME_IN_USE, "이미 예약된 시간은 삭제할 수 없습니다.");
         }
-        int affectedRowCount = jpaReservationTimeRepository.deleteById(timeId);
-
-        if(affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "삭제된 시간 데이터가 없습니다.");
-        }
+        jpaReservationTimeRepository.deleteById(timeId);
     }
 
     public List<ReservationTime> getAll() {

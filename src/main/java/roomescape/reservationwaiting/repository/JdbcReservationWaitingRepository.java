@@ -10,20 +10,36 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationwaiting.ReservationWaiting;
+import roomescape.theme.Theme;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
-    private static final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) ->
-            new ReservationWaiting(
-                    rs.getLong("id"),
-                    rs.getDate("date").toLocalDate(),
-                    rs.getLong("theme_id"),
-                    rs.getLong("time_id"),
-                    rs.getString("name"),
-                    rs.getTimestamp("requested_at").toLocalDateTime()
-            );
+    private static final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> {
+        Theme theme = Theme.of(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("description"),
+                rs.getString("thumbnail_url")
+        );
+
+        ReservationTime reservationTime = ReservationTime.of(
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime()
+        );
+
+        return new ReservationWaiting(
+                rs.getLong("id"),
+                rs.getDate("date").toLocalDate(),
+                theme,
+                reservationTime,
+                rs.getString("name"),
+                rs.getTimestamp("requested_at").toLocalDateTime()
+        );
+    };
+
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -40,8 +56,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
             preparedStatement.setDate(1, Date.valueOf(reservationWaiting.getDate()));
-            preparedStatement.setLong(2, reservationWaiting.getThemeId());
-            preparedStatement.setLong(3, reservationWaiting.getTimeId());
+            preparedStatement.setLong(2, reservationWaiting.getTheme().getId());
+            preparedStatement.setLong(3, reservationWaiting.getTime().getId());
             preparedStatement.setString(4, reservationWaiting.getName());
             preparedStatement.setTimestamp(5, Timestamp.valueOf(reservationWaiting.getRequestAt()));
             return preparedStatement;
