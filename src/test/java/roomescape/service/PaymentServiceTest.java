@@ -51,6 +51,7 @@ class PaymentServiceTest {
                 reservationTimeRepository,
                 paymentOrderRepository,
                 null, // TossPaymentGateway — prepare() 테스트에서는 사용되지 않음
+                null, // ReservationService — prepare() 테스트에서는 사용되지 않음
                 TestDateTimes.fixedClock()
         );
         ReflectionTestUtils.setField(paymentService, "clientKey", TEST_CLIENT_KEY);

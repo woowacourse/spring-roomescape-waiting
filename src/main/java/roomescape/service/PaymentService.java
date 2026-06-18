@@ -25,10 +25,10 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.result.PaymentConfirmResult;
+import roomescape.service.result.ReservationResult;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PaymentService {
 
@@ -37,6 +37,7 @@ public class PaymentService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final PaymentOrderRepository paymentOrderRepository;
     private final TossPaymentGateway tossPaymentGateway;
+    private final ReservationService reservationService;
     private final Clock clock;
 
     @Value("${toss.client-key}")
@@ -56,21 +57,20 @@ public class PaymentService {
         log.info("[결제 승인 완료] orderId={} status={} approvedAt={}", response.orderId(), response.status(),
                 response.approvedAt());
 
-        Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
-        reservation.confirmPendingEntry(paymentOrder.getEntryId());
-        reservationRepository.update(reservation);
+        ReservationResult reservationResult = reservationService.confirmPendingEntry(paymentOrder.getEntryId());
 
         log.info("[예약 확정] entryId={} PENDING→RESERVED", paymentOrder.getEntryId());
 
         return new PaymentConfirmResult(
                 response,
-                reservation.getTheme().getName(),
-                reservation.getTheme().getThumbnailImageUrl(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt()
+                reservationResult.theme().name(),
+                reservationResult.theme().thumbnailImageUrl(),
+                reservationResult.date(),
+                reservationResult.time().startAt()
         );
     }
 
+    @Transactional
     public void cancel(String orderId) {
         if (orderId == null) {
             return;
@@ -84,6 +84,7 @@ public class PaymentService {
         });
     }
 
+    @Transactional
     public PreparePaymentResponse prepare(ReservationCommand command) {
         Reservation reservation = findOrCreateSlotForUpdate(command);
         reservation.addPendingEntry(command.name(), command.amount(), LocalDateTime.now(clock));
