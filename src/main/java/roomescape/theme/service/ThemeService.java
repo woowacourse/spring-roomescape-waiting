@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
@@ -14,6 +15,7 @@ import roomescape.theme.repository.JpaThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final JpaThemeRepository jpaThemeRepository;
@@ -27,6 +29,7 @@ public class ThemeService {
         this.jpaReservationRepository = jpaReservationRepository;
     }
 
+    @Transactional
     public Theme save(final String name, final String description, final String thumbnailUrl) {
         Theme nonIdTheme;
         try {
@@ -51,6 +54,7 @@ public class ThemeService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND, "테마를 찾을 수 없습니다."));
     }
 
+    @Transactional
     public void deleteById(final long themeId) {
         if (!jpaThemeRepository.existsById(themeId)) {
             throw new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND, "존재하지 않는 테마입니다.");

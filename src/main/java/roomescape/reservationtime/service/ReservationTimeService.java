@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
@@ -16,6 +17,7 @@ import roomescape.reservationtime.repository.JpaReservationTimeRepository;
 import roomescape.theme.service.ThemeService;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final JpaReservationTimeRepository jpaReservationTimeRepository;
@@ -32,7 +34,7 @@ public class ReservationTimeService {
         this.themeService = themeService;
     }
 
-
+    @Transactional
     public ReservationTime save(final LocalTime startAt) {
         ReservationTime reservationTime;
         try {
@@ -58,6 +60,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(final long timeId) {
         if (!jpaReservationTimeRepository.existsById(timeId)) {
             throw new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "존재하지 않는 시간입니다.");

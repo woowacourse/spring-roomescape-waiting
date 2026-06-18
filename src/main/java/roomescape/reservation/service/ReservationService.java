@@ -16,6 +16,7 @@ import roomescape.theme.Theme;
 import roomescape.theme.service.ThemeService;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final JpaReservationRepository jpaReservationRepository;
     private final ReservationTimeService reservationTimeService;
@@ -38,6 +39,7 @@ public class ReservationService {
         return jpaReservationRepository.findAll();
     }
 
+    @Transactional
     public Reservation save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
         reservationValidator.validateCreateReferenceIds(themeId, timeId);
 
@@ -53,6 +55,8 @@ public class ReservationService {
         return jpaReservationRepository.save(nonIdReservation);
     }
 
+
+    @Transactional
     public void saveWith(String name, LocalDate date, Theme theme, ReservationTime reservationTime) {
         Reservation nonIdReservation = Reservation.createNew(name, date, theme, reservationTime);
 
@@ -67,6 +71,7 @@ public class ReservationService {
                 ));
     }
 
+    @Transactional
     public void deleteById(final long id) {
         if (!jpaReservationRepository.existsById(id)){
             throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
@@ -96,6 +101,7 @@ public class ReservationService {
         return reservation;
     }
 
+    @Transactional
     public Reservation updateByIdAndName(
             final long id,
             final String name,

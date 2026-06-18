@@ -14,6 +14,7 @@ import roomescape.reservationwaiting.repository.JpaReservationWaitingRepository;
 import roomescape.theme.Theme;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitingService {
     private final JpaReservationWaitingRepository reservationWaitingRepository;
 
@@ -23,6 +24,7 @@ public class ReservationWaitingService {
         this.reservationWaitingRepository = jpaReservationWaitingRepository;
     }
 
+    @Transactional
     public ReservationWaiting save(String name, LocalDate date, Theme theme, ReservationTime time) {
 
         if (reservationWaitingRepository.existsByDateAndThemeIdAndTimeIdAndName(date, theme.getId(), time.getId(), name)) {
