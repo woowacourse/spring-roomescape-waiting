@@ -2,6 +2,9 @@ package roomescape.infra.toss;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
@@ -29,6 +32,12 @@ public class TossPaymentGateway implements PaymentGateway {
         this.objectMapper = objectMapper;
     }
 
+    @Retryable(
+            retryFor = { RetryablePaymentException.class },
+            noRetryFor = { CustomException.class },
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2.0, random = true)
+    )
     @Override
     public PaymentResult confirm(PaymentConfirmation confirmation) {
         TossPaymentRequest request = new TossPaymentRequest(
@@ -60,10 +69,15 @@ public class TossPaymentGateway implements PaymentGateway {
             Throwable cause = e.getCause();
             if (cause instanceof SocketTimeoutException && cause.getMessage() != null
                     && cause.getMessage().contains("Read")) {
-                throw new CustomException(ErrorCode.PAYMENT_READ_TIMEOUT);
+                throw new RetryablePaymentException(ErrorCode.PAYMENT_READ_TIMEOUT);
             }
-            throw new CustomException(ErrorCode.PAYMENT_CONNECTION_TIMEOUT);
+            throw new RetryablePaymentException(ErrorCode.PAYMENT_CONNECTION_TIMEOUT);
         }
+    }
+
+    @Recover
+    public PaymentResult recoverConfirm(RetryablePaymentException e, PaymentConfirmation confirmation) {
+        throw new CustomException(e.getErrorCode());
     }
 
     private ErrorCode mapToErrorCode(TossErrorResponse error) {
