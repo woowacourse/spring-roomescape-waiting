@@ -1,4 +1,4 @@
-package roomescape.payment;
+package roomescape.payment.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

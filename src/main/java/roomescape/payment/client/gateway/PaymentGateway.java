@@ -1,4 +1,4 @@
-package roomescape.payment.client;
+package roomescape.payment.client.gateway;
 
 import roomescape.payment.service.dto.PaymentConfirmation;
 import roomescape.payment.service.dto.PaymentResult;

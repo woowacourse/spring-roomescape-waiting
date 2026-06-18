@@ -11,7 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.common.AcceptanceTest;
-import roomescape.payment.client.PaymentGateway;
+import roomescape.payment.client.gateway.PaymentGateway;
 import roomescape.payment.service.dto.PaymentResult;
 import roomescape.payment.service.dto.PaymentStatus;
 import roomescape.reservation.domain.ReservationStatus;

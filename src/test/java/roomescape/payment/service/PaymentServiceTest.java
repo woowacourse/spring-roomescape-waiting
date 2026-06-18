@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
-import roomescape.payment.client.PaymentGateway;
+import roomescape.payment.client.gateway.PaymentGateway;
 import roomescape.payment.domain.Payment;
 import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.exception.PaymentAmountMismatchException;

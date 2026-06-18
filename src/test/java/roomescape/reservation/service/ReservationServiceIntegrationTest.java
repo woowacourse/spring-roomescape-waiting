@@ -8,7 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
-import roomescape.payment.client.PaymentGateway;
+import roomescape.payment.client.gateway.PaymentGateway;
 import roomescape.payment.service.PaymentService;
 import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
@@ -28,7 +28,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.PENDING_PAYMENT;
-import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 

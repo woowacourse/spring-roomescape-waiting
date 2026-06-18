@@ -1,4 +1,4 @@
-package roomescape.payment.client;
+package roomescape.payment.client.gateway;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;

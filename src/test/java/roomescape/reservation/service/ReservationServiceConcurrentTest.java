@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
-import roomescape.payment.client.PaymentGateway;
+import roomescape.payment.client.gateway.PaymentGateway;
 import roomescape.payment.service.PaymentService;
 import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
