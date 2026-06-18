@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.repository.JpaReservationTimeRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -29,11 +30,11 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 시간을 저장한다")
     void save() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository jpaReservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository,
+                jpaReservationRepository,
                 themeService
         );
         ReservationTime savedTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
@@ -50,7 +51,7 @@ class ReservationTimeServiceTest {
     @DisplayName("중복된 예약 시간은 저장할 수 없다")
     void saveDuplicateTime() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
@@ -67,7 +68,7 @@ class ReservationTimeServiceTest {
     @DisplayName("특정 날짜와 테마에 이미 예약된 시간을 제외한 예약 가능 시간을 조회한다")
     void findAvailableTimes() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
@@ -93,13 +94,14 @@ class ReservationTimeServiceTest {
     @DisplayName("지난 날짜에 대해서는 예약 가능 시간이 조회되지 않는다")
     void findAvailableTimesInPastDate() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
                 themeService
         );
+
         LocalDate pastDate = LocalDate.now().minusDays(1);
 
         when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
@@ -120,13 +122,14 @@ class ReservationTimeServiceTest {
         assumeTrue(LocalTime.now().isBefore(LocalTime.of(23, 59)));
 
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
                 themeService
         );
+
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         LocalTime futureTime = now.plusMinutes(1);
@@ -149,7 +152,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약이 존재하는 예약 시간은 삭제할 수 없다")
     void deleteById() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
@@ -166,7 +169,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약이 없는 예약 시간을 삭제한다")
     void deleteByIdWithoutReservation() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
@@ -186,7 +189,7 @@ class ReservationTimeServiceTest {
     @DisplayName("존재하지 않는 예약 시간은 삭제할 수 없다")
     void deleteByIdNotFound() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
@@ -204,13 +207,14 @@ class ReservationTimeServiceTest {
     @DisplayName("ID로 예약 시간을 조회한다")
     void getById() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
                 themeService
         );
+
         ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
@@ -224,7 +228,7 @@ class ReservationTimeServiceTest {
     @DisplayName("존재하지 않는 ID로 예약 시간을 조회할 수 없다")
     void getByIdNotFound() {
         JpaReservationTimeRepository reservationTimeRepository = mock(JpaReservationTimeRepository.class);
-        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        JpaReservationRepository reservationRepository = mock(JpaReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,

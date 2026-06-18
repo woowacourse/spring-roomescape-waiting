@@ -3,10 +3,12 @@
 ## 기능 명세
 
 1단계
-- [ ] 매핑 변환 
-  - [ ] JDBC -> jpa 변경
+- [X] 매핑 변환
   - [X] Theme 매핑 변환
-  - [X] ReservationTime 매핑 변
+  - [X] ReservationTime 매핑 변환
+- [ ] 연관관계 매핑
+  - [X] Reservation 매핑
+  - [ ] ReservationWaiting 매핑
 
 ## API 명세
 
