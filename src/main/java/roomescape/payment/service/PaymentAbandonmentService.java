@@ -65,7 +65,9 @@ public class PaymentAbandonmentService {
         if (!order.isPending()) {
             return;
         }
-        orderService.markFailed(order);
-        reservationService.cancelPending(order.getReservationId());
+        // CAS로 PENDING→FAILED를 선점한 쪽만 예약 취소를 진행한다(동시에 결제 확정이 끼어들면 양보).
+        if (orderService.markFailed(order)) {
+            reservationService.cancelPending(order.getReservationId());
+        }
     }
 }

@@ -98,8 +98,10 @@ public class PaymentService {
             orderService.markNeedsCheck(order, paymentKey);
             return ConfirmOutcome.NEEDS_CHECK;
         }
-        orderService.complete(order, result.paymentKey());
-        reservationService.confirm(order.getReservationId());
+        // CAS로 상태를 선점한 쪽만 예약 확정을 진행한다(동시 수렴 시 한쪽만 이김).
+        if (orderService.complete(order, result.paymentKey())) {
+            reservationService.confirm(order.getReservationId());
+        }
         return ConfirmOutcome.CONFIRMED;
     }
 }

@@ -113,6 +113,21 @@ public class OrderJdbcDao implements OrderDao {
     }
 
     @Override
+    public int compareAndUpdate(Order order, OrderStatus expectedStatus) {
+        String sql = """
+                UPDATE orders
+                SET payment_key = :paymentKey, status = :status
+                WHERE order_id = :orderId AND status = :expected
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("paymentKey", order.getPaymentKey())
+                .addValue("status", order.getStatus().name())
+                .addValue("orderId", order.getOrderId())
+                .addValue("expected", expectedStatus.name());
+        return jdbcTemplate.update(sql, params);
+    }
+
+    @Override
     public List<Order> findNeedsCheck() {
         String sql = """
                 SELECT id, order_id, idempotency_key, reservation_id, amount, payment_key, status

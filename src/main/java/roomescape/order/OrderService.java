@@ -66,14 +66,20 @@ public class OrderService {
         return orderDao.findNeedsCheck().stream().map(Order::getOrderId).toList();
     }
 
-    public void complete(Order order, String paymentKey) {
+    /**
+     * 주문을 확정한다. 전이 전 상태(expected)를 기억해 CAS로 갱신 — 동시에 다른 곳(recheck·reconcile·워커)이
+     * 이미 수렴시켰으면 0행이 돌아오고 false를 반환한다(졌음). 이긴 호출만 예약 확정 같은 후속을 진행해야 한다.
+     */
+    public boolean complete(Order order, String paymentKey) {
+        OrderStatus expected = order.getStatus();
         order.complete(paymentKey);
-        orderDao.update(order);
+        return orderDao.compareAndUpdate(order, expected) == 1;
     }
 
-    public void markFailed(Order order) {
+    public boolean markFailed(Order order) {
+        OrderStatus expected = order.getStatus();
         order.markFailed();
-        orderDao.update(order);
+        return orderDao.compareAndUpdate(order, expected) == 1;
     }
 
     public void markNeedsCheck(Order order, String paymentKey) {

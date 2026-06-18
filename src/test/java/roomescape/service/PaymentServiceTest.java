@@ -303,4 +303,22 @@ class PaymentServiceTest {
         assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
     }
+
+    @Test
+    @DisplayName("CAS 직렬화: 같은 NEEDS_CHECK 주문을 둘이 동시에 수렴시키면 한쪽만 이긴다(status가 곧 version)")
+    void compareAndSetSerializesConverge() {
+        Created created = createReservationWithOrder();
+        orderService.markNeedsCheck(created.order(), "pk-ok");
+        // 둘 다 NEEDS_CHECK를 읽은 상태(동시 진입 흉내) — 어느 쪽도 아직 전이하지 않았다.
+        Order first = orderService.findByOrderId(created.order().getOrderId()).orElseThrow();
+        Order second = orderService.findByOrderId(created.order().getOrderId()).orElseThrow();
+
+        boolean firstWon = orderService.complete(first, "pk-ok");
+        boolean secondWon = orderService.complete(second, "pk-ok");
+
+        assertThat(firstWon).isTrue();    // 1행 — 내가 이김
+        assertThat(secondWon).isFalse();  // 0행 — 이미 CONFIRMED라 졌음(status 가드가 DB에서 막음)
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.CONFIRMED);
+    }
 }

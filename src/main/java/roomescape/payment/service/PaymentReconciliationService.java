@@ -41,12 +41,16 @@ public class PaymentReconciliationService {
             return; // 사용자 recheck 등으로 이미 수렴됐으면 건너뛴다(멱등).
         }
         PaymentApprovalStatus status = paymentGateway.findStatus(orderId);
+        // 상태 전이를 CAS로 선점한 쪽만 예약 후속을 진행한다 — 워커와 사용자 recheck가 동시에 와도(또는
+        // 여러 인스턴스의 워커가 동시에 와도) DB가 한쪽만 이기게 직렬화한다(낙관, status가 곧 version).
         if (status == PaymentApprovalStatus.APPROVED) {
-            orderService.complete(order, order.getPaymentKey());
-            reservationService.confirm(order.getReservationId());
+            if (orderService.complete(order, order.getPaymentKey())) {
+                reservationService.confirm(order.getReservationId());
+            }
         } else {
-            orderService.markFailed(order);
-            reservationService.cancelPending(order.getReservationId());
+            if (orderService.markFailed(order)) {
+                reservationService.cancelPending(order.getReservationId());
+            }
         }
     }
 }
