@@ -15,23 +15,26 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.PaymentAmountMismatchException;
+import roomescape.common.vo.Name;
 import roomescape.fixture.FakePaymentGateway;
 import roomescape.member.Member;
 import roomescape.member.MemberDao;
 import roomescape.member.dao.MemberJdbcDao;
+import roomescape.order.Order;
 import roomescape.order.OrderDao;
 import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
 import roomescape.order.dao.OrderJdbcDao;
 import roomescape.payment.PaymentService;
+import roomescape.payment.web.PaymentReadyResponse;
 import roomescape.promotion.PromotionService;
 import roomescape.promotion.dao.PromotionOutboxJdbcDao;
-import roomescape.reservation.ReservationCreator;
+import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationDao;
-import roomescape.reservation.ReservationOrder;
-import roomescape.reservation.ReservationService;
 import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.dao.ReservationJdbcDao;
+import roomescape.reservation.service.ReservationCreator;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.web.ReservationRequestDto;
 import roomescape.store.dao.StoreJdbcDao;
 import roomescape.theme.Theme;
@@ -40,7 +43,6 @@ import roomescape.theme.dao.ThemeJdbcDao;
 import roomescape.time.Time;
 import roomescape.time.TimeDao;
 import roomescape.time.dao.TimeJdbcDao;
-import roomescape.common.vo.Name;
 import roomescape.waiting.dao.WaitingJdbcDao;
 
 /**
@@ -59,6 +61,8 @@ class PaymentServiceTest {
     private PaymentService paymentService;
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private OrderService orderService;
     @Autowired
     private OrderDao orderDao;
     @Autowired
@@ -88,15 +92,20 @@ class PaymentServiceTest {
         theme = themeDao.insert(new Theme(new Name("방탈출"), "http://url", "설명", 30000L));
     }
 
-    private ReservationOrder createReservationWithOrder() {
-        return reservationService.create(member,
+    private Created createReservationWithOrder() {
+        Reservation reservation = reservationService.create(member,
                 new ReservationRequestDto(LocalDate.now().plusDays(1), time.getId(), theme.getId(), storeId));
+        Order order = orderService.create(reservation.getId(), theme.getPrice());
+        return new Created(reservation, order);
+    }
+
+    private record Created(Reservation reservation, Order order) {
     }
 
     @Test
     @DisplayName("금액이 일치하면 주문이 CONFIRMED, 예약이 BOOKED가 된다")
     void confirmSuccess() {
-        ReservationOrder created = createReservationWithOrder();
+        Created created = createReservationWithOrder();
 
         paymentService.confirm(member, "pk-1", created.order().getOrderId(), created.order().getAmount());
 
@@ -109,7 +118,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("조작된 금액은 검증에서 막히고 주문·예약 상태가 그대로다")
     void confirmAmountMismatch() {
-        ReservationOrder created = createReservationWithOrder();
+        Created created = createReservationWithOrder();
 
         assertThatThrownBy(() -> paymentService.confirm(member, "pk-1",
                 created.order().getOrderId(), created.order().getAmount() + 1))
@@ -124,7 +133,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("만료 정리(expire)는 주문을 FAILED로, 예약을 CANCELED로 만든다")
     void expireAbandonedOrder() {
-        ReservationOrder created = createReservationWithOrder();
+        Created created = createReservationWithOrder();
 
         paymentService.expire(created.order().getOrderId());
 
@@ -135,9 +144,24 @@ class PaymentServiceTest {
     }
 
     @Test
+    @DisplayName("결제 준비를 다시 호출해도 같은 예약의 미결제 주문은 재사용된다(중복 생성 안 함)")
+    void prepareReusesPendingOrder() {
+        Reservation reservation = reservationService.create(member,
+                new ReservationRequestDto(LocalDate.now().plusDays(1), time.getId(), theme.getId(), storeId));
+
+        PaymentReadyResponse first = paymentService.prepare(member, reservation.getId());
+        PaymentReadyResponse second = paymentService.prepare(member, reservation.getId());
+
+        assertThat(second.orderId()).isEqualTo(first.orderId());
+        Integer orderCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM orders WHERE reservation_id = ?", Integer.class, reservation.getId());
+        assertThat(orderCount).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("이미 확정된 주문은 만료 정리에서 건너뛴다")
     void expireSkipsConfirmed() {
-        ReservationOrder created = createReservationWithOrder();
+        Created created = createReservationWithOrder();
         paymentService.confirm(member, "pk-1", created.order().getOrderId(), created.order().getAmount());
 
         paymentService.expire(created.order().getOrderId());

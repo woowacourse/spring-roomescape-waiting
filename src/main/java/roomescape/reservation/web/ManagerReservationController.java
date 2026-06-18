@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.member.Member;
-import roomescape.reservation.AdminReservationService;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.service.AdminReservationService;
 
 @RestController
 @RequestMapping("/manager/reservations")

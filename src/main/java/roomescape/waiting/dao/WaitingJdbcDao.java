@@ -11,16 +11,16 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.waiting.WaitingDao;
+import roomescape.common.vo.Name;
+import roomescape.common.vo.Slot;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
-import roomescape.common.vo.Slot;
 import roomescape.store.Store;
 import roomescape.theme.Theme;
 import roomescape.time.Time;
 import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingDao;
 import roomescape.waiting.Waitings;
-import roomescape.common.vo.Name;
 
 @Repository
 public class WaitingJdbcDao implements WaitingDao {

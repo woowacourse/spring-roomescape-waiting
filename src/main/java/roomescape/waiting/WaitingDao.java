@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.common.CommonDao;
 import roomescape.common.vo.Slot;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.Waitings;
 
 public interface WaitingDao extends CommonDao<Waiting> {
 

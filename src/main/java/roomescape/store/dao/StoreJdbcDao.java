@@ -6,8 +6,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import roomescape.store.StoreDao;
 import roomescape.store.Store;
+import roomescape.store.StoreDao;
 
 @Repository
 public class StoreJdbcDao implements StoreDao {

@@ -14,24 +14,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.member.MemberDao;
-import roomescape.order.OrderDao;
-import roomescape.promotion.PromotionOutboxDao;
-import roomescape.reservation.ReservationDao;
-import roomescape.theme.ThemeDao;
-import roomescape.time.TimeDao;
+import roomescape.common.vo.Name;
 import roomescape.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.order.Order;
+import roomescape.order.OrderDao;
+import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
 import roomescape.promotion.OutboxStatus;
+import roomescape.promotion.PromotionOutboxDao;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationOrder;
-import roomescape.reservation.ReservationService;
+import roomescape.reservation.ReservationDao;
 import roomescape.reservation.ReservationStatus;
+import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.web.ReservationRequestDto;
 import roomescape.store.Store;
 import roomescape.theme.Theme;
+import roomescape.theme.ThemeDao;
 import roomescape.time.Time;
-import roomescape.common.vo.Name;
-import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.time.TimeDao;
 import roomescape.worker.ExpiredOrderWorker;
 
 @SpringBootTest(properties = "scheduling.enabled=false")
@@ -42,6 +43,8 @@ class ExpiredOrderWorkerTest {
     private ExpiredOrderWorker worker;
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private OrderService orderService;
     @Autowired
     private ReservationDao reservationDao;
     @Autowired
@@ -85,15 +88,20 @@ class ExpiredOrderWorkerTest {
         jdbcTemplate.update("DELETE FROM stores");
     }
 
-    private ReservationOrder createPending() {
-        return reservationService.create(member, new ReservationRequestDto(
+    private Pending createPending() {
+        Reservation reservation = reservationService.create(member, new ReservationRequestDto(
                 LocalDate.now().plusDays(1), time.getId(), theme.getId(), store.getId()));
+        Order order = orderService.create(reservation.getId(), theme.getPrice());
+        return new Pending(reservation, order);
+    }
+
+    private record Pending(Reservation reservation, Order order) {
     }
 
     @Test
     @DisplayName("TTL 지난 미결제 PENDING은 정리되어 예약 CANCELED, 주문 FAILED")
     void expiresAbandonedPending() {
-        ReservationOrder created = createPending();
+        Pending created = createPending();
         // created_at을 TTL(기본 30분)보다 한참 전으로 조작 — 방치된 것처럼.
         jdbcTemplate.update("UPDATE orders SET created_at = ? WHERE order_id = ?",
                 Timestamp.valueOf(LocalDateTime.now().minusHours(1)), created.order().getOrderId());
@@ -111,7 +119,7 @@ class ExpiredOrderWorkerTest {
     @Test
     @DisplayName("TTL 이내의 갓 만든 PENDING은 건드리지 않는다 (결제 진행 중 보호 — 4:59 걱정)")
     void keepsFreshPending() {
-        ReservationOrder created = createPending(); // created_at = now (fresh)
+        Pending created = createPending(); // created_at = now (fresh)
 
         worker.expireAbandonedOrders();
 

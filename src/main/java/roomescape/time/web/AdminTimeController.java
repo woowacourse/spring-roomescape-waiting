@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.time.Time;
-import roomescape.time.web.TimeRequestDto;
-import roomescape.time.web.TimeResponseDto;
 import roomescape.time.TimeService;
 
 @RestController

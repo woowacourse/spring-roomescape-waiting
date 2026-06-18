@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.InvalidInputException;
-import roomescape.member.MemberDao;
 import roomescape.member.web.LoginRequestDto;
 import roomescape.member.web.SignupRequestDto;
 

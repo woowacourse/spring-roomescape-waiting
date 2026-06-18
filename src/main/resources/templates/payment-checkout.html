@@ -40,19 +40,19 @@ h1{font-size:1.2rem;color:#ebebeb;margin-bottom:1.5rem;letter-spacing:.08em;font
 
 <script>
 (function () {
-  // 예약 생성 응답을 reservation 페이지에서 sessionStorage로 넘겨받는다.
-  const order = JSON.parse(sessionStorage.getItem('toss_order') || 'null');
-  if (!order) { location.href = '/'; return; }
-
-  document.getElementById('order-name').textContent = order.orderName;
-  document.getElementById('amount').textContent = order.amount.toLocaleString() + '원';
+  // reservation 페이지에서 넘긴 예약 식별자. 주문은 아직 없다 — 이 페이지에서 만든다.
+  const checkout = JSON.parse(sessionStorage.getItem('toss_checkout') || 'null');
+  if (!checkout) { location.href = '/'; return; }
 
   const payBtn = document.getElementById('pay-btn');
   const cancelBtn = document.getElementById('cancel-btn');
   const errEl = document.getElementById('err');
 
+  let order; // { reservationId, orderId, amount, orderName } — /payments/ready 응답
+
   // 미결제(PENDING) 주문/예약을 정리해 슬롯을 즉시 풀어준다 (failUrl 콜백과 같은 엔드포인트).
   async function abandon() {
+    if (!order) { return; } // 주문 생성 전이면 정리할 주문도 없다.
     try {
       await fetch('/payments/fail', {
         method: 'POST',
@@ -65,10 +65,25 @@ h1{font-size:1.2rem;color:#ebebeb;margin-bottom:1.5rem;letter-spacing:.08em;font
   let widgets;
   (async () => {
     try {
+      // 1) 결제 시작 — 서버가 주문을 만들고(= 결제 의사) 결제 정보를 돌려준다.
+      const res = await fetch('/payments/ready', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reservationId: checkout.reservationId })
+      });
+      if (res.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }
+      if (!res.ok) {
+        errEl.textContent = '결제 준비에 실패했습니다. 새로고침하거나 취소 후 다시 시도해주세요.';
+        return;
+      }
+      order = await res.json();
+      document.getElementById('order-name').textContent = order.orderName;
+      document.getElementById('amount').textContent = order.amount.toLocaleString() + '원';
+
+      // 2) 토스 v2 결제위젯 구동. 금액을 먼저 설정해야 결제수단 UI를 렌더할 수 있다.
       const cfg = await (await fetch('/payments/config')).json();
       const tossPayments = TossPayments(cfg.clientKey);
       widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
-      // 금액을 먼저 설정해야 결제수단 UI를 렌더할 수 있다.
       await widgets.setAmount({ currency: 'KRW', value: order.amount });
       await Promise.all([
         widgets.renderPaymentMethods({ selector: '#payment-method', variantKey: 'DEFAULT' }),
@@ -106,7 +121,7 @@ h1{font-size:1.2rem;color:#ebebeb;margin-bottom:1.5rem;letter-spacing:.08em;font
     // 명시적 취소 = 빠른 슬롯 해제 후 예약 페이지로 복귀.
     cancelBtn.disabled = true;
     await abandon();
-    location.href = order.themeId ? ('/reservation?themeId=' + order.themeId) : '/';
+    location.href = checkout.themeId ? ('/reservation?themeId=' + checkout.themeId) : '/';
   });
 })();
 </script>

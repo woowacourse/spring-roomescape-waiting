@@ -16,8 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationOrder;
-import roomescape.reservation.ReservationService;
+import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
@@ -30,16 +29,16 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<PaymentReadyResponse> create(
+    public ResponseEntity<ReservationResponseDto> create(
             @LoginMember Member member,
             @Valid @RequestBody ReservationRequestDto request
     ) {
-        ReservationOrder result = reservationService.create(member, request);
+        Reservation reservation = reservationService.create(member, request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(result.reservation().getId())
+                .buildAndExpand(reservation.getId())
                 .toUri();
-        return ResponseEntity.created(uri).body(PaymentReadyResponse.from(result.reservation(), result.order()));
+        return ResponseEntity.created(uri).body(ReservationResponseDto.from(reservation));
     }
 
     @GetMapping

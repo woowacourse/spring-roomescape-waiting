@@ -5,11 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.promotion.PromotionOutboxDao;
-import roomescape.reservation.ReservationCreator;
-import roomescape.reservation.ReservationDao;
-import roomescape.waiting.WaitingDao;
 import roomescape.common.vo.Slot;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.service.ReservationCreator;
+import roomescape.waiting.WaitingDao;
 
 /**
  * 대기 승격 오케스트레이션. 대기 신청/조회/취소(WaitingService)와 분리해, 승격이라는 관심사만 모은다.

@@ -47,23 +47,29 @@ class PaymentControllerE2ETest extends BaseE2ETest {
         });
     }
 
-    private Response createReservation() {
+    private Response prepareOrder() {
         Map<String, Object> body = new HashMap<>();
         body.put("date", LocalDate.now().plusDays(1).toString());
         body.put("timeId", timeId);
         body.put("themeId", themeId);
         body.put("storeId", storeId);
-        return RestAssured.given()
+        long reservationId = ((Number) RestAssured.given()
                 .sessionId(userSession).contentType(ContentType.JSON).body(body)
                 .when().post("/reservations")
                 .then().statusCode(HttpStatus.CREATED.value())
+                .extract().path("id")).longValue();
+        return RestAssured.given()
+                .sessionId(userSession).contentType(ContentType.JSON)
+                .body(Map.of("reservationId", reservationId))
+                .when().post("/payments/ready")
+                .then().statusCode(HttpStatus.OK.value())
                 .extract().response();
     }
 
     @Test
     @DisplayName("금액이 일치하면 승인되어 예약이 BOOKED로 확정된다")
     void confirmSuccess() {
-        Response created = createReservation();
+        Response created = prepareOrder();
         String orderId = created.path("orderId");
         int amount = created.path("amount");
         Long reservationId = ((Number) created.path("reservationId")).longValue();
@@ -83,7 +89,7 @@ class PaymentControllerE2ETest extends BaseE2ETest {
     @Test
     @DisplayName("게이트웨이가 카드 거절을 던지면 그 status(403)로 응답한다")
     void confirmCardRejected() {
-        Response created = createReservation();
+        Response created = prepareOrder();
         String orderId = created.path("orderId");
         int amount = created.path("amount");
         willThrow(new TossPaymentException.CardRejected("한도초과 또는 잔액부족"))
@@ -99,7 +105,7 @@ class PaymentControllerE2ETest extends BaseE2ETest {
     @Test
     @DisplayName("조작된 금액은 400으로 차단되고 게이트웨이가 호출되지 않는다")
     void confirmAmountMismatch() {
-        Response created = createReservation();
+        Response created = prepareOrder();
         String orderId = created.path("orderId");
 
         RestAssured.given()
@@ -114,7 +120,7 @@ class PaymentControllerE2ETest extends BaseE2ETest {
     @Test
     @DisplayName("실패 콜백은 결제 대기 주문/예약을 정리한다(CANCELED)")
     void failCleansUp() {
-        Response created = createReservation();
+        Response created = prepareOrder();
         String orderId = created.path("orderId");
         Long reservationId = ((Number) created.path("reservationId")).longValue();
 
@@ -147,7 +153,7 @@ class PaymentControllerE2ETest extends BaseE2ETest {
     @Test
     @DisplayName("타인의 주문을 실패 처리하려 하면 404로 차단되고 피해자 예약은 보존된다")
     void failByOtherMemberIsBlocked() {
-        Response created = createReservation();
+        Response created = prepareOrder();
         String orderId = created.path("orderId");
         Long reservationId = ((Number) created.path("reservationId")).longValue();
         seedMember("타인", "other@test.com", "USER");

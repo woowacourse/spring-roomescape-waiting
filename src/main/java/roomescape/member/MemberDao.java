@@ -1,7 +1,6 @@
 package roomescape.member;
 
 import java.util.Optional;
-import roomescape.member.Member;
 
 public interface MemberDao {
     Member insert(Member member);

@@ -28,6 +28,15 @@ public class OrderService {
         return orderDao.insert(Order.create(orderId, reservationId, amount));
     }
 
+    /**
+     * 결제 시작용 주문을 확보한다. 같은 예약에 아직 처리되지 않은(PENDING) 주문이 있으면 그걸 재사용하고,
+     * 없으면 새로 만든다 — 결제창 새로고침 등으로 한 예약에 미결제 주문이 중복으로 쌓이지 않게 한다(멱등).
+     */
+    public Order getOrCreate(Long reservationId, long amount) {
+        return orderDao.findPendingByReservationId(reservationId)
+                .orElseGet(() -> create(reservationId, amount));
+    }
+
     @Transactional(readOnly = true)
     public Optional<Order> findByOrderId(String orderId) {
         return orderDao.findByOrderId(orderId);

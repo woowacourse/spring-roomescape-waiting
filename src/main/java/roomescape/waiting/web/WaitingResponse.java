@@ -2,9 +2,9 @@ package roomescape.waiting.web;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
+import roomescape.reservation.ReservationStatus;
 import roomescape.theme.web.ThemeResponseDto;
 import roomescape.time.web.TimeResponseDto;
-import roomescape.reservation.ReservationStatus;
 import roomescape.waiting.Waiting;
 
 public record WaitingResponse(

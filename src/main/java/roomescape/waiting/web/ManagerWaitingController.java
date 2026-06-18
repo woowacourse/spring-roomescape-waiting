@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.auth.service.WaitingAuthorizationService;
 import roomescape.member.Member;
-import roomescape.waiting.web.WaitingResponse;
 import roomescape.waiting.WaitingService;
 
 @RestController

@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,14 +9,15 @@ import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.vo.Slot;
-import roomescape.time.TimeDao;
 import roomescape.member.Member;
-import roomescape.order.Order;
-import roomescape.order.OrderService;
 import roomescape.promotion.PromotionService;
-import roomescape.time.Time;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.web.ReservationPatchDto;
 import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.time.Time;
+import roomescape.time.TimeDao;
 
 @Service
 @Transactional
@@ -26,22 +27,19 @@ public class ReservationService {
     private final PromotionService promotionService;
     private final ReservationAuthorizationService authorizationService;
     private final ReservationCreator reservationCreator;
-    private final OrderService orderService;
 
     public ReservationService(
             ReservationDao reservationDao,
             TimeDao timeDao,
             PromotionService promotionService,
             ReservationAuthorizationService authorizationService,
-            ReservationCreator reservationCreator,
-            OrderService orderService
+            ReservationCreator reservationCreator
     ) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
         this.promotionService = promotionService;
         this.authorizationService = authorizationService;
         this.reservationCreator = reservationCreator;
-        this.orderService = orderService;
     }
 
     @Transactional(readOnly = true)
@@ -59,16 +57,23 @@ public class ReservationService {
         return reservation;
     }
 
-    public ReservationOrder create(Member member, ReservationRequestDto request) {
+    /**
+     * 활성 여부를 따지지 않고 예약을 조회한다. 결제 준비는 PENDING(isActive=false) 예약을 다뤄야 해서
+     * findActiveById를 못 쓴다.
+     */
+    @Transactional(readOnly = true)
+    public Reservation findById(Long id) {
+        return reservationDao.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+    }
+
+    public Reservation create(Member member, ReservationRequestDto request) {
         Reservation reservation = reservationCreator.createByUser(member, request, LocalDateTime.now());
-        Reservation saved;
         try {
-            saved = reservationDao.insert(reservation);
+            return reservationDao.insert(reservation);
         } catch (DuplicateKeyException e) {
             throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
         }
-        Order order = orderService.create(saved.getId(), saved.getTheme().getPrice());
-        return new ReservationOrder(saved, order);
     }
 
     public Reservation updateByUser(Long id, Member member, ReservationPatchDto request) {
@@ -107,6 +112,9 @@ public class ReservationService {
      */
     public void cancelPending(Long reservationId) {
         reservationDao.findById(reservationId).ifPresent(reservation -> {
+            if (reservation.getStatus() != ReservationStatus.PENDING) {
+                return; // 이미 확정(BOOKED)·취소(CANCELED)됨 — 정리할 것이 없다(멱등).
+            }
             reservation.cancelPending(LocalDateTime.now());
             reservationDao.update(reservation);
             promotionService.enqueuePromotion(reservation.getSlot());

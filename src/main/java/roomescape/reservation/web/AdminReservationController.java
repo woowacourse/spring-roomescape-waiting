@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.common.PageResponse;
-import roomescape.reservation.AdminReservationService;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.service.AdminReservationService;
 
 @Validated
 @RestController

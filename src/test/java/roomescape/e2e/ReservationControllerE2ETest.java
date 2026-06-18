@@ -45,7 +45,7 @@ class ReservationControllerE2ETest extends BaseE2ETest {
     class Post {
 
         @Test
-        @DisplayName("로그인 유저가 예약을 생성하면 201과 결제 정보를 반환한다(결제 대기)")
+        @DisplayName("로그인 유저가 예약을 생성하면 201과 PENDING 예약을 반환한다(주문은 결제 시작 때 생성)")
         void createsReservation() {
             Map<String, Object> body = new HashMap<>();
             body.put("date", LocalDate.now().plusDays(1).toString());
@@ -59,9 +59,9 @@ class ReservationControllerE2ETest extends BaseE2ETest {
                     .body(body)
                     .when().post("/reservations")
                     .then().statusCode(HttpStatus.CREATED.value())
-                    .body("orderId", org.hamcrest.Matchers.notNullValue())
-                    .body("amount", org.hamcrest.Matchers.equalTo(30000))
-                    .body("orderName", org.hamcrest.Matchers.equalTo("테마A"));
+                    .body("id", org.hamcrest.Matchers.notNullValue())
+                    .body("status", org.hamcrest.Matchers.equalTo("PENDING"))
+                    .body("theme.name", org.hamcrest.Matchers.equalTo("테마A"));
         }
     }
 

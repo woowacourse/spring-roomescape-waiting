@@ -9,8 +9,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.time.TimeDao;
 import roomescape.time.Time;
+import roomescape.time.TimeDao;
 
 @Repository
 public class TimeJdbcDao implements TimeDao {

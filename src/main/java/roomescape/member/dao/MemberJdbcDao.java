@@ -7,8 +7,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.member.MemberDao;
 import roomescape.member.Member;
+import roomescape.member.MemberDao;
 import roomescape.member.MemberRole;
 import roomescape.store.Store;
 

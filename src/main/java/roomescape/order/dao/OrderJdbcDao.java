@@ -9,8 +9,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.order.OrderDao;
 import roomescape.order.Order;
+import roomescape.order.OrderDao;
 import roomescape.order.OrderStatus;
 
 @Repository
@@ -56,6 +56,19 @@ public class OrderJdbcDao implements OrderDao {
                 """;
         return jdbcTemplate.query(sql, new MapSqlParameterSource("orderId", orderId), ROW_MAPPER)
                 .stream().findFirst();
+    }
+
+    @Override
+    public Optional<Order> findPendingByReservationId(Long reservationId) {
+        String sql = """
+                SELECT id, order_id, reservation_id, amount, payment_key, status
+                FROM orders
+                WHERE reservation_id = :reservationId AND status = :status
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("reservationId", reservationId)
+                .addValue("status", OrderStatus.PENDING.name());
+        return jdbcTemplate.query(sql, params, ROW_MAPPER).stream().findFirst();
     }
 
     @Override

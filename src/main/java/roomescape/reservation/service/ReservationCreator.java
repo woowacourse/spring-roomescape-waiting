@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
@@ -6,15 +6,17 @@ import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.vo.Slot;
-import roomescape.store.StoreDao;
-import roomescape.theme.ThemeDao;
-import roomescape.time.TimeDao;
 import roomescape.member.Member;
-import roomescape.store.Store;
-import roomescape.theme.Theme;
-import roomescape.time.Time;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
 import roomescape.reservation.web.AdminReservationRequestDto;
 import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.store.Store;
+import roomescape.store.StoreDao;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeDao;
+import roomescape.time.Time;
+import roomescape.time.TimeDao;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingDao;
 

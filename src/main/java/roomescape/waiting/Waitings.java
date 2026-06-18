@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
-
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
+import roomescape.common.vo.Slot;
 import roomescape.member.Member;
 import roomescape.reservation.Reservation;
-import roomescape.common.vo.Slot;
 
 public class Waitings {
     private static final int MAX_WAITING_COUNT = 5;

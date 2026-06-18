@@ -9,7 +9,9 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.Member;
 import roomescape.order.Order;
 import roomescape.order.OrderService;
-import roomescape.reservation.ReservationService;
+import roomescape.payment.web.PaymentReadyResponse;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.service.ReservationService;
 
 /**
  * 결제 애플리케이션 서비스. 토스를 모르고 PaymentGateway(포트)만 의존한다.
@@ -38,6 +40,17 @@ public class PaymentService {
      */
     public String clientKey() {
         return paymentGateway.clientKey();
+    }
+
+    /**
+     * 결제 시작. 결제 대기(PENDING) 예약에 묶을 주문을 이 시점에 만들고(= 주문 = 결제 의사), 결제창 구동에
+     * 필요한 정보를 돌려준다. 금액은 클라이언트를 믿지 않고 서버가 테마 가격으로 정한다.
+     */
+    public PaymentReadyResponse prepare(Member member, Long reservationId) {
+        authorizationService.validateMemberCanAccess(member, reservationId);
+        Reservation reservation = reservationService.findById(reservationId);
+        Order order = orderService.getOrCreate(reservationId, reservation.getTheme().getPrice());
+        return PaymentReadyResponse.from(reservation, order);
     }
 
     /**
