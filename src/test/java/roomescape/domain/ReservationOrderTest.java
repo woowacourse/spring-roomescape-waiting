@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservationOrder.OrderStatus;
 import roomescape.domain.reservationOrder.ReservationOrder;
 import roomescape.exception.PaymentException.AlreadyProcessedException;
 import roomescape.exception.PaymentException.PaymentAmountMismatchException;
@@ -60,5 +61,33 @@ class ReservationOrderTest {
 
         assertThatThrownBy(() -> order.confirm("pk_new"))
                 .isInstanceOf(AlreadyProcessedException.class);
+    }
+
+    @Test
+    void create로_생성된_주문은_PENDING_상태이다() {
+        ReservationOrder order = ReservationOrder.create(10000, 1L);
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+    }
+
+    @Test
+    void confirm하면_CONFIRMED_상태로_전이한다() {
+        ReservationOrder order = ReservationOrder.create(10000, 1L);
+
+        assertThat(order.confirm("pk_test").getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+    }
+
+    @Test
+    void markUnknown하면_UNKNOWN_상태로_전이한다() {
+        ReservationOrder order = ReservationOrder.create(10000, 1L);
+
+        assertThat(order.markUnknown().getStatus()).isEqualTo(OrderStatus.UNKNOWN);
+    }
+
+    @Test
+    void 이미_확정된_주문은_markUnknown해도_상태가_유지된다() {
+        ReservationOrder confirmed = ReservationOrder.restore("order-1", 10000, "pk_test", 1L);
+
+        assertThat(confirmed.markUnknown().getStatus()).isEqualTo(OrderStatus.CONFIRMED);
     }
 }

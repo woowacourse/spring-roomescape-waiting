@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.payment.PaymentResult;
 import roomescape.domain.payment.PaymentStatus;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationOrder.OrderStatus;
 import roomescape.domain.reservationOrder.ReservationOrder;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
@@ -23,6 +24,7 @@ import roomescape.exception.PaymentException.AlreadyProcessedException;
 import roomescape.exception.PaymentException.PaymentAmountMismatchException;
 import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.exception.PaymentException.PaymentNotFoundException;
+import roomescape.exception.PaymentException.PaymentResultUnknownException;
 import roomescape.fake.FakePaymentGateway;
 import roomescape.fake.FakeReservationOrderRepository;
 import roomescape.fake.FakeReservationRepository;
@@ -110,5 +112,20 @@ class PaymentServiceTest {
                 .isInstanceOf(PaymentNotFoundException.class);
 
         assertThat(paymentGateway.isCalled()).isFalse();
+    }
+
+    @Test
+    void 결과가_불명확하면_주문을_확인필요로_기록하고_예외를_던진다() {
+        reservation(1L);
+        orderRepository.save(ReservationOrder.restore("order-1", 10000, null, 1L));
+        paymentGateway.setException(new PaymentResultUnknownException("결제 결과를 확인하지 못했습니다."));
+
+        assertThatThrownBy(() -> paymentService.confirm(new PaymentConfirmRequest("pk_test", "order-1", 10000)))
+                .isInstanceOf(PaymentResultUnknownException.class);
+
+        assertThat(orderRepository.findById("order-1")).get()
+                .extracting(ReservationOrder::getStatus).isEqualTo(OrderStatus.UNKNOWN);
+        assertThat(reservationRepository.findReservationById(1L)).get()
+                .extracting(Reservation::isPaid).isEqualTo(false);
     }
 }
