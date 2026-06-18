@@ -105,7 +105,8 @@ class ThemeIntegrationTest {
         jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", "보예");
         Long userId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE name = ?", Long.class, "보예");
         jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
+            "INSERT INTO reservation(user_id, reservation_slot_id, status, created_at, updated_at) "
+                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             userId,
             targetSlotId,
             "CONFIRMED"

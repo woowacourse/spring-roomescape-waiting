@@ -141,7 +141,8 @@ class AdminReservationSlotIntegrationTest {
         );
 
         jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
+            "INSERT INTO reservation(user_id, reservation_slot_id, status, created_at, updated_at) "
+                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             userId,
             reservationId,
             "CONFIRMED"

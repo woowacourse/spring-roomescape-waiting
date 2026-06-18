@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
@@ -38,7 +37,7 @@ class ReservationIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
     @MockitoSpyBean
-    private ReservationRepository reservationRepository;
+    private JpaReservationRepository reservationRepository;
 
     @TestConfiguration
     static class TestClockConfig {
@@ -200,14 +199,14 @@ class ReservationIntegrationTest {
             reservationSlotId,
             ReservationStatus.WAITING
         );
-        doAnswer(invocationOnMock ->
-            {
-                if (invocationOnMock.getArgument(0).equals(waitingReservationId)) {
+        doAnswer(invocationOnMock -> {
+                Reservation reservation = invocationOnMock.getArgument(0);
+                if (reservation.getId().equals(waitingReservationId)) {
                     throw new IllegalArgumentException("대기 전환에 실패했습니다.");
                 }
                 return invocationOnMock.callRealMethod();
             }
-        ).when(reservationRepository).update(anyLong(), any(Reservation.class));
+        ).when(reservationRepository).save(any(Reservation.class));
 
         // when & then
         given().
@@ -271,7 +270,8 @@ class ReservationIntegrationTest {
             name
         );
         jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
+            "INSERT INTO reservation(user_id, reservation_slot_id, status, created_at, updated_at) "
+                + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             userId,
             reservationSlotId,
             status.name()
