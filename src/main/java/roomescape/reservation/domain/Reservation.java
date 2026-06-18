@@ -1,79 +1,41 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Reservation {
-    private final Long id;
-    private final String name;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final Status status;
-    private final LocalDateTime createdAt;
 
-    public Reservation(String name, ReservationTime time, Theme theme, Status status, LocalDateTime createdAt) {
-        this(null, name, time, theme, status, createdAt);
-    }
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private Reservation(Long id, String name, ReservationTime time, Theme theme, Status status,
-                       LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.time = time;
-        this.theme = theme;
-        this.status = status;
-        this.createdAt = createdAt;
-    }
+    @Column
+    private String name;
 
-    public Reservation withId(Long id) {
-        return new Reservation(id, this.name, this.time, this.theme, this.status, this.createdAt);
-    }
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
 
-    public Reservation withTime(ReservationTime time) {
-        return new Reservation(this.id, this.name, time, this.theme, this.status, this.createdAt);
-    }
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
 
-    public Reservation withStatus(Status status) {
-        return new Reservation(this.id, this.name, this.time, this.theme, status, this.createdAt);
-    }
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
-    public Reservation promote() {
-        if (this.status != Status.WAITING) {
-            throw new IllegalStateException("WAITING 상태만 예약으로 가능합니다.");
-        }
-        return new Reservation(id, name, time, theme, Status.RESERVED, createdAt);
-    }
-
-    public Reservation withCreatedAt(LocalDateTime createdAt) {
-        return new Reservation(this.id, this.name, this.time, this.theme, this.status, createdAt);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    @Column
+    private LocalDateTime createdAt;
 
     public boolean isReserved() {
         return this.status.equals(Status.RESERVED);
@@ -90,6 +52,14 @@ public class Reservation {
         }
     }
 
+    public Reservation(String name, ReservationTime time, Theme theme, Status status, LocalDateTime createdAt) {
+        this.name = name;
+        this.time = time;
+        this.theme = theme;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
+
     public void validateExpired(LocalDateTime dateTime) {
         time.validateExpired(dateTime);
     }
@@ -100,5 +70,20 @@ public class Reservation {
 
     public Long getTimeId() {
         return time.getId();
+    }
+
+    public void promote() {
+        if (this.status != Status.WAITING) {
+            throw new IllegalStateException("WAITING 상태만 예약으로 가능합니다.");
+        }
+        status = Status.RESERVED;
+    }
+
+    public void update(ReservationTime newTime) {
+        time = newTime;
+    }
+
+    public void updateName(String name) {
+        this.name = name;
     }
 }

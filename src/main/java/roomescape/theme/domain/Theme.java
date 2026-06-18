@@ -1,39 +1,33 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String imageUrl;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column
+    private String name;
+
+    @Column
+    private String description;
+
+    @Column
+    private String imageUrl;
 
     public Theme(String name, String description, String imageUrl) {
-        this(null, name, description, imageUrl);
-    }
-
-    private Theme(Long id, String name, String description, String imageUrl) {
-        this.id = id;
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
-    }
-
-    public Theme withId(Long id) {
-        return new Theme(id, this.name, this.description, this.imageUrl);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
     }
 }
