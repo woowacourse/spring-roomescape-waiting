@@ -66,7 +66,8 @@ public class PaymentService {
 
         PaymentResult result;
         try {
-            result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+            result = paymentGateway.confirm(
+                    new PaymentConfirmation(paymentKey, orderId, amount, order.getIdempotencyKey()));
         } catch (PaymentResultUnknownException e) {
             // read timeout 등 결과 불명확: 실패로 단정하지 않고 '확인 필요'로 남긴다(사용자가 내역에서 재시도).
             // 예외를 다시 던지지 않으므로 @Transactional이 이 마크를 커밋한다.

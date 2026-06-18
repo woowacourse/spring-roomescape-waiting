@@ -68,15 +68,17 @@ CREATE TABLE reservations
 
 CREATE TABLE orders
 (
-    id             BIGINT       NOT NULL AUTO_INCREMENT,
-    order_id       VARCHAR(64)  NOT NULL,
-    reservation_id BIGINT       NOT NULL,
-    amount         BIGINT       NOT NULL,
-    payment_key    VARCHAR(200),
-    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
-    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id        VARCHAR(64)  NOT NULL,
+    idempotency_key VARCHAR(64)  NOT NULL, -- 주문당 고정. confirm 재시도가 토스에서 이중 승인되지 않게 헤더로 보냄
+    reservation_id  BIGINT       NOT NULL,
+    amount          BIGINT       NOT NULL,
+    payment_key     VARCHAR(200),
+    status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE (order_id),
+    UNIQUE (idempotency_key),
     UNIQUE (reservation_id), -- 한 예약엔 주문 1건만(결제 준비 멱등의 DB 백스톱: 동시 요청 경합도 차단)
     FOREIGN KEY (reservation_id) REFERENCES reservations (id)
 );

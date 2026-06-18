@@ -45,7 +45,7 @@ class TossPaymentRealApiTest {
         // 유효한 결제 인증을 거치지 않은 임의의 paymentKey/orderId → 토스가 4xx 에러를 응답한다.
         // 구체 코드는 상황에 따라 다를 수 있어(NOT_FOUND_PAYMENT/INVALID_REQUEST 등) "TossPaymentException으로 변환"만 검증.
         PaymentConfirmation confirmation = new PaymentConfirmation(
-                "tgen_does_not_exist_payment_key", "real-api-test-order", 1000L);
+                "tgen_does_not_exist_payment_key", "real-api-test-order", 1000L, "real-api-idem");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation))
                 .isInstanceOf(TossPaymentException.class);
@@ -56,7 +56,7 @@ class TossPaymentRealApiTest {
     void 샌드박스에서_인증한_결제건을_승인하면_DONE을_반환한다() {
         // 같은 paymentKey는 한 번만 승인된다(두 번째부터 ALREADY_PROCESSED_PAYMENT).
         PaymentResult result = tossPaymentGateway.confirm(
-                new PaymentConfirmation(PAYMENT_KEY, ORDER_ID, AMOUNT));
+                new PaymentConfirmation(PAYMENT_KEY, ORDER_ID, AMOUNT, "real-api-idem"));
 
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.totalAmount()).isEqualTo(AMOUNT);

@@ -27,7 +27,8 @@ public class OrderService {
      */
     public Order create(Long reservationId, long amount) {
         String orderId = UUID.randomUUID().toString();
-        return orderDao.insert(Order.create(orderId, reservationId, amount));
+        String idempotencyKey = UUID.randomUUID().toString();
+        return orderDao.insert(Order.create(orderId, idempotencyKey, reservationId, amount));
     }
 
     /**

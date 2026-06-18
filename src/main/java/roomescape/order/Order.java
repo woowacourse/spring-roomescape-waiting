@@ -8,35 +8,39 @@ import roomescape.common.exception.PaymentAmountMismatchException;
  * 결제 대상 주문. 예약 생성(결제 전) 시점에 orderId와 최종 amount를 함께 박아 둔다.
  * amount는 이 시점의 스냅샷이며, 이후 테마 가격이 바뀌어도 검증 기준은 항상 여기 저장된 값이다.
  * paymentKey는 승인 성공 후 토스로부터 받아 합류한다.
+ * idempotencyKey는 주문당 고정 — confirm 재시도가 토스에서 이중 승인되지 않도록 헤더로 보낼 멱등키다.
  */
 public class Order {
     private final Long id;
     private final String orderId;
+    private final String idempotencyKey;
     private final Long reservationId;
     private final long amount;
     private String paymentKey;
     private OrderStatus status;
 
-    private Order(Long id, String orderId, Long reservationId, long amount,
+    private Order(Long id, String orderId, String idempotencyKey, Long reservationId, long amount,
                   String paymentKey, OrderStatus status) {
         DomainAssert.notNull(orderId, "주문 번호는 비어 있을 수 없습니다.");
+        DomainAssert.notNull(idempotencyKey, "멱등키는 비어 있을 수 없습니다.");
         DomainAssert.notNull(reservationId, "예약 식별자는 비어 있을 수 없습니다.");
         DomainAssert.notNull(status, "주문 상태는 비어 있을 수 없습니다.");
         this.id = id;
         this.orderId = orderId;
+        this.idempotencyKey = idempotencyKey;
         this.reservationId = reservationId;
         this.amount = amount;
         this.paymentKey = paymentKey;
         this.status = status;
     }
 
-    public static Order create(String orderId, Long reservationId, long amount) {
-        return new Order(null, orderId, reservationId, amount, null, OrderStatus.PENDING);
+    public static Order create(String orderId, String idempotencyKey, Long reservationId, long amount) {
+        return new Order(null, orderId, idempotencyKey, reservationId, amount, null, OrderStatus.PENDING);
     }
 
-    public static Order reconstruct(Long id, String orderId, Long reservationId, long amount,
-                                    String paymentKey, OrderStatus status) {
-        return new Order(id, orderId, reservationId, amount, paymentKey, status);
+    public static Order reconstruct(Long id, String orderId, String idempotencyKey, Long reservationId,
+                                    long amount, String paymentKey, OrderStatus status) {
+        return new Order(id, orderId, idempotencyKey, reservationId, amount, paymentKey, status);
     }
 
     /**
@@ -84,6 +88,10 @@ public class Order {
 
     public String getOrderId() {
         return orderId;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     public Long getReservationId() {

@@ -6,9 +6,11 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -68,6 +70,12 @@ class TossPaymentGatewayTest {
                 .setBody(body));
     }
 
+    private void drainRecordedRequests() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) {
+            // 공유 MockWebServer라 이전 테스트가 남긴 요청 기록을 비운다.
+        }
+    }
+
     @Test
     void 승인_성공이면_도메인_결과로_번역해_반환한다() {
         enqueue(200, """
@@ -83,7 +91,7 @@ class TossPaymentGatewayTest {
                 """);
 
         PaymentResult result = tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 30000L));
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1"));
 
         assertThat(result.paymentKey()).isEqualTo("test_pk_1");
         assertThat(result.orderId()).isEqualTo("order-1");
@@ -92,12 +100,26 @@ class TossPaymentGatewayTest {
     }
 
     @Test
+    void confirm_요청에_주문의_Idempotency_Key를_헤더로_싣는다() throws InterruptedException {
+        drainRecordedRequests();
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "DONE", "totalAmount": 30000}
+                """);
+
+        tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-key-42"));
+
+        RecordedRequest recorded = mockWebServer.takeRequest(1, TimeUnit.SECONDS);
+        assertThat(recorded).isNotNull();
+        assertThat(recorded.getHeader("Idempotency-Key")).isEqualTo("idem-key-42");
+    }
+
+    @Test
     void 에러_상태인데_본문이_비어있어도_부서지지_않고_TossPaymentException으로_변환한다() {
         // 실제로 겪은 케이스: confirm-url 오설정 등으로 에러 status + 빈 본문이 올 때 핸들러가 터지면 안 된다.
         enqueue(404, "");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 30000L)))
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1")))
                 .isInstanceOf(TossPaymentException.class);
     }
 
@@ -108,7 +130,7 @@ class TossPaymentGatewayTest {
         mockWebServer.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 30000L)))
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1")))
                 .isInstanceOf(PaymentResultUnknownException.class);
     }
 
@@ -118,7 +140,7 @@ class TossPaymentGatewayTest {
         enqueue(httpStatus, "{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 30000L)))
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1")))
                 .isInstanceOf(expected);
     }
 
