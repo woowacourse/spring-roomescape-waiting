@@ -12,7 +12,7 @@ public class Payment {
     private final OrderId orderId;
     private final Long reservationId;
     private final Long amount;
-    private final String paymentkey;
+    private final String paymentKey;
 
     private static void validateId(final Long id) {
         if (id == null) {
@@ -26,8 +26,8 @@ public class Payment {
         }
     }
 
-    private static void validatePaymentkey(final String paymentkey) {
-        if (paymentkey == null || paymentkey.isBlank()) {
+    private static void validatePaymentKey(final String paymentKey) {
+        if (paymentKey == null || paymentKey.isBlank()) {
             throw new IllegalArgumentException("결제키는 비워둘 수 없습니다.");
         }
     }
@@ -48,20 +48,20 @@ public class Payment {
             final OrderId orderId,
             final Long reservationId,
             final Long amount,
-            final String paymentkey
+            final String paymentKey
     ) {
         validateId(id);
-        return new Payment(id, orderId, reservationId, amount, paymentkey);
+        return new Payment(id, orderId, reservationId, amount, paymentKey);
     }
 
-    public Payment confirm(final String paymentkey) {
-        validatePaymentkey(paymentkey);
+    public Payment confirm(final String paymentKey) {
+        validatePaymentKey(paymentKey);
         return new Payment(
                 this.id,
                 this.orderId,
                 this.reservationId,
                 this.amount,
-                paymentkey
+                paymentKey
         );
     }
 
@@ -72,7 +72,7 @@ public class Payment {
                 this.orderId,
                 this.reservationId,
                 this.amount,
-                this.paymentkey
+                this.paymentKey
         );
     }
 

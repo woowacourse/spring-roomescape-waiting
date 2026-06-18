@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS payment
     order_id       VARCHAR(255) NOT NULL,
     reservation_id BIGINT       NOT NULL,
     amount         BIGINT       NOT NULL,
-    paymentkey     VARCHAR(255) NULL,
+    payment_key     VARCHAR(255) NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
 );
