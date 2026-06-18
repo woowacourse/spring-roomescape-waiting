@@ -8,6 +8,7 @@ import roomescape.domain.payment.Payment;
 import roomescape.domain.payment.PaymentConfirmation;
 import roomescape.domain.payment.PaymentGateway;
 import roomescape.domain.payment.PaymentResult;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.PaymentRepository;
@@ -54,20 +55,30 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
-        PaymentResult result = paymentGateway.confirm(confirmation);
+        try {
+            PaymentResult result = paymentGateway.confirm(confirmation);
 
-        Payment payment = paymentRepository.save(
-                new Payment(reservation.getId(), result.paymentKey(), result.orderId(), result.amount())
-        );
+            Payment payment = paymentRepository.save(
+                    new Payment(reservation.getId(), result.paymentKey(), result.orderId(), result.amount(), PaymentStatus.CONFIRMED)
+            );
 
-        reservation.confirm();
-        reservationRepository.updateStatus(reservation);
+            reservation.confirm();
+            reservationRepository.updateStatus(reservation);
 
-        ThemeSlot reservedSlot = new ThemeSlot(
-                reservation.getTheme(), reservation.getDate(), reservation.getTime(), true
-        );
-        themeSlotRepository.update(reservedSlot);
+            ThemeSlot reservedSlot = new ThemeSlot(
+                    reservation.getTheme(), reservation.getDate(), reservation.getTime(), true
+            );
+            themeSlotRepository.update(reservedSlot);
 
-        return payment;
+            return payment;
+
+        } catch (CustomException e) {
+            if (e.getErrorCode() == ErrorCode.PAYMENT_READ_TIMEOUT) {
+                return paymentRepository.save(
+                        new Payment(reservation.getId(), null, confirmation.orderId(), confirmation.amount(), PaymentStatus.UNCERTAIN)
+                );
+            }
+            throw e;
+        }
     }
 }

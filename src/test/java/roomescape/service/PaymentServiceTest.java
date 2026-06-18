@@ -18,8 +18,10 @@ import roomescape.domain.payment.Payment;
 import roomescape.domain.payment.PaymentConfirmation;
 import roomescape.domain.payment.PaymentGateway;
 import roomescape.domain.payment.PaymentResult;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
+import roomescape.global.exception.ErrorCode;
 import roomescape.repository.FakePaymentRepository;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeThemeSlotRepository;
@@ -103,6 +105,40 @@ class PaymentServiceTest {
         assertThatThrownBy(() -> paymentService.confirmPayment(confirmation))
                 .isInstanceOf(CustomException.class)
                 .hasMessage("예약이 존재하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("read timeout 발생 시 예약은 PENDING을 유지하고 UNCERTAIN Payment가 저장된다.")
+    void confirmPayment_readTimeout_savesUncertainPaymentAndKeepsPending() {
+        PaymentGateway timeoutGateway = confirmation -> {
+            throw new CustomException(ErrorCode.PAYMENT_READ_TIMEOUT);
+        };
+        paymentService = new PaymentService(timeoutGateway, fakeReservationRepository, fakePaymentRepository, fakeThemeSlotRepository);
+
+        Reservation reservation = pendingReservation("order-123", 10000L);
+        PaymentConfirmation confirmation = new PaymentConfirmation("pay-key", "order-123", 10000L);
+
+        Payment payment = paymentService.confirmPayment(confirmation);
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.UNCERTAIN);
+        assertThat(payment.getPaymentKey()).isNull();
+        assertThat(fakeReservationRepository.findById(reservation.getId()).get().isConfirmed()).isFalse();
+    }
+
+    @Test
+    @DisplayName("read timeout 이외의 결제 예외는 그대로 전파된다.")
+    void confirmPayment_connectionTimeout_propagatesException() {
+        PaymentGateway connectionFailGateway = confirmation -> {
+            throw new CustomException(ErrorCode.PAYMENT_CONNECTION_TIMEOUT);
+        };
+        paymentService = new PaymentService(connectionFailGateway, fakeReservationRepository, fakePaymentRepository, fakeThemeSlotRepository);
+
+        pendingReservation("order-123", 10000L);
+        PaymentConfirmation confirmation = new PaymentConfirmation("pay-key", "order-123", 10000L);
+
+        assertThatThrownBy(() -> paymentService.confirmPayment(confirmation))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ErrorCode.PAYMENT_CONNECTION_TIMEOUT.getMessage());
     }
 
     @Test
