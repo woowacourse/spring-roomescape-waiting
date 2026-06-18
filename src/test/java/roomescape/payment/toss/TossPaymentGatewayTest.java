@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import okhttp3.mockwebserver.MockResponse;
@@ -23,18 +25,22 @@ import roomescape.config.TossClientConfig;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.ratelimit.OutboundRateLimitProperties;
 
 class TossPaymentGatewayTest {
 
     private MockWebServer mockWebServer;
     private TossPaymentGateway tossPaymentGateway;
+    private RecordingSleeper sleeper;
 
     @BeforeEach
     void beforeEach() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
+        sleeper = new RecordingSleeper();
+        OutboundRateLimitProperties rateLimitProperties = rateLimitProperties();
         var restClient = new TossClientConfig().tossRestClient(mockWebServer.url("/").toString(), "test_gsk_dummy",
-                Duration.ofSeconds(1), Duration.ofSeconds(1));
+                Duration.ofSeconds(1), Duration.ofSeconds(1), rateLimitProperties, new AtomicLong(0L)::get, sleeper);
         tossPaymentGateway = new TossPaymentGateway(restClient, new ObjectMapper(), new TossPaymentErrorMapper());
     }
 
@@ -97,6 +103,37 @@ class TossPaymentGatewayTest {
                         .isEqualTo(DomainErrorCode.PAYMENT_UNKNOWN));
     }
 
+    @Test
+    void retryAfter429ResponseTest() throws InterruptedException {
+        enqueue(429, "{}");
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"paymentKey\":\"payment_key\",\"orderId\":\"order_test\",\"status\":\"DONE\",\"totalAmount\":50000}"));
+
+        var result = tossPaymentGateway.confirm(new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L));
+
+        assertThat(result.status()).isEqualTo("DONE");
+        assertThat(mockWebServer.getRequestCount()).isEqualTo(2);
+        assertThat(sleeper.durations()).containsExactly(Duration.ofSeconds(1));
+    }
+
+    @Test
+    void exhausted429ResponsesMapToRetryablePaymentErrorTest() {
+        enqueue(429, "{}");
+        enqueue(429, "{}");
+        enqueue(429, "{}");
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(
+                new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L)))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
+                        .isEqualTo(DomainErrorCode.PAYMENT_RETRYABLE));
+
+        assertThat(mockWebServer.getRequestCount()).isEqualTo(3);
+        assertThat(sleeper.durations()).containsExactly(Duration.ofSeconds(1), Duration.ofSeconds(1));
+    }
+
     static Stream<Arguments> errorCases() {
         return Stream.of(
                 arguments(400, "ALREADY_PROCESSED_PAYMENT", DomainErrorCode.PAYMENT_ALREADY_PROCESSED),
@@ -111,7 +148,26 @@ class TossPaymentGatewayTest {
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(statusCode)
                 .setHeader("Content-Type", "application/json")
+                .setHeader("Retry-After", "1")
                 .setBody(body));
+    }
+
+    private OutboundRateLimitProperties rateLimitProperties() {
+        return new OutboundRateLimitProperties(true, 30, 30D, 3);
+    }
+
+    private static class RecordingSleeper implements roomescape.ratelimit.BackoffSleeper {
+
+        private final java.util.ArrayList<Duration> durations = new java.util.ArrayList<>();
+
+        @Override
+        public void sleep(Duration duration) {
+            durations.add(duration);
+        }
+
+        private List<Duration> durations() {
+            return durations;
+        }
     }
 
     private String expectedAuthorization() {

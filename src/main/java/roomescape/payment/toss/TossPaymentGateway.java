@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -18,6 +19,7 @@ import roomescape.payment.PaymentResult;
 import roomescape.payment.toss.dto.TossErrorResponse;
 import roomescape.payment.toss.dto.TossPaymentConfirmRequest;
 import roomescape.payment.toss.dto.TossPaymentResponse;
+import roomescape.ratelimit.OutboundRateLimitException;
 
 @Component
 public class TossPaymentGateway implements PaymentGateway {
@@ -45,6 +47,9 @@ public class TossPaymentGateway implements PaymentGateway {
                     .body(request)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        if (res.getStatusCode().value() == HttpStatus.TOO_MANY_REQUESTS.value()) {
+                            throw new RoomEscapeException(DomainErrorCode.PAYMENT_RETRYABLE);
+                        }
                         try {
                             TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
                             throw errorMapper.map(error);
@@ -60,6 +65,8 @@ public class TossPaymentGateway implements PaymentGateway {
                     response.totalAmount());
         } catch (ResourceAccessException e) {
             throw mapAccessException(e);
+        } catch (OutboundRateLimitException e) {
+            throw new RoomEscapeException(DomainErrorCode.PAYMENT_RETRYABLE);
         } catch (RestClientException e) {
             if (hasCause(e, SocketTimeoutException.class)) {
                 throw new RoomEscapeException(DomainErrorCode.PAYMENT_UNKNOWN);
