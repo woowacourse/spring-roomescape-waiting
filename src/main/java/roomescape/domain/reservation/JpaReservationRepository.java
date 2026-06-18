@@ -52,6 +52,19 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     @Query("""
         select reservation
         from Reservation reservation
+        join fetch reservation.user
+        join fetch reservation.reservationSlot slot
+        join fetch slot.date date
+        join fetch slot.time time
+        join fetch slot.theme
+        where reservation.status = :status
+        order by date.date desc, time.startAt desc, reservation.id
+        """)
+    List<Reservation> findWaitingReservationsForAdmin(ReservationStatus status);
+
+    @Query("""
+        select reservation
+        from Reservation reservation
         join fetch reservation.user user
         join fetch reservation.reservationSlot slot
         join fetch slot.date date

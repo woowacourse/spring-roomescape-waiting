@@ -83,7 +83,7 @@ class ReservationIntegrationTest {
         given().log().all()
             .contentType(ContentType.JSON)
             .body(request)
-            .when().post("/reservations")
+            .when().post("/waitings")
             .then().log().all()
             .statusCode(201)
             .body("date", is("2026-06-01"))
@@ -95,7 +95,7 @@ class ReservationIntegrationTest {
         given()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then()
             .statusCode(200)
             .body("username", is("보예"))
@@ -119,7 +119,7 @@ class ReservationIntegrationTest {
         given().log().all()
             .contentType(ContentType.JSON)
             .body(request)
-            .when().post("/reservations")
+            .when().post("/waitings")
             .then().log().all()
             .statusCode(400)
             .body("code", is("INPUT_VALIDATION_ERROR"))
@@ -134,7 +134,7 @@ class ReservationIntegrationTest {
         given().log().all()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then().log().all()
             .statusCode(200)
             .body("username", is("보예"))
@@ -158,7 +158,7 @@ class ReservationIntegrationTest {
         given().log().all()
             .contentType(ContentType.JSON)
             .param("name", "말랑")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then().log().all()
             .statusCode(200)
             .body("username", is("말랑"))
@@ -171,7 +171,7 @@ class ReservationIntegrationTest {
     void getUserReservationsWithoutName() {
         given().log().all()
             .contentType(ContentType.JSON)
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then().log().all()
             .statusCode(400)
             .body("code", is("REQUIRED_PARAMETER_MISSING"))
@@ -185,14 +185,14 @@ class ReservationIntegrationTest {
 
         given().log().all()
             .contentType(ContentType.JSON)
-            .when().delete("/reservations/{id}", reservationId)
+            .when().delete("/waitings/{id}", reservationId)
             .then().log().all()
             .statusCode(204);
 
         given()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then()
             .statusCode(200)
             .body("username", is("보예"))
@@ -231,7 +231,7 @@ class ReservationIntegrationTest {
         // when & then
         given().
             contentType(ContentType.JSON)
-            .when().delete("/reservations/{id}", confirmedReservationId)
+            .when().delete("/waitings/{id}", confirmedReservationId)
             .then()
             .statusCode(500);
 
@@ -266,7 +266,7 @@ class ReservationIntegrationTest {
         given()
             .contentType(ContentType.JSON)
             .param("name", "보예")
-            .when().get("/reservations")
+            .when().get("/reservations-mine")
             .then()
             .statusCode(200)
             .body("reservations[0].reservationSlot.date.startWhen", is("2026-06-02"))

@@ -66,6 +66,20 @@ public class ReservationService {
             .toList();
     }
 
+    public List<ReservationResponse> getWaitingReservations() {
+        List<Reservation> reservations = reservationRepository.findWaitingReservationsForAdmin(
+            ReservationStatus.WAITING
+        );
+        Map<Long, Long> waitingNumberByReservationId = calculateWaitingNumbers(reservations);
+        return reservations.stream()
+            .map(reservation -> new ReservationWithWaitingNumber(
+                reservation,
+                waitingNumberByReservationId.get(reservation.getId())
+            ))
+            .map(ReservationResponse::from)
+            .toList();
+    }
+
     public UserReservationsResponse getUserReservations(String username) {
         List<Reservation> reservations = reservationRepository.findUserReservations(username);
         Map<Long, Long> waitingNumberByReservationId = calculateWaitingNumbersInSameSlots(reservations);

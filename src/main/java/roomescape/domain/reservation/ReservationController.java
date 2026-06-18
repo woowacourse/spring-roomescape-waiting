@@ -26,7 +26,7 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @PostMapping("/reservations")
+    @PostMapping("/waitings")
     public ResponseEntity<CreateReservationResponse> createReservation(
         @Valid @RequestBody CreateReservationRequest request
     ) {
@@ -34,7 +34,7 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/reservations")
+    @GetMapping("/reservations-mine")
     public ResponseEntity<UserReservationsResponse> getUserReservations(
         @RequestParam
         @NotBlank(message = "예약자 이름은 필수 입력값 입니다.")
@@ -44,7 +44,7 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> cancelUserReservation(
         @PathVariable Long id
     ) {

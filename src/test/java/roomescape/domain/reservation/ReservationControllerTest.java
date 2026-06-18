@@ -68,7 +68,7 @@ class ReservationControllerTest {
             .willReturn(response);
 
         // when & then
-        mockMvc.perform(post("/reservations")
+        mockMvc.perform(post("/waitings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -92,7 +92,7 @@ class ReservationControllerTest {
         );
 
         // when & then
-        mockMvc.perform(post("/reservations")
+        mockMvc.perform(post("/waitings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
@@ -124,7 +124,7 @@ class ReservationControllerTest {
         given(reservationService.getUserReservations(name)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/reservations")
+        mockMvc.perform(get("/reservations-mine")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("name", name))
             .andExpect(status().isOk())
@@ -143,7 +143,7 @@ class ReservationControllerTest {
     @DisplayName("예약자 이름 조회 시 이름이 누락되면 예외가 발생한다.")
     void getUserReservationsWithoutName() throws Exception {
         // given & when & then
-        mockMvc.perform(get("/reservations")
+        mockMvc.perform(get("/reservations-mine")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("REQUIRED_PARAMETER_MISSING"))
@@ -157,7 +157,7 @@ class ReservationControllerTest {
         Long id = 1L;
 
         // when & then
-        mockMvc.perform(delete("/reservations/{id}", id))
+        mockMvc.perform(delete("/waitings/{id}", id))
             .andExpect(status().isNoContent());
 
         verify(reservationService).cancelUserReservation(id);
@@ -228,7 +228,7 @@ class ReservationControllerTest {
     @DisplayName("예약 삭제 시 id를 누락한 경우 예외가 발생한다.")
     void cancelUserReservationWithoutId() throws Exception {
         // given & when & then
-        mockMvc.perform(delete("/reservations"))
+        mockMvc.perform(delete("/waitings"))
             .andExpect(status().isMethodNotAllowed());
     }
 }

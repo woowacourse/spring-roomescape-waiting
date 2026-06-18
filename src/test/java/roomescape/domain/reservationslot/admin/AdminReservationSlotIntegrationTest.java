@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.support.TestFixture;
 
@@ -37,48 +36,43 @@ class AdminReservationSlotIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자의 예약 전체 조회를 end-to-end로 확인한다.")
-    void getAllReservation() {
-        saveThemeDateTimeAndReservation("보예");
+    @DisplayName("관리자의 대기 목록 조회를 end-to-end로 확인한다.")
+    void getWaitingReservations() {
+        var theme = testFixture.saveTheme("공포");
+        var date = testFixture.saveDate("2026-06-01");
+        var time = testFixture.saveTime("10:00");
+        var slot = testFixture.saveSlot(date, time, theme);
+        testFixture.saveReservation("보예", slot, ReservationStatus.CONFIRMED);
+        testFixture.saveReservation("수민", slot, ReservationStatus.WAITING);
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().get("/admin/reservations")
+            .when().get("/admin/waitings")
             .then().log().all()
             .statusCode(200)
-            .body("[0].date", is("2026-06-01"))
-            .body("[0].time.startAt", is("10:00"))
-            .body("[0].theme.name", is("공포"));
+            .body("[0].theme.name", is("공포"))
+            .body("[0].userName", is("수민"))
+            .body("[0].waitingNumber", is(1))
+            .body("[0].reservationStatus", is("WAITING"));
     }
 
     @Test
-    @DisplayName("관리자가 토큰을 누락했을 경우 401 예외가 발생한다.")
-    void getAllReservationWithoutToken() {
-        given().log().all()
-            .contentType(ContentType.JSON)
-            .when().get("/admin/reservations")
-            .then().log().all()
-            .statusCode(401);
-    }
-
-    @Test
-    @DisplayName("관리자의 예약 취소를 end-to-end로 확인한다.")
-    void deleteReservation() {
-        Long reservationId = saveThemeDateTimeAndReservation("보예");
+    @DisplayName("관리자의 대기 예약 취소를 end-to-end로 확인한다.")
+    void deleteWaitingReservation() {
+        var theme = testFixture.saveTheme("공포");
+        var date = testFixture.saveDate("2026-06-01");
+        var time = testFixture.saveTime("10:00");
+        var slot = testFixture.saveSlot(date, time, theme);
+        Long reservationId = testFixture.saveReservation("보예", slot, ReservationStatus.WAITING).getId();
 
         given().log().all()
             .contentType(ContentType.JSON)
             .header("X-ADMIN-TOKEN", adminToken)
-            .when().delete("/admin/reservations/{id}", reservationId)
+            .when().delete("/admin/waitings/{id}", reservationId)
             .then().log().all()
             .statusCode(204);
 
         assertThat(testFixture.findReservationStatus(reservationId)).isEqualTo(ReservationStatus.CANCELED);
-    }
-
-    private Long saveThemeDateTimeAndReservation(String name) {
-        Reservation reservation = testFixture.saveReservation(name, "2026-06-01", "10:00", "공포");
-        return reservation.getId();
     }
 }

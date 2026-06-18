@@ -20,16 +20,16 @@ public class AdminReservationController {
     private final ReservationService reservationService;
     private final AdminRequestValidator validator;
 
-    @GetMapping("/admin/reservations")
-    public ResponseEntity<List<ReservationResponse>> getAllReservation(HttpServletRequest request) {
+    @GetMapping("/admin/waitings")
+    public ResponseEntity<List<ReservationResponse>> getWaitingReservations(HttpServletRequest request) {
         if (validator.isUnauthorized(request)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        List<ReservationResponse> response = reservationService.getAllReservations();
+        List<ReservationResponse> response = reservationService.getWaitingReservations();
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/admin/reservations/{id}")
+    @DeleteMapping("/admin/waitings/{id}")
     public ResponseEntity<Void> cancelReservation(HttpServletRequest request, @PathVariable Long id) {
         if (validator.isUnauthorized(request)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
