@@ -12,8 +12,10 @@ public class Payment {
     private final String paymentKey;
     private final Long amount;
     private final PaymentState state;
+    private final String idempotencyKey;
 
-    private Payment(Long id, Long reservationId, String orderId, String paymentKey, Long amount, PaymentState state) {
+    private Payment(Long id, Long reservationId, String orderId, String paymentKey, Long amount, PaymentState state,
+                    String idempotencyKey) {
         if (reservationId == null) {
             throw new IllegalArgumentException("예약 정보는 필수입니다.");
         }
@@ -26,25 +28,29 @@ public class Payment {
         if (state == null) {
             throw new IllegalArgumentException("결제 상태는 필수입니다.");
         }
+        if (idempotencyKey == null || idempotencyKey.isBlank() || idempotencyKey.length() > 300) {
+            throw new IllegalArgumentException("멱등키는 1~300자여야 합니다.");
+        }
         this.id = id;
         this.reservationId = reservationId;
         this.orderId = orderId;
         this.paymentKey = paymentKey;
         this.amount = amount;
         this.state = state;
+        this.idempotencyKey = idempotencyKey;
     }
 
-    public static Payment pending(Long reservationId, String orderId, Long amount) {
-        return new Payment(null, reservationId, orderId, null, amount, PaymentState.PENDING);
+    public static Payment pending(Long reservationId, String orderId, Long amount, String idempotencyKey) {
+        return new Payment(null, reservationId, orderId, null, amount, PaymentState.PENDING, idempotencyKey);
     }
 
     public static Payment restore(Long id, Long reservationId, String orderId, String paymentKey, Long amount,
-                                  PaymentState state) {
-        return new Payment(id, reservationId, orderId, paymentKey, amount, state);
+                                  PaymentState state, String idempotencyKey) {
+        return new Payment(id, reservationId, orderId, paymentKey, amount, state, idempotencyKey);
     }
 
     public Payment confirm(String paymentKey) {
-        return new Payment(id, reservationId, orderId, paymentKey, amount, PaymentState.CONFIRMED);
+        return new Payment(id, reservationId, orderId, paymentKey, amount, PaymentState.CONFIRMED, idempotencyKey);
     }
 
     public boolean isAmountMismatched(Long requestedAmount) {
@@ -77,5 +83,9 @@ public class Payment {
 
     public PaymentState getState() {
         return state;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 }

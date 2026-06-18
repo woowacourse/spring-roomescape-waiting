@@ -65,7 +65,7 @@
   <div class="row"><span class="label">주문번호</span>
     <span class="val" style="color:#555" th:text="${orderId} ?: '(취소되어 전달되지 않음)'">order-xxxx</span></div>
 
-  <a href="/payments/checkout">← 다시 시도하기</a>
+  <a th:href="${orderId} != null ? @{/payments/checkout(orderId=${orderId})} : '/my-reservations'">← 다시 시도하기</a>
 </div>
 </body>
 </html>

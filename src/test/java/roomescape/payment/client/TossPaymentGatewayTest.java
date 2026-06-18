@@ -3,6 +3,7 @@ package roomescape.payment.client;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -53,10 +54,24 @@ class TossPaymentGatewayTest {
                         }
                         """, MediaType.APPLICATION_JSON));
 
-        var result = gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L));
+        var result = gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "idem-key-1"));
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.approvedAmount()).isEqualTo(10000L);
+    }
+
+    @Test
+    void confirm은_주문에_고정된_멱등키를_헤더로_보낸다() {
+        server.expect(requestTo(CONFIRM_URL))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "idem-key-1"))
+                .andRespond(withSuccess("""
+                        {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "DONE", "totalAmount": 10000}
+                        """, MediaType.APPLICATION_JSON));
+
+        gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "idem-key-1"));
+
+        server.verify();
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")
@@ -67,7 +82,7 @@ class TossPaymentGatewayTest {
                         .body("{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}")
                         .contentType(MediaType.APPLICATION_JSON));
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk", "order-1", 10000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk", "order-1", 10000L, "idem-key-1")))
                 .isInstanceOf(expected);
     }
 

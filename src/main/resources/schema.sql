@@ -68,12 +68,13 @@ CREATE TABLE reservation_waiting
 
 CREATE TABLE payment
 (
-    id             BIGINT       NOT NULL AUTO_INCREMENT,
-    reservation_id BIGINT       NOT NULL,
-    order_id       VARCHAR(64)  NOT NULL,
-    payment_key    VARCHAR(255),
-    amount         BIGINT       NOT NULL,
-    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id  BIGINT       NOT NULL,
+    order_id        VARCHAR(64)  NOT NULL,
+    payment_key     VARCHAR(255),
+    amount          BIGINT       NOT NULL,
+    status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    idempotency_key VARCHAR(64)  NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
     CONSTRAINT unique_payment_order_id UNIQUE (order_id)

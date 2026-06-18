@@ -18,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.payment.client.PaymentTimeoutException;
 import roomescape.payment.domain.Payment;
 import roomescape.payment.domain.PaymentAmountMismatchException;
 import roomescape.payment.domain.PaymentGateway;
@@ -95,5 +96,22 @@ class PaymentServiceTest {
         Payment payment = paymentRepository.getByOrderId(orderId);
         assertThat(payment.getPaymentKey()).isEqualTo("test_pk_1");
         assertThat(payment.getState()).isEqualTo(PaymentState.CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("read timeout이면 결제 실패로 단정하지 않고 UNKNOWN(확인 필요)으로 남긴다")
+    void 읽기타임아웃이면_UNKNOWN으로_남고_paymentKey가_보관된다() {
+        given(paymentGateway.confirm(any()))
+                .willThrow(new PaymentTimeoutException("결제 결과를 확인하지 못했습니다."));
+
+        assertThatThrownBy(() -> paymentService.confirm("test_pk_1", orderId, 10000L))
+                .isInstanceOf(PaymentTimeoutException.class);
+
+        Reservation notConfirmed = reservationRepository.findById(reservation.getId()).orElseThrow();
+        assertThat(notConfirmed.getStatus()).isEqualTo(ReservationStatus.PENDING);
+
+        Payment payment = paymentRepository.getByOrderId(orderId);
+        assertThat(payment.getState()).isEqualTo(PaymentState.UNKNOWN);
+        assertThat(payment.getPaymentKey()).isEqualTo("test_pk_1");
     }
 }

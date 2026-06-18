@@ -24,7 +24,8 @@ public class JdbcPaymentRepository implements PaymentRepository {
             resultSet.getString("order_id"),
             resultSet.getString("payment_key"),
             resultSet.getLong("amount"),
-            PaymentState.valueOf(resultSet.getString("status"))
+            PaymentState.valueOf(resultSet.getString("status")),
+            resultSet.getString("idempotency_key")
     );
 
     public JdbcPaymentRepository(JdbcTemplate jdbcTemplate) {
@@ -32,7 +33,7 @@ public class JdbcPaymentRepository implements PaymentRepository {
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("payment")
                 .usingGeneratedKeyColumns("id")
-                .usingColumns("reservation_id", "order_id", "amount", "status");
+                .usingColumns("reservation_id", "order_id", "amount", "status", "idempotency_key");
     }
 
     @Override
@@ -41,10 +42,11 @@ public class JdbcPaymentRepository implements PaymentRepository {
                 .addValue("reservation_id", payment.getReservationId())
                 .addValue("order_id", payment.getOrderId())
                 .addValue("amount", payment.getAmount())
-                .addValue("status", payment.getState().name());
+                .addValue("status", payment.getState().name())
+                .addValue("idempotency_key", payment.getIdempotencyKey());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Payment.restore(id, payment.getReservationId(), payment.getOrderId(), payment.getPaymentKey(),
-                payment.getAmount(), payment.getState());
+                payment.getAmount(), payment.getState(), payment.getIdempotencyKey());
     }
 
     @Override
@@ -64,6 +66,12 @@ public class JdbcPaymentRepository implements PaymentRepository {
     @Override
     public void confirm(String orderId, String paymentKey) {
         String query = "UPDATE payment SET payment_key = ?, status = 'CONFIRMED' WHERE order_id = ?";
+        jdbcTemplate.update(query, paymentKey, orderId);
+    }
+
+    @Override
+    public void markUnknown(String orderId, String paymentKey) {
+        String query = "UPDATE payment SET payment_key = ?, status = 'UNKNOWN' WHERE order_id = ?";
         jdbcTemplate.update(query, paymentKey, orderId);
     }
 
