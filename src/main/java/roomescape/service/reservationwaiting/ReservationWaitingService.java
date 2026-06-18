@@ -2,7 +2,9 @@ package roomescape.service.reservationwaiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationslot.ReservationSlot;
@@ -41,6 +43,7 @@ public class ReservationWaitingService {
         this.reservationTimeService = reservationTimeService;
     }
 
+    @Transactional
     public ReservationWaiting save(
             final String name,
             final LocalDate date,
@@ -72,6 +75,11 @@ public class ReservationWaitingService {
                     "이미 같은 예약에 대기 중입니다."
             );
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationWaiting> getAll() {
+        return reservationWaitingRepository.findAll();
     }
 
     private ReservationSlot findExistingSlot(final ReservationSlot slot) {
@@ -116,6 +124,7 @@ public class ReservationWaitingService {
         }
     }
 
+    @Transactional
     public void deleteByIdAndName(final Long waitingId, final String name) {
         ReservationName waitingName = ReservationName.from(name);
         ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
@@ -130,6 +139,17 @@ public class ReservationWaitingService {
                     "삭제된 대기 데이터가 없습니다."
             );
         }
+
+        reservationWaitingRepository.delete(reservationWaiting);
+    }
+
+    @Transactional
+    public void deleteById(final Long waitingId) {
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.RESERVATION_WAITING_NOT_FOUND,
+                        "삭제된 대기 데이터가 없습니다."
+                ));
 
         reservationWaitingRepository.delete(reservationWaiting);
     }

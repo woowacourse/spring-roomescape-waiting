@@ -1,5 +1,6 @@
 package roomescape.support;
 
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +14,11 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
 
     private final Map<Long, ReservationWaiting> waitings = new LinkedHashMap<>();
     private long sequence = 1L;
+
+    @Override
+    public List<ReservationWaiting> findAll() {
+        return List.copyOf(waitings.values());
+    }
 
     @Override
     public ReservationWaiting save(final ReservationWaiting reservationWaiting) {

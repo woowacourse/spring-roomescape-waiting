@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -54,6 +55,14 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
                 )
                 .map(ReservationJpaEntity::toDomain);
     }
+
+    @Override
+    public List<Reservation> findByName(ReservationName name) {
+        return reservationJpaRepository.findByName(name.value()).stream()
+                .map(ReservationJpaEntity::toDomain)
+                .toList();
+    }
+
 
     @Override
     public List<Reservation> findByDateAndTheme(final LocalDate date, final Theme theme) {

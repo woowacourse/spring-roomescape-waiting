@@ -17,6 +17,9 @@ public interface ReservationJpaRepository extends JpaRepository<ReservationJpaEn
     Optional<ReservationJpaEntity> findById(Long id);
 
     @EntityGraph(attributePaths = {"slot", "slot.theme", "slot.time"})
+    List<ReservationJpaEntity> findByName(String name);
+
+    @EntityGraph(attributePaths = {"slot", "slot.theme", "slot.time"})
     Optional<ReservationJpaEntity> findBySlot_DateAndSlot_Theme_IdAndSlot_Time_Id(
             LocalDate date,
             Long themeId,

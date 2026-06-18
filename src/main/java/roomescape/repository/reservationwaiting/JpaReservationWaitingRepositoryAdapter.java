@@ -1,6 +1,7 @@
 package roomescape.repository.reservationwaiting;
 
 import java.util.Optional;
+import java.util.List;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
@@ -27,6 +28,14 @@ public class JpaReservationWaitingRepositoryAdapter implements ReservationWaitin
     ) {
         this.reservationWaitingJpaRepository = reservationWaitingJpaRepository;
         this.reservationSlotJpaRepository = reservationSlotJpaRepository;
+    }
+
+    @Override
+    public List<ReservationWaiting> findAll() {
+        return reservationWaitingJpaRepository.findAllByOrderBySlot_DateAscSlot_Theme_IdAscSlot_Time_IdAscRequestedAtAscIdAsc()
+                .stream()
+                .map(ReservationWaitingJpaEntity::toDomain)
+                .toList();
     }
 
     @Override

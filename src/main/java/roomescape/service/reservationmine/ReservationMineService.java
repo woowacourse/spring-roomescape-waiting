@@ -3,19 +3,16 @@ package roomescape.service.reservationmine;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.controller.reservation.dto.ReservationResponse;
-import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
-import roomescape.controller.theme.dto.ThemeResponse;
-import roomescape.service.history.MyHistoryService;
+import roomescape.domain.reservation.ReservationName;
+import roomescape.repository.reservation.ReservationRepository;
 
 @Service
 public class ReservationMineService {
 
-    private static final String RESERVATION_STATUS = "RESERVATION";
+    private final ReservationRepository reservationRepository;
 
-    private final MyHistoryService myHistoryService;
-
-    public ReservationMineService(final MyHistoryService myHistoryService) {
-        this.myHistoryService = myHistoryService;
+    public ReservationMineService(final ReservationRepository reservationRepository) {
+        this.reservationRepository = reservationRepository;
     }
 
     public List<ReservationResponse> getAllByName(final String name) {
@@ -23,15 +20,8 @@ public class ReservationMineService {
             return List.of();
         }
 
-        return myHistoryService.getAllByName(name).stream()
-                .filter(history -> RESERVATION_STATUS.equals(history.status()))
-                .map(history -> new ReservationResponse(
-                        history.reservationId(),
-                        history.name(),
-                        history.date(),
-                        ThemeResponse.from(history.theme()),
-                        ReservationTimeResponse.from(history.time())
-                ))
+        return reservationRepository.findByName(ReservationName.from(name)).stream()
+                .map(ReservationResponse::from)
                 .toList();
     }
 }
