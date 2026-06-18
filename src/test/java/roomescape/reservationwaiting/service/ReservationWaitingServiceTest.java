@@ -97,4 +97,31 @@ class ReservationWaitingServiceTest {
         assertThat(reservationWaitingService.getWaitingByMemberId(member.getId()).get(0).turn()).isEqualTo(1L);
         assertThat(reservationWaitingService.getWaitingByMemberId(other.getId()).get(0).turn()).isEqualTo(2L);
     }
+
+    @Test
+    @DisplayName("어드민은 전체 대기 목록을 조회한다")
+    void 어드민은_전체_대기_목록을_조회한다() {
+        saveWaiting(member);
+        saveWaiting(other);
+
+        assertThat(reservationWaitingService.getAllWaitings()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("어드민은 소유자가 아니어도 대기를 취소할 수 있다")
+    void 어드민은_소유자가_아니어도_대기를_취소할_수_있다() {
+        ReservationWaiting waiting = saveWaiting(member);
+
+        reservationWaitingService.deleteWaitingByAdmin(waiting.getId());
+
+        assertThat(waitingRepository.findById(waiting.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("어드민이 존재하지 않는 대기를 취소하면 예외가 발생한다")
+    void 어드민이_존재하지_않는_대기를_취소하면_예외() {
+        assertThatThrownBy(() -> reservationWaitingService.deleteWaitingByAdmin(99999L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("존재하지 않는 대기입니다.");
+    }
 }
