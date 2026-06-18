@@ -22,4 +22,8 @@ public class OrderRepository {
         }
         return order;
     }
+
+    public void update(Order order) {
+        store.put(order.getOrderId(), order);
+    }
 }

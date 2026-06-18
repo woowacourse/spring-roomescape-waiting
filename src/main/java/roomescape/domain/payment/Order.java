@@ -11,6 +11,8 @@ public class Order {
     private final Long timeId;
     private final Long themeId;
     private final String idempotencyKey;
+    private String paymentKey;
+    private PaymentStatus paymentStatus;
 
     public Order(String orderId, Long amount, String name, LocalDate date, Long timeId, Long themeId, String idempotencyKey) {
         this.orderId = orderId;
@@ -20,6 +22,7 @@ public class Order {
         this.timeId = timeId;
         this.themeId = themeId;
         this.idempotencyKey = idempotencyKey;
+        this.paymentStatus = PaymentStatus.PAYMENT_PENDING;
     }
 
     public String getOrderId() {
@@ -48,5 +51,26 @@ public class Order {
 
     public String getIdempotencyKey() {
         return idempotencyKey;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void confirmSuccess(String paymentKey) {
+        this.paymentKey = paymentKey;
+        this.paymentStatus = PaymentStatus.CONFIRMED;
+    }
+
+    public void markUncertain() {
+        this.paymentStatus = PaymentStatus.PAYMENT_UNCERTAIN;
+    }
+
+    public void markFailed() {
+        this.paymentStatus = PaymentStatus.PAYMENT_FAILED;
     }
 }

@@ -7,6 +7,7 @@ import roomescape.domain.payment.PaymentGateway;
 import roomescape.domain.payment.PaymentResult;
 import roomescape.dto.payment.PaymentPrepareRequest;
 import roomescape.exception.PaymentAmountMismatchException;
+import roomescape.exception.PaymentUncertainException;
 import roomescape.repository.OrderRepository;
 
 import java.util.UUID;
@@ -41,7 +42,20 @@ public class PaymentService {
             throw new PaymentAmountMismatchException(order.getAmount(), amount);
         }
         PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount, order.getIdempotencyKey());
-        return paymentGateway.confirm(confirmation);
+        try {
+            PaymentResult result = paymentGateway.confirm(confirmation);
+            order.confirmSuccess(result.paymentKey());
+            orderRepository.update(order);
+            return result;
+        } catch (PaymentUncertainException e) {
+            order.markUncertain();
+            orderRepository.update(order);
+            throw e;
+        } catch (RuntimeException e) {
+            order.markFailed();
+            orderRepository.update(order);
+            throw e;
+        }
     }
 
     public Order getOrder(String orderId) {
