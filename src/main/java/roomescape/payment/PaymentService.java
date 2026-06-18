@@ -5,10 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.ReservationAuthorizationService;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.Member;
 import roomescape.order.Order;
 import roomescape.order.OrderService;
+import roomescape.order.OrderStatus;
 import roomescape.payment.web.PaymentReadyResponse;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.ReservationService;
@@ -55,27 +57,44 @@ public class PaymentService {
 
     /**
      * successUrl 콜백 처리. 저장된 주문 금액과 대조한 뒤(검증), 통과해야 승인 API를 호출한다.
-     * 승인되면 주문을 확정(CONFIRMED)하고 예약 확정(BOOKED)을 예약 서비스에 위임한다.
-     * read timeout처럼 결과가 불명확하면 실패로 단정하지 않고 주문을 NEEDS_CHECK로 남긴다(확인 필요).
      */
     public ConfirmOutcome confirm(Member member, String paymentKey, String orderId, long amount) {
         Order order = orderService.findByOrderId(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 주문입니다."));
         authorizationService.validateMemberCanAccess(member, order.getReservationId());
         order.validateAmount(amount);
+        return approve(order, paymentKey);
+    }
 
+    /**
+     * 결과 불명확(NEEDS_CHECK)으로 남은 주문을 재확인한다. 저장된 paymentKey와 주문의 멱등키로 다시 승인 요청하면
+     * 토스가 첫 응답을 그대로 돌려줘(멱등) 이중 승인 없이 결과를 확정한다(여전히 모름이면 NEEDS_CHECK 유지).
+     */
+    public ConfirmOutcome recheck(Member member, String orderId) {
+        Order order = orderService.findByOrderId(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 주문입니다."));
+        authorizationService.validateMemberCanAccess(member, order.getReservationId());
+        if (order.getStatus() != OrderStatus.NEEDS_CHECK) {
+            throw new BusinessRuleViolationException("확인이 필요한 주문이 아닙니다.");
+        }
+        return approve(order, order.getPaymentKey());
+    }
+
+    /**
+     * 게이트웨이 승인을 호출하고 결과를 주문/예약 상태로 전파한다(confirm·recheck 공유).
+     * 승인되면 주문 확정(CONFIRMED)+예약 확정(BOOKED). read timeout처럼 결과가 불명확하면 실패로 단정하지 않고
+     * 시도한 paymentKey와 함께 주문을 NEEDS_CHECK로 남긴다 — 예외를 다시 던지지 않아 @Transactional이 커밋한다.
+     * connect 실패·토스 에러는 잡지 않아 그대로 전파된다(롤백 + advice 안내).
+     */
+    private ConfirmOutcome approve(Order order, String paymentKey) {
         PaymentResult result;
         try {
-            result = paymentGateway.confirm(
-                    new PaymentConfirmation(paymentKey, orderId, amount, order.getIdempotencyKey()));
+            result = paymentGateway.confirm(new PaymentConfirmation(
+                    paymentKey, order.getOrderId(), order.getAmount(), order.getIdempotencyKey()));
         } catch (PaymentResultUnknownException e) {
-            // read timeout 등 결과 불명확: 실패로 단정하지 않고 '확인 필요'로 남긴다(사용자가 내역에서 재시도).
-            // 예외를 다시 던지지 않으므로 @Transactional이 이 마크를 커밋한다.
-            orderService.markNeedsCheck(order);
+            orderService.markNeedsCheck(order, paymentKey);
             return ConfirmOutcome.NEEDS_CHECK;
         }
-        // connect 실패(PaymentGatewayUnreachableException)·토스 에러(TossPaymentException)는 잡지 않는다
-        // → 에러로 전파(롤백 + advice가 사용자에게 안내).
         orderService.complete(order, result.paymentKey());
         reservationService.confirm(order.getReservationId());
         return ConfirmOutcome.CONFIRMED;

@@ -71,8 +71,8 @@ public class OrderService {
         orderDao.update(order);
     }
 
-    public void markNeedsCheck(Order order) {
-        order.markNeedsCheck();
+    public void markNeedsCheck(Order order, String paymentKey) {
+        order.markNeedsCheck(paymentKey);
         orderDao.update(order);
     }
 

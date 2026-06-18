@@ -175,7 +175,19 @@ function mkItem(it) {
       </div>`;
   } else if (it.status === 'PENDING') {
     statusClass = 'waiting';
-    statusText = '결제 대기';
+    if (it.order?.status === 'NEEDS_CHECK') {
+      statusText = '확인 필요';
+      actionsHtml = `
+        <div class="res-actions">
+          <button class="btn-s" onclick="recheck('${it.order.orderId}')">결제 확인</button>
+        </div>`;
+    } else {
+      statusText = '결제 대기';
+      actionsHtml = `
+        <div class="res-actions">
+          <button class="btn-s" onclick="goPay(${it.id}, ${it.theme?.id})">결제하기</button>
+        </div>`;
+    }
   } else {
     statusClass = 'canceled';
     statusText = '취소됨';
@@ -233,6 +245,34 @@ async function doCancel(id) {
       return;
     }
     toast('ok', '예약이 취소되었습니다');
+    await loadReservations();
+  } catch {
+    toast('err', '네트워크 오류가 발생했습니다');
+  }
+}
+
+function goPay(reservationId, themeId) {
+  // 결제 시작 진입점. reservation 페이지와 같은 흐름을 재사용한다(checkout이 /payments/ready로 주문 확보).
+  sessionStorage.setItem('toss_checkout', JSON.stringify({ reservationId, themeId }));
+  location.href = '/payment/checkout';
+}
+
+async function recheck(orderId) {
+  // 결과 불명확(NEEDS_CHECK) 주문 재확인. 서버가 저장된 paymentKey+멱등키로 다시 confirm한다(위젯 없이).
+  try {
+    const r = await fetch('/payments/recheck', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId })
+    });
+    if (!r.ok) {
+      let msg = '결제 확인에 실패했습니다';
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+      toast('err', msg);
+      return;
+    }
+    const body = await r.json();
+    toast('ok', body.status === 'CONFIRMED' ? '결제가 확정되었습니다' : '아직 확인 중입니다. 잠시 후 다시 시도해 주세요');
     await loadReservations();
   } catch {
     toast('err', '네트워크 오류가 발생했습니다');

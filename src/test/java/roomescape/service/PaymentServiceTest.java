@@ -249,4 +249,19 @@ class PaymentServiceTest {
         assertThat(myOrders).hasSize(1);
         assertThat(myOrders.get(0).status()).isEqualTo("NEEDS_CHECK");
     }
+
+    @Test
+    @DisplayName("NEEDS_CHECK 주문 재확인(recheck)이 성공하면 CONFIRMED·BOOKED로 확정된다")
+    void recheckConfirmsNeedsCheckOrder() {
+        Created created = createReservationWithOrder();
+        orderService.markNeedsCheck(created.order(), "pk-ok"); // 정상 paymentKey로 NEEDS_CHECK 상태 세팅
+
+        ConfirmOutcome outcome = paymentService.recheck(member, created.order().getOrderId());
+
+        assertThat(outcome).isEqualTo(ConfirmOutcome.CONFIRMED);
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.BOOKED);
+    }
 }

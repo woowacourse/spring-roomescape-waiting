@@ -69,8 +69,10 @@ public class Order {
     /**
      * 승인 결과가 불명확한 상태로 표시한다(read timeout 등). 실패가 아니라 '확인 필요' —
      * reaper가 건드리지 않고, 멱등 재시도로 결과를 확정한다.
+     * 재확인(recheck) 때 같은 요청을 다시 보낼 수 있도록 시도했던 paymentKey를 함께 저장한다.
      */
-    public void markNeedsCheck() {
+    public void markNeedsCheck(String paymentKey) {
+        this.paymentKey = paymentKey;
         this.status = OrderStatus.NEEDS_CHECK;
     }
 

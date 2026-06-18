@@ -50,6 +50,13 @@ public class PaymentController {
         return ResponseEntity.ok(new PaymentConfirmResponse(outcome));
     }
 
+    @PostMapping("/recheck")
+    public ResponseEntity<PaymentConfirmResponse> recheck(@LoginMember Member member,
+                                                          @RequestBody PaymentRecheckRequestDto request) {
+        ConfirmOutcome outcome = paymentService.recheck(member, request.orderId());
+        return ResponseEntity.ok(new PaymentConfirmResponse(outcome));
+    }
+
     @PostMapping("/fail")
     public ResponseEntity<Void> fail(@LoginMember Member member,
                                      @RequestBody PaymentFailRequestDto request) {
