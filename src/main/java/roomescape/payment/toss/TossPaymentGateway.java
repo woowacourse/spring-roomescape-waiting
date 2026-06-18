@@ -20,6 +20,8 @@ import roomescape.domain.exception.RoomescapeException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
+import roomescape.ratelimit.OutboundRateLimitException;
+import roomescape.ratelimit.RetryAfterExceededException;
 
 @Component
 public class TossPaymentGateway implements PaymentGateway {
@@ -61,6 +63,12 @@ public class TossPaymentGateway implements PaymentGateway {
     }
 
     private RoomescapeException toNetworkException(RestClientException exception) {
+        if (exception instanceof OutboundRateLimitException) {
+            return new RoomescapeException(DomainErrorCode.PAYMENT_RETRYABLE, "결제 승인 요청이 일시적으로 많습니다. 잠시 후 다시 시도해주세요.");
+        }
+        if (exception instanceof RetryAfterExceededException) {
+            return new RoomescapeException(DomainErrorCode.PAYMENT_RETRYABLE, "결제 승인 서버 요청 제한으로 잠시 후 다시 시도해주세요.");
+        }
         Throwable rootCause = rootCause(exception);
         if (rootCause instanceof ConnectException) {
             return new RoomescapeException(DomainErrorCode.PAYMENT_RETRYABLE, "결제 승인 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.");

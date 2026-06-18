@@ -35,6 +35,7 @@ import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.payment.toss.TossPaymentGateway;
 import roomescape.payment.toss.TossPaymentProperties;
+import roomescape.ratelimit.RetryAfterInterceptor;
 
 class TossPaymentGatewayTest {
 
@@ -136,6 +137,40 @@ class TossPaymentGatewayTest {
             assertThat(elapsedMillis)
                     .isGreaterThanOrEqualTo(100)
                     .isLessThan(900);
+        }
+    }
+
+    @DisplayName("Toss가 429를 반환하면 Retry-After 후 같은 멱등키로 재시도한다.")
+    @Test
+    void retryAfterTooManyRequestsWithSameIdempotencyKey() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse()
+                    .setResponseCode(429)
+                    .addHeader(HttpHeaders.RETRY_AFTER, "0"));
+            server.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setBody("""
+                            {"paymentKey":"payment-key","orderId":"order-123456","totalAmount":23000,"status":"DONE"}
+                            """)
+                    .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+            server.start();
+            RestClient restClient = RestClient.builder()
+                    .requestInterceptor(new RetryAfterInterceptor(2, Duration.ZERO, duration -> {
+                    }))
+                    .build();
+            TossPaymentGateway gateway = newGateway(restClient, server.url("/v1/payments/confirm").toString());
+
+            PaymentResult result = gateway.confirm(new PaymentConfirmation(
+                    "payment-key",
+                    "order-123456",
+                    23000,
+                    "fixed-idempotency-key"
+            ));
+
+            assertThat(result.status()).isEqualTo("DONE");
+            assertThat(server.getRequestCount()).isEqualTo(2);
+            assertThat(server.takeRequest().getHeader("Idempotency-Key")).isEqualTo("fixed-idempotency-key");
+            assertThat(server.takeRequest().getHeader("Idempotency-Key")).isEqualTo("fixed-idempotency-key");
         }
     }
 
