@@ -31,7 +31,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 resultSet.getString("description"),
-                resultSet.getString("image_url")
+                resultSet.getString("image_url"),
+                resultSet.getLong("running_time")
         );
     }
 
@@ -48,7 +49,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 generatedKey,
                 theme.getName(),
                 theme.getDescription(),
-                theme.getImageUrl()
+                theme.getImageUrl(),
+                theme.getRunningTime()
         );
     }
 
@@ -58,7 +60,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                     SELECT id,
                            name,
                            description,
-                           image_url
+                           image_url,
+                           running_time
                     FROM theme
                     WHERE id = :id
                 """;
@@ -77,7 +80,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                     SELECT id,
                            name,
                            description,
-                           image_url
+                           image_url,
+                           running_time
                     FROM theme
                 """;
 
@@ -91,6 +95,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                            t.name,
                            t.description,
                            t.image_url,
+                           t.running_time,
                            COUNT(r.id) AS reservation_count
                     FROM theme AS t
                     LEFT JOIN slot AS s
@@ -100,7 +105,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     LEFT JOIN reservation AS r
                       ON r.slot_id = s.id
                       AND r.status = 'CONFIRMED'
-                    GROUP BY t.id, t.name, t.description, t.image_url
+                    GROUP BY t.id, t.name, t.description, t.image_url, t.running_time
                     ORDER BY reservation_count DESC,
                              t.name ASC
                     LIMIT :limit

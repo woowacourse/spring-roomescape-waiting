@@ -13,15 +13,15 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    void delete(Long id);
+    int delete(Long id);
 
-    boolean existsConfirmedBySlotId(Long slotId);
+    boolean existsOccupiedBySlotId(Long slotId);
 
     Optional<Reservation> findFirstWaitingBySlotId(Long slotId);
 
     Reservation updateStatus(Reservation reservation);
 
-    List<Reservation> findConfirmedByName(String name);
+    List<Reservation> findReservedByName(String name);
 
     List<WaitingRank> findWaitingRanksByName(String name);
 

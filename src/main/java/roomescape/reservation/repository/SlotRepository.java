@@ -13,4 +13,8 @@ public interface SlotRepository {
     void lockForUpdate(Long slotId);
 
     Optional<Slot> findById(Long id);
+
+    void deleteByThemeId(Long themeId);
+
+    void deleteByTimeId(Long timeId);
 }

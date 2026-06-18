@@ -44,7 +44,7 @@ class ThemeServiceTest {
     private SlotRepository slotRepository;
 
     @Test
-    @Sql(scripts = "/data.sql")
+    @Sql(scripts = {"/empty.sql", "/data.sql"})
     void 최근_1주_동안의_예약_상위_10개의_테마를_조회한다() {
         // when
         List<ThemeResponse> popularThemes = themeService.getPopularThemes(1L, 10L);
@@ -90,5 +90,23 @@ class ThemeServiceTest {
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId())).isInstanceOf(
                         RoomEscapeException.class).extracting("errorCode")
                 .isEqualTo(ThemeErrorCode.RESERVATION_EXIST_ON_THEME);
+    }
+
+    @Test
+    void 예약이_모두_취소되어_슬롯만_남은_테마도_삭제할_수_있다() {
+        // given : 예약 생성 후 취소하면 슬롯 행만 남는다
+        ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png"));
+        Slot slot = slotRepository.findOrCreate(LocalDate.parse("2026-08-05"), time, theme);
+        Reservation saved = reservationRepository.save(
+                Reservation.create(slot, "브라운", ReservationStatus.CONFIRMED, LocalDateTime.now()));
+        reservationRepository.delete(saved.getId());
+
+        // when
+        themeService.deleteTheme(theme.getId());
+
+        // then
+        assertThat(themeRepository.findById(theme.getId())).isEmpty();
     }
 }

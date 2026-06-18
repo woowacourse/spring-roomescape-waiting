@@ -69,8 +69,15 @@ public class Reservation {
     }
 
     public Reservation confirm() {
+        if (!status.isPending()) {
+            throw new IllegalStateException("결제 대기 상태에서만 확정으로 전환할 수 있습니다. (현재: " + status + ")");
+        }
+        return new Reservation(id, slot, name, ReservationStatus.CONFIRMED, createdAt);
+    }
+
+    public Reservation promote() {
         if (!status.isWaiting()) {
-            throw new IllegalStateException("대기 상태에서만 확정으로 전환할 수 있습니다. (현재: " + status + ")");
+            throw new IllegalStateException("대기 상태에서만 확정으로 승급할 수 있습니다. (현재: " + status + ")");
         }
         return new Reservation(id, slot, name, ReservationStatus.CONFIRMED, createdAt);
     }
@@ -85,8 +92,16 @@ public class Reservation {
         return status.isConfirmed();
     }
 
+    public boolean isPending() {
+        return status.isPending();
+    }
+
     public boolean isWaiting() {
         return status.isWaiting();
+    }
+
+    public boolean isOccupying() {
+        return status.isOccupying();
     }
 
     public boolean isSameName(String otherName) {

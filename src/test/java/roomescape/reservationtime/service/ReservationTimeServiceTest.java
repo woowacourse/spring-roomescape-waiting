@@ -1,5 +1,6 @@
 package roomescape.reservationtime.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -75,5 +76,27 @@ class ReservationTimeServiceTest {
                 .isInstanceOf(RoomEscapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(ReservationTimeErrorCode.RESERVATION_EXIST_ON_TIME);
+    }
+
+    @Test
+    void 예약이_모두_취소되어_슬롯만_남은_시간도_삭제할_수_있다() {
+        // given : 예약 생성 후 취소하면 슬롯 행만 남는다
+        ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00"))
+        );
+        Theme theme = themeRepository.save(
+                Theme.create("귀신찾기", "귀신을 찾는다", "https://image.png")
+        );
+        Slot slot = slotRepository.findOrCreate(LocalDate.parse("2026-08-05"), time, theme);
+        Reservation saved = reservationRepository.save(
+                Reservation.create(slot, "브라운", ReservationStatus.CONFIRMED, LocalDateTime.now())
+        );
+        reservationRepository.delete(saved.getId());
+
+        // when
+        reservationTimeService.deleteReservationTime(time.getId());
+
+        // then
+        assertThat(reservationTimeRepository.findById(time.getId())).isEmpty();
     }
 }
