@@ -27,6 +27,8 @@ public class TossPaymentGateway implements PaymentGateway {
         try {
             TossPaymentResponse response = tossRestClient.post()
                     .uri("/v1/payments/confirm")
+                    // 타임아웃으로 끊긴 뒤 재시도해도 같은 결제로 식별되도록 주문에 고정된 멱등키를 싣는다.
+                    .header("Idempotency-Key", confirmation.idempotencyKey())
                     .body(new TossConfirmRequest(confirmation.paymentKey(), confirmation.orderId(), confirmation.amount()))
                     .retrieve()
                     .body(TossPaymentResponse.class);

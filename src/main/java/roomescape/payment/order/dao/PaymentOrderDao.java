@@ -17,24 +17,26 @@ public class PaymentOrderDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public PaymentOrder insert(String orderId, Long amount, Long reservationId) {
+    public PaymentOrder insert(String orderId, Long amount, Long reservationId, String idempotencyKey) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("order_id", orderId)
                 .addValue("amount", amount)
-                .addValue("reservation_id", reservationId);
+                .addValue("reservation_id", reservationId)
+                .addValue("idempotency_key", idempotencyKey);
 
         Long id = (long) simpleJdbcInsert.executeAndReturnKey(parameters);
-        return new PaymentOrder(id, orderId, amount, reservationId);
+        return new PaymentOrder(id, orderId, amount, reservationId, idempotencyKey);
     }
 
     public PaymentOrder selectByOrderId(String orderId) {
-        String sql = "SELECT id, order_id, amount, reservation_id FROM payment_order WHERE order_id = ?";
+        String sql = "SELECT id, order_id, amount, reservation_id, idempotency_key FROM payment_order WHERE order_id = ?";
         return simpleJdbcInsert.getJdbcTemplate().queryForObject(sql,
                 (rs, rowNum) -> new PaymentOrder(
                         rs.getLong("id"),
                         rs.getString("order_id"),
                         rs.getLong("amount"),
-                        rs.getLong("reservation_id")
+                        rs.getLong("reservation_id"),
+                        rs.getString("idempotency_key")
                 ), orderId);
     }
 }

@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.service.PaymentService;
 
@@ -22,7 +21,7 @@ public class PaymentController {
     @PostMapping("/confirm")
     public ResponseEntity<PaymentResult> confirm(@RequestBody PaymentConfirmRequest request) {
         PaymentResult result = paymentService.confirm(
-                new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount()));
+                request.paymentKey(), request.orderId(), request.amount());
         return ResponseEntity.ok(result);
     }
 }

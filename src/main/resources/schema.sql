@@ -29,13 +29,15 @@ CREATE TABLE reservation (
 );
 
 CREATE TABLE payment_order (
-    id             BIGINT       NOT NULL AUTO_INCREMENT,
-    order_id       VARCHAR(255) NOT NULL,
-    amount         BIGINT       NOT NULL,
-    reservation_id BIGINT       NOT NULL,
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id        VARCHAR(255) NOT NULL,
+    amount          BIGINT       NOT NULL,
+    reservation_id  BIGINT       NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,
 
     PRIMARY KEY (id),
     CONSTRAINT uk_payment_order_order_id UNIQUE (order_id),
+    CONSTRAINT uk_payment_order_idempotency_key UNIQUE (idempotency_key),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
 );
 

@@ -20,11 +20,15 @@ public class PaymentService {
         this.paymentGateway = paymentGateway;
     }
 
-    public PaymentResult confirm(PaymentConfirmation confirmation) {
-        PaymentOrder order = paymentOrderDao.selectByOrderId(confirmation.orderId());
-        if (!order.amount().equals(confirmation.amount())) {
+    public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
+        PaymentOrder order = paymentOrderDao.selectByOrderId(orderId);
+        if (!order.amount().equals(amount)) {
             throw new RoomescapeException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
+        // 멱등키는 클라이언트 입력이 아니라, 주문 생성 시 저장해 둔 값을 사용한다.
+        // success 새로고침/재시도로 confirm 이 여러 번 와도 항상 같은 키가 실려 토스가 중복을 인지한다.
+        PaymentConfirmation confirmation =
+                new PaymentConfirmation(paymentKey, orderId, amount, order.idempotencyKey());
         return paymentGateway.confirm(confirmation);
     }
 }
