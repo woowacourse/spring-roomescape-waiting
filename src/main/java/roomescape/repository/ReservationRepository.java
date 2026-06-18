@@ -146,6 +146,18 @@ public class ReservationRepository {
         }
     }
 
+    public boolean existsById(final Long id) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE id = ?
+                """;
+
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+
+        return count != null && count > 0;
+    }
+
     public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
                 SELECT COUNT(id)

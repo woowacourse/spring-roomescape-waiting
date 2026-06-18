@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS payment
     amount         BIGINT       NOT NULL,
     paymentkey     VARCHAR(255) NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS waiting_list
