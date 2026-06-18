@@ -24,6 +24,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.security:spring-security-crypto'
 
+    // 토스 호출용 RestClient 요청 팩토리. simple(HttpURLConnection)은 401 응답 바디를 삼키고
+    // jdk는 응답 바디 지연을 read timeout으로 못 잡아, 둘 다 잡는 Apache HttpComponents를 쓴다.
+    implementation 'org.apache.httpcomponents.client5:httpclient5'
+
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-gson:0.11.2'
