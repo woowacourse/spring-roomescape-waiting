@@ -20,5 +20,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findBySlot_DateAndSlot_Theme(LocalDate date, Theme theme);
 
+    // JPA 2단계
     List<Reservation> findByReserver(Member reserver);
 }
