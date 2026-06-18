@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 import roomescape.client.dto.PaymentConfirmation;
 
 
@@ -74,7 +72,7 @@ class TossClientTimeoutTest {
 
         var start = System.nanoTime();
         assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation()))
-                .isInstanceOf(RestClientException.class)
+                .isInstanceOf(TossConfirmResultUnknownException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         var elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
@@ -103,7 +101,7 @@ class TossClientTimeoutTest {
             try {
                 tossPaymentGateway.confirm(confirmation());
                 succeeded++;
-            } catch (RestClientException e) {
+            } catch (TossConfirmResultUnknownException e) {
                 // 타임아웃으로 일찍 포기한 호출 — 성공 TPS 에 세지 않는다.
             }
         }
@@ -117,22 +115,22 @@ class TossClientTimeoutTest {
     }
 
     @Test
-    @Timeout(value = 3, unit = TimeUnit.SECONDS, threadMode = ThreadMode.SEPARATE_THREAD)
+    @Timeout(value = 5, unit = TimeUnit.SECONDS, threadMode = ThreadMode.SEPARATE_THREAD)
     void 라우팅불가_IP면_connectTimeout만큼_기다렸다가_SocketTimeout으로_실패한다() {
         // 학생이 채운 tossRestClient 의 connect timeout 을 그대로 검증한다.
-        // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(3초)이 끊어 실패시킨다.
+        // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(5초)이 끊어 실패시킨다.
         var gateway = new TossPaymentGateway(
                 new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500),
                 new ObjectMapper());
 
         var start = System.nanoTime();
         assertThatThrownBy(() -> gateway.confirm(confirmation()))
-                .isInstanceOf(ResourceAccessException.class)
-                .hasCauseInstanceOf(SocketTimeoutException.class);
+                .isInstanceOf(TossConnectionException.class)
+                .hasRootCauseInstanceOf(SocketTimeoutException.class);
         var elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
-        // connect timeout(500ms)만큼 기다렸다가 끊긴다.
-        assertThat(elapsedMs).isBetween(300L, 2500L);
+        // connect timeout(500ms) 3회 재시도 + 재시도 간격(300ms) 2회 ≈ 2100ms. JVM/Spring 오버헤드 여유를 두고 4000ms로 상한을 잡는다.
+        assertThat(elapsedMs).isBetween(300L, 4000L);
     }
 
 }

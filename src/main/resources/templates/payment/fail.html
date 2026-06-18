@@ -40,7 +40,7 @@
 </head>
 <body>
 <div class="card">
-  <h1>❌ 결제를 실패했어요</h1>
+  <h1 th:text="${title} ?: '❌ 결제를 실패했어요'">❌ 결제를 실패했어요</h1>
 
   <div class="row"><span class="label">에러코드</span>
     <span class="val" th:text="${code}">REJECT_CARD_PAYMENT</span></div>
