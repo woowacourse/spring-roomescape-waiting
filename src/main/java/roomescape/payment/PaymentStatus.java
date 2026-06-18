@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.payment;
 
 /**
  * 결제 상태를 표현하는 도메인 enum. 정의되지 않은 외부 상태값은 UNKNOWN 으로 떨어뜨린다.

@@ -21,9 +21,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
-import roomescape.domain.PaymentConfirmation;
-import roomescape.domain.PaymentResult;
-import roomescape.domain.PaymentStatus;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentStatus;
 
 class TossPaymentGatewayTest {
 

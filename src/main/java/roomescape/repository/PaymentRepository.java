@@ -1,7 +1,7 @@
 package roomescape.repository;
 
 import java.util.Optional;
-import roomescape.domain.Payment;
+import roomescape.payment.Payment;
 
 public interface PaymentRepository {
 
