@@ -52,7 +52,7 @@ public class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    void 대기자가_있을때_예약자가_취소하면_첫번째_대기자가_예약확정된다() {
+    void 대기자가_있을때_예약자가_취소하면_첫번째_대기자가_결제대기로_승격된다() {
         // given
         예약_시간과_테마를_생성한다();
         예약자가_예약한다();
@@ -63,7 +63,7 @@ public class ReservationAcceptanceTest extends AcceptanceTest {
         예약자가_예약을_취소한다();
 
         // then
-        첫번째_대기자의_예약_상태가_확정으로_변경된다();
+        첫번째_대기자의_예약_상태가_결제대기로_변경된다();
     }
 
     private void 예약_시간과_테마를_생성한다() {
@@ -111,7 +111,7 @@ public class ReservationAcceptanceTest extends AcceptanceTest {
         ReservationAssertions.readMyName("대기자", 1, ReservationStatus.WAITING.name());
     }
 
-    private void 첫번째_대기자의_예약_상태가_확정으로_변경된다() {
-        ReservationAssertions.readMyName("예약자2", 1, ReservationStatus.CONFIRMED.name());
+    private void 첫번째_대기자의_예약_상태가_결제대기로_변경된다() {
+        ReservationAssertions.readMyName("예약자2", 1, ReservationStatus.PENDING.name());
     }
 }

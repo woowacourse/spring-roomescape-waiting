@@ -22,6 +22,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByOrderId(String orderId);
 
+    Optional<Reservation> findPendingByOrderId(String orderId);
+
     Reservation startPaymentConfirmation(String orderId);
 
     Reservation releasePaymentConfirmation(String orderId);
@@ -33,6 +35,8 @@ public interface ReservationRepository {
     void deletePendingByOrderId(String orderId);
 
     void deleteStalePendingBefore(LocalDateTime expiresBefore);
+
+    List<Reservation> findStalePendingBefore(LocalDateTime expiresBefore);
 
     List<Reservation> findByName(String name);
 

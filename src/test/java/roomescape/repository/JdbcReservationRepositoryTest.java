@@ -99,14 +99,15 @@ public class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void findByNameDoesNotReturnPendingReservationTest() {
+    void findByNameReturnsPendingReservationTest() {
         Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
                 theme, "order_test", 50000L);
         reservationRepository.save(pendingReservation);
 
         List<Reservation> reservations = reservationRepository.findByName("fizz");
 
-        assertThat(reservations).isEmpty();
+        assertThat(reservations).hasSize(1);
+        assertThat(reservations.get(0).getStatus()).isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test
@@ -121,14 +122,15 @@ public class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void findAllDoesNotReturnPendingReservationTest() {
+    void findAllReturnsPendingReservationTest() {
         Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
                 theme, "order_test", 50000L);
         reservationRepository.save(pendingReservation);
 
         List<Reservation> reservations = reservationRepository.findAll();
 
-        assertThat(reservations).isEmpty();
+        assertThat(reservations).hasSize(1);
+        assertThat(reservations.get(0).getStatus()).isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test
@@ -144,6 +146,19 @@ public class JdbcReservationRepositoryTest {
         assertThat(found.getOrderId()).isEqualTo("order_test");
         assertThat(found.getIdempotencyKey()).isEqualTo("order_test");
         assertThat(found.getAmount()).isEqualTo(50000L);
+    }
+
+    @Test
+    void findPendingByOrderIdReturnsOnlyPendingReservationTest() {
+        Reservation pendingReservation = Reservation.pending("fizz", LocalDate.of(2026, 5, 2), reservationTime,
+                theme, "order_test", 50000L);
+        reservationRepository.save(pendingReservation);
+
+        assertThat(reservationRepository.findPendingByOrderId("order_test")).isPresent();
+
+        reservationRepository.startPaymentConfirmation("order_test");
+
+        assertThat(reservationRepository.findPendingByOrderId("order_test")).isEmpty();
     }
 
     @Test
@@ -251,6 +266,26 @@ public class JdbcReservationRepositoryTest {
 
         assertThat(reservationRepository.findByOrderId("order_old")).isEmpty();
         assertThat(reservationRepository.findByOrderId("order_fresh")).isPresent();
+    }
+
+    @Test
+    void findStalePendingBeforeTest() {
+        String sql = """
+                INSERT INTO reservation(name, date, time_id, theme_id, status, order_id, idempotency_key, amount,
+                                        created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+        jdbcTemplate.update(sql, "old", "2026-05-02", 1L, 1L, ReservationStatus.PENDING.name(),
+                "order_old", "order_old", 50000L, LocalDateTime.of(2026, 5, 2, 7, 59));
+        jdbcTemplate.update(sql, "fresh", "2026-05-02", 2L, 1L, ReservationStatus.PENDING.name(),
+                "order_fresh", "order_fresh", 50000L, LocalDateTime.of(2026, 5, 2, 8, 0));
+
+        List<Reservation> staleReservations = reservationRepository.findStalePendingBefore(
+                LocalDateTime.of(2026, 5, 2, 8, 0));
+
+        assertThat(staleReservations).hasSize(1);
+        assertThat(staleReservations.get(0).getOrderId()).isEqualTo("order_old");
+        assertThat(reservationRepository.findByOrderId("order_old")).isPresent();
     }
 
     @Test
