@@ -11,25 +11,25 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
+    private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
-    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final JpaReservationWaitingRepository reservationWaitingRepository;
     private final JpaThemeRepository themeRepository;
     private final ReservationValidator reservationValidator;
 
     public ReservationService(
-            ReservationRepository reservationRepository,
+            JpaReservationRepository reservationRepository,
             JpaReservationTimeRepository reservationTimeRepository,
-            ReservationWaitingRepository reservationWaitingRepository,
+            JpaReservationWaitingRepository reservationWaitingRepository,
             JpaThemeRepository themeRepository,
             ReservationValidator reservationValidator) {
         this.reservationRepository = reservationRepository;
@@ -64,14 +64,14 @@ public class ReservationService {
     public void delete(Long id, String name) {
         Reservation reservation = findReservation(id);
         reservationValidator.validateUpdatableReservation(reservation, name);
-        reservationRepository.delete(id);
+        reservationRepository.deleteById(id);
         promoteFirstWaiting(reservation);
     }
 
     @Transactional
     public void deleteByAdmin(Long id) {
         Reservation reservation = findReservation(id);
-        reservationRepository.delete(id);
+        reservationRepository.deleteById(id);
         if (!reservation.isPast()) {
             promoteFirstWaiting(reservation);
         }
@@ -86,7 +86,7 @@ public class ReservationService {
         reservationValidator.validateUpdatePolicy(reservation, updatedReservation);
 
         try {
-            reservationRepository.update(updatedReservation);
+            reservationRepository.save(updatedReservation);
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
@@ -96,9 +96,7 @@ public class ReservationService {
 
     private Reservation save(Reservation reservation) {
         try {
-            Long id = reservationRepository.insert(reservation);
-            return reservationRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("생성된 예약을 찾을 수 없습니다."));
+            return reservationRepository.save(reservation);
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
@@ -106,7 +104,7 @@ public class ReservationService {
 
     private void promoteFirstWaiting(Reservation canceledReservation) {
         try {
-            reservationWaitingRepository.findFirstWaiting(
+            reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
                             canceledReservation.getDate(),
                             canceledReservation.getTime().getId(),
                             canceledReservation.getTheme().getId())
@@ -124,8 +122,8 @@ public class ReservationService {
                 waiting.getTime(),
                 waiting.getTheme());
 
-        reservationRepository.insert(reservation);
-        reservationWaitingRepository.delete(waiting.getId());
+        reservationRepository.save(reservation);
+        reservationWaitingRepository.delete(waiting);
     }
 
     private Reservation findReservation(Long id) {

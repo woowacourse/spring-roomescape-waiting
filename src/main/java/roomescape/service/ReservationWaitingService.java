@@ -15,8 +15,8 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
 import roomescape.repository.result.ReservationWaitingOrderResult;
 import roomescape.service.result.WaitingResult;
@@ -24,13 +24,13 @@ import roomescape.service.result.WaitingResult;
 @Service
 @Transactional(readOnly = true)
 public class ReservationWaitingService {
-    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final JpaReservationWaitingRepository reservationWaitingRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
     private final ReservationWaitingValidator reservationWaitingValidator;
 
     public ReservationWaitingService(
-            ReservationWaitingRepository reservationWaitingRepository,
+            JpaReservationWaitingRepository reservationWaitingRepository,
             JpaReservationTimeRepository reservationTimeRepository,
             JpaThemeRepository themeRepository,
             ReservationWaitingValidator reservationWaitingValidator
@@ -78,7 +78,7 @@ public class ReservationWaitingService {
     public void delete(Long id, String name) {
         ReservationWaiting waiting = findWaiting(id);
         reservationWaitingValidator.validateUpdatableReservation(waiting, name);
-        reservationWaitingRepository.delete(id);
+        reservationWaitingRepository.deleteById(id);
     }
 
     private long calculateTurn(ReservationWaiting waiting) {
@@ -120,9 +120,7 @@ public class ReservationWaitingService {
     @NonNull
     private ReservationWaiting save(ReservationWaiting waiting) {
         try {
-            Long id = reservationWaitingRepository.insert(waiting);
-            return reservationWaitingRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("생성된 예약 대기를 찾을 수 없습니다."));
+            return reservationWaitingRepository.save(waiting);
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약 대기를 신청한 시간입니다.");
         }

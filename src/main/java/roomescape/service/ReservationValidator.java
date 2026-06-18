@@ -1,21 +1,20 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import roomescape.repository.jpa.JpaReservationRepository;
 
 @Component
 public class ReservationValidator {
 
-    private final ReservationRepository reservationRepository;
+    private final JpaReservationRepository reservationRepository;
 
-    public ReservationValidator(ReservationRepository reservationRepository) {
+    public ReservationValidator(JpaReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 
@@ -27,7 +26,7 @@ public class ReservationValidator {
     }
 
     public void validateNotReserved(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsWith(date, timeId, themeId)) {
+        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, timeId, themeId)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
     }

@@ -18,15 +18,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.BusinessException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
 
 class ReservationTimeServiceTest {
 
     private final JpaReservationTimeRepository reservationTimeRepository = mock();
-    private final ReservationRepository reservationRepository = mock();
-    private final ReservationWaitingRepository reservationWaitingRepository = mock();
+    private final JpaReservationRepository reservationRepository = mock();
+    private final JpaReservationWaitingRepository reservationWaitingRepository = mock();
     private final ReservationTimeService service = new ReservationTimeService(
             reservationTimeRepository,
             reservationRepository,
@@ -82,9 +82,9 @@ class ReservationTimeServiceTest {
     void 시간_삭제_테스트() {
         // given
         Long id = 1L;
-        when(reservationRepository.existsByTimeId(id))
+        when(reservationRepository.existsByTime_Id(id))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByTimeId(id))
+        when(reservationWaitingRepository.existsByTime_Id(id))
                 .thenReturn(false);
 
         // when
@@ -98,7 +98,7 @@ class ReservationTimeServiceTest {
     void 예약이_존재하는_시간은_삭제시_예외_발생() {
         // given
         Long id = 1L;
-        when(reservationRepository.existsByTimeId(id))
+        when(reservationRepository.existsByTime_Id(id))
                 .thenReturn(true);
 
         // when & then
@@ -113,9 +113,9 @@ class ReservationTimeServiceTest {
     void 예약_대기가_존재하는_시간은_삭제시_예외_발생() {
         // given
         Long id = 1L;
-        when(reservationRepository.existsByTimeId(id))
+        when(reservationRepository.existsByTime_Id(id))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByTimeId(id))
+        when(reservationWaitingRepository.existsByTime_Id(id))
                 .thenReturn(true);
 
         // when & then

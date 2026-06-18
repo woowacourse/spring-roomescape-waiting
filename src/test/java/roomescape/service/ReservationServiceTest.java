@@ -23,16 +23,16 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
 
 class ReservationServiceTest {
 
-    private final ReservationRepository reservationRepository = mock();
+    private final JpaReservationRepository reservationRepository = mock();
     private final JpaReservationTimeRepository reservationTimeRepository = mock();
-    private final ReservationWaitingRepository reservationWaitingRepository = mock();
+    private final JpaReservationWaitingRepository reservationWaitingRepository = mock();
     private final JpaThemeRepository themeRepository = mock();
     private final ReservationValidator reservationValidator = new ReservationValidator(reservationRepository);
     private final ReservationService service = new ReservationService(
@@ -93,12 +93,12 @@ class ReservationServiceTest {
         Reservation savedReservation = new Reservation(id, name, date, time, theme);
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
-        when(reservationRepository.existsWith(date, timeId, themeId))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, timeId, themeId))
                 .thenReturn(false);
         when(themeRepository.findById(themeId))
                 .thenReturn(Optional.of(theme));
-        when(reservationRepository.insert(any(Reservation.class)))
-                .thenReturn(id);
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenReturn(savedReservation);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(savedReservation));
 
@@ -108,7 +108,7 @@ class ReservationServiceTest {
         // then
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
         assertThat(result).isEqualTo(savedReservation);
-        verify(reservationRepository, times(1)).insert(captor.capture());
+        verify(reservationRepository, times(1)).save(captor.capture());
         Reservation captured = captor.getValue();
         assertAll(
                 () -> assertThat(captured.getId()).isNull(),
@@ -131,12 +131,12 @@ class ReservationServiceTest {
         Reservation savedReservation = new Reservation(id, name, pastDate, time, theme);
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(time));
-        when(reservationRepository.existsWith(pastDate, timeId, themeId))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(pastDate, timeId, themeId))
                 .thenReturn(false);
         when(themeRepository.findById(themeId))
                 .thenReturn(Optional.of(theme));
-        when(reservationRepository.insert(any(Reservation.class)))
-                .thenReturn(id);
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenReturn(savedReservation);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(savedReservation));
 
@@ -145,7 +145,7 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEqualTo(savedReservation);
-        verify(reservationRepository, times(1)).insert(any(Reservation.class));
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
 
     @Test
@@ -163,7 +163,7 @@ class ReservationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 시간으로는 예약할 수 없습니다.");
 
-        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     @Test
@@ -177,10 +177,11 @@ class ReservationServiceTest {
         Reservation promotedReservation = createReservation(2L, "구구", date, time);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
-        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(date,
+                time.getId(), reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.insert(any(Reservation.class)))
-                .thenReturn(promotedReservation.getId());
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenReturn(promotedReservation);
         when(reservationRepository.findById(promotedReservation.getId()))
                 .thenReturn(Optional.of(promotedReservation));
 
@@ -189,9 +190,9 @@ class ReservationServiceTest {
 
         // then
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-        verify(reservationRepository, times(1)).delete(id);
-        verify(reservationRepository, times(1)).insert(captor.capture());
-        verify(reservationWaitingRepository, times(1)).delete(waiting.getId());
+        verify(reservationRepository, times(1)).deleteById(id);
+        verify(reservationRepository, times(1)).save(captor.capture());
+        verify(reservationWaitingRepository, times(1)).delete(waiting);
 
         Reservation captured = captor.getValue();
         assertAll(
@@ -210,14 +211,15 @@ class ReservationServiceTest {
         Reservation reservation = createReservation(id, name, date, time);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
-        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(date,
+                time.getId(), reservation.getTheme().getId()))
                 .thenReturn(Optional.empty());
 
         // when
         service.delete(id, name);
 
         // then
-        verify(reservationRepository, times(1)).delete(id);
+        verify(reservationRepository, times(1)).deleteById(id);
     }
 
     @Test
@@ -230,9 +232,10 @@ class ReservationServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, time, reservation.getTheme());
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
-        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(date,
+                time.getId(), reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.insert(any(Reservation.class)))
+        when(reservationRepository.save(any(Reservation.class)))
                 .thenThrow(new DuplicateKeyException("duplicate reservation"));
 
         // when & then
@@ -243,7 +246,7 @@ class ReservationServiceTest {
                             "일시적인 문제로 예약 작업을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");
                 });
 
-        verify(reservationWaitingRepository, never()).delete(waiting.getId());
+        verify(reservationWaitingRepository, never()).delete(waiting);
     }
 
     @Test
@@ -255,9 +258,10 @@ class ReservationServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, time, reservation.getTheme());
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
-        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(date,
+                time.getId(), reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.insert(any(Reservation.class)))
+        when(reservationRepository.save(any(Reservation.class)))
                 .thenThrow(new DuplicateKeyException("duplicate reservation"));
 
         // when & then
@@ -280,10 +284,11 @@ class ReservationServiceTest {
         Reservation promotedReservation = createReservation(2L, "구구", date, time);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
-        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(date,
+                time.getId(), reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.insert(any(Reservation.class)))
-                .thenReturn(promotedReservation.getId());
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenReturn(promotedReservation);
         when(reservationRepository.findById(promotedReservation.getId()))
                 .thenReturn(Optional.of(promotedReservation));
 
@@ -292,9 +297,9 @@ class ReservationServiceTest {
 
         // then
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-        verify(reservationRepository, times(1)).delete(id);
-        verify(reservationRepository, times(1)).insert(captor.capture());
-        verify(reservationWaitingRepository, times(1)).delete(waiting.getId());
+        verify(reservationRepository, times(1)).deleteById(id);
+        verify(reservationRepository, times(1)).save(captor.capture());
+        verify(reservationWaitingRepository, times(1)).delete(waiting);
 
         Reservation captured = captor.getValue();
         assertAll(
@@ -317,8 +322,8 @@ class ReservationServiceTest {
         service.deleteByAdmin(id);
 
         // then
-        verify(reservationRepository, times(1)).delete(id);
-        verify(reservationWaitingRepository, never()).delete(any(Long.class));
+        verify(reservationRepository, times(1)).deleteById(id);
+        verify(reservationWaitingRepository, never()).deleteById(any(Long.class));
     }
 
     @Test
@@ -338,15 +343,16 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservation), Optional.of(updatedReservation));
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(updateTime));
-        when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(updateDate, timeId,
+                reservation.getTheme().getId()))
                 .thenReturn(false);
-        when(reservationWaitingRepository.findFirstWaiting(
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.insert(any(Reservation.class)))
-                .thenReturn(promotedReservation.getId());
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenReturn(promotedReservation);
         when(reservationRepository.findById(promotedReservation.getId()))
                 .thenReturn(Optional.of(promotedReservation));
 
@@ -356,10 +362,9 @@ class ReservationServiceTest {
         // then
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
         assertThat(result).isEqualTo(updatedReservation);
-        verify(reservationRepository, times(1)).update(captor.capture());
-        verify(reservationRepository, times(1)).insert(any(Reservation.class));
-        verify(reservationWaitingRepository, times(1)).delete(waiting.getId());
-        Reservation captured = captor.getValue();
+        verify(reservationRepository, times(2)).save(captor.capture());
+        verify(reservationWaitingRepository, times(1)).delete(waiting);
+        Reservation captured = captor.getAllValues().getFirst();
         assertAll(
                 () -> assertThat(captured.getId()).isEqualTo(id),
                 () -> assertThat(captured.getName()).isEqualTo(name),
@@ -383,9 +388,10 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservation), Optional.of(updatedReservation));
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(updateTime));
-        when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(updateDate, timeId,
+                reservation.getTheme().getId()))
                 .thenReturn(false);
-        when(reservationWaitingRepository.findFirstWaiting(
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()))
@@ -396,8 +402,7 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEqualTo(updatedReservation);
-        verify(reservationRepository, times(1)).update(any(Reservation.class));
-        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
         verify(reservationWaitingRepository, never()).delete(any());
     }
 
@@ -416,14 +421,16 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(updateTime));
-        when(reservationRepository.existsWith(updateDate, timeId, reservation.getTheme().getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(updateDate, timeId,
+                reservation.getTheme().getId()))
                 .thenReturn(false);
-        when(reservationWaitingRepository.findFirstWaiting(
+        when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.insert(any(Reservation.class)))
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenReturn(new Reservation(id, name, updateDate, updateTime, reservation.getTheme()))
                 .thenThrow(new DuplicateKeyException("duplicate reservation"));
 
         // when & then
@@ -446,7 +453,8 @@ class ReservationServiceTest {
         Reservation updatedReservation = createReservation(id, name, updateDate, time);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation), Optional.of(updatedReservation));
-        when(reservationRepository.existsWith(updateDate, time.getId(), reservation.getTheme().getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(updateDate, time.getId(),
+                reservation.getTheme().getId()))
                 .thenReturn(false);
 
         // when
@@ -456,7 +464,7 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.getDate()).isEqualTo(updateDate),
                 () -> assertThat(result.getTime()).isEqualTo(time));
-        verify(reservationRepository, times(1)).update(any(Reservation.class));
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
 
     @Test
@@ -473,7 +481,7 @@ class ReservationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("변경할 날짜 또는 시간이 필요합니다.");
 
-        verify(reservationRepository, never()).update(any(Reservation.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     @Test
@@ -488,7 +496,7 @@ class ReservationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
 
-        verify(reservationRepository, never()).update(any(Reservation.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     @Test
@@ -508,7 +516,7 @@ class ReservationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 예약 시간입니다.");
 
-        verify(reservationRepository, never()).update(any(Reservation.class));
+        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     private Reservation createReservation(Long id, String name, LocalDate date, ReservationTime time) {

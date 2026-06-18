@@ -23,15 +23,15 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
 import roomescape.repository.result.ReservationWaitingOrderResult;
 import roomescape.service.result.WaitingResult;
 
 class ReservationWaitingServiceTest {
 
-    private final ReservationWaitingRepository reservationWaitingRepository = mock();
+    private final JpaReservationWaitingRepository reservationWaitingRepository = mock();
     private final JpaReservationTimeRepository reservationTimeRepository = mock();
     private final JpaThemeRepository themeRepository = mock();
     private final ReservationWaitingValidator reservationWaitingValidator = mock();
@@ -103,8 +103,8 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(theme.getId()))
                 .thenReturn(Optional.of(theme));
-        when(reservationWaitingRepository.insert(any(ReservationWaiting.class)))
-                .thenReturn(id);
+        when(reservationWaitingRepository.save(any(ReservationWaiting.class)))
+                .thenReturn(savedWaiting);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(savedWaiting));
         when(reservationWaitingRepository.countEarlierWaitings(id))
@@ -115,7 +115,7 @@ class ReservationWaitingServiceTest {
 
         // then
         ArgumentCaptor<ReservationWaiting> captor = ArgumentCaptor.forClass(ReservationWaiting.class);
-        verify(reservationWaitingRepository).insert(captor.capture());
+        verify(reservationWaitingRepository).save(captor.capture());
 
         ReservationWaiting captured = captor.getValue();
         assertAll(
@@ -148,7 +148,7 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
 
-        verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
+        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class));
     }
 
     @Test
@@ -159,7 +159,7 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(theme.getId()))
                 .thenReturn(Optional.of(theme));
-        when(reservationWaitingRepository.insert(any(ReservationWaiting.class)))
+        when(reservationWaitingRepository.save(any(ReservationWaiting.class)))
                 .thenThrow(new DuplicateKeyException("duplicate waiting"));
 
         // when & then
@@ -180,7 +180,7 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 시간입니다.");
 
-        verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
+        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class));
     }
 
     @Test
@@ -197,7 +197,7 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 테마입니다.");
 
-        verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
+        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class));
     }
 
     @Test
@@ -213,7 +213,7 @@ class ReservationWaitingServiceTest {
         service.delete(id, name);
 
         // then
-        verify(reservationWaitingRepository).delete(id);
+        verify(reservationWaitingRepository).deleteById(id);
     }
 
     @Test
@@ -231,7 +231,7 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("본인의 예약 대기만 취소할 수 있습니다.");
 
-        verify(reservationWaitingRepository, never()).delete(id);
+        verify(reservationWaitingRepository, never()).deleteById(id);
     }
 
     @Test
@@ -255,7 +255,7 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 예약 대기는 취소할 수 없습니다.");
 
-        verify(reservationWaitingRepository, never()).delete(id);
+        verify(reservationWaitingRepository, never()).deleteById(id);
     }
 
     @Test
@@ -270,6 +270,6 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 예약 대기입니다.");
 
-        verify(reservationWaitingRepository, never()).delete(id);
+        verify(reservationWaitingRepository, never()).deleteById(id);
     }
 }

@@ -1,23 +1,22 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.Test;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.exception.BusinessException;
-import roomescape.repository.ReservationRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import org.junit.jupiter.api.Test;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.exception.BusinessException;
+import roomescape.repository.jpa.JpaReservationRepository;
+
 class ReservationValidatorTest {
 
-    private final ReservationRepository reservationRepository = mock();
+    private final JpaReservationRepository reservationRepository = mock();
     private final ReservationValidator validator = new ReservationValidator(reservationRepository);
 
     @Test
@@ -47,7 +46,7 @@ class ReservationValidatorTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
         Long themeId = 1L;
-        when(reservationRepository.existsWith(date, timeId, themeId))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, timeId, themeId))
                 .thenReturn(false);
 
         // when & then
@@ -61,7 +60,7 @@ class ReservationValidatorTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
         Long themeId = 1L;
-        when(reservationRepository.existsWith(date, timeId, themeId))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, timeId, themeId))
                 .thenReturn(true);
 
         // when & then
@@ -73,7 +72,8 @@ class ReservationValidatorTest {
     @Test
     void 본인의_미래_예약이면_변경_가능하다() {
         // given
-        Reservation reservation = createReservation("브라운", LocalDate.now().plusDays(1), new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = createReservation("브라운", LocalDate.now().plusDays(1),
+                new ReservationTime(1L, LocalTime.parse("08:00")));
 
         // when & then
         assertThatNoException()
@@ -83,7 +83,8 @@ class ReservationValidatorTest {
     @Test
     void 본인의_예약이_아니면_변경_가능_검증시_예외가_발생한다() {
         // given
-        Reservation reservation = createReservation("구구", LocalDate.now().plusDays(1), new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = createReservation("구구", LocalDate.now().plusDays(1),
+                new ReservationTime(1L, LocalTime.parse("08:00")));
 
         // when & then
         assertThatThrownBy(() -> validator.validateUpdatableReservation(reservation, "브라운"))
@@ -94,7 +95,8 @@ class ReservationValidatorTest {
     @Test
     void 지난_예약이면_변경_가능_검증시_예외가_발생한다() {
         // given
-        Reservation reservation = createReservation("브라운", LocalDate.now().minusDays(1), new ReservationTime(1L, LocalTime.parse("08:00")));
+        Reservation reservation = createReservation("브라운", LocalDate.now().minusDays(1),
+                new ReservationTime(1L, LocalTime.parse("08:00")));
 
         // when & then
         assertThatThrownBy(() -> validator.validateUpdatableReservation(reservation, "브라운"))
@@ -107,8 +109,9 @@ class ReservationValidatorTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = createReservation("브라운", date, new ReservationTime(1L, LocalTime.parse("08:00")));
-        Reservation updatedReservation = createReservation("브라운", date, new ReservationTime(2L, LocalTime.parse("09:00")));
-        when(reservationRepository.existsWith(date, 2L, 1L))
+        Reservation updatedReservation = createReservation("브라운", date,
+                new ReservationTime(2L, LocalTime.parse("09:00")));
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, 2L, 1L))
                 .thenReturn(false);
 
         // when & then

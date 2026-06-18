@@ -7,21 +7,21 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final JpaReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
-    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final JpaReservationRepository reservationRepository;
+    private final JpaReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationTimeService(JpaReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository,
-                                  ReservationWaitingRepository reservationWaitingRepository) {
+                                  JpaReservationRepository reservationRepository,
+                                  JpaReservationWaitingRepository reservationWaitingRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
@@ -44,10 +44,10 @@ public class ReservationTimeService {
     }
 
     private void validateDeletable(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByTime_Id(id)) {
             throw new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다.");
         }
-        if (reservationWaitingRepository.existsByTimeId(id)) {
+        if (reservationWaitingRepository.existsByTime_Id(id)) {
             throw new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약 대기가 존재하는 시간은 삭제할 수 없습니다.");
         }
     }

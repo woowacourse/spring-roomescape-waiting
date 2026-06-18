@@ -8,7 +8,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
 import roomescape.service.result.TimeAvailabilityResult;
@@ -17,11 +17,11 @@ import roomescape.service.result.TimeAvailabilityResult;
 @Transactional(readOnly = true)
 public class ReservationAvailabilityService {
 
-    private final ReservationRepository reservationRepository;
+    private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
 
-    public ReservationAvailabilityService(ReservationRepository reservationRepository,
+    public ReservationAvailabilityService(JpaReservationRepository reservationRepository,
                                           JpaReservationTimeRepository reservationTimeRepository,
                                           JpaThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
@@ -32,7 +32,7 @@ public class ReservationAvailabilityService {
     public List<TimeAvailabilityResult> findAvailableTime(Long themeId, LocalDate date) {
         validateThemeExists(themeId);
         List<ReservationTime> times = reservationTimeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findReservationsByThemeAndDate(themeId, date);
+        List<Reservation> reservations = reservationRepository.findReservationsByTheme_IdAndDate(themeId, date);
 
         return times.stream()
                 .map(time -> new TimeAvailabilityResult(

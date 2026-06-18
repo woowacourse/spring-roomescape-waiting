@@ -14,14 +14,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
 import roomescape.service.result.TimeAvailabilityResult;
 
 class ReservationAvailabilityServiceTest {
 
-    private final ReservationRepository reservationRepository = mock();
+    private final JpaReservationRepository reservationRepository = mock();
     private final JpaReservationTimeRepository reservationTimeRepository = mock();
     private final JpaThemeRepository themeRepository = mock();
     private final ReservationAvailabilityService service = new ReservationAvailabilityService(
@@ -44,7 +44,7 @@ class ReservationAvailabilityServiceTest {
                 .thenReturn(Optional.of(theme));
         when(reservationTimeRepository.findAll())
                 .thenReturn(List.of(reservedTime, availableTime));
-        when(reservationRepository.findReservationsByThemeAndDate(themeId, date))
+        when(reservationRepository.findReservationsByTheme_IdAndDate(themeId, date))
                 .thenReturn(List.of(reservation));
 
         // when
