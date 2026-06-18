@@ -12,6 +12,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import roomescape.payment.PaymentApprovalStatus;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.exception.PaymentGatewayUnreachableException;
@@ -64,6 +65,22 @@ public class TossPaymentGateway implements PaymentGateway {
         }
         return new PaymentResult(response.paymentKey(), response.orderId(),
                 response.status(), response.totalAmount());
+    }
+
+    @Override
+    public PaymentApprovalStatus findStatus(String orderId) {
+        TossPaymentResponse response;
+        try {
+            response = restClient.get()
+                    .uri(properties.findUrl() + "/{orderId}", orderId)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::translateErrorStatus)
+                    .body(TossPaymentResponse.class);
+        } catch (RestClientException e) {
+            throw translateTransportFailure(e);
+        }
+        return response != null && "DONE".equals(response.status())
+                ? PaymentApprovalStatus.APPROVED : PaymentApprovalStatus.NOT_APPROVED;
     }
 
     @Override

@@ -61,6 +61,11 @@ public class OrderService {
         return orderDao.findByReservationIds(reservationIds);
     }
 
+    @Transactional(readOnly = true)
+    public List<String> findNeedsCheckOrderIds() {
+        return orderDao.findNeedsCheck().stream().map(Order::getOrderId).toList();
+    }
+
     public void complete(Order order, String paymentKey) {
         order.complete(paymentKey);
         orderDao.update(order);

@@ -18,6 +18,8 @@ toss:
   secret-key: ${TOSS_SECRET_KEY:}
   base-url: ${TOSS_BASE_URL:https://api.tosspayments.com}
   confirm-url: ${TOSS_CONFIRM_URL:/v1/payments/confirm}
+  # find-url: 주문별 결제 상태 조회(GET {find-url}/{orderId}). reconciliation이 진실 확인에 쓴다.
+  find-url: ${TOSS_FIND_URL:/v1/payments/orders}
   # connect: 연결 맺기까지, read: 연결 후 응답 읽기까지 최대 대기. 느린 호출을 일찍 포기해 스레드 보호.
   connect-timeout: ${TOSS_CONNECT_TIMEOUT:2s}
   read-timeout: ${TOSS_READ_TIMEOUT:5s}
@@ -29,3 +31,6 @@ payment:
   expiry:
     ttl-minutes: ${PAYMENT_EXPIRY_TTL_MINUTES:30}
     poll-interval-ms: ${PAYMENT_EXPIRY_POLL_INTERVAL_MS:60000}
+  # 결과 불명확(NEEDS_CHECK) 주문을 토스에 조회해 확정/실패로 자동 수렴(reconciliation).
+  reconciliation:
+    poll-interval-ms: ${PAYMENT_RECONCILIATION_POLL_INTERVAL_MS:60000}

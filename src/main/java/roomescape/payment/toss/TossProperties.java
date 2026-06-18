@@ -10,5 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "toss")
 public record TossProperties(String clientKey, String secretKey, String baseUrl, String confirmUrl,
-                             Duration connectTimeout, Duration readTimeout) {
+                             String findUrl, Duration connectTimeout, Duration readTimeout) {
 }

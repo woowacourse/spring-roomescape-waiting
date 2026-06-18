@@ -1,5 +1,6 @@
 package roomescape.fixture;
 
+import roomescape.payment.PaymentApprovalStatus;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.exception.PaymentGatewayUnreachableException;
@@ -16,6 +17,9 @@ public class FakePaymentGateway implements PaymentGateway {
     /** 이 paymentKey로 confirm하면 연결 실패(확실히 안 됨)를 흉내 내 PaymentGatewayUnreachableException을 던진다. */
     public static final String CONNECT_FAIL_KEY = "pk-connect-fail";
 
+    /** reconciliation 조회(findStatus)가 돌려줄 값. 테스트에서 setReconcileStatus로 제어한다(기본 NOT_APPROVED). */
+    private PaymentApprovalStatus reconcileStatus = PaymentApprovalStatus.NOT_APPROVED;
+
     @Override
     public PaymentResult confirm(PaymentConfirmation confirmation) {
         String paymentKey = confirmation.paymentKey();
@@ -31,6 +35,15 @@ public class FakePaymentGateway implements PaymentGateway {
                 "DONE",
                 confirmation.amount()
         );
+    }
+
+    @Override
+    public PaymentApprovalStatus findStatus(String orderId) {
+        return reconcileStatus;
+    }
+
+    public void setReconcileStatus(PaymentApprovalStatus reconcileStatus) {
+        this.reconcileStatus = reconcileStatus;
     }
 
     @Override

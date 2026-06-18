@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import roomescape.payment.PaymentApprovalStatus;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.exception.PaymentResultUnknownException;
@@ -132,6 +133,24 @@ class TossPaymentGatewayTest {
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
                 new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1")))
                 .isInstanceOf(PaymentResultUnknownException.class);
+    }
+
+    @Test
+    void 결제상태_조회가_DONE이면_APPROVED로_번역한다() {
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "DONE", "totalAmount": 30000}
+                """);
+
+        assertThat(tossPaymentGateway.findStatus("order-1")).isEqualTo(PaymentApprovalStatus.APPROVED);
+    }
+
+    @Test
+    void 결제상태_조회가_DONE이_아니면_NOT_APPROVED로_번역한다() {
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "READY", "totalAmount": 30000}
+                """);
+
+        assertThat(tossPaymentGateway.findStatus("order-1")).isEqualTo(PaymentApprovalStatus.NOT_APPROVED);
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")
