@@ -28,6 +28,7 @@ import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
 import roomescape.order.dao.OrderJdbcDao;
 import roomescape.payment.ConfirmOutcome;
+import roomescape.payment.OrderAbandonmentService;
 import roomescape.payment.PaymentGatewayUnreachableException;
 import roomescape.payment.PaymentHistoryService;
 import roomescape.payment.PaymentService;
@@ -56,7 +57,7 @@ import roomescape.waiting.dao.WaitingJdbcDao;
  * 주문·예약은 실제 DAO/서비스로 굴려 *실제 상태 전이*와 와이어링까지 검증한다.
  */
 @JdbcTest
-@Import({PaymentService.class, PaymentHistoryService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
+@Import({PaymentService.class, PaymentHistoryService.class, OrderAbandonmentService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
         ReservationAuthorizationService.class, PromotionService.class, FakePaymentGateway.class,
         ReservationJdbcDao.class, OrderJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class,
         MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class})
@@ -67,6 +68,8 @@ class PaymentServiceTest {
     private PaymentService paymentService;
     @Autowired
     private PaymentHistoryService paymentHistoryService;
+    @Autowired
+    private OrderAbandonmentService abandonmentService;
     @Autowired
     private ReservationService reservationService;
     @Autowired
@@ -174,7 +177,7 @@ class PaymentServiceTest {
     void expireAbandonedOrder() {
         Created created = createReservationWithOrder();
 
-        paymentService.expire(created.order().getOrderId());
+        abandonmentService.expire(created.order().getOrderId());
 
         assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
                 .isEqualTo(OrderStatus.FAILED);
@@ -214,7 +217,7 @@ class PaymentServiceTest {
         Created created = createReservationWithOrder();
         paymentService.confirm(member, "pk-1", created.order().getOrderId(), created.order().getAmount());
 
-        paymentService.expire(created.order().getOrderId());
+        abandonmentService.expire(created.order().getOrderId());
 
         assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
                 .isEqualTo(OrderStatus.CONFIRMED);

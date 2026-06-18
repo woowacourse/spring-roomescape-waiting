@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
 import roomescape.payment.ConfirmOutcome;
+import roomescape.payment.OrderAbandonmentService;
 import roomescape.payment.PaymentHistoryService;
 import roomescape.payment.PaymentService;
 
@@ -20,10 +21,13 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final PaymentHistoryService paymentHistoryService;
+    private final OrderAbandonmentService abandonmentService;
 
-    public PaymentController(PaymentService paymentService, PaymentHistoryService paymentHistoryService) {
+    public PaymentController(PaymentService paymentService, PaymentHistoryService paymentHistoryService,
+                            OrderAbandonmentService abandonmentService) {
         this.paymentService = paymentService;
         this.paymentHistoryService = paymentHistoryService;
+        this.abandonmentService = abandonmentService;
     }
 
     @GetMapping("/config")
@@ -60,7 +64,7 @@ public class PaymentController {
     @PostMapping("/fail")
     public ResponseEntity<Void> fail(@LoginMember Member member,
                                      @RequestBody PaymentFailRequestDto request) {
-        paymentService.fail(member, request.orderId());
+        abandonmentService.fail(member, request.orderId());
         return ResponseEntity.ok().build();
     }
 }
