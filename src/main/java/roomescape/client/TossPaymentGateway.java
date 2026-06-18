@@ -57,6 +57,8 @@ public class TossPaymentGateway implements PaymentGateway {
             TossPaymentResponse response = tossRestClient.post()
                     .uri("/v1/payments/confirm")
                     .contentType(MediaType.APPLICATION_JSON)
+                    // orderId 를 멱등키로 그대로 쓴다. 결제 생성 시 한 번만 발급되어 재시도·새로고침에도 같은 값이 유지되므로
+                    // (PaymentService.createOrder, generateOrderId 참고) 별도 컬럼 없이도 "주문당 고정 키" 조건을 만족한다.
                     .header("Idempotency-Key", confirmation.orderId())
                     .body(request)
                     .retrieve()
