@@ -15,8 +15,8 @@ import roomescape.common.vo.Name;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeDao;
 import roomescape.theme.ThemeReservationCount;
-import roomescape.theme.web.AvailableTimeResponseDto;
-import roomescape.time.web.TimeResponseDto;
+import roomescape.theme.web.dto.AvailableTimeResponseDto;
+import roomescape.time.web.dto.TimeResponseDto;
 
 
 @Repository

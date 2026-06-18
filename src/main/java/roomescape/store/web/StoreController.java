@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.store.StoreService;
+import roomescape.store.web.dto.StoreResponseDto;
 
 @RestController
 @RequestMapping("/stores")

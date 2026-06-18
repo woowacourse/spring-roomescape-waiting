@@ -14,6 +14,14 @@ import roomescape.payment.ConfirmOutcome;
 import roomescape.payment.OrderAbandonmentService;
 import roomescape.payment.PaymentHistoryService;
 import roomescape.payment.PaymentService;
+import roomescape.payment.web.dto.MyOrderResponse;
+import roomescape.payment.web.dto.PaymentClientConfigResponse;
+import roomescape.payment.web.dto.PaymentConfirmRequestDto;
+import roomescape.payment.web.dto.PaymentConfirmResponse;
+import roomescape.payment.web.dto.PaymentFailRequestDto;
+import roomescape.payment.web.dto.PaymentReadyRequestDto;
+import roomescape.payment.web.dto.PaymentReadyResponse;
+import roomescape.payment.web.dto.PaymentRecheckRequestDto;
 
 @RestController
 @RequestMapping("/payments")

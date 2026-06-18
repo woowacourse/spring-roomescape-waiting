@@ -11,9 +11,9 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.vo.Name;
 import roomescape.reservation.ReservationDao;
-import roomescape.theme.web.AvailableTimeResponseDto;
-import roomescape.theme.web.PopularThemeRequestDto;
-import roomescape.theme.web.ThemeRequestDto;
+import roomescape.theme.web.dto.AvailableTimeResponseDto;
+import roomescape.theme.web.dto.PopularThemeRequestDto;
+import roomescape.theme.web.dto.ThemeRequestDto;
 
 @Service
 @Transactional

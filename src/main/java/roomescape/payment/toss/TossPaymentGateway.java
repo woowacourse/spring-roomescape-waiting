@@ -14,9 +14,12 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
-import roomescape.payment.PaymentGatewayUnreachableException;
+import roomescape.payment.exception.PaymentGatewayUnreachableException;
 import roomescape.payment.PaymentResult;
-import roomescape.payment.PaymentResultUnknownException;
+import roomescape.payment.exception.PaymentResultUnknownException;
+import roomescape.payment.toss.dto.TossConfirmRequest;
+import roomescape.payment.toss.dto.TossErrorResponse;
+import roomescape.payment.toss.dto.TossPaymentResponse;
 
 /**
  * 토스 결제 승인 어댑터(부패 방지 계층). 토스 요청·응답·에러 *포맷(DTO)*은 이 클래스 밖으로 새지 않는다.

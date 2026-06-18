@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.time.TimeService;
+import roomescape.time.web.dto.TimeResponseDto;
 
 @RestController
 @RequestMapping("/manager/times")

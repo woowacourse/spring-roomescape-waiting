@@ -34,7 +34,7 @@ import roomescape.time.Time;
 import roomescape.time.TimeDao;
 import roomescape.time.TimeService;
 import roomescape.time.dao.TimeJdbcDao;
-import roomescape.time.web.TimeRequestDto;
+import roomescape.time.web.dto.TimeRequestDto;
 
 @JdbcTest
 @Import({TimeService.class, TimeJdbcDao.class, ReservationJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class})

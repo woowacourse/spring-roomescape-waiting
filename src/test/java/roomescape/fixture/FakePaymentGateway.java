@@ -2,9 +2,9 @@ package roomescape.fixture;
 
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
-import roomescape.payment.PaymentGatewayUnreachableException;
+import roomescape.payment.exception.PaymentGatewayUnreachableException;
 import roomescape.payment.PaymentResult;
-import roomescape.payment.PaymentResultUnknownException;
+import roomescape.payment.exception.PaymentResultUnknownException;
 
 /**
  * 테스트용 결제 게이트웨이 더블. 기본은 항상 성공이고, 특정 sentinel paymentKey로 전송 실패를 흉내 낸다.

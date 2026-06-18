@@ -17,6 +17,8 @@ import roomescape.auth.service.WaitingAuthorizationService;
 import roomescape.member.Member;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingService;
+import roomescape.waiting.web.dto.WaitingRequestDto;
+import roomescape.waiting.web.dto.WaitingResponse;
 
 @RestController
 @RequestMapping("/waitings")

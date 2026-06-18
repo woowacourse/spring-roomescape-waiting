@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.order.OrderService;
-import roomescape.payment.web.MyOrderResponse;
+import roomescape.payment.web.dto.MyOrderResponse;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.ReservationService;
 

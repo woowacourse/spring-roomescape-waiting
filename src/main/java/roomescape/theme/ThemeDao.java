@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import roomescape.common.CommonDao;
 import roomescape.common.vo.Name;
-import roomescape.theme.web.AvailableTimeResponseDto;
+import roomescape.theme.web.dto.AvailableTimeResponseDto;
 
 public interface ThemeDao extends CommonDao<Theme> {
     boolean existsByName(Name name);

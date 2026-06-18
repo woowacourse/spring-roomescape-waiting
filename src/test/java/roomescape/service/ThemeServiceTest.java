@@ -32,13 +32,13 @@ import roomescape.theme.Theme;
 import roomescape.theme.ThemeDao;
 import roomescape.theme.ThemeService;
 import roomescape.theme.dao.ThemeJdbcDao;
-import roomescape.theme.web.AvailableTimeResponseDto;
-import roomescape.theme.web.PopularThemeRequestDto;
-import roomescape.theme.web.ThemeRequestDto;
+import roomescape.theme.web.dto.AvailableTimeResponseDto;
+import roomescape.theme.web.dto.PopularThemeRequestDto;
+import roomescape.theme.web.dto.ThemeRequestDto;
 import roomescape.time.Time;
 import roomescape.time.TimeDao;
 import roomescape.time.dao.TimeJdbcDao;
-import roomescape.time.web.TimeResponseDto;
+import roomescape.time.web.dto.TimeResponseDto;
 
 @JdbcTest
 @Import({ThemeService.class, ThemeJdbcDao.class, ReservationJdbcDao.class, TimeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class})

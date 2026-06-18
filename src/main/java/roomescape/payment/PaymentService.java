@@ -9,7 +9,8 @@ import roomescape.member.Member;
 import roomescape.order.Order;
 import roomescape.order.OrderService;
 import roomescape.order.OrderStatus;
-import roomescape.payment.web.PaymentReadyResponse;
+import roomescape.payment.exception.PaymentResultUnknownException;
+import roomescape.payment.web.dto.PaymentReadyResponse;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.ReservationService;
 

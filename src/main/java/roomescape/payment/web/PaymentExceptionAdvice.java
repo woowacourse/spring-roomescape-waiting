@@ -9,7 +9,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.payment.PaymentGatewayUnreachableException;
+import roomescape.payment.exception.PaymentGatewayUnreachableException;
 
 /**
  * 결제 게이트웨이 연결 실패(connect) 처리. '확실히 안 됨'이므로 결제 실패가 아니라 '다시 시도'를 안내한다.

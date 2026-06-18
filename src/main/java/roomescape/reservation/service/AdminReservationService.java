@@ -12,8 +12,8 @@ import roomescape.member.MemberDao;
 import roomescape.promotion.PromotionService;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationDao;
-import roomescape.reservation.web.AdminReservationRequestDto;
-import roomescape.reservation.web.ReservationPatchDto;
+import roomescape.reservation.web.dto.AdminReservationRequestDto;
+import roomescape.reservation.web.dto.ReservationPatchDto;
 import roomescape.time.Time;
 import roomescape.time.TimeDao;
 

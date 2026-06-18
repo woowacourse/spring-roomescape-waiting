@@ -22,14 +22,14 @@ import roomescape.promotion.PromotionOutboxDao;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationDao;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.reservation.web.dto.ReservationRequestDto;
 import roomescape.store.Store;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeDao;
 import roomescape.time.Time;
 import roomescape.time.TimeDao;
 import roomescape.waiting.WaitingService;
-import roomescape.waiting.web.WaitingRequestDto;
+import roomescape.waiting.web.dto.WaitingRequestDto;
 import roomescape.worker.PromotionOutboxWorker;
 
 @SpringBootTest(properties = "scheduling.enabled=false")
