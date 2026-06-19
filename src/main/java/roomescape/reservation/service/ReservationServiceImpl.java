@@ -63,13 +63,21 @@ public class ReservationServiceImpl implements ReservationService {
         validateNotHoliday(time);
         Theme theme = themeRepository.findById(themeId);
         validateNotDuplicated(request.name(), themeId, time);
-        Status status = Status.from(reservationRepository.hasConfirmedReservation(themeId, time));
-        Reservation newReservation = new Reservation(request.name(), time, theme, status, LocalDateTime.now());
+        boolean hasConfirmed = reservationRepository.hasConfirmedReservation(themeId, time);
+        Status status = resolveStatus(request.orderId(), hasConfirmed);
+        Reservation newReservation = new Reservation(request.name(), time, theme, status, request.orderId(), request.amount(), LocalDateTime.now());
         try {
             return reservationRepository.save(newReservation);
         } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException();
         }
+    }
+
+    private Status resolveStatus(String orderId, boolean hasConfirmed) {
+        if (hasConfirmed) {
+            return Status.WAITING;
+        }
+        return orderId != null ? Status.PAYMENT_PENDING : Status.CONFIRMED;
     }
 
     private ReservationTime findTime(Long timeId) {
@@ -106,6 +114,13 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         cancelWithPromotion(reservation);
+    }
+
+    @Override
+    @Transactional
+    public void cancelByOrderId(String orderId) {
+        reservationRepository.findByOrderId(orderId)
+                .ifPresent(reservation -> cancelWithPromotion(reservation));
     }
 
     @Override

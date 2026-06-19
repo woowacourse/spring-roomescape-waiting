@@ -24,6 +24,7 @@ class ReservationTest {
                 time,
                 theme,
                 Status.RESERVED,
+                null, null,
                 LocalDateTime.now()).withId(1L);
 
         // then
@@ -42,6 +43,7 @@ class ReservationTest {
                 time,
                 theme,
                 Status.RESERVED,
+                null, null,
                 LocalDateTime.now()).withId(1L);
 
         // when & then
@@ -59,6 +61,7 @@ class ReservationTest {
                 time,
                 theme,
                 Status.RESERVED,
+                null, null,
                 LocalDateTime.now()).withId(1L);
 
         // when

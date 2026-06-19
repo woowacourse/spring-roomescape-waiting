@@ -57,7 +57,7 @@ class JdbcReservationRepositoryTest {
                 LocalDateTime.now().plusHours(3).toString());
         ReservationTime time = new ReservationTime(timeId, LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(3));
-        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now());
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, null, null, LocalDateTime.now());
 
         // when
         Reservation saved = reservationRepository.save(reservation);

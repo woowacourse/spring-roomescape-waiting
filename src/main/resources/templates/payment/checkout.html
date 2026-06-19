@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>결제</title>
+    <style>
+        body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f6f7fb; }
+        .page { width: min(600px, calc(100% - 32px)); margin: 40px auto; }
+        .card { background: #fff; border: 1px solid #dde3f0; border-radius: 18px; padding: 24px; }
+        h2 { margin-top: 0; }
+        #payment-widget { margin-bottom: 16px; }
+        #agreement-widget { margin-bottom: 16px; }
+        button { width: 100%; border: none; background: #4f46e5; color: white; font-weight: 700;
+                 padding: 14px; border-radius: 12px; font-size: 1rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="card">
+        <h2>결제</h2>
+        <p>주문명: <strong th:text="${orderName}"></strong></p>
+        <p>결제 금액: <strong th:text="${amount}"></strong>원</p>
+        <div id="payment-widget"></div>
+        <div id="agreement-widget"></div>
+        <button id="pay-btn">결제하기</button>
+    </div>
+</div>
+
+<script src="https://js.tosspayments.com/v2/standard"></script>
+<script th:inline="javascript">
+    const clientKey = /*[[${clientKey}]]*/ '';
+    const orderId   = /*[[${orderId}]]*/ '';
+    const amount    = /*[[${amount}]]*/ 0;
+    const orderName = /*[[${orderName}]]*/ '';
+
+    const tossPayments = TossPayments(clientKey);
+    const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+
+    widgets.setAmount({ currency: 'KRW', value: amount });
+
+    Promise.all([
+        widgets.renderPaymentMethods({ selector: '#payment-widget', variantKey: 'DEFAULT' }),
+        widgets.renderAgreement({ selector: '#agreement-widget', variantKey: 'AGREEMENT' }),
+    ]);
+
+    document.getElementById('pay-btn').addEventListener('click', async () => {
+        await widgets.requestPayment({
+            orderId,
+            orderName,
+            successUrl: window.location.origin + '/payments/success',
+            failUrl:    window.location.origin + '/payments/fail',
+        });
+    });
+</script>
+</body>
+</html>

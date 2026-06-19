@@ -46,9 +46,9 @@ class ReservationTransactionTest {
         ReservationTime time = timeRepository.save(START, END);
         Theme theme = themeRepository.save(new Theme("테마", "설명", "https://img.test/a.png"));
         Reservation reserved = reservationRepository.save(
-                new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()));
+                new Reservation("라이", time, theme, Status.RESERVED, null, null, LocalDateTime.now()));
         Reservation waiting = reservationRepository.save(
-                new Reservation("어셔", time, theme, Status.WAITING, LocalDateTime.now()));
+                new Reservation("어셔", time, theme, Status.WAITING, null, null, LocalDateTime.now()));
 
         // when
         reservationService.cancelForUser(reserved.getId(), "라이");
@@ -69,9 +69,9 @@ class ReservationTransactionTest {
         ReservationTime time = timeRepository.save(START, END);
         Theme theme = themeRepository.save(new Theme("테마", "설명", "https://img.test/a.png"));
         Reservation reserved = reservationRepository.save(
-                new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()));
+                new Reservation("라이", time, theme, Status.RESERVED, null, null, LocalDateTime.now()));
         Reservation waiting = reservationRepository.save(
-                new Reservation("어셔", time, theme, Status.WAITING, LocalDateTime.now()));
+                new Reservation("어셔", time, theme, Status.WAITING, null, null, LocalDateTime.now()));
 
         doThrow(new RuntimeException("강제 실패"))
                 .when(reservationRepository).deleteById(reserved.getId());

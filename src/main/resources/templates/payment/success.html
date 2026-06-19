@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>결제 완료</title></head>
+<body>
+<h2>결제가 완료되었습니다.</h2>
+<p>결제 키: <span th:text="${result.paymentKey}"></span></p>
+<p>주문 ID: <span th:text="${result.orderId}"></span></p>
+<p>결제 금액: <span th:text="${result.approvedAmount}"></span>원</p>
+<a href="/page/reservations">예약 목록으로 돌아가기</a>
+</body>
+</html>

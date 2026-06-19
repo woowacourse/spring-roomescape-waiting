@@ -13,6 +13,8 @@ public interface ReservationService {
 
     void cancel(Long id);
 
+    void cancelByOrderId(String orderId);
+
     void cancelForUser(Long id, String name);
 
     Reservation update(Long id, Long timeId);

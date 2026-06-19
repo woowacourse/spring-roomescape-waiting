@@ -110,7 +110,7 @@ class ReservationControllerTest {
         ReservationTime newTime = new ReservationTime(2L, LocalDateTime.of(2030, 6, 1, 14, 0),
                 LocalDateTime.of(2030, 6, 1, 16, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation updated = new Reservation("라이", newTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation updated = new Reservation("라이", newTime, theme, Status.RESERVED, null, null, LocalDateTime.now()).withId(1L);
         when(reservationService.update(1L, 2L)).thenReturn(updated);
 
         String requestBody = """
@@ -210,7 +210,7 @@ class ReservationControllerTest {
                 LocalDateTime.of(2030, 6, 1, 10, 0),
                 LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, null, null, LocalDateTime.now()).withId(1L);
         when(reservationService.create(any())).thenReturn(saved);
 
         String requestBody = """
@@ -239,7 +239,7 @@ class ReservationControllerTest {
                 LocalDateTime.of(2030, 6, 1, 10, 0),
                 LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation saved = new Reservation("라이", time, theme, Status.WAITING, LocalDateTime.now()).withId(1L);
+        Reservation saved = new Reservation("라이", time, theme, Status.WAITING, null, null, LocalDateTime.now()).withId(1L);
         when(reservationService.create(any())).thenReturn(saved);
 
         String requestBody = """
