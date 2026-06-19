@@ -13,6 +13,7 @@ import roomescape.exception.RoomescapeException;
 import roomescape.reservation.MyReservation;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.dao.ReservationDao;
+import roomescape.payment.service.PaymentService;
 import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
@@ -26,13 +27,15 @@ public class ReservationService {
     private final ThemeDao themeDao;
     private final TimeDao timeDao;
     private final ReservationWaitingDao reservationWaitingDao;
+    private final PaymentService paymentService;
 
     public ReservationService(ReservationDao reservationDao, ThemeDao themeDao, TimeDao timeDao,
-                              ReservationWaitingDao reservationWaitingDao) {
+                              ReservationWaitingDao reservationWaitingDao, PaymentService paymentService) {
         this.reservationDao = reservationDao;
         this.themeDao = themeDao;
         this.timeDao = timeDao;
         this.reservationWaitingDao = reservationWaitingDao;
+        this.paymentService = paymentService;
     }
 
     public List<Reservation> findAll() {
@@ -125,6 +128,7 @@ public class ReservationService {
         reservationDao.updateNameByThemeIdAndDateAndTimeId(approvedReservation)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
         reservationWaitingDao.deleteById(firstWaiting.get().getId());
+        paymentService.createReservationOrder(approvedReservation.getId());
     }
 
     private Theme getThemeById(Long themeId, Map<Long, Theme> themes) {

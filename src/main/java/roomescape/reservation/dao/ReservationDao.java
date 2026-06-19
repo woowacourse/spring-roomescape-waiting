@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
 import roomescape.time.ReservationTime;
 
 @Repository
@@ -20,7 +21,8 @@ public class ReservationDao {
                     rs.getLong("theme_id"),
                     rs.getDate("date").toLocalDate(),
                     new ReservationTime(rs.getLong("time_id"),
-                            rs.getTime("start_at").toLocalTime())
+                            rs.getTime("start_at").toLocalTime()),
+                    ReservationStatus.from(rs.getString("status"))
             );
 
     private final JdbcTemplate jdbcTemplate;
@@ -35,7 +37,8 @@ public class ReservationDao {
 
     public List<Reservation> selectAll() {
         String sql =
-                "select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id "
+                "select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, "
+                        + "r.theme_id as theme_id, r.status "
                         + "from reservation r "
                         + "inner join reservation_time t "
                         + "on r.time_id = t.id";
@@ -45,7 +48,7 @@ public class ReservationDao {
     public Optional<Reservation> selectById(Long id) {
         String sql =
                 """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
+                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id, r.status
                         from reservation r
                         inner join reservation_time t
                         on r.time_id = t.id
@@ -59,7 +62,7 @@ public class ReservationDao {
         String sql = """
                 select r.id as reservation_id, r.name, r.date,
                        t.id as time_id, t.start_at as start_at,
-                       r.theme_id as theme_id
+                       r.theme_id as theme_id, r.status
                 from reservation r
                 inner join reservation_time t
                 on r.time_id = t.id
@@ -73,7 +76,7 @@ public class ReservationDao {
     public List<Reservation> selectByThemeIdAndDate(Long themeId, LocalDate date) {
         String sql =
                 """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
+                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id, r.status
                         from reservation r
                         inner join reservation_time t
                         on r.time_id = t.id
@@ -87,7 +90,7 @@ public class ReservationDao {
     public List<Reservation> selectByTimeId(Long timeId) {
         String sql =
                 """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
+                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id, r.status
                         from reservation r
                         inner join reservation_time t
                         on r.time_id = t.id
@@ -113,7 +116,7 @@ public class ReservationDao {
         String sql = """
                 select r.id as reservation_id, r.name, r.date,
                        t.id as time_id, t.start_at as start_at,
-                       r.theme_id as theme_id
+                       r.theme_id as theme_id, r.status
                 from reservation r
                 inner join reservation_time t
                 on r.time_id = t.id
@@ -127,7 +130,7 @@ public class ReservationDao {
     public List<Reservation> selectByName(String name) {
         String sql =
                 """
-                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id
+                        select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id, r.status
                         from reservation r
                         inner join reservation_time t
                         on r.time_id = t.id
@@ -142,11 +145,12 @@ public class ReservationDao {
                 .addValue("name", reservation.getName())
                 .addValue("theme_id", reservation.getThemeId())
                 .addValue("date", reservation.getDate())
-                .addValue("time_id", reservation.getTime().getId());
+                .addValue("time_id", reservation.getTime().getId())
+                .addValue("status", reservation.getStatus().name());
 
         Long id = (long) simpleJdbcInsert.executeAndReturnKey(parameters);
         return new Reservation(id, reservation.getName(), reservation.getThemeId(), reservation.getDate(),
-                reservation.getTime());
+                reservation.getTime(), reservation.getStatus());
     }
 
     public Optional<Reservation> updateDateTimeById(Long id, LocalDate date, Long timeId) {
@@ -159,13 +163,14 @@ public class ReservationDao {
     public Optional<Reservation> updateNameByThemeIdAndDateAndTimeId(Reservation reservation) {
         String sql = """
                 update reservation
-                set name = ?
+                set name = ?, status = ?
                 where id = ? and theme_id = ? and date = ? and time_id = ?
                 """;
 
         jdbcTemplate.update(
                 sql,
                 reservation.getName(),
+                reservation.getStatus().name(),
                 reservation.getId(),
                 reservation.getThemeId(),
                 reservation.getDate(),
@@ -173,6 +178,11 @@ public class ReservationDao {
         );
 
         return selectById(reservation.getId());
+    }
+
+    public void updateStatusById(Long id, ReservationStatus status) {
+        String sql = "update reservation set status = ? where id = ?";
+        jdbcTemplate.update(sql, status.name(), id);
     }
 
     public boolean existsByThemeIdAndAfterDate(Long themeId, LocalDate now) {

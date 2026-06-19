@@ -25,6 +25,7 @@ public enum ErrorCode {
     RESERVATION_TIME_NOT_FOUND(NOT_FOUND, "예약 시간을 찾을 수 없습니다."),
     THEME_NOT_FOUND(NOT_FOUND, "테마를 찾을 수 없습니다."),
     RESERVATION_WAITING_NOT_FOUND(NOT_FOUND, "예약 대기 정보를 찾을 수 없습니다."),
+    PAYMENT_NOT_FOUND(NOT_FOUND, "결제 주문을 찾을 수 없습니다."),
 
     // --- CONFLICT 409 ---
     RESERVATION_ALREADY_EXISTS(CONFLICT, "이미 예약이 존재합니다."),
@@ -32,6 +33,7 @@ public enum ErrorCode {
     CANNOT_DELETE_RESERVED_THEME(CONFLICT, "이미 예약이 존재하는 테마이므로 삭제할 수 없습니다."),
     DUPLICATED_RESERVATION(CONFLICT, "본인 예약에 대기를 신청할 수 없습니다."),
     DUPLICATED_RESERVATION_WAITING(CONFLICT, "이미 해당 예약의 대기가 존재합니다."),
+    PAYMENT_CONFIRM_FAILED(CONFLICT, "결제 승인이 완료되지 않았습니다."),
     ;
 
     private final HttpStatus status;

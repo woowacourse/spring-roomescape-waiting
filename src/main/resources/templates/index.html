@@ -302,6 +302,14 @@
             const actionCell = document.createElement('td');
             const actions = document.createElement('div');
             actions.className = 'table-actions';
+            if (reservation.status === '결제 대기') {
+                const payButton = document.createElement('button');
+                payButton.className = 'primary-button';
+                payButton.type = 'button';
+                payButton.dataset.payId = reservation.id;
+                payButton.textContent = '결제하기';
+                actions.append(payButton);
+            }
             const cancelButton = document.createElement('button');
             cancelButton.className = 'danger-button';
             cancelButton.type = 'button';
@@ -393,6 +401,12 @@
     });
 
     reservationRows.addEventListener('click', async (event) => {
+        const payButton = event.target.closest('button[data-pay-id]');
+        if (payButton) {
+            window.location.href = `/payments/checkout?reservationId=${encodeURIComponent(payButton.dataset.payId)}`;
+            return;
+        }
+
         const button = event.target.closest('button[data-cancel-id]');
         if (!button) {
             return;

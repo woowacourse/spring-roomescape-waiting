@@ -24,8 +24,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.payment.service.PaymentService;
 import roomescape.reservation.MyReservation;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dto.ReservationChangeRequest;
 import roomescape.theme.Theme;
@@ -50,6 +52,9 @@ public class ReservationServiceTest {
 
     @Mock
     private ReservationWaitingDao reservationWaitingDao;
+
+    @Mock
+    private PaymentService paymentService;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -398,8 +403,10 @@ public class ReservationServiceTest {
         assertThat(approvedReservation.getThemeId()).isEqualTo(themeId);
         assertThat(approvedReservation.getDate()).isEqualTo(date);
         assertThat(approvedReservation.getTime().getId()).isEqualTo(timeId);
+        assertThat(approvedReservation.getStatus()).isEqualTo(ReservationStatus.PENDING_PAYMENT);
         verify(reservationDao, times(0)).deleteById(id);
         verify(reservationWaitingDao, times(1)).deleteById(waiting.getId());
+        verify(paymentService, times(1)).createReservationOrder(id);
     }
 
     @Test
@@ -426,6 +433,7 @@ public class ReservationServiceTest {
         verify(reservationDao, times(0)).updateNameByThemeIdAndDateAndTimeId(any(Reservation.class));
         verify(reservationDao, times(1)).deleteById(id);
         verify(reservationWaitingDao, times(0)).deleteById(anyLong());
+        verifyNoInteractions(paymentService);
     }
 
     @Test
@@ -469,5 +477,6 @@ public class ReservationServiceTest {
         assertThat(approvedReservationCaptor.getValue().getName()).isEqualTo(waiting.getName());
         verify(reservationDao, times(0)).deleteById(id);
         verify(reservationWaitingDao, times(0)).deleteById(waiting.getId());
+        verifyNoInteractions(paymentService);
     }
 }

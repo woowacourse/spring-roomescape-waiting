@@ -11,6 +11,7 @@ public record ReservationResponse(
         Long themeId,
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
+        String status,
         TimeResponse time) {
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
@@ -18,6 +19,7 @@ public record ReservationResponse(
                 reservation.getName(),
                 reservation.getThemeId(),
                 reservation.getDate(),
+                reservation.getStatus().getDescription(),
                 TimeResponse.from(reservation.getTime())
         );
     }

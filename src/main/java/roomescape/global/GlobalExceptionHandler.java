@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.ErrorResponse;
 import roomescape.exception.RoomescapeException;
+import roomescape.payment.PaymentAmountMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -37,6 +38,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_REQUEST);
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    protected ResponseEntity<ErrorResponse> handlePaymentAmountMismatchException(PaymentAmountMismatchException ex) {
+        ErrorResponse response = new ErrorResponse("PAYMENT_AMOUNT_MISMATCH", ex.getMessage());
 
         return ResponseEntity.badRequest().body(response);
     }
