@@ -83,7 +83,7 @@ class ReservationSlotTest {
     }
 
     @Test
-    @DisplayName("미래 슬롯에 예약하면 성공한다.")
+    @DisplayName("미래 슬롯에 예약하면 결제 대기 상태로 성공한다.")
     void reserve_future_slot() {
         // given
         ReservationSlot slot = futureSlot.withReservations(new Reservations(new ArrayList<>()));
@@ -92,7 +92,7 @@ class ReservationSlotTest {
         Reservation result = slot.reserve("한다");
 
         // then
-        assertThat(result.getStatus()).isEqualTo(RESERVED);
+        assertThat(result.getStatus()).isEqualTo(PENDING_PAYMENT);
         assertThat(result.getSlotId()).isEqualTo(1L);
     }
 
@@ -128,7 +128,7 @@ class ReservationSlotTest {
                 .isEqualTo(CANCELED);
 
         Assertions.assertThat(promoted.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
     @Test
@@ -256,7 +256,7 @@ class ReservationSlotTest {
 
         // then
         Assertions.assertThat(actual.getStatus())
-                .isEqualTo(RESERVED);
+                .isEqualTo(PENDING_PAYMENT);
     }
 
 }

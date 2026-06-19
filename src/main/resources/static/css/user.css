@@ -302,6 +302,18 @@ body {
     line-height: 1.6;
 }
 
+.theme-price {
+    color: #d2b44c;
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.popular-theme-price {
+    color: #d2b44c;
+    font-weight: 800;
+    font-size: 14px;
+}
+
 .next-button-area {
     display: flex;
     justify-content: flex-end;

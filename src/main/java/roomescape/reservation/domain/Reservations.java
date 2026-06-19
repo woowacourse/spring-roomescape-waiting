@@ -31,7 +31,7 @@ public record Reservations(
             return ReservationStatus.WAITING;
         }
 
-        return ReservationStatus.RESERVED;
+        return ReservationStatus.PENDING_PAYMENT;
     }
 
     public Reservations cancel(Long reservationId, String requesterName) {
@@ -52,7 +52,7 @@ public record Reservations(
 
     private Reservations processUpdateAction(Long reservationId, Consumer<Reservation> action) {
         Reservation target = popById(reservationId);
-        if (target.isReserved()) {
+        if (target.isReserved() || target.isPendingPayment()) {
             action.accept(target);
             return withPromotedIfPresent(target);
         }
@@ -84,9 +84,15 @@ public record Reservations(
         }
     }
 
+    public Optional<Reservation> findPromoted() {
+        return values.stream()
+                .filter(reservation -> reservation.getStatus().equals(ReservationStatus.PENDING_PAYMENT))
+                .findFirst();
+    }
+
     public boolean hasReserved() {
         return values.stream()
-                .anyMatch(Reservation::isReserved);
+                .anyMatch(r -> r.isReserved() || r.isPendingPayment());
     }
 
     public Reservation findById(Long reservationId) {

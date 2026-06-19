@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 성공 - ENIGMA ROOMS</title>
+    <link rel="stylesheet" href="/css/user.css">
+    <style>
+        .status-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 40px;
+            background: #0b0d10;
+            border: 1px solid rgba(210, 180, 76, 0.3);
+            border-radius: 14px;
+        }
+        .status-container h1 {
+            color: #d2b44c;
+            margin-bottom: 20px;
+        }
+        .status-container p {
+            color: #b5b5b5;
+            margin-bottom: 30px;
+        }
+        .result-details {
+            text-align: left;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .result-details div {
+            margin-bottom: 10px;
+            color: #a9a9a9;
+        }
+        .result-details strong {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <h1>결제가 완료되었습니다!</h1>
+        <p>ENIGMA ROOMS를 이용해주셔서 감사합니다.</p>
+
+        <div class="result-details" th:if="${result}">
+            <div>주문 번호: <strong th:text="${result.orderId}"></strong></div>
+            <div>결제 키: <strong th:text="${paymentKey}"></strong></div>
+            <div>결제 금액: <strong th:text="${#numbers.formatInteger(result.approvedAmount, 0, 'COMMA')} + '원'"></strong></div>
+        </div>
+
+        <button class="primary-button" onclick="location.href='/reservation-lookup'">예약 내역 확인하기</button>
+    </div>
+</body>
+</html>

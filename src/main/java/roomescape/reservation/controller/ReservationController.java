@@ -27,12 +27,11 @@ public class ReservationController {
 
     @AuthGuard(roles = {MEMBER, MANAGER})
     @PostMapping("/slots/{slotId}/reservations")
-    public ResponseEntity<ReservationDetailDto> create(
+    public ResponseEntity<ReservationWithSlotDetailDto> create(
             @PathVariable Long slotId,
             @LoginMember Member member
     ) {
-        Reservation saved = reservationService.reserve(member.getName(), slotId);
-        ReservationDetailDto responseData = ReservationDetailDto.from(saved);
+        ReservationWithSlotDetailDto responseData = reservationService.reserve(member.getName(), slotId);
         return ResponseEntity.ok(responseData);
     }
 

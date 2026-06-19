@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
+import static roomescape.reservation.domain.ReservationStatus.PENDING_PAYMENT;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 @JdbcTest
@@ -72,7 +73,7 @@ class ReservationRepositoryTest {
 
         reservationDate1 = jdbcReservationDateRepository.save(ReservationDate.create(date1));
         reservationDate2 = jdbcReservationDateRepository.save(ReservationDate.create(date2));
-        theme = jdbcThemeRepository.save(Theme.create("테마", "설명", "썸네일"));
+        theme = jdbcThemeRepository.save(Theme.create("테마", "설명", "썸네일", 1000L));
 
         slot1 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate1, reservationTime1, theme));
         slot2 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate1, reservationTime2, theme));
@@ -171,6 +172,20 @@ class ReservationRepositoryTest {
                 .hasSize(1);
         assertThat(jdbcReservationRepository.findReservedAndWaitingBySlotId(slot3.getId()))
                 .isEmpty();
+    }
+
+    @Test
+    @DisplayName("결제 대기 상태의 예약도 활성 예약+대기 목록에 포함된다.")
+    void findReservedAndWaitingBySlotId_includes_pending_payment() {
+        // given
+        save(Reservation.reserve(name, slot1.getId(), PENDING_PAYMENT, LocalDateTime.now()));
+
+        // when
+        List<Reservation> result = jdbcReservationRepository.findReservedAndWaitingBySlotId(slot1.getId());
+
+        // then
+        assertThat(result)
+                .hasSize(1);
     }
 
     @Test

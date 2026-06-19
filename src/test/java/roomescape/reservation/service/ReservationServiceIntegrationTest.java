@@ -4,9 +4,13 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
+import roomescape.payment.client.PaymentGateway;
+import roomescape.payment.service.PaymentService;
+import roomescape.reservation.controller.dto.response.ReservationWithSlotDetailDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationErrorInformation;
@@ -23,11 +27,12 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
+import static roomescape.reservation.domain.ReservationStatus.PENDING_PAYMENT;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 
-@Import({ReservationService.class})
+@Import({ReservationService.class, PaymentService.class})
 class ReservationServiceIntegrationTest extends ServiceSupport {
 
     private final String name = "송송";
@@ -40,6 +45,9 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
     private ReservationSlot slot1;
     private ReservationSlot slot2;
     private Theme theme;
+
+    @MockitoBean
+    private PaymentGateway paymentGateway;
 
     @BeforeEach
     void setUp() {
@@ -107,10 +115,10 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             saveReservation(name, slot1);
 
             // when
-            Reservation actual = reservationService.reserve(anotherName, slot1.getId());
+            ReservationWithSlotDetailDto actual = reservationService.reserve(anotherName, slot1.getId());
 
             // then
-            assertThat(actual.getStatus())
+            assertThat(actual.status())
                     .isEqualTo(ReservationStatus.WAITING);
         }
 
@@ -122,11 +130,11 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             reservationService.cancelByManager(slot1.getId(), reservation.getId());
 
             // when
-            Reservation actual = reservationService.reserve(name, slot1.getId());
+            ReservationWithSlotDetailDto actual = reservationService.reserve(name, slot1.getId());
 
             // then
-            Assertions.assertThat(actual.getStatus())
-                    .isEqualTo(RESERVED);
+            Assertions.assertThat(actual.status())
+                    .isEqualTo(PENDING_PAYMENT);
         }
 
         @Test
@@ -138,11 +146,11 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             reservationService.cancelByManager(slot1.getId(), saved.getId());
 
             // when
-            Reservation actual = reservationService.reserve(anotherName, slot1.getId());
+            ReservationWithSlotDetailDto actual = reservationService.reserve(anotherName, slot1.getId());
 
             // then
-            Assertions.assertThat(actual.getStatus())
-                    .isEqualTo(RESERVED);
+            Assertions.assertThat(actual.status())
+                    .isEqualTo(PENDING_PAYMENT);
         }
 
         @Test
@@ -161,21 +169,32 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         @DisplayName("slotId를 기반으로 예약을 생성할 수 있다.")
         void reserve_with_slotId() {
             // given & when
-            Reservation actual = reservationService.reserve(name, slot1.getId());
+            ReservationWithSlotDetailDto actual = reservationService.reserve(name, slot1.getId());
 
             // then
-            Assertions.assertThat(actual.getSlotId())
+            Assertions.assertThat(actual.slotId())
                     .isEqualTo(slot1.getId());
 
-            Assertions.assertThat(actual.getStatus())
-                    .isEqualTo(RESERVED);
+            Assertions.assertThat(actual.status())
+                    .isEqualTo(PENDING_PAYMENT);
+        }
+
+        @Test
+        @DisplayName("빈 슬롯에 예약하면 결제를 위한 주문이 생성된다.")
+        void reserve_creates_order() {
+            // given & when
+            ReservationWithSlotDetailDto actual = reservationService.reserve(name, slot1.getId());
+
+            // then
+            Assertions.assertThat(actual.orderId()).isNotNull();
+            Assertions.assertThat(actual.amount()).isNotNull();
         }
 
     }
 
     @Nested
     @DisplayName("예약 취소 비즈니스 로직 통합 테스트")
-    class cancle_test {
+    class cancel_test {
 
         @Test
         @DisplayName("관리자 전용으로 예약을 취소하면 CANCELED 상태가 된다.")
@@ -246,7 +265,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
                     .isEqualTo(CANCELED);
 
             Assertions.assertThat(promoted.getStatus())
-                    .isEqualTo(RESERVED);
+                    .isEqualTo(PENDING_PAYMENT);
         }
 
         @Test
@@ -268,7 +287,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
                     .isEqualTo(CANCELED);
 
             Assertions.assertThat(promoted.getStatus())
-                    .isEqualTo(RESERVED);
+                    .isEqualTo(PENDING_PAYMENT);
         }
 
     }

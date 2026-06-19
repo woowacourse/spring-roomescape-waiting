@@ -18,6 +18,8 @@ public enum ThemeErrorInformation implements ErrorInformation {
     THEME_ALREADY_EXISTS(HttpStatus.CONFLICT, "THEME_006", "이미 등록된 테마입니다."),
     THEME_STATUS_UPDATE_FAILED(HttpStatus.BAD_REQUEST, "THEME_007", "테마 활성화/비활성화 상태 변경에 실패했습니다."),
     INACTIVE_THEME_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "THEME_008", "해당 테마은 비활성화 되었습니다."),
+    AMOUNT_IS_NULL(HttpStatus.BAD_REQUEST, "THEME_009", "테마 가격이 누락되었습니다."),
+    AMOUNT_IS_NEGATIVE(HttpStatus.BAD_REQUEST, "THEME_010", "테마 가격은 음수일 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

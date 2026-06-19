@@ -96,6 +96,20 @@ class ThemeRepositoryTest {
     }
 
     @Test
+    @DisplayName("테마를 등록하면 가격이 그대로 저장되고 조회된다.")
+    void save_and_find_amount() {
+        // given
+        Theme savedTheme = jdbcThemeRepository.save(ThemeFixture.theme());
+
+        // when
+        Theme actual = jdbcThemeRepository.findById(savedTheme.getId()).get();
+
+        // then
+        assertThat(actual.getAmount())
+                .isEqualTo(savedTheme.getAmount());
+    }
+
+    @Test
     @DisplayName("테마를 1개 등록하면 테마 데이터 수가 1 증가한다.")
     void save() {
         // given

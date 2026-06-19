@@ -55,7 +55,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                     t.name          AS theme_name,
                     t.description   AS description,
                     t.thumbnail_url AS thumbnail_url,
-                    t.is_active     AS theme_is_active
+                    t.is_active     AS theme_is_active,
+                    t.amount        AS amount
                 FROM reservation_slot rs
                 JOIN reservation_date rd ON rs.date_id  = rd.id
                 JOIN reservation_time rt ON rs.time_id  = rt.id
@@ -79,7 +80,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                     t.name          AS theme_name,
                     t.description   AS description,
                     t.thumbnail_url AS thumbnail_url,
-                    t.is_active     AS theme_is_active
+                    t.is_active     AS theme_is_active,
+                    t.amount        AS amount
                 FROM reservation_slot rs
                 JOIN reservation_date rd ON rs.date_id  = rd.id
                 JOIN reservation_time rt ON rs.time_id  = rt.id
@@ -114,7 +116,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                     t.name          AS theme_name,
                     t.description   AS description,
                     t.thumbnail_url AS thumbnail_url,
-                    t.is_active     AS theme_is_active
+                    t.is_active     AS theme_is_active,
+                    t.amount        AS amount
                 FROM reservation_slot rs
                 JOIN reservation_date rd ON rs.date_id  = rd.id
                 JOIN reservation_time rt ON rs.time_id  = rt.id
@@ -150,7 +153,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                     t.name          AS theme_name,
                     t.description   AS description,
                     t.thumbnail_url AS thumbnail_url,
-                    t.is_active     AS theme_is_active
+                    t.is_active     AS theme_is_active,
+                    t.amount        AS amount
                 FROM reservation_slot rs
                 JOIN reservation_date rd ON rs.date_id  = rd.id
                 JOIN reservation_time rt ON rs.time_id  = rt.id
@@ -191,7 +195,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 rs.getString("theme_name"),
                 rs.getString("description"),
                 rs.getString("thumbnail_url"),
-                rs.getBoolean("theme_is_active")
+                rs.getBoolean("theme_is_active"),
+                rs.getLong("amount")
         );
 
         return ReservationSlot.load(

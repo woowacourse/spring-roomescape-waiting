@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static roomescape.reservation.domain.ReservationStatus.PENDING_PAYMENT;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
@@ -27,7 +28,8 @@ public class FakeReservationRepository implements ReservationRepository {
                 .map(r -> new ReservationWithSlotInformation(
                         r.getId(), r.getSlotId(), r.getName(),
                         null, null, null, null, null,
-                        r.getStatus(), LocalDateTime.now(), null))
+                        r.getStatus(), LocalDateTime.now(), null,
+                        null, null, null, null))
                 .toList();
     }
 
@@ -40,7 +42,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Reservation> findReservedAndWaitingBySlotId(Long slotId) {
         return store.values().stream()
                 .filter(r -> r.getSlotId() != null && r.getSlotId().equals(slotId))
-                .filter(r -> r.getStatus() == RESERVED || r.getStatus() == WAITING)
+                .filter(r -> r.getStatus() == RESERVED || r.getStatus() == WAITING || r.getStatus() == PENDING_PAYMENT)
                 .sorted(Comparator.comparing(Reservation::getReservedAt))
                 .toList();
     }

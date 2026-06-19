@@ -2,6 +2,7 @@ package roomescape.theme.controller.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public record ThemeSaveDto(
 
@@ -12,6 +13,10 @@ public record ThemeSaveDto(
         String description,
 
         @NotNull(message = "thumbnailUrl은 필수 입력값입니다.")
-        String thumbnailUrl
+        String thumbnailUrl,
+
+        @NotNull(message = "amount는 필수 입력값입니다.")
+        @PositiveOrZero(message = "amount는 음수일 수 없습니다.")
+        Long amount
 ) {
 }

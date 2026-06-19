@@ -49,8 +49,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme register(String name, String description, String thumbnailUrl) {
-        return themeRepository.save(Theme.create(name, description, thumbnailUrl));
+    public Theme register(String name, String description, String thumbnailUrl, Long amount) {
+        return themeRepository.save(Theme.create(name, description, thumbnailUrl, amount));
     }
 
     @Transactional

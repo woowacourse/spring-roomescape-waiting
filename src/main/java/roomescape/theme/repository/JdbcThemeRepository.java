@@ -25,7 +25,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                     resultSet.getString("name"),
                     resultSet.getString("description"),
                     resultSet.getString("thumbnail_url"),
-                    resultSet.getBoolean("is_active")
+                    resultSet.getBoolean("is_active"),
+                    resultSet.getLong("amount")
             );
 
     public JdbcThemeRepository(NamedParameterJdbcTemplate jdbcTemplate) {
@@ -66,17 +67,19 @@ public class JdbcThemeRepository implements ThemeRepository {
                 .addValue("name", theme.getName())
                 .addValue("description", theme.getDescription())
                 .addValue("thumbnail_url", theme.getThumbnailUrl())
-                .addValue("is_active", theme.isActive());
+                .addValue("is_active", theme.isActive())
+                .addValue("amount", theme.getAmount());
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        return Theme.load(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl(), theme.isActive());
+        return Theme.load(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl(), theme.isActive(), theme.getAmount());
     }
 
     @Override
     public boolean updateStatus(Theme theme) {
         String sql = """
-                UPDATE theme 
+                UPDATE theme
                 SET name = :name, description = :description,
-                    thumbnail_url = :thumbnail_url, is_active = :is_active
+                    thumbnail_url = :thumbnail_url, is_active = :is_active,
+                    amount = :amount
                 WHERE id = :id
                 """;
 
@@ -85,7 +88,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 .addValue("name", theme.getName())
                 .addValue("description", theme.getDescription())
                 .addValue("thumbnail_url", theme.getThumbnailUrl())
-                .addValue("is_active", theme.isActive());
+                .addValue("is_active", theme.isActive())
+                .addValue("amount", theme.getAmount());
 
         int updateCount = jdbcTemplate.update(sql, params);
         return updateCount > 0;
@@ -104,6 +108,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     t.description,
                     t.thumbnail_url,
                     t.is_active,
+                    t.amount,
                     COUNT(r.id) AS reservation_count
                 FROM reservation r
                 JOIN reservation_slot rs ON r.slot_id  = rs.id
@@ -113,7 +118,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                   AND r.status    = 'RESERVED'
                   AND d.date >= :startDate
                   AND d.date <= :endDate
-                GROUP BY t.id, t.name, t.description, t.thumbnail_url, t.is_active
+                GROUP BY t.id, t.name, t.description, t.thumbnail_url, t.is_active, t.amount
                 ORDER BY reservation_count DESC
                 LIMIT :limit
                 """;
@@ -129,6 +134,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 rs.getString("description"),
                 rs.getString("thumbnail_url"),
                 rs.getBoolean("is_active"),
+                rs.getLong("amount"),
                 rs.getLong("reservation_count")
         ));
     }
