@@ -20,6 +20,7 @@ public enum ErrorCode {
     FORBIDDEN_RESERVATION_WAITING_ACCESS(FORBIDDEN, "본인의 예약 대기 정보만 접근 가능합니다."),
     CANNOT_CANCEL_PAST_RESERVATION_WAITING(BAD_REQUEST, "이미 지난 시간의 예약 대기를 취소할 수 없습니다."),
     CANNOT_WAIT_WITHOUT_RESERVATION(BAD_REQUEST, "예약이 마감된 경우에만 대기 신청이 가능합니다."),
+    PAYMENT_AMOUNT_MISMATCH(BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
     ;
 
     private final HttpStatus status;

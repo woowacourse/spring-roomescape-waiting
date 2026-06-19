@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.ErrorResponse;
 import roomescape.global.exception.RoomescapeException;
+import roomescape.payment.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,5 +40,10 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_REQUEST);
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    protected ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse("TOSS_PAYMENT_ERROR", ex.getMessage()));
     }
 }

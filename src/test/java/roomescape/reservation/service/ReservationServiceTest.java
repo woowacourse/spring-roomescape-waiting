@@ -42,6 +42,9 @@ public class ReservationServiceTest {
     @Mock
     private ReservationWaitingDao reservationWaitingDao;
 
+    @Mock
+    private roomescape.payment.order.dao.PaymentOrderDao paymentOrderDao;
+
     @InjectMocks
     private ReservationService reservationService;
 
@@ -131,7 +134,7 @@ public class ReservationServiceTest {
         given(reservationDao.insert(any(Reservation.class)))
                 .willReturn(new Reservation(10L, "초록", themeId, date, time));
 
-        Reservation actual = reservationService.add("초록", themeId, date, timeId);
+        Reservation actual = reservationService.add("초록", themeId, date, timeId, "order-1", 1000L);
 
         assertThat(actual.getId()).isEqualTo(10L);
         assertThat(actual.getName()).isEqualTo("초록");
@@ -141,7 +144,7 @@ public class ReservationServiceTest {
     void 존재하지_않는_시간으로_예약시_예외발생() {
         given(timeDao.selectById(anyLong())).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now().plusDays(1), 999L))
+        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now().plusDays(1), 999L, "order-1", 1000L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessageContaining(ErrorCode.RESERVATION_TIME_NOT_FOUND.getMessage());
     }
@@ -151,11 +154,11 @@ public class ReservationServiceTest {
         ReservationTime mockTime = new ReservationTime(17L, LocalTime.now().minusMinutes(10));
         when(timeDao.selectById(anyLong())).thenReturn(Optional.of(mockTime));
 
-        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now().minusDays(1), 1L))
+        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now().minusDays(1), 1L, "order-1", 1000L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.PAST_RESERVATION.getMessage());
 
-        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now(), mockTime.getId()))
+        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now(), mockTime.getId(), "order-1", 1000L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.PAST_RESERVATION.getMessage());
     }
@@ -169,7 +172,7 @@ public class ReservationServiceTest {
         given(timeDao.selectById(timeId)).willReturn(Optional.of(time));
         given(themeDao.existsById(themeId)).willReturn(false);
 
-        assertThatThrownBy(() -> reservationService.add("브라운", themeId, LocalDate.now().plusDays(1), timeId))
+        assertThatThrownBy(() -> reservationService.add("브라운", themeId, LocalDate.now().plusDays(1), timeId, "order-1", 1000L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessageContaining(ErrorCode.THEME_NOT_FOUND.getMessage());
     }
@@ -185,7 +188,7 @@ public class ReservationServiceTest {
         given(themeDao.existsById(themeId)).willReturn(true);
         given(reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)).willReturn(true);
 
-        assertThatThrownBy(() -> reservationService.add("브라운", themeId, date, timeId))
+        assertThatThrownBy(() -> reservationService.add("브라운", themeId, date, timeId, "order-1", 1000L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.RESERVATION_ALREADY_EXISTS.getMessage());
     }
@@ -202,7 +205,7 @@ public class ReservationServiceTest {
         given(reservationDao.insert(any(Reservation.class)))
                 .willThrow(new DuplicateKeyException("duplicate"));
 
-        assertThatThrownBy(() -> reservationService.add("브라운", themeId, date, timeId))
+        assertThatThrownBy(() -> reservationService.add("브라운", themeId, date, timeId, "order-1", 1000L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.RESERVATION_ALREADY_EXISTS.getMessage());
     }

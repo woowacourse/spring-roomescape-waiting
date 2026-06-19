@@ -52,7 +52,9 @@ public class ThemeControllerTest {
                 "name", "초록",
                 "themeId", themeId,
                 "date", date.toString(),
-                "timeId", 1L
+                "timeId", 1L,
+                "orderId", "order-" + themeId + "-" + date,
+                "amount", 1000L
         );
 
         RestAssured.given().log().all()

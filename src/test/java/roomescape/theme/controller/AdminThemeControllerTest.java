@@ -45,7 +45,9 @@ public class AdminThemeControllerTest {
                 "name", "로치",
                 "themeId", 1L,
                 "date", LocalDate.now().plusDays(1).toString(),
-                "timeId", 1L
+                "timeId", 1L,
+                "orderId", "order-1",
+                "amount", 1000L
         );
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

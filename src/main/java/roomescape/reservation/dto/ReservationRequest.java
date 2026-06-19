@@ -13,5 +13,9 @@ public record ReservationRequest(
         @NotNull
         Long timeId,
         @NotNull
-        Long themeId) {
+        Long themeId,
+        @NotBlank
+        String orderId,
+        @NotNull
+        Long amount) {
 }

@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.dto.ReservationChangeRequest;
+import roomescape.reservation.dto.ReservationCreatedResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
@@ -48,17 +49,19 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationCreatedResponse> create(@Valid @RequestBody ReservationRequest request) {
         Reservation reservation = reservationService.add(
                 request.name(),
                 request.themeId(),
                 request.date(),
-                request.timeId()
+                request.timeId(),
+                request.orderId(),
+                request.amount()
         );
 
         URI location = URI.create("/reservations/" + reservation.getId());
 
-        return ResponseEntity.created(location).body(ReservationResponse.from(reservation));
+        return ResponseEntity.created(location).body(new ReservationCreatedResponse(reservation.getId()));
     }
 
     @PatchMapping("/{id}")
