@@ -78,6 +78,7 @@ public class PaymentController {
             }
             throw e;
         }
+
         return ResponseEntity.status(303)
                 .location(java.net.URI.create("/user.html?payment=success"))
                 .build();

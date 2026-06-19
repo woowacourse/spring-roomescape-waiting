@@ -19,12 +19,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.client.ResponseCreator;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +63,12 @@ class TossPaymentGatewayTest {
                         MediaType.APPLICATION_JSON
                 ));
 
-        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key"));
+        PaymentResult result = gateway.confirm(new PaymentConfirmation(
+                "payment-key",
+                "order-123456",
+                23000,
+                "fixed-idempotency-key"
+        ));
 
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.totalAmount()).isEqualTo(23000);
@@ -88,7 +93,12 @@ class TossPaymentGatewayTest {
         server.expect(once(), requestTo(CONFIRM_URL))
                 .andRespond(responseFor(tossCode));
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key")))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation(
+                "payment-key",
+                "order-123456",
+                23000,
+                "fixed-idempotency-key"
+        )))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(expectedCode);
@@ -127,7 +137,12 @@ class TossPaymentGatewayTest {
             );
             long startedAt = System.nanoTime();
 
-            assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key")))
+            assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation(
+                    "payment-key",
+                    "order-123456",
+                    23000,
+                    "fixed-idempotency-key"
+            )))
                     .isInstanceOf(RoomescapeException.class)
                     .extracting("code")
                     .isEqualTo(DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN);
@@ -157,3 +172,4 @@ class TossPaymentGatewayTest {
         );
     }
 }
+                           

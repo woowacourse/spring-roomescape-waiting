@@ -79,3 +79,4 @@ CREATE TABLE IF NOT EXISTS payment_order (
 
 CREATE INDEX idx_payment_order_schedule_status
     ON payment_order(schedule_id, status);
+    
