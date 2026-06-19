@@ -20,6 +20,7 @@ import roomescape.time.service.TimeService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -64,13 +65,21 @@ public class ReservationServiceImpl implements ReservationService {
         Theme theme = themeRepository.findById(themeId);
         validateNotDuplicated(request.name(), themeId, time);
         boolean hasConfirmed = reservationRepository.hasConfirmedReservation(themeId, time);
-        Status status = resolveStatus(request.orderId(), hasConfirmed);
-        Reservation newReservation = new Reservation(request.name(), time, theme, status, request.orderId(), request.amount(), LocalDateTime.now());
+        String orderId = generateOrderId(request.amount());
+        Status status = resolveStatus(orderId, hasConfirmed);
+        Reservation newReservation = new Reservation(request.name(), time, theme, status, orderId, request.amount(), LocalDateTime.now());
         try {
             return reservationRepository.save(newReservation);
         } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException();
         }
+    }
+
+    private String generateOrderId(Long amount) {
+        if (amount == null) {
+            return null;
+        }
+        return "order-" + UUID.randomUUID().toString().replace("-", "");
     }
 
     private Status resolveStatus(String orderId, boolean hasConfirmed) {

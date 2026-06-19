@@ -82,7 +82,7 @@ class ReservationServiceImplTest {
         when(themeRepository.findById(1L)).thenReturn(theme);
 
         // when
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null);
         Reservation result = reservationService.create(dto);
 
         // then
@@ -107,7 +107,7 @@ class ReservationServiceImplTest {
         when(themeRepository.findById(1L)).thenReturn(theme);
 
         // when
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null);
         Reservation result = reservationService.create(dto);
 
         // then
@@ -120,7 +120,7 @@ class ReservationServiceImplTest {
     @Test
     void create_timeId가_null이면_예외() {
         // given
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, null, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, null, null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
@@ -133,7 +133,7 @@ class ReservationServiceImplTest {
     void create_존재하지_않는_timeId이면_예외() {
         // given
         when(timeService.findById(999L)).thenThrow(new TimeNotFoundException(999L));
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 999L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 999L, null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
@@ -146,7 +146,7 @@ class ReservationServiceImplTest {
         // given
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         when(timeService.findById(1L)).thenReturn(time);
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", null, 1L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", null, 1L, null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
@@ -161,7 +161,7 @@ class ReservationServiceImplTest {
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(999L)).thenReturn(false);
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 999L, 1L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 999L, 1L, null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
@@ -176,7 +176,7 @@ class ReservationServiceImplTest {
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(1L)).thenReturn(true);
         when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(true);
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
@@ -199,7 +199,7 @@ class ReservationServiceImplTest {
         when(themeRepository.findById(1L)).thenReturn(theme);
         when(reservationRepository.isDuplicatedWithName(any(), any(), any())).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null);
 
         // when & then
         assertThatCode(() -> reservationService.create(dto))
@@ -212,7 +212,7 @@ class ReservationServiceImplTest {
         // given
         ReservationTime time = new ReservationTime(1L, PAST_START, PAST_END);
         when(timeService.findById(1L)).thenReturn(time);
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null, null);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L, null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
@@ -249,9 +249,9 @@ class ReservationServiceImplTest {
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         List<ReservationWithWaitingOrder> reservationWithWaitingOrders = List.of(
                 new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme), Status.RESERVED, null),
+                        ThemeResponse.from(theme), Status.RESERVED, null, null, null, null),
                 new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme2), Status.WAITING, 3)
+                        ThemeResponse.from(theme2), Status.WAITING, 3, null, null, null)
         );
         when(reservationRepository.findAllByName("라이")).thenReturn(reservationWithWaitingOrders);
 

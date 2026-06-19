@@ -3,8 +3,6 @@ package roomescape.ui.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -120,7 +118,7 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId, null, null));
+            reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId, null));
             addSuccessMessage(redirectAttributes, "예약을 생성했습니다.");
         } catch (PastReservationException | DuplicateReservationException |
                  IllegalArgumentException | ThemeNotFoundException | TimeNotFoundException e) {
@@ -149,13 +147,12 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
-            Reservation created = reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId, orderId, amount));
+            Reservation created = reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId, amount));
             if (created.getStatus() == Status.WAITING) {
                 addSuccessMessage(redirectAttributes, "이미 예약된 슬롯이라 예약 대기로 등록되었습니다.");
                 return "redirect:/page/reservations?name=" + name;
             }
-            redirectAttributes.addAttribute("orderId", orderId);
+            redirectAttributes.addAttribute("orderId", created.getOrderId());
             redirectAttributes.addAttribute("amount", amount);
             redirectAttributes.addAttribute("orderName", "방탈출 예약");
             return "redirect:/page/payment";
