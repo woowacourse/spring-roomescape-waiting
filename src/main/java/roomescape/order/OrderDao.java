@@ -11,6 +11,8 @@ public interface OrderDao {
 
     Optional<Order> findPendingByReservationId(Long reservationId);
 
+    Optional<Order> findConfirmedByReservationId(Long reservationId);
+
     Order update(Order order);
 
     /**

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.LoginMember;
 import roomescape.member.Member;
+import roomescape.payment.service.PaymentCancellationService;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.web.dto.ReservationPatchDto;
@@ -26,9 +27,12 @@ import roomescape.reservation.web.dto.ReservationResponseDto;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final PaymentCancellationService paymentCancellationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                PaymentCancellationService paymentCancellationService) {
         this.reservationService = reservationService;
+        this.paymentCancellationService = paymentCancellationService;
     }
 
     @PostMapping
@@ -67,7 +71,7 @@ public class ReservationController {
             @LoginMember Member member,
             @PathVariable Long id
     ) {
-        reservationService.cancel(id, member);
+        paymentCancellationService.cancelBooking(member, id);
         return ResponseEntity.noContent().build();
     }
 }

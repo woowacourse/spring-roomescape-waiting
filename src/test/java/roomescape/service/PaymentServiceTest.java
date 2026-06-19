@@ -30,6 +30,7 @@ import roomescape.order.dao.OrderJdbcDao;
 import roomescape.payment.ConfirmOutcome;
 import roomescape.payment.PaymentApprovalStatus;
 import roomescape.payment.service.PaymentAbandonmentService;
+import roomescape.payment.service.PaymentCancellationService;
 import roomescape.payment.exception.PaymentGatewayUnreachableException;
 import roomescape.payment.exception.PaymentResultUnknownException;
 import roomescape.payment.service.PaymentHistoryService;
@@ -61,7 +62,7 @@ import roomescape.waiting.dao.WaitingJdbcDao;
  * 주문·예약은 실제 DAO/서비스로 굴려 *실제 상태 전이*와 와이어링까지 검증한다.
  */
 @JdbcTest
-@Import({PaymentService.class, PaymentHistoryService.class, PaymentAbandonmentService.class, PaymentReconciliationService.class, PaymentRefundService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
+@Import({PaymentService.class, PaymentHistoryService.class, PaymentAbandonmentService.class, PaymentCancellationService.class, PaymentReconciliationService.class, PaymentRefundService.class, OrderService.class, ReservationService.class, ReservationCreator.class,
         ReservationAuthorizationService.class, PromotionService.class, FakePaymentGateway.class,
         ReservationJdbcDao.class, OrderJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class,
         MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class, PromotionOutboxJdbcDao.class})
@@ -78,6 +79,8 @@ class PaymentServiceTest {
     private PaymentReconciliationService reconciliationService;
     @Autowired
     private PaymentRefundService refundService;
+    @Autowired
+    private PaymentCancellationService cancellationService;
     @Autowired
     private FakePaymentGateway fakeGateway;
     @Autowired
@@ -372,6 +375,36 @@ class PaymentServiceTest {
         assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
                 .isEqualTo(OrderStatus.NEEDS_REFUND);
         assertThat(fakeGateway.canceledPaymentKeys()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("정상 취소: 결제된 예약을 취소하면 예약은 CANCELED, 주문은 NEEDS_REFUND로 환불 예약된다")
+    void cancelBookingSchedulesRefundForPaidReservation() {
+        Created created = createReservationWithOrder();
+        paymentService.confirm(member, "pk-1", created.order().getOrderId(), created.order().getAmount());
+
+        cancellationService.cancelBooking(member, created.reservation().getId());
+
+        assertThat(reservationDao.findById(created.reservation().getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
+        // 외부 호출은 하지 않고 흔적만 남긴다 — 워커가 주울 NEEDS_REFUND.
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.NEEDS_REFUND);
+        assertThat(fakeGateway.canceledPaymentKeys()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("정상 취소 후 워커가 NEEDS_REFUND 주문을 게이트웨이 취소로 환불하고 FAILED로 수렴시킨다")
+    void cancelBookingThenWorkerRefunds() {
+        Created created = createReservationWithOrder();
+        paymentService.confirm(member, "pk-1", created.order().getOrderId(), created.order().getAmount());
+        cancellationService.cancelBooking(member, created.reservation().getId());
+
+        refundService.refund(created.order().getOrderId());
+
+        assertThat(orderDao.findByOrderId(created.order().getOrderId()).orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.FAILED);
+        assertThat(fakeGateway.canceledPaymentKeys()).contains("pk-1");
     }
 
     @Test

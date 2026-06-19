@@ -56,6 +56,15 @@ public class OrderService {
         return orderDao.findByOrderId(orderId);
     }
 
+    /**
+     * 예약에 묶인 결제 완료(CONFIRMED) 주문을 찾는다. 결제된 예약을 취소할 때 환불 대상 주문을 집기 위함 —
+     * 결제 없이 확정된(어드민) 예약이면 비어 있다.
+     */
+    @Transactional(readOnly = true)
+    public Optional<Order> findConfirmedByReservationId(Long reservationId) {
+        return orderDao.findConfirmedByReservationId(reservationId);
+    }
+
     @Transactional(readOnly = true)
     public List<Order> findByReservationIds(List<Long> reservationIds) {
         return orderDao.findByReservationIds(reservationIds);

@@ -62,6 +62,15 @@ public class OrderJdbcDao implements OrderDao {
 
     @Override
     public Optional<Order> findPendingByReservationId(Long reservationId) {
+        return findByReservationIdAndStatus(reservationId, OrderStatus.PENDING);
+    }
+
+    @Override
+    public Optional<Order> findConfirmedByReservationId(Long reservationId) {
+        return findByReservationIdAndStatus(reservationId, OrderStatus.CONFIRMED);
+    }
+
+    private Optional<Order> findByReservationIdAndStatus(Long reservationId, OrderStatus status) {
         String sql = """
                 SELECT id, order_id, idempotency_key, reservation_id, amount, payment_key, status
                 FROM orders
@@ -69,7 +78,7 @@ public class OrderJdbcDao implements OrderDao {
                 """;
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("reservationId", reservationId)
-                .addValue("status", OrderStatus.PENDING.name());
+                .addValue("status", status.name());
         return jdbcTemplate.query(sql, params, ROW_MAPPER).stream().findFirst();
     }
 
