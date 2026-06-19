@@ -8,6 +8,7 @@ public record TossProperties(
         String secretKey,
         String clientKey,
         int connectTimeoutMs,
-        int readTimeoutMs
+        int readTimeoutMs,
+        int maxAttempts
 ) {
 }

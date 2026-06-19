@@ -13,3 +13,12 @@ toss:
   client-key: ${TOSS_CLIENT_KEY:test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq}
   connect-timeout-ms: 2000
   read-timeout-ms: 5000
+  max-attempts: 3
+
+rate-limit:
+  capacity: 20
+  refill-per-second: 10
+
+outbound-rate-limit:
+  capacity: 10
+  refill-per-second: 5
