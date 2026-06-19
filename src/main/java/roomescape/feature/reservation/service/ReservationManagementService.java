@@ -2,6 +2,7 @@ package roomescape.feature.reservation.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.feature.payment.PaymentApprover;
 import roomescape.feature.payment.PaymentException;
+import roomescape.feature.payment.PaymentProperties;
+import roomescape.feature.payment.PaymentTimeoutException;
+import roomescape.feature.payment.domain.Payment;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
 import roomescape.feature.reservation.domain.OrderStatus;
 import roomescape.feature.reservation.domain.Reservation;
@@ -46,19 +50,25 @@ public class ReservationManagementService implements ReservationService, AdminRe
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final PaymentApprover paymentApprover;
+    private final PaymentProperties paymentProperties;
     private final ReservationMapper reservationMapper;
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private final OrderPaymentService orderPaymentService;
+
     @Override
     public List<ReservationResponseDto> getReservations() {
-        List<Reservation> reservations = reservationRepository.findAllReservations();
-        return convertReservationsToDto(reservations);
+        return convertReservationsToDto(reservationRepository.findAllReservations());
     }
 
     private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
+        List<Long> reservationIds = reservations.stream().map(Reservation::getId).toList();
+        Map<Long, Payment> paymentsByReservationId = orderPaymentService.findPaymentsByReservationIds(reservationIds);
+
         return reservations.stream()
-                .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
+                .map(reservation -> reservationMapper.toResponseDto(
+                        reservation, getWaitingNumber(reservation), paymentsByReservationId.get(reservation.getId())))
                 .toList();
     }
 
@@ -72,10 +82,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
     @Override
     public List<ReservationResponseDto> getReservationsByName(ReserverName name) {
-        List<Reservation> reservations = reservationRepository.findReservationsByNameAndNotDeleted(name);
-        return reservations.stream()
-                .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
-                .toList();
+        return convertReservationsToDto(reservationRepository.findReservationsByNameAndNotDeleted(name));
     }
 
     @Override
@@ -111,7 +118,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
                     parameterErrorResponses);
         }
 
-        return Reservation.create(command.name(), command.date(), time, theme, status);
+        return Reservation.create(command.name(), command.date(), time, theme, status, paymentProperties.amount());
     }
 
     @Override
@@ -143,16 +150,22 @@ public class ReservationManagementService implements ReservationService, AdminRe
     public void confirmReservation(Long reservationId, PaymentApproveRequest request) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(reservationId)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
-        Reservation confirmedReservation = reservation.confirmOrder();
+        // 외부 호출 전 사전 검증: 이미 확정됐거나 금액이 어긋나면 토스를 호출하지 않고 즉시 차단한다.
+        reservation.confirmOrder(request.amount());
 
-        boolean approved = paymentApprover.approve(request);
+        boolean approved;
+        try {
+            approved = paymentApprover.approve(request);
+        } catch (PaymentTimeoutException e) {
+            // 결과 불명 → 실패로 단정하지 않고 '확인 필요'로 영속화한 뒤 그대로 표면화한다.
+            orderPaymentService.markConfirmationRequired(reservationId, request);
+            throw e;
+        }
         if (!approved) {
             throw new IllegalStateException("결제 승인에 실패했습니다.");
         }
 
-        reservationRepository.changeOrderStatus(
-                reservationId, reservation.getVersion(),
-                reservation.getOrderStatus(), confirmedReservation.getOrderStatus());
+        orderPaymentService.confirm(reservationId, request);
     }
 
     @Override

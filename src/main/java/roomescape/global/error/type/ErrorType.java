@@ -7,4 +7,6 @@ public interface ErrorType {
     HttpStatus status();
 
     String message();
+
+    String code();
 }

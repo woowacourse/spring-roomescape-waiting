@@ -10,46 +10,60 @@ import roomescape.global.error.exception.GeneralException;
 @Getter
 public class Reservation {
 
+    // 금액이 관심사가 아닌 재구성(reconstruct) 편의 오버로드용 기본값
+    private static final long UNDEFINED_AMOUNT = 0L;
+
     private final Long id;
     private final ReserverName name;
     private final Slot slot;
     private final ReservationStatus status;
     private final OrderStatus orderStatus;
+    private final long amount;
     private final long version;
 
     private Reservation(
-        Long id, ReserverName name, Slot slot, ReservationStatus status, OrderStatus orderStatus, long version) {
+        Long id, ReserverName name, Slot slot, ReservationStatus status, OrderStatus orderStatus,
+        long amount, long version) {
         this.id = id;
         this.name = name;
         this.slot = slot;
         this.status = status;
         this.orderStatus = orderStatus;
+        this.amount = amount;
         this.version = version;
     }
 
-    public static Reservation create(ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
+    public static Reservation create(
+        ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status, long amount) {
         Slot slot = new Slot(date, time, theme);
         validateFuture(slot);
 
-        return new Reservation(null, name, slot, status, OrderStatus.PENDING, 0L);
+        return new Reservation(null, name, slot, status, OrderStatus.PENDING, amount, 0L);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status) {
-        return new Reservation(id, name, new Slot(date, time, theme), status, OrderStatus.PENDING, 0L);
+        return new Reservation(id, name, new Slot(date, time, theme), status, OrderStatus.PENDING, UNDEFINED_AMOUNT, 0L);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status, long version) {
-        return new Reservation(id, name, new Slot(date, time, theme), status, OrderStatus.PENDING, version);
+        return new Reservation(
+            id, name, new Slot(date, time, theme), status, OrderStatus.PENDING, UNDEFINED_AMOUNT, version);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status, OrderStatus orderStatus, long version) {
-        return new Reservation(id, name, new Slot(date, time, theme), status, orderStatus, version);
+        return new Reservation(id, name, new Slot(date, time, theme), status, orderStatus, UNDEFINED_AMOUNT, version);
+    }
+
+    public static Reservation reconstruct(
+        Long id, ReserverName name, LocalDate date,
+        Time time, Theme theme, ReservationStatus status, OrderStatus orderStatus, long amount, long version) {
+        return new Reservation(id, name, new Slot(date, time, theme), status, orderStatus, amount, version);
     }
 
     public Reservation update(ReserverName requestName, LocalDate newDate, Time newTime, Theme newTheme) {
@@ -57,7 +71,7 @@ public class Reservation {
         validateUpdatable(requestName, newSlot);
         validateChanged(newSlot);
 
-        return new Reservation(this.id, this.name, newSlot, this.status, this.orderStatus, this.version);
+        return new Reservation(this.id, this.name, newSlot, this.status, this.orderStatus, this.amount, this.version);
     }
 
     public Reservation delete() {
@@ -65,7 +79,8 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.ALREADY_DELETED);
         }
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.DELETED, this.orderStatus, this.version);
+        return new Reservation(
+            this.id, this.name, this.slot, ReservationStatus.DELETED, this.orderStatus, this.amount, this.version);
     }
 
     public Reservation cancelActive(ReserverName requestName) {
@@ -74,7 +89,8 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.orderStatus, this.version);
+        return new Reservation(
+            this.id, this.name, this.slot, ReservationStatus.CANCELED, this.orderStatus, this.amount, this.version);
     }
 
     public Reservation cancelWaiting(ReserverName requestName) {
@@ -83,7 +99,8 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.orderStatus, this.version);
+        return new Reservation(
+            this.id, this.name, this.slot, ReservationStatus.CANCELED, this.orderStatus, this.amount, this.version);
     }
 
     public Reservation confirmWaiting() {
@@ -91,10 +108,31 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
         }
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.ACTIVE, this.orderStatus, this.version);
+        return new Reservation(
+            this.id, this.name, this.slot, ReservationStatus.ACTIVE, this.orderStatus, this.amount, this.version);
     }
 
-    public Reservation confirmOrder() {
+    public Reservation confirmOrder(long paidAmount) {
+        if (this.status != ReservationStatus.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+        // PENDING(미결제)과 CONFIRMATION_REQUIRED(결과 불명)는 확정 가능. 이미 CONFIRMED 인 경우만 거절한다.
+        if (this.orderStatus == OrderStatus.CONFIRMED) {
+            throw new GeneralException(ReservationErrorType.ALREADY_CONFIRMED_ORDER);
+        }
+        if (this.amount != paidAmount) {
+            throw new GeneralException(ReservationErrorType.PAYMENT_AMOUNT_MISMATCH);
+        }
+
+        return new Reservation(
+            this.id, this.name, this.slot, this.status, OrderStatus.CONFIRMED, this.amount, this.version);
+    }
+
+    /**
+     * 결제 결과가 불명확(read timeout 등)할 때 '확인 필요' 상태로 표시한다.
+     * 결제 실패로 단정하지 않으며, 이후 재확인으로 확정될 수 있다.
+     */
+    public Reservation markConfirmationRequired() {
         if (this.status != ReservationStatus.ACTIVE) {
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
@@ -102,7 +140,8 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.ALREADY_CONFIRMED_ORDER);
         }
 
-        return new Reservation(this.id, this.name, this.slot, this.status, OrderStatus.CONFIRMED, this.version);
+        return new Reservation(
+            this.id, this.name, this.slot, this.status, OrderStatus.CONFIRMATION_REQUIRED, this.amount, this.version);
     }
 
     private void validateCancelable(ReserverName requestName) {

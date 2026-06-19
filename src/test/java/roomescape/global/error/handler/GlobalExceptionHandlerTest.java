@@ -22,6 +22,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import roomescape.feature.payment.PaymentConnectionException;
+import roomescape.feature.payment.PaymentException;
+import roomescape.feature.payment.PaymentFailureType;
+import roomescape.feature.payment.PaymentTimeoutException;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.global.error.dto.ErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
@@ -92,7 +96,7 @@ class GlobalExceptionHandlerTest {
                 handler.handleIllegalRequestForm(exception);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
+            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("INVALID_REQUEST", "요청 형식이 올바르지 않습니다."));
         }
 
         @Test
@@ -103,7 +107,7 @@ class GlobalExceptionHandlerTest {
                 handler.handleIllegalRequestForm(exception);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
+            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("INVALID_REQUEST", "요청 형식이 올바르지 않습니다."));
         }
 
         @Test
@@ -115,7 +119,7 @@ class GlobalExceptionHandlerTest {
                 handler.handleIllegalRequestForm(exception);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
+            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("INVALID_REQUEST", "요청 형식이 올바르지 않습니다."));
         }
 
         @Test
@@ -127,7 +131,7 @@ class GlobalExceptionHandlerTest {
                 handler.handleIllegalRequestForm(exception);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
+            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("INVALID_REQUEST", "요청 형식이 올바르지 않습니다."));
         }
     }
 
@@ -197,6 +201,66 @@ class GlobalExceptionHandlerTest {
                     new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."),
                     new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다.")
                 );
+        }
+    }
+
+    @Nested
+    class PaymentException_처리 {
+
+        @Test
+        void CARD_DECLINED는_400과_failureType을_code로_반환한다() {
+            PaymentException exception = new PaymentException(
+                PaymentFailureType.CARD_DECLINED, "REJECT_CARD_COMPANY", "결제 승인이 거절되었습니다.");
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody().code()).isEqualTo("CARD_DECLINED");
+        }
+
+        @Test
+        void CLIENT_FAULT는_500과_failureType을_code로_반환한다() {
+            PaymentException exception = new PaymentException(
+                PaymentFailureType.CLIENT_FAULT, "INVALID_API_KEY", "잘못된 시크릿키 연동 정보 입니다.");
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(response.getBody().code()).isEqualTo("CLIENT_FAULT");
+        }
+
+        @Test
+        void RETRYABLE는_503을_반환한다() {
+            PaymentException exception = new PaymentException(
+                PaymentFailureType.RETRYABLE, "PROVIDER_ERROR", "일시적인 오류입니다.");
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
+
+    @Nested
+    class 전송_계층_실패_처리 {
+
+        @Test
+        void 연결_실패는_503과_PAYMENT_GATEWAY_UNREACHABLE을_반환한다() {
+            PaymentConnectionException exception = new PaymentConnectionException(new RuntimeException("connect refused"));
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentConnectionException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+            assertThat(response.getBody().code()).isEqualTo("PAYMENT_GATEWAY_UNREACHABLE");
+        }
+
+        @Test
+        void 읽기_타임아웃은_504와_PAYMENT_RESULT_UNKNOWN을_반환한다() {
+            PaymentTimeoutException exception = new PaymentTimeoutException(new RuntimeException("read timed out"));
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentTimeoutException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
+            assertThat(response.getBody().code()).isEqualTo("PAYMENT_RESULT_UNKNOWN");
         }
     }
 

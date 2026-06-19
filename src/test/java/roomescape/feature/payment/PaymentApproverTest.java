@@ -3,6 +3,7 @@ package roomescape.feature.payment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -10,6 +11,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
 
@@ -75,6 +79,68 @@ class PaymentApproverTest {
 
         // then
         assertThat(approved).isFalse();
+    }
+
+    @Test
+    void 멱등성을_위해_Idempotency_Key_헤더로_orderId를_전송한다() {
+        // given
+        mockTossServer.expect(requestTo(APPROVE_URL))
+                .andExpect(header("Idempotency-Key", ORDER_ID))
+                .andRespond(withSuccess(
+                        "{\"status\":\"DONE\",\"paymentKey\":\"%s\"}".formatted(PAYMENT_KEY),
+                        MediaType.APPLICATION_JSON));
+
+        // when
+        boolean approved = paymentApprover.approve(APPROVE_REQUEST);
+
+        // then
+        assertThat(approved).isTrue();
+        mockTossServer.verify();
+    }
+
+    @Test
+    void 연결_실패는_PaymentConnectionException으로_변환한다() {
+        // given: TCP 연결 수립 실패 (ConnectException) → ResourceAccessException 으로 표면화
+        mockTossServer.expect(requestTo(APPROVE_URL))
+                .andRespond(request -> {
+                    throw new ResourceAccessException("connection refused", new ConnectException("Connection refused"));
+                });
+
+        // when
+        Throwable thrown = catchThrowable(() -> paymentApprover.approve(APPROVE_REQUEST));
+
+        // then
+        assertThat(thrown).isInstanceOf(PaymentConnectionException.class);
+    }
+
+    @Test
+    void 느린_응답은_PaymentTimeoutException으로_변환한다() {
+        // given: 읽기 타임아웃 (SocketTimeoutException) → ResourceAccessException 으로 표면화
+        mockTossServer.expect(requestTo(APPROVE_URL))
+                .andRespond(request -> {
+                    throw new ResourceAccessException("read timed out", new SocketTimeoutException("Read timed out"));
+                });
+
+        // when
+        Throwable thrown = catchThrowable(() -> paymentApprover.approve(APPROVE_REQUEST));
+
+        // then
+        assertThat(thrown).isInstanceOf(PaymentTimeoutException.class);
+    }
+
+    @Test
+    void 이미_처리된_결제는_승인_성공으로_간주해_true를_반환한다() {
+        // given: 토스가 ALREADY_PROCESSED_PAYMENT 에러를 응답 (멱등 케이스)
+        mockTossServer.expect(requestTo(APPROVE_URL))
+                .andRespond(withStatus(HttpStatus.BAD_REQUEST)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"code\":\"ALREADY_PROCESSED_PAYMENT\",\"message\":\"이미 처리된 결제 입니다.\"}"));
+
+        // when
+        boolean approved = paymentApprover.approve(APPROVE_REQUEST);
+
+        // then
+        assertThat(approved).isTrue();
     }
 
     @Nested

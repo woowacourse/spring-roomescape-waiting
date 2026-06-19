@@ -22,4 +22,9 @@ public enum GeneralErrorType implements ErrorType {
     public String message() {
         return message;
     }
+
+    @Override
+    public String code() {
+        return name();
+    }
 }

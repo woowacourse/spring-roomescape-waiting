@@ -11,6 +11,8 @@ public enum ReservationFixture {
     FUTURE("예약자", LocalDate.now().plusYears(1)),
     PAST("예약자", LocalDate.now().minusYears(1));
 
+    public static final long DEFAULT_AMOUNT = 1_000L;
+
     private final String name;
     private final LocalDate date;
 
@@ -20,7 +22,7 @@ public enum ReservationFixture {
     }
 
     public Reservation createInstance(Time time, Theme theme) {
-        return Reservation.create(new ReserverName(name), date, time, theme, ReservationStatus.ACTIVE);
+        return Reservation.create(new ReserverName(name), date, time, theme, ReservationStatus.ACTIVE, DEFAULT_AMOUNT);
     }
 
     public String getName() {
