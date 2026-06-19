@@ -125,11 +125,8 @@ class TossPaymentGatewayTest {
     @ParameterizedTest
     @MethodSource("retryableErrorBodies")
     void confirm_maps_retryable_toss_error_to_retryable_payment_gateway_exception(String responseBody) {
-        server.expect(once(), requestTo(TOSS_CONFIRM_URL))
-                .andExpect(method(HttpMethod.POST))
-                .andRespond(withServerError()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(responseBody));
+        expectRetryableTossError(responseBody);
+        expectRetryableTossError(responseBody);
 
         assertThatThrownBy(() -> gateway.confirm(paymentConfirmation()))
                 .isInstanceOf(RetryablePaymentGatewayException.class)
@@ -206,6 +203,14 @@ class TossPaymentGatewayTest {
                   "message": "토스 내부 처리 실패"
                 }
                 """);
+    }
+
+    private void expectRetryableTossError(String responseBody) {
+        server.expect(once(), requestTo(TOSS_CONFIRM_URL))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withServerError()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(responseBody));
     }
 
     private PaymentConfirmation paymentConfirmation() {

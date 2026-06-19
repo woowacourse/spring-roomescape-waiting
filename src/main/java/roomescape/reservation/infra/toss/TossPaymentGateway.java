@@ -30,6 +30,8 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class TossPaymentGateway implements PaymentGateway {
 
+    private static final int MAX_CONFIRM_ATTEMPTS = 3;
+
     private final RestClient tossRestClient;
     private final ObjectMapper objectMapper;
 
@@ -41,6 +43,20 @@ public class TossPaymentGateway implements PaymentGateway {
                 confirmation.amount()
         );
 
+        for (int attempt = 1; attempt <= MAX_CONFIRM_ATTEMPTS; attempt++) {
+            try {
+                return requestConfirm(confirmation, request);
+            } catch (RetryablePaymentGatewayException e) {
+                if (attempt == MAX_CONFIRM_ATTEMPTS) {
+                    throw e;
+                }
+            }
+        }
+
+        throw new PaymentGatewayException("결제 승인에 실패했습니다.");
+    }
+
+    private PaymentResult requestConfirm(PaymentConfirmation confirmation, ConfirmRequest request) {
         TossPaymentResponse response;
         try {
             response = tossRestClient.post()
