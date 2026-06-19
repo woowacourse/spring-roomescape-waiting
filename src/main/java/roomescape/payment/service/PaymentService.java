@@ -1,10 +1,15 @@
 package roomescape.payment.service;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.infrastructure.payment.toss.toss.TossPaymentException;
 import roomescape.payment.Payment;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
@@ -33,8 +38,17 @@ public class PaymentService {
     }
 
     public Payment createReservationOrder(Long reservationId) {
+        Optional<Payment> existingPayment = paymentDao.selectByReservationId(reservationId);
+        if (existingPayment.isPresent()) {
+            return existingPayment.get();
+        }
         String orderId = "reservation-" + reservationId + "-" + UUID.randomUUID().toString().replace("-", "");
-        return paymentDao.save(new Payment(reservationId, orderId, RESERVATION_PAYMENT_AMOUNT));
+        String idempotencyKey = UUID.randomUUID().toString();
+        return paymentDao.save(new Payment(reservationId, orderId, idempotencyKey, RESERVATION_PAYMENT_AMOUNT));
+    }
+
+    public Optional<Payment> findOrderByReservationId(Long reservationId) {
+        return paymentDao.selectByReservationId(reservationId);
     }
 
     public Payment findLatestOrderByReservationId(Long reservationId) {
@@ -42,7 +56,7 @@ public class PaymentService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = {RoomescapeException.class, TossPaymentException.class})
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         Payment payment = paymentDao.selectByOrderId(orderId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.PAYMENT_NOT_FOUND));
@@ -50,13 +64,48 @@ public class PaymentService {
         if (!payment.getAmount().equals(amount)) {
             throw new PaymentAmountMismatchException(payment.getAmount(), amount);
         }
-        var confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
-        PaymentResult result = paymentGateway.confirm(confirmation);
+        var confirmation = new PaymentConfirmation(paymentKey, orderId, payment.getIdempotencyKey(), amount);
+        PaymentResult result = confirmPayment(orderId, confirmation);
         if (result.status() != PaymentStatus.DONE) {
+            paymentDao.updateStatus(orderId, PaymentStatus.FAILED);
             throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
         paymentDao.updateApproved(orderId, result.paymentKey(), result.status());
         reservationDao.updateStatusById(payment.getReservationId(), ReservationStatus.CONFIRMED);
         return result;
+    }
+
+    private PaymentResult confirmPayment(String orderId, PaymentConfirmation confirmation) {
+        try {
+            return paymentGateway.confirm(confirmation);
+        } catch (TossPaymentException.AlreadyProcessed e) {
+            paymentDao.updateStatus(orderId, PaymentStatus.UNKNOWN);
+            throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRM_UNKNOWN);
+        } catch (TossPaymentException e) {
+            paymentDao.updateStatus(orderId, PaymentStatus.FAILED);
+            throw e;
+        } catch (RestClientException e) {
+            if (hasCause(e, SocketTimeoutException.class)) {
+                paymentDao.updateStatus(orderId, PaymentStatus.UNKNOWN);
+                throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRM_UNKNOWN);
+            }
+            if (hasCause(e, ConnectException.class)) {
+                paymentDao.updateStatus(orderId, PaymentStatus.FAILED);
+                throw new RoomescapeException(ErrorCode.PAYMENT_GATEWAY_UNAVAILABLE);
+            }
+            paymentDao.updateStatus(orderId, PaymentStatus.UNKNOWN);
+            throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRM_UNKNOWN);
+        }
+    }
+
+    private boolean hasCause(Throwable throwable, Class<? extends Throwable> causeType) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }

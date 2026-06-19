@@ -49,10 +49,13 @@ CREATE TABLE payment(
     reservation_id BIGINT NOT NULL,
     payment_key VARCHAR(255),
     order_id VARCHAR(64) NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,
     amount BIGINT NOT NULL,
     status VARCHAR(20) NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE RESTRICT,
+    UNIQUE (reservation_id),
+    UNIQUE (idempotency_key),
     UNIQUE (order_id)
 );
