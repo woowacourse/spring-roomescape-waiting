@@ -100,7 +100,7 @@ public class SlotDaoTest {
     }
 
     @Test
-    void 참조하는_대기가_없으면_슬롯이_삭제된다() {
+    void 슬롯을_삭제한다() {
         long deleted = slotDao.delete(1L);
 
         assertThat(deleted).isEqualTo(1L);
@@ -108,7 +108,7 @@ public class SlotDaoTest {
     }
 
     @Test
-    void 대기가_참조하는_슬롯_삭제시_FK_제약으로_예외가_발생한다() {
+    void 대기가_참조하는_슬롯은_삭제할_수_없다() {
         jdbcTemplate.update("insert into waiting (slot_id, name, created_at) values (1, '테스트', '2026-05-15 10:30:00')");
 
         assertThatThrownBy(() -> slotDao.delete(1L))

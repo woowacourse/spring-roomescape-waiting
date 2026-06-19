@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservationOrder.OrderResponse;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
+import roomescape.service.ReservationOrderService;
 import roomescape.service.ReservationService;
 
 import java.util.List;
@@ -24,11 +26,14 @@ public class ReservationRestController {
 
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
+    private final ReservationOrderService reservationOrderService;
 
     public ReservationRestController(ReservationService reservationService,
-                                     ReservationWaitingService reservationWaitingService) {
+                                     ReservationWaitingService reservationWaitingService,
+                                     ReservationOrderService reservationOrderService) {
         this.reservationService = reservationService;
         this.reservationWaitingService = reservationWaitingService;
+        this.reservationOrderService = reservationOrderService;
     }
 
     @GetMapping("/reservations")
@@ -47,15 +52,21 @@ public class ReservationRestController {
         return ResponseEntity.ok(reservationResponse);
     }
 
+    @GetMapping("/reservations/{reservationId}/order")
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable long reservationId) {
+        OrderResponse orderResponse = OrderResponse.from(reservationOrderService.getByReservationId(reservationId));
+        return ResponseEntity.ok(orderResponse);
+    }
+
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest reservationReq) {
-        ReservationResponse newReservation = reservationService.create(reservationReq);
+    public ResponseEntity<OrderResponse> create(@RequestBody ReservationRequest reservationReq) {
+        OrderResponse newReservation = reservationService.reserve(reservationReq);
         return new ResponseEntity<>(newReservation, HttpStatus.CREATED);
     }
 
     @PutMapping("/reservations/{id}")
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id,
-                                                      @RequestBody ReservationRequest reservationReq) {
+                                                  @RequestBody ReservationRequest reservationReq) {
         ReservationResponse updatedReservation = reservationService.update(id, reservationReq);
         return ResponseEntity.ok(updatedReservation);
     }

@@ -91,42 +91,6 @@ public class ReservationTest {
     }
 
     @Test
-    void 미래_슬롯으로_이동하면_정상_변경된다() {
-        Slot currentSlot = slotOf(LocalDateTime.now().plusDays(1));
-        Slot newSlot = slotOf(LocalDateTime.now().plusDays(2));
-        Reservation reservation = Reservation.restore(1L, currentSlot, "브라운", LocalDateTime.now());
-
-        Reservation moved = reservation.update("네오", newSlot);
-
-        assertThat(moved.getId()).isEqualTo(1L);
-        assertThat(moved.getName()).isEqualTo("네오");
-        assertThat(moved.getDate()).isEqualTo(newSlot.getDate());
-        assertThat(moved.getTime()).isEqualTo(newSlot.getTime());
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 과거_슬롯으로_이동하면_예외가_발생한다(int day, int hour) {
-        Slot currentSlot = slotOf(LocalDateTime.now().plusDays(1));
-        Slot pastSlot = slotOf(LocalDateTime.now().minusDays(day).minusHours(hour));
-        Reservation reservation = Reservation.restore(1L, currentSlot, "브라운", LocalDateTime.now());
-
-        assertThatThrownBy(() -> reservation.update("네오", pastSlot))
-                .isExactlyInstanceOf(ExpiredDateTimeException.class);
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 과거_예약은_미래_슬롯으로_이동해도_예외가_발생한다(int day, int hour) {
-        Slot pastSlot = slotOf(LocalDateTime.now().minusDays(day).minusHours(hour));
-        Slot futureSlot = slotOf(LocalDateTime.now().plusDays(2));
-        Reservation reservation = Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now());
-
-        assertThatThrownBy(() -> reservation.update("네오", futureSlot))
-                .isExactlyInstanceOf(ExpiredDateTimeException.class);
-    }
-
-    @Test
     void isReservedBy는_예약자_이름과_일치하는지_확인한다() {
         Slot slot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
         Reservation reservation = Reservation.restore(1L, slot, "브라운", LocalDateTime.now());

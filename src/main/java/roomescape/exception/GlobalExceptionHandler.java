@@ -11,6 +11,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handle(HttpMessageNotReadableException e) {
+        Throwable cause = e.getMostSpecificCause();
+        if (cause instanceof InvalidInputException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse("INVALID_INPUT", cause.getMessage()));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_INPUT", "요청 본문을 해석할 수 없습니다."));
+    }
+
     @ExceptionHandler(ReservationAlreadyExistException.class)
     public ResponseEntity<ErrorResponse> handle(ReservationAlreadyExistException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -63,20 +74,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handle(DataIntegrityViolationException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("DATA_INTEGRITY_VIOLATION", "데이터 충돌이 발생했습니다. 다시 시도해주세요."));
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handle(HttpMessageNotReadableException e) {
-        Throwable cause = e.getCause();
-        while (cause != null && !(cause instanceof InvalidInputException)) {
-            cause = cause.getCause();
-        }
-        if (cause == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("INVALID_INPUT", "요청 본문을 읽을 수 없습니다."));
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_INPUT", cause.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)

@@ -10,40 +10,60 @@ import roomescape.exception.ExpiredDateTimeException;
 public class Reservation {
 
     private final Long id;
-    private final String name;
     private final Slot slot;
-
+    private final String name;
     private final LocalDateTime createdAt;
+    private final boolean paid;
 
-    private Reservation(Long id, String name, Slot slot, LocalDateTime createdAt) {
+    private Reservation(Long id, Slot slot, String name, LocalDateTime createdAt, boolean paid) {
         this.id = id;
         this.slot = slot;
         this.name = name;
         this.createdAt = createdAt;
+        this.paid = paid;
     }
 
     public static Reservation create(String name, Slot slot) {
         validateNotExpired(slot);
-        return new Reservation(null, name, slot, LocalDateTime.now());
+        return new Reservation(null, slot, name, LocalDateTime.now(), false);
     }
 
     public static Reservation restore(Long id, Slot slot, String name, LocalDateTime createdAt) {
-        return new Reservation(id, name, slot, createdAt);
+        return new Reservation(id, slot, name, createdAt, false);
+    }
+
+    public static Reservation restore(Long id, Slot slot, String name, LocalDateTime createdAt, boolean paid) {
+        return new Reservation(id, slot, name, createdAt, paid);
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, this.name, this.slot, this.createdAt);
+        return new Reservation(id, this.slot, this.name, this.createdAt, this.paid);
     }
 
     public Reservation update(String name) {
         validateNotExpired(this.slot);
-        return new Reservation(this.id, name, this.slot, this.createdAt);
+        return new Reservation(this.id, this.slot, name, this.createdAt, this.paid);
     }
 
     public Reservation update(String name, Slot slot) {
-        validateNotExpired(this.slot);
         validateNotExpired(slot);
-        return new Reservation(this.id, name, slot, LocalDateTime.now());
+        return new Reservation(this.id, slot, name, LocalDateTime.now(), this.paid);
+    }
+
+    public Reservation updatePaid(boolean paid) {
+        return new Reservation(this.id, this.slot, this.name, this.createdAt, paid);
+    }
+
+    public Reservation confirmPayment() {
+        return new Reservation(this.id, this.slot, this.name, this.createdAt, true);
+    }
+
+    public boolean isPaid() {
+        return paid;
+    }
+
+    public Long getSlotId() {
+        return slot.getId();
     }
 
     public boolean isReservedBy(String name) {
@@ -90,9 +110,5 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public long getSlotId() {
-        return slot.getId();
     }
 }

@@ -30,6 +30,7 @@ import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.repository.JdbcReservationOrderRepository;
 import roomescape.repository.JdbcReservationRepository;
 import roomescape.repository.JdbcReservationTimeRepository;
 import roomescape.repository.JdbcReservationWaitingRepository;
@@ -39,7 +40,8 @@ import roomescape.repository.JdbcThemeRepository;
 @JdbcTest
 @Import({ReservationService.class, SlotDomainService.class, JdbcSlotRepository.class,
         JdbcReservationRepository.class, JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class, JdbcReservationWaitingRepository.class})
+        JdbcThemeRepository.class, JdbcReservationWaitingRepository.class,
+        ReservationOrderService.class, JdbcReservationOrderRepository.class})
 class ReservationServiceTest {
 
     @Autowired

@@ -32,6 +32,7 @@ CREATE TABLE reservation
     slot_id    BIGINT       NOT NULL,
     name       VARCHAR(255) NOT NULL,
     created_at TIMESTAMP    NOT NULL,
+    paid       BOOLEAN      NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id),
     UNIQUE (slot_id),
     FOREIGN KEY (slot_id) REFERENCES slot (id) ON DELETE RESTRICT
@@ -46,4 +47,14 @@ CREATE TABLE waiting
     PRIMARY KEY (id),
     UNIQUE (slot_id, name),
     FOREIGN KEY (slot_id) REFERENCES slot (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE reservation_order
+(
+    id             VARCHAR(64)  NOT NULL,
+    amount         BIGINT       NOT NULL,
+    payment_key    VARCHAR(255),
+    reservation_id BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (reservation_id)
 );
