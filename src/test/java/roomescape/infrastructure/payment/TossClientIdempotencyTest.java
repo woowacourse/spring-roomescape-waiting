@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentStatus;
 import roomescape.exception.TossPaymentException;
@@ -32,6 +33,10 @@ import roomescape.exception.TossPaymentException;
  * <p>선행: 이 테스트는 read timeout 이 동작해야 시나리오가 성립한다. 타임아웃 학습 테스트를 먼저 통과시킨 뒤 풀자.
  */
 @SpringBootTest
+@TestPropertySource(properties = {
+        "outbound-rate-limit.capacity=1000",
+        "outbound-rate-limit.refill-per-second=1000"
+})
 class TossClientIdempotencyTest {
 
     static MockWebServer mockWebServer;

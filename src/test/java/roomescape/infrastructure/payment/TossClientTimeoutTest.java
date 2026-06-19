@@ -18,11 +18,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TossClientConfig;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.exception.TossPaymentException;
 
 @SpringBootTest
+@TestPropertySource(properties = {
+        "outbound-rate-limit.capacity=1000",
+        "outbound-rate-limit.refill-per-second=1000"
+})
 class TossClientTimeoutTest {
 
     // 응답 없는(SYN 무응답) IP → connect 가 매달려 connect timeout 을 유발한다.
@@ -121,7 +126,10 @@ class TossClientTimeoutTest {
         // 학생이 채운 tossRestClient 의 connect timeout 을 그대로 검증한다.
         // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(3초)이 끊어 실패시킨다.
         var gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500),
+                new TossClientConfig().tossRestClient(
+                        BLACKHOLE_URL, "test_gsk_dummy", 500, 500, 3,
+                        10L, 10.0
+                ),
                 new ObjectMapper());
 
         var start = System.nanoTime();

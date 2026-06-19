@@ -17,7 +17,8 @@ public class CheckoutController {
     private final ReservationService reservationService;
     private final String clientKey;
 
-    public CheckoutController(PaymentService paymentService, ReservationService reservationService, @Value("${toss.client-key}") String clientKey) {
+    public CheckoutController(PaymentService paymentService, ReservationService reservationService,
+                              @Value("${toss.client-key}") String clientKey) {
         this.paymentService = paymentService;
         this.reservationService = reservationService;
         this.clientKey = clientKey;
@@ -71,7 +72,9 @@ public class CheckoutController {
     }
 
     private String encode(String message) {
-        if (message == null) return "";
+        if (message == null) {
+            return "";
+        }
         return java.net.URLEncoder.encode(message, java.nio.charset.StandardCharsets.UTF_8);
     }
 }
