@@ -208,7 +208,7 @@ body.admin-body {
         grid-template-columns: 1fr 1.5fr;
         grid-template-rows: auto auto;
     }
-    
+
     .res-payment-box {
         padding: 0;
         grid-column: 1 / -1;
@@ -221,6 +221,7 @@ body.admin-body {
     .res-card {
         flex-direction: column;
     }
+
     .res-id-sidebar {
         padding: 10px;
         border-right: none;

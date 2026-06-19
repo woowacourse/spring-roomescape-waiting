@@ -276,7 +276,7 @@
             const badge = getBadgeInfo(r.status);
             const orderInfo = (r.order && r.status === 'WAITING') ? ` (대기 순번: ${r.order}번)` : '';
             const paymentBtn = (r.status === 'PENDING_PAYMENT' || r.status === 'UNCERTAIN')
-                ? (r.status === 'UNCERTAIN' && r.paymentKey 
+                ? (r.status === 'UNCERTAIN' && r.paymentKey
                     ? `<button class="btn-primary-sm" style="margin-right:8px;" onclick="location.href='/payments/success?paymentKey=${r.paymentKey}&orderId=${r.orderId}&amount=${r.amount}'">확인</button>`
                     : `<button class="btn-primary-sm" style="margin-right:8px;" onclick="payReservation('${r.orderId}', '${r.themeResponse.name}', ${r.amount})">${r.status === 'UNCERTAIN' ? '재시도' : '결제하기'}</button>`)
                 : '';
