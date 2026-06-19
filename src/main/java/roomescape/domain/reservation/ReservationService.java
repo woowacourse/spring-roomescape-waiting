@@ -1,8 +1,10 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,9 @@ public class ReservationService {
     private final WaitingRepository waitingRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentGateway paymentGateway;
+
+    @Value("${pending-ttl.minutes:30}")
+    private int pendingTtlMinutes;
 
     public ReservationService(
             ReservationRepository reservationRepository,
@@ -82,7 +87,8 @@ public class ReservationService {
         ReservationSlot slot = ReservationSlot.of(request.date(), time, theme);
         validateDuplicateReservation(slot);
 
-        Reservation pending = Reservation.pendingPayment(request.name(), request.date(), time, theme, orderId, quotedAmount);
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(pendingTtlMinutes);
+        Reservation pending = Reservation.pendingPayment(request.name(), request.date(), time, theme, orderId, quotedAmount, expiresAt);
         try {
             reservationRepository.save(pending);
         } catch (DuplicateKeyException exception) {
@@ -134,10 +140,11 @@ public class ReservationService {
 
     private void promoteToReservation(Waiting waiting) {
         String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(pendingTtlMinutes);
         try {
             Reservation pending = Reservation.pendingPayment(
                     waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme(), orderId,
-                    waiting.getTheme().getPrice()
+                    waiting.getTheme().getPrice(), expiresAt
             );
             reservationRepository.save(pending);
             waitingRepository.deleteById(waiting.getId());
@@ -168,6 +175,18 @@ public class ReservationService {
         } catch (DuplicateKeyException exception) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
+    }
+
+    @Transactional
+    public void expireAndPromote(Long reservationId) {
+        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+        if (reservation.getStatus() != ReservationStatus.PENDING_PAYMENT) {
+            return;
+        }
+        reservationRepository.deleteById(reservationId);
+        Waitings waitings = Waitings.of(waitingRepository.findAllBySlotForUpdate(reservation.getSlot()));
+        waitings.first().ifPresent(this::promoteToReservation);
     }
 
     @Transactional
