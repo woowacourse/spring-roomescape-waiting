@@ -67,12 +67,27 @@ function renderAll(reservations, waitings) {
 
   rows.forEach(({type, data}) => {
     const tr = document.createElement('tr');
-    if (type === 'reservation' && data.status === 'PENDING') {
+    if (type === 'reservation' && data.paymentStatus === 'UNKNOWN') {
+      tr.innerHTML = `
+        <td>${data.date}</td>
+        <td>${data.themeName}</td>
+        <td>${formatTime(data.time.startAt)}</td>
+        <td><span class="status-badge status-badge--waiting">확인 필요</span></td>
+        <td>${paymentCell(data)}</td>
+        <td style="text-align:right;">
+          <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
+            onclick="recheckPayment('${data.paymentKey}', '${data.orderId}', ${data.paymentAmount})">결과 확인</button>
+          <button class="btn btn-danger"
+            onclick="cancelReservation(${data.id})">취소</button>
+        </td>
+      `;
+    } else if (type === 'reservation' && data.status === 'PENDING') {
       tr.innerHTML = `
         <td>${data.date}</td>
         <td>${data.themeName}</td>
         <td>${formatTime(data.time.startAt)}</td>
         <td><span class="status-badge status-badge--waiting">결제 필요</span></td>
+        <td>${paymentCell(data)}</td>
         <td style="text-align:right;">
           <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
             onclick="payReservation('${data.orderId}')">결제하기</button>
@@ -86,6 +101,7 @@ function renderAll(reservations, waitings) {
         <td>${data.themeName}</td>
         <td>${formatTime(data.time.startAt)}</td>
         <td><span class="status-badge status-badge--reserved">예약</span></td>
+        <td>${paymentCell(data)}</td>
         <td style="text-align:right;">
           <button class="btn btn-secondary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
             onclick="openEditModal(${data.id}, '${data.date}', ${data.themeId})">변경</button>
@@ -99,6 +115,7 @@ function renderAll(reservations, waitings) {
         <td>${data.themeName}</td>
         <td>${formatTime(data.startAt)}</td>
         <td><span class="status-badge status-badge--waiting">대기 ${data.turn}순번</span></td>
+        <td>—</td>
         <td style="text-align:right;">
           <button class="btn btn-danger"
             onclick="cancelWaiting(${data.id})">취소</button>
@@ -109,6 +126,28 @@ function renderAll(reservations, waitings) {
   });
 }
 
+function paymentCell(data) {
+  const amount = data.paymentAmount != null ? data.paymentAmount.toLocaleString() + '원' : '';
+  const orderLine = data.orderId
+    ? `<div style="font-size:0.68rem;color:#aaa;word-break:break-all;">주문 ${data.orderId}</div>` : '';
+  if (data.paymentStatus === 'CONFIRMED') {
+    return `<span class="status-badge status-badge--reserved">확정</span>`
+      + `<div style="font-size:0.72rem;color:#888;margin-top:4px;">${amount}</div>`
+      + orderLine
+      + `<div style="font-size:0.68rem;color:#aaa;word-break:break-all;">결제키 ${data.paymentKey || ''}</div>`;
+  }
+  if (data.paymentStatus === 'UNKNOWN') {
+    return `<span class="status-badge status-badge--waiting">확인 필요</span>`
+      + orderLine;
+  }
+  if (data.paymentStatus === 'PENDING') {
+    return `<span class="status-badge status-badge--waiting">결제 대기</span>`
+      + `<div style="font-size:0.72rem;color:#888;margin-top:4px;">${amount}</div>`
+      + orderLine;
+  }
+  return '—';
+}
+
 function formatTime(value) {
   if (!value) return '';
   const parts = String(value).split(':');
@@ -117,6 +156,10 @@ function formatTime(value) {
 
 function payReservation(orderId) {
   window.location.href = `/payments/checkout?orderId=${orderId}`;
+}
+
+function recheckPayment(paymentKey, orderId, amount) {
+  window.location.href = `/payments/success?paymentKey=${paymentKey}&orderId=${orderId}&amount=${amount}`;
 }
 
 function cancelReservation(id, btn) {

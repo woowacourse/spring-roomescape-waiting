@@ -45,7 +45,7 @@ public class ReservationController {
     public ResponseEntity<List<ReservationResponse>> getMyReservations(@LoginMember Member member) {
         List<ReservationResponse> responses = reservationService.getReservationsByMember(member).stream()
                 .map(reservation -> ReservationResponse.of(
-                        reservation, paymentService.getPendingOrderId(reservation.getId())))
+                        reservation, paymentService.findByReservationId(reservation.getId()).orElse(null)))
                 .toList();
         return ResponseEntity.ok(responses);
     }

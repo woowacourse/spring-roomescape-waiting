@@ -13,5 +13,7 @@ public interface PaymentRepository {
 
     void confirm(String orderId, String paymentKey);
 
+    void markUnknown(String orderId, String paymentKey);
+
     void deleteByOrderId(String orderId);
 }
