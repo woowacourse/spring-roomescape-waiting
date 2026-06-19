@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
-import roomescape.global.ratelimit.NanoClockConfig;
 import roomescape.global.ratelimit.RateLimitConfig;
 import roomescape.global.ratelimit.RateLimiters;
 import roomescape.global.ratelimit.InboundRateLimitInterceptor;
@@ -18,8 +17,7 @@ import roomescape.global.ratelimit.InboundRateLimitInterceptor;
 @Import({
         InboundRateLimitInterceptor.class,
         RateLimiters.class,
-        RateLimitConfig.class,
-        NanoClockConfig.class
+        RateLimitConfig.class
 })
 public @interface WebMvcControllerTest {
     @AliasFor(annotation = WebMvcTest.class, attribute = "controllers")
