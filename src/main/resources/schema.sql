@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS reservation_waiting;
+DROP TABLE IF EXISTS reservation_payment;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS theme;
 DROP TABLE IF EXISTS reservation_time;
@@ -45,4 +46,22 @@ CREATE TABLE IF NOT EXISTS reservation_waiting
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     UNIQUE (name, date, time_id, theme_id)
+);
+
+CREATE TABLE IF NOT EXISTS reservation_payment
+(
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id    VARCHAR(64)  NOT NULL,
+    amount      BIGINT       NOT NULL,
+    payment_key VARCHAR(255),
+    name        VARCHAR(255) NOT NULL,
+    date        DATE         NOT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    time_id     BIGINT       NOT NULL,
+    theme_id    BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    UNIQUE (order_id),
+    UNIQUE (date, time_id, theme_id)
 );

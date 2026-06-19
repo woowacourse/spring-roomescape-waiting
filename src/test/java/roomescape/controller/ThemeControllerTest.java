@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,7 @@ class ThemeControllerTest extends ControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("id", 0)
-                .queryParam("date", "2026-04-29")
+                .queryParam("date", LocalDate.now().plusDays(1).toString())
                 .when().get("/themes/{id}/times")
                 .then().log().all()
                 .statusCode(200);

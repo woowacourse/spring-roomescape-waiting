@@ -157,7 +157,12 @@ class ReservationDaoTest {
 
     @Test
     void existsByDateAndTimeIdAndThemeId_존재하면_true() {
-        assertThat(reservationDao.existsByDateAndTimeIdAndThemeId(LocalDate.of(2026, 4, 29), 3L, 1L)).isTrue();
+        LocalDate date = LocalDate.now().plusDays(30);
+        ReservationTime time = new ReservationTime(3L, java.time.LocalTime.of(12, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        reservationDao.save(new Reservation("브라운", date, LocalDateTime.now(), time, theme));
+
+        assertThat(reservationDao.existsByDateAndTimeIdAndThemeId(date, 3L, 1L)).isTrue();
     }
 
     @Test

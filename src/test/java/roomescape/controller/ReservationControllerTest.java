@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.nullValue;
 
 import io.restassured.RestAssured;
@@ -27,7 +28,47 @@ class ReservationControllerTest extends ControllerTest {
                 .body("date", equalTo(date))
                 .body("time", equalTo("10:00"))
                 .body("themeName", equalTo("공포의 저택"))
-                .body("reservationStatus", equalTo("RESERVED"));
+                .body("reservationStatus", equalTo("CONFIRMED"));
+    }
+
+    @DisplayName("예약 결제 대기 주문 생성")
+    @Test
+    void 예약_결제_대기_주문_생성() {
+        String date = LocalDate.now().plusDays(1).toString();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservationParams("브라운", date, 1, 1))
+                .when().post("/reservations/payment")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", equalTo(1))
+                .body("orderId", matchesPattern("[A-Za-z0-9_-]{6,64}"))
+                .body("amount", equalTo(10000))
+                .body("clientKey", equalTo("test_gck_test"))
+                .body("orderName", equalTo("공포의 저택 예약"))
+                .body("reservationStatus", equalTo("PAYMENT_PENDING"));
+    }
+
+    @DisplayName("결제 대기 중인 슬롯은 다시 결제 대기 주문을 만들 수 없다")
+    @Test
+    void 결제_대기_중인_슬롯이면_409() {
+        String date = LocalDate.now().plusDays(1).toString();
+        Map<String, Object> params = reservationParams("브라운", date, 1, 1);
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/payment")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/payment")
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("이미 예약된 시간입니다."));
     }
 
     @DisplayName("사용자 예약 삭제")
@@ -69,13 +110,17 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("사용자 예약 조회")
     @Test
     void 사용자_예약_조회() {
+        String date = LocalDate.now().plusDays(1).toString();
+        createReservation("조회자", date, 1, 1);
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .queryParam("username", "김철수")
+                .queryParam("username", "조회자")
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservations[0].reservationStatus", equalTo("RESERVED"));
+                .body("reservations[0].date", equalTo(date))
+                .body("reservations[0].reservationStatus", equalTo("CONFIRMED"));
     }
 
     @DisplayName("존재하지 않는 시간으로 예약하면 404")
@@ -105,9 +150,12 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("이미 예약된 시간이면 409")
     @Test
     void 이미_예약된_시간이면_409() {
+        String date = LocalDate.now().plusDays(30).toString();
+        createReservation("포비", date, 3, 1);
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("브라운", "2026-04-29", 3, 1))
+                .body(reservationParams("브라운", date, 3, 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
@@ -181,7 +229,7 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(200)
                 .body("date", equalTo(updateDate))
                 .body("time", equalTo("11:00"))
-                .body("reservationStatus", equalTo("RESERVED"));
+                .body("reservationStatus", equalTo("CONFIRMED"));
     }
 
     @DisplayName("존재하지 않는 예약 변경하면 404")
@@ -313,9 +361,12 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("본인이 이미 예약한 슬롯에 대기 신청하면 409")
     @Test
     void 본인_예약_슬롯에_대기_신청하면_409() {
+        String futureDate = LocalDate.now().plusDays(30).toString();
+        createReservation("김철수", futureDate, 3, 1);
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("김철수", "2026-05-10", 3, 1))
+                .body(reservationParams("김철수", futureDate, 3, 1))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(409)
@@ -343,7 +394,7 @@ class ReservationControllerTest extends ControllerTest {
     void 존재하지_않는_시간으로_대기_신청하면_404() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("이영희", "2026-05-10", 999, 1))
+                .body(reservationParams("이영희", LocalDate.now().plusDays(1).toString(), 999, 1))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(404)
@@ -355,7 +406,7 @@ class ReservationControllerTest extends ControllerTest {
     void 존재하지_않는_테마로_대기_신청하면_404() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("이영희", "2026-05-10", 3, 999))
+                .body(reservationParams("이영희", LocalDate.now().plusDays(1).toString(), 3, 999))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(404)
@@ -476,7 +527,7 @@ class ReservationControllerTest extends ControllerTest {
                 .body("reservations[0].waitingNumber", equalTo(1))
                 .body("reservations[1].date", equalTo(futureDate))
                 .body("reservations[1].time", equalTo("16:00"))
-                .body("reservations[1].reservationStatus", equalTo("RESERVED"))
+                .body("reservations[1].reservationStatus", equalTo("CONFIRMED"))
                 .body("reservations[1].waitingNumber", nullValue());
     }
 

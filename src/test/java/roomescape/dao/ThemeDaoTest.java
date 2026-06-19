@@ -3,6 +3,7 @@ package roomescape.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +19,7 @@ import roomescape.domain.Theme;
 class ThemeDaoTest {
 
     private EmbeddedDatabase dataSource;
+    private JdbcTemplate jdbcTemplate;
     private ThemeDao themeDao;
 
     @BeforeEach
@@ -27,7 +29,8 @@ class ThemeDaoTest {
                 .addScript("classpath:schema.sql")
                 .addScript("classpath:data.sql")
                 .build();
-        themeDao = new ThemeDao(new JdbcTemplate(dataSource));
+        jdbcTemplate = new JdbcTemplate(dataSource);
+        themeDao = new ThemeDao(jdbcTemplate);
     }
 
     @AfterEach
@@ -57,7 +60,25 @@ class ThemeDaoTest {
 
     @Test
     void findPopularThemes_인기_테마_순위_조회() {
-        List<Theme> themes = themeDao.findPopularThemes(4, LocalDate.of(2026, 4, 29), LocalDate.of(2026, 5, 5));
+        clearReservations();
+        LocalDate from = LocalDate.now().minusDays(7);
+        LocalDate to = LocalDate.now().minusDays(1);
+        saveReservation("김철수", from, 3, 1);
+        saveReservation("이영희", from.plusDays(1), 5, 1);
+        saveReservation("박민준", from.plusDays(2), 7, 1);
+        saveReservation("최수진", from.plusDays(3), 4, 1);
+        saveReservation("정다은", from.plusDays(4), 8, 1);
+        saveReservation("강현수", from.plusDays(1), 6, 4);
+        saveReservation("윤지원", from.plusDays(2), 9, 4);
+        saveReservation("임서준", from.plusDays(3), 11, 4);
+        saveReservation("한지아", from.plusDays(4), 3, 4);
+        saveReservation("김철수", from.plusDays(2), 2, 3);
+        saveReservation("이영희", from.plusDays(5), 6, 3);
+        saveReservation("박민준", to, 10, 3);
+        saveReservation("최수진", from.plusDays(4), 4, 2);
+        saveReservation("강현수", to, 8, 2);
+
+        List<Theme> themes = themeDao.findPopularThemes(4, from, to);
 
         assertThat(themes).hasSize(4);
         assertThat(themes.get(0).getName()).isEqualTo("공포의 저택");
@@ -68,7 +89,11 @@ class ThemeDaoTest {
 
     @Test
     void findAvailableTimeById_예약된_시간은_false_나머지는_true() {
-        List<AvailableTime> times = themeDao.findAvailableTimeById(1L, LocalDate.of(2026, 5, 10));
+        clearReservations();
+        LocalDate date = LocalDate.now().plusDays(1);
+        saveReservation("김철수", date, 3, 1);
+
+        List<AvailableTime> times = themeDao.findAvailableTimeById(1L, date);
 
         AvailableTime bookedSlot = times.stream()
                 .filter(t -> t.time().getStartAt().getHour() == 12)
@@ -101,5 +126,19 @@ class ThemeDaoTest {
         int deletedCount = themeDao.delete(999L);
 
         assertThat(deletedCount).isZero();
+    }
+
+    private void clearReservations() {
+        jdbcTemplate.update("DELETE FROM reservation");
+    }
+
+    private void saveReservation(String name, LocalDate date, long timeId, long themeId) {
+        jdbcTemplate.update(
+                """
+                        INSERT INTO reservation (name, date, created_at, time_id, theme_id)
+                        VALUES (?, ?, ?, ?, ?)
+                        """,
+                name, date, LocalDateTime.now(), timeId, themeId
+        );
     }
 }

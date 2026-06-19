@@ -14,6 +14,8 @@ import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.InvalidInputException;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.exception.PastReservationException;
+import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.toss.TossPaymentException;
 import roomescape.service.exception.ReservationConflictException;
 
 @RestControllerAdvice
@@ -42,6 +44,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PastReservationException.class)
     public ResponseEntity<ErrorResponse> handlePastReservation(PastReservationException e) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentAmountMismatch(PaymentAmountMismatchException e) {
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleTossPayment(TossPaymentException e) {
+        return ResponseEntity.status(e.getStatus())
                 .body(new ErrorResponse(e.getMessage()));
     }
 

@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import java.net.URI;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,20 +18,31 @@ import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.MyReservationResponse;
 import roomescape.controller.dto.response.MyReservationsResponse;
+import roomescape.controller.dto.response.ReservationPaymentResponse;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationWaitingResponse;
 import roomescape.controller.dto.response.ReservationWaitingsResponse;
 import roomescape.controller.dto.response.ReservationsResponse;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationPayment;
+import roomescape.service.ReservationPaymentService;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/reservations")
 @RestController
 public class ReservationController {
     private final ReservationService reservationService;
+    private final ReservationPaymentService reservationPaymentService;
+    private final String tossClientKey;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(
+            ReservationService reservationService,
+            ReservationPaymentService reservationPaymentService,
+            @Value("${toss.client-key}") String tossClientKey
+    ) {
         this.reservationService = reservationService;
+        this.reservationPaymentService = reservationPaymentService;
+        this.tossClientKey = tossClientKey;
     }
 
     @GetMapping
@@ -48,6 +60,17 @@ public class ReservationController {
                 request.name(), request.date(), request.timeId(), request.themeId());
         ReservationResponse response = ReservationResponse.fromReserved(reservation, reservation.getTheme());
         URI location = URI.create("/reservations/" + response.id());
+        return ResponseEntity.created(location).body(response);
+    }
+
+    @PostMapping("/payment")
+    public ResponseEntity<ReservationPaymentResponse> createReservationPayment(
+            @Valid @RequestBody ReservationRequest request
+    ) {
+        ReservationPayment payment = reservationPaymentService.prepare(
+                request.name(), request.date(), request.timeId(), request.themeId());
+        ReservationPaymentResponse response = ReservationPaymentResponse.from(payment, tossClientKey);
+        URI location = URI.create("/reservations/payment/" + response.orderId());
         return ResponseEntity.created(location).body(response);
     }
 
