@@ -13,14 +13,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import roomescape.payment.client.dto.CancelRequest;
 import roomescape.payment.client.dto.ConfirmRequest;
 import roomescape.payment.NetworkUncertain;
+import roomescape.payment.PaymentGateway;
 import roomescape.payment.client.dto.TossErrorResponse;
 import roomescape.payment.client.dto.TossPaymentResponse;
 import roomescape.payment.dto.PaymentResult;
 
 @Component
-public class TossPaymentGateway {
+public class TossPaymentGateway implements PaymentGateway {
 
     private static final Logger log = LoggerFactory.getLogger(TossPaymentGateway.class);
+    private static final int CONFIRM_MAX_ATTEMPTS = 3;
+    private static final long CONFIRM_RETRY_DELAY_MS = 1_000L;
 
     private final RestClient tossRestClient;
     private final ObjectMapper objectMapper;
@@ -30,7 +33,7 @@ public class TossPaymentGateway {
         this.objectMapper = objectMapper;
     }
 
-    @Retryable(retryFor = TossPaymentException.Retryable.class, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+    @Retryable(retryFor = TossPaymentException.Retryable.class, maxAttempts = CONFIRM_MAX_ATTEMPTS, backoff = @Backoff(delay = CONFIRM_RETRY_DELAY_MS))
     public PaymentResult confirm(String paymentKey, String orderId, long amount) {
         log.info("결제 승인 요청 paymentKey={} orderId={} amount={}", paymentKey, orderId, amount);
         try {

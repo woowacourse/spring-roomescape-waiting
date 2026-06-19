@@ -1,6 +1,7 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,25 +19,31 @@ public class ReservationRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> Reservation.of(
-            resultSet.getLong("reservation_id"),
-            resultSet.getString("name"),
-            resultSet.getDate("date").toLocalDate(),
-            ReservationTime.of(
-                    resultSet.getLong("time_id"),
-                    resultSet.getTime("time_start_at").toLocalTime(),
-                    resultSet.getTime("time_finish_at").toLocalTime()
-            ),
-            Theme.of(
-                    resultSet.getLong("theme_id"),
-                    resultSet.getString("theme_name"),
-                    resultSet.getString("theme_description"),
-                    resultSet.getString("theme_image_url"),
-                    resultSet.getLong("theme_price")
-            ),
-            ReservationStatus.valueOf(resultSet.getString("status")),
-            resultSet.getString("order_id")
-    );
+    private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
+        java.sql.Timestamp expiresTs = resultSet.getTimestamp("pending_expires_at");
+        LocalDateTime pendingExpiresAt = expiresTs != null ? expiresTs.toLocalDateTime() : null;
+        return Reservation.of(
+                resultSet.getLong("reservation_id"),
+                resultSet.getString("name"),
+                resultSet.getDate("date").toLocalDate(),
+                ReservationTime.of(
+                        resultSet.getLong("time_id"),
+                        resultSet.getTime("time_start_at").toLocalTime(),
+                        resultSet.getTime("time_finish_at").toLocalTime()
+                ),
+                Theme.of(
+                        resultSet.getLong("theme_id"),
+                        resultSet.getString("theme_name"),
+                        resultSet.getString("theme_description"),
+                        resultSet.getString("theme_image_url"),
+                        resultSet.getLong("theme_price")
+                ),
+                ReservationStatus.valueOf(resultSet.getString("status")),
+                resultSet.getString("order_id"),
+                resultSet.getLong("quoted_amount"),
+                pendingExpiresAt
+        );
+    };
 
     private final RowMapper<Long> timeMapper = (resultSet, rowNum) ->
             resultSet.getLong("time_id");
@@ -70,10 +77,13 @@ public class ReservationRepository {
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId())
                 .addValue("status", reservation.getStatus().name())
-                .addValue("order_id", reservation.getOrderId());
+                .addValue("order_id", reservation.getOrderId())
+                .addValue("quoted_amount", reservation.getQuotedAmount())
+                .addValue("pending_expires_at", reservation.getPendingExpiresAt());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Reservation.of(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus(), reservation.getOrderId());
+                reservation.getTheme(), reservation.getStatus(), reservation.getOrderId(),
+                reservation.getQuotedAmount(), reservation.getPendingExpiresAt());
     }
 
     public void updateStatus(Long id, ReservationStatus status) {
@@ -137,7 +147,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findById(Long id) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount, r.pending_expires_at,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price
@@ -151,7 +161,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findByIdForUpdate(Long id) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount, r.pending_expires_at,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price
@@ -166,7 +176,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findBySlot(ReservationSlot slot) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount, r.pending_expires_at,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price
@@ -182,7 +192,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findByOrderId(String orderId) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount, r.pending_expires_at,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price
@@ -197,5 +207,33 @@ public class ReservationRepository {
     public void update(Reservation reservation) {
         String query = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
         jdbcTemplate.update(query, reservation.getDate(), reservation.getTime().getId(), reservation.getId());
+    }
+
+    public List<Reservation> findAllByStatus(ReservationStatus status) {
+        String query = """
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount, r.pending_expires_at,
+                       t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                       th.image_url AS theme_image_url, th.price AS theme_price
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme th ON r.theme_id = th.id
+                WHERE r.status = ?
+                """;
+        return jdbcTemplate.query(query, rowMapper, status.name());
+    }
+
+    public List<Reservation> findExpiredPending(LocalDateTime now) {
+        String query = """
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount, r.pending_expires_at,
+                       t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                       th.image_url AS theme_image_url, th.price AS theme_price
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme th ON r.theme_id = th.id
+                WHERE r.status = 'PENDING_PAYMENT' AND r.pending_expires_at < ?
+                """;
+        return jdbcTemplate.query(query, rowMapper, now);
     }
 }

@@ -30,8 +30,10 @@ CREATE TABLE reservation
     date     DATE         NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
-    status   VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
-    order_id VARCHAR(64)  UNIQUE NULL,
+    status              VARCHAR(20)  NOT NULL,
+    order_id            VARCHAR(64)  UNIQUE NULL,
+    quoted_amount       BIGINT       NOT NULL DEFAULT 0,
+    pending_expires_at  TIMESTAMP    NULL DEFAULT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
@@ -41,11 +43,12 @@ CREATE TABLE reservation
 CREATE TABLE payment
 (
     id             BIGINT       NOT NULL AUTO_INCREMENT,
-    payment_key    VARCHAR(200) NOT NULL UNIQUE,
-    order_id       VARCHAR(64)  NOT NULL UNIQUE,
-    amount         BIGINT       NOT NULL,
-    status         VARCHAR(20)  NOT NULL,
-    reservation_id BIGINT       NOT NULL,
+    payment_key      VARCHAR(200) NOT NULL UNIQUE,
+    order_id         VARCHAR(64)  NOT NULL UNIQUE,
+    amount           BIGINT       NOT NULL,
+    status           VARCHAR(20)  NOT NULL,
+    cancel_attempts  INT          NOT NULL DEFAULT 0,
+    reservation_id   BIGINT       NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
