@@ -11,8 +11,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.payment.NetworkUncertain;
+import roomescape.payment.PaymentGatewayConfigException;
 import roomescape.payment.PaymentGatewayException;
-import roomescape.payment.client.TossPaymentException;
+import roomescape.payment.PaymentTransientException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -29,17 +30,17 @@ public class GlobalExceptionHandler {
                 );
     }
 
-    @ExceptionHandler(TossPaymentException.GatewayConfig.class)
-    public ResponseEntity<ErrorResponse> handleTossGatewayConfig(TossPaymentException.GatewayConfig exception) {
-        log.error("[운영 알람] Toss API 키 설정 오류 code={} message={}", exception.getCode(), exception.getMessage());
+    @ExceptionHandler(PaymentGatewayConfigException.class)
+    public ResponseEntity<ErrorResponse> handleGatewayConfig(PaymentGatewayConfigException exception) {
+        log.error("[운영 알람] 결제 게이트웨이 설정 오류 code={} message={}", exception.getCode(), exception.getMessage());
         return ResponseEntity
                 .status(exception.getStatus())
                 .body(ErrorResponse.of(exception.getMessage()));
     }
 
-    @ExceptionHandler(TossPaymentException.Retryable.class)
-    public ResponseEntity<ErrorResponse> handleTossRetryable(TossPaymentException.Retryable exception) {
-        log.error("[운영 알람] Toss 내부 오류 재시도 초과 code={} message={}", exception.getCode(), exception.getMessage());
+    @ExceptionHandler(PaymentTransientException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentTransient(PaymentTransientException exception) {
+        log.error("[운영 알람] 결제 게이트웨이 일시적 오류 재시도 초과 code={} message={}", exception.getCode(), exception.getMessage());
         return ResponseEntity
                 .status(exception.getStatus())
                 .body(ErrorResponse.of(exception.getMessage()));

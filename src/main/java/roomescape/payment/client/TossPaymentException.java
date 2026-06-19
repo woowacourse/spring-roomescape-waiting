@@ -2,7 +2,9 @@ package roomescape.payment.client;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import roomescape.payment.PaymentGatewayConfigException;
 import roomescape.payment.PaymentGatewayException;
+import roomescape.payment.PaymentTransientException;
 import roomescape.payment.client.dto.TossErrorResponse;
 
 public class TossPaymentException extends PaymentGatewayException {
@@ -16,7 +18,7 @@ public class TossPaymentException extends PaymentGatewayException {
         this.code = code;
     }
 
-    public static TossPaymentException of(HttpStatusCode status, TossErrorResponse error) {
+    public static PaymentGatewayException of(HttpStatusCode status, TossErrorResponse error) {
         return switch (error.code()) {
             case "ALREADY_PROCESSED_PAYMENT" -> new AlreadyProcessed(error.message());
             case "DUPLICATED_ORDER_ID" -> new DuplicatedOrder(error.message());
@@ -62,7 +64,7 @@ public class TossPaymentException extends PaymentGatewayException {
         }
     }
 
-    public static class GatewayConfig extends TossPaymentException {
+    public static class GatewayConfig extends PaymentGatewayConfigException {
         public GatewayConfig(String message) {
             super(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED_KEY", message);
         }
@@ -80,7 +82,7 @@ public class TossPaymentException extends PaymentGatewayException {
         }
     }
 
-    public static class Retryable extends TossPaymentException {
+    public static class Retryable extends PaymentTransientException {
         public Retryable(String message) {
             super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
         }
