@@ -117,7 +117,7 @@ class TossClientTimeoutTest {
     void confirm_fails_after_connect_timeout_when_toss_host_does_not_respond() {
         // Spring context 대신 timeout 값이 들어간 RestClient를 직접 만들어 connect timeout만 검증한다.
         TossPaymentGateway gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_secret_key", 500, 500, 2),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_secret_key", 500, 500, 2, 100, 100.0),
                 new ObjectMapper()
         );
 

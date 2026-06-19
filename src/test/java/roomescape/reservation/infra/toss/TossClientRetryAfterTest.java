@@ -32,7 +32,9 @@ class TossClientRetryAfterTest {
                         "test_secret_key",
                         500,
                         500,
-                        2
+                        2,
+                        100,
+                        100.0
                 ),
                 new ObjectMapper()
         );
