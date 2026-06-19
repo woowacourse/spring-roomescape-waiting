@@ -19,6 +19,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
+import roomescape.repository.OrderRepository;
 import roomescape.service.dto.MyReservationResult;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
@@ -32,19 +33,22 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final ReservationPolicy reservationPolicy;
     private final WaitingRepository waitingRepository;
+    private final OrderRepository orderRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             ReservationPolicy reservationPolicy,
-            WaitingRepository waitingRepository
+            WaitingRepository waitingRepository,
+            OrderRepository orderRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.reservationPolicy = reservationPolicy;
         this.waitingRepository = waitingRepository;
+        this.orderRepository = orderRepository;
     }
 
 
@@ -83,8 +87,11 @@ public class ReservationService {
         List<MyReservationResult> results = new ArrayList<>();
 
         reservationRepository.findByNameOrderByDateAscTimeAsc(name).forEach(r ->
-                results.add(MyReservationResult.ofReservation(
-                        r.getId(), r.getSlot())));
+                orderRepository.findByReservationId(r.getId())
+                        .ifPresentOrElse(
+                                order -> results.add(MyReservationResult.ofReservation(r.getId(), r.getSlot(), order)),
+                                () -> results.add(MyReservationResult.ofReservation(r.getId(), r.getSlot()))
+                        ));
 
         waitingRepository.findByName(name).forEach(w ->
                 results.add(MyReservationResult.ofWaiting(

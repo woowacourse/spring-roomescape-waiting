@@ -8,12 +8,16 @@ public class Order {
     private final String orderId;
     private final Long amount;
     private final Long reservationId;
+    private final String idempotencyKey;
+    private PaymentStatus status;
     private String paymentKey;
 
-    public Order(String orderId, Long amount, Long reservationId) {
+    public Order(String orderId, Long amount, Long reservationId, String idempotencyKey) {
         this.orderId = orderId;
         this.amount = amount;
         this.reservationId = reservationId;
+        this.idempotencyKey = idempotencyKey;
+        this.status = PaymentStatus.PENDING;
     }
 
     public String getOrderId() {
@@ -28,11 +32,24 @@ public class Order {
         return reservationId;
     }
 
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
     public void confirm(String paymentKey) {
         this.paymentKey = paymentKey;
+        this.status = PaymentStatus.CONFIRMED;
+    }
+
+    public void markUnknown() {
+        this.status = PaymentStatus.UNKNOWN;
     }
 
     public String getPaymentKey() {
         return paymentKey;
+    }
+
+    public PaymentStatus getStatus() {
+        return status;
     }
 }
