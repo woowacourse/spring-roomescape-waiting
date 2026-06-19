@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.PaymentAmountMismatchException;
+import roomescape.global.exception.RetryablePaymentGatewayException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.application.dto.PaymentConfirmCommand;
@@ -45,13 +46,64 @@ public class PaymentCommandService {
         validateAmount(payment, command.amount());
         validatePending(payment);
 
-        PaymentResult result = paymentGateway.confirm(
-                new PaymentConfirmation(command.paymentKey(), command.orderId(), command.amount()));
+        var result = confirmPaymentGateway(command, payment);
         validateApproved(result);
-        confirmPayment(payment.confirm(command.paymentKey()));
+        confirmPayment(payment.confirm(result.paymentKey()));
         confirmReservation(payment);
 
         return result;
+    }
+
+    private PaymentResult confirmPaymentGateway(PaymentConfirmCommand command, Payment payment) {
+        try {
+            return paymentGateway.confirm(
+                    new PaymentConfirmation(command.paymentKey(), command.orderId(), command.amount()));
+        } catch (RetryablePaymentGatewayException e) {
+            return reconcileIfAlreadyApproved(command, payment, e);
+        }
+    }
+
+    private PaymentResult reconcileIfAlreadyApproved(
+            PaymentConfirmCommand command,
+            Payment payment,
+            RetryablePaymentGatewayException originalException
+    ) {
+        var result = findPaymentByOrderId(command, originalException);
+        if (canConfirmInquiredPayment(payment, result)) {
+            return result;
+        }
+        throw originalException;
+    }
+
+    private PaymentResult findPaymentByOrderId(
+            PaymentConfirmCommand command,
+            RetryablePaymentGatewayException originalException
+    ) {
+        try {
+            return paymentGateway.findByOrderId(command.orderId());
+        } catch (NotFoundException e) {
+            return findPaymentByPaymentKey(command, originalException);
+        } catch (RuntimeException e) {
+            throw originalException;
+        }
+    }
+
+    private PaymentResult findPaymentByPaymentKey(
+            PaymentConfirmCommand command,
+            RetryablePaymentGatewayException originalException
+    ) {
+        try {
+            return paymentGateway.findByPaymentKey(command.paymentKey());
+        } catch (RuntimeException e) {
+            throw originalException;
+        }
+    }
+
+    private boolean canConfirmInquiredPayment(Payment payment, PaymentResult result) {
+        return result != null
+                && result.status() == PaymentStatus.DONE
+                && payment.getOrderId().value().equals(result.orderId())
+                && payment.getAmount().value().equals(result.approvedAmount());
     }
 
     private void validateAmount(Payment payment, Long amount) {
