@@ -19,9 +19,13 @@ public class OutboundRateLimitInterceptor implements ClientHttpRequestIntercepto
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
             throws IOException {
+        consumeToken();
+        return execution.execute(request, body);
+    }
+
+    public void consumeToken() {
         if (properties.enabled() && !rateLimiter.tryConsume()) {
             throw new OutboundRateLimitException("Outbound rate limit exceeded before calling Toss");
         }
-        return execution.execute(request, body);
     }
 }

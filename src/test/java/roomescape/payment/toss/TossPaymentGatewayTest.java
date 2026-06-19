@@ -38,10 +38,7 @@ class TossPaymentGatewayTest {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         sleeper = new RecordingSleeper();
-        OutboundRateLimitProperties rateLimitProperties = rateLimitProperties();
-        var restClient = new TossClientConfig().tossRestClient(mockWebServer.url("/").toString(), "test_gsk_dummy",
-                Duration.ofSeconds(1), Duration.ofSeconds(1), rateLimitProperties, new AtomicLong(0L)::get, sleeper);
-        tossPaymentGateway = new TossPaymentGateway(restClient, new ObjectMapper(), new TossPaymentErrorMapper());
+        tossPaymentGateway = tossPaymentGateway(rateLimitProperties(), new AtomicLong(0L));
     }
 
     @AfterEach
@@ -119,6 +116,22 @@ class TossPaymentGatewayTest {
     }
 
     @Test
+    void retryAfter429ConsumesOutboundTokenBeforeRetryTest() {
+        tossPaymentGateway = tossPaymentGateway(new OutboundRateLimitProperties(true, 1, 0.1D, 3),
+                new AtomicLong(0L));
+        enqueue(429, "{}");
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(
+                new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L)))
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
+                        .isEqualTo(DomainErrorCode.PAYMENT_RETRYABLE));
+
+        assertThat(mockWebServer.getRequestCount()).isEqualTo(1);
+        assertThat(sleeper.durations()).containsExactly(Duration.ofSeconds(1));
+    }
+
+    @Test
     void exhausted429ResponsesMapToRetryablePaymentErrorTest() {
         enqueue(429, "{}");
         enqueue(429, "{}");
@@ -154,6 +167,12 @@ class TossPaymentGatewayTest {
 
     private OutboundRateLimitProperties rateLimitProperties() {
         return new OutboundRateLimitProperties(true, 30, 30D, 3);
+    }
+
+    private TossPaymentGateway tossPaymentGateway(OutboundRateLimitProperties properties, AtomicLong now) {
+        var restClient = new TossClientConfig().tossRestClient(mockWebServer.url("/").toString(), "test_gsk_dummy",
+                Duration.ofSeconds(1), Duration.ofSeconds(1), properties, now::get, sleeper);
+        return new TossPaymentGateway(restClient, new ObjectMapper(), new TossPaymentErrorMapper());
     }
 
     private static class RecordingSleeper implements roomescape.ratelimit.BackoffSleeper {

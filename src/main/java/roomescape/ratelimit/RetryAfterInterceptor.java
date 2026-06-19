@@ -15,10 +15,16 @@ public class RetryAfterInterceptor implements ClientHttpRequestInterceptor {
 
     private final int maxAttempts;
     private final BackoffSleeper sleeper;
+    private final Runnable beforeRetry;
 
     public RetryAfterInterceptor(int maxAttempts, BackoffSleeper sleeper) {
+        this(maxAttempts, sleeper, () -> { });
+    }
+
+    public RetryAfterInterceptor(int maxAttempts, BackoffSleeper sleeper, Runnable beforeRetry) {
         this.maxAttempts = maxAttempts;
         this.sleeper = sleeper;
+        this.beforeRetry = beforeRetry;
     }
 
     @Override
@@ -30,6 +36,7 @@ public class RetryAfterInterceptor implements ClientHttpRequestInterceptor {
             Duration retryAfter = retryAfter(response);
             response.close();
             sleeper.sleep(retryAfter);
+            beforeRetry.run();
             response = execution.execute(request, body);
             attempt++;
         }

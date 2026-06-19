@@ -31,12 +31,14 @@ public class TossClientConfig {
     ) {
         String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+        OutboundRateLimitInterceptor outboundRateLimitInterceptor = new OutboundRateLimitInterceptor(rateLimitProperties,
+                new TokenBucket(rateLimitProperties.capacity(), rateLimitProperties.refillPerSecond(), nanoTime));
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .requestFactory(requestFactory(connectTimeout, readTimeout))
-                .requestInterceptor(new OutboundRateLimitInterceptor(rateLimitProperties,
-                        new TokenBucket(rateLimitProperties.capacity(), rateLimitProperties.refillPerSecond(), nanoTime)))
-                .requestInterceptor(new RetryAfterInterceptor(rateLimitProperties.maxAttempts(), sleeper))
+                .requestInterceptor(outboundRateLimitInterceptor)
+                .requestInterceptor(new RetryAfterInterceptor(rateLimitProperties.maxAttempts(), sleeper,
+                        outboundRateLimitInterceptor::consumeToken))
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .build();
     }
