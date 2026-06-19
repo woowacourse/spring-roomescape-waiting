@@ -12,6 +12,9 @@ import roomescape.domain.theme.dto.ThemeResponse;
 @Service
 public class ThemeService {
 
+    private static final int RANKING_PERIOD_DAYS = 7;
+    private static final int RANKING_TOP_COUNT = 10;
+
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -22,17 +25,17 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> getTopThemes() {
-        LocalDate startDate = LocalDate.now().minusDays(7);
+        LocalDate startDate = LocalDate.now().minusDays(RANKING_PERIOD_DAYS);
         LocalDate endDate = LocalDate.now();
 
-        List<Long> top10Ids = ThemeRanking.from(
+        List<Long> topIds = ThemeRanking.from(
                 reservationRepository.findThemeIdsByDateRange(startDate, endDate)
-        ).topThemeIds(10);
+        ).topThemeIds(RANKING_TOP_COUNT);
 
-        Map<Long, Theme> themeMap = themeRepository.findByIds(top10Ids).stream()
+        Map<Long, Theme> themeMap = themeRepository.findByIds(topIds).stream()
                 .collect(Collectors.toMap(Theme::getId, t -> t));
 
-        return top10Ids.stream()
+        return topIds.stream()
                 .map(themeMap::get)
                 .map(ThemeResponse::from)
                 .toList();

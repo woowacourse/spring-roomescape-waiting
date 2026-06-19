@@ -17,6 +17,7 @@ import roomescape.payment.domain.PaymentRepository;
 public class CancelRetryJob {
 
     private static final Logger log = LoggerFactory.getLogger(CancelRetryJob.class);
+    private static final long RETRY_INTERVAL_MS = 60_000L;
 
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
@@ -38,7 +39,7 @@ public class CancelRetryJob {
         this.maxAttempts = maxAttempts;
     }
 
-    @Scheduled(fixedDelay = 60_000)
+    @Scheduled(fixedDelay = RETRY_INTERVAL_MS)
     public void retryPendingCancels() {
         List<Reservation> targets = reservationRepository.findAllByStatus(ReservationStatus.CANCEL_UNCERTAIN);
         if (targets.isEmpty()) {
