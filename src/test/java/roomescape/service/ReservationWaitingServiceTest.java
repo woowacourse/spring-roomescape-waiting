@@ -309,7 +309,7 @@ class ReservationWaitingServiceTest {
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         ReservationSlot slot = saveSlot(date, time, theme);
-        return reservationDao.insert(Reservation.createWithoutId(name, slot));
+        return reservationDao.insert(Reservation.createConfirmedWithoutId(name, slot));
     }
 
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {

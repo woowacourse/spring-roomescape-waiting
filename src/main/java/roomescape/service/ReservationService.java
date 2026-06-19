@@ -12,33 +12,39 @@ import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
+import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.dto.response.ReservationResponse;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
+    private static final long RESERVATION_AMOUNT = 10_000L;
+
     private final ReservationDao reservationDao;
     private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final ReservationSlotDao reservationSlotDao;
+    private final PaymentOrderDao paymentOrderDao;
 
     public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao,
-                              ThemeDao themeDao, ReservationSlotDao reservationSlotDao) {
+                              ThemeDao themeDao, ReservationSlotDao reservationSlotDao, PaymentOrderDao paymentOrderDao) {
         this.reservationDao = reservationDao;
         this.reservationWaitingDao = reservationWaitingDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.reservationSlotDao = reservationSlotDao;
+        this.paymentOrderDao = paymentOrderDao;
     }
 
     @Transactional
-    public ReservationResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
+    public ReservationPaymentResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.date(), reservationTime, theme);
@@ -48,11 +54,18 @@ public class ReservationService {
         lockSlot.validateNotPast(now);
         validateUniqueReservation(lockSlot);
 
-        Reservation reservation = Reservation.createWithoutId(command.name(), lockSlot);
+        Reservation reservation = Reservation.createPendingWithoutId(command.name(), lockSlot);
 
         try {
             Reservation savedReservation = reservationDao.insert(reservation);
-            return ReservationResponse.from(savedReservation);
+
+            String orderId = generateOrderId();
+            long amount = RESERVATION_AMOUNT;
+
+            PaymentOrder paymentOrder = PaymentOrder.createPendingWithoutId(orderId, savedReservation.getId(), amount, now);
+            paymentOrderDao.insert(paymentOrder);
+
+            return ReservationPaymentResponse.from(savedReservation, orderId, amount);
         } catch (DuplicateKeyException exception) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
@@ -110,6 +123,8 @@ public class ReservationService {
 
     @Transactional
     public void delete(Long reservationId) {
+        paymentOrderDao.deleteByReservationId(reservationId);
+
         int deleted = reservationDao.delete(reservationId);
         if (deleted == 0) {
             throw new RoomEscapeException(ReservationErrorCode.NOT_FOUND);
@@ -169,8 +184,12 @@ public class ReservationService {
         reservationWaitingDao.delete(waiting.getId());
     }
 
-    private ReservationSlot lockSlot(ReservationSlot slot){
+    private ReservationSlot lockSlot(ReservationSlot slot) {
         return reservationSlotDao.selectByIdForUpdate(slot.getId())
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
+    }
+
+    private String generateOrderId() {
+        return UUID.randomUUID().toString();
     }
 }

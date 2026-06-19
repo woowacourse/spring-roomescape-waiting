@@ -8,6 +8,7 @@ import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UpdateReservationRequest;
 import roomescape.dto.response.MyReservationResponse;
+import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
@@ -27,13 +28,13 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(
+    public ResponseEntity<ReservationPaymentResponse> addReservation(
             @Valid @RequestBody ReservationRequest request) {
         CreateReservationCommand command = new CreateReservationCommand(
                 request.name(), request.date(), request.timeId(), request.themeId()
         );
-        ReservationResponse response = reservationService.addReservation(command, LocalDateTime.now());
-        return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
+        ReservationPaymentResponse response = reservationService.addReservation(command, LocalDateTime.now());
+        return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.reservationId()))
                 .body(response);
     }
 

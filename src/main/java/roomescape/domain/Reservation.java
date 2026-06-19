@@ -13,18 +13,36 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
+    private final ReservationState state;
+    private final String paymentKey;
 
-    public Reservation(Long id, String name, ReservationSlot slot) {
+    public Reservation(Long id, String name, ReservationSlot slot, ReservationState state, String paymentKey) {
         Objects.requireNonNull(name, "예약자명은 필수값 입니다.");
         Objects.requireNonNull(slot, "예약 슬롯은 필수값 입니다.");
-
+        Objects.requireNonNull(state, "예약 상태는 필수값 입니다.");
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.state = state;
+        this.paymentKey = paymentKey;
     }
 
-    public static Reservation createWithoutId(String name, ReservationSlot slot) {
-        return new Reservation(null, name, slot);
+    public static Reservation createConfirmedWithoutId(String name, ReservationSlot slot) {
+        return new Reservation(null, name, slot, ReservationState.CONFIRMED, null);
+    }
+
+    public static Reservation createPendingWithoutId(String name, ReservationSlot slot) {
+        return new Reservation(null, name, slot, ReservationState.PENDING, null);
+    }
+
+    public Reservation confirmPayment(String paymentKey) {
+        Objects.requireNonNull(paymentKey, "결제 키는 필수값 입니다.");
+
+        if (state != ReservationState.PENDING) {
+            throw new IllegalStateException("결제 대기 상태의 예약만 확정할 수 있습니다.");
+        }
+
+        return new Reservation(id, name, slot, ReservationState.CONFIRMED, paymentKey);
     }
 
     public void validateCancelable(LocalDateTime now) {
@@ -57,8 +75,16 @@ public class Reservation {
         return slot.getTheme();
     }
 
-    public ReservationSlot getSlot(){
+    public ReservationSlot getSlot() {
         return slot;
+    }
+
+    public ReservationState getState() {
+        return state;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
     }
 
     @Override

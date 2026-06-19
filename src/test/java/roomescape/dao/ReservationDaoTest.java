@@ -37,7 +37,7 @@ class ReservationDaoTest {
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
         ReservationSlot slot = saveSlot(LocalDate.of(2026, 5, 5), savedTime, savedTheme);
-        Reservation reservation = Reservation.createWithoutId("브라운", slot);
+        Reservation reservation = Reservation.createConfirmedWithoutId("브라운", slot);
 
         // when
         Reservation saved = reservationDao.insert(reservation);
@@ -237,6 +237,6 @@ class ReservationDaoTest {
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         ReservationSlot slot = saveSlot(date, time, theme);
-        return reservationDao.insert(Reservation.createWithoutId(name, slot));
+        return reservationDao.insert(Reservation.createConfirmedWithoutId(name, slot));
     }
 }

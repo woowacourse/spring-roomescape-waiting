@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,6 +144,6 @@ class ThemeServiceTest {
 
     private void saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         ReservationSlot slot = saveSlot(date, time, theme);
-        reservationDao.insert(Reservation.createWithoutId(name, slot));
+        reservationDao.insert(Reservation.createConfirmedWithoutId(name, slot));
     }
 }

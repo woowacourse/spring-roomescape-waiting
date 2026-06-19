@@ -268,7 +268,7 @@ class ThemeDaoTest {
 
     private void saveReservation(LocalDate date, ReservationTime time, Theme theme) {
         ReservationSlot slot = saveSlot(date, time, theme);
-        reservationDao.insert(Reservation.createWithoutId("예약자", slot));
+        reservationDao.insert(Reservation.createConfirmedWithoutId("예약자", slot));
     }
 
     private ReservationSlot saveSlot(LocalDate date, ReservationTime time, Theme theme) {
