@@ -29,7 +29,12 @@ public class PaymentService {
     public void confirm(String paymentKey, String orderId, Long amount) {
         Order order = orderRepository.getByOrderId(orderId);
         validateAmount(order, amount);
-        paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        paymentGateway.confirm(new PaymentConfirmation(
+                paymentKey,
+                orderId,
+                amount,
+                order.getIdempotencyKey()
+        ));
         orderRepository.confirm(orderId, paymentKey);
         reservationRepository.updateStatus(order.getReservationId(), ReservationStatus.CONFIRMED);
     }

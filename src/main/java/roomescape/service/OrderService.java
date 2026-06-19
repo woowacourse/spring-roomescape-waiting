@@ -15,7 +15,8 @@ public class OrderService {
 
     public Order create(long amount, Long reservationId) {
         String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
-        Order order = new Order(orderId, amount, reservationId);
+        String idempotencyKey = UUID.randomUUID().toString();
+        Order order = new Order(orderId, amount, reservationId, idempotencyKey);
         orderRepository.save(order);
         return order;
     }

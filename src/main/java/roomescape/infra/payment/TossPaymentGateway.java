@@ -28,8 +28,8 @@ public class TossPaymentGateway implements PaymentGateway {
     public TossPaymentGateway(
             @Value("${toss.base-url}") String baseUrl,
             @Value("${toss.secret-key:}") String secretKey,
-            @Value("${toss.connect-timeout}") Duration connectTimeout,
-            @Value("${toss.read-timeout}") Duration readTimeout,
+            @Value("${toss.connect-timeout:3s}") Duration connectTimeout,
+            @Value("${toss.read-timeout:5s}") Duration readTimeout,
             ObjectMapper objectMapper
     ) {
         String basic = Base64.getEncoder()
@@ -52,6 +52,7 @@ public class TossPaymentGateway implements PaymentGateway {
             TossPaymentResponse response = restClient.post()
                     .uri("/v1/payments/confirm")
                     .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.idempotencyKey())
                     .body(TossConfirmRequest.from(confirmation))
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {

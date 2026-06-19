@@ -8,12 +8,14 @@ public class Order {
     private final String orderId;
     private final Long amount;
     private final Long reservationId;
+    private final String idempotencyKey;
     private String paymentKey;
 
-    public Order(String orderId, Long amount, Long reservationId) {
+    public Order(String orderId, Long amount, Long reservationId, String idempotencyKey) {
         this.orderId = orderId;
         this.amount = amount;
         this.reservationId = reservationId;
+        this.idempotencyKey = idempotencyKey;
     }
 
     public String getOrderId() {
@@ -26,6 +28,10 @@ public class Order {
 
     public Long getReservationId() {
         return reservationId;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     public void confirm(String paymentKey) {
