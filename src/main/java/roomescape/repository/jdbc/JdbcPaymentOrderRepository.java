@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentOrderStatus;
 import roomescape.repository.PaymentOrderRepository;
 
 @Repository
@@ -37,9 +38,22 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     }
 
     @Override
+    public void update(PaymentOrder paymentOrder) {
+        String sql = """
+                UPDATE payment_order
+                SET payment_key = ?, status = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql,
+                paymentOrder.getPaymentKey(),
+                paymentOrder.getStatus().name(),
+                paymentOrder.getId());
+    }
+
+    @Override
     public Optional<PaymentOrder> findByOrderId(String orderId) {
         String sql = """
-                SELECT id, order_id, amount, entry_id, created_at
+                SELECT id, order_id, amount, entry_id, created_at, payment_key, status
                 FROM payment_order
                 WHERE order_id = ?
                 """;
@@ -48,7 +62,9 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 rs.getString("order_id"),
                 rs.getLong("amount"),
                 rs.getLong("entry_id"),
-                rs.getTimestamp("created_at").toLocalDateTime()
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getString("payment_key"),
+                PaymentOrderStatus.valueOf(rs.getString("status"))
         ), orderId);
         return result.stream().findFirst();
     }

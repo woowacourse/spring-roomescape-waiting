@@ -11,11 +11,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
+import roomescape.client.TossConfirmResultUnknownException;
+import roomescape.client.TossConnectionException;
 import roomescape.client.TossPaymentException;
 import roomescape.client.TossPaymentGateway;
 import roomescape.client.dto.TossPaymentResponse;
 import roomescape.controller.client.dto.response.PreparePaymentResponse;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentOrderStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
@@ -56,11 +59,12 @@ class PaymentServiceTest {
         this.themeRepository = new FakeThemeRepository();
         this.paymentOrderRepository = new FakePaymentOrderRepository();
         this.tossPaymentGateway = Mockito.mock(TossPaymentGateway.class);
+        ReservationQueryRepository reservationQueryRepository = Mockito.mock(ReservationQueryRepository.class);
         ReservationService reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
-                Mockito.mock(ReservationQueryRepository.class),
+                reservationQueryRepository,
                 TestDateTimes.fixedClock()
         );
         this.paymentService = new PaymentService(
@@ -70,9 +74,12 @@ class PaymentServiceTest {
                 paymentOrderRepository,
                 tossPaymentGateway,
                 reservationService,
+                reservationQueryRepository,
                 TestDateTimes.fixedClock()
         );
         ReflectionTestUtils.setField(paymentService, "clientKey", TEST_CLIENT_KEY);
+        // 운영 환경에서는 Spring이 self(트랜잭션 프록시)를 주입하지만, 여기서는 직접 생성하므로 자기 참조로 채운다.
+        ReflectionTestUtils.setField(paymentService, "self", paymentService);
     }
 
     private long preparePendingEntry(String name, PaymentOrderRepository paymentOrderRepositoryToSave, String orderId, Long amount) {
@@ -222,6 +229,97 @@ class PaymentServiceTest {
 
         Reservation reservation = reservationRepository.findByEntryId(entryId).orElseThrow();
         assertThat(reservation.findActiveEntry(entryId).getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void 결제_승인에_성공하면_PaymentOrder가_CONFIRMED와_paymentKey로_영속화된다() {
+        // given
+        Long amount = ThemeFixture.DEFAULT_PRICE;
+        preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
+        TossPaymentResponse response = new TossPaymentResponse(
+                "payment-key-1", "order-1", "주문명", "DONE", amount, "카드", "2024-01-01T00:00:00");
+        when(tossPaymentGateway.confirm(any())).thenReturn(response);
+
+        // when
+        paymentService.confirm("payment-key-1", "order-1", amount);
+
+        // then
+        PaymentOrder saved = paymentOrderRepository.findByOrderId("order-1").orElseThrow();
+        assertThat(saved.getStatus()).isEqualTo(PaymentOrderStatus.CONFIRMED);
+        assertThat(saved.getPaymentKey()).isEqualTo("payment-key-1");
+    }
+
+    @Test
+    void 토스_승인_결과가_불명이면_PaymentOrder는_CONFIRM_RESULT_UNKNOWN으로_저장되고_엔트리는_PENDING으로_남으며_예외가_전파된다() {
+        // given
+        Long amount = ThemeFixture.DEFAULT_PRICE;
+        long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
+        when(tossPaymentGateway.confirm(any()))
+                .thenThrow(new TossConfirmResultUnknownException(new RuntimeException("read timeout")));
+
+        // when & then
+        assertThatThrownBy(() -> paymentService.confirm("payment-key-1", "order-1", amount))
+                .isInstanceOf(TossConfirmResultUnknownException.class);
+
+        PaymentOrder saved = paymentOrderRepository.findByOrderId("order-1").orElseThrow();
+        assertThat(saved.getStatus()).isEqualTo(PaymentOrderStatus.CONFIRM_RESULT_UNKNOWN);
+
+        Reservation reservation = reservationRepository.findByEntryId(entryId).orElseThrow();
+        assertThat(reservation.findActiveEntry(entryId).getStatus()).isEqualTo(ReservationStatus.PENDING);
+    }
+
+    @Test
+    void 결제_실패_정리_시_PaymentOrder가_FAILED로_저장된다() {
+        // given
+        Long amount = ThemeFixture.DEFAULT_PRICE;
+        preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
+
+        // when
+        paymentService.cancel("order-1");
+
+        // then
+        PaymentOrder saved = paymentOrderRepository.findByOrderId("order-1").orElseThrow();
+        assertThat(saved.getStatus()).isEqualTo(PaymentOrderStatus.FAILED);
+    }
+
+    @Test
+    void 이미_확정된_결제는_뒤늦은_cancel_호출에도_FAILED로_덮어써지지_않는다() {
+        // given: confirm()까지 성공해 RESERVED + CONFIRMED 상태
+        Long amount = ThemeFixture.DEFAULT_PRICE;
+        long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
+        TossPaymentResponse response = new TossPaymentResponse(
+                "payment-key-1", "order-1", "주문명", "DONE", amount, "카드", "2024-01-01T00:00:00");
+        when(tossPaymentGateway.confirm(any())).thenReturn(response);
+        paymentService.confirm("payment-key-1", "order-1", amount);
+
+        // when: 브라우저 뒤로가기 등으로 cancel이 뒤늦게 호출됨
+        paymentService.cancel("order-1");
+
+        // then: 결제/예약 상태가 그대로 유지된다
+        PaymentOrder saved = paymentOrderRepository.findByOrderId("order-1").orElseThrow();
+        assertThat(saved.getStatus()).isEqualTo(PaymentOrderStatus.CONFIRMED);
+
+        Reservation reservation = reservationRepository.findByEntryId(entryId).orElseThrow();
+        assertThat(reservation.findActiveEntry(entryId).getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void 토스_연결이_실패하면_PaymentOrder는_FAILED로_저장되고_엔트리는_PENDING으로_남으며_예외가_전파된다() {
+        // given
+        Long amount = ThemeFixture.DEFAULT_PRICE;
+        long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
+        when(tossPaymentGateway.confirm(any()))
+                .thenThrow(new TossConnectionException(new RuntimeException("connect timeout")));
+
+        // when & then
+        assertThatThrownBy(() -> paymentService.confirm("payment-key-1", "order-1", amount))
+                .isInstanceOf(TossConnectionException.class);
+
+        PaymentOrder saved = paymentOrderRepository.findByOrderId("order-1").orElseThrow();
+        assertThat(saved.getStatus()).isEqualTo(PaymentOrderStatus.FAILED);
+
+        Reservation reservation = reservationRepository.findByEntryId(entryId).orElseThrow();
+        assertThat(reservation.findActiveEntry(entryId).getStatus()).isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test

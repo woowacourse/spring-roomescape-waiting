@@ -23,6 +23,12 @@ public class FakePaymentOrderRepository implements PaymentOrderRepository {
     }
 
     @Override
+    public void update(PaymentOrder paymentOrder) {
+        storage.put(paymentOrder.getId(), paymentOrder);
+        orderIdIndex.put(paymentOrder.getOrderId(), paymentOrder);
+    }
+
+    @Override
     public Optional<PaymentOrder> findByOrderId(String orderId) {
         return Optional.ofNullable(orderIdIndex.get(orderId));
     }
