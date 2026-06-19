@@ -24,6 +24,7 @@ public class JdbcAdminReservationQuery implements AdminReservationQuery {
                     t.name AS theme_name,
                     t.description AS theme_description,
                     t.thumbnail_image_url AS theme_thumbnail_image_url,
+                    t.price AS theme_price,
                     t.is_active AS theme_is_active,
                     rt.id AS time_id,
                     rt.start_at AS time_start_at,

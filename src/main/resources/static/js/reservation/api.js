@@ -24,6 +24,14 @@ export function createWaitingReservation(payload) {
   });
 }
 
+export function createPaymentOrder(payload) {
+  return requestJson("/api/orders/reservation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
+
 export function fetchReservation(id) {
   return requestJson(`/api/reservations/${id}`);
 }

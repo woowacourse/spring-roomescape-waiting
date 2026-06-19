@@ -1,5 +1,5 @@
 import View from "../../common/View.js";
-import { clearElement, delegate, emit, formatDateInputValue, formatTime, qs } from "../../common/helpers.js";
+import { clearElement, delegate, emit, formatDateInputValue, formatPrice, formatTime, qs } from "../../common/helpers.js";
 
 export default class ReservationSectionView extends View {
   constructor(element) {
@@ -55,7 +55,7 @@ export default class ReservationSectionView extends View {
     themes.forEach((theme) => {
       const option = document.createElement("option");
       option.value = theme.id;
-      option.textContent = theme.name;
+      option.textContent = `${theme.name} (${formatPrice(theme.price)})`;
       this.themeSelect.appendChild(option);
     });
 

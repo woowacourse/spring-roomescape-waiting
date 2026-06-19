@@ -17,6 +17,7 @@ public final class AdminReservationSlotResponseRowMapper {
                             rs.getString("theme_name"),
                             rs.getString("theme_description"),
                             rs.getString("theme_thumbnail_image_url"),
+                            rs.getInt("theme_price"),
                             rs.getBoolean("theme_is_active")
                     ),
                     new AdminReservationTimeResponse(

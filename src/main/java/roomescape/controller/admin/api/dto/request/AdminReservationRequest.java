@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
-import roomescape.service.command.ReservationCommand;
+import roomescape.application.service.command.ReservationCommand;
 
 public record AdminReservationRequest(
         @NotBlank(message = "예약자 이름 정보는 비어있을 수 없습니다.")

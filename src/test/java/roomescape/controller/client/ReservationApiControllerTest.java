@@ -22,26 +22,26 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
+import roomescape.application.service.ReservationService;
+import roomescape.application.service.command.ReservationChangeCommand;
+import roomescape.application.service.command.ReservationCommand;
+import roomescape.application.service.result.ReservationSlotResult;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.client.api.ReservationApiController;
+import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
-import roomescape.controller.client.api.dto.response.ReservationResponse;
 import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationResponse;
+import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 import roomescape.controller.client.api.dto.response.ReservationSlotResponse;
 import roomescape.controller.client.api.dto.response.ReservationTimeResponse;
 import roomescape.controller.client.api.dto.response.ThemeResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
-import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
-import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 import roomescape.controller.client.fixture.ReservationApiRequestFixture;
-import roomescape.service.ReservationService;
-import roomescape.service.command.ReservationChangeCommand;
-import roomescape.service.command.ReservationCommand;
 import roomescape.service.fixture.ReservationServiceFixture;
-import roomescape.service.result.ReservationSlotResult;
 
 @WebMvcTest(ReservationApiController.class)
 class ReservationApiControllerTest extends BaseControllerUnitTest {

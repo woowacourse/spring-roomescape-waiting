@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>결제 완료 · RoomEscape</title>
+  <link href="/styles/common.css" rel="stylesheet" />
+  <style>
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .result-card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    .desc {
+      margin: 0 0 20px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .label {
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .value {
+      text-align: right;
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .actions a {
+      flex: 1;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      padding: 12px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+<main class="result-card">
+  <h1 data-role="title">결제 승인 중</h1>
+  <p class="desc" data-role="description">서버에서 Toss 결제를 승인하고 예약을 확정하고 있습니다.</p>
+
+  <div class="row"><span class="label">주문번호</span><span class="value" data-role="order-id">-</span></div>
+  <div class="row"><span class="label">결제상태</span><span class="value" data-role="payment-status">-</span></div>
+  <div class="row"><span class="label">예약번호</span><span class="value" data-role="reservation-id">-</span></div>
+
+  <div class="actions">
+    <a href="/search">예약 확인</a>
+    <a href="/">홈으로</a>
+  </div>
+</main>
+
+<script type="module">
+  import { getSearchParam } from "/js/common/helpers.js";
+  import { requestJson } from "/js/common/http.js";
+
+  const paymentKey = getSearchParam("paymentKey");
+  const orderId = getSearchParam("orderId");
+  const amount = Number(getSearchParam("amount"));
+
+  async function confirmPayment() {
+    if (!paymentKey || !orderId || !amount) {
+      throw new Error("결제 승인 정보가 누락되었습니다.");
+    }
+
+    const result = await requestJson("/api/payments/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentKey, orderId, amount })
+    });
+
+    document.querySelector('[data-role="title"]').textContent = "결제가 완료되었습니다";
+    document.querySelector('[data-role="description"]').textContent =
+        result.orderType === "WAITING" ? "선결제 후 대기 등록이 완료되었습니다." : "선결제 후 예약이 확정되었습니다.";
+    document.querySelector('[data-role="order-id"]').textContent = result.orderId;
+    document.querySelector('[data-role="payment-status"]').textContent = result.paymentStatus;
+    document.querySelector('[data-role="reservation-id"]').textContent = result.reservationId;
+  }
+
+  confirmPayment().catch((error) => {
+    document.querySelector('[data-role="title"]').textContent = "결제 승인 실패";
+    document.querySelector('[data-role="description"]').textContent = error.message;
+    document.querySelector('[data-role="order-id"]').textContent = orderId || "-";
+  });
+</script>
+</body>
+</html>

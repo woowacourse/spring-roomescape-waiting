@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>결제 · RoomEscape</title>
+  <link href="/styles/common.css" rel="stylesheet" />
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <style>
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .payment-card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 20px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .label {
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .value {
+      text-align: right;
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    #payment-method {
+      margin-top: 20px;
+    }
+
+    .btn-pay {
+      width: 100%;
+      margin-top: 16px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px;
+    }
+
+    .btn-pay:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .notice {
+      margin-top: 16px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+<main class="payment-card">
+  <h1>방탈출 선결제</h1>
+  <div class="row"><span class="label">주문명</span><span class="value" data-role="order-name">-</span></div>
+  <div class="row"><span class="label">주문번호</span><span class="value" data-role="order-id">-</span></div>
+  <div class="row"><span class="label">결제금액</span><span class="value" data-role="amount">-</span></div>
+
+  <div id="payment-method"></div>
+  <div id="agreement"></div>
+
+  <button class="btn-pay" data-role="pay-button" disabled type="button">결제하기</button>
+  <p class="notice" data-role="notice">테스트 결제입니다. 실제 출금은 발생하지 않습니다.</p>
+</main>
+
+<script type="module">
+  import { formatPrice, getSearchParam } from "/js/common/helpers.js";
+  import { requestJson } from "/js/common/http.js";
+
+  const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+  const orderId = getSearchParam("orderId");
+  const payButton = document.querySelector('[data-role="pay-button"]');
+  const notice = document.querySelector('[data-role="notice"]');
+
+  async function initialize() {
+    if (!orderId) {
+      throw new Error("주문번호가 없습니다.");
+    }
+
+    const order = await requestJson(`/api/orders/${encodeURIComponent(orderId)}`);
+
+    document.querySelector('[data-role="order-name"]').textContent = order.orderName;
+    document.querySelector('[data-role="order-id"]').textContent = order.orderId;
+    document.querySelector('[data-role="amount"]').textContent = formatPrice(order.amount);
+
+    const tossPayments = TossPayments(clientKey);
+    const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+
+    await widgets.setAmount({ currency: "KRW", value: order.amount });
+    await Promise.all([
+      widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" }),
+      widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" })
+    ]);
+
+    payButton.disabled = false;
+    payButton.addEventListener("click", async () => {
+      try {
+        await widgets.requestPayment({
+          orderId: order.orderId,
+          orderName: order.orderName,
+          successUrl: `${window.location.origin}/toss/success.html`,
+          failUrl: `${window.location.origin}/toss/fail.html`
+        });
+      } catch (error) {
+        if (error.code !== "USER_CANCEL") {
+          notice.textContent = `결제 요청 실패: ${error.message}`;
+        }
+      }
+    });
+  }
+
+  initialize().catch((error) => {
+    notice.textContent = error.message;
+  });
+</script>
+</body>
+</html>

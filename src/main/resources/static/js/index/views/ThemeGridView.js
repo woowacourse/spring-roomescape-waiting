@@ -1,5 +1,5 @@
 import View from "../../common/View.js";
-import { clearElement, createElement } from "../../common/helpers.js";
+import { clearElement, createElement, formatPrice } from "../../common/helpers.js";
 import { createThemeImage } from "../../common/image.js";
 
 export default class ThemeGridView extends View {
@@ -30,8 +30,9 @@ export default class ThemeGridView extends View {
       media.appendChild(createThemeImage(theme.thumbnailImageUrl, theme.name));
 
       const name = createElement("div", "theme-card-name", theme.name);
+      const price = createElement("div", "theme-card-price", formatPrice(theme.price));
       const description = createElement("div", "theme-card-desc", theme.description);
-      body.append(name, description);
+      body.append(name, price, description);
 
       card.addEventListener("click", () => {
         window.location.href = reservePath;

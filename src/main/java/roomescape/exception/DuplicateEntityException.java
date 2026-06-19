@@ -1,6 +1,8 @@
 package roomescape.exception;
 
-public class DuplicateEntityException extends RuntimeException {
+import roomescape.common.BusinessException;
+
+public class DuplicateEntityException extends BusinessException {
 
     public DuplicateEntityException(String message, Object... args) {
         super(message.formatted(args));

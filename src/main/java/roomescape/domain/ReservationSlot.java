@@ -79,6 +79,29 @@ public class ReservationSlot {
         return reservations.addReserved(name);
     }
 
+    public Reservation pending(String name, ReservationStatus status) {
+        validateNotPast();
+        validateDuplicateReservation(name);
+        return reservations.addPending(name, status);
+    }
+
+    public void confirmPendingReservation(long reservationId, ReservationStatus status) {
+        Reservation reservation = reservations.findActiveById(reservationId)
+                .filter(Reservation::isActivePending)
+                .orElseThrow(() -> new EntityNotFoundException("결제 대기 예약 정보를 찾을 수 없습니다."));
+
+        if (status == ReservationStatus.RESERVED) {
+            confirmReserved(reservation);
+            return;
+        }
+
+        if (reservations.hasReservedReservation()) {
+            reservation.confirmWaiting();
+            return;
+        }
+        reservation.confirmReserved();
+    }
+
     public void cancelReservation(long reservationId) {
         reservations.findActiveById(reservationId)
                 .ifPresent(reservation -> {
@@ -104,6 +127,11 @@ public class ReservationSlot {
                 .orElseThrow(() -> new EntityNotFoundException("저장된 예약 찾을 수 없습니다."));
     }
 
+    public Reservation findLatestPendingEntryByName(String name) {
+        return reservations.findLatestPendingEntryByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("저장된 결제 대기 예약을 찾을 수 없습니다."));
+    }
+
     public boolean isSameSlot(LocalDate date, ReservationTime time) {
         return this.date.isEqual(date) && this.time.equals(time);
     }
@@ -124,6 +152,13 @@ public class ReservationSlot {
         if (reservations.hasReservationByName(name)) {
             throw new DuplicateEntityException("이미 예약 또는 대기가 존재합니다. (%s)", name);
         }
+    }
+
+    private void confirmReserved(Reservation reservation) {
+        if (reservations.hasReservedReservation()) {
+            throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", date, time.getStartAt());
+        }
+        reservation.confirmReserved();
     }
 
     private void validateCancelable(Reservation reservation) {

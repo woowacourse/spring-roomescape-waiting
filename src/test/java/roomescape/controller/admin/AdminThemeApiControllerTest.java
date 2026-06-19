@@ -19,14 +19,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
+import roomescape.application.service.ThemeService;
+import roomescape.application.service.command.ThemeRegisterCommand;
+import roomescape.application.service.result.ThemeRegisterResult;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminThemeApiController;
 import roomescape.controller.admin.api.dto.request.AdminThemeRequest;
 import roomescape.controller.admin.api.dto.response.AdminThemeResponse;
 import roomescape.controller.admin.api.query.AdminThemeQuery;
-import roomescape.service.ThemeService;
-import roomescape.service.command.ThemeRegisterCommand;
-import roomescape.service.result.ThemeRegisterResult;
 
 @WebMvcTest(AdminThemeApiController.class)
 class AdminThemeApiControllerTest extends BaseControllerUnitTest {

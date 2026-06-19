@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>결제 실패 · RoomEscape</title>
+  <link href="/styles/common.css" rel="stylesheet" />
+  <style>
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .result-card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 20px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .label {
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .value {
+      color: var(--danger);
+      text-align: right;
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 22px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<main class="result-card">
+  <h1>결제를 완료하지 못했습니다</h1>
+  <div class="row"><span class="label">에러코드</span><span class="value" data-role="code">-</span></div>
+  <div class="row"><span class="label">에러메시지</span><span class="value" data-role="message">-</span></div>
+  <div class="row"><span class="label">주문번호</span><span class="value" data-role="order-id">-</span></div>
+  <a href="/reserve">예약 다시 시도</a>
+</main>
+
+<script type="module">
+  import { getSearchParam } from "/js/common/helpers.js";
+
+  const orderId = getSearchParam("orderId");
+  document.querySelector('[data-role="code"]').textContent = getSearchParam("code") || "-";
+  document.querySelector('[data-role="message"]').textContent = getSearchParam("message") || "-";
+  document.querySelector('[data-role="order-id"]').textContent = orderId || "-";
+
+  if (orderId) {
+    fetch(`/api/orders/${encodeURIComponent(orderId)}/fail`, { method: "POST" });
+  }
+</script>
+</body>
+</html>

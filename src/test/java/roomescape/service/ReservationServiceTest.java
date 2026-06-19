@@ -11,6 +11,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import roomescape.application.service.ReservationService;
+import roomescape.application.service.command.ReservationChangeCommand;
+import roomescape.application.service.command.ReservationCommand;
+import roomescape.application.service.result.ReservationSlotResult;
+import roomescape.application.service.result.ReservationTimeResult;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationActiveStatus;
 import roomescape.domain.ReservationSlot;
@@ -24,14 +29,10 @@ import roomescape.exception.EntityNotFoundException;
 import roomescape.persistence.ReservationSlotRepository;
 import roomescape.persistence.ReservationTimeRepository;
 import roomescape.persistence.dto.ReservationCondition;
-import roomescape.service.command.ReservationChangeCommand;
-import roomescape.service.command.ReservationCommand;
 import roomescape.service.fake.FakeReservationSlotRepository;
 import roomescape.service.fake.FakeReservationTimeRepository;
 import roomescape.service.fake.FakeThemeRepository;
 import roomescape.service.fixture.ReservationServiceFixture;
-import roomescape.service.result.ReservationSlotResult;
-import roomescape.service.result.ReservationTimeResult;
 
 class ReservationServiceTest {
 

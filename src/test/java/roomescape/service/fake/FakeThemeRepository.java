@@ -20,6 +20,7 @@ public class FakeThemeRepository implements ThemeRepository {
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailImageUrl(),
+                theme.getPrice(),
                 theme.isActive()
         );
         themes.put(id, savedTheme);

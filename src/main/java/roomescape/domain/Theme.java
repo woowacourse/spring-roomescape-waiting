@@ -14,25 +14,42 @@ public class Theme {
     private final String name;
     private final String description;
     private final String thumbnailImageUrl;
+    private final int price;
     private boolean isActive;
 
     public Theme(Long id, String name, String description, String thumbnailImageUrl, boolean isActive) {
-        validateTheme(name, description, thumbnailImageUrl);
+        this(id, name, description, thumbnailImageUrl, 0, isActive);
+    }
+
+    public Theme(Long id, String name, String description, String thumbnailImageUrl, int price, boolean isActive) {
+        validateTheme(name, description, thumbnailImageUrl, price);
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnailImageUrl = thumbnailImageUrl;
+        this.price = price;
         this.isActive = isActive;
     }
 
     public Theme(String name, String description, String thumbnailImageUrl) {
-        this(null, name, description, thumbnailImageUrl, true);
+        this(name, description, thumbnailImageUrl, 0);
     }
 
-    private static void validateTheme(String name, String description, String thumbnailImageUrl) {
+    public Theme(String name, String description, String thumbnailImageUrl, int price) {
+        this(null, name, description, thumbnailImageUrl, price, true);
+    }
+
+    private static void validateTheme(String name, String description, String thumbnailImageUrl, int price) {
         validateName(name);
         validateDescription(description);
         validateThumbnailImageUrl(thumbnailImageUrl);
+        validatePrice(price);
+    }
+
+    private static void validatePrice(int price) {
+        if (price < 0) {
+            throw new RoomEscapeException("가격은 0원 이상이어야 합니다.");
+        }
     }
 
     private static void validateThumbnailImageUrl(String thumbnailImageUrl) {

@@ -59,6 +59,10 @@ export function formatTime(startAt) {
   return startAt.substring(0, 5);
 }
 
+export function formatPrice(price) {
+  return `${Number(price || 0).toLocaleString("ko-KR")}원`;
+}
+
 export function getSearchParam(name) {
   return new URLSearchParams(window.location.search).get(name);
 }

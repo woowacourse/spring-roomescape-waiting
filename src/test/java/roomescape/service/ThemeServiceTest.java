@@ -5,11 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import roomescape.application.service.ThemeService;
+import roomescape.application.service.command.ThemeRegisterCommand;
+import roomescape.application.service.result.ThemeRegisterResult;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.persistence.ThemeRepository;
-import roomescape.service.command.ThemeRegisterCommand;
 import roomescape.service.fake.FakeThemeRepository;
-import roomescape.service.result.ThemeRegisterResult;
 
 class ThemeServiceTest {
 

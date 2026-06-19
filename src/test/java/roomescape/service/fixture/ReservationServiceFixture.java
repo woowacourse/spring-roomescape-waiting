@@ -3,11 +3,11 @@ package roomescape.service.fixture;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import roomescape.service.command.ReservationChangeCommand;
-import roomescape.service.result.ReservationResult;
-import roomescape.service.result.ReservationSlotResult;
-import roomescape.service.result.ReservationTimeResult;
-import roomescape.service.result.ThemeRegisterResult;
+import roomescape.application.service.command.ReservationChangeCommand;
+import roomescape.application.service.result.ReservationResult;
+import roomescape.application.service.result.ReservationSlotResult;
+import roomescape.application.service.result.ReservationTimeResult;
+import roomescape.application.service.result.ThemeRegisterResult;
 
 public class ReservationServiceFixture {
 

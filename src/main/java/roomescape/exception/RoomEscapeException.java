@@ -1,6 +1,8 @@
 package roomescape.exception;
 
-public class RoomEscapeException extends RuntimeException {
+import roomescape.common.BusinessException;
+
+public class RoomEscapeException extends BusinessException {
 
     public RoomEscapeException(String message) {
         super(message);

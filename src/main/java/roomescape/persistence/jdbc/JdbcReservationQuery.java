@@ -29,6 +29,7 @@ public class JdbcReservationQuery implements ReservationQuery {
                        t.name AS theme_name,
                        t.description AS theme_description,
                        t.thumbnail_image_url AS theme_thumbnail_image_url,
+                       t.price AS theme_price,
                        rt.id AS time_id,
                        rt.start_at AS time_start_at,
                        re.id AS reservation_id,
@@ -76,6 +77,7 @@ public class JdbcReservationQuery implements ReservationQuery {
                        r.date AS res_date,
                        rt.start_at AS res_start_at,
                        t.name AS theme_name,
+                       t.price AS theme_price,
                        re.status AS res_status,
                        CASE WHEN re.status = 'WAITING'
                             THEN (SELECT COUNT(*) + 1

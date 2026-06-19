@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.application.service.ReservationService;
+import roomescape.application.service.result.ReservationSlotResult;
 import roomescape.controller.admin.api.dto.request.AdminReservationRequest;
 import roomescape.controller.admin.api.dto.response.AdminReservationSlotResponse;
 import roomescape.controller.admin.api.query.AdminReservationQuery;
-import roomescape.service.ReservationService;
-import roomescape.service.result.ReservationSlotResult;
 
 @RestController
 @RequestMapping("/api/admin/reservations")

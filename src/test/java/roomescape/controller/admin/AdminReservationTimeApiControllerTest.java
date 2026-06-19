@@ -21,14 +21,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
+import roomescape.application.service.ReservationTimeService;
+import roomescape.application.service.command.ReservationTimeCommand;
+import roomescape.application.service.result.ReservationTimeResult;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminReservationTimeApiController;
 import roomescape.controller.admin.api.dto.response.AdminReservationTimeResponse;
 import roomescape.controller.admin.api.query.AdminReservationTimeQuery;
 import roomescape.controller.admin.fixture.AdminReservationTimeApiRequestFixture;
-import roomescape.service.ReservationTimeService;
-import roomescape.service.command.ReservationTimeCommand;
-import roomescape.service.result.ReservationTimeResult;
 
 @WebMvcTest(AdminReservationTimeApiController.class)
 class AdminReservationTimeApiControllerTest extends BaseControllerUnitTest {
