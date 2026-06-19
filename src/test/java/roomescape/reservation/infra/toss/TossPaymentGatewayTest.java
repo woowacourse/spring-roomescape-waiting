@@ -38,6 +38,10 @@ import tools.jackson.databind.ObjectMapper;
 class TossPaymentGatewayTest {
 
     private static final String TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
+    private static final String TOSS_PAYMENT_KEY_INQUIRY_URL =
+            "https://api.tosspayments.com/v1/payments/payment-key";
+    private static final String TOSS_ORDER_ID_INQUIRY_URL =
+            "https://api.tosspayments.com/v1/payments/orders/order-id";
 
     private MockRestServiceServer server;
     private TossPaymentGateway gateway;
@@ -80,6 +84,77 @@ class TossPaymentGatewayTest {
             softly.assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
             softly.assertThat(result.approvedAmount()).isEqualTo(1_000L);
         });
+    }
+
+    @DisplayName("paymentKey로 토스 결제를 조회해 결제 결과로 변환합니다.")
+    @Test
+    void find_by_payment_key_maps_success_response_to_payment_result() {
+        server.expect(once(), requestTo(TOSS_PAYMENT_KEY_INQUIRY_URL))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("""
+                                {
+                                  "paymentKey": "payment-key",
+                                  "orderId": "order-id",
+                                  "status": "DONE",
+                                  "totalAmount": 1000
+                                }
+                                """));
+
+        PaymentResult result = gateway.findByPaymentKey("payment-key");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.paymentKey()).isEqualTo("payment-key");
+            softly.assertThat(result.orderId()).isEqualTo("order-id");
+            softly.assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
+            softly.assertThat(result.approvedAmount()).isEqualTo(1_000L);
+        });
+    }
+
+    @DisplayName("orderId로 토스 결제를 조회해 결제 결과로 변환합니다.")
+    @Test
+    void find_by_order_id_maps_success_response_to_payment_result() {
+        server.expect(once(), requestTo(TOSS_ORDER_ID_INQUIRY_URL))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("""
+                                {
+                                  "paymentKey": "payment-key",
+                                  "orderId": "order-id",
+                                  "status": "DONE",
+                                  "totalAmount": 1000
+                                }
+                                """));
+
+        PaymentResult result = gateway.findByOrderId("order-id");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.paymentKey()).isEqualTo("payment-key");
+            softly.assertThat(result.orderId()).isEqualTo("order-id");
+            softly.assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
+            softly.assertThat(result.approvedAmount()).isEqualTo(1_000L);
+        });
+    }
+
+    @DisplayName("토스 결제 조회 오류 코드도 애플리케이션 결제 예외로 변환합니다.")
+    @Test
+    void find_by_order_id_maps_toss_error_code_to_payment_exception() {
+        server.expect(once(), requestTo(TOSS_ORDER_ID_INQUIRY_URL))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withBadRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("""
+                                {
+                                  "code": "NOT_FOUND_PAYMENT",
+                                  "message": "토스 원문 메시지"
+                                }
+                                """));
+
+        assertThatThrownBy(() -> gateway.findByOrderId("order-id"))
+                .isInstanceOf(PaymentNotFoundException.class)
+                .hasMessage("결제 정보를 찾을 수 없습니다. 다시 결제를 시도해주세요.");
     }
 
     @DisplayName("토스 결제 승인 오류 코드를 애플리케이션 결제 예외로 변환합니다.")

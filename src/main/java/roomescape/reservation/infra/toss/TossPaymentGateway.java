@@ -81,6 +81,38 @@ public class TossPaymentGateway implements PaymentGateway {
         return response.toResult();
     }
 
+    @Override
+    public PaymentResult findByPaymentKey(String paymentKey) {
+        return requestPayment("/v1/payments/{paymentKey}", paymentKey);
+    }
+
+    @Override
+    public PaymentResult findByOrderId(String orderId) {
+        return requestPayment("/v1/payments/orders/{orderId}", orderId);
+    }
+
+    private PaymentResult requestPayment(String uri, String id) {
+        TossPaymentResponse response;
+        try {
+            response = tossRestClient.get()
+                    .uri(uri, id)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (httpRequest, httpResponse) -> {
+                        throw convertTossErrorToException(httpResponse);
+                    })
+                    .body(TossPaymentResponse.class);
+        } catch (ResourceAccessException e) {
+            throw new RetryablePaymentGatewayException(e);
+        } catch (RestClientException e) {
+            if (hasCause(e, SocketTimeoutException.class)) {
+                throw new RetryablePaymentGatewayException(e);
+            }
+            throw e;
+        }
+
+        return response.toResult();
+    }
+
     private boolean hasCause(Throwable exception, Class<? extends Throwable> causeType) {
         Throwable current = exception;
         while (current != null) {
