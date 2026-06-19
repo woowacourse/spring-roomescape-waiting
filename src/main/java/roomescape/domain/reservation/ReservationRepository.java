@@ -200,4 +200,18 @@ public class ReservationRepository {
         String query = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
         jdbcTemplate.update(query, reservation.getDate(), reservation.getTime().getId(), reservation.getId());
     }
+
+    public List<Reservation> findAllByStatus(ReservationStatus status) {
+        String query = """
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount,
+                       t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                       th.image_url AS theme_image_url, th.price AS theme_price
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme th ON r.theme_id = th.id
+                WHERE r.status = ?
+                """;
+        return jdbcTemplate.query(query, rowMapper, status.name());
+    }
 }

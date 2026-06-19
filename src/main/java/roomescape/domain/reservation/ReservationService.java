@@ -170,6 +170,18 @@ public class ReservationService {
         }
     }
 
+    @Transactional
+    public void completeCancelAndCleanup(Long reservationId) {
+        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+        paymentRepository.deleteByReservationId(reservationId);
+        int deleted = reservationRepository.deleteById(reservationId);
+        if (deleted > 0) {
+            Waitings waitings = Waitings.of(waitingRepository.findAllBySlotForUpdate(reservation.getSlot()));
+            waitings.first().ifPresent(this::promoteToReservation);
+        }
+    }
+
     private void validateDuplicateReservation(ReservationSlot slot) {
         if (reservationRepository.existsBySlot(slot)) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
