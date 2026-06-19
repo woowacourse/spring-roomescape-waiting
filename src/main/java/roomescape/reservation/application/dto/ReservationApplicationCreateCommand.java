@@ -13,12 +13,16 @@ public record ReservationApplicationCreateCommand(
         LocalDate date,
         Long themeId,
         Long timeId,
+        String paymentKey,
+        Long amount,
         LocalDateTime now
 ) {
     public Reservation toReservation(ReservationSlot slot) {
         return Reservation.builder()
                 .memberName(new MemberName(name))
                 .slot(slot)
+                .paymentKey(paymentKey)
+                .amount(amount)
                 .build();
     }
 

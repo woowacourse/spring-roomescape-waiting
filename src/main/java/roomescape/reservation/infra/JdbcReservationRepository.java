@@ -28,7 +28,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return jdbcTemplate.query("""
-                    SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at
+                    SELECT r.id, r.name, r.date, r.theme_id, r.time_id, r.payment_key, r.amount, r.payment_status, rt.start_at
                     FROM reservation r
                     JOIN reservation_time rt ON r.time_id = rt.id
                     WHERE r.id = ?
@@ -41,10 +41,19 @@ public class JdbcReservationRepository implements ReservationRepository {
                             .startAt(rs.getObject("start_at", LocalTime.class))
                             .build();
 
+                    roomescape.payment.PaymentStatus status = null;
+                    String statusRaw = rs.getString("payment_status");
+                    if (statusRaw != null) {
+                        status = roomescape.payment.PaymentStatus.from(statusRaw);
+                    }
+
                     return Reservation.builder()
                             .id(rs.getLong("id"))
                             .memberName(new MemberName(rs.getString("name")))
                             .slot(slot)
+                            .paymentKey(rs.getString("payment_key"))
+                            .amount(rs.getLong("amount") == 0 && rs.wasNull() ? null : rs.getLong("amount"))
+                            .paymentStatus(status)
                             .build();
                 }
                 , id).stream().findFirst();
@@ -75,7 +84,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("name", reservation.getMemberName().name())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
-                .addValue("time_id", slot.timeId());
+                .addValue("time_id", slot.timeId())
+                .addValue("payment_key", reservation.getPaymentKey())
+                .addValue("amount", reservation.getAmount())
+                .addValue("payment_status", reservation.getPaymentStatus() != null ? reservation.getPaymentStatus().name() : null);
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return reservation.withId(id);

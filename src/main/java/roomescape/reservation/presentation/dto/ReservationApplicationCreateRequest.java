@@ -19,9 +19,11 @@ public record ReservationApplicationCreateRequest(
         Long themeId,
         @NotNull(message = "시간은 비어있을 수 없습니다.")
         @Positive(message = "시간ID는 양수여야 합니다.")
-        Long timeId
+        Long timeId,
+        String paymentKey,
+        Long amount
 ) {
     public ReservationApplicationCreateCommand toCommand(LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(name, date, themeId, timeId, now);
+        return new ReservationApplicationCreateCommand(name, date, themeId, timeId, paymentKey, amount, now);
     }
 }

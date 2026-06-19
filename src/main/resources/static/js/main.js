@@ -394,7 +394,9 @@ async function submitReservation(form) {
                 name,
                 date: state.selectedDate,
                 themeId: state.selectedThemeId,
-                timeId: state.selectedTimeId
+                timeId: state.selectedTimeId,
+                paymentKey: "mock_payment_key_" + new Date().getTime(),
+                amount: 1000
             }
         });
 

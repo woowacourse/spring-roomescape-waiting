@@ -375,9 +375,10 @@ function renderMyReservationItem(reservation) {
       <span class="row-main">
         <span class="reservation-card-heading">
           <strong>${escapeHtml(reservation.theme.name)}</strong>
+          ${reservation.paymentStatus === 'UNKNOWN' ? `<em class="waiting-badge">확인 필요</em>` : (reservation.paymentStatus === 'CANCELED' ? `<em class="lock-badge">결제 실패</em>` : '')}
           ${past ? `<em class="lock-badge">지난 예약</em>` : `<em class="open-badge">변경 가능</em>`}
         </span>
-        <small>${escapeHtml(reservation.date)} ${escapeHtml(reservation.time.startAt)} · ${escapeHtml(reservation.name)}</small>
+        <small>${escapeHtml(reservation.date)} ${escapeHtml(reservation.time.startAt)} · ${escapeHtml(reservation.name)} · ${escapeHtml(reservation.paymentStatus || 'WAITING')}</small>
       </span>
       <span class="reservation-card-actions">
         <button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}" ${past || editing ? "disabled" : ""}>

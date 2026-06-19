@@ -3,12 +3,19 @@ package roomescape.reservation.application.service;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentStatus;
 import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
@@ -33,6 +40,7 @@ public class ReservationCommandService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
+    private final PaymentGateway paymentGateway;
 
     public ReservationApplicationResult save(ReservationApplicationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
@@ -48,7 +56,38 @@ public class ReservationCommandService {
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
 
-        Reservation savedReservation = saveReservation(request.toReservation(slot));
+        Reservation reservation = request.toReservation(slot);
+
+        try {
+            PaymentResult result = paymentGateway.confirm(
+                    new PaymentConfirmation(request.paymentKey(), UUID.randomUUID().toString(), request.amount())
+            );
+            reservation = Reservation.builder()
+                    .memberName(reservation.getMemberName())
+                    .slot(reservation.getSlot())
+                    .paymentKey(request.paymentKey())
+                    .amount(request.amount())
+                    .paymentStatus(PaymentStatus.DONE)
+                    .build();
+        } catch (ResourceAccessException e) {
+            reservation = Reservation.builder()
+                    .memberName(reservation.getMemberName())
+                    .slot(reservation.getSlot())
+                    .paymentKey(request.paymentKey())
+                    .amount(request.amount())
+                    .paymentStatus(PaymentStatus.CANCELED)
+                    .build();
+        } catch (RestClientException e) {
+            reservation = Reservation.builder()
+                    .memberName(reservation.getMemberName())
+                    .slot(reservation.getSlot())
+                    .paymentKey(request.paymentKey())
+                    .amount(request.amount())
+                    .paymentStatus(PaymentStatus.UNKNOWN)
+                    .build();
+        }
+
+        Reservation savedReservation = saveReservation(reservation);
         return ReservationApplicationResult.confirmed(
                 savedReservation,
                 ThemeResult.from(theme),
@@ -132,4 +171,6 @@ public class ReservationCommandService {
             throw new ConflictException("변경하려는 날짜와 시간에 이미 예약이 존재합니다.");
         }
     }
+
+
 }
