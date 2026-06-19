@@ -30,6 +30,7 @@ public class PaymentService {
     private final PaymentOrderStatusService paymentOrderStatusService;
     private final ScheduleService scheduleService;
     private final ReservationService reservationService;
+
     private final PaymentGateway paymentGateway;
     private final PaymentOrderIdGenerator orderIdGenerator;
     private final PaymentIdempotencyKeyGenerator idempotencyKeyGenerator;
@@ -62,10 +63,7 @@ public class PaymentService {
         Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
         reservationService.validatePaymentOrderCreatable(member, schedule, now);
 
-        Optional<PaymentOrder> reusableOrder = paymentOrderDao.findReusableByMemberIdAndScheduleId(
-                member.getId(),
-                schedule.getId()
-        );
+        Optional<PaymentOrder> reusableOrder = paymentOrderDao.findReusableByMemberIdAndScheduleId(member.getId(), schedule.getId());
         if (reusableOrder.isPresent()) {
             return reusableOrder.get();
         }
@@ -94,7 +92,6 @@ public class PaymentService {
 
         validateAmount(order, callbackAmount);
         reservationService.validateBeforeConfirm(order.getMemberId(), order.getScheduleId(), LocalDateTime.now());
-
         PaymentResult result;
         try {
             result = paymentGateway.confirm(new PaymentConfirmation(
@@ -110,10 +107,7 @@ public class PaymentService {
             throw e;
         }
 
-        Long reservationId = reservationService.saveConfirmedReservationByPayment(
-                order.getScheduleId(),
-                order.getMemberId()
-        );
+        Long reservationId = reservationService.saveConfirmedReservationByPayment(order.getScheduleId(), order.getMemberId());
         paymentOrderDao.confirm(orderId, result.paymentKey(), reservationId, LocalDateTime.now());
     }
 
@@ -128,8 +122,8 @@ public class PaymentService {
         return checkoutProperties.getClientKey();
     }
 
-    public List<PaymentOrderHistory> findOrdersByMember(Member member) {
-        return paymentOrderDao.findHistoriesByMemberId(member.getId());
+    public List<PaymentOrderHistory> findAllOrders() {
+        return paymentOrderDao.findAllHistories();
     }
 
     private void validateCheckoutConfigured() {
@@ -143,18 +137,12 @@ public class PaymentService {
 
     private void validateAmount(PaymentOrder order, int callbackAmount) {
         if (order.getAmount() != callbackAmount) {
-            throw new RoomescapeException(
-                    DomainErrorCode.PAYMENT_AMOUNT_MISMATCH,
-                    "결제 금액이 주문 금액과 일치하지 않습니다."
-            );
+            throw new RoomescapeException(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH, "결제 금액이 주문 금액과 일치하지 않습니다.");
         }
     }
 
     private PaymentOrder getOrder(String orderId) {
         return paymentOrderDao.findByOrderId(orderId)
-                .orElseThrow(() -> new RoomescapeException(
-                        DomainErrorCode.NOT_FOUND_PAYMENT_ORDER,
-                        "주문 정보를 찾을 수 없습니다. orderId: " + orderId
-                ));
+                .orElseThrow(() -> new RoomescapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER, "주문 정보를 찾을 수 없습니다. orderId: " + orderId));
     }
 }

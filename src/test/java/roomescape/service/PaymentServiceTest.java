@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,7 @@ import roomescape.payment.PaymentOrderIdGenerator;
 import roomescape.payment.PaymentOrderStatus;
 import roomescape.payment.PaymentResult;
 import roomescape.repository.PaymentOrderDao;
+import roomescape.service.dto.PaymentOrderHistory;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -433,6 +435,17 @@ class PaymentServiceTest {
         verify(paymentOrderDao, never()).fail(any(), any(), any(), any(LocalDateTime.class));
     }
 
+    @DisplayName("관리자 결제 주문 조회는 전체 주문 내역을 반환한다.")
+    @Test
+    void findAllOrders() {
+        List<PaymentOrderHistory> histories = List.of(paymentOrderHistory("order-123456"));
+        given(paymentOrderDao.findAllHistories()).willReturn(histories);
+
+        List<PaymentOrderHistory> results = paymentService.findAllOrders();
+
+        assertThat(results).isEqualTo(histories);
+    }
+
     private PaymentOrder pendingOrder(int amount) {
         return PaymentOrder.pending(
                 "order-123456",
@@ -485,6 +498,23 @@ class PaymentServiceTest {
                 new Theme(1L, "테마", "설명", "https://example.com/theme.jpg", price),
                 date,
                 new ReservationTime(1L, time)
+        );
+    }
+
+    private PaymentOrderHistory paymentOrderHistory(String orderId) {
+        return new PaymentOrderHistory(
+                orderId,
+                99L,
+                PaymentOrderStatus.CONFIRMED,
+                "payment-key",
+                23000,
+                null,
+                null,
+                LocalDate.of(2026, 7, 1),
+                LocalTime.of(10, 0),
+                "테마",
+                "설명",
+                "https://example.com/theme.jpg"
         );
     }
 }

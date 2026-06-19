@@ -19,12 +19,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseCreator;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +35,7 @@ import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.payment.toss.TossPaymentGateway;
 import roomescape.payment.toss.TossPaymentProperties;
+import roomescape.ratelimit.RetryAfterInterceptor;
 
 class TossPaymentGatewayTest {
 
@@ -63,12 +64,7 @@ class TossPaymentGatewayTest {
                         MediaType.APPLICATION_JSON
                 ));
 
-        PaymentResult result = gateway.confirm(new PaymentConfirmation(
-                "payment-key",
-                "order-123456",
-                23000,
-                "fixed-idempotency-key"
-        ));
+        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key"));
 
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.totalAmount()).isEqualTo(23000);
@@ -93,12 +89,7 @@ class TossPaymentGatewayTest {
         server.expect(once(), requestTo(CONFIRM_URL))
                 .andRespond(responseFor(tossCode));
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation(
-                "payment-key",
-                "order-123456",
-                23000,
-                "fixed-idempotency-key"
-        )))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key")))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(expectedCode);
@@ -137,12 +128,7 @@ class TossPaymentGatewayTest {
             );
             long startedAt = System.nanoTime();
 
-            assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation(
-                    "payment-key",
-                    "order-123456",
-                    23000,
-                    "fixed-idempotency-key"
-            )))
+            assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment-key", "order-123456", 23000, "fixed-idempotency-key")))
                     .isInstanceOf(RoomescapeException.class)
                     .extracting("code")
                     .isEqualTo(DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN);
@@ -151,6 +137,40 @@ class TossPaymentGatewayTest {
             assertThat(elapsedMillis)
                     .isGreaterThanOrEqualTo(100)
                     .isLessThan(900);
+        }
+    }
+
+    @DisplayName("Toss가 429를 반환하면 Retry-After 후 같은 멱등키로 재시도한다.")
+    @Test
+    void retryAfterTooManyRequestsWithSameIdempotencyKey() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse()
+                    .setResponseCode(429)
+                    .addHeader(HttpHeaders.RETRY_AFTER, "0"));
+            server.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setBody("""
+                            {"paymentKey":"payment-key","orderId":"order-123456","totalAmount":23000,"status":"DONE"}
+                            """)
+                    .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+            server.start();
+            RestClient restClient = RestClient.builder()
+                    .requestInterceptor(new RetryAfterInterceptor(2, Duration.ZERO, duration -> {
+                    }))
+                    .build();
+            TossPaymentGateway gateway = newGateway(restClient, server.url("/v1/payments/confirm").toString());
+
+            PaymentResult result = gateway.confirm(new PaymentConfirmation(
+                    "payment-key",
+                    "order-123456",
+                    23000,
+                    "fixed-idempotency-key"
+            ));
+
+            assertThat(result.status()).isEqualTo("DONE");
+            assertThat(server.getRequestCount()).isEqualTo(2);
+            assertThat(server.takeRequest().getHeader("Idempotency-Key")).isEqualTo("fixed-idempotency-key");
+            assertThat(server.takeRequest().getHeader("Idempotency-Key")).isEqualTo("fixed-idempotency-key");
         }
     }
 
@@ -172,4 +192,3 @@ class TossPaymentGatewayTest {
         );
     }
 }
-                           

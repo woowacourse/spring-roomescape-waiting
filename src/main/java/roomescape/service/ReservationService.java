@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.*;
 import roomescape.controller.dto.AdminReservationRequest;
+import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.repository.ReservationDao;
@@ -62,6 +63,22 @@ public class ReservationService {
                 member,
                 schedule,
                 ReservationStatus.RESERVED,
+                now
+        );
+
+        return reservationDao.save(reservation);
+    }
+
+    @Transactional
+    public Long saveWaitingReservation(UserReservationRequest request, Member member) {
+        LocalDateTime now = LocalDateTime.now();
+        Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
+        validateWaitingCreatable(member, schedule, now);
+
+        Reservation reservation = Reservation.createBy(
+                member,
+                schedule,
+                ReservationStatus.WAITING,
                 now
         );
 
@@ -129,6 +146,18 @@ public class ReservationService {
 
         if (reservationDao.countReservationByScheduleId(schedule.getId()) != EMPTY_RESERVATION_COUNT) {
             throw new RoomescapeException(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE, "이미 예약된 슬롯은 결제할 수 없습니다. 예약 대기를 이용해주세요.");
+        }
+    }
+
+    private void validateWaitingCreatable(Member member, Schedule schedule, LocalDateTime now) {
+        validateNotPastSchedule(schedule, now);
+
+        if (reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())) {
+            throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다.");
+        }
+
+        if (reservationDao.countReservationByScheduleId(schedule.getId()) == EMPTY_RESERVATION_COUNT) {
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 가능한 슬롯은 결제 후 예약해주세요.");
         }
     }
 
