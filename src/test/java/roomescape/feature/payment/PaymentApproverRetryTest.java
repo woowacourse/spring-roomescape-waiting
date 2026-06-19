@@ -139,12 +139,12 @@ class PaymentApproverRetryTest {
 
         @Bean
         @Primary
-        RestClient mockPaymentRestClient() {
-            RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
+        RestClient.Builder mockTossRestClientBuilder() {
+            RestClient.Builder builder = RestClient.builder();
             this.server = MockRestServiceServer.bindTo(builder)
                     .ignoreExpectOrder(true)
                     .build();
-            return builder.build();
+            return builder;
         }
     }
 }
