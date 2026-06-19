@@ -22,7 +22,7 @@ import roomescape.domain.waiting.WaitingRepository;
 import roomescape.domain.waiting.Waitings;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
-import roomescape.payment.client.TossPaymentGateway;
+import roomescape.payment.PaymentGateway;
 import roomescape.payment.dto.PaymentResult;
 import roomescape.payment.domain.Payment;
 import roomescape.payment.domain.PaymentRepository;
@@ -35,7 +35,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
     private final PaymentRepository paymentRepository;
-    private final TossPaymentGateway tossPaymentGateway;
+    private final PaymentGateway paymentGateway;
 
     public ReservationService(
             ReservationRepository reservationRepository,
@@ -43,14 +43,14 @@ public class ReservationService {
             ThemeRepository themeRepository,
             WaitingRepository waitingRepository,
             PaymentRepository paymentRepository,
-            TossPaymentGateway tossPaymentGateway
+            PaymentGateway paymentGateway
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
         this.paymentRepository = paymentRepository;
-        this.tossPaymentGateway = tossPaymentGateway;
+        this.paymentGateway = paymentGateway;
     }
 
     @Transactional
@@ -73,7 +73,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void createPendingReservation(ReservationRequest request, String orderId) {
+    public void createPendingReservation(ReservationRequest request, String orderId, long quotedAmount) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(request.themeId())
@@ -82,7 +82,7 @@ public class ReservationService {
         ReservationSlot slot = ReservationSlot.of(request.date(), time, theme);
         validateDuplicateReservation(slot);
 
-        Reservation pending = Reservation.pendingPayment(request.name(), request.date(), time, theme, orderId);
+        Reservation pending = Reservation.pendingPayment(request.name(), request.date(), time, theme, orderId, quotedAmount);
         try {
             reservationRepository.save(pending);
         } catch (DuplicateKeyException exception) {
@@ -120,7 +120,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
 
         paymentRepository.findByReservationId(id).ifPresent(payment -> {
-            tossPaymentGateway.cancel(payment.getPaymentKey(), "예약 취소");
+            paymentGateway.cancel(payment.getPaymentKey(), "예약 취소");
             paymentRepository.deleteByReservationId(id);
         });
 
@@ -136,7 +136,8 @@ public class ReservationService {
         String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
         try {
             Reservation pending = Reservation.pendingPayment(
-                    waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme(), orderId
+                    waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme(), orderId,
+                    waiting.getTheme().getPrice()
             );
             reservationRepository.save(pending);
             waitingRepository.deleteById(waiting.getId());

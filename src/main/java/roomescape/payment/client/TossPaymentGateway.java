@@ -13,12 +13,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import roomescape.payment.client.dto.CancelRequest;
 import roomescape.payment.client.dto.ConfirmRequest;
 import roomescape.payment.NetworkUncertain;
+import roomescape.payment.PaymentGateway;
 import roomescape.payment.client.dto.TossErrorResponse;
 import roomescape.payment.client.dto.TossPaymentResponse;
 import roomescape.payment.dto.PaymentResult;
 
 @Component
-public class TossPaymentGateway {
+public class TossPaymentGateway implements PaymentGateway {
 
     private static final Logger log = LoggerFactory.getLogger(TossPaymentGateway.class);
 

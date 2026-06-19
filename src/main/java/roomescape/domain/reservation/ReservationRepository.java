@@ -35,7 +35,8 @@ public class ReservationRepository {
                     resultSet.getLong("theme_price")
             ),
             ReservationStatus.valueOf(resultSet.getString("status")),
-            resultSet.getString("order_id")
+            resultSet.getString("order_id"),
+            resultSet.getLong("quoted_amount")
     );
 
     private final RowMapper<Long> timeMapper = (resultSet, rowNum) ->
@@ -70,10 +71,11 @@ public class ReservationRepository {
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId())
                 .addValue("status", reservation.getStatus().name())
-                .addValue("order_id", reservation.getOrderId());
+                .addValue("order_id", reservation.getOrderId())
+                .addValue("quoted_amount", reservation.getQuotedAmount());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Reservation.of(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus(), reservation.getOrderId());
+                reservation.getTheme(), reservation.getStatus(), reservation.getOrderId(), reservation.getQuotedAmount());
     }
 
     public void updateStatus(Long id, ReservationStatus status) {
@@ -137,7 +139,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findById(Long id) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price
@@ -151,7 +153,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findByIdForUpdate(Long id) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price
@@ -166,7 +168,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findBySlot(ReservationSlot slot) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price
@@ -182,7 +184,7 @@ public class ReservationRepository {
 
     public Optional<Reservation> findByOrderId(String orderId) {
         String query = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
+                SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id, r.quoted_amount,
                        t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
                        th.image_url AS theme_image_url, th.price AS theme_price

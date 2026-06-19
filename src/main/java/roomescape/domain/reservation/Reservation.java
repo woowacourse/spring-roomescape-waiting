@@ -15,8 +15,9 @@ public class Reservation {
     private final Theme theme;
     private final ReservationStatus status;
     private final String orderId;
+    private final long quotedAmount;
 
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status, String orderId) {
+    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status, String orderId, long quotedAmount) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -24,24 +25,25 @@ public class Reservation {
         this.theme = theme;
         this.status = status;
         this.orderId = orderId;
+        this.quotedAmount = quotedAmount;
     }
 
-    public static Reservation of(Long id, String name, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status, String orderId) {
-        return new Reservation(id, name, date, time, theme, status, orderId);
+    public static Reservation of(Long id, String name, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status, String orderId, long quotedAmount) {
+        return new Reservation(id, name, date, time, theme, status, orderId, quotedAmount);
     }
 
     public static Reservation of(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(id, name, date, time, theme, ReservationStatus.CONFIRMED, null);
+        return new Reservation(id, name, date, time, theme, ReservationStatus.CONFIRMED, null, 0);
     }
 
     public static Reservation of(String name, LocalDate date, ReservationTime time, Theme theme) {
         time.validateIfTimePast(date);
-        return new Reservation(null, name, date, time, theme, ReservationStatus.CONFIRMED, null);
+        return new Reservation(null, name, date, time, theme, ReservationStatus.CONFIRMED, null, 0);
     }
 
-    public static Reservation pendingPayment(String name, LocalDate date, ReservationTime time, Theme theme, String orderId) {
+    public static Reservation pendingPayment(String name, LocalDate date, ReservationTime time, Theme theme, String orderId, long quotedAmount) {
         time.validateIfTimePast(date);
-        return new Reservation(null, name, date, time, theme, ReservationStatus.PENDING_PAYMENT, orderId);
+        return new Reservation(null, name, date, time, theme, ReservationStatus.PENDING_PAYMENT, orderId, quotedAmount);
     }
 
     public void validateOwner(String newRequestOwner) {
@@ -67,6 +69,7 @@ public class Reservation {
     public Theme getTheme() { return theme; }
     public ReservationStatus getStatus() { return status; }
     public String getOrderId() { return orderId; }
+    public long getQuotedAmount() { return quotedAmount; }
 
     public ReservationSlot getSlot() {
         return ReservationSlot.of(date, time, theme);
