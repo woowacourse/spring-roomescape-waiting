@@ -13,10 +13,17 @@ public record Order(
         Long amount,
         String paymentKey,
         PaymentStatus status,
+        String idempotencyKey,
         LocalDateTime createdAt
 ) {
 
-    public static Order ready(String orderId, Long reservationId, Long amount, LocalDateTime createdAt) {
-        return new Order(null, orderId, reservationId, amount, null, PaymentStatus.READY, createdAt);
+    public static Order ready(
+            String orderId,
+            Long reservationId,
+            Long amount,
+            String idempotencyKey,
+            LocalDateTime createdAt
+    ) {
+        return new Order(null, orderId, reservationId, amount, null, PaymentStatus.READY, idempotencyKey, createdAt);
     }
 }

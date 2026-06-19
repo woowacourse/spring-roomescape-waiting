@@ -15,3 +15,5 @@ toss:
   base-url: https://api.tosspayments.com
   client-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
   secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+  connect-timeout-ms: 1000
+  read-timeout-ms: 3000

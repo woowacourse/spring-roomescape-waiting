@@ -7,6 +7,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.PaymentDetails;
 import roomescape.payment.OrderTicket;
 import roomescape.payment.PaymentOrderPort;
 
@@ -24,8 +25,9 @@ public class OrderService implements PaymentOrderPort {
     @Transactional
     public OrderTicket placeOrder(long reservationId) {
         String orderId = "order_" + UUID.randomUUID().toString().replace("-", "");
+        String idempotencyKey = UUID.randomUUID().toString();
         Order saved = orderRepository.save(
-                Order.ready(orderId, reservationId, RESERVATION_AMOUNT, LocalDateTime.now(clock)));
+                Order.ready(orderId, reservationId, RESERVATION_AMOUNT, idempotencyKey, LocalDateTime.now(clock)));
         return new OrderTicket(saved.orderId(), saved.amount());
     }
 
@@ -33,5 +35,16 @@ public class OrderService implements PaymentOrderPort {
     public Optional<OrderTicket> findTicket(long reservationId) {
         return orderRepository.findByReservationId(reservationId)
                 .map(order -> new OrderTicket(order.orderId(), order.amount()));
+    }
+
+    @Override
+    public Optional<PaymentDetails> findDetails(long reservationId) {
+        return orderRepository.findByReservationId(reservationId)
+                .map(order -> new PaymentDetails(
+                        order.orderId(),
+                        order.paymentKey(),
+                        order.amount(),
+                        order.status()
+                ));
     }
 }

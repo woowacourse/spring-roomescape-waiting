@@ -405,6 +405,18 @@
             color: #555;
         }
 
+        .payment-detail {
+            margin-top: 8px;
+            font-size: 0.82rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .payment-detail span {
+            margin-right: 12px;
+            word-break: break-all;
+        }
+
         .reservation-actions {
             display: flex;
             gap: 8px;
@@ -432,6 +444,21 @@
 
         .status-chip.pending {
             background: #3498db;
+            color: white;
+        }
+
+        .status-chip.confirmed {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-chip.unknown {
+            background: #8e44ad;
+            color: white;
+        }
+
+        .status-chip.failed {
+            background: #e74c3c;
             color: white;
         }
 
@@ -1011,9 +1038,10 @@
                             <span>📅 ${item.date}</span>
                             <span>⏰ ${item.time?.startAt ?? ''}</span>
                             <span>🎭 ${item.theme?.name ?? ''}</span>
+                            ${paymentDetail(item)}
                         </div>
                         <div class="reservation-actions">
-                            <button class="btn-success" onclick="resumePendingPayment(${item.id}, '${encodeURIComponent(name)}')">결제하기</button>
+                            <button class="btn-success" onclick="resumePendingPayment(${item.id}, '${encodeURIComponent(name)}')">${paymentActionLabel(item)}</button>
                         </div>
                     </div>
                 </div>
@@ -1028,6 +1056,7 @@
                         <span>📅 ${item.date}</span>
                         <span>⏰ ${item.time?.startAt ?? ''}</span>
                         <span>🎭 ${item.theme?.name ?? ''}</span>
+                        ${paymentDetail(item)}
                     </div>
                     <div class="reservation-actions">
                         <button class="btn-secondary" onclick="toggleEditForm(${item.id})">변경</button>
@@ -1044,6 +1073,38 @@
                 </div>
             </div>
         `;
+    }
+
+    function paymentDetail(item) {
+        const payment = item.payment;
+        if (!payment) return '';
+
+        const paymentKey = payment.paymentKey
+            ? `<span>paymentKey ${payment.paymentKey}</span>`
+            : '<span>paymentKey -</span>';
+        const amount = payment.amount != null
+            ? `<span>${Number(payment.amount).toLocaleString()}원</span>`
+            : '<span>금액 -</span>';
+
+        return `
+            <div class="payment-detail">
+                <span class="status-chip ${paymentStatusClass(payment.status)}">${payment.status}</span>
+                <span>orderId ${payment.orderId ?? '-'}</span>
+                ${paymentKey}
+                ${amount}
+            </div>
+        `;
+    }
+
+    function paymentStatusClass(status) {
+        if (status === '확정') return 'confirmed';
+        if (status === '확인필요') return 'unknown';
+        if (status === '결제대기') return 'pending';
+        return 'failed';
+    }
+
+    function paymentActionLabel(item) {
+        return item.payment?.status === '확인필요' ? '결제 확인/재시도' : '결제하기';
     }
 
     async function fetchOrEmpty(url) {

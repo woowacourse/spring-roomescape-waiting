@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.FixedClockConfig;
@@ -43,6 +44,8 @@ class ReservationCommandServiceTest {
     private WaitingQueryService waitingQueryService;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @MockitoSpyBean
     private ReservationDao reservationDao;
 
@@ -83,6 +86,13 @@ class ReservationCommandServiceTest {
         assertThat(order.reservationId()).isEqualTo(created.id());
         assertThat(order.amount()).isEqualTo(5_000L);
         assertThat(order.status()).isEqualTo(PaymentStatus.READY);
+        String idempotencyKey = jdbcTemplate.queryForObject(
+                "SELECT idempotency_key FROM payment_order WHERE order_id = ?",
+                String.class,
+                pending.orderId()
+        );
+        assertThat(idempotencyKey).isNotBlank();
+        assertThat(idempotencyKey).hasSizeLessThanOrEqualTo(300);
     }
 
     @Test

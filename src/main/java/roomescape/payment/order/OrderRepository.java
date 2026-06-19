@@ -29,6 +29,7 @@ public class OrderRepository {
             rs.getLong("amount"),
             rs.getString("payment_key"),
             PaymentStatus.valueOf(rs.getString("status")),
+            rs.getString("idempotency_key"),
             rs.getObject("created_at", LocalDateTime.class)
     );
 
@@ -46,6 +47,7 @@ public class OrderRepository {
                 .addValue("amount", order.amount())
                 .addValue("payment_key", order.paymentKey())
                 .addValue("status", order.status().name())
+                .addValue("idempotency_key", order.idempotencyKey())
                 .addValue("created_at", order.createdAt());
 
         long id = insertExecutor.executeAndReturnKey(params).longValue();
@@ -56,13 +58,14 @@ public class OrderRepository {
                 order.amount(),
                 order.paymentKey(),
                 order.status(),
+                order.idempotencyKey(),
                 order.createdAt()
         );
     }
 
     public Optional<Order> findByOrderId(String orderId) {
         String sql = """
-                SELECT id, order_id, reservation_id, amount, payment_key, status, created_at
+                SELECT id, order_id, reservation_id, amount, payment_key, status, idempotency_key, created_at
                 FROM payment_order
                 WHERE order_id = :orderId
                 """;
@@ -73,7 +76,7 @@ public class OrderRepository {
 
     public Optional<Order> findByReservationId(long reservationId) {
         String sql = """
-                SELECT id, order_id, reservation_id, amount, payment_key, status, created_at
+                SELECT id, order_id, reservation_id, amount, payment_key, status, idempotency_key, created_at
                 FROM payment_order
                 WHERE reservation_id = :reservationId
                 """;
@@ -83,7 +86,10 @@ public class OrderRepository {
     }
 
     public List<Order> findAll() {
-        String sql = "SELECT id, order_id, reservation_id, amount, payment_key, status, created_at FROM payment_order";
+        String sql = """
+                SELECT id, order_id, reservation_id, amount, payment_key, status, idempotency_key, created_at
+                FROM payment_order
+                """;
         return jdbcTemplate.query(sql, Map.of(), rowMapper);
     }
 
@@ -92,14 +98,34 @@ public class OrderRepository {
                 UPDATE payment_order
                 SET payment_key = :paymentKey, status = :status
                 WHERE order_id = :orderId
+                  AND status <> :doneStatus
                 """;
         int affected = jdbcTemplate.update(sql, Map.of(
                 "orderId", orderId,
                 "paymentKey", paymentKey,
-                "status", status.name()
+                "status", status.name(),
+                "doneStatus", PaymentStatus.DONE.name()
         ));
 
-        if (affected == 0) {
+        if (affected == 0 && findByOrderId(orderId).isEmpty()) {
+            throw new OrderNotFoundException("요청한 결제 주문을 찾을 수 없습니다.");
+        }
+    }
+
+    public void markUnknown(String orderId) {
+        String sql = """
+                UPDATE payment_order
+                SET status = :status
+                WHERE order_id = :orderId
+                  AND status <> :doneStatus
+                """;
+        int affected = jdbcTemplate.update(sql, Map.of(
+                "orderId", orderId,
+                "status", PaymentStatus.UNKNOWN.name(),
+                "doneStatus", PaymentStatus.DONE.name()
+        ));
+
+        if (affected == 0 && findByOrderId(orderId).isEmpty()) {
             throw new OrderNotFoundException("요청한 결제 주문을 찾을 수 없습니다.");
         }
     }

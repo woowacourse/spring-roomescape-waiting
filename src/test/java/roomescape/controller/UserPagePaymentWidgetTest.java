@@ -39,6 +39,10 @@ class UserPagePaymentWidgetTest {
 
         assertThat(page).contains("item.status === '결제대기'");
         assertThat(page).contains("결제대기");
+        assertThat(page).contains("payment.status");
+        assertThat(page).contains("payment.orderId");
+        assertThat(page).contains("payment.paymentKey");
+        assertThat(page).contains("payment.amount");
         assertThat(page).contains("resumePendingPayment");
         assertThat(page).contains("/payment?name=");
     }
