@@ -146,6 +146,59 @@
             margin: -8px 0 16px;
         }
 
+        .payment-info {
+            display: grid;
+            gap: 8px;
+            padding: 12px 0 16px;
+            border-top: 1px solid #f0f0f3;
+            font-size: 14px;
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .payment-row span {
+            color: #666;
+        }
+
+        .payment-row strong,
+        .payment-row code {
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .payment-row code {
+            font-size: 12px;
+        }
+
+        .payment-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 22px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .payment-status.pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .payment-status.confirmed {
+            background: #f0fff4;
+            color: #1d6b1f;
+        }
+
+        .payment-status.unknown {
+            background: #fff8db;
+            color: #8a5a00;
+        }
+
         .reservation-when {
             color: #666;
             font-size: 15px;
@@ -373,6 +426,7 @@
                             <span class="current-time">${r.time.startAt}</span>
                         </p>
                         ${isWaiting ? `<p class="waiting-order">대기 순번 ${r.waitingOrder}번</p>` : ''}
+                        ${renderPaymentInfo(r)}
                     </div>
                     <div class="actions">
                         ${isWaiting ? '' : '<button class="update-btn">변경</button>'}
@@ -399,6 +453,48 @@
                 <div class="card-message"></div>
             </div>
         `;
+    }
+
+    function renderPaymentInfo(r) {
+        if (!r.paymentStatus) {
+            return '';
+        }
+
+        const payment = paymentLabel(r.paymentStatus);
+        return `
+            <div class="payment-info">
+                <div class="payment-row">
+                    <span>결제 상태</span>
+                    <strong class="payment-status ${payment.className}">${payment.text}</strong>
+                </div>
+                <div class="payment-row">
+                    <span>주문번호</span>
+                    <code>${escapeHtml(r.orderId || '-')}</code>
+                </div>
+                ${r.paymentKey ? `
+                <div class="payment-row">
+                    <span>승인 키</span>
+                    <code>${escapeHtml(r.paymentKey)}</code>
+                </div>
+                ` : ''}
+                ${r.amount ? `
+                <div class="payment-row">
+                    <span>결제금액</span>
+                    <strong>${Number(r.amount).toLocaleString()}원</strong>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    function paymentLabel(status) {
+        if (status === 'CONFIRMED') {
+            return {text: '확정', className: 'confirmed'};
+        }
+        if (status === 'UNKNOWN') {
+            return {text: '확인 필요', className: 'unknown'};
+        }
+        return {text: '결제 대기', className: 'pending'};
     }
 
     function attachCardHandlers() {

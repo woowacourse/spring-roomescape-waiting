@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Order;
 import roomescape.domain.ReservationStatus;
 import roomescape.exception.client.PaymentAmountMismatchException;
+import roomescape.exception.server.PaymentUnavailableException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.repository.OrderRepository;
@@ -29,12 +30,17 @@ public class PaymentService {
     public void confirm(String paymentKey, String orderId, Long amount) {
         Order order = orderRepository.getByOrderId(orderId);
         validateAmount(order, amount);
-        paymentGateway.confirm(new PaymentConfirmation(
-                paymentKey,
-                orderId,
-                amount,
-                order.getIdempotencyKey()
-        ));
+        try {
+            paymentGateway.confirm(new PaymentConfirmation(
+                    paymentKey,
+                    orderId,
+                    amount,
+                    order.getIdempotencyKey()
+            ));
+        } catch (PaymentUnavailableException e) {
+            orderRepository.markUnknown(orderId);
+            throw e;
+        }
         orderRepository.confirm(orderId, paymentKey);
         reservationRepository.updateStatus(order.getReservationId(), ReservationStatus.CONFIRMED);
     }

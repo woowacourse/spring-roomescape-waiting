@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Order;
@@ -27,5 +28,15 @@ public class OrderRepository {
 
     public void confirm(String orderId, String paymentKey) {
         getByOrderId(orderId).confirm(paymentKey);
+    }
+
+    public void markUnknown(String orderId) {
+        getByOrderId(orderId).markUnknown();
+    }
+
+    public Optional<Order> findByReservationId(Long reservationId) {
+        return store.values().stream()
+                .filter(order -> order.getReservationId().equals(reservationId))
+                .findFirst();
     }
 }
