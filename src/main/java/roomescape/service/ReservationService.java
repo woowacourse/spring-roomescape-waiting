@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationRankResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.exception.InvalidStateException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -68,6 +70,11 @@ public class ReservationService {
                 status
         );
 
+        if (status == ReservationStatus.CONFIRMED) {
+            String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
+            reservation.setPaymentInfo(orderId, 50_000L); // 데모용 고정 금액
+        }
+
         reservation.validateNotPast();
 
         return ReservationResponse.from(reservationRepository.save(reservation));
@@ -114,6 +121,10 @@ public class ReservationService {
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
 
+        if (reservation.isToday()) {
+            throw new InvalidStateException("당일 예약은 취소할 수 없습니다.");
+        }
+
         Reservations currentReservations = reservationRepository.findByDateAndThemeAndTimeForUpdate(
                 reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
 
@@ -152,11 +163,13 @@ public class ReservationService {
     }
 
     private void promoteNextWaiting(Reservation deleted, Reservations currentReservations) {
-        if (deleted.isConfirmed()) {
+        if (deleted.takesSlot()) {
             currentReservations.findNextWaiting(deleted.getId())
                     .ifPresent(next -> {
-                        next.confirm();
-                        reservationRepository.updateStatus(next.getId(), next.getStatus());
+                        String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
+                        next.setPaymentInfo(orderId, 50_000L); // 결제 대기 상태로 변경 및 주문 정보 설정
+                        reservationRepository.updatePayment(next.getId(), null, next.getStatus(), next.getOrderId(),
+                                next.getAmount());
                     });
         }
     }

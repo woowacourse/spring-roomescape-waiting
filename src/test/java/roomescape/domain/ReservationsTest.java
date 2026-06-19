@@ -18,7 +18,8 @@ class ReservationsTest {
 
     @Test
     void 중복_예약시_예외() {
-        Reservation reservation = new Reservation(1L, "브라운", date, time, theme, ReservationStatus.CONFIRMED);
+        Reservation reservation = new Reservation(1L, "브라운", date, time, theme, ReservationStatus.CONFIRMED, null, null,
+                null);
         Reservations reservations = new Reservations(List.of(reservation));
 
         assertThatThrownBy(() -> reservations.validateDuplicate("브라운"))
@@ -27,7 +28,8 @@ class ReservationsTest {
 
     @Test
     void 승인된_예약이_있으면_대기() {
-        Reservation confirmed = new Reservation(1L, "브라운", date, time, theme, ReservationStatus.CONFIRMED);
+        Reservation confirmed = new Reservation(1L, "브라운", date, time, theme, ReservationStatus.CONFIRMED, null, null,
+                null);
         Reservations reservations = new Reservations(List.of(confirmed));
 
         assertThat(reservations.determineStatus()).isEqualTo(ReservationStatus.WAITING);
@@ -42,8 +44,10 @@ class ReservationsTest {
 
     @Test
     void 다음_대기_조회() {
-        Reservation waiting1 = new Reservation(2L, "아나키", date, time, theme, ReservationStatus.WAITING);
-        Reservation waiting2 = new Reservation(3L, "그해", date, time, theme, ReservationStatus.WAITING);
+        Reservation waiting1 = new Reservation(2L, "아나키", date, time, theme, ReservationStatus.WAITING, null, null,
+                null);
+        Reservation waiting2 = new Reservation(3L, "그해", date, time, theme, ReservationStatus.WAITING, null, null,
+                null);
         Reservations reservations = new Reservations(List.of(waiting1, waiting2));
 
         Optional<Reservation> next = reservations.findNextWaiting(1L);
@@ -54,7 +58,8 @@ class ReservationsTest {
 
     @Test
     void 대기_예약이_없으면_다음_대기_없음() {
-        Reservation confirmed = new Reservation(1L, "브라운", date, time, theme, ReservationStatus.CONFIRMED);
+        Reservation confirmed = new Reservation(1L, "브라운", date, time, theme, ReservationStatus.CONFIRMED, null, null,
+                null);
         Reservations reservations = new Reservations(List.of(confirmed));
 
         Optional<Reservation> next = reservations.findNextWaiting(2L);

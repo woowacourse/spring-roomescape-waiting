@@ -105,18 +105,18 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    void 대기_예약_승인_확인() {
-        LocalDate date = LocalDate.now();
-        Reservation confirmed = reservationRepository.save(
-                new Reservation("브라운", date, time, theme, ReservationStatus.CONFIRMED));
-        Reservation waiting = reservationRepository.save(
-                new Reservation("아나키", date, time, theme, ReservationStatus.WAITING));
+    void 결제_정보_업데이트_확인() {
+        Reservation reservation = reservationRepository.save(
+                new Reservation("브라운", LocalDate.now(), time, theme, ReservationStatus.PENDING_PAYMENT));
 
-        reservationRepository.delete(confirmed.getId());
-        reservationRepository.updateStatus(waiting.getId(), ReservationStatus.CONFIRMED);
+        reservationRepository.updatePayment(reservation.getId(), "payment-key", ReservationStatus.CONFIRMED, "order-id",
+                50000L);
 
-        Reservation result = reservationRepository.findById(waiting.getId()).orElseThrow();
+        Reservation result = reservationRepository.findById(reservation.getId()).orElseThrow();
         assertThat(result.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+        assertThat(result.getPaymentKey()).isEqualTo("payment-key");
+        assertThat(result.getOrderId()).isEqualTo("order-id");
+        assertThat(result.getAmount()).isEqualTo(50000L);
     }
 
     @Test

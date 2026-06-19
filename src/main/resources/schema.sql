@@ -28,6 +28,9 @@ CREATE TABLE reservation
     time_id       BIGINT,
     theme_id      BIGINT,
     status        VARCHAR(255) NOT NULL,
+    order_id      VARCHAR(255),
+    payment_key   VARCHAR(255),
+    amount        BIGINT,
 
     confirmed_key INT INVISIBLE GENERATED ALWAYS AS (CASE WHEN status = 'CONFIRMED' THEN 1 END),
 

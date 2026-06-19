@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('ROOMESCAPE')}"></head>
+<body>
+<header th:replace="~{layout :: header}"></header>
+
+<main class="container">
+    <!-- 예약 단계 표시 -->
+    <section class="booking-flow">
+        <div class="flow-step is-active" data-step="1">
+            <div class="step-dot"></div>
+            <span class="step-label">테마 선택</span>
+        </div>
+        <div class="flow-step" data-step="2">
+            <div class="step-dot"></div>
+            <span class="step-label">날짜 선택</span>
+        </div>
+        <div class="flow-step" data-step="3">
+            <div class="step-dot"></div>
+            <span class="step-label">정보 입력</span>
+        </div>
+    </section>
+
+    <!-- 1단계: 테마 목록 -->
+    <div id="step-1" class="step-content">
+        <h2 class="section-title">테마를 선택하세요</h2>
+
+        <section id="popular-themes-section" style="margin-bottom: 60px;">
+            <h3 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="sparkles" style="color: #f59e0b;"></i> 인기 테마
+            </h3>
+            <div id="popular-theme-grid" class="theme-grid"
+                 style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+                <!-- 인기 테마가 여기에 삽입됩니다 -->
+            </div>
+        </section>
+
+        <h3 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--text-muted);">전체 테마</h3>
+        <div id="theme-grid" class="theme-grid">
+            <!-- 테마 카드가 여기에 동적으로 삽입됩니다 -->
+        </div>
+    </div>
+
+    <!-- 2단계: 날짜 선택 -->
+    <div id="step-2" class="step-content is-hidden">
+        <h2 class="section-title">날짜를 선택하세요</h2>
+        <div class="calendar-box">
+            <button type="button" class="btn-back" onclick="setStep(1)">
+                <i data-lucide="chevron-left"></i> 테마 선택으로 돌아가기
+            </button>
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- 날짜 버튼이 여기에 동적으로 삽입됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3단계: 예약 정보 입력 -->
+    <div id="step-3" class="step-content is-hidden">
+        <h2 class="section-title">예약 정보를 입력하세요</h2>
+
+        <div class="form-card">
+            <button type="button" class="btn-back" onclick="setStep(2)">
+                <i data-lucide="chevron-left"></i> 날짜 선택으로 돌아가기
+            </button>
+
+            <div class="booking-summary"
+                 style="background:#f8fafc; padding:20px; border-radius:12px; margin-bottom:32px; border:1px solid var(--border);">
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">선택한 예약 정보</p>
+                <p style="font-weight:700; font-size:1.1rem; color:var(--primary);">
+                    <span id="summary-theme-name">테마명</span> • <span id="summary-date">날짜</span>
+                </p>
+            </div>
+
+            <form id="reserve-form">
+                <div class="form-group">
+                    <label for="time-select">예약 시간</label>
+                    <select id="time-select" name="timeId" required>
+                        <option value="">시간을 선택해주세요</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="name-input">예약자 성함</label>
+                    <input type="text" id="name-input" placeholder="성함을 입력해주세요" required/>
+                </div>
+
+                <button type="submit" class="btn-primary">예약 신청하기</button>
+            </form>
+            <p id="reserve-message" style="margin-top:16px; text-align:center; font-weight:600;"></p>
+        </div>
+    </div>
+
+    <!-- 내 예약 확인 섹션 -->
+    <section id="my-section" class="is-hidden" style="margin-top: 40px;">
+        <h2 class="section-title">내 예약 내역</h2>
+        <div class="form-card" style="margin-bottom:40px; max-width:600px;">
+            <p style="margin-bottom: 24px; color: var(--text-muted); text-align: center;">예약 시 입력하신 성함을 입력하여 예약 내역을
+                확인하세요.</p>
+            <form id="my-search-form">
+                <div class="form-group">
+                    <label for="my-name-input">예약자 성함</label>
+                    <div style="display:flex; gap:12px;">
+                        <input type="text" id="my-name-input" placeholder="성함을 입력해주세요" style="flex:1;" required/>
+                        <button type="submit" class="btn-primary" style="width:100px;">조회</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="my-list" style="max-width:800px; margin:0 auto;">
+            <!-- 예약 내역이 여기에 동적으로 삽입됩니다 -->
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<!-- 결제 모달 -->
+<div id="payment-modal" class="payment-modal-overlay">
+    <div class="payment-modal-content">
+        <button class="close-modal" onclick="closePaymentModal()">&times;</button>
+        <h3 id="payment-modal-title">결제하기</h3>
+        <p id="payment-modal-desc">예약 확정을 위해 결제를 진행해 주세요.</p>
+
+        <div id="modal-payment-widget-container"></div>
+        <div id="modal-agreement-widget-container"></div>
+
+        <button id="modal-payment-btn" class="btn-primary" style="margin-top: 20px;">결제 요청</button>
+    </div>
+</div>
+
+<script src="https://js.tosspayments.com/v1/payment-widget"></script>
+<script th:inline="javascript">
+    window.TOSS_CLIENT_KEY = [[${clientKey}]];
+</script>
+<script src="/js/user.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('관리자 대시보드')}"></head>
+<body class="admin-body">
+<header th:replace="~{layout :: header}"></header>
+
+<main class="container admin-container" style="padding-top: 40px;">
+    <h2 class="section-title">관리자 대시보드</h2>
+
+    <div class="admin-grid">
+        <section class="admin-card">
+            <h3>테마 관리</h3>
+            <form id="theme-form" class="admin-form">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <input type="text" id="theme-name" name="name" placeholder="테마명" required/>
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <input type="text" id="theme-desc" name="description" placeholder="테마 설명" required/>
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label for="theme-file"
+                           style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">테마
+                        이미지 파일</label>
+                    <input type="file" id="theme-file" name="file" accept="image/*" required/>
+                </div>
+                <button type="submit" class="btn-primary" style="padding: 10px;">테마 추가</button>
+            </form>
+            <div id="admin-theme-list" class="admin-list" style="margin-top: 20px;">
+                <!-- 테마 목록 -->
+            </div>
+        </section>
+
+        <section class="admin-card">
+            <h3>시간 관리</h3>
+            <form id="time-form" class="admin-form">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <input type="time" id="time-start" required/>
+                </div>
+                <button type="submit" class="btn-primary" style="padding: 10px;">시간 슬롯 추가</button>
+            </form>
+            <div id="admin-time-list" class="admin-list" style="margin-top: 20px;">
+                <!-- 시간 목록 -->
+            </div>
+        </section>
+    </div>
+
+    <section class="admin-card" style="margin-bottom: 40px;">
+        <h3>전체 예약 현황</h3>
+        <div class="table-wrapper" style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>예약자</th>
+                    <th>날짜</th>
+                    <th>시간</th>
+                    <th>테마</th>
+                    <th>상태</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody id="admin-reservation-list">
+                <!-- 예약 목록 -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<script src="/js/admin.js"></script>
+</body>
+</html>

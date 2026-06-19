@@ -38,4 +38,12 @@ public class ReservationRank {
     public Long getRank() {
         return rank;
     }
+
+    public String getOrderId() {
+        return reservation.getOrderId();
+    }
+
+    public Long getAmount() {
+        return reservation.getAmount();
+    }
 }
