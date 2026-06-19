@@ -1442,6 +1442,15 @@ input:focus-visible {
     background: #15090a;
 }
 
+.my-reservation-item.is-payment-confirmed {
+    border-color: rgba(229, 9, 20, 0.34);
+}
+
+.my-reservation-item.is-payment-closed {
+    border-color: rgba(255, 77, 95, 0.34);
+    background: #120d0e;
+}
+
 .my-reservation-item.is-editing {
     align-items: start;
 }
@@ -1468,6 +1477,50 @@ input:focus-visible {
     margin-top: 4px;
     color: #ffd08a;
     font-weight: 900;
+}
+
+.payment-history-item .reservation-card-actions {
+    min-width: 88px;
+    justify-content: flex-end;
+}
+
+.payment-history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.payment-history-meta span,
+.payment-history-key {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.payment-history-meta span {
+    max-width: 100%;
+    padding: 4px 7px;
+    border: 1px solid var(--line);
+    color: var(--text);
+    background: #0b0b0b;
+    font-size: 0.76rem;
+    font-weight: 900;
+}
+
+.payment-history-order-id {
+    display: block;
+    flex-basis: 100%;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    line-height: 1.35;
+    white-space: normal;
+    word-break: break-all;
+}
+
+.payment-history-key {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    line-height: 1.35;
 }
 
 .payment-badge {

@@ -1,4 +1,4 @@
-import {api} from "./api.js";
+import {api, findPaymentHistories} from "./api.js";
 import {appEl} from "./dom.js";
 import {ADMIN_TABS, canSubmitReservation, isPastReservation, selectedTheme, selectedTime, state} from "./state.js";
 import {render, syncThemeFilter} from "./render.js";
@@ -139,6 +139,17 @@ async function processPaymentRedirect(parsedParams) {
     }
 }
 
+async function retryPaymentApproval() {
+    const params = state.payment.result?.params;
+
+    if (!params) {
+        showToast("다시 확인할 결제 정보를 찾을 수 없습니다.", "error");
+        return;
+    }
+
+    await processPaymentRedirect({ok: true, params});
+}
+
 async function refreshAfterSuccessfulPayment(orderId) {
     let dataRefreshFailed = false;
     let searchReloadResult = {failed: false, partialFailure: false};
@@ -163,7 +174,7 @@ async function refreshAfterSuccessfulPayment(orderId) {
 }
 
 function reconcileSuccessfulPayment(orderId) {
-    if (isMatchingPendingPaymentOrder(state.payment.pendingContext?.reservation, orderId)) {
+    if (isMatchingPendingPayment(state.payment.pendingContext?.reservation, orderId)) {
         state.payment.pendingContext = null;
     }
 
@@ -172,7 +183,7 @@ function reconcileSuccessfulPayment(orderId) {
 }
 
 function reconcilePaidReservation(reservation, orderId) {
-    if (!isMatchingPendingPaymentOrder(reservation, orderId)) {
+    if (!isMatchingPendingPayment(reservation, orderId)) {
         return reservation;
     }
 
@@ -183,7 +194,7 @@ function reconcilePaidReservation(reservation, orderId) {
     };
 }
 
-function isMatchingPendingPaymentOrder(reservation, orderId) {
+function isMatchingPendingPayment(reservation, orderId) {
     return isPaymentPendingReservation(reservation) && reservation.payment?.orderId === orderId;
 }
 
@@ -241,12 +252,12 @@ function reconcileFailedPaymentCleanup(orderId) {
         return;
     }
 
-    if (isMatchingPendingPaymentOrder(state.payment.pendingContext?.reservation, orderId)) {
+    if (isMatchingPendingPayment(state.payment.pendingContext?.reservation, orderId)) {
         state.payment.pendingContext = null;
     }
 
-    state.reservations = state.reservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
-    state.searchedReservations = state.searchedReservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
+    state.reservations = state.reservations.filter((reservation) => !isMatchingPendingPayment(reservation, orderId));
+    state.searchedReservations = state.searchedReservations.filter((reservation) => !isMatchingPendingPayment(reservation, orderId));
 }
 
 async function handleClick(event) {
@@ -378,6 +389,11 @@ async function handleClick(event) {
 
         if (action === "start-payment") {
             await preparePayment(actionTarget);
+            return;
+        }
+
+        if (action === "retry-payment-approval") {
+            await retryPaymentApproval();
             return;
         }
 
@@ -963,6 +979,7 @@ async function loadSearchedReservations(options = {}) {
     if (!username) {
         state.searchedReservations = [];
         state.searchedWaitings = [];
+        state.searchedPayments = [];
         state.reservationSearchSubmitted = false;
         state.reservationSearchSubmittedName = "";
         render();
@@ -970,20 +987,25 @@ async function loadSearchedReservations(options = {}) {
     }
 
     state.loading.searchedReservations = true;
+    state.loading.searchedPayments = true;
     if (!options.silent) {
         render();
     }
 
     try {
         const query = new URLSearchParams({username}).toString();
-        const [reservationResult, waitingResult] = await Promise.allSettled([
+        const [reservationResult, waitingResult, paymentResult] = await Promise.allSettled([
             api(`/reservations?${query}`),
-            api(`/waitings?${query}`)
+            api(`/waitings?${query}`),
+            findPaymentHistories(username)
         ]);
-        const failedResults = [reservationResult, waitingResult].filter((result) => result.status === "rejected");
+        const applicationResults = [reservationResult, waitingResult];
+        const failedApplicationResults = applicationResults.filter((result) => result.status === "rejected");
+        const failedResults = [reservationResult, waitingResult, paymentResult]
+            .filter((result) => result.status === "rejected");
 
-        if (failedResults.length === 2) {
-            throw failedResults[0].reason;
+        if (failedApplicationResults.length === applicationResults.length) {
+            throw failedApplicationResults[0].reason;
         }
 
         state.searchedReservations = reservationResult.status === "fulfilled"
@@ -992,6 +1014,9 @@ async function loadSearchedReservations(options = {}) {
         state.searchedWaitings = waitingResult.status === "fulfilled"
             ? waitingResult.value
             : (options.silent ? state.searchedWaitings : []);
+        state.searchedPayments = paymentResult.status === "fulfilled"
+            ? paymentResult.value
+            : (options.silent ? state.searchedPayments : []);
         state.reservationSearchSubmitted = true;
         state.reservationSearchSubmittedName = username;
         syncReservationEditWithSearchResults();
@@ -1006,6 +1031,7 @@ async function loadSearchedReservations(options = {}) {
         if (!options.silent) {
             state.searchedReservations = [];
             state.searchedWaitings = [];
+            state.searchedPayments = [];
             state.reservationSearchSubmitted = false;
             state.reservationSearchSubmittedName = "";
             clearReservationEdit();
@@ -1015,6 +1041,7 @@ async function loadSearchedReservations(options = {}) {
         return {failed: true, partialFailure: false};
     } finally {
         state.loading.searchedReservations = false;
+        state.loading.searchedPayments = false;
         render();
     }
 }
@@ -1042,9 +1069,11 @@ function clearReservationSearch() {
     state.reservationSearchName = "";
     state.searchedReservations = [];
     state.searchedWaitings = [];
+    state.searchedPayments = [];
     state.reservationSearchSubmitted = false;
     state.reservationSearchSubmittedName = "";
     state.loading.searchedReservations = false;
+    state.loading.searchedPayments = false;
     clearReservationEdit();
     render();
 }

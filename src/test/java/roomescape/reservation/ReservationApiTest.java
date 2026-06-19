@@ -10,6 +10,7 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +18,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.reservation.domain.Payment;
+import roomescape.reservation.domain.repository.PaymentRepository;
 import roomescape.support.ApiTest;
 import roomescape.support.TestDataHelper;
 
@@ -25,6 +28,9 @@ class ReservationApiTest {
 
     @Autowired
     private TestDataHelper testHelper;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     @DisplayName("방탈출 예약 추가 API를 테스트합니다.")
     @Test
@@ -68,6 +74,31 @@ class ReservationApiTest {
                 .when().delete("/reservations/{id}", reservationId)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("결제 주문이 있는 예약 삭제 API는 연결된 주문도 함께 삭제합니다.")
+    @Test
+    void delete_reservation_with_payment() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        Payment payment = paymentRepository.save(Payment.create(reservationId, 50_000L));
+        testHelper.confirmPayment(payment, "confirmed-payment-key");
+
+        RestAssured.given()
+                .when().delete("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findOptionalPaymentStatus(payment.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.existsReservation(reservationId)).isFalse();
+        });
     }
 
     @DisplayName("과거 날짜로 예약 생성 요청 시 422 응답 반환을 테스트합니다.")

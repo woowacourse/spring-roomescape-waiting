@@ -1,16 +1,16 @@
 package roomescape.reservation.application.dto;
 
-import roomescape.reservation.domain.PaymentOrder;
+import roomescape.reservation.domain.Payment;
 
 public record PaymentReadyResult(
         String orderId,
         Long amount
 ) {
 
-    public static PaymentReadyResult from(PaymentOrder paymentOrder) {
+    public static PaymentReadyResult from(Payment payment) {
         return new PaymentReadyResult(
-                paymentOrder.getOrderId().value(),
-                paymentOrder.getAmount().value()
+                payment.getOrderId().value(),
+                payment.getAmount().value()
         );
     }
 

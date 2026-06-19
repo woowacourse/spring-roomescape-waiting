@@ -1,7 +1,7 @@
 package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
-import roomescape.reservation.domain.PaymentOrder;
+import roomescape.reservation.domain.Payment;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.theme.application.dto.ThemeResult;
@@ -30,7 +30,7 @@ public record ReservationResult(
     }
 
     public static ReservationResult paymentPending(Reservation reservation, ThemeResult themeResult,
-                                                   ReservationTimeResult timeResult, PaymentOrder paymentOrder) {
+                                                   ReservationTimeResult timeResult, Payment payment) {
         return new ReservationResult(
                 reservation.getId(),
                 reservation.getUserName(),
@@ -38,7 +38,7 @@ public record ReservationResult(
                 themeResult,
                 timeResult,
                 reservation.getStatus().name(),
-                PaymentReadyResult.from(paymentOrder)
+                PaymentReadyResult.from(payment)
         );
     }
 

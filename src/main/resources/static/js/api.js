@@ -1,3 +1,11 @@
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export async function api(path, options = {}) {
   const init = {
     method: options.method || "GET",
@@ -26,10 +34,15 @@ export async function api(path, options = {}) {
   const data = readJson(text);
 
   if (!response.ok) {
-    throw new Error(resolveError(data, text, response.status));
+    throw new ApiError(resolveError(data, text, response.status), response.status);
   }
 
   return data;
+}
+
+export function findPaymentHistories(username) {
+  const query = new URLSearchParams({username}).toString();
+  return api(`/payments?${query}`);
 }
 
 function readJson(text) {

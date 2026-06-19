@@ -13,12 +13,12 @@ import roomescape.reservation.application.dto.PaymentFailCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
-import roomescape.reservation.domain.PaymentOrder;
+import roomescape.reservation.domain.Payment;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.repository.PaymentOrderRepository;
+import roomescape.reservation.domain.repository.PaymentRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
@@ -37,8 +37,8 @@ public class ReservationCommandService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
-    private final PaymentOrderRepository orderRepository;
-    private final PaymentService paymentService;
+    private final PaymentRepository paymentRepository;
+    private final PaymentCommandService paymentCommandService;
 
     public ReservationResult save(ReservationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
@@ -51,13 +51,13 @@ public class ReservationCommandService {
         Reservation reservation = request.toReservation(slot);
 
         Reservation savedReservation = saveReservation(reservation);
-        PaymentOrder savedOrder = paymentService.prepare(savedReservation.getId());
+        Payment savedPayment = paymentCommandService.prepare(savedReservation.getId());
 
         return ReservationResult.paymentPending(
                 savedReservation,
                 ThemeResult.from(theme),
                 ReservationTimeResult.from(time),
-                savedOrder
+                savedPayment
         );
     }
 
@@ -87,6 +87,8 @@ public class ReservationCommandService {
 
         slot.validateDeletable(now);
 
+        paymentRepository.deleteByReservationId(reservationId);
+
         if (reservationRepository.delete(reservationId) == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
@@ -99,13 +101,13 @@ public class ReservationCommandService {
             return;
         }
 
-        orderRepository.findByOrderId(command.normalizedOrderId())
-                .filter(PaymentOrder::isPending)
-                .ifPresent(order -> deletePendingPaymentReservation(order, command.now()));
+        paymentRepository.findByOrderId(command.normalizedOrderId())
+                .filter(Payment::isPending)
+                .ifPresent(payment -> deletePendingPaymentReservation(payment, command.now()));
     }
 
-    private void deletePendingPaymentReservation(PaymentOrder order, LocalDateTime now) {
-        Reservation reservation = reservationRepository.findById(order.getReservationId())
+    private void deletePendingPaymentReservation(Payment payment, LocalDateTime now) {
+        Reservation reservation = reservationRepository.findById(payment.getReservationId())
                 .filter(candidate -> candidate.getStatus() == ReservationStatus.PAYMENT_PENDING)
                 .orElse(null);
 
@@ -116,12 +118,12 @@ public class ReservationCommandService {
         ReservationSlot slot = reservation.getSlot();
         slot.validateDeletable(now);
 
-        if (orderRepository.deletePendingByOrderId(order.getOrderId().value()) == 0) {
+        if (paymentRepository.deletePendingByOrderId(payment.getOrderId().value()) == 0) {
             return;
         }
 
         if (reservationRepository.deleteByIdAndStatus(
-                order.getReservationId(),
+                payment.getReservationId(),
                 ReservationStatus.PAYMENT_PENDING) == 0) {
             return;
         }
@@ -152,7 +154,7 @@ public class ReservationCommandService {
             Reservation promotedReservation = saveReservation(
                     Reservation.create(waiting.getUser(), waiting.getSlot(), now)
             );
-            paymentService.prepare(promotedReservation.getId());
+            paymentCommandService.prepare(promotedReservation.getId());
         });
     }
 

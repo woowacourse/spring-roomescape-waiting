@@ -1,13 +1,15 @@
 package roomescape.reservation.infra.toss;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.global.exception.PaymentAlreadyProcessedException;
 import roomescape.global.exception.PaymentCardRejectedException;
 import roomescape.global.exception.PaymentGatewayConfigurationException;
@@ -21,10 +23,14 @@ import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.infra.toss.dto.ConfirmRequest;
 import roomescape.reservation.infra.toss.dto.TossErrorResponse;
 import roomescape.reservation.infra.toss.dto.TossPaymentResponse;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
 @Component
 public class TossPaymentGateway implements PaymentGateway {
+
+    private static final int MAX_CONFIRM_ATTEMPTS = 3;
 
     private final RestClient tossRestClient;
     private final ObjectMapper objectMapper;
@@ -37,24 +43,92 @@ public class TossPaymentGateway implements PaymentGateway {
                 confirmation.amount()
         );
 
-        TossPaymentResponse response = tossRestClient.post()
-                .uri("/v1/payments/confirm")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(request)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (httpRequest, httpResponse) -> {
-                    throw convertTossErrorToException(httpResponse);
-                })
-                .body(TossPaymentResponse.class);
+        for (int attempt = 1; attempt <= MAX_CONFIRM_ATTEMPTS; attempt++) {
+            try {
+                return requestConfirm(confirmation, request);
+            } catch (RetryablePaymentGatewayException e) {
+                if (attempt == MAX_CONFIRM_ATTEMPTS) {
+                    throw e;
+                }
+            }
+        }
+
+        throw new PaymentGatewayException("결제 승인에 실패했습니다.");
+    }
+
+    private PaymentResult requestConfirm(PaymentConfirmation confirmation, ConfirmRequest request) {
+        TossPaymentResponse response;
+        try {
+            response = tossRestClient.post()
+                    .uri("/v1/payments/confirm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.orderId())
+                    .body(request)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (httpRequest, httpResponse) -> {
+                        throw convertTossErrorToException(httpResponse);
+                    })
+                    .body(TossPaymentResponse.class);
+        } catch (ResourceAccessException e) {
+            throw new RetryablePaymentGatewayException(e);
+        } catch (RestClientException e) {
+            if (hasCause(e, SocketTimeoutException.class)) {
+                throw new RetryablePaymentGatewayException(e);
+            }
+            throw e;
+        }
 
         return response.toResult();
+    }
+
+    @Override
+    public PaymentResult findByPaymentKey(String paymentKey) {
+        return requestPayment("/v1/payments/{paymentKey}", paymentKey);
+    }
+
+    @Override
+    public PaymentResult findByOrderId(String orderId) {
+        return requestPayment("/v1/payments/orders/{orderId}", orderId);
+    }
+
+    private PaymentResult requestPayment(String uri, String id) {
+        TossPaymentResponse response;
+        try {
+            response = tossRestClient.get()
+                    .uri(uri, id)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (httpRequest, httpResponse) -> {
+                        throw convertTossErrorToException(httpResponse);
+                    })
+                    .body(TossPaymentResponse.class);
+        } catch (ResourceAccessException e) {
+            throw new RetryablePaymentGatewayException(e);
+        } catch (RestClientException e) {
+            if (hasCause(e, SocketTimeoutException.class)) {
+                throw new RetryablePaymentGatewayException(e);
+            }
+            throw e;
+        }
+
+        return response.toResult();
+    }
+
+    private boolean hasCause(Throwable exception, Class<? extends Throwable> causeType) {
+        Throwable current = exception;
+        while (current != null) {
+            if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private RuntimeException convertTossErrorToException(ClientHttpResponse response) {
         TossErrorResponse error;
         try {
             error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             return new PaymentGatewayException("결제 승인에 실패했습니다.");
         }
 

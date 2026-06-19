@@ -4,12 +4,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.net.SocketTimeoutException;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -34,8 +36,8 @@ import roomescape.global.exception.RetryablePaymentGatewayException;
 import roomescape.reservation.application.port.out.payment.PaymentGateway;
 import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.application.port.out.payment.PaymentStatus;
-import roomescape.reservation.application.service.PaymentService;
-import roomescape.reservation.domain.PaymentOrder;
+import roomescape.reservation.application.service.PaymentCommandService;
+import roomescape.reservation.domain.Payment;
 import roomescape.support.ApiTest;
 import roomescape.support.TestDataHelper;
 
@@ -48,7 +50,7 @@ class PaymentApiTest {
     private TestDataHelper testHelper;
 
     @Autowired
-    private PaymentService paymentService;
+    private PaymentCommandService paymentCommandService;
 
     @Value("${toss.client-key}")
     private String tossClientKey;
@@ -70,90 +72,148 @@ class PaymentApiTest {
     @DisplayName("결제 승인 성공 API를 테스트합니다.")
     @Test
     void confirm_payment() {
-        PaymentOrder order = preparePaymentOrder();
+        Payment payment = preparePayment();
         given(paymentGateway.confirm(any()))
                 .willReturn(
-                        new PaymentResult(PAYMENT_KEY, order.getOrderId().value(), PaymentStatus.DONE,
-                                order.getAmount().value()));
+                        new PaymentResult(PAYMENT_KEY, payment.getOrderId().value(), PaymentStatus.DONE,
+                                payment.getAmount().value()));
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(paymentConfirmRequest(order))
+                .body(paymentConfirmRequest(payment))
                 .when().post("/payments/success")
                 .then().log().all()
                 .statusCode(200)
                 .body("paymentKey", equalTo(PAYMENT_KEY))
-                .body("orderId", equalTo(order.getOrderId().value()))
+                .body("orderId", equalTo(payment.getOrderId().value()))
                 .body("status", equalTo("DONE"))
-                .body("approvedAmount", equalTo(order.getAmount().value().intValue()));
+                .body("approvedAmount", equalTo(payment.getAmount().value().intValue()));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("CONFIRMED");
-            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("CONFIRMED");
         });
     }
 
     @DisplayName("결제 승인 결과가 DONE이 아니면 API는 결제 주문과 예약 상태를 확정하지 않습니다.")
     @Test
     void confirm_payment_non_done_result() {
-        PaymentOrder order = preparePaymentOrder();
+        Payment payment = preparePayment();
         given(paymentGateway.confirm(any()))
                 .willReturn(
-                        new PaymentResult(PAYMENT_KEY, order.getOrderId().value(), PaymentStatus.ABORTED,
-                                order.getAmount().value()));
+                        new PaymentResult(PAYMENT_KEY, payment.getOrderId().value(), PaymentStatus.ABORTED,
+                                payment.getAmount().value()));
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(paymentConfirmRequest(order))
+                .body(paymentConfirmRequest(payment))
                 .when().post("/payments/success")
                 .then().log().all()
                 .statusCode(422);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("PAYMENT_PENDING");
-            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("PAYMENT_PENDING");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("PENDING");
         });
     }
 
     @DisplayName("이미 확정된 결제 주문 승인 요청 시 API는 게이트웨이를 호출하지 않고 409를 반환합니다.")
     @Test
     void confirm_payment_already_confirmed_order() {
-        PaymentOrder order = preparePaymentOrder();
+        Payment payment = preparePayment();
         String savedPaymentKey = "already_confirmed_payment_key";
-        testHelper.confirmPaymentOrder(order, savedPaymentKey);
+        testHelper.confirmPayment(payment, savedPaymentKey);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(paymentConfirmRequest(order))
+                .body(paymentConfirmRequest(payment))
                 .when().post("/payments/success")
                 .then().log().all()
                 .statusCode(409);
 
         verify(paymentGateway, never()).confirm(any());
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("CONFIRMED");
-            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("CONFIRMED");
-            softly.assertThat(testHelper.findPaymentKey(order.getOrderId().value())).isEqualTo(savedPaymentKey);
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentKey(payment.getOrderId().value())).isEqualTo(savedPaymentKey);
         });
     }
 
     @DisplayName("결제 게이트웨이 장애가 발생하면 API는 502를 반환하고 결제 주문과 예약 상태를 확정하지 않습니다.")
     @Test
     void confirm_payment_gateway_exception() {
-        PaymentOrder order = preparePaymentOrder();
+        Payment payment = preparePayment();
         given(paymentGateway.confirm(any()))
                 .willThrow(new PaymentGatewayException("결제 승인에 실패했습니다."));
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(paymentConfirmRequest(order))
+                .body(paymentConfirmRequest(payment))
                 .when().post("/payments/success")
                 .then().log().all()
                 .statusCode(502);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("PAYMENT_PENDING");
-            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("PAYMENT_PENDING");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("PENDING");
+        });
+    }
+
+    @DisplayName("결제 승인 timeout 후 토스 조회 결과가 완료 상태이면 기존 성공 API에서 확정 결과를 반환합니다.")
+    @Test
+    void confirm_payment_reconciles_retryable_failure_by_order_id() {
+        Payment payment = preparePayment();
+        String resolvedPaymentKey = "resolved_payment_key";
+        given(paymentGateway.confirm(any()))
+                .willThrow(new RetryablePaymentGatewayException(new SocketTimeoutException()));
+        given(paymentGateway.findByOrderId(payment.getOrderId().value()))
+                .willReturn(new PaymentResult(resolvedPaymentKey, payment.getOrderId().value(), PaymentStatus.DONE,
+                        payment.getAmount().value()));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(paymentConfirmRequest(payment))
+                .when().post("/payments/success")
+                .then().log().all()
+                .statusCode(200)
+                .body("paymentKey", equalTo(resolvedPaymentKey))
+                .body("orderId", equalTo(payment.getOrderId().value()))
+                .body("status", equalTo("DONE"))
+                .body("approvedAmount", equalTo(payment.getAmount().value().intValue()));
+
+        verify(paymentGateway).findByOrderId(payment.getOrderId().value());
+        verify(paymentGateway, never()).findByPaymentKey(anyString());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentKey(payment.getOrderId().value())).isEqualTo(resolvedPaymentKey);
+        });
+    }
+
+    @DisplayName("결제 승인 timeout 후 토스 조회 결과가 완료 상태가 아니면 API는 503을 반환하고 결제 주문과 예약 상태를 확정하지 않습니다.")
+    @Test
+    void confirm_payment_timeout_preserves_pending_status() {
+        Payment payment = preparePayment();
+        given(paymentGateway.confirm(any()))
+                .willThrow(new RetryablePaymentGatewayException(new SocketTimeoutException()));
+        given(paymentGateway.findByOrderId(payment.getOrderId().value()))
+                .willReturn(new PaymentResult(PAYMENT_KEY, payment.getOrderId().value(), PaymentStatus.ABORTED,
+                        payment.getAmount().value()));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(paymentConfirmRequest(payment))
+                .when().post("/payments/success")
+                .then().log().all()
+                .statusCode(503)
+                .body("errorMessage", equalTo("결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요."))
+                .body("$", not(hasKey("code")));
+
+        verify(paymentGateway).findByOrderId(payment.getOrderId().value());
+        verify(paymentGateway, never()).findByPaymentKey(anyString());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("PAYMENT_PENDING");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("PENDING");
         });
     }
 
@@ -165,13 +225,13 @@ class PaymentApiTest {
             int expectedStatus,
             String expectedMessage
     ) {
-        PaymentOrder order = preparePaymentOrder();
+        Payment payment = preparePayment();
         given(paymentGateway.confirm(any()))
                 .willThrow(exception);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(paymentConfirmRequest(order))
+                .body(paymentConfirmRequest(payment))
                 .when().post("/payments/success")
                 .then().log().all()
                 .statusCode(expectedStatus)
@@ -179,8 +239,8 @@ class PaymentApiTest {
                 .body("$", not(hasKey("code")));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findReservationStatus(order.getReservationId())).isEqualTo("PAYMENT_PENDING");
-            softly.assertThat(testHelper.findPaymentOrderStatus(order.getOrderId().value())).isEqualTo("PENDING");
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("PAYMENT_PENDING");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("PENDING");
         });
     }
 
@@ -203,18 +263,18 @@ class PaymentApiTest {
     @DisplayName("결제 실패 콜백은 대기 중인 주문과 연결 예약을 정리하고 204를 반환합니다.")
     @Test
     void fail_payment_pending_order_cleanup() {
-        PaymentOrder order = preparePaymentOrder();
+        Payment payment = preparePayment();
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(paymentFailRequest(order.getOrderId().value()))
+                .body(paymentFailRequest(payment.getOrderId().value()))
                 .when().post("/payments/fail")
                 .then().log().all()
                 .statusCode(204);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(testHelper.findOptionalPaymentOrderStatus(order.getOrderId().value())).isEmpty();
-            softly.assertThat(testHelper.existsReservation(order.getReservationId())).isFalse();
+            softly.assertThat(testHelper.findOptionalPaymentStatus(payment.getOrderId().value())).isEmpty();
+            softly.assertThat(testHelper.existsReservation(payment.getReservationId())).isFalse();
         });
     }
 
@@ -269,7 +329,7 @@ class PaymentApiTest {
         );
     }
 
-    private PaymentOrder preparePaymentOrder() {
+    private Payment preparePayment() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long reservationId = testHelper.insertReservation(
@@ -279,14 +339,14 @@ class PaymentApiTest {
                 timeId
         );
 
-        return paymentService.prepare(reservationId);
+        return paymentCommandService.prepare(reservationId);
     }
 
-    private Map<String, Object> paymentConfirmRequest(PaymentOrder order) {
+    private Map<String, Object> paymentConfirmRequest(Payment payment) {
         return Map.of(
                 "paymentKey", PAYMENT_KEY,
-                "orderId", order.getOrderId().value(),
-                "amount", order.getAmount().value()
+                "orderId", payment.getOrderId().value(),
+                "amount", payment.getAmount().value()
         );
     }
 
