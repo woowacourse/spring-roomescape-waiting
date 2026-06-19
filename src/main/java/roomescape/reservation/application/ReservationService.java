@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -29,18 +29,47 @@ import roomescape.waiting.domain.WaitingLines;
 import roomescape.waiting.domain.WaitingPromotionPolicy;
 
 @Service
-@RequiredArgsConstructor
 public class ReservationService implements CreateReservationUseCase, FindReservationUseCase, CancelReservationUseCase {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final SlotAssembler slotAssembler;
     private final WaitingPromotionPolicy waitingPromotionPolicy;
+    private final OrderIdGenerator orderIdGenerator;
     private final Clock clock;
+
+    @Autowired
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            WaitingRepository waitingRepository,
+            SlotAssembler slotAssembler,
+            WaitingPromotionPolicy waitingPromotionPolicy,
+            OrderIdGenerator orderIdGenerator,
+            Clock clock
+    ) {
+        this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
+        this.slotAssembler = slotAssembler;
+        this.waitingPromotionPolicy = waitingPromotionPolicy;
+        this.orderIdGenerator = orderIdGenerator;
+        this.clock = clock;
+    }
+
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            WaitingRepository waitingRepository,
+            SlotAssembler slotAssembler,
+            WaitingPromotionPolicy waitingPromotionPolicy,
+            Clock clock
+    ) {
+        this(reservationRepository, waitingRepository, slotAssembler, waitingPromotionPolicy, new OrderIdGenerator(), clock);
+    }
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         Slot slot = slotAssembler.assembleExisting(body.date(), body.timeId(), body.themeId());
         throwIfSlotUnavailableForReservation(slot.getId());
-        Reservation reservation = reservationRepository.save(Reservation.create(memberId, slot));
+        Reservation reservation = reservationRepository.save(
+                Reservation.createPending(memberId, slot, orderIdGenerator.generate())
+        );
 
         return ReservationSaveResponse.from(reservation);
     }

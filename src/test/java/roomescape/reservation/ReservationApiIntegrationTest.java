@@ -151,7 +151,7 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
                 .then().log().all()
                 .statusCode(200)
                 .body("data.size()", is(1))
-                .body("data[0].status", is("RESERVED"));
+                .body("data[0].status", is("CONFIRMED"));
     }
 
     @Test
@@ -195,7 +195,7 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
                 .statusCode(200)
                 .body("success", is(true))
                 .body("data.size()", is(1))
-                .body("data[0].status", is("RESERVED"))
+                .body("data[0].status", is("CONFIRMED"))
                 .body("data[0].waitingOrder", is((Object) null));
 
         RestAssured.given().log().all()

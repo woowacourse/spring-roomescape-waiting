@@ -12,19 +12,63 @@ public class Reservation {
     private final Long id;
     private final Long memberId;
     private final Slot slot;
+    private final ReservationStatus status;
+    private final String orderId;
+    private final int amount;
+    private final String paymentKey;
 
-    private Reservation(Long id, Long memberId, Slot slot) {
+    private Reservation(
+            Long id,
+            Long memberId,
+            Slot slot,
+            ReservationStatus status,
+            String orderId,
+            int amount,
+            String paymentKey
+    ) {
         this.id = id;
         this.memberId = Objects.requireNonNull(memberId, "memberId는 null일 수 없습니다.");
         this.slot = Objects.requireNonNull(slot, "slot은 null일 수 없습니다.");
+        this.status = Objects.requireNonNull(status, "status는 null일 수 없습니다.");
+        this.orderId = orderId;
+        this.amount = amount;
+        this.paymentKey = paymentKey;
     }
 
     public static Reservation create(long memberId, Slot slot) {
-        return new Reservation(null, memberId, slot);
+        return createConfirmed(memberId, slot);
+    }
+
+    public static Reservation createPending(long memberId, Slot slot, String orderId) {
+        return new Reservation(null, memberId, slot, ReservationStatus.PENDING, orderId, slot.getPrice(), null);
+    }
+
+    public static Reservation createConfirmed(long memberId, Slot slot) {
+        return new Reservation(null, memberId, slot, ReservationStatus.CONFIRMED, null, slot.getPrice(), null);
     }
 
     public static Reservation of(Long id, Long memberId, Slot slot) {
-        return new Reservation(id, memberId, slot);
+        return new Reservation(id, memberId, slot, ReservationStatus.CONFIRMED, null, slot.getPrice(), null);
+    }
+
+    public static Reservation of(
+            Long id,
+            Long memberId,
+            Slot slot,
+            ReservationStatus status,
+            String orderId,
+            int amount,
+            String paymentKey
+    ) {
+        return new Reservation(id, memberId, slot, status, orderId, amount, paymentKey);
+    }
+
+    public boolean isPending() {
+        return status == ReservationStatus.PENDING;
+    }
+
+    public boolean isConfirmedWith(String paymentKey) {
+        return status == ReservationStatus.CONFIRMED && Objects.equals(this.paymentKey, paymentKey);
     }
 
     public boolean isOwnedBy(Long memberId) {

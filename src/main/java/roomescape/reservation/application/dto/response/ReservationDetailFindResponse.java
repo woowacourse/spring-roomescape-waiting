@@ -32,13 +32,14 @@ public record ReservationDetailFindResponse(
                         projection.themeId(),
                         projection.themeName(),
                         projection.themeDescription(),
-                        projection.thumbnailUrl()
+                        projection.thumbnailUrl(),
+                        projection.themePrice()
                 ),
                 new TimeInformation(
                         projection.timeId(),
                         projection.startAt()
                 ),
-                ReservationStatus.RESERVED,
+                projection.status(),
                 null
         );
     }
@@ -52,7 +53,8 @@ public record ReservationDetailFindResponse(
                         projection.themeId(),
                         projection.themeName(),
                         projection.themeDescription(),
-                        projection.thumbnailUrl()
+                        projection.thumbnailUrl(),
+                        0
                 ),
                 new TimeInformation(
                         projection.timeId(),

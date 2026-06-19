@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservation.application.port.out.projection.ReservationDetailProjection;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.slot.domain.Slot;
 import roomescape.theme.domain.Theme;
@@ -34,8 +35,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("theme_name"),
                     resultSet.getString("theme_description"),
                     resultSet.getString("theme_thumbnail_url"),
+                    resultSet.getInt("theme_price"),
                     resultSet.getLong("time_id"),
-                    resultSet.getTime("start_at").toLocalTime()
+                    resultSet.getTime("start_at").toLocalTime(),
+                    ReservationStatus.valueOf(resultSet.getString("status"))
             );
 
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
@@ -47,28 +50,41 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail_url")
+                resultSet.getString("theme_thumbnail_url"),
+                resultSet.getInt("theme_price")
         );
         Slot slot = Slot.of(
                 resultSet.getLong("slot_id"),
                 resultSet.getDate("date").toLocalDate(),
                 time,
-                theme
+                theme,
+                resultSet.getInt("slot_price")
         );
         return Reservation.of(
                 resultSet.getLong("reservation_id"),
                 resultSet.getLong("member_id"),
-                slot
+                slot,
+                ReservationStatus.valueOf(resultSet.getString("status")),
+                resultSet.getString("order_id"),
+                resultSet.getInt("amount"),
+                resultSet.getString("payment_key")
         );
     };
 
     @Override
     public Reservation save(Reservation reservation) {
-        String insertReservationSql = "INSERT INTO reservation(member_id, slot_id) VALUES (:memberId, :slotId)";
+        String insertReservationSql = """
+                INSERT INTO reservation(member_id, slot_id, status, order_id, amount, payment_key)
+                VALUES (:memberId, :slotId, :status, :orderId, :amount, :paymentKey)
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", reservation.getMemberId())
-                .addValue("slotId", reservation.getSlotId());
+                .addValue("slotId", reservation.getSlotId())
+                .addValue("status", reservation.getStatus().name())
+                .addValue("orderId", reservation.getOrderId())
+                .addValue("amount", reservation.getAmount())
+                .addValue("paymentKey", reservation.getPaymentKey());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         template.update(insertReservationSql, params, keyHolder);
@@ -81,8 +97,30 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Reservation.of(
                 keyHolder.getKey().longValue(),
                 reservation.getMemberId(),
-                reservation.getSlot()
+                reservation.getSlot(),
+                reservation.getStatus(),
+                reservation.getOrderId(),
+                reservation.getAmount(),
+                reservation.getPaymentKey()
         );
+    }
+
+    @Override
+    public boolean confirmPayment(long reservationId, String orderId, String paymentKey) {
+        String sql = """
+                UPDATE reservation
+                SET status = 'CONFIRMED', payment_key = :paymentKey
+                WHERE id = :reservationId
+                AND order_id = :orderId
+                AND status = 'PENDING'
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("reservationId", reservationId)
+                .addValue("orderId", orderId)
+                .addValue("paymentKey", paymentKey);
+
+        return template.update(sql, params) == 1;
     }
 
     @Override
@@ -97,8 +135,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.name AS theme_name,
                     t.description AS theme_description,
                     t.thumbnail_url AS theme_thumbnail_url,
+                    t.price AS theme_price,
                     rt.id AS time_id,
-                    rt.start_at
+                    rt.start_at,
+                    r.status
                 FROM reservation r
                 JOIN slot s ON r.slot_id = s.id
                 JOIN theme t ON s.theme_id = t.id
@@ -142,8 +182,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.name AS theme_name,
                     t.description AS theme_description,
                     t.thumbnail_url AS theme_thumbnail_url,
+                    t.price AS theme_price,
                     rt.id AS time_id,
-                    rt.start_at
+                    rt.start_at,
+                    r.status
                 FROM reservation r
                 JOIN slot s ON r.slot_id = s.id
                 JOIN theme t ON s.theme_id = t.id
@@ -171,14 +213,20 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT
                     r.id AS reservation_id,
                     r.member_id,
+                    r.status,
+                    r.order_id,
+                    r.amount,
+                    r.payment_key,
                     s.id AS slot_id,
+                    s.price AS slot_price,
                     s.date,
                     rt.id AS time_id,
                     rt.start_at,
                     t.id AS theme_id,
                     t.name AS theme_name,
                     t.description AS theme_description,
-                    t.thumbnail_url AS theme_thumbnail_url
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    t.price AS theme_price
                 FROM reservation r
                 JOIN slot s ON r.slot_id = s.id
                 JOIN reservation_time rt ON s.time_id = rt.id
@@ -188,6 +236,41 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", reservationId);
+
+        return template.query(sql, params, reservationRowMapper)
+                .stream()
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByOrderId(String orderId) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.member_id,
+                    r.status,
+                    r.order_id,
+                    r.amount,
+                    r.payment_key,
+                    s.id AS slot_id,
+                    s.price AS slot_price,
+                    s.date,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    t.price AS theme_price
+                FROM reservation r
+                JOIN slot s ON r.slot_id = s.id
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN theme t ON s.theme_id = t.id
+                WHERE r.order_id = :orderId
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("orderId", orderId);
 
         return template.query(sql, params, reservationRowMapper)
                 .stream()
@@ -213,5 +296,19 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("slotId", slotId);
 
         return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
+    }
+
+    @Override
+    public void deletePendingByOrderIdAndMemberId(String orderId, long memberId) {
+        String sql = """
+                DELETE FROM reservation
+                WHERE order_id = :orderId
+                AND member_id = :memberId
+                AND status = 'PENDING'
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("orderId", orderId)
+                .addValue("memberId", memberId);
+        template.update(sql, params);
     }
 }

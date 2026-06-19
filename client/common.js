@@ -32,6 +32,7 @@ let selectedTimeLabel = null;
 let selectedThemeName = null;
 let currentLoginName = localStorage.getItem(AUTH_NAME_KEY);
 let isAuthenticated = false;
+let paymentClientKey = null;
 
 function getAccessToken() {
   return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -56,6 +57,13 @@ function clearAccessToken() {
 
 function currentUserLabel() {
   return currentLoginName || "현재 사용자";
+}
+
+function paymentRedirectUrl(result) {
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.searchParams.set("paymentResult", result);
+  return url.toString();
 }
 
 function setCommonAuthState(authenticated) {
@@ -313,7 +321,7 @@ function renderPopular(themes) {
 }
 
 function summarizeReservations(reservations) {
-  const reservedCount = reservations.filter((reservation) => reservation.status === "RESERVED").length;
+  const reservedCount = reservations.filter((reservation) => reservation.status === "CONFIRMED").length;
   const waitingCount = reservations.filter((reservation) => reservation.status === "WAITING").length;
 
   reservationSummaryEl.classList.remove("hidden");
@@ -336,7 +344,7 @@ function findReservationById(reservations, id, status = null) {
 }
 
 function buildReservationChangeMessage(beforeReservations, afterReservations, canceledReservationId) {
-  const beforeReserved = findReservationById(beforeReservations, canceledReservationId, "RESERVED");
+  const beforeReserved = findReservationById(beforeReservations, canceledReservationId, "CONFIRMED");
   const reorderedWaitings = afterReservations
     .filter((reservation) => reservation.status === "WAITING")
     .sort((a, b) => (a.waitingOrder ?? 0) - (b.waitingOrder ?? 0));
@@ -382,12 +390,13 @@ function renderMyReservationCards(reservations) {
   reservations.forEach((reservation) => {
     const card = document.createElement("article");
     const isWaiting = reservation.status === "WAITING";
+    const isPending = reservation.status === "PENDING";
     const menuId = `${reservation.status}-${reservation.id}`;
-    const statusLabel = isWaiting ? "대기" : "예약";
+    const statusLabel = isWaiting ? "대기" : (isPending ? "결제 대기" : "예약");
     const menuItems = isWaiting
       ? `<button type="button" class="menu-item delete" data-waiting-delete-id="${reservation.id}">대기 취소</button>`
       : `<button type="button" class="menu-item delete" data-delete-id="${reservation.id}">예약 취소</button>`;
-    const rankLabel = isWaiting ? `대기 ${reservation.waitingOrder}번째` : "확정 예약";
+    const rankLabel = isWaiting ? `대기 ${reservation.waitingOrder}번째` : (isPending ? "결제 대기" : "확정 예약");
 
     card.className = `reservation-card${isWaiting ? " waiting-card" : ""}`;
     card.innerHTML = `
@@ -410,7 +419,7 @@ function renderMyReservationCards(reservations) {
         <p><span>날짜</span><strong>${reservation.date}</strong></p>
         <p><span>테마</span><strong>${reservation.theme.name}</strong></p>
         <p><span>시간</span><strong>${reservation.time.time}</strong></p>
-        <p><span>상태</span><strong>${isWaiting ? `${reservation.waitingOrder}번째 대기` : "예약 확정"}</strong></p>
+        <p><span>상태</span><strong>${isWaiting ? `${reservation.waitingOrder}번째 대기` : (isPending ? "결제 대기" : "예약 확정")}</strong></p>
       </div>
     `;
     myReservationCardsEl.appendChild(card);
@@ -424,6 +433,83 @@ async function loadMyReservations() {
   summarizeReservations(reservations);
   renderMyReservationCards(reservations);
   return reservations;
+}
+
+async function loadPaymentClientKey() {
+  if (paymentClientKey) return paymentClientKey;
+  const config = await api("/user/payments/config");
+  paymentClientKey = config.clientKey;
+  return paymentClientKey;
+}
+
+async function requestTossPayment(order) {
+  const clientKey = await loadPaymentClientKey();
+  if (!window.TossPayments) {
+    throw new Error("Toss Payments SDK를 불러오지 못했습니다.");
+  }
+
+  const tossPayments = window.TossPayments(clientKey);
+  const payment = tossPayments.payment({ customerKey: "ANONYMOUS" });
+  await payment.requestPayment({
+    method: "CARD",
+    amount: {
+      value: order.amount,
+      currency: "KRW",
+    },
+    orderId: order.orderId,
+    orderName: order.orderName || `${selectedThemeName} ${selectedTimeLabel}`,
+    customerName: currentUserLabel(),
+    successUrl: paymentRedirectUrl("success"),
+    failUrl: paymentRedirectUrl("fail"),
+  });
+}
+
+async function handlePaymentRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const result = params.get("paymentResult");
+  if (!result) return;
+
+  try {
+    if (result === "success") {
+      const response = await api("/user/payments/confirm", {
+        method: "POST",
+        body: JSON.stringify({
+          paymentKey: params.get("paymentKey"),
+          orderId: params.get("orderId"),
+          amount: Number(params.get("amount")),
+        }),
+      });
+      myReservationSectionEl.classList.remove("hidden");
+      await loadMyReservations();
+      await showResultModal({
+        title: "예약 확정",
+        message: `${currentUserLabel()}님의 결제가 승인되어 예약이 확정되었습니다.\n주문번호: ${response.orderId}`,
+      });
+      setStatus("결제 승인 및 예약 확정 완료");
+      return;
+    }
+
+    await api("/user/payments/fail", {
+      method: "POST",
+      body: JSON.stringify({
+        code: params.get("code"),
+        message: params.get("message"),
+        orderId: params.get("orderId"),
+      }),
+    });
+    await showResultModal({
+      title: "결제 실패",
+      message: params.get("message") || "결제가 취소되었거나 실패했습니다.",
+      isError: true,
+    });
+    setStatus("결제 실패 또는 취소", true);
+  } catch (error) {
+    await showErrorModal("결제 처리 실패", error);
+  } finally {
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.search = "";
+    window.history.replaceState({}, document.title, cleanUrl.toString());
+  }
 }
 
 function closeMenuPanels() {
@@ -478,6 +564,7 @@ document.getElementById("theme-list").addEventListener("keydown", async (e) => {
 
 document.getElementById("reservation-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  let reservationOrder = null;
   try {
     if (!selectedThemeId || !selectedTimeId) {
       setStatus("테마와 시간을 먼저 선택하세요.", true);
@@ -499,7 +586,7 @@ document.getElementById("reservation-form").addEventListener("submit", async (e)
       return;
     }
 
-    await api("/user/reservations", {
+    reservationOrder = await api("/user/reservations", {
       method: "POST",
       body: JSON.stringify({
         date,
@@ -508,15 +595,23 @@ document.getElementById("reservation-form").addEventListener("submit", async (e)
         storeId: 1,
       }),
     });
-    setStatus(`예약 완료: ${currentUserLabel()} / ${date} / ${selectedTimeLabel}`);
-    await showResultModal({
-      title: "예약 성공",
-      message: `${currentUserLabel()}님의 예약이 완료되었습니다.`,
-    });
-    await loadMyReservations();
-    const items = await api(`/user/times/availability?date=${date}&themeId=${selectedThemeId}`);
-    renderAvailableTimes(items);
+    setStatus("결제창으로 이동합니다.");
+    await requestTossPayment(reservationOrder);
   } catch (error) {
+    if (reservationOrder?.orderId) {
+      try {
+        await api("/user/payments/fail", {
+          method: "POST",
+          body: JSON.stringify({
+            code: "PAYMENT_WINDOW_FAILED",
+            message: error.message,
+            orderId: reservationOrder.orderId,
+          }),
+        });
+      } catch (cleanupError) {
+        console.warn("결제 대기 예약 정리 실패", cleanupError);
+      }
+    }
     setStatus(`예약 실패: ${error.message}`, true);
     await showResultModal({
       title: "예약 실패",
@@ -690,3 +785,4 @@ setCommonAuthState(Boolean(getAccessToken()));
 if (getAccessToken()) {
   authStatusEl.textContent = `${currentUserLabel()} 로그인 상태입니다.`;
 }
+handlePaymentRedirect();

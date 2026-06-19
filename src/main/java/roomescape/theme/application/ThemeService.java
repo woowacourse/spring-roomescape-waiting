@@ -27,7 +27,7 @@ public class ThemeService implements CreateThemeUseCase, FindThemeUseCase, Delet
 
     public ThemeSaveResponse save(ThemeSaveRequest body) {
         validateAlreadyThemeNot(body.name());
-        Theme theme = themeAssembler.assemble(body.name(), body.description(), body.thumbnailUrl());
+        Theme theme = themeAssembler.assemble(body.name(), body.description(), body.thumbnailUrl(), body.price());
         return ThemeSaveResponse.from(themeRepository.save(theme));
     }
 

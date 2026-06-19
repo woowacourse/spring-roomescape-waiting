@@ -10,6 +10,8 @@ import roomescape.reservation.domain.Reservation;
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
 
+    boolean confirmPayment(long reservationId, String orderId, String paymentKey);
+
     List<ReservationDetailProjection> findAll();
 
     Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
@@ -20,7 +22,11 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(long reservationId);
 
+    Optional<Reservation> findByOrderId(String orderId);
+
     boolean existsBySlotId(long slotId);
 
     boolean existsByMemberIdAndSlotId(long memberId, long slotId);
+
+    void deletePendingByOrderIdAndMemberId(String orderId, long memberId);
 }

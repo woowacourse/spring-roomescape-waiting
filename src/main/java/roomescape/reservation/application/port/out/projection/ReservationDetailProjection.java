@@ -2,6 +2,7 @@ package roomescape.reservation.application.port.out.projection;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.reservation.domain.ReservationStatus;
 
 public record ReservationDetailProjection(
         Long id,
@@ -12,8 +13,10 @@ public record ReservationDetailProjection(
         String themeName,
         String themeDescription,
         String thumbnailUrl,
+        int themePrice,
         Long timeId,
-        LocalTime startAt
+        LocalTime startAt,
+        ReservationStatus status
 ) {
     public long getTimeId() {
         return timeId();

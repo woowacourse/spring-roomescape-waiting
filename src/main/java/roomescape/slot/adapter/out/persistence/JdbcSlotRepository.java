@@ -31,24 +31,27 @@ public class JdbcSlotRepository implements SlotRepository {
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail_url")
+                resultSet.getString("theme_thumbnail_url"),
+                resultSet.getInt("theme_price")
         );
         return Slot.of(
                 resultSet.getLong("id"),
                 resultSet.getDate("date").toLocalDate(),
                 time,
-                theme
+                theme,
+                resultSet.getInt("price")
         );
     };
 
     @Override
     public Slot save(Slot slot) {
-        String sql = "INSERT INTO slot(date, time_id, theme_id) VALUES (:date, :timeId, :themeId)";
+        String sql = "INSERT INTO slot(date, time_id, theme_id, price) VALUES (:date, :timeId, :themeId, :price)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", slot.getDate())
                 .addValue("timeId", slot.getTimeId())
-                .addValue("themeId", slot.getThemeId());
+                .addValue("themeId", slot.getThemeId())
+                .addValue("price", slot.getPrice());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         template.update(sql, params, keyHolder);
@@ -62,7 +65,8 @@ public class JdbcSlotRepository implements SlotRepository {
                 id.longValue(),
                 slot.getDate(),
                 slot.getTime(),
-                slot.getTheme()
+                slot.getTheme(),
+                slot.getPrice()
         );
     }
 
@@ -72,12 +76,14 @@ public class JdbcSlotRepository implements SlotRepository {
                 SELECT
                     s.id,
                     s.date,
+                    s.price,
                     rt.id AS time_id,
                     rt.start_at,
                     t.id AS theme_id,
                     t.name AS theme_name,
                     t.description AS theme_description,
-                    t.thumbnail_url AS theme_thumbnail_url
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    t.price AS theme_price
                 FROM slot s
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN theme t ON s.theme_id = t.id
@@ -102,12 +108,14 @@ public class JdbcSlotRepository implements SlotRepository {
                 SELECT
                     s.id,
                     s.date,
+                    s.price,
                     rt.id AS time_id,
                     rt.start_at,
                     t.id AS theme_id,
                     t.name AS theme_name,
                     t.description AS theme_description,
-                    t.thumbnail_url AS theme_thumbnail_url
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    t.price AS theme_price
                 FROM slot s
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN theme t ON s.theme_id = t.id
@@ -148,12 +156,14 @@ public class JdbcSlotRepository implements SlotRepository {
                 SELECT
                     s.id,
                     s.date,
+                    s.price,
                     rt.id AS time_id,
                     rt.start_at,
                     t.id AS theme_id,
                     t.name AS theme_name,
                     t.description AS theme_description,
-                    t.thumbnail_url AS theme_thumbnail_url
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    t.price AS theme_price
                 FROM slot s
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN theme t ON s.theme_id = t.id
