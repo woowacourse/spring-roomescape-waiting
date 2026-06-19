@@ -8,6 +8,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentOrderStatus;
 import roomescape.repository.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -16,6 +17,8 @@ import roomescape.repository.WaitingRepository;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.service.dto.ReservationPayment;
+import roomescape.service.dto.UserReservation;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -68,6 +71,22 @@ public class ReservationService {
 
     public List<Reservation> findUserReservations(String name, int page, int size) {
          return reservationRepository.findUserReservations(name, page, size);
+    }
+
+    public List<UserReservation> findUserReservationsWithPayments(String name, int page, int size) {
+        return findUserReservations(name, page, size).stream()
+                .map(reservation -> new UserReservation(
+                        reservation,
+                        paymentOrderRepository.findByReservationId(reservation.getId())
+                                .map(order -> new ReservationPayment(
+                                        order.orderId(),
+                                        order.status(),
+                                        order.paymentKey(),
+                                        order.amount()
+                                ))
+                                .orElse(null)
+                ))
+                .toList();
     }
 
     @Transactional
@@ -141,7 +160,15 @@ public class ReservationService {
             return;
         }
         String orderId = "order-" + java.util.UUID.randomUUID().toString().replace("-", "");
-        paymentOrderRepository.save(new PaymentOrder(orderId, reservation.getId(), RESERVATION_AMOUNT, null));
+        String idempotencyKey = java.util.UUID.randomUUID().toString();
+        paymentOrderRepository.save(new PaymentOrder(
+                orderId,
+                reservation.getId(),
+                RESERVATION_AMOUNT,
+                idempotencyKey,
+                null,
+                PaymentOrderStatus.PENDING
+        ));
     }
 
     private void update(Reservation reservation) {

@@ -12,7 +12,11 @@ public interface PaymentOrderRepository {
 
     Optional<PaymentOrder> findByReservationId(long reservationId);
 
+    void recordPaymentKey(String orderId, String paymentKey);
+
     void complete(String orderId, String paymentKey);
 
-    void deleteByOrderId(String orderId);
+    void markUnknown(String orderId);
+
+    void markFailed(String orderId);
 }

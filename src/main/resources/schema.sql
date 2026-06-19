@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS payment_order (
     order_id VARCHAR(64) NOT NULL,
     reservation_id BIGINT NOT NULL,
     amount BIGINT NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,
     payment_key VARCHAR(255),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     PRIMARY KEY (order_id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
 );
