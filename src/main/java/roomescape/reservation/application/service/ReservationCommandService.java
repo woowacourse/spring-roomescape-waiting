@@ -9,12 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.UniqueConstraintViolationException;
+import roomescape.reservation.application.dto.PaymentFailCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
+import roomescape.reservation.domain.PaymentOrder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
@@ -33,6 +37,8 @@ public class ReservationCommandService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
+    private final PaymentOrderRepository orderRepository;
+    private final PaymentService paymentService;
 
     public ReservationResult save(ReservationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
@@ -45,10 +51,13 @@ public class ReservationCommandService {
         Reservation reservation = request.toReservation(slot);
 
         Reservation savedReservation = saveReservation(reservation);
-        return ReservationResult.confirmed(
+        PaymentOrder savedOrder = paymentService.prepare(savedReservation.getId());
+
+        return ReservationResult.paymentPending(
                 savedReservation,
                 ThemeResult.from(theme),
-                ReservationTimeResult.from(time)
+                ReservationTimeResult.from(time),
+                savedOrder
         );
     }
 
@@ -85,6 +94,41 @@ public class ReservationCommandService {
         promoteFirstWaitingToReservation(slot, now);
     }
 
+    public void cleanupPendingPaymentFailure(PaymentFailCommand command) {
+        if (!command.hasOrderId()) {
+            return;
+        }
+
+        orderRepository.findByOrderId(command.normalizedOrderId())
+                .filter(PaymentOrder::isPending)
+                .ifPresent(order -> deletePendingPaymentReservation(order, command.now()));
+    }
+
+    private void deletePendingPaymentReservation(PaymentOrder order, LocalDateTime now) {
+        Reservation reservation = reservationRepository.findById(order.getReservationId())
+                .filter(candidate -> candidate.getStatus() == ReservationStatus.PAYMENT_PENDING)
+                .orElse(null);
+
+        if (reservation == null) {
+            return;
+        }
+
+        ReservationSlot slot = reservation.getSlot();
+        slot.validateDeletable(now);
+
+        if (orderRepository.deletePendingByOrderId(order.getOrderId().value()) == 0) {
+            return;
+        }
+
+        if (reservationRepository.deleteByIdAndStatus(
+                order.getReservationId(),
+                ReservationStatus.PAYMENT_PENDING) == 0) {
+            return;
+        }
+
+        promoteFirstWaitingToReservation(slot, now);
+    }
+
     private Reservation updateReservationSlot(ReservationUpdateCommand request, LocalTime startAt,
                                               Reservation reservation) {
         Reservation updatedReservation = reservation.updateDateAndTime(
@@ -105,7 +149,10 @@ public class ReservationCommandService {
             waitingRepository.delete(waiting.getId());
             waitingRepository.rebalanceRank(waiting.getSlot(), waiting.getRank());
 
-            saveReservation(Reservation.create(waiting.getUser(), waiting.getSlot(), now));
+            Reservation promotedReservation = saveReservation(
+                    Reservation.create(waiting.getUser(), waiting.getSlot(), now)
+            );
+            paymentService.prepare(promotedReservation.getId());
         });
     }
 

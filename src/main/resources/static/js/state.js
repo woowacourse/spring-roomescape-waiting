@@ -33,6 +33,31 @@ export const state = {
         searchedReservations: false
     },
     submitting: false,
+    payment: {
+        pendingContext: null,
+        processing: {
+            status: "idle",
+            orderId: "",
+            paymentKey: "",
+            amount: null,
+            message: ""
+        },
+        failure: {
+            code: "",
+            message: "",
+            orderId: ""
+        },
+        result: null,
+        config: null,
+        configPromise: null,
+        configStatus: "idle",
+        configError: "",
+        tossPayments: null,
+        widgets: null,
+        paymentWindow: null,
+        tossClientKey: "",
+        sdkError: ""
+    },
     toast: null,
     confirm: null
 };

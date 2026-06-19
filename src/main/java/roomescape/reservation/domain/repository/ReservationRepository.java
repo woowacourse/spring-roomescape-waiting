@@ -3,6 +3,7 @@ package roomescape.reservation.domain.repository;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.ReservationStatus;
 
 public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
@@ -11,7 +12,11 @@ public interface ReservationRepository {
 
     Integer update(Long id, ReservationSlot slot);
 
+    Integer updateStatus(Long id, ReservationStatus status);
+
     Integer delete(Long id);
+
+    Integer deleteByIdAndStatus(Long id, ReservationStatus status);
 
     Boolean existsBySlot(ReservationSlot slot);
 

@@ -18,6 +18,7 @@ import roomescape.fixture.ReservationFixture;
 import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.support.TestDataHelper;
@@ -86,6 +87,7 @@ class JdbcReservationRepositoryTest {
                         .timeId(timeId)
                         .startAt(LocalTime.of(9, 0))
                         .build())
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -115,6 +117,7 @@ class JdbcReservationRepositoryTest {
                         .timeId(timeId)
                         .startAt(LocalTime.of(9, 0))
                         .build())
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThatThrownBy(() -> reservationRepository.save(reservation))
@@ -137,6 +140,7 @@ class JdbcReservationRepositoryTest {
                         .timeId(notExistTimeId)
                         .startAt(LocalTime.of(9, 0))
                         .build())
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThatThrownBy(() -> reservationRepository.save(reservation))
@@ -159,6 +163,7 @@ class JdbcReservationRepositoryTest {
                         .timeId(timeId)
                         .startAt(LocalTime.of(9, 0))
                         .build())
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThatThrownBy(() -> reservationRepository.save(reservation))
@@ -241,6 +246,7 @@ class JdbcReservationRepositoryTest {
                         .timeId(newTimeId)
                         .startAt(LocalTime.of(10, 0))
                         .build())
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         reservationRepository.update(updateReservation.getId(), updateReservation.getSlot());

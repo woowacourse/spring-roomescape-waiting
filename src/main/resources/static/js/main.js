@@ -2,6 +2,16 @@ import {api} from "./api.js";
 import {appEl} from "./dom.js";
 import {ADMIN_TABS, canSubmitReservation, isPastReservation, selectedTheme, selectedTime, state} from "./state.js";
 import {render, syncThemeFilter} from "./render.js";
+import {
+    approveTossRedirectPayment,
+    cleanupTossFailRedirectPayment,
+    isPaymentPendingReservation,
+    parseTossFailRedirectParams,
+    parseTossRedirectParams,
+    preloadTossPayments,
+    rememberPendingPayment,
+    requestTossPayment
+} from "./payment.js";
 
 window.addEventListener("hashchange", handleRoute);
 document.addEventListener("click", handleClick);
@@ -13,9 +23,15 @@ document.addEventListener("error", handleImageError, true);
 boot();
 
 async function boot() {
-    applyRoute();
+    const routeResult = applyRoute();
     state.loading.boot = true;
     render();
+    if (routeResult.paymentProcessing) {
+        void processPaymentRedirect(routeResult.paymentParams);
+    }
+    if (routeResult.paymentFailure) {
+        void processPaymentFailureCleanup(routeResult.paymentParams);
+    }
 
     try {
         await loadAllData({silent: true});
@@ -28,25 +44,209 @@ async function boot() {
     } finally {
         state.loading.boot = false;
         render({animate: true});
+        preloadTossPayments();
     }
 }
 
 function handleRoute() {
-    applyRoute();
+    const routeResult = applyRoute();
     render({animate: true});
+    if (routeResult.paymentProcessing) {
+        void processPaymentRedirect(routeResult.paymentParams);
+    }
+    if (routeResult.paymentFailure) {
+        void processPaymentFailureCleanup(routeResult.paymentParams);
+    }
 }
 
 function applyRoute() {
-    const normalized = location.hash.replace(/^#\/?/, "");
-    const [route = "reserve", tab = "themes"] = normalized.split("/");
+    const {segments} = parseRouteHash(location.hash);
+    const [route = "reserve", tab = "themes"] = segments;
 
     if (route === "admin") {
         state.route = "admin";
         state.adminTab = ADMIN_TABS.has(tab) ? tab : "themes";
-        return;
+        return {paymentProcessing: false, paymentFailure: false};
+    }
+
+    if (route === "payment" && tab === "processing") {
+        state.route = "payment-processing";
+        return {
+            paymentProcessing: true,
+            paymentFailure: false,
+            paymentParams: parseTossRedirectParams(location.search, location.hash)
+        };
+    }
+
+    if (route === "payment" && tab === "fail") {
+        state.route = "payment-fail";
+        const paymentParams = parseTossFailRedirectParams(location.search, location.hash);
+        applyPaymentFailRoute(paymentParams);
+        return {
+            paymentProcessing: false,
+            paymentFailure: true,
+            paymentParams
+        };
     }
 
     state.route = "reserve";
+    return {paymentProcessing: false, paymentFailure: false};
+}
+
+function parseRouteHash(hash) {
+    const normalized = String(hash || "").replace(/^#\/?/, "");
+    const [path = "reserve"] = normalized.split("?");
+    const segments = path.split("/").filter(Boolean);
+
+    return {
+        segments: segments.length ? segments : ["reserve"]
+    };
+}
+
+async function processPaymentRedirect(parsedParams) {
+    if (!parsedParams.ok) {
+        state.payment.processing = {
+            status: "failed",
+            orderId: "",
+            paymentKey: "",
+            amount: null,
+            message: parsedParams.message
+        };
+        state.payment.result = {
+            status: "failed",
+            message: parsedParams.message
+        };
+        showToast(parsedParams.message, "error");
+        render();
+        return;
+    }
+
+    try {
+        const approval = approveTossRedirectPayment(parsedParams.params);
+        render();
+        const result = await approval;
+
+        const searchReloadResult = await refreshAfterSuccessfulPayment(parsedParams.params.orderId);
+        routeToReserveAfterSuccessfulPayment();
+
+        if (!result.skipped) {
+            showMutationToast("결제가 완료되었습니다.", searchReloadResult);
+        }
+    } catch (error) {
+        showToast(error.message || "결제 승인을 완료하지 못했습니다.", "error");
+    } finally {
+        render({animate: true});
+    }
+}
+
+async function refreshAfterSuccessfulPayment(orderId) {
+    let dataRefreshFailed = false;
+    let searchReloadResult = {failed: false, partialFailure: false};
+
+    try {
+        await loadAllData({silent: true});
+        ensureSelectedTheme();
+        if (state.selectedThemeId) {
+            await loadAvailableTimes({silent: true});
+        }
+        searchReloadResult = await reloadReservationSearchIfNeeded();
+    } catch (error) {
+        dataRefreshFailed = true;
+    }
+
+    reconcileSuccessfulPayment(orderId);
+
+    return {
+        failed: dataRefreshFailed || searchReloadResult.failed,
+        partialFailure: searchReloadResult.partialFailure
+    };
+}
+
+function reconcileSuccessfulPayment(orderId) {
+    if (isMatchingPendingPaymentOrder(state.payment.pendingContext?.reservation, orderId)) {
+        state.payment.pendingContext = null;
+    }
+
+    state.reservations = state.reservations.map((reservation) => reconcilePaidReservation(reservation, orderId));
+    state.searchedReservations = state.searchedReservations.map((reservation) => reconcilePaidReservation(reservation, orderId));
+}
+
+function reconcilePaidReservation(reservation, orderId) {
+    if (!isMatchingPendingPaymentOrder(reservation, orderId)) {
+        return reservation;
+    }
+
+    return {
+        ...reservation,
+        status: "CONFIRMED",
+        payment: null
+    };
+}
+
+function isMatchingPendingPaymentOrder(reservation, orderId) {
+    return isPaymentPendingReservation(reservation) && reservation.payment?.orderId === orderId;
+}
+
+function routeToReserveAfterSuccessfulPayment() {
+    state.route = "reserve";
+    history.replaceState(null, "", `${location.pathname}#/reserve`);
+}
+
+function applyPaymentFailRoute(params) {
+    state.payment.failure = params;
+    state.payment.processing = {
+        status: "failed",
+        orderId: params.orderId,
+        paymentKey: "",
+        amount: null,
+        message: params.message
+    };
+    state.payment.result = {
+        status: "failed",
+        message: params.message
+    };
+}
+
+async function processPaymentFailureCleanup(params) {
+    try {
+        const result = await cleanupTossFailRedirectPayment(params);
+
+        if (result.skipped) {
+            return;
+        }
+
+        await refreshAfterFailedPaymentCleanup(result.orderId);
+    } catch (error) {
+        showToast(error.message || "결제 실패 기록을 정리하지 못했습니다.", "error");
+    } finally {
+        render();
+    }
+}
+
+async function refreshAfterFailedPaymentCleanup(orderId) {
+    try {
+        await loadAllData({silent: true});
+        ensureSelectedTheme();
+        if (state.selectedThemeId) {
+            await loadAvailableTimes({silent: true});
+        }
+        await reloadReservationSearchIfNeeded();
+    } finally {
+        reconcileFailedPaymentCleanup(orderId);
+    }
+}
+
+function reconcileFailedPaymentCleanup(orderId) {
+    if (!orderId) {
+        return;
+    }
+
+    if (isMatchingPendingPaymentOrder(state.payment.pendingContext?.reservation, orderId)) {
+        state.payment.pendingContext = null;
+    }
+
+    state.reservations = state.reservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
+    state.searchedReservations = state.searchedReservations.filter((reservation) => !isMatchingPendingPaymentOrder(reservation, orderId));
 }
 
 async function handleClick(event) {
@@ -173,6 +373,11 @@ async function handleClick(event) {
 
         if (action === "edit-reservation") {
             await startReservationEdit(Number(actionTarget.dataset.reservationId));
+            return;
+        }
+
+        if (action === "start-payment") {
+            await preparePayment(actionTarget);
             return;
         }
 
@@ -393,7 +598,7 @@ async function submitReservation(form) {
         const isWaitingApplication = time && !time.available;
         const endpoint = isWaitingApplication ? "/waitings" : "/reservations";
 
-        await api(endpoint, {
+        const reservation = await api(endpoint, {
             method: "POST",
             body: {
                 name,
@@ -409,8 +614,17 @@ async function submitReservation(form) {
         state.availableTimes = [];
         await loadAllData({silent: true});
         const searchReloadResult = await reloadReservationSearchIfNeeded();
-        const successMessage = isWaitingApplication ? "예약 대기를 신청했습니다." : "예약이 완료되었습니다.";
+        const paymentPending = !isWaitingApplication && isPaymentPendingReservation(reservation);
+        if (paymentPending) {
+            rememberPendingPayment(reservation);
+        }
+        const successMessage = isWaitingApplication
+            ? "예약 대기를 신청했습니다."
+            : (paymentPending ? "예약이 접수되었습니다. 결제를 진행해 주세요." : "예약이 완료되었습니다.");
         showMutationToast(successMessage, searchReloadResult);
+        if (paymentPending) {
+            await startPayment(reservation);
+        }
         submitted = true;
     } catch (error) {
         showToast(error.message, "error");
@@ -420,6 +634,72 @@ async function submitReservation(form) {
         if (submitted) {
             scrollToPageTop();
         }
+    }
+}
+
+async function preparePayment(actionTarget) {
+    const reservation = findPaymentReservation(actionTarget.dataset.reservationId);
+
+    if (!reservation) {
+        showToast("결제할 예약 정보를 찾을 수 없습니다.", "error");
+        return;
+    }
+
+    if (!isPaymentPendingReservation(reservation)) {
+        showToast("결제 대기 중인 예약만 결제할 수 있습니다.", "error");
+        return;
+    }
+
+    rememberPendingPayment(reservation);
+    state.payment.processing = {
+        status: "ready",
+        orderId: reservation.payment?.orderId || "",
+        message: "결제창을 준비하고 있습니다."
+    };
+    render();
+
+    await startPayment(reservation);
+}
+
+async function startPayment(reservation) {
+    const orderId = reservation.payment?.orderId || "";
+
+    state.payment.processing = {
+        status: "ready",
+        orderId,
+        message: "결제창을 준비하고 있습니다."
+    };
+    render();
+
+    try {
+        const result = await requestTossPayment(reservation);
+
+        if (!result.ok) {
+            state.payment.processing = {
+                status: "failed",
+                orderId,
+                message: result.message
+            };
+            showToast(result.message, "error");
+            render();
+            return;
+        }
+
+        state.payment.processing = {
+            status: "requested",
+            orderId,
+            message: "결제창에서 결제를 진행해 주세요."
+        };
+        render();
+    } catch (error) {
+        const message = error.message || "결제창을 열지 못했습니다. 잠시 후 다시 시도해 주세요.";
+        state.payment.processing = {
+            status: "failed",
+            orderId,
+            message
+        };
+        showToast(message, "error");
+        render();
     }
 }
 
@@ -794,6 +1074,16 @@ function syncReservationEditWithSearchResults() {
 function findReservation(reservationId) {
     return [...state.searchedReservations, ...state.reservations]
         .find((reservation) => Number(reservation.id) === Number(reservationId)) || null;
+}
+
+function findPaymentReservation(reservationId) {
+    const contextReservation = state.payment.pendingContext?.reservation;
+
+    if (contextReservation && Number(contextReservation.id) === Number(reservationId)) {
+        return contextReservation;
+    }
+
+    return findReservation(reservationId);
 }
 
 function findWaiting(waitingId) {

@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.fixture.ReservationFixture;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.support.TestDataHelper;
 
@@ -44,12 +45,12 @@ class ReservationTableConstraintTest {
         LocalDate date = LocalDate.of(2026, 5, 6);
 
         jdbcTemplate.update(
-                "INSERT INTO reservation (id, name, date, theme_id, time_id) VALUES (?, ?, ?, ?, ?)",
-                1L, "스타크", date, themeId, timeId);
+                "INSERT INTO reservation (id, name, date, theme_id, time_id, status) VALUES (?, ?, ?, ?, ?, ?)",
+                1L, "스타크", date, themeId, timeId, ReservationStatus.PAYMENT_PENDING.name());
 
         assertThatThrownBy(() -> jdbcTemplate.update(
-                "INSERT INTO reservation (id, name, date, theme_id, time_id) VALUES (?, ?, ?, ?, ?)",
-                1L, "피노", date, themeId, timeId))
+                "INSERT INTO reservation (id, name, date, theme_id, time_id, status) VALUES (?, ?, ?, ?, ?, ?)",
+                1L, "피노", date, themeId, timeId, ReservationStatus.PAYMENT_PENDING.name()))
                 .isInstanceOf(DuplicateKeyException.class);
     }
 
@@ -61,12 +62,12 @@ class ReservationTableConstraintTest {
         LocalDate date = LocalDate.of(2026, 5, 6);
 
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
-                "스타크", date, themeId, timeId);
+                "INSERT INTO reservation (name, date, theme_id, time_id, status) VALUES (?, ?, ?, ?, ?)",
+                "스타크", date, themeId, timeId, ReservationStatus.PAYMENT_PENDING.name());
 
         assertThatThrownBy(() -> jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
-                "피노", date, themeId, timeId))
+                "INSERT INTO reservation (name, date, theme_id, time_id, status) VALUES (?, ?, ?, ?, ?)",
+                "피노", date, themeId, timeId, ReservationStatus.PAYMENT_PENDING.name()))
                 .isInstanceOf(DuplicateKeyException.class);
     }
 
@@ -78,8 +79,8 @@ class ReservationTableConstraintTest {
         LocalDate date = LocalDate.of(2026, 5, 6);
 
         assertThatThrownBy(() -> jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
-                null, date, themeId, timeId))
+                "INSERT INTO reservation (name, date, theme_id, time_id, status) VALUES (?, ?, ?, ?, ?)",
+                null, date, themeId, timeId, ReservationStatus.PAYMENT_PENDING.name()))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -92,8 +93,8 @@ class ReservationTableConstraintTest {
         String outOfRangeName = "a".repeat(256);
 
         assertThatThrownBy(() -> jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
-                outOfRangeName, date, themeId, timeId))
+                "INSERT INTO reservation (name, date, theme_id, time_id, status) VALUES (?, ?, ?, ?, ?)",
+                outOfRangeName, date, themeId, timeId, ReservationStatus.PAYMENT_PENDING.name()))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -111,6 +112,7 @@ class ReservationTableConstraintTest {
                         .timeId(timeId)
                         .startAt(LocalTime.of(9, 0))
                         .build())
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThatThrownBy(() -> reservationRepository.save(reservation))
@@ -131,6 +133,7 @@ class ReservationTableConstraintTest {
                         .timeId(notExistTimeId)
                         .startAt(LocalTime.of(9, 0))
                         .build())
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThatThrownBy(() -> reservationRepository.save(reservation))

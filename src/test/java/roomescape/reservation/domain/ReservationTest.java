@@ -70,10 +70,12 @@ class ReservationTest {
         Reservation reservation = Reservation.builder()
                 .user(STARK)
                 .slot(slot)
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
         Reservation other = Reservation.builder()
                 .user(STARK)
                 .slot(slot)
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThat(reservation).isNotEqualTo(other);
@@ -92,6 +94,7 @@ class ReservationTest {
                 .id(1L)
                 .user(STARK)
                 .slot(slot)
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
         Reservation updatedReservation = reservation.updateDateAndTime(
                 LocalDate.of(2026, 5, 7),
@@ -116,6 +119,7 @@ class ReservationTest {
                 .id(1L)
                 .user(STARK)
                 .slot(slot)
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         Reservation updatedReservation = reservation.updateDateAndTime(
@@ -147,6 +151,7 @@ class ReservationTest {
                 .id(1L)
                 .user(STARK)
                 .slot(slot)
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThatThrownBy(() -> reservation.updateDateAndTime(
@@ -172,6 +177,7 @@ class ReservationTest {
                 .id(1L)
                 .user(STARK)
                 .slot(slot)
+                .status(ReservationStatus.PAYMENT_PENDING)
                 .build();
 
         assertThatThrownBy(() -> reservation.updateDateAndTime(
