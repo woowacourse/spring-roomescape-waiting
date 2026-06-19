@@ -15,19 +15,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.DuplicateEntityException;
-import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ThemeDao;
-import roomescape.dao.TimeDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
-import roomescape.domain.vo.Name;
-import roomescape.dto.request.ReservationPatchDto;
-import roomescape.dto.request.ReservationRequestDto;
-import roomescape.service.ReservationService;
+import roomescape.common.vo.Name;
+import roomescape.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.web.ReservationPatchDto;
+import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeDao;
+import roomescape.time.Time;
+import roomescape.time.TimeDao;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -72,6 +72,7 @@ class ReservationConcurrencyTest {
     void tearDown() {
         jdbcTemplate.update("DELETE FROM promotion_outbox");
         jdbcTemplate.update("DELETE FROM waitings");
+        jdbcTemplate.update("DELETE FROM orders");
         jdbcTemplate.update("DELETE FROM reservations");
         jdbcTemplate.update("DELETE FROM times");
         jdbcTemplate.update("DELETE FROM themes");

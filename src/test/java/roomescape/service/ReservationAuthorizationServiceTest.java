@@ -17,21 +17,21 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
-import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ThemeDao;
-import roomescape.dao.TimeDao;
-import roomescape.dao.jdbc.MemberJdbcDao;
-import roomescape.dao.jdbc.ReservationJdbcDao;
-import roomescape.dao.jdbc.ThemeJdbcDao;
-import roomescape.dao.jdbc.TimeJdbcDao;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
-import roomescape.domain.Reservation;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
+import roomescape.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.member.MemberRole;
+import roomescape.member.dao.MemberJdbcDao;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.dao.ReservationJdbcDao;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeDao;
+import roomescape.theme.dao.ThemeJdbcDao;
+import roomescape.time.Time;
+import roomescape.time.TimeDao;
+import roomescape.time.dao.TimeJdbcDao;
 
 @JdbcTest
 @Import({ReservationAuthorizationService.class, ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class,

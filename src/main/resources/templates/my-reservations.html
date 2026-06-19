@@ -169,6 +169,9 @@ function mkItem(it) {
         <button class="btn-cancel" onclick="doCancel(${it.id})">취소</button>
         <button class="btn-s" onclick="openModal(${it.id},'${(it.theme?.name||'').replace(/'/g,"\\'")}',${it.theme?.id})">수정</button>
       </div>`;
+  } else if (it.status === 'PENDING') {
+    statusClass = 'waiting';
+    statusText = '결제 대기';
   } else {
     statusClass = 'canceled';
     statusText = '취소됨';

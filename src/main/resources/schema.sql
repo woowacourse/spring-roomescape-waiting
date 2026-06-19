@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS promotion_outbox;
 DROP TABLE IF EXISTS waitings;
 DROP TABLE IF EXISTS reservations;
@@ -20,6 +21,7 @@ CREATE TABLE themes
     name          VARCHAR(40) NOT NULL,
     thumbnail_url VARCHAR(2048),
     description   VARCHAR(400),
+    price         BIGINT      NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     UNIQUE (name)
 );
@@ -55,12 +57,28 @@ CREATE TABLE reservations
     status     VARCHAR(20) NOT NULL DEFAULT 'BOOKED',
     deleted_at TIMESTAMP   NOT NULL DEFAULT '9999-12-31 00:00:00',
     version    BIGINT      NOT NULL DEFAULT 0,
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES members (id),
     FOREIGN KEY (time_id) REFERENCES times (id),
     FOREIGN KEY (theme_id) REFERENCES themes (id),
     FOREIGN KEY (store_id) REFERENCES stores (id),
     UNIQUE (theme_id, date, time_id, store_id, deleted_at)
+);
+
+CREATE TABLE orders
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id       VARCHAR(64)  NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    amount         BIGINT       NOT NULL,
+    payment_key    VARCHAR(200),
+    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE (order_id),
+    UNIQUE (reservation_id), -- 한 예약엔 주문 1건만(결제 준비 멱등의 DB 백스톱: 동시 요청 경합도 차단)
+    FOREIGN KEY (reservation_id) REFERENCES reservations (id)
 );
 
 CREATE TABLE waitings

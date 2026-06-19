@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
-import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
+import roomescape.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.member.MemberRole;
 
 class AuthFilterTest {
 

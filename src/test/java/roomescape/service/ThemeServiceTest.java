@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,24 +20,25 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ThemeDao;
-import roomescape.dao.TimeDao;
-import roomescape.dao.jdbc.MemberJdbcDao;
-import roomescape.dao.jdbc.ReservationJdbcDao;
-import roomescape.dao.jdbc.StoreJdbcDao;
-import roomescape.dao.jdbc.ThemeJdbcDao;
-import roomescape.dao.jdbc.TimeJdbcDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
-import roomescape.dto.request.PopularThemeRequestDto;
-import roomescape.dto.request.ThemeRequestDto;
-import roomescape.dto.response.AvailableTimeResponseDto;
-import roomescape.dto.response.TimeResponseDto;
+import roomescape.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.member.dao.MemberJdbcDao;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.dao.ReservationJdbcDao;
+import roomescape.store.Store;
+import roomescape.store.dao.StoreJdbcDao;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeDao;
+import roomescape.theme.ThemeService;
+import roomescape.theme.dao.ThemeJdbcDao;
+import roomescape.theme.web.AvailableTimeResponseDto;
+import roomescape.theme.web.PopularThemeRequestDto;
+import roomescape.theme.web.ThemeRequestDto;
+import roomescape.time.Time;
+import roomescape.time.TimeDao;
+import roomescape.time.dao.TimeJdbcDao;
+import roomescape.time.web.TimeResponseDto;
 
 @JdbcTest
 @Import({ThemeService.class, ThemeJdbcDao.class, ReservationJdbcDao.class, TimeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class})
@@ -71,8 +73,8 @@ class ThemeServiceTest {
                 "유저", "user@test.com", "password", "USER"
         );
         member = memberDao.findByEmail("user@test.com").orElseThrow();
-        requestDto1 = new ThemeRequestDto("테마1", "http://thumbnail_url", "설명1");
-        requestDto2 = new ThemeRequestDto("테마2", "http://thumbnail_url", "설명2");
+        requestDto1 = new ThemeRequestDto("테마1", "http://thumbnail_url", "설명1", 30000L);
+        requestDto2 = new ThemeRequestDto("테마2", "http://thumbnail_url", "설명2", 35000L);
     }
 
     @Nested
@@ -187,6 +189,40 @@ class ThemeServiceTest {
             assertThat(result).containsExactlyInAnyOrder(
                     new AvailableTimeResponseDto(TimeResponseDto.from(bookedTime), true),
                     new AvailableTimeResponseDto(TimeResponseDto.from(availableTime), false)
+            );
+        }
+
+        @Test
+        @DisplayName("취소된 예약의 시간은 다시 예약 가능으로 표시된다")
+        void canceledReservationFreesSlot() {
+            Theme savedTheme = themeService.create(requestDto1);
+            Time time = timeDao.insert(new Time(LocalTime.of(13, 0)));
+            LocalDate date = LocalDate.of(2099, 1, 1);
+            Reservation reservation = reservationDao.insert(
+                    Reservation.createByAdmin(member, date, time, savedTheme, store));
+            reservation.cancelByAdmin(LocalDateTime.now());
+            reservationDao.update(reservation);
+
+            List<AvailableTimeResponseDto> result = themeService.findAvailableTimesById(savedTheme.getId(), date);
+
+            assertThat(result).containsExactly(
+                    new AvailableTimeResponseDto(TimeResponseDto.from(time), false)
+            );
+        }
+
+        @Test
+        @DisplayName("결제 대기(PENDING) 예약의 시간은 점유로 표시된다")
+        void pendingReservationOccupiesSlot() {
+            Theme savedTheme = themeService.create(requestDto1);
+            Time time = timeDao.insert(new Time(LocalTime.of(13, 0)));
+            LocalDate date = LocalDate.of(2099, 1, 1);
+            reservationDao.insert(
+                    Reservation.createByUser(member, date, time, savedTheme, store, LocalDateTime.now()));
+
+            List<AvailableTimeResponseDto> result = themeService.findAvailableTimesById(savedTheme.getId(), date);
+
+            assertThat(result).containsExactly(
+                    new AvailableTimeResponseDto(TimeResponseDto.from(time), true)
             );
         }
     }

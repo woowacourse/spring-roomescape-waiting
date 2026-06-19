@@ -15,9 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.InvalidInputException;
 import roomescape.config.PasswordConfig;
-import roomescape.dao.jdbc.MemberJdbcDao;
-import roomescape.domain.Member;
-import roomescape.dto.request.LoginRequestDto;
+import roomescape.member.Member;
+import roomescape.member.MemberService;
+import roomescape.member.dao.MemberJdbcDao;
+import roomescape.member.web.LoginRequestDto;
 
 @JdbcTest
 @Import({MemberService.class, MemberJdbcDao.class, PasswordConfig.class})

@@ -3,13 +3,12 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.InvalidInputException;
+import roomescape.time.Time;
 
 class TimeTest {
 
@@ -36,30 +35,6 @@ class TimeTest {
         void throwsWhenTimeAfter22() {
             assertThatThrownBy(() -> new Time(1L, LocalTime.of(22, 1)))
                     .isInstanceOf(InvalidInputException.class);
-        }
-    }
-
-    @Nested
-    class IsReservationBefore {
-
-        @Test
-        @DisplayName("예약 일시가 현재보다 과거이면 true를 반환한다")
-        void returnsTrueWhenReservationIsInPast() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            LocalDate pastDate = LocalDate.now().minusDays(1);
-            LocalDateTime now = LocalDateTime.now();
-
-            assertThat(time.isReservationBefore(now, pastDate)).isTrue();
-        }
-
-        @Test
-        @DisplayName("예약 일시가 현재보다 미래이면 false를 반환한다")
-        void returnsFalseWhenReservationIsInFuture() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            LocalDate futureDate = LocalDate.now().plusDays(1);
-            LocalDateTime now = LocalDateTime.now();
-
-            assertThat(time.isReservationBefore(now, futureDate)).isFalse();
         }
     }
 }

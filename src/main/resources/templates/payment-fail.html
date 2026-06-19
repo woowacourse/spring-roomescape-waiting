@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제 실패 — ESCAPE</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:#080808;color:#d4d4d4;font-family:'Inter',sans-serif;font-weight:300;padding:2rem}
+.box{max-width:440px;width:100%;text-align:center;border:1px solid #525252;background:#0f0f0f;padding:3rem}
+h1{font-size:1.3rem;color:#e5485a;margin-bottom:1rem;letter-spacing:.04em}
+p{font-size:.92rem;color:#aaa;letter-spacing:.05em;line-height:1.7}
+.code{font-size:.78rem;color:#777;margin-top:.75rem;letter-spacing:.08em}
+a{display:inline-block;margin-top:2rem;color:#c22235;text-decoration:none;font-size:.8rem;
+  letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>결제가 완료되지 않았습니다</h1>
+  <p id="reason">결제가 취소되었거나 실패했습니다.</p>
+  <p class="code" id="code"></p>
+  <a href="/">목록으로 돌아가기</a>
+</div>
+<script>
+const params = new URLSearchParams(location.search);
+const code = params.get('code');
+const message = params.get('message');
+const orderId = params.get('orderId'); // 사용자가 취소하면 없을 수 있다(PAY_PROCESS_CANCELED)
+
+if (message) document.getElementById('reason').textContent = message;
+if (code) document.getElementById('code').textContent = '[' + code + ']';
+
+// 결제 대기 상태의 주문/예약 정리. orderId가 없으면 서버의 null 가드가 받아준다.
+fetch('/payments/fail', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ code, message, orderId })
+}).catch(() => {});
+</script>
+</body>
+</html>

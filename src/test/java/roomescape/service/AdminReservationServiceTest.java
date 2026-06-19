@@ -17,32 +17,36 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.common.PageResponse;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ThemeDao;
-import roomescape.dao.TimeDao;
-import roomescape.dao.WaitingDao;
-import roomescape.dao.jdbc.MemberJdbcDao;
-import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
-import roomescape.dao.jdbc.ReservationJdbcDao;
-import roomescape.dao.jdbc.StoreJdbcDao;
-import roomescape.dao.jdbc.ThemeJdbcDao;
-import roomescape.dao.jdbc.TimeJdbcDao;
-import roomescape.dao.jdbc.WaitingJdbcDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
-import roomescape.domain.Waiting;
-import roomescape.domain.vo.Name;
-import roomescape.dto.request.AdminReservationRequestDto;
-import roomescape.dto.request.ReservationPatchDto;
-import roomescape.dto.request.WaitingRequestDto;
-import roomescape.dto.response.PageResponse;
+import roomescape.common.vo.Name;
+import roomescape.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.member.dao.MemberJdbcDao;
+import roomescape.promotion.PromotionService;
+import roomescape.promotion.dao.PromotionOutboxJdbcDao;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.ReservationStatus;
+import roomescape.reservation.dao.ReservationJdbcDao;
+import roomescape.reservation.service.AdminReservationService;
+import roomescape.reservation.service.ReservationCreator;
+import roomescape.reservation.web.AdminReservationRequestDto;
+import roomescape.reservation.web.ReservationPatchDto;
+import roomescape.store.Store;
+import roomescape.store.dao.StoreJdbcDao;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeDao;
+import roomescape.theme.dao.ThemeJdbcDao;
+import roomescape.time.Time;
+import roomescape.time.TimeDao;
+import roomescape.time.dao.TimeJdbcDao;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingDao;
+import roomescape.waiting.WaitingService;
+import roomescape.waiting.dao.WaitingJdbcDao;
+import roomescape.waiting.web.WaitingRequestDto;
 import roomescape.worker.PromotionOutboxWorker;
 
 @JdbcTest
@@ -306,7 +310,7 @@ class AdminReservationServiceTest {
             promotionOutboxWorker.processPendingTasks();
 
             assertThat(reservationDao.findAllByMemberId(firstWaiter.getId()))
-                    .anyMatch(r -> r.getStatus() == ReservationStatus.BOOKED);
+                    .anyMatch(r -> r.getStatus() == ReservationStatus.PENDING);
             assertThat(waitingService.findAll())
                     .singleElement()
                     .satisfies(remaining -> {

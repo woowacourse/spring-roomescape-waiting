@@ -365,6 +365,7 @@ async function doReserve() {
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true;
   try {
+    // 1) 예약을 PENDING으로 생성만 한다 — 주문 생성·결제 준비는 결제 페이지에서 한다.
     const r = await fetch('/reservations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -383,9 +384,10 @@ async function doReserve() {
       toast('err', msg);
       return;
     }
-    closeModal();
-    toast('ok', '예약이 완료되었습니다');
-    await onDate(selDate);
+    const reservation = await r.json(); // { id, name, date, status, theme, time }
+    // 2) 예약 식별자를 결제 페이지로 넘기고 이동 — 거기서 주문을 만들고 v2 결제위젯을 띄운다.
+    sessionStorage.setItem('toss_checkout', JSON.stringify({ reservationId: reservation.id, themeId: Number(themeId) }));
+    location.href = '/payment/checkout';
   } catch {
     closeModal();
     toast('err', '네트워크 오류가 발생했습니다');

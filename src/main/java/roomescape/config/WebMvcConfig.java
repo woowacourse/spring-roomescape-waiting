@@ -33,11 +33,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Bean
     public FilterRegistrationBean<AuthFilter> authFilterRegistration() {
         FilterRegistrationBean<AuthFilter> registration = new FilterRegistrationBean<>(authFilter);
-        registration.addUrlPatterns(
-                "/reservations", "/reservations/*",
-                "/waitings", "/waitings/*",
-                "/members/me"
-        );
+        // 전 경로에 걸고, 공용 경로만 AuthFilter.shouldNotFilter에서 통과시킨다(default-deny).
+        registration.addUrlPatterns("/*");
         return registration;
     }
 

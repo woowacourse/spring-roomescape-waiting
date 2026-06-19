@@ -5,10 +5,10 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
-import roomescape.dao.ReservationDao;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.Store;
+import roomescape.member.Member;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.store.Store;
 
 @Service
 @Transactional(readOnly = true)

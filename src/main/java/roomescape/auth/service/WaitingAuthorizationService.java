@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
-import roomescape.dao.WaitingDao;
-import roomescape.domain.Member;
-import roomescape.domain.Store;
-import roomescape.domain.Waiting;
+import roomescape.member.Member;
+import roomescape.store.Store;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingDao;
 
 @Service
 public class WaitingAuthorizationService {

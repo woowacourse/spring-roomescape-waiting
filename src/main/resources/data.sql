@@ -15,35 +15,35 @@ INSERT INTO times(start_at) values ('16:00');
 INSERT INTO times(start_at) values ('18:00');
 INSERT INTO times(start_at) values ('20:00');
 
-INSERT INTO themes(name, thumbnail_url, description)
-VALUES ('냥이 점집', 'https://i.postimg.cc/3JRp43dK/1553676990.jpg', '난이도 NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
-VALUES ('어느 구두쇠의 전시회장', 'https://i.postimg.cc/4yrMrRfQ/image.jpg', '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+INSERT INTO themes(name, thumbnail_url, description, price)
+VALUES ('냥이 점집', 'https://i.postimg.cc/3JRp43dK/1553676990.jpg', '난이도 NORMAL 3/5', 30000);
+INSERT INTO themes(name, thumbnail_url, description, price)
+VALUES ('어느 구두쇠의 전시회장', 'https://i.postimg.cc/4yrMrRfQ/image.jpg', '난이도: NORMAL 3/5', 32000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('준단화:몸을 잘라낸 꽃',
         'https://www.seoul-escape.com/storage/episode/2024_11/06/qnAHwzCVuvRU7x62epGGSUciARX22w08CsrMSBb9.png',
-        '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+        '난이도: NORMAL 3/5', 33000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('팩토리', 'https://www.seoul-escape.com/storage/episode/2024_11/06/qnAHwzCVuvRU7x62epGGSUciARX22w08CsrMSBb9.png',
-        '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+        '난이도: NORMAL 3/5', 34000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('고문실', 'https://www.seoul-escape.com/storage/episode/2022_11/09/hFa2HaQPrHERgVtstgwsVfdMGT69AGxRMRXpolRe.png',
-        '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+        '난이도: NORMAL 3/5', 35000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('엘리베이터', 'https://www.seoul-escape.com/storage/episode/2022_11/09/ZEiSp4KjRt6L47SroX8ikS0OoeR99nftI4ndeS2r.png',
-        '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+        '난이도: NORMAL 3/5', 36000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('접견', 'https://www.seoul-escape.com/storage/episode/2026_04/11/mbAc3GHBTmF9mWtXh6JJ1DW2lyioqzt5ih68Pnie.png',
-        '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+        '난이도: NORMAL 3/5', 37000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('오시리스', 'https://www.seoul-escape.com/storage/episode/2026_02/20/m9gnxCTeS22AbuXCNRJ4SKLzLtzk8NMEwuJzebb4.png',
-        '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+        '난이도: NORMAL 3/5', 38000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('만찬', 'https://www.seoul-escape.com/storage/episode/2026_02/20/m9gnxCTeS22AbuXCNRJ4SKLzLtzk8NMEwuJzebb4.png',
-        '난이도: NORMAL 3/5');
-INSERT INTO themes(name, thumbnail_url, description)
+        '난이도: NORMAL 3/5', 39000);
+INSERT INTO themes(name, thumbnail_url, description, price)
 VALUES ('오모테나시', 'https://www.seoul-escape.com/storage/episode/2024_11/06/qnAHwzCVuvRU7x62epGGSUciARX22w08CsrMSBb9.png',
-        '난이도: NORMAL 3/5');
+        '난이도: NORMAL 3/5', 40000);
 
 -- 강남점 매니저(manager1@test.com) 조회용 예약
 INSERT INTO reservations(member_id, date, theme_id, time_id, store_id, status)

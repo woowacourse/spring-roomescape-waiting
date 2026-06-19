@@ -11,7 +11,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.BusinessRuleViolationException;
-import roomescape.domain.vo.Name;
+import roomescape.common.vo.Name;
+import roomescape.member.Member;
+import roomescape.member.MemberRole;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
+import roomescape.store.Store;
+import roomescape.theme.Theme;
+import roomescape.time.Time;
 
 class ReservationTest {
 
@@ -38,7 +45,7 @@ class ReservationTest {
 
             Reservation reservation = Reservation.createByUser(member, futureDate, time, theme, store, now);
 
-            assertThat(reservation.isActive()).isTrue();
+            assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING);
         }
 
         @Test

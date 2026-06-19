@@ -20,32 +20,39 @@ import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
-import roomescape.dao.MemberDao;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ThemeDao;
-import roomescape.dao.TimeDao;
-import roomescape.dao.jdbc.MemberJdbcDao;
-import roomescape.dao.jdbc.PromotionOutboxJdbcDao;
-import roomescape.dao.jdbc.ReservationJdbcDao;
-import roomescape.dao.jdbc.StoreJdbcDao;
-import roomescape.dao.jdbc.ThemeJdbcDao;
-import roomescape.dao.jdbc.TimeJdbcDao;
-import roomescape.dao.jdbc.WaitingJdbcDao;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Store;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
-import roomescape.domain.vo.Name;
-import roomescape.dto.request.ReservationPatchDto;
-import roomescape.dto.request.ReservationRequestDto;
+import roomescape.common.vo.Name;
+import roomescape.member.Member;
+import roomescape.member.MemberDao;
+import roomescape.member.MemberRole;
+import roomescape.member.dao.MemberJdbcDao;
+import roomescape.order.OrderService;
+import roomescape.order.dao.OrderJdbcDao;
+import roomescape.promotion.PromotionService;
+import roomescape.promotion.dao.PromotionOutboxJdbcDao;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDao;
+import roomescape.reservation.ReservationStatus;
+import roomescape.reservation.dao.ReservationJdbcDao;
+import roomescape.reservation.service.ReservationCreator;
+import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.web.ReservationPatchDto;
+import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.store.Store;
+import roomescape.store.dao.StoreJdbcDao;
+import roomescape.theme.Theme;
+import roomescape.theme.ThemeDao;
+import roomescape.theme.dao.ThemeJdbcDao;
+import roomescape.time.Time;
+import roomescape.time.TimeDao;
+import roomescape.time.dao.TimeJdbcDao;
+import roomescape.waiting.WaitingService;
+import roomescape.waiting.dao.WaitingJdbcDao;
 
 @JdbcTest
 @Import({ReservationService.class, ReservationCreator.class, ReservationAuthorizationService.class, WaitingService.class,
         ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class,
-        WaitingJdbcDao.class, PromotionOutboxJdbcDao.class, PromotionService.class})
+        WaitingJdbcDao.class, PromotionOutboxJdbcDao.class, PromotionService.class,
+        OrderJdbcDao.class, OrderService.class})
 @ActiveProfiles("test")
 class ReservationServiceTest {
 
@@ -102,6 +109,7 @@ class ReservationServiceTest {
             Reservation saved = reservationService.create(member, requestDto1);
 
             assertThat(saved.getId()).isNotNull();
+            assertThat(saved.getStatus()).isEqualTo(ReservationStatus.PENDING);
             assertThat(saved.getMember()).isEqualTo(member);
             assertThat(saved.getDate()).isEqualTo(requestDto1.date());
         }
@@ -150,7 +158,8 @@ class ReservationServiceTest {
         @Test
         @DisplayName("BOOKED 예약을 조회한다")
         void returnsActiveReservation() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, requestDto1.date(), savedTime1, savedTheme1, store));
 
             assertThat(reservationService.findActiveById(saved.getId())).isEqualTo(saved);
         }
@@ -203,7 +212,8 @@ class ReservationServiceTest {
         @Test
         @DisplayName("본인 예약을 수정한다")
         void updatesReservation() {
-            Reservation saved = reservationService.create(member, requestDto1);
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, requestDto1.date(), savedTime1, savedTheme1, store));
             LocalDate newDate = LocalDate.now().plusDays(3);
             ReservationPatchDto updateDto = new ReservationPatchDto(newDate, savedTime2.getId());
 
@@ -283,6 +293,22 @@ class ReservationServiceTest {
 
             assertThatThrownBy(() -> reservationService.cancel(saved.getId(), otherMember))
                     .isInstanceOf(HiddenResourceException.class);
+        }
+    }
+
+    @Nested
+    class CancelPending {
+
+        @Test
+        @DisplayName("PENDING이 아닌 예약에 cancelPending을 호출해도 예외 없이 상태가 유지된다(멱등)")
+        void noOpWhenNotPending() {
+            Reservation booked = reservationDao.insert(
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, store));
+
+            reservationService.cancelPending(booked.getId());
+
+            assertThat(reservationDao.findById(booked.getId()).orElseThrow().getStatus())
+                    .isEqualTo(ReservationStatus.BOOKED);
         }
     }
 }
