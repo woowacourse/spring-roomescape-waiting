@@ -16,7 +16,6 @@ import roomescape.payment.application.dto.PaymentCancel;
 import roomescape.payment.application.dto.PaymentConfirmation;
 import roomescape.payment.application.PaymentGateway;
 import roomescape.payment.application.dto.PaymentResult;
-import roomescape.payment.domain.OrderStatus;
 import roomescape.payment.infra.client.dto.CancelRequest;
 import roomescape.payment.infra.client.dto.ConfirmRequest;
 import roomescape.payment.infra.client.dto.TossErrorResponse;
@@ -89,10 +88,10 @@ public class TossPaymentGateway implements PaymentGateway {
     }
 
     private PaymentResult toResult(final TossPaymentResponse response) {
-        PaymentStatus tossStatus = PaymentStatus.from(response.status());
+        TossPaymentStatus status = TossPaymentStatus.from(response.status());
         return PaymentResult.builder()
                 .paymentKey(response.paymentKey())
-                .status(OrderStatus.fromToss(tossStatus))
+                .status(status.toDomainStatus())
                 .approvedAmount(response.totalAmount())
                 .createdAt(OffsetDateTime.parse(response.approvedAt()).toLocalDateTime())
                 .build();

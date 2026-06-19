@@ -12,7 +12,7 @@ import roomescape.payment.application.dto.PaymentResult;
 import roomescape.payment.application.exception.OrderUpdateException;
 import roomescape.payment.application.exception.PaymentAmountMismatchException;
 import roomescape.payment.application.exception.PaymentUnauthorizedException;
-import roomescape.payment.domain.OrderStatus;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.infra.client.exception.TossBusinessException;
 import roomescape.payment.infra.client.exception.TossInfrastructureException;
 
@@ -35,9 +35,8 @@ public class PaymentService {
         }
 
         PaymentResult result = executeConfirm(paymentKey, orderId, amount);
-
-        OrderStatus actualStatus = result.status();
-        if (!actualStatus.equals(OrderStatus.COMPLETED)) {
+        PaymentStatus actualStatus = result.status();
+        if (!actualStatus.equals(PaymentStatus.COMPLETED)) {
             orderService.fail(orderId);
             throw new OrderUpdateException("결제가 정상적으로 완료되지 않았습니다. 현재 상태: " + actualStatus.name());
         }

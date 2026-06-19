@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import roomescape.payment.domain.Order;
 import roomescape.payment.domain.OrderRepository;
-import roomescape.payment.domain.OrderStatus;
+import roomescape.payment.domain.PaymentStatus;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class JdbcOrderRepository implements OrderRepository {
                 resultSet.getString("id"),
                 resultSet.getLong("amount"),
                 resultSet.getLong("reservation_id"),
-                OrderStatus.valueOf(resultSet.getString("status")),
+                PaymentStatus.valueOf(resultSet.getString("status")),
                 resultSet.getTimestamp("created_at").toLocalDateTime(),
                 resultSet.getString("payment_key")
         );

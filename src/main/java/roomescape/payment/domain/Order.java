@@ -13,7 +13,7 @@ public class Order {
     private String orderId;
     private Long amount;
     private Long reservationId;
-    private OrderStatus status;
+    private PaymentStatus status;
     private LocalDateTime createdAt;
     private String paymentKey;
 
@@ -22,7 +22,7 @@ public class Order {
                 .orderId(orderId)
                 .amount(amount)
                 .reservationId(reservationId)
-                .status(OrderStatus.PENDING)
+                .status(PaymentStatus.PENDING)
                 .createdAt(LocalDateTime.now(clock))
                 .build();
     }
@@ -33,7 +33,7 @@ public class Order {
                 .orderId(orderId)
                 .amount(amount)
                 .reservationId(reservationId)
-                .status(OrderStatus.COMPLETED)
+                .status(PaymentStatus.COMPLETED)
                 .createdAt(LocalDateTime.now(clock))
                 .paymentKey(paymentKey)
                 .build();
@@ -45,7 +45,7 @@ public class Order {
                 .orderId(orderId)
                 .amount(amount)
                 .reservationId(reservationId)
-                .status(OrderStatus.FAILED)
+                .status(PaymentStatus.FAILED)
                 .createdAt(LocalDateTime.now(clock))
                 .paymentKey(paymentKey)
                 .build();
@@ -57,7 +57,7 @@ public class Order {
                 .orderId(orderId)
                 .amount(amount)
                 .reservationId(reservationId)
-                .status(OrderStatus.CANCELED)
+                .status(PaymentStatus.CANCELED)
                 .createdAt(LocalDateTime.now(clock))
                 .paymentKey(paymentKey)
                 .build();
