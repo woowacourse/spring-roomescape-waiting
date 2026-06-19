@@ -2,15 +2,37 @@ package roomescape.domain;
 
 import java.util.Objects;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
+@Entity
 public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnailUrl;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnailUrl;
 
+    // JPA용
+    protected Theme() {
+    }
+
+    // 사용자 생성
+    public Theme(String name, String description, String thumbnailUrl) {
+        validateNameLength(name);
+        validateDescriptionLength(description);
+        validateThumbnailUrlLength(thumbnailUrl);
+        this.name = name;
+        this.description = description;
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    // JDBC → JPA 과정에서 깨지는 것을 방지하기 위한 코드로 곧 삭제 예정
     public Theme(Long id, String name, String description, String thumbnailUrl) {
         validateNameLength(name);
         validateDescriptionLength(description);
@@ -20,6 +42,7 @@ public class Theme {
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
     }
+
 
     private void validateNameLength(String name) {
         if (name.length() > 255) {

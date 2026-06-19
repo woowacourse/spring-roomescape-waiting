@@ -23,10 +23,10 @@ public class AdminTimeService {
 
     public TimeResponse save(TimeRequest request) {
         try {
-            Long id = timeRepository.save(request.startAt());
-            Time saved = new Time(id, request.startAt());
-            return TimeResponse.from(saved);
-        } catch (DuplicateKeyException e) {
+            Time time = new Time(request.startAt());
+            timeRepository.save(time);
+            return TimeResponse.from(time);
+        } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_TIME);
         }
     }
@@ -39,7 +39,7 @@ public class AdminTimeService {
 
     public void delete(long id) {
         try {
-            timeRepository.delete(id);
+            timeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.UNALLOWED_DELETE_RESERVED_TIME);
         }

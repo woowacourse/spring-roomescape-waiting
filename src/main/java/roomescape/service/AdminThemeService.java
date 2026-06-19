@@ -4,6 +4,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.ThemeRequest;
 import roomescape.exception.CustomException;
@@ -20,15 +21,17 @@ public class AdminThemeService {
 
     public Long save(ThemeRequest request) {
         try {
-            return themeRepository.save(request.name(), request.description(), request.thumbnailUrl());
-        } catch (DuplicateKeyException e) {
+            Theme theme = new Theme(request.name(), request.description(), request.thumbnailUrl());
+            themeRepository.save(theme);
+            return theme.getId();
+        } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_THEME);
         }
     }
 
     public void delete(long id) {
         try {
-            themeRepository.delete(id);
+            themeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.UNALLOWED_DELETE_EXISTS_THEME);
         }

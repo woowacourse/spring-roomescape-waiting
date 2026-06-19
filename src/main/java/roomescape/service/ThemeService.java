@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.repository.ThemeRepository;
@@ -21,7 +22,8 @@ public class ThemeService {
         LocalDate endDate = today.minusDays(1);
         LocalDate startDate = today.minusDays(7);
 
-        return themeRepository.findPopularThemes(size, startDate, endDate).stream()
+
+        return themeRepository.findPopularThemes(startDate, endDate, PageRequest.of(0, size)).stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
