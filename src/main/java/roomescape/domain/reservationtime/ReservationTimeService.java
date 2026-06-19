@@ -41,13 +41,12 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTime(Long id) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_EXIST));
         if (reservationRepository.countByTimeId(id) > 0) {
             throw new RoomescapeException(ReservationTimeErrorCode.RESERVATION_TIME_IN_USE);
         }
-        int deletedCount = reservationTimeRepository.deleteById(id);
-        if (deletedCount == 0) {
-            log.warn("이미 삭제된 예약 시간 삭제 요청이 들어왔습니다. timeId={}", id);
-        }
+        reservationTimeRepository.delete(reservationTime);
     }
 
     public List<ReservationTimeAvailabilityResponse> getReservationTimeAvailability(Long themeId, Long dateId) {
@@ -59,11 +58,6 @@ public class ReservationTimeService {
                 isAvailable(reservationTime, reservedTimeIds)
             ))
             .toList();
-    }
-
-    public ReservationTime findById(Long id) {
-        return reservationTimeRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_EXIST));
     }
 
     private Set<Long> getReservedTimeIds(Long themeId, Long dateId) {
