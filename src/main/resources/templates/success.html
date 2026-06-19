@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 완료</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    p.desc {
+      color: #888;
+      margin: 0 0 24px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 16px;
+    }
+
+    .row .label {
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .row .val {
+      text-align: right;
+      word-break: break-all;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      color: #3182f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>결제를 완료했어요</h1>
+  <p class="desc">브라우저 인증 후, <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 예약을 확정했습니다.</p>
+
+  <div class="row"><span class="label">예약 상태</span>
+    <span class="val" th:text="${reservation.status}">CONFIRMED</span></div>
+  <div class="row"><span class="label">예약자</span>
+    <span class="val" th:text="${reservation.name}">홍길동</span></div>
+  <div class="row"><span class="label">예약일</span>
+    <span class="val" th:text="${reservation.date}">2026-06-18</span></div>
+  <div class="row"><span class="label">예약 시간</span>
+    <span class="val" th:text="${reservation.time.startAt}">10:00</span></div>
+  <div class="row"><span class="label">테마</span>
+    <span class="val" th:text="${reservation.theme.name}">방탈출</span></div>
+  <div class="row"><span class="label">주문번호</span>
+    <span class="val" th:text="${orderId}">order-xxxx</span></div>
+  <div class="row"><span class="label">승인 금액</span>
+    <span class="val" th:text="${#numbers.formatInteger(amount, 0, 'COMMA') + '원'}">50,000원</span></div>
+  <div class="row"><span class="label">paymentKey</span>
+    <span class="val" th:text="${paymentKey}">tviva...</span></div>
+
+  <a th:href="@{/my.html(name=${reservation.name})}">내 예약 보기</a>
+</div>
+</body>
+</html>

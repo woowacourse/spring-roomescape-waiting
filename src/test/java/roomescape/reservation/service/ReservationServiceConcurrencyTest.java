@@ -1,12 +1,14 @@
 package roomescape.reservation.service;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InfrastructureException;
 import roomescape.global.exception.NotFoundException;
@@ -33,7 +35,19 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql(
+        statements = {
+                "DELETE FROM reservation_history",
+                "DELETE FROM reservation",
+                "DELETE FROM reservation_time",
+                "DELETE FROM theme",
+                "ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1",
+                "ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1",
+                "ALTER TABLE theme ALTER COLUMN id RESTART WITH 1",
+                "ALTER SEQUENCE reservation_request_order_seq RESTART WITH 1"
+        },
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+)
 class ReservationServiceConcurrencyTest {
 
     private static final String NAME = "브라운";

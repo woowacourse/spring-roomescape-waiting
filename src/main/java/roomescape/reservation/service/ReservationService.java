@@ -39,17 +39,34 @@ public class ReservationService {
 
     @Transactional
     public Reservation create(String name, LocalDate date, Long timeId, Long themeId) {
+        validateCreatable(name, date, timeId, themeId);
+
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
         ReservationSlot slot = ReservationSlot.of(theme, date, time);
 
-        if (reservationRepository.existsConflict(name, slot)) {
-            throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
-        }
-
         Reservation reservation = Reservation.create(name, slot, LocalDateTime.now());
 
         return reservationRepository.save(reservation);
+    }
+
+    @Transactional(readOnly = true)
+    public Reservation findById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public void validateCreatable(String name, LocalDate date, Long timeId, Long themeId) {
+        ReservationTime time = findTime(timeId);
+        Theme theme = findTheme(themeId);
+        ReservationSlot slot = ReservationSlot.of(theme, date, time);
+
+        Reservation.create(name, slot, LocalDateTime.now());
+
+        if (reservationRepository.existsConflict(name, slot)) {
+            throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
+        }
     }
 
     @Transactional

@@ -11,3 +11,10 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+
+payment:
+  reservation-amount: ${ROOMESCAPE_RESERVATION_AMOUNT:1000}
+  toss:
+    base-url: ${TOSS_PAYMENTS_BASE_URL:https://api.tosspayments.com}
+    client-key: ${TOSS_PAYMENTS_CLIENT_KEY:test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm}
+    secret-key: ${TOSS_PAYMENTS_SECRET_KEY:test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6}

@@ -53,6 +53,30 @@ CREATE TABLE reservation_history
     PRIMARY KEY (id)
 );
 
+CREATE TABLE payment_order
+(
+    id              BIGINT        NOT NULL AUTO_INCREMENT,
+    order_id        VARCHAR(64)   NOT NULL,
+    amount          BIGINT        NOT NULL,
+    status          VARCHAR(20)   NOT NULL,
+    name            VARCHAR(255)  NOT NULL,
+    date            DATE          NOT NULL,
+    time_id         BIGINT        NOT NULL,
+    theme_id        BIGINT        NOT NULL,
+    payment_key     VARCHAR(2048),
+    reservation_id  BIGINT,
+    failure_code    VARCHAR(255),
+    failure_message VARCHAR(1000),
+    created_at      TIMESTAMP     NOT NULL,
+    updated_at      TIMESTAMP     NOT NULL,
+    confirmed_at    TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE (order_id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
 CREATE INDEX idx_reservation_slot_request_order
     ON reservation (theme_id, date, time_id, request_order);
 
@@ -61,3 +85,6 @@ CREATE INDEX idx_reservation_name
 
 CREATE INDEX idx_reservation_history_name
     ON reservation_history (name);
+
+CREATE INDEX idx_payment_order_slot_name_status
+    ON payment_order (theme_id, date, time_id, name, status);

@@ -8,3 +8,10 @@ spring:
   sql:
     init:
       data-locations: optional:classpath:/no-data.sql
+
+payment:
+  reservation-amount: 1000
+  toss:
+    base-url: http://localhost
+    client-key: test_ck_local
+    secret-key: test_sk_local
