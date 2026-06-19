@@ -55,7 +55,8 @@ public class ReservationService {
         List<Reservation> reservations = reservationDao.selectByName(name);
         for (Reservation reservation : reservations) {
             Theme theme = getThemeById(reservation.getThemeId(), themes);
-            myReservations.add(new MyReservation(reservation, theme));
+            myReservations.add(new MyReservation(reservation, theme,
+                    paymentService.findOrderByReservationId(reservation.getId()).orElse(null)));
         }
 
         List<ReservationWaiting> reservationWaitings = reservationWaitingDao.selectByName(name);

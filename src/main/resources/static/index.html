@@ -93,6 +93,10 @@
                         <th>테마</th>
                         <th>날짜</th>
                         <th>시간</th>
+                        <th>결제 상태</th>
+                        <th>orderId</th>
+                        <th>paymentKey</th>
+                        <th>금액</th>
                         <th>대기 순번</th>
                         <th></th>
                     </tr>
@@ -263,7 +267,7 @@
     function renderReservations(reservations) {
         reservationRows.innerHTML = '';
         if (reservations.length === 0) {
-            reservationRows.innerHTML = '<tr><td class="empty" colspan="7">예약 내역이 없습니다.</td></tr>';
+            reservationRows.innerHTML = '<tr><td class="empty" colspan="11">예약 내역이 없습니다.</td></tr>';
             return;
         }
 
@@ -290,6 +294,28 @@
 
             const timeCell = document.createElement('td');
             timeCell.textContent = reservation.startAt ?? reservation.time?.startAt ?? '';
+
+            const paymentStatusCell = document.createElement('td');
+            if (reservation.paymentStatus) {
+                const paymentBadge = document.createElement('span');
+                paymentBadge.className = `status-badge ${paymentStatusClass(reservation.paymentStatus)}`;
+                paymentBadge.textContent = reservation.paymentStatus;
+                paymentStatusCell.append(paymentBadge);
+            } else {
+                paymentStatusCell.textContent = '-';
+            }
+
+            const orderIdCell = document.createElement('td');
+            orderIdCell.className = 'identifier-cell';
+            orderIdCell.textContent = reservation.orderId ?? '-';
+
+            const paymentKeyCell = document.createElement('td');
+            paymentKeyCell.className = 'identifier-cell';
+            paymentKeyCell.textContent = reservation.paymentKey ?? '-';
+
+            const amountCell = document.createElement('td');
+            amountCell.className = 'amount-cell';
+            amountCell.textContent = reservation.amount == null ? '-' : `${Number(reservation.amount).toLocaleString()}원`;
 
             const waitingNumberCell = document.createElement('td');
             if (isWaiting) {
@@ -318,9 +344,34 @@
             cancelButton.textContent = '취소';
             actions.append(cancelButton);
             actionCell.append(actions);
-            row.append(nameCell, statusCell, themeCell, dateCell, timeCell, waitingNumberCell, actionCell);
+            row.append(
+                nameCell,
+                statusCell,
+                themeCell,
+                dateCell,
+                timeCell,
+                paymentStatusCell,
+                orderIdCell,
+                paymentKeyCell,
+                amountCell,
+                waitingNumberCell,
+                actionCell
+            );
             reservationRows.append(row);
         });
+    }
+
+    function paymentStatusClass(paymentStatus) {
+        if (paymentStatus === '확정') {
+            return 'confirmed';
+        }
+        if (paymentStatus === '실패') {
+            return 'failed';
+        }
+        if (paymentStatus === '확인 필요') {
+            return 'unknown';
+        }
+        return 'pending';
     }
 
     async function loadThemes() {
@@ -360,7 +411,7 @@
 
     async function loadReservations(name = currentReservationName) {
         if (!name) {
-            reservationRows.innerHTML = '<tr><td class="empty" colspan="7">이름으로 내 예약을 조회하세요.</td></tr>';
+            reservationRows.innerHTML = '<tr><td class="empty" colspan="11">이름으로 내 예약을 조회하세요.</td></tr>';
             return;
         }
 

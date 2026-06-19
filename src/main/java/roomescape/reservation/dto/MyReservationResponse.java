@@ -18,7 +18,15 @@ public record MyReservationResponse(
         LocalTime startAt,
         String status,
         @JsonInclude(Include.NON_NULL)
-        Long waitingNumber
+        Long waitingNumber,
+        @JsonInclude(Include.NON_NULL)
+        String paymentStatus,
+        @JsonInclude(Include.NON_NULL)
+        String orderId,
+        @JsonInclude(Include.NON_NULL)
+        String paymentKey,
+        @JsonInclude(Include.NON_NULL)
+        Long amount
 ) {
     public static MyReservationResponse from(MyReservation myReservation) {
         return new MyReservationResponse(
@@ -29,7 +37,11 @@ public record MyReservationResponse(
                 myReservation.getDate(),
                 myReservation.getStartAt(),
                 myReservation.getStatus(),
-                myReservation.getWaitingNumber()
+                myReservation.getWaitingNumber(),
+                myReservation.getPaymentStatus(),
+                myReservation.getOrderId(),
+                myReservation.getPaymentKey(),
+                myReservation.getAmount()
         );
     }
 }
