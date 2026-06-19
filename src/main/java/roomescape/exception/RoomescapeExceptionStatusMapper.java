@@ -2,6 +2,7 @@ package roomescape.exception;
 
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import roomescape.infrastructure.payment.OutboundRateLimitException;
 import roomescape.infrastructure.payment.TossPaymentException;
 
 public class RoomescapeExceptionStatusMapper {
@@ -27,7 +28,8 @@ public class RoomescapeExceptionStatusMapper {
             Map.entry(ReservationNotWaitingException.class, HttpStatus.CONFLICT),
             Map.entry(DuplicateWaitingReservationException.class, HttpStatus.CONFLICT),
             Map.entry(PaymentAmountMismatchException.class, HttpStatus.CONFLICT),
-            Map.entry(PaymentOrderNotFoundException.class, HttpStatus.NOT_FOUND)
+            Map.entry(PaymentOrderNotFoundException.class, HttpStatus.NOT_FOUND),
+            Map.entry(OutboundRateLimitException.class, HttpStatus.TOO_MANY_REQUESTS)
     );
 
     public HttpStatus statusOf(RoomescapeBaseException exception) {

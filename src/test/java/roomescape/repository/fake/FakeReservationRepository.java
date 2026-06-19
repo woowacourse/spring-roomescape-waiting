@@ -68,20 +68,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(LocalDate date,
-                                                                                                   Long timeId,
-                                                                                                   Long themeId,
-                                                                                                   Long storeId) {
-        return store.values().stream()
-                .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
-                .filter(r -> r.getDate().equals(date))
-                .filter(r -> r.getTime().getId().equals(timeId))
-                .filter(r -> r.getTheme().getId().equals(themeId))
-                .filter(r -> r.getStore().getId().equals(storeId))
-                .min(Comparator.comparing(Reservation::getId));
-    }
-
-    @Override
     public Optional<Reservation> findById(Long id) {
         return Optional.ofNullable(store.get(id));
     }
@@ -137,6 +123,22 @@ public class FakeReservationRepository implements ReservationRepository {
         }
         store.put(reservation.getId(), reservation);
         return 1;
+    }
+
+    @Override
+    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long storeId
+    ) {
+        return store.values().stream()
+                .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
+                .filter(r -> r.getDate().equals(date))
+                .filter(r -> r.getTime().getId().equals(timeId))
+                .filter(r -> r.getTheme().getId().equals(themeId))
+                .filter(r -> r.getStore().getId().equals(storeId))
+                .min(Comparator.comparing(Reservation::getId));
     }
 
     public void failUpdateWaitingToReservedOnce() {

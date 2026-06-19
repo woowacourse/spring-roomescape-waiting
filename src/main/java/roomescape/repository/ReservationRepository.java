@@ -17,9 +17,6 @@ public interface ReservationRepository {
 
     Map<Reservation, Integer> findWaitingReservationsWithOrderByUserId(Long userId);
 
-    Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
-            LocalDate date, Long timeId, Long themeId, Long storeId);
-
     Optional<Reservation> findById(Long id);
 
     Long save(Reservation reservation);
@@ -31,6 +28,13 @@ public interface ReservationRepository {
     int updateStatus(Long id, ReservationStatus status);
 
     int updateWaitingToReserved(Reservation reservation);
+
+    Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long storeId
+    );
 
     List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
 

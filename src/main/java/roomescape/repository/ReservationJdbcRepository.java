@@ -167,37 +167,6 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(LocalDate date,
-                                                                                                   Long timeId,
-                                                                                                   Long themeId,
-                                                                                                   Long storeId) {
-        String sql = SELECT_BASE + """
-                where r.date = ?
-                  and r.time_id = ?
-                  and r.theme_id = ?
-                  and r.store_id = ?
-                  and r.status = ?
-                order by r.created_at asc, r.id asc
-                limit 1
-                for update
-                """;
-
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(
-                    sql,
-                    rowMapper,
-                    date,
-                    timeId,
-                    themeId,
-                    storeId,
-                    ReservationStatus.WAITING.name()
-            ));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
     public Optional<Reservation> findById(Long id) {
         String sql = SELECT_BASE + " where r.id = ?";
         try {
@@ -262,6 +231,35 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 ReservationStatus.RESERVED.name(),
                 reservation.getId(),
                 ReservationStatus.WAITING.name());
+    }
+
+    @Override
+    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long storeId
+    ) {
+        String sql = SELECT_BASE + """
+                 where r.date = ?
+                   and r.time_id = ?
+                   and r.theme_id = ?
+                   and r.store_id = ?
+                   and r.status = ?
+                 order by r.created_at, r.id
+                 limit 1
+                 for update
+                """;
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper,
+                    date,
+                    timeId,
+                    themeId,
+                    storeId,
+                    ReservationStatus.WAITING.name()));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

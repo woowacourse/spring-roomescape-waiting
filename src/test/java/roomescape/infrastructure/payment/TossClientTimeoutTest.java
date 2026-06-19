@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import roomescape.domain.payment.PaymentConfirmation;
+import roomescape.infrastructure.ratelimiter.TokenBucket;
 
 @SpringBootTest
 class TossClientTimeoutTest {
@@ -73,7 +74,13 @@ class TossClientTimeoutTest {
     @Timeout(value = 3, unit = TimeUnit.SECONDS, threadMode = ThreadMode.SEPARATE_THREAD)
     void connectTimeout_보다_연결이_느리면_연결_실패_예외로_실패한다() {
         TossPaymentGateway gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500),
+                new TossClientConfig().tossRestClient(
+                        BLACKHOLE_URL,
+                        "test_gsk_dummy",
+                        500,
+                        500,
+                        0,
+                        new TokenBucket(1_000, 1_000, System::nanoTime)),
                 new ObjectMapper());
 
         long start = System.nanoTime();
