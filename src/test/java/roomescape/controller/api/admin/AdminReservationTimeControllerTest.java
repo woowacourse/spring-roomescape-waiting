@@ -1,4 +1,4 @@
-package roomescape.controller.admin;
+package roomescape.controller.api.admin;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -21,7 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.controller.ReservationTimeController;
+import roomescape.controller.api.ReservationTimeController;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.service.ReservationTimeService;
@@ -46,7 +46,7 @@ public class AdminReservationTimeControllerTest {
         given(reservationTimeService.save(any())).willReturn(
                 new ReservationTimeResponse(1L, LocalTime.of(22, 0)));
 
-        mockMvc.perform(post("/admin/times")
+        mockMvc.perform(post("/api/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -59,7 +59,7 @@ public class AdminReservationTimeControllerTest {
     void 시간_삭제() throws Exception {
         willDoNothing().given(reservationTimeService).delete(10L);
 
-        mockMvc.perform(delete("/admin/times/10"))
+        mockMvc.perform(delete("/api/admin/times/10"))
                 .andExpect(status().isNoContent());
     }
 
@@ -68,7 +68,7 @@ public class AdminReservationTimeControllerTest {
         willThrow(new AlreadyExistsException("해당 시간에 예약이 존재하여 삭제할 수 없습니다."))
                 .given(reservationTimeService).delete(1L);
 
-        mockMvc.perform(delete("/admin/times/1"))
+        mockMvc.perform(delete("/api/admin/times/1"))
                 .andExpect(status().isConflict());
     }
 }

@@ -290,6 +290,11 @@ body {
     color: #854d0e;
 }
 
+.badge-uncertain {
+    background: #f1f5f9;
+    color: #475569;
+}
+
 .badge-pending {
     background: #e0e7ff;
     color: #3730a3;

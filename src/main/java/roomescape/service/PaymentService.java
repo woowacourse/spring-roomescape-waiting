@@ -4,7 +4,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentResult;
+import roomescape.domain.PaymentStatus;
 import roomescape.exception.PaymentAmountMismatchException;
+import roomescape.exception.TossPaymentException;
 import roomescape.repository.ReservationRepository;
 
 @Service
@@ -28,12 +30,22 @@ public class PaymentService {
         }
 
         var confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
-        var result = paymentGateway.confirm(confirmation);
-
-        reservation.completePayment(result.paymentKey());
-        reservationRepository.updatePayment(reservation.getId(), result.paymentKey(), reservation.getStatus(),
-                reservation.getOrderId(), reservation.getAmount());
-
-        return result;
+        try {
+            var result = paymentGateway.confirm(confirmation);
+            reservation.completePayment(result.paymentKey());
+            reservationRepository.updatePayment(reservation.getId(), result.paymentKey(), reservation.getStatus(),
+                    reservation.getOrderId(), reservation.getAmount());
+            return result;
+        } catch (TossPaymentException.AlreadyProcessed e) {
+            reservation.completePayment(paymentKey);
+            reservationRepository.updatePayment(reservation.getId(), paymentKey, reservation.getStatus(),
+                    reservation.getOrderId(), reservation.getAmount());
+            return new PaymentResult(paymentKey, orderId, PaymentStatus.DONE, amount);
+        } catch (TossPaymentException.Retryable e) {
+            reservation.markUncertain();
+            reservationRepository.updatePayment(reservation.getId(), paymentKey, reservation.getStatus(),
+                    reservation.getOrderId(), reservation.getAmount());
+            throw e;
+        }
     }
 }

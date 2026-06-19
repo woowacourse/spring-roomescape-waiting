@@ -1,4 +1,4 @@
-package roomescape.controller.admin;
+package roomescape.controller.api.admin;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
 
 @RestController
-@RequestMapping("/admin/times")
+@RequestMapping("/api/admin/times")
 public class AdminReservationTimeController {
     private final ReservationTimeService reservationTimeService;
 

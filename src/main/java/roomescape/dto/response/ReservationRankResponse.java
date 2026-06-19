@@ -6,7 +6,7 @@ import roomescape.domain.ReservationStatus;
 
 public record ReservationRankResponse(Long id, String name, LocalDate date, ReservationTimeResponse timeResponse,
                                       ThemeResponse themeResponse, ReservationStatus status, Long order,
-                                      String orderId, Long amount) {
+                                      String orderId, String paymentKey, Long amount) {
     public static ReservationRankResponse from(ReservationRank reservation) {
         return new ReservationRankResponse(
                 reservation.getId(),
@@ -17,6 +17,7 @@ public record ReservationRankResponse(Long id, String name, LocalDate date, Rese
                 reservation.getStatus(),
                 reservation.getRank(),
                 reservation.getOrderId(),
+                reservation.getPaymentKey(),
                 reservation.getAmount()
         );
     }
