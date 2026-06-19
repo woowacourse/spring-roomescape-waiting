@@ -16,6 +16,8 @@ public class FakeReservationRepository implements ReservationRepository {
 
     private final Map<Long, Reservation> store = new HashMap<>();
     private long nextId = 1L;
+    private boolean failDeleteOnce;
+    private boolean failUpdateWaitingToReservedOnce;
 
     @Override
     public List<Reservation> findAllByStoreIds(List<Long> storeIds, int limit, int offset) {
@@ -79,6 +81,10 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public int deleteById(Long id) {
+        if (failDeleteOnce) {
+            failDeleteOnce = false;
+            return 0;
+        }
         return store.remove(id) == null ? 0 : 1;
     }
 
@@ -117,6 +123,22 @@ public class FakeReservationRepository implements ReservationRepository {
         }
         store.put(reservation.getId(), reservation);
         return 1;
+    }
+
+    @Override
+    public Optional<Reservation> findFirstWaitingReservationByDateAndTimeAndThemeAndStoreForUpdate(
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long storeId
+    ) {
+        return store.values().stream()
+                .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
+                .filter(r -> r.getDate().equals(date))
+                .filter(r -> r.getTime().getId().equals(timeId))
+                .filter(r -> r.getTheme().getId().equals(themeId))
+                .filter(r -> r.getStore().getId().equals(storeId))
+                .min(Comparator.comparing(Reservation::getId));
     }
 
     public void failUpdateWaitingToReservedOnce() {
