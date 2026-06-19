@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.infrastructure.toss.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -67,5 +68,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handle(DataIntegrityViolationException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("DATA_INTEGRITY_VIOLATION", "요청을 처리할 수 없습니다."));
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    public ResponseEntity<ErrorResponse> handle(PaymentAmountMismatchException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("PAYMENT_AMOUNT_MISMATCH", e.getMessage()));
+    }
+
+    @ExceptionHandler(TossPaymentException.GatewayConfig.class)
+    public ResponseEntity<ErrorResponse> handle(TossPaymentException.GatewayConfig e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(e.getCode(), "결제 시스템 오류입니다. 관리자에게 문의하세요."));
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handle(TossPaymentException e) {
+        return ResponseEntity.status(e.getStatus())
+                .body(new ErrorResponse(e.getCode(), e.getMessage()));
     }
 }

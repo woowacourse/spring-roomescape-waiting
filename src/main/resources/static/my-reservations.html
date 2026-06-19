@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 예약 조회</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; }
+
+        nav {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            gap: 32px;
+        }
+        nav .brand { font-weight: 700; font-size: 18px; color: #1a1a1a; }
+        nav a { text-decoration: none; color: #555; font-size: 14px; padding: 6px 0; border-bottom: 2px solid transparent; }
+        nav a.active, nav a:hover { color: #4f46e5; border-bottom-color: #4f46e5; }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+
+        .search-bar { display: flex; gap: 12px; margin-bottom: 32px; align-items: flex-end; }
+        .search-bar input {
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            width: 280px;
+            outline: none;
+        }
+        .search-bar input:focus { border-color: #4f46e5; }
+        .search-btn {
+            padding: 10px 24px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .search-btn:hover { background: #4338ca; }
+
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        thead { background: #f9fafb; }
+        th { padding: 14px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+        td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid #f3f4f6; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.reserved { background: #d1fae5; color: #065f46; }
+        .badge.waiting { background: #fef3c7; color: #92400e; }
+
+        .cancel-btn {
+            padding: 5px 14px;
+            background: #fff;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .cancel-btn:hover { background: #fef2f2; }
+
+        .empty { text-align: center; padding: 48px; color: #9ca3af; font-size: 14px; }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 999;
+        }
+        .toast.show { display: block; }
+        .toast.error { background: #dc2626; }
+    </style>
+</head>
+<body>
+<nav>
+    <span class="brand">방탈출 예약</span>
+    <a href="/reservation.html">예약하기</a>
+    <a href="/my-reservations.html" class="active">내 예약 조회</a>
+    <a href="/popular-themes.html">인기 테마</a>
+</nav>
+
+<div class="container">
+    <div class="search-bar">
+        <input type="text" id="nameInput" placeholder="이름을 입력하세요" onkeydown="if(event.key==='Enter') loadReservations()" />
+        <button class="search-btn" onclick="loadReservations()">조회하기</button>
+    </div>
+
+    <div id="result"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let currentName = '';
+
+    async function loadReservations() {
+        const name = document.getElementById('nameInput').value.trim();
+        if (!name) { showToast('이름을 입력해주세요', true); return; }
+        currentName = name;
+
+        try {
+            const res = await fetch(`/reservations/mine?name=${encodeURIComponent(name)}`);
+            const data = await res.json();
+            renderTable(data);
+        } catch (e) {
+            showToast('조회 중 오류가 발생했습니다', true);
+        }
+    }
+
+    function renderTable(items) {
+        const result = document.getElementById('result');
+        if (items.length === 0) {
+            result.innerHTML = '<div class="empty">예약 내역이 없습니다</div>';
+            return;
+        }
+
+        const rows = items.map(item => {
+            const statusBadge = item.status === 'RESERVED'
+                ? '<span class="badge reserved">예약확정</span>'
+                : `<span class="badge waiting">${item.sequence}번째 대기</span>`;
+
+            const cancelBtn = item.status === 'WAITING'
+                ? `<button class="cancel-btn" onclick="cancelWaiting(${item.waitingId})">대기 취소</button>`
+                : `<button class="cancel-btn" onclick="cancelReservation(${item.reservationId})">예약 취소</button>`;
+
+            return `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${item.time.startAt}</td>
+                    <td>${item.theme.name}</td>
+                    <td>${statusBadge}</td>
+                    <td>${cancelBtn}</td>
+                </tr>
+            `;
+        }).join('');
+
+        result.innerHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>시간</th>
+                        <th>테마</th>
+                        <th>상태</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    }
+
+    async function cancelReservation(reservationId) {
+        if (!confirm('예약을 취소하시겠습니까?')) return;
+
+        try {
+            const res = await fetch(`/reservations/${reservationId}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('예약이 취소되었습니다');
+                loadReservations();
+            } else {
+                const err = await res.json();
+                showToast(err.message || '취소에 실패했습니다', true);
+            }
+        } catch (e) {
+            showToast('오류가 발생했습니다', true);
+        }
+    }
+
+    async function cancelWaiting(waitingId) {
+        if (!confirm('대기를 취소하시겠습니까?')) return;
+
+        try {
+            const res = await fetch(`/reservations/waitings/${waitingId}?name=${encodeURIComponent(currentName)}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                showToast('대기가 취소되었습니다');
+                loadReservations();
+            } else {
+                const err = await res.json();
+                showToast(err.message || '취소에 실패했습니다', true);
+            }
+        } catch (e) {
+            showToast('오류가 발생했습니다', true);
+        }
+    }
+
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'toast show' + (isError ? ' error' : '');
+        setTimeout(() => toast.className = 'toast', 3000);
+    }
+</script>
+</body>
+</html>
