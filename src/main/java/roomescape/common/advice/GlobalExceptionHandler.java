@@ -16,6 +16,7 @@ import roomescape.common.exception.IllegalDateTimeException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.PaymentException;
 import roomescape.common.exception.UnauthorizedException;
+import roomescape.common.exception.UpdateException;
 import roomescape.payment.application.exception.OrderUpdateException;
 
 @Slf4j
@@ -77,8 +78,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 
-    @ExceptionHandler(OrderUpdateException.class)
-    public ResponseEntity<String> handleOrderException(OrderUpdateException e) {
+    @ExceptionHandler(UpdateException.class)
+    public ResponseEntity<String> handleOrderException(UpdateException e) {
         log.error("주문 상태 갱신 실패 (자동 환불 처리됨): {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
