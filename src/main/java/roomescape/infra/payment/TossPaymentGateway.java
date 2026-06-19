@@ -1,6 +1,8 @@
 package roomescape.infra.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -11,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import roomescape.exception.server.PaymentUnavailableException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
@@ -44,16 +48,34 @@ public class TossPaymentGateway implements PaymentGateway {
 
     @Override
     public PaymentResult confirm(PaymentConfirmation confirmation) {
-        TossPaymentResponse response = restClient.post()
-                .uri("/v1/payments/confirm")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(TossConfirmRequest.from(confirmation))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
-                    TossErrorResponse error = objectMapper.readValue(errorResponse.getBody(), TossErrorResponse.class);
-                    throw TossPaymentException.of(errorResponse.getStatusCode(), error);
-                })
-                .body(TossPaymentResponse.class);
-        return response.toResult();
+        try {
+            TossPaymentResponse response = restClient.post()
+                    .uri("/v1/payments/confirm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(TossConfirmRequest.from(confirmation))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
+                        TossErrorResponse error = objectMapper.readValue(errorResponse.getBody(), TossErrorResponse.class);
+                        throw TossPaymentException.of(errorResponse.getStatusCode(), error);
+                    })
+                    .body(TossPaymentResponse.class);
+            return response.toResult();
+        } catch (RestClientException e) {
+            if (hasTimeoutOrConnectionCause(e)) {
+                throw new PaymentUnavailableException();
+            }
+            throw e;
+        }
+    }
+
+    private boolean hasTimeoutOrConnectionCause(Throwable e) {
+        Throwable current = e;
+        while (current != null) {
+            if (current instanceof SocketTimeoutException || current instanceof ConnectException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }
