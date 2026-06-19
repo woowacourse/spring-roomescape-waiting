@@ -9,6 +9,7 @@ import roomescape.reservation.application.dto.ReservationIntegrationInfo;
 @Builder
 public record OrderInfo(
         String orderId,
+        String paymentKey,
         Long amount,
         LocalDateTime createdAt,
         ReservationIntegrationInfo reservation,
@@ -17,6 +18,7 @@ public record OrderInfo(
     public static OrderInfo from(Order order, ReservationIntegrationInfo reservation) {
         return OrderInfo.builder()
                 .orderId(order.getOrderId())
+                .paymentKey(order.getPaymentKey())
                 .amount(order.getAmount())
                 .reservation(reservation)
                 .createdAt(order.getCreatedAt())

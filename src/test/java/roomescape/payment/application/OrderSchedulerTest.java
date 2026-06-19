@@ -26,8 +26,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.payment.application.dto.OrderInfo;
+import roomescape.payment.application.dto.PaymentResult;
 import roomescape.payment.domain.Order;
 import roomescape.payment.domain.OrderStatus;
+import roomescape.payment.infra.client.PaymentStatus;
+import roomescape.payment.infra.client.exception.TossBusinessException.PaymentNotFound;
 import roomescape.reservation.application.PendingReservationService;
 import roomescape.reservation.application.ReservationManager;
 import roomescape.reservation.application.ReservationReader;
@@ -55,6 +58,9 @@ class OrderSchedulerTest {
 
     @Mock
     private ReservationReader reservationReader;
+
+    @Mock
+    private PaymentGateway paymentGateway;
 
     @InjectMocks
     private OrderScheduler scheduler;
@@ -120,7 +126,7 @@ class OrderSchedulerTest {
     @Test
     @DisplayName("중간에 특정 예약 환불 중 에러가 발생해도, 다음 대기 예약의 환불은 정상적으로 진행되어야 한다.")
     void continueProcessing_OnException() {
-        // given: 2명의 대기 예약자 세팅
+        // given
         PendingReservation errorPending = PendingReservation.builder().id(1L).name("에러나는사람").build();
         PendingReservation successPending = PendingReservation.builder().id(2L).name("정상인사람").build();
         given(pendingReservationService.findExpiredReservations(today)).willReturn(List.of(errorPending, successPending));
@@ -145,6 +151,7 @@ class OrderSchedulerTest {
         given(orderService.getOrder(2L)).willReturn(successOrder);
 
         doThrow(new RuntimeException("토스 서버 통신 장애")).when(paymentService).cancelBySystem(eq("order-1"), anyString());
+
         // when
         scheduler.processExpiredPendingRefunds();
 
@@ -168,11 +175,13 @@ class OrderSchedulerTest {
 
         ReservationIntegrationInfo resInfo = new ReservationIntegrationInfo(1L, "포비", "테마1", "ACTIVE");
         given(reservationReader.readAll(anyList())).willReturn(Map.of(1L, resInfo));
+        given(paymentGateway.getStatus("order-1")).willThrow(new PaymentNotFound("결제 내역 없음"));
 
         // when
         scheduler.cleanupUnpaidReservations();
+
         // then
-        verify(paymentService, times(1)).fail("order-1");
+        verify(orderService, times(1)).fail("order-1");
         verify(reservationManager, times(1)).cancelReservation(eq(1L), any(ReservationCancelCommand.class));
     }
 
@@ -200,14 +209,48 @@ class OrderSchedulerTest {
                 2L, successResInfo
         ));
 
-        doThrow(new RuntimeException("결제 DB 업데이트 장애")).when(paymentService).fail("order-1");
+        given(paymentGateway.getStatus("order-1")).willThrow(new PaymentNotFound("결제 내역 없음"));
+        given(paymentGateway.getStatus("order-2")).willThrow(new PaymentNotFound("결제 내역 없음"));
+
+        doThrow(new RuntimeException("결제 DB 업데이트 장애")).when(orderService).fail("order-1");
 
         // when
         scheduler.cleanupUnpaidReservations();
 
         // then
         verify(reservationManager, never()).cancelReservation(eq(1L), any());
-        verify(paymentService, times(1)).fail("order-2");
+        verify(orderService, times(1)).fail("order-2");
         verify(reservationManager, times(1)).cancelReservation(eq(2L), any(ReservationCancelCommand.class));
+    }
+
+    @Test
+    @DisplayName("유령 예약 청소 시 토스에 결제 완료(DONE) 상태로 남아있다면, 예약 취소 전 자동 환불을 먼저 진행한다.")
+    void cleanupUnpaidReservations_RefundIfPaid() {
+        // given
+        LocalDateTime fiveMinutesAgo = LocalDateTime.now(clock).minusMinutes(5);
+
+        Order paidOrder = mock(Order.class);
+        given(paidOrder.getOrderId()).willReturn("order-1");
+        given(paidOrder.getReservationId()).willReturn(1L);
+
+        given(orderService.findAbandonedOrders(fiveMinutesAgo)).willReturn(List.of(paidOrder));
+
+        ReservationIntegrationInfo resInfo = new ReservationIntegrationInfo(1L, "포비", "테마1", "ACTIVE");
+        given(reservationReader.readAll(anyList())).willReturn(Map.of(1L, resInfo));
+
+        PaymentResult tossResult = PaymentResult.builder()
+                .paymentKey("test-payment-key")
+                .status(PaymentStatus.DONE)
+                .approvedAmount(50000L)
+                .build();
+        given(paymentGateway.getStatus("order-1")).willReturn(tossResult);
+
+        // when
+        scheduler.cleanupUnpaidReservations();
+
+        // then
+        verify(paymentService, times(1)).cancelBySystem(eq("order-1"), anyString());
+        verify(orderService, times(1)).fail("order-1");
+        verify(reservationManager, times(1)).cancelReservation(eq(1L), any(ReservationCancelCommand.class));
     }
 }

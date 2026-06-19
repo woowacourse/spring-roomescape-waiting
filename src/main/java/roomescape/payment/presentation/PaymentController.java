@@ -41,10 +41,10 @@ public class PaymentController {
             model.addAttribute("username", order.reservation().name());
             return "success";
         } catch (PaymentAmountMismatchException e) {
-            paymentService.fail(request.orderId());
+            orderService.fail(request.orderId());
             return failView(model, "AMOUNT_MISMATCH", e.getMessage(), request.orderId());
         } catch (TossPaymentException e) {
-            paymentService.fail(request.orderId());
+            orderService.fail(request.orderId());
             return failView(model, e.getCode(), e.getMessage(), request.orderId());
         }
     }
@@ -56,7 +56,7 @@ public class PaymentController {
             @RequestParam(required = false) String orderId,
             Model model
     ) {
-        paymentService.fail(orderId);
+        orderService.fail(orderId);
         return failView(model, code, message, orderId);
     }
 
