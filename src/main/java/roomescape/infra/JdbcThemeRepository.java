@@ -27,13 +27,13 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public List<Theme> findAll() {
-        String sql = "SELECT id, name, description, thumbnail_url FROM theme";
+        String sql = "SELECT id, name, description, thumbnail_url, price FROM theme";
         return jdbcTemplate.query(sql, rowMapper());
     }
 
     @Override
     public Optional<Theme> findById(long id) {
-        String sql = "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ?";
+        String sql = "SELECT id, name, description, thumbnail_url, price FROM theme WHERE id = ?";
         return jdbcTemplate.query(sql, rowMapper(), id).stream().findFirst();
     }
 
@@ -42,10 +42,11 @@ public class JdbcThemeRepository implements ThemeRepository {
         Map<String, Object> params = Map.of(
                 "name", theme.getName(),
                 "description", theme.getDescription(),
-                "thumbnail_url", theme.getThumbnailUrl());
+                "thumbnail_url", theme.getThumbnailUrl(),
+                "price", theme.getPrice());
 
         long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        return new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
+        return new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl(), theme.getPrice());
     }
 
     @Override
@@ -62,6 +63,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     t.name,
                     t.description,
                     t.thumbnail_url,
+                    t.price,
                     count(*) as reservation_count
                 FROM (
                     SELECT ts.theme_id
@@ -69,7 +71,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                         INNER JOIN theme_slot ts ON r.theme_slot_id = ts.id
                     WHERE ts.date BETWEEN ? AND ?
                 ) as r
-                
+
                 INNER JOIN theme t
                 ON r.theme_id = t.id
                 GROUP BY t.id
@@ -85,7 +87,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getString("description"),
-                rs.getString("thumbnail_url")
+                rs.getString("thumbnail_url"),
+                rs.getLong("price")
         );
     }
 }

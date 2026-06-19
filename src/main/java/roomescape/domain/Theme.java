@@ -8,23 +8,26 @@ public class Theme {
     private final String name;
     private final String description;
     private final String thumbnailUrl;
+    private final Long price;
 
-    public Theme(Long id, String name, String description, String thumbnailUrl) {
+    public Theme(Long id, String name, String description, String thumbnailUrl, Long price) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
+        this.price = price;
     }
 
-    public Theme(String name, String description, String thumbnailUrl) {
+    public Theme(String name, String description, String thumbnailUrl, Long price) {
         this.id = null;
         this.name = name;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
+        this.price = price;
     }
 
     public static Theme of(Long id, Theme theme) {
-        return new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
+        return new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl(), theme.getPrice());
     }
 
     public Long getId() {
@@ -41,6 +44,10 @@ public class Theme {
 
     public String getThumbnailUrl() {
         return thumbnailUrl;
+    }
+
+    public Long getPrice() {
+        return price;
     }
 
     @Override

@@ -34,6 +34,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByOrderId(String orderId) {
+        return storage.values().stream()
+                .filter(r -> Objects.equals(r.getOrderId(), orderId))
+                .findFirst();
+    }
+
+    @Override
     public Reservation save(Reservation reservation) {
         long id = sequence.getAndIncrement();
         Reservation savedReservation = new Reservation(
@@ -43,7 +50,9 @@ public class FakeReservationRepository implements ReservationRepository {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
-                reservation.getReservationStatus()
+                reservation.getReservationStatus(),
+                reservation.getOrderId(),
+                reservation.getAmount()
         );
         storage.put(id, savedReservation);
         return savedReservation;
@@ -105,7 +114,9 @@ public class FakeReservationRepository implements ReservationRepository {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
-                getReservation.getReservationStatus()
+                getReservation.getReservationStatus(),
+                getReservation.getOrderId(),
+                getReservation.getAmount()
         );
         storage.remove(id);
         storage.put(id, newReservation);

@@ -55,7 +55,7 @@ public class ConcurrencyWithMySqlTest {
     @RepeatedTest(5)
     @DisplayName("같은 빈 슬롯에 동시에 예약하면 정확히 하나만 CONFIRMED가 된다 (MySQL)")
     void 동시에_같은_슬롯에_예약하면_하나만_CONFIRMED가_된다() throws Exception {
-        // given — 미래의 빈 슬롯 ID 조회
+        // given - 미래의 빈 슬롯 ID 조회
         long themeSlotId = RestAssured.given()
                 .when().get("/times?themeId=1&date=" + LocalDate.now().plusMonths(6))
                 .then().statusCode(200)
@@ -93,7 +93,7 @@ public class ConcurrencyWithMySqlTest {
         doneLatch.await(15, TimeUnit.SECONDS);
         executor.shutdown();
 
-        // then — CONFIRMED는 정확히 하나여야 한다
+        // then - CONFIRMED는 정확히 하나여야 한다
         long confirmedCount = statuses.stream()
                 .filter("CONFIRMED"::equals)
                 .count();

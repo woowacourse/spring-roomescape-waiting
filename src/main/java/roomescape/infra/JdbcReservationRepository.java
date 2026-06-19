@@ -12,6 +12,7 @@ import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,34 +40,40 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rs.getLong("theme_id"),
                     rs.getString("theme_name"),
                     rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail_url")
+                    rs.getString("theme_thumbnail_url"),
+                    rs.getLong("theme_price")
             ),
-            toStatus(rs.getString("status"))
+            toStatus(rs.getString("status")),
+            rs.getString("order_id"),
+            rs.getObject("amount", Long.class)
     );
 
     @Override
     public List<Reservation> findAll() {
         String sql = """
-                SELECT 
-                    r.id AS r_id, 
-                    r.name, 
+                SELECT
+                    r.id AS r_id,
+                    r.name,
                     r.status,
+                    r.order_id,
+                    r.amount,
                     ts.id AS theme_slot_id,
                     ts.date,
                     ts.is_reserved,
-                    t.id AS t_id, 
+                    t.id AS t_id,
                     t.start_at,
                     theme.id AS theme_id,
                     theme.name AS theme_name,
                     theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
-                FROM 
-                    reservation r 
+                    theme.thumbnail_url AS theme_thumbnail_url,
+                    theme.price AS theme_price
+                FROM
+                    reservation r
                         INNER JOIN
                         theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN  
+                        INNER JOIN
                         time t ON ts.time_id = t.id
-                        INNER JOIN 
+                        INNER JOIN
                         theme theme ON ts.theme_id = theme.id
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper);
@@ -75,26 +82,29 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(long reservationId) {
         String sql = """
-                SELECT 
+                SELECT
                     r.id AS r_id,
                     r.name,
                     r.status,
+                    r.order_id,
+                    r.amount,
                     ts.id AS theme_slot_id,
                     ts.date,
                     ts.is_reserved,
                     t.id AS t_id,
-                    t.start_at, 
+                    t.start_at,
                     theme.id as theme_id,
                     theme.name AS theme_name,
                     theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
-                FROM 
-                    reservation r 
+                    theme.thumbnail_url AS theme_thumbnail_url,
+                    theme.price AS theme_price
+                FROM
+                    reservation r
                         INNER JOIN
                         theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN 
+                        INNER JOIN
                         time t ON ts.time_id = t.id
-                        INNER JOIN 
+                        INNER JOIN
                         theme theme ON ts.theme_id = theme.id
                 WHERE r.id = ?
                 """;
@@ -103,26 +113,62 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
+    public Optional<Reservation> findByOrderId(String orderId) {
         String sql = """
-                SELECT 
+                SELECT
                     r.id AS r_id,
                     r.name,
                     r.status,
+                    r.order_id,
+                    r.amount,
                     ts.id AS theme_slot_id,
                     ts.date,
                     ts.is_reserved,
                     t.id AS t_id,
-                    t.start_at, 
+                    t.start_at,
                     theme.id as theme_id,
                     theme.name AS theme_name,
                     theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
-                FROM 
-                    reservation r 
-                        INNER JOIN 
+                    theme.thumbnail_url AS theme_thumbnail_url,
+                    theme.price AS theme_price
+                FROM
+                    reservation r
+                        INNER JOIN
                         theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN 
+                        INNER JOIN
+                        time t ON ts.time_id = t.id
+                        INNER JOIN
+                        theme theme ON ts.theme_id = theme.id
+                WHERE r.order_id = ?
+                """;
+
+        return jdbcTemplate.query(sql, reservationRowMapper, orderId).stream().findFirst();
+    }
+
+    @Override
+    public List<Reservation> findByName(String name) {
+        String sql = """
+                SELECT
+                    r.id AS r_id,
+                    r.name,
+                    r.status,
+                    r.order_id,
+                    r.amount,
+                    ts.id AS theme_slot_id,
+                    ts.date,
+                    ts.is_reserved,
+                    t.id AS t_id,
+                    t.start_at,
+                    theme.id as theme_id,
+                    theme.name AS theme_name,
+                    theme.description AS theme_description,
+                    theme.thumbnail_url AS theme_thumbnail_url,
+                    theme.price AS theme_price
+                FROM
+                    reservation r
+                        INNER JOIN
+                        theme_slot ts ON r.theme_slot_id = ts.id
+                        INNER JOIN
                         time t ON ts.time_id = t.id
                         INNER JOIN
                         theme theme ON ts.theme_id = theme.id
@@ -140,11 +186,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     private Map<String, Object> createParams(Reservation reservation) {
-        return Map.of(
-                "name", reservation.getName(),
-                "theme_slot_id", reservation.getThemeSlotId(),
-                "status", reservation.getReservationStatusName()
-        );
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", reservation.getName());
+        params.put("theme_slot_id", reservation.getThemeSlotId());
+        params.put("status", reservation.getReservationStatusName());
+        params.put("order_id", reservation.getOrderId());
+        params.put("amount", reservation.getAmount());
+        return params;
     }
 
     @Override
@@ -158,10 +206,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                         SELECT EXISTS (
                             SELECT 1
-                            FROM reservation 
+                            FROM reservation
                             WHERE theme_slot_id = ?
                             AND status != 'CANCELLED'
-                        ) 
+                        )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, themeSlotId));
     }
@@ -169,8 +217,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void updateStatus(Reservation reservation) {
         String sql = """
-                UPDATE reservation 
-                SET status = ? 
+                UPDATE reservation
+                SET status = ?
                 WHERE id = ?
                 """;
         jdbcTemplate.update(sql,
@@ -182,7 +230,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void updateThemeSlot(Reservation reservation) {
         String sql = """
-                UPDATE reservation 
+                UPDATE reservation
                 SET theme_slot_id = ?
                 WHERE id = ?
                 """;
@@ -232,26 +280,29 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByThemeSlotAndPending(Long themeSlotId) {
         String sql = """
-                SELECT 
+                SELECT
                     r.id AS r_id,
                     r.name,
                     r.status,
+                    r.order_id,
+                    r.amount,
                     ts.id AS theme_slot_id,
                     ts.date,
                     ts.is_reserved,
                     t.id AS t_id,
-                    t.start_at, 
+                    t.start_at,
                     theme.id as theme_id,
                     theme.name AS theme_name,
                     theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
-                FROM 
-                    reservation r 
+                    theme.thumbnail_url AS theme_thumbnail_url,
+                    theme.price AS theme_price
+                FROM
+                    reservation r
                         INNER JOIN
                         theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN 
+                        INNER JOIN
                         time t ON ts.time_id = t.id
-                        INNER JOIN 
+                        INNER JOIN
                         theme theme ON ts.theme_id = theme.id
                 WHERE ts.id = ?
                 AND r.status = 'PENDING'
@@ -263,26 +314,29 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId) {
         String sql = """
-                SELECT 
+                SELECT
                     r.id AS r_id,
                     r.name,
                     r.status,
+                    r.order_id,
+                    r.amount,
                     ts.id AS theme_slot_id,
                     ts.date,
                     ts.is_reserved,
                     t.id AS t_id,
-                    t.start_at, 
+                    t.start_at,
                     theme.id as theme_id,
                     theme.name AS theme_name,
                     theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
-                FROM 
-                    reservation r 
+                    theme.thumbnail_url AS theme_thumbnail_url,
+                    theme.price AS theme_price
+                FROM
+                    reservation r
                         INNER JOIN
                         theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN 
+                        INNER JOIN
                         time t ON ts.time_id = t.id
-                        INNER JOIN 
+                        INNER JOIN
                         theme theme ON ts.theme_id = theme.id
                 WHERE ts.id = ?
                 AND r.status = 'PENDING'

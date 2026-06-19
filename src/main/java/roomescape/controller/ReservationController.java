@@ -71,13 +71,6 @@ public class ReservationController {
     }
 
     private ReservationResponse toResponse(Reservation reservation) {
-        return new ReservationResponse(
-                reservation.getId(),
-                reservation.getName(),
-                reservation.getDate(),
-                TimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme()),
-                reservation.getReservationStatusName()
-        );
+        return ReservationResponse.from(reservation);
     }
 }
