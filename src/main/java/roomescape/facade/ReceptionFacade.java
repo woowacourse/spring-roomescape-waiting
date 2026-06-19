@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.response.ReceptionResponse;
 import roomescape.domain.Reservation;
@@ -15,6 +16,9 @@ import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
+import roomescape.payment.PaymentConfirmationResult;
+import roomescape.payment.PaymentService;
+import roomescape.service.PaymentReservationService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -29,14 +33,20 @@ public class ReceptionFacade {
     private final WaitService waitService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final PaymentService paymentService;
+    private final PaymentReservationService paymentReservationService;
     private final Clock clock;
 
     public ReceptionFacade(ReservationService reservationService, WaitService waitService,
-                           ReservationTimeService reservationTimeService, ThemeService themeService, Clock clock) {
+                            ReservationTimeService reservationTimeService, ThemeService themeService,
+                            PaymentService paymentService, PaymentReservationService paymentReservationService,
+                            Clock clock) {
         this.reservationService = reservationService;
         this.waitService = waitService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.paymentService = paymentService;
+        this.paymentReservationService = paymentReservationService;
         this.clock = clock;
     }
 
@@ -78,6 +88,30 @@ public class ReceptionFacade {
         return receptions;
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public ReceptionResponse confirmPayment(String paymentKey, String orderId, Long amount) {
+        Reservation reservation = paymentReservationService.preparePaymentConfirmation(orderId, amount);
+
+        PaymentConfirmationResult confirmationResult = paymentService.confirm(paymentKey, orderId,
+                reservation.getIdempotencyKey(), amount);
+        if (confirmationResult.unknown()) {
+            paymentReservationService.markPaymentUnknown(orderId);
+            throw new RoomEscapeException(DomainErrorCode.PAYMENT_UNKNOWN);
+        }
+
+        Reservation confirmed = paymentReservationService.confirmPayment(orderId, confirmationResult.paymentResult(),
+                amount);
+        return ReceptionResponse.from(confirmed, 0L, ReservationStatus.CONFIRMED.name());
+    }
+
+    @Transactional
+    public void failPayment(String orderId) {
+        if (orderId == null || orderId.isBlank()) {
+            return;
+        }
+        reservationService.deletePendingByOrderId(orderId);
+    }
+
     @Transactional
     public void deleteReservation(Long id) {
         reservationService.lockById(id);
@@ -99,10 +133,14 @@ public class ReceptionFacade {
 
     private ReceptionResponse saveReservationOrWait(ServiceReservationCreateRequest request,
                                                     ReservationTime reservationTime, Theme theme) {
+        reservationService.deleteExpiredPendingPayments(LocalDateTime.now(clock));
         Optional<Long> lockedId = reservationService.lockBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
         Optional<Reservation> existing = lockedId.map(reservationService::findReservation);
         return existing.map(r -> {
+            if (r.isPending()) {
+                throw new RoomEscapeException(DomainErrorCode.SLOT_JUST_TAKEN);
+            }
             if (r.isReservedBy(request.name())) {
                 throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION);
             }
@@ -110,8 +148,8 @@ public class ReceptionFacade {
             return ReceptionResponse.from(newWait, waitService.calculateOrder(newWait),
                     ReservationStatus.WAITING.name());
         }).orElseGet(() -> {
-            Reservation saved = reservationService.save(request, reservationTime, theme);
-            return ReceptionResponse.from(saved, 0L, ReservationStatus.CONFIRMED.name());
+            Reservation saved = reservationService.savePending(request, reservationTime, theme);
+            return ReceptionResponse.from(saved, 0L, ReservationStatus.PENDING.name());
         });
     }
 

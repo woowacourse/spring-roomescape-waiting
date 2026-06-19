@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>결제 승인</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="section">
+      <p class="eyebrow">Payment</p>
+      <h1>결제 승인 처리 중</h1>
+      <div id="payment-result" class="result">결제를 승인하고 있습니다.</div>
+      <a class="secondary-button" href="/">예약 페이지로 돌아가기</a>
+    </section>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const result = document.querySelector("#payment-result");
+
+    async function confirmPayment() {
+      const response = await fetch("/payments/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentKey: params.get("paymentKey"),
+          orderId: params.get("orderId"),
+          amount: Number(params.get("amount")),
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        result.textContent = body.detail || "결제 승인에 실패했습니다.";
+        return;
+      }
+      const themeName = document.createElement("strong");
+      themeName.textContent = body.theme.name;
+
+      const reservationInfo = document.createElement("p");
+      reservationInfo.textContent = `${body.date} ${body.time.startAt.slice(0, 5)} 예약이 확정되었습니다.`;
+
+      result.replaceChildren(themeName, reservationInfo);
+    }
+
+    confirmPayment().catch(() => { result.textContent = "결제 승인에 실패했습니다."; });
+  </script>
+</body>
+</html>

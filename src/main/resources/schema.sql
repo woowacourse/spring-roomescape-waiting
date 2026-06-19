@@ -22,15 +22,24 @@ CREATE TABLE theme
 
 CREATE TABLE reservation
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(255) NOT NULL,
-    date     DATE         NOT NULL,
-    time_id  BIGINT       NOT NULL,
-    theme_id BIGINT       NOT NULL,
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(255) NOT NULL,
+    date        DATE         NOT NULL,
+    time_id     BIGINT       NOT NULL,
+    theme_id    BIGINT       NOT NULL,
+    status      VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
+    order_id    VARCHAR(64),
+    idempotency_key VARCHAR(64),
+    amount      BIGINT,
+    payment_key VARCHAR(255),
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id)
+    CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id),
+    CONSTRAINT uk_reservation_order_id UNIQUE (order_id),
+    CONSTRAINT uk_reservation_idempotency_key UNIQUE (idempotency_key),
+    CONSTRAINT uk_reservation_payment_key UNIQUE (payment_key)
 );
 
 CREATE TABLE wait

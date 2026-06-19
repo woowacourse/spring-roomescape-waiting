@@ -8,8 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.config.TestClockConfig;
+import roomescape.config.TestPaymentGatewayConfig;
 
-@Import(TestClockConfig.class)
+@Import({TestClockConfig.class, TestPaymentGatewayConfig.class})
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public abstract class SpringTestBase {
 

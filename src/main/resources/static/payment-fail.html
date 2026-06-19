@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>결제 실패</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="section">
+      <p class="eyebrow">Payment</p>
+      <h1>결제가 완료되지 않았습니다</h1>
+      <div id="payment-result" class="result">결제 실패 정보를 정리하고 있습니다.</div>
+      <a class="secondary-button" href="/">다시 예약하기</a>
+    </section>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const message = params.get("message") || "결제가 취소되었거나 실패했습니다.";
+    const orderId = params.get("orderId");
+    const result = document.querySelector("#payment-result");
+
+    async function handleFail() {
+      if (orderId) {
+        await fetch("/payments/fail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, message, orderId }),
+        });
+      }
+      const failMessage = document.createElement("strong");
+      failMessage.textContent = message;
+
+      if (!code) {
+        result.replaceChildren(failMessage);
+        return;
+      }
+
+      const failCode = document.createElement("p");
+      failCode.textContent = `실패 코드: ${code}`;
+
+      result.replaceChildren(failMessage, failCode);
+    }
+
+    handleFail().catch(() => { result.textContent = message; });
+  </script>
+</body>
+</html>
