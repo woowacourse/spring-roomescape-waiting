@@ -1,7 +1,6 @@
 package roomescape.payment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +35,7 @@ class PaymentServiceTest {
 
         assertThat(result.paymentResult()).isEqualTo(expected);
         assertThat(result.unknown()).isFalse();
+        assertThat(result.failed()).isFalse();
         verify(paymentGateway, times(1)).confirm(new PaymentConfirmation("payment_key", "order_test", "order_test", 50000L));
     }
 
@@ -52,6 +52,7 @@ class PaymentServiceTest {
 
         assertThat(result.paymentResult()).isEqualTo(expected);
         assertThat(result.unknown()).isFalse();
+        assertThat(result.failed()).isFalse();
         assertConfirmAttemptsUseSameIdempotencyKey("stored_key", 3);
     }
 
@@ -65,33 +66,47 @@ class PaymentServiceTest {
 
         assertThat(result.unknown()).isTrue();
         assertThat(result.paymentResult()).isNull();
+        assertThat(result.failed()).isFalse();
         assertConfirmAttemptsUseSameIdempotencyKey("stored_key", 3);
     }
 
     @Test
-    void confirmRetryableGatewayErrorThrowsAfterRetryBudgetTest() {
+    void confirmRetryableGatewayErrorReturnsFailureAfterRetryBudgetTest() {
         PaymentConfirmation confirmation = new PaymentConfirmation("payment_key", "order_test", "stored_key", 50000L);
         when(paymentGateway.confirm(confirmation))
                 .thenThrow(new RoomEscapeException(DomainErrorCode.PAYMENT_RETRYABLE));
 
-        assertThatThrownBy(() -> paymentService.confirm("payment_key", "order_test", "stored_key", 50000L))
-                .isInstanceOf(RoomEscapeException.class)
-                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
-                        .isEqualTo(DomainErrorCode.PAYMENT_RETRYABLE));
+        PaymentConfirmationResult result = paymentService.confirm("payment_key", "order_test", "stored_key", 50000L);
+
+        assertThat(result.failed()).isTrue();
+        assertThat(result.failureCode()).isEqualTo(DomainErrorCode.PAYMENT_RETRYABLE);
         assertConfirmAttemptsUseSameIdempotencyKey("stored_key", 3);
     }
 
     @Test
-    void confirmDoesNotRetryNonRetryablePaymentErrorTest() {
+    void confirmDoesNotRetryNonRetryablePaymentErrorAndReturnsFailureTest() {
         PaymentConfirmation confirmation = new PaymentConfirmation("payment_key", "order_test", "stored_key", 50000L);
         when(paymentGateway.confirm(confirmation))
                 .thenThrow(new RoomEscapeException(DomainErrorCode.PAYMENT_REJECTED));
 
-        assertThatThrownBy(() -> paymentService.confirm("payment_key", "order_test", "stored_key", 50000L))
-                .isInstanceOf(RoomEscapeException.class)
-                .satisfies(e -> assertThat(((RoomEscapeException) e).code())
-                        .isEqualTo(DomainErrorCode.PAYMENT_REJECTED));
+        PaymentConfirmationResult result = paymentService.confirm("payment_key", "order_test", "stored_key", 50000L);
+
+        assertThat(result.failed()).isTrue();
+        assertThat(result.failureCode()).isEqualTo(DomainErrorCode.PAYMENT_REJECTED);
         verify(paymentGateway, times(1)).confirm(confirmation);
+    }
+
+    @Test
+    void confirmGatewayResultMismatchReturnsFailureTest() {
+        PaymentResult result = new PaymentResult("payment_key", "other_order", "DONE", 50000L);
+        when(paymentGateway.confirm(new PaymentConfirmation("payment_key", "order_test", "stored_key", 50000L)))
+                .thenReturn(result);
+
+        PaymentConfirmationResult confirmationResult = paymentService.confirm("payment_key", "order_test",
+                "stored_key", 50000L);
+
+        assertThat(confirmationResult.failed()).isTrue();
+        assertThat(confirmationResult.failureCode()).isEqualTo(DomainErrorCode.PAYMENT_FAILED);
     }
 
     private void assertConfirmAttemptsUseSameIdempotencyKey(String idempotencyKey, int attempts) {

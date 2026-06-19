@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +65,7 @@ public class ReceptionFacade {
         List<ReceptionResponse> receptions = new ArrayList<>();
 
         reservationService.findByName(name).stream()
-                .map(r -> ReceptionResponse.from(r, 0L, ReservationStatus.CONFIRMED.name()))
+                .map(r -> ReceptionResponse.from(r, 0L, r.getStatus().name()))
                 .forEach(receptions::add);
 
         waitService.findByName(name).stream()
@@ -78,7 +79,7 @@ public class ReceptionFacade {
         List<ReceptionResponse> receptions = new ArrayList<>();
 
         reservationService.findAll().stream()
-                .map(r -> ReceptionResponse.from(r, 0L, ReservationStatus.CONFIRMED.name()))
+                .map(r -> ReceptionResponse.from(r, 0L, r.getStatus().name()))
                 .forEach(receptions::add);
 
         waitService.findAll().stream()
@@ -98,9 +99,12 @@ public class ReceptionFacade {
             paymentReservationService.markPaymentUnknown(orderId);
             throw new RoomEscapeException(DomainErrorCode.PAYMENT_UNKNOWN);
         }
+        if (confirmationResult.failed()) {
+            paymentReservationService.releasePaymentConfirmation(orderId);
+            throw new RoomEscapeException(confirmationResult.failureCode());
+        }
 
-        Reservation confirmed = paymentReservationService.confirmPayment(orderId, confirmationResult.paymentResult(),
-                amount);
+        Reservation confirmed = paymentReservationService.confirmPayment(orderId, confirmationResult.paymentResult());
         return ReceptionResponse.from(confirmed, 0L, ReservationStatus.CONFIRMED.name());
     }
 
@@ -109,7 +113,9 @@ public class ReceptionFacade {
         if (orderId == null || orderId.isBlank()) {
             return;
         }
+        Optional<Reservation> pendingReservation = reservationService.findPendingByOrderId(orderId);
         reservationService.deletePendingByOrderId(orderId);
+        pendingReservation.ifPresent(this::promoteNextWait);
     }
 
     @Transactional
@@ -121,7 +127,7 @@ public class ReceptionFacade {
 
         waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
                 .findFirst()
-                .ifPresent(this::confirmFirstWait);
+                .ifPresent(this::promoteFirstWait);
     }
 
     @Transactional
@@ -131,9 +137,15 @@ public class ReceptionFacade {
         waitService.delete(id);
     }
 
+    @Scheduled(fixedDelayString = "${roomescape.pending-payment-cleanup-delay-ms:60000}")
+    @Transactional
+    public void deleteExpiredPendingPayments() {
+        deleteExpiredPendingPayments(LocalDateTime.now(clock));
+    }
+
     private ReceptionResponse saveReservationOrWait(ServiceReservationCreateRequest request,
                                                     ReservationTime reservationTime, Theme theme) {
-        reservationService.deleteExpiredPendingPayments(LocalDateTime.now(clock));
+        deleteExpiredPendingPayments(LocalDateTime.now(clock));
         Optional<Long> lockedId = reservationService.lockBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
         Optional<Reservation> existing = lockedId.map(reservationService::findReservation);
@@ -153,11 +165,27 @@ public class ReceptionFacade {
         });
     }
 
-    private void confirmFirstWait(Wait firstOrder) {
+    private void promoteFirstWait(Wait firstOrder) {
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest(firstOrder.getName(),
                 firstOrder.getReservationDate(), firstOrder.getTime().getId(), firstOrder.getTheme().getId());
 
-        reservationService.save(request, firstOrder.getTime(), firstOrder.getTheme());
+        reservationService.savePending(request, firstOrder.getTime(), firstOrder.getTheme());
         waitService.delete(firstOrder.getId());
+    }
+
+    private void promoteNextWait(Reservation reservation) {
+        waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
+                .findFirst()
+                .ifPresent(this::promoteFirstWait);
+    }
+
+    private void deleteExpiredPendingPayments(LocalDateTime now) {
+        reservationService.findExpiredPendingPayments(now)
+                .forEach(this::deleteExpiredPendingPayment);
+    }
+
+    private void deleteExpiredPendingPayment(Reservation reservation) {
+        reservationService.deletePendingByOrderId(reservation.getOrderId());
+        promoteNextWait(reservation);
     }
 }

@@ -164,15 +164,71 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findPendingByOrderId(String orderId) {
+        String sql = """
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
+                       t.id as time_id, t.start_at as time_value,
+                       th.id as theme_id, th.name as theme_name,
+                       th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
+                FROM reservation r
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme th ON r.theme_id = th.id
+                WHERE r.order_id = (?) AND r.status = ?
+                FOR UPDATE
+                """;
+
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, reservationRowMapper(), orderId,
+                    ReservationStatus.PENDING.name()));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Reservation startPaymentConfirmation(String orderId) {
+        String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE order_id = ? AND status IN (?, ?)
+                """;
+
+        int updated = jdbcTemplate.update(sql, ReservationStatus.PAYMENT_CONFIRMING.name(), orderId,
+                ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
+        if (updated == 0) {
+            throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
+        }
+        return findByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
+    }
+
+    @Override
+    public Reservation releasePaymentConfirmation(String orderId) {
+        String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE order_id = ? AND status = ?
+                """;
+
+        int updated = jdbcTemplate.update(sql, ReservationStatus.PENDING.name(), orderId,
+                ReservationStatus.PAYMENT_CONFIRMING.name());
+        if (updated == 0) {
+            throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
+        }
+        return findByOrderId(orderId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
+    }
+
+    @Override
     public Reservation confirmPayment(String orderId, String paymentKey) {
         String sql = """
                 UPDATE reservation
                 SET status = ?, payment_key = ?
-                WHERE order_id = ? AND status IN (?, ?)
+                WHERE order_id = ? AND status = ?
                 """;
 
         int updated = jdbcTemplate.update(sql, ReservationStatus.CONFIRMED.name(), paymentKey,
-                orderId, ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
+                orderId, ReservationStatus.PAYMENT_CONFIRMING.name());
         if (updated == 0) {
             throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
         }
@@ -185,11 +241,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 UPDATE reservation
                 SET status = ?
-                WHERE order_id = ? AND status IN (?, ?)
+                WHERE order_id = ? AND status = ?
                 """;
 
         int updated = jdbcTemplate.update(sql, ReservationStatus.PAYMENT_UNKNOWN.name(), orderId,
-                ReservationStatus.PENDING.name(), ReservationStatus.PAYMENT_UNKNOWN.name());
+                ReservationStatus.PAYMENT_CONFIRMING.name());
         if (updated == 0) {
             throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER);
         }
@@ -212,6 +268,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findStalePendingBefore(LocalDateTime expiresBefore) {
+        String sql = """
+                SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
+                       t.id as time_id, t.start_at as time_value,
+                       th.id as theme_id, th.name as theme_name,
+                       th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
+                FROM reservation r
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme th ON r.theme_id = th.id
+                WHERE r.status = ? AND r.created_at < ?
+                ORDER BY r.created_at, r.id
+                FOR UPDATE
+                """;
+
+        return jdbcTemplate.query(sql, reservationRowMapper(), ReservationStatus.PENDING.name(), expiresBefore);
+    }
+
+    @Override
     public List<Reservation> findByName(String name) {
         String sql = """
                 SELECT r.id, r.name, r.date, r.status, r.order_id, r.idempotency_key, r.amount, r.payment_key,
@@ -221,7 +295,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation r
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme th ON r.theme_id = th.id
-                WHERE r.name = (?) AND r.status = 'CONFIRMED'
+                WHERE r.name = (?) AND r.status IN ('PENDING', 'CONFIRMED')
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper(), name);
@@ -254,7 +328,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation r
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme th ON r.theme_id = th.id
-                WHERE r.status = 'CONFIRMED'
+                WHERE r.status IN ('PENDING', 'CONFIRMED')
                 """;
 
         return jdbcTemplate.query(sql, reservationRowMapper());

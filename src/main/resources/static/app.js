@@ -340,7 +340,7 @@ function renderPaymentHistory(paymentHistory) {
 function createPaymentHistoryItem(payment) {
   const item = document.createElement("article");
   item.className = "reservation-item payment-history-item";
-  item.append(createPaymentHistorySummary(payment));
+  item.append(createPaymentHistorySummary(payment), createPaymentHistoryActions(payment));
   return item;
 }
 
@@ -387,6 +387,36 @@ function createPaymentStatusPill(payment) {
   return pill;
 }
 
+function createPaymentHistoryActions(payment) {
+  const actions = document.createElement("div");
+  actions.className = "reservation-actions";
+
+  if (payment.status !== "PENDING") {
+    return actions;
+  }
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "primary-button compact-button";
+  button.textContent = "결제하기";
+  button.addEventListener("click", () => handlePendingPayment(payment));
+  actions.appendChild(button);
+  return actions;
+}
+
+async function handlePendingPayment(payment) {
+  renderReservationResult(payment);
+  showToast("결제창을 여는 중입니다.");
+  try {
+    await requestTossPayment(payment);
+  } catch (error) {
+    await cleanupPendingPayment(payment.orderId);
+    showToast(error.message || "결제가 취소되었습니다.", true);
+    await refreshReservationSearch();
+    await loadAvailableTimes();
+  }
+}
+
 function createReservationItem(reservation) {
   const item = document.createElement("article");
   item.className = "reservation-item";
@@ -426,6 +456,9 @@ function createStatusPill(reservation) {
   if (reservation.status === "WAITING") {
     pill.className = "status-pill is-waiting";
     pill.textContent = `대기 ${reservation.order}번`;
+  } else if (reservation.status === "PENDING") {
+    pill.className = "status-pill is-pending";
+    pill.textContent = "결제 대기";
   } else {
     pill.className = "status-pill is-confirmed";
     pill.textContent = "예약 확정";
@@ -437,6 +470,18 @@ function createReservationActions(reservation) {
   const actions = document.createElement("div");
   actions.className = "reservation-actions";
   const past = isPastReservation(reservation);
+
+  if (reservation.status === "PENDING") {
+    const paymentButton = document.createElement("button");
+    paymentButton.type = "button";
+    paymentButton.className = "primary-button compact-button";
+    paymentButton.textContent = "결제하기";
+    paymentButton.disabled = past;
+    paymentButton.title = past ? "지난 예약은 결제할 수 없습니다." : "같은 주문의 결제를 이어서 진행합니다.";
+    paymentButton.addEventListener("click", () => handlePendingPayment(reservation));
+    actions.appendChild(paymentButton);
+  }
+
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "danger-button";

@@ -109,6 +109,72 @@ class PaymentAcceptanceTest extends AcceptanceTest {
                 .body("[0].amount", equalTo(50000));
     }
 
+    @Test
+    void 예약자가_취소하면_첫번째_대기가_결제대기_예약으로_승격된다() {
+        예약_시간과_테마를_생성한다();
+        Map<String, Object> pending = ReservationFixture.createPendingReservation("예약자", NOW_DATE, 1L, 1L);
+        ReservationFixture.confirmPayment((String) pending.get("orderId"), (Integer) pending.get("amount"));
+
+        ReservationFixture.createPendingReservation("대기자", NOW_DATE, 1L, 1L);
+        ReservationFixture.deleteReservation(((Number) pending.get("id")).longValue());
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=대기자")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", equalTo(1))
+                .body("[0].status", equalTo(ReservationStatus.PENDING.name()))
+                .body("[0].orderId", notNullValue())
+                .body("[0].amount", equalTo(50000));
+
+        RestAssured.given().log().all()
+                .when().get("/payments?name=대기자")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", equalTo(1))
+                .body("[0].status", equalTo(ReservationStatus.PENDING.name()))
+                .body("[0].orderId", notNullValue())
+                .body("[0].amount", equalTo(50000));
+    }
+
+    @Test
+    void 승격된_대기의_결제_실패시_다음_대기가_결제대기로_승격된다() {
+        예약_시간과_테마를_생성한다();
+        Map<String, Object> pending = ReservationFixture.createPendingReservation("예약자", NOW_DATE, 1L, 1L);
+        ReservationFixture.confirmPayment((String) pending.get("orderId"), (Integer) pending.get("amount"));
+
+        ReservationFixture.createPendingReservation("첫번째대기", NOW_DATE, 1L, 1L);
+        ReservationFixture.createPendingReservation("두번째대기", NOW_DATE, 1L, 1L);
+        ReservationFixture.deleteReservation(((Number) pending.get("id")).longValue());
+        Map<String, Object> promoted = RestAssured.given().log().all()
+                .when().get("/payments?name=첫번째대기")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .path("[0]");
+
+        Map<String, Object> failParams = new HashMap<>();
+        failParams.put("code", "PAY_PROCESS_CANCELED");
+        failParams.put("message", "사용자가 결제를 취소했습니다.");
+        failParams.put("orderId", promoted.get("orderId"));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(failParams)
+                .when().post("/payments/fail")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/payments?name=두번째대기")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", equalTo(1))
+                .body("[0].status", equalTo(ReservationStatus.PENDING.name()))
+                .body("[0].orderId", notNullValue())
+                .body("[0].amount", equalTo(50000));
+    }
+
     private void 예약_시간과_테마를_생성한다() {
         ReservationTimeFixture.createReservationTime(FUTURE_TIME);
         ThemeFixture.createTheme("방탈출1", "방탈출1 설명", "theme/url.png");

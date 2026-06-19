@@ -19,7 +19,7 @@ import roomescape.service.dto.request.ServiceReservationCreateRequest;
 public class ReservationService {
 
     private static final long RESERVATION_AMOUNT = 50_000L;
-    private static final long PENDING_PAYMENT_TTL_MINUTES = 10L;
+    private static final long PENDING_PAYMENT_TTL_MINUTES = 60L;
 
     private final ReservationRepository reservationRepository;
     private final OrderIdGenerator orderIdGenerator;
@@ -85,8 +85,20 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_PAYMENT_ORDER));
     }
 
+    public Optional<Reservation> findPendingByOrderId(String orderId) {
+        return reservationRepository.findPendingByOrderId(orderId);
+    }
+
     public Reservation confirmPayment(String orderId, String paymentKey) {
         return reservationRepository.confirmPayment(orderId, paymentKey);
+    }
+
+    public Reservation startPaymentConfirmation(String orderId) {
+        return reservationRepository.startPaymentConfirmation(orderId);
+    }
+
+    public Reservation releasePaymentConfirmation(String orderId) {
+        return reservationRepository.releasePaymentConfirmation(orderId);
     }
 
     public Reservation markPaymentUnknown(String orderId) {
@@ -103,6 +115,10 @@ public class ReservationService {
 
     public void deleteExpiredPendingPayments(LocalDateTime now) {
         reservationRepository.deleteStalePendingBefore(now.minusMinutes(PENDING_PAYMENT_TTL_MINUTES));
+    }
+
+    public List<Reservation> findExpiredPendingPayments(LocalDateTime now) {
+        return reservationRepository.findStalePendingBefore(now.minusMinutes(PENDING_PAYMENT_TTL_MINUTES));
     }
 
     public void validateReferencedTheme(Long themeId) {

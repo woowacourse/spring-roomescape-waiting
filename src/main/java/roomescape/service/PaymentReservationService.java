@@ -6,7 +6,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.payment.PaymentResult;
-import roomescape.payment.PaymentStatus;
 
 @Service
 public class PaymentReservationService {
@@ -22,13 +21,17 @@ public class PaymentReservationService {
         reservationService.lockByOrderId(orderId);
         Reservation reservation = reservationService.findByOrderId(orderId);
         validatePaymentRequest(reservation, amount);
-        return reservation;
+        return reservationService.startPaymentConfirmation(orderId);
     }
 
     @Transactional
-    public Reservation confirmPayment(String orderId, PaymentResult result, Long amount) {
-        validatePaymentResult(result, orderId, amount);
+    public Reservation confirmPayment(String orderId, PaymentResult result) {
         return reservationService.confirmPayment(orderId, result.paymentKey());
+    }
+
+    @Transactional
+    public Reservation releasePaymentConfirmation(String orderId) {
+        return reservationService.releasePaymentConfirmation(orderId);
     }
 
     @Transactional
@@ -45,12 +48,4 @@ public class PaymentReservationService {
         }
     }
 
-    private void validatePaymentResult(PaymentResult result, String orderId, Long amount) {
-        if (!PaymentStatus.DONE.name().equals(result.status()) || !result.orderId().equals(orderId)) {
-            throw new RoomEscapeException(DomainErrorCode.PAYMENT_FAILED);
-        }
-        if (!result.approvedAmount().equals(amount)) {
-            throw new RoomEscapeException(DomainErrorCode.PAYMENT_AMOUNT_MISMATCH);
-        }
-    }
 }
