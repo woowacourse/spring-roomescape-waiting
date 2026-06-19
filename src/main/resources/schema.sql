@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS store_managers;
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_slot;
 DROP TABLE IF EXISTS reservation_time;
@@ -81,6 +82,21 @@ CREATE TABLE reservation
 );
 
 CREATE INDEX idx_reservation_user_id ON reservation (user_id);
+
+CREATE TABLE orders
+(
+    id             BIGINT      NOT NULL AUTO_INCREMENT,
+    order_id       VARCHAR(64) NOT NULL,
+    reservation_id BIGINT      NOT NULL,
+    amount         BIGINT      NOT NULL,
+    status         VARCHAR(30) NOT NULL,
+    payment_key    VARCHAR(200),
+    created_at     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    CONSTRAINT unique_order_id UNIQUE (order_id)
+);
 
 CREATE TABLE store_managers
 (

@@ -38,6 +38,7 @@ import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.WebConfig;
+import roomescape.service.OrderService;
 import roomescape.service.ReservationService;
 
 @WebMvcTest(controllers = ReservationController.class,
@@ -54,6 +55,9 @@ class ReservationControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    @MockitoBean
+    private OrderService orderService;
 
     @Test
     @DisplayName("GET /reservations/mine - 로그인 사용자의 예약 목록을 응답한다")
@@ -106,7 +110,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("POST /reservations - 생성된 id를 Location 헤더에 담아 201을 반환한다")
     void createReservationReturns201WithLocationHeader() throws Exception {
-        given(reservationService.create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED)))
+        given(reservationService.create(any(CreateReservationCommand.class), eq(ReservationStatus.PAYMENT_WAITING)))
                 .willReturn(Fixtures.sampleReservation(7L));
 
         Map<String, Object> body = Map.of(
@@ -126,7 +130,7 @@ class ReservationControllerTest {
     @DisplayName("POST /reservations - 서비스가 DuplicateReservationException을 던지면 409과 메시지를 반환한다")
     void createReservationReturns409OnDuplicateReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION, "해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요."))
-                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
+                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.PAYMENT_WAITING));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-05-06",
@@ -145,7 +149,7 @@ class ReservationControllerTest {
     @DisplayName("POST /reservations - 서비스가 PastDateTimeReservationException을 던지면 422와 메시지를 반환한다")
     void createReservationReturns422OnPastDateTimeReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION, "예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."))
-                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
+                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.PAYMENT_WAITING));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-05-06",

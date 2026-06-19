@@ -179,77 +179,31 @@ const Roomescape = (() => {
         return [img, fallback];
     }
 
-    function showAdminLogin() {
-        byId('admin-auth-panel').style.display = '';
-        byId('admin-content').style.display = 'none';
-    }
-
-    function showAdminContent() {
-        byId('admin-auth-panel').style.display = 'none';
-        byId('admin-content').style.display = '';
-    }
-
-    function setAdminMessage(message) {
-        const el = byId('admin-auth-message');
-        if (el) el.textContent = message || '';
-    }
-
     async function verifyManagerToken(token) {
         await api('GET', '/admin/reservations?page=0&size=1', {token});
     }
 
     function setupAdminAuth(onReady) {
-        const form = byId('admin-login-form');
-        const logout = byId('admin-logout-btn');
-
-        form.addEventListener('submit', async event => {
-            event.preventDefault();
-            setAdminMessage('');
-            const username = byId('admin-username').value.trim();
-            const password = byId('admin-password').value;
-            if (!username || !password) {
-                setAdminMessage('아이디와 비밀번호를 입력해주세요.');
-                return;
-            }
-            try {
-                const token = await login(username, password);
-                await verifyManagerToken(token);
-                setToken(token);
-                byId('admin-password').value = '';
-                showAdminContent();
-                await onReady();
-            } catch (e) {
-                clearToken();
-                showAdminLogin();
-                setAdminMessage(e.status === 403
-                    ? '접근 권한이 없습니다. 관리자 계정으로 로그인해주세요.'
-                    : e.message);
-            }
-        });
-
-        logout.addEventListener('click', () => {
-            clearToken();
-            showAdminLogin();
-            setAdminMessage('로그아웃되었습니다.');
-        });
-
         const token = getToken();
+        const returnParam = '/?returnTo=' + encodeURIComponent(window.location.pathname);
         if (!token) {
-            showAdminLogin();
+            window.location.href = returnParam + '&authError=login';
             return;
         }
-
         verifyManagerToken(token)
             .then(async () => {
-                showAdminContent();
+                const loading = byId('admin-loading');
+                const content = byId('admin-content');
+                if (loading) loading.style.display = 'none';
+                if (content) content.style.display = '';
+                const logout = byId('admin-logout-btn');
+                if (logout) logout.addEventListener('click', () => { clearToken(); window.location.href = '/'; });
                 await onReady();
             })
             .catch(e => {
                 clearToken();
-                showAdminLogin();
-                setAdminMessage(e.status === 403
-                    ? '관리자 권한이 필요합니다. 다시 로그인해주세요.'
-                    : '관리자 로그인이 필요합니다.');
+                const errCode = e.status === 403 ? 'forbidden' : 'unauthorized';
+                window.location.href = returnParam + '&authError=' + errCode;
             });
     }
 
@@ -279,6 +233,7 @@ const Roomescape = (() => {
         setOptions,
         imageOrFallback,
         setupAdminAuth,
+        verifyManagerToken,
         memberToken: authToken,
         managerToken,
         auth: {

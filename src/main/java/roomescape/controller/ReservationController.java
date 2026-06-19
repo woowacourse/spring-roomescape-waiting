@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.Order;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.dto.reservation.command.DeleteReservationCommand;
@@ -26,6 +27,7 @@ import roomescape.dto.reservation.request.UpdateReservationRequest;
 import roomescape.domain.User;
 import roomescape.infrastructure.LoginRequired;
 import roomescape.infrastructure.LoginUser;
+import roomescape.service.OrderService;
 import roomescape.service.ReservationService;
 
 @Validated
@@ -35,9 +37,11 @@ import roomescape.service.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final OrderService orderService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, OrderService orderService) {
         this.reservationService = reservationService;
+        this.orderService = orderService;
     }
 
     @GetMapping("/mine")
@@ -59,8 +63,8 @@ public class ReservationController {
             @LoginUser User loginUser,
             @Valid @RequestBody CreateReservationRequest request) {
         Reservation createdReservation = reservationService.create(
-                CreateReservationCommand.of(loginUser, request), ReservationStatus.RESERVED);
-
+                CreateReservationCommand.of(loginUser, request), ReservationStatus.PAYMENT_WAITING);
+        orderService.create(createdReservation);
         URI location = URI.create("/reservations/" + createdReservation.getId());
         return ResponseEntity.created(location).body(ReservationResponse.from(createdReservation));
     }
