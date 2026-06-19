@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.feature.reservation.domain.OrderStatus;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -40,7 +41,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findAllReservations() {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id, r.name, r.date, r.status, r.version,
+                        SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
                                rt.id AS time_id, rt.start_at, rt.status AS time_status,
                                t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                                t.status AS theme_status
@@ -56,7 +57,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findLowestIdWaitingReservation(SlotKey slotKey) {
         String findSql = """
-                SELECT r.id, r.name, r.date, r.status, r.version,
+                SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.status AS theme_status
@@ -139,6 +140,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 mapTime(rs),
                 mapTheme(rs),
                 ReservationStatus.valueOf(rs.getString("status")),
+                OrderStatus.valueOf(rs.getString("order_status")),
                 rs.getLong("version")
         );
     }
@@ -164,7 +166,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.version,
+                SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.status AS theme_status
@@ -187,7 +189,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findReservationByIdAndNotDeleted(Long id) {
         String sql = """
-                SELECT r.id, r.name, r.date, r.status, r.version,
+                SELECT r.id, r.name, r.date, r.status, r.order_status, r.version,
                        rt.id AS time_id, rt.start_at, rt.status AS time_status,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.status AS theme_status
@@ -278,7 +280,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return Reservation.reconstruct(reservation.getId(), reservation.getName(), reservation.getDate(),
                 reservation.getTime(), reservation.getTheme(), reservation.getStatus(),
-                reservation.getVersion() + 1);
+                reservation.getOrderStatus(), reservation.getVersion() + 1);
     }
 
     @Override
@@ -301,6 +303,31 @@ public class JdbcReservationRepository implements ReservationRepository {
         if (updatedRowCount == 0) {
             throw new OptimisticLockingFailureException(
                     "예약 상태가 다른 요청에 의해 먼저 변경되었습니다."
+                            + " id: " + id
+                            + " version: " + version);
+        }
+    }
+
+    @Override
+    public void changeOrderStatus(Long id, long version, OrderStatus from, OrderStatus to) {
+        String sql = """
+                UPDATE reservation
+                SET order_status = :to,
+                    version = version + 1
+                WHERE id = :id
+                  AND order_status = :from
+                  AND version = :version
+                """;
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("version", version)
+                .addValue("from", from.name())
+                .addValue("to", to.name());
+
+        int updatedRowCount = jdbcTemplate.update(sql, parameters);
+        if (updatedRowCount == 0) {
+            throw new OptimisticLockingFailureException(
+                    "예약 주문 상태가 다른 요청에 의해 먼저 변경되었습니다."
                             + " id: " + id
                             + " version: " + version);
         }

@@ -53,6 +53,8 @@
       color: #2b8a3e;
     }
   </style>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <script src="/js/payment.js"></script>
 </head>
 <body class="container mt-5">
 <div style="max-width: 500px; margin: auto;">
@@ -296,24 +298,30 @@
     const body = { name, date, timeId, themeId };
     const button = document.getElementById('submitReservationButton');
     const previousButtonText = button.innerText;
-    const endpoint = selectedTimeOption?.dataset.available === 'false'
-        ? '/api/reservations/waitings'
-        : '/api/reservations';
+    const isWaiting = selectedTimeOption?.dataset.available === 'false';
+    const endpoint = isWaiting ? '/api/reservations/waitings' : '/api/reservations';
 
     try {
       button.disabled = true;
       button.innerText = '처리 중...';
 
-      await requestJson(endpoint, {
+      const created = await requestJson(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
 
-      location.href = `/?reservationName=${encodeURIComponent(name)}`;
+      if (isWaiting) {
+        location.href = `/?reservationName=${encodeURIComponent(name)}`;
+        return;
+      }
+
+      // ACTIVE 예약은 생성 직후 바로 결제로 넘어간다. (토스 결제창으로 리다이렉트)
+      button.innerText = '결제창으로 이동 중...';
+      await startReservationPayment(created.id, name);
     } catch (error) {
       console.error("전송 중 오류:", error);
-      showReservationError(error.data || { message: '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' });
+      showReservationError(error.data || { message: error.message || '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' });
     } finally {
       button.disabled = false;
       button.innerText = previousButtonText;

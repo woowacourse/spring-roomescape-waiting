@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import roomescape.feature.payment.PaymentApprover;
 import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
@@ -46,6 +47,8 @@ class AdminReservationServiceTest {
     @Mock
     private ThemeRepository themeRepository;
     @Mock
+    private PaymentApprover paymentApprover;
+    @Mock
     private ApplicationEventPublisher eventPublisher;
 
     private AdminReservationService reservationService;
@@ -54,7 +57,7 @@ class AdminReservationServiceTest {
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         reservationService = new ReservationManagementService(
-            reservationRepository, timeRepository, themeRepository, mapper, eventPublisher);
+            reservationRepository, timeRepository, themeRepository, paymentApprover, mapper, eventPublisher);
     }
 
     private Time timeWithId(Long id) {

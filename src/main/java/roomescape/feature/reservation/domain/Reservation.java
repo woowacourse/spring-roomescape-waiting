@@ -14,13 +14,16 @@ public class Reservation {
     private final ReserverName name;
     private final Slot slot;
     private final ReservationStatus status;
+    private final OrderStatus orderStatus;
     private final long version;
 
-    private Reservation(Long id, ReserverName name, Slot slot, ReservationStatus status, long version) {
+    private Reservation(
+        Long id, ReserverName name, Slot slot, ReservationStatus status, OrderStatus orderStatus, long version) {
         this.id = id;
         this.name = name;
         this.slot = slot;
         this.status = status;
+        this.orderStatus = orderStatus;
         this.version = version;
     }
 
@@ -28,19 +31,25 @@ public class Reservation {
         Slot slot = new Slot(date, time, theme);
         validateFuture(slot);
 
-        return new Reservation(null, name, slot, status, 0L);
+        return new Reservation(null, name, slot, status, OrderStatus.PENDING, 0L);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status) {
-        return new Reservation(id, name, new Slot(date, time, theme), status, 0L);
+        return new Reservation(id, name, new Slot(date, time, theme), status, OrderStatus.PENDING, 0L);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status, long version) {
-        return new Reservation(id, name, new Slot(date, time, theme), status, version);
+        return new Reservation(id, name, new Slot(date, time, theme), status, OrderStatus.PENDING, version);
+    }
+
+    public static Reservation reconstruct(
+        Long id, ReserverName name, LocalDate date,
+        Time time, Theme theme, ReservationStatus status, OrderStatus orderStatus, long version) {
+        return new Reservation(id, name, new Slot(date, time, theme), status, orderStatus, version);
     }
 
     public Reservation update(ReserverName requestName, LocalDate newDate, Time newTime, Theme newTheme) {
@@ -48,7 +57,7 @@ public class Reservation {
         validateUpdatable(requestName, newSlot);
         validateChanged(newSlot);
 
-        return new Reservation(this.id, this.name, newSlot, this.status, this.version);
+        return new Reservation(this.id, this.name, newSlot, this.status, this.orderStatus, this.version);
     }
 
     public Reservation delete() {
@@ -56,7 +65,7 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.ALREADY_DELETED);
         }
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.DELETED, this.version);
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.DELETED, this.orderStatus, this.version);
     }
 
     public Reservation cancelActive(ReserverName requestName) {
@@ -65,7 +74,7 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.version);
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.orderStatus, this.version);
     }
 
     public Reservation cancelWaiting(ReserverName requestName) {
@@ -74,7 +83,7 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.version);
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.CANCELED, this.orderStatus, this.version);
     }
 
     public Reservation confirmWaiting() {
@@ -82,7 +91,18 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
         }
 
-        return new Reservation(this.id, this.name, this.slot, ReservationStatus.ACTIVE, this.version);
+        return new Reservation(this.id, this.name, this.slot, ReservationStatus.ACTIVE, this.orderStatus, this.version);
+    }
+
+    public Reservation confirmOrder() {
+        if (this.status != ReservationStatus.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+        if (this.orderStatus != OrderStatus.PENDING) {
+            throw new GeneralException(ReservationErrorType.ALREADY_CONFIRMED_ORDER);
+        }
+
+        return new Reservation(this.id, this.name, this.slot, this.status, OrderStatus.CONFIRMED, this.version);
     }
 
     private void validateCancelable(ReserverName requestName) {

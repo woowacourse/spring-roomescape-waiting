@@ -229,4 +229,45 @@ class ReservationTest {
                     .hasMessage("대기중인 예약이 아닙니다.");
         }
     }
+
+    @Nested
+    class 주문을_확정한다 {
+
+        @Test
+        void ACTIVE이고_PENDING이면_CONFIRMED_상태로_전이된다() {
+            // given
+            Reservation activeReservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+
+            // when
+            Reservation confirmed = activeReservation.confirmOrder();
+
+            // then
+            assertThat(confirmed.getOrderStatus()).isEqualTo(OrderStatus.CONFIRMED);
+        }
+
+        @Test
+        void ACTIVE가_아니면_예외를_던진다() {
+            // given
+            Reservation waitingReservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+            // when & then
+            assertThatThrownBy(waitingReservation::confirmOrder)
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("활성된 예약이 아닙니다.");
+        }
+
+        @Test
+        void 이미_주문이_확정된_상태이면_예외를_던진다() {
+            // given
+            Reservation confirmedReservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME,
+                    ReservationStatus.ACTIVE, OrderStatus.CONFIRMED, 0L);
+
+            // when & then
+            assertThatThrownBy(confirmedReservation::confirmOrder)
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("이미 주문이 확정된 예약입니다.");
+        }
+    }
 }

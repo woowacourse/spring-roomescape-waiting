@@ -30,6 +30,7 @@ import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.service.ReservationService;
+import roomescape.feature.reservation.domain.OrderStatus;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.dto.response.ReservationThemeResponseDto;
 import roomescape.feature.time.dto.response.ReservationTimeResponseDto;
@@ -92,7 +93,7 @@ class ReservationControllerTest {
             new ReservationTimeResponseDto(1L, TimeFixture.VALID_10_00.getStartAt(), false),
             new ReservationThemeResponseDto(1L, ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(), ThemeFixture.VALID.getImageUrl(), false),
-            ReservationEditableStatus.EDITABLE, "", null
+            ReservationEditableStatus.EDITABLE, "", null, OrderStatus.CONFIRMED
         );
     }
 

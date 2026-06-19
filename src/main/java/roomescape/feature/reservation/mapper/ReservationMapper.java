@@ -40,7 +40,8 @@ public final class ReservationMapper {
 
         return new ReservationResponseDto(reservation.getId(), reservation.getName().value(), reservation.getDate(),
             timeMapper.toReservationResponseDto(reservation.getTime()),
-            themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber);
+            themeMapper.toReservationResponseDto(reservation.getTheme()), status, status.getMessage(), waitingNumber,
+            reservation.getOrderStatus());
     }
 
     private ReservationEditableStatus getStatus(Reservation reservation) {
