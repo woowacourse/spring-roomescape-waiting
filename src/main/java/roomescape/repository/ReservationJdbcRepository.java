@@ -248,12 +248,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public int updateWaitingToReserved(Reservation reservation) {
-        String sql = "update reservation set status = ? where id = ? and status = ?";
-        return jdbcTemplate.update(sql,
-                ReservationStatus.RESERVED.name(),
-                reservation.getId(),
-                ReservationStatus.WAITING.name());
+    public int updateStatus(Long id, ReservationStatus status) {
+        String sql = "update reservation set status = ? where id = ?";
+        return jdbcTemplate.update(sql, status.name(), id);
     }
 
     @Override
@@ -282,6 +279,25 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class,
                 date, timeId, themeId, storeId, ReservationStatus.RESERVED.name()));
+    }
+
+    @Override
+    public boolean existsReservedOrPaymentPendingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId,
+                                                                               Long themeId, Long storeId) {
+        String sql = """
+                select exists(
+                    select 1
+                    from reservation
+                    where date = ?
+                      and time_id = ?
+                      and theme_id = ?
+                      and store_id = ?
+                      and status in (?, ?)
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class,
+                date, timeId, themeId, storeId, ReservationStatus.RESERVED.name(),
+                ReservationStatus.PAYMENT_PENDING.name()));
     }
 
     @Override

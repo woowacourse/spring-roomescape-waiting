@@ -17,6 +17,7 @@ import roomescape.dto.command.UpdateReservationCommand;
 public final class Fixtures {
 
     public static final long DEFAULT_STORE_ID = 1L;
+    public static final long DEFAULT_AMOUNT = 10_000L;
 
     private Fixtures() {
     }
@@ -89,7 +90,12 @@ public final class Fixtures {
     }
 
     public static CreateReservationCommand createCommand(long userId, long themeId, LocalDate date, long timeId) {
-        return new CreateReservationCommand(userId, themeId, date, timeId, DEFAULT_STORE_ID);
+        return createCommand(userId, themeId, date, timeId, DEFAULT_AMOUNT);
+    }
+
+    public static CreateReservationCommand createCommand(long userId, long themeId, LocalDate date, long timeId,
+                                                         long amount) {
+        return new CreateReservationCommand(userId, themeId, date, timeId, DEFAULT_STORE_ID, amount);
     }
 
     public static UpdateReservationCommand updateCommand(

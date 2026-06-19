@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>결제 실패</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+<main style="max-width:640px;margin:80px auto;padding:0 24px;">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">결제 실패</span>
+        </div>
+        <div id="payment-result" style="display:grid;gap:12px;"></div>
+        <div style="display:flex;gap:10px;margin-top:24px;">
+            <a class="btn btn-primary" href="/">예약 페이지로 이동</a>
+        </div>
+    </div>
+</main>
+<script src="app.js"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const result = Roomescape.byId('payment-result');
+
+    [
+        ['code', params.get('code')],
+        ['message', params.get('message')],
+        ['orderId', params.get('orderId')],
+    ].forEach(([key, value]) => {
+        result.appendChild(Roomescape.h('div', {style: {background: 'var(--bg-input)', borderRadius: 'var(--radius)', padding: '14px'}}, [
+            Roomescape.h('div', {text: key, style: {fontSize: '12px', color: 'var(--text-muted)', fontWeight: '700'}}),
+            Roomescape.h('div', {text: value || '-', style: {fontSize: '15px', wordBreak: 'break-all'}}),
+        ]));
+    });
+</script>
+</body>
+</html>

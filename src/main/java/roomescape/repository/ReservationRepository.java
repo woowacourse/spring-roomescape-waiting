@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 
 public interface ReservationRepository {
 
@@ -27,11 +28,14 @@ public interface ReservationRepository {
 
     int update(Reservation reservation);
 
-    int updateWaitingToReserved(Reservation reservation);
+    int updateStatus(Long id, ReservationStatus status);
 
     List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
 
     boolean existsReservedByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);
+
+    boolean existsReservedOrPaymentPendingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId,
+                                                                        Long storeId);
 
     boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
                                                        Long userId);

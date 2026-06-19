@@ -181,9 +181,11 @@
 
 <div id="toast-container"></div>
 
+<script src="https://js.tosspayments.com/v2/standard"></script>
 <script src="app.js"></script>
 <script>
     const R = Roomescape;
+    const RESERVATION_AMOUNT = 10000;
     const state = {selectedTheme: null, selectedDate: null, selectedTime: null, themes: [], isWaiting: false};
     const themePageState = {page: 0, hasNext: false};
 
@@ -427,7 +429,7 @@
 
     function updateStepThreeButton() {
         const btn = R.byId('submit-reservation-btn');
-        btn.textContent = state.isWaiting ? '🕐 대기 신청' : '🎟 예약 확정';
+        btn.textContent = state.isWaiting ? '🕐 대기 신청' : '💳 결제하기';
         btn.style.background = state.isWaiting ? '#eab308' : '';
         btn.style.color = state.isWaiting ? '#0d0f1a' : '';
     }
@@ -447,7 +449,7 @@
             },
             text: state.isWaiting
                 ? '🕐 이미 예약된 슬롯입니다. 대기 신청 모드로 진행합니다.'
-                : '🎟 일반 예약 모드입니다.',
+                : '💳 결제 인증 후 예약이 확정됩니다.',
         });
         container.append(
             modeBanner,
@@ -461,7 +463,63 @@
                 R.h('div', {text: state.selectedDate || '–', style: {fontSize: '16px', fontWeight: '700'}}),
                 R.h('div', {text: `⏰ ${state.selectedTime?.startAt || '–'}`, style: {fontSize: '12px', color: 'var(--text-secondary)'}}),
             ]),
+            state.isWaiting ? null : R.h('div', {
+                style: {
+                    gridColumn: '1 / -1',
+                    background: 'var(--bg-input)',
+                    borderRadius: 'var(--radius)',
+                    padding: '16px',
+                },
+            }, [
+                R.h('div', {text: '결제 금액', style: {fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600'}}),
+                R.h('div', {text: `${RESERVATION_AMOUNT.toLocaleString()}원`, style: {fontSize: '16px', fontWeight: '700'}}),
+            ]),
         );
+    }
+
+    function getCustomerKey() {
+        const key = 'roomescape.payment.customerKey';
+        const existing = localStorage.getItem(key);
+        if (existing) return existing;
+        const generated = crypto.randomUUID();
+        localStorage.setItem(key, generated);
+        return generated;
+    }
+
+    async function loadTossClientKey() {
+        const config = await R.api('GET', '/payments/config');
+        return config.clientKey;
+    }
+
+    async function createTossPayments() {
+        if (typeof TossPayments !== 'function') {
+            throw new Error('결제창 SDK를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.');
+        }
+        const clientKey = await loadTossClientKey();
+        if (!clientKey || clientKey === 'test_ck_REPLACE_ME') {
+            throw new Error('Toss 클라이언트 키를 설정해주세요.');
+        }
+        return TossPayments(clientKey);
+    }
+
+    async function requestTossPayment(paymentReservation) {
+        const tossPayments = await createTossPayments();
+        const payment = tossPayments.payment({customerKey: getCustomerKey()});
+        const orderName = `${state.selectedTheme.name} ${state.selectedDate} ${state.selectedTime.startAt}`;
+        const baseUrl = window.location.origin;
+
+        await payment.requestPayment({
+            method: 'CARD',
+            amount: {
+                currency: 'KRW',
+                value: paymentReservation.amount,
+            },
+            orderId: paymentReservation.orderId,
+            orderName,
+            customerName: tokenInfo()?.username || tokenInfo()?.sub,
+            successUrl: `${baseUrl}/payments/success`,
+            failUrl: `${baseUrl}/payments/fail`,
+        });
     }
 
     async function submitReservation() {
@@ -473,20 +531,26 @@
         const isWaiting = state.isWaiting;
         if (isWaiting && !confirm('이미 예약된 슬롯입니다. 대기 등록하시겠습니까?')) return;
         const endpoint = isWaiting ? '/reservations/waiting' : '/reservations';
+        const body = {
+            themeId: state.selectedTheme.id,
+            date: state.selectedDate,
+            timeId: state.selectedTime.id,
+            storeId: 1,
+        };
+        if (!isWaiting) {
+            body.amount = RESERVATION_AMOUNT;
+        }
         try {
-            await R.api('POST', endpoint, {
+            const result = await R.api('POST', endpoint, {
                 token: R.auth.getMemberToken(),
-                body: {
-                    themeId: state.selectedTheme.id,
-                    date: state.selectedDate,
-                    timeId: state.selectedTime.id,
-                    storeId: 1,
-                },
+                body,
             });
+            if (!isWaiting) {
+                await requestTossPayment(result);
+                return;
+            }
             R.toast(
-                isWaiting
-                    ? `"${state.selectedTheme.name}" 대기 등록이 완료되었습니다.`
-                    : `"${state.selectedTheme.name}" 예약이 완료되었습니다.`,
+                `"${state.selectedTheme.name}" 대기 등록이 완료되었습니다.`,
                 'success',
             );
             state.selectedTheme = null;

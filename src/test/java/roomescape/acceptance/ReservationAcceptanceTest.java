@@ -191,7 +191,8 @@ class ReservationAcceptanceTest {
                 "date", "2026-05-08",
                 "themeId", slot.themeId(),
                 "timeId", slot.timeId(),
-                "storeId", slot.storeId());
+                "storeId", slot.storeId(),
+                "amount", 10_000);
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, slot.bearer())
@@ -227,7 +228,8 @@ class ReservationAcceptanceTest {
                 "date", "2026-05-08",
                 "themeId", existing.themeId(),
                 "timeId", existing.timeId(),
-                "storeId", DbFixtures.defaultStoreId(jdbcTemplate));
+                "storeId", DbFixtures.defaultStoreId(jdbcTemplate),
+                "amount", 10_000);
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "브라운"))
@@ -246,7 +248,8 @@ class ReservationAcceptanceTest {
                 "date", "2026-05-06",
                 "themeId", slot.themeId(),
                 "timeId", slot.timeId(),
-                "storeId", slot.storeId());
+                "storeId", slot.storeId(),
+                "amount", 10_000);
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, slot.bearer())

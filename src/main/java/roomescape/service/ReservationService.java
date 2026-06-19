@@ -11,10 +11,12 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
+import roomescape.domain.payment.PaymentOrder;
 import roomescape.dto.command.CancelReservationCommand;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.response.ReservationWithStatusResponses;
 import roomescape.dto.command.UpdateReservationCommand;
+import roomescape.dto.response.ReservationPaymentResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -30,6 +32,8 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.StoreRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserRepository;
+import roomescape.repository.PaymentOrderRepository;
+import roomescape.service.payment.OrderIdGenerator;
 
 @Service
 public class ReservationService {
@@ -39,6 +43,8 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
+    private final OrderIdGenerator orderIdGenerator;
     private final TimeProvider timeProvider;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -46,12 +52,16 @@ public class ReservationService {
                               ReservationTimeRepository reservationTimeRepository,
                               UserRepository userRepository,
                               StoreRepository storeRepository,
+                              PaymentOrderRepository paymentOrderRepository,
+                              OrderIdGenerator orderIdGenerator,
                               TimeProvider timeProvider) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.userRepository = userRepository;
         this.storeRepository = storeRepository;
+        this.paymentOrderRepository = paymentOrderRepository;
+        this.orderIdGenerator = orderIdGenerator;
         this.timeProvider = timeProvider;
     }
 
@@ -74,14 +84,16 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createReservation(CreateReservationCommand command) {
-        Reservation newReservation = buildReservation(command, ReservationStatus.RESERVED);
+    public ReservationPaymentResponse createReservation(CreateReservationCommand command) {
+        Reservation newReservation = buildReservation(command, ReservationStatus.PAYMENT_PENDING);
 
         validateNotPastDateTime(newReservation);
         validateNotDuplicated(newReservation);
 
         Long newReservationId = reservationRepository.save(newReservation);
-        return newReservation.withId(newReservationId);
+        String orderId = orderIdGenerator.generate();
+        paymentOrderRepository.save(new PaymentOrder(null, newReservationId, orderId, command.amount()));
+        return new ReservationPaymentResponse(newReservationId, orderId, command.amount());
     }
 
     @Transactional
@@ -206,7 +218,7 @@ public class ReservationService {
     }
 
     private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(
+        if (reservationRepository.existsReservedOrPaymentPendingByDateAndTimeAndThemeAndStore(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
                 reservation.getStore().getId())) {
             throw new DuplicateReservationException();

@@ -73,12 +73,8 @@ public class Reservation {
         return new Reservation(id, user, theme, date, time, store, status);
     }
 
-    public Reservation confirm() {
-        if (!isWaiting()) {
-            throw new InvalidDomainException("예약 대기 상태만 확정할 수 있습니다.");
-        }
-
-        return new Reservation(id, user, theme, date, time, store, ReservationStatus.RESERVED);
+    public Reservation withStatus(ReservationStatus status) {
+        return new Reservation(id, user, theme, date, time, store, status);
     }
 
     public Long getId() {

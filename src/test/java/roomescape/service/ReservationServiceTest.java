@@ -13,6 +13,9 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
+import roomescape.domain.payment.PaymentOrder;
+import roomescape.dto.response.ReservationPaymentResponse;
+import roomescape.dto.response.ReservationResponses;
 import roomescape.dto.response.ReservationWithStatusResponses;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
@@ -30,6 +33,8 @@ import roomescape.repository.fake.FakeReservationTimeRepository;
 import roomescape.repository.fake.FakeStoreRepository;
 import roomescape.repository.fake.FakeThemeRepository;
 import roomescape.repository.fake.FakeUserRepository;
+import roomescape.repository.fake.FakePaymentOrderRepository;
+import roomescape.service.payment.FixedOrderIdGenerator;
 
 class ReservationServiceTest {
 
@@ -38,6 +43,7 @@ class ReservationServiceTest {
     private FakeThemeRepository themeRepository;
     private FakeUserRepository userRepository;
     private FakeStoreRepository storeRepository;
+    private FakePaymentOrderRepository paymentOrderRepository;
     private ReservationService service;
     private User manager;
 
@@ -48,9 +54,11 @@ class ReservationServiceTest {
         themeRepository = new FakeThemeRepository(reservationRepository);
         userRepository = new FakeUserRepository();
         storeRepository = new FakeStoreRepository();
+        paymentOrderRepository = new FakePaymentOrderRepository();
         storeRepository.save(Fixtures.store("매장"));
         service = new ReservationService(reservationRepository, themeRepository, reservationTimeRepository,
-                userRepository, storeRepository, new TestClockConfig().timeProvider());
+                userRepository, storeRepository, paymentOrderRepository, new FixedOrderIdGenerator("order_123456"),
+                new TestClockConfig().timeProvider());
         manager = buildUser("매니저");
         storeRepository.assignManager(Fixtures.DEFAULT_STORE_ID, manager.getId());
     }
@@ -60,14 +68,34 @@ class ReservationServiceTest {
         User brown = buildUser("브라운");
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        Reservation created = service.createReservation(
+        ReservationPaymentResponse created = service.createReservation(
                 Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 8), timeId));
 
-        assertThat(created.getId()).isPositive();
-        assertThat(created.getUser().getName()).isEqualTo("브라운");
-        assertThat(created.getDate()).isEqualTo(LocalDate.of(2026, 5, 8));
-        assertThat(created.getTheme().getId()).isEqualTo(themeId);
-        assertThat(created.getTime().getId()).isEqualTo(timeId);
+        assertThat(created.reservationId()).isPositive();
+        assertThat(created.orderId()).isEqualTo("order_123456");
+        assertThat(created.amount()).isEqualTo(Fixtures.DEFAULT_AMOUNT);
+
+        Reservation reservation = reservationRepository.findById(created.reservationId()).orElseThrow();
+        assertThat(reservation.getUser().getName()).isEqualTo("브라운");
+        assertThat(reservation.getDate()).isEqualTo(LocalDate.of(2026, 5, 8));
+        assertThat(reservation.getTheme().getId()).isEqualTo(themeId);
+        assertThat(reservation.getTime().getId()).isEqualTo(timeId);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PAYMENT_PENDING);
+    }
+
+    @Test
+    void createReservation_결제_인증_전에_orderId와_amount를_저장한다() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+
+        ReservationPaymentResponse created = service.createReservation(
+                Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 8), timeId, 37_000L));
+
+        PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(created.orderId()).orElseThrow();
+        assertThat(paymentOrder.getReservationId()).isEqualTo(created.reservationId());
+        assertThat(paymentOrder.getAmount()).isEqualTo(37_000L);
+        assertThat(paymentOrder.getOrderId()).matches("[A-Za-z0-9_-]{6,64}");
     }
 
     @Test

@@ -112,25 +112,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int updateWaitingToReserved(Reservation reservation) {
-        if (failUpdateWaitingToReservedOnce) {
-            failUpdateWaitingToReservedOnce = false;
+    public int updateStatus(Long id, ReservationStatus status) {
+        Reservation reservation = store.get(id);
+        if (reservation == null) {
             return 0;
         }
-        Reservation existing = store.get(reservation.getId());
-        if (existing == null || !existing.isWaiting()) {
-            return 0;
-        }
-        store.put(reservation.getId(), reservation);
+        store.put(id, reservation.withStatus(status));
         return 1;
-    }
-
-    public void failDeleteOnce() {
-        failDeleteOnce = true;
-    }
-
-    public void failUpdateWaitingToReservedOnce() {
-        failUpdateWaitingToReservedOnce = true;
     }
 
     @Override
@@ -151,6 +139,18 @@ public class FakeReservationRepository implements ReservationRepository {
                         && r.getTheme().getId().equals(themeId)
                         && r.getStore().getId().equals(storeId)
                         && r.getStatus().equals(ReservationStatus.RESERVED));
+    }
+
+    @Override
+    public boolean existsReservedOrPaymentPendingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId,
+                                                                               Long themeId, Long storeId) {
+        return store.values().stream()
+                .anyMatch(r -> r.getDate().equals(date)
+                        && r.getTime().getId().equals(timeId)
+                        && r.getTheme().getId().equals(themeId)
+                        && r.getStore().getId().equals(storeId)
+                        && (r.getStatus().equals(ReservationStatus.RESERVED)
+                        || r.getStatus().equals(ReservationStatus.PAYMENT_PENDING)));
     }
 
     @Override

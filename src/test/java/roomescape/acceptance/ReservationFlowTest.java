@@ -43,7 +43,8 @@ class ReservationFlowTest {
                 "date", "2026-05-08",
                 "timeId", slot.timeId(),
                 "themeId", slot.themeId(),
-                "storeId", slot.storeId());
+                "storeId", slot.storeId(),
+                "amount", 10_000);
         RestAssured.given().log().all()
                 .header("Authorization", slot.bearer())
                 .contentType(ContentType.JSON)
