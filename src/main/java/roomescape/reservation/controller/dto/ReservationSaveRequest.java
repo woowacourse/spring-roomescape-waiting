@@ -11,6 +11,6 @@ public record ReservationSaveRequest(
 ) {
 
     public ReservationSaveServiceRequest toServiceDto() {
-        return new ReservationSaveServiceRequest(name, themeId, timeId, null, null);
+        return new ReservationSaveServiceRequest(name, themeId, timeId, null);
     }
 }
