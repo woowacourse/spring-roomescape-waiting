@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -158,12 +159,46 @@ class PaymentApiTest {
         });
     }
 
-    @DisplayName("결제 승인 timeout이 발생하면 API는 503을 반환하고 결제 주문과 예약 상태를 확정하지 않습니다.")
+    @DisplayName("결제 승인 timeout 후 토스 조회 결과가 완료 상태이면 기존 성공 API에서 확정 결과를 반환합니다.")
+    @Test
+    void confirm_payment_reconciles_retryable_failure_by_order_id() {
+        Payment payment = preparePayment();
+        String resolvedPaymentKey = "resolved_payment_key";
+        given(paymentGateway.confirm(any()))
+                .willThrow(new RetryablePaymentGatewayException(new SocketTimeoutException()));
+        given(paymentGateway.findByOrderId(payment.getOrderId().value()))
+                .willReturn(new PaymentResult(resolvedPaymentKey, payment.getOrderId().value(), PaymentStatus.DONE,
+                        payment.getAmount().value()));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(paymentConfirmRequest(payment))
+                .when().post("/payments/success")
+                .then().log().all()
+                .statusCode(200)
+                .body("paymentKey", equalTo(resolvedPaymentKey))
+                .body("orderId", equalTo(payment.getOrderId().value()))
+                .body("status", equalTo("DONE"))
+                .body("approvedAmount", equalTo(payment.getAmount().value().intValue()));
+
+        verify(paymentGateway).findByOrderId(payment.getOrderId().value());
+        verify(paymentGateway, never()).findByPaymentKey(anyString());
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("CONFIRMED");
+            softly.assertThat(testHelper.findPaymentKey(payment.getOrderId().value())).isEqualTo(resolvedPaymentKey);
+        });
+    }
+
+    @DisplayName("결제 승인 timeout 후 토스 조회 결과가 완료 상태가 아니면 API는 503을 반환하고 결제 주문과 예약 상태를 확정하지 않습니다.")
     @Test
     void confirm_payment_timeout_preserves_pending_status() {
         Payment payment = preparePayment();
         given(paymentGateway.confirm(any()))
                 .willThrow(new RetryablePaymentGatewayException(new SocketTimeoutException()));
+        given(paymentGateway.findByOrderId(payment.getOrderId().value()))
+                .willReturn(new PaymentResult(PAYMENT_KEY, payment.getOrderId().value(), PaymentStatus.ABORTED,
+                        payment.getAmount().value()));
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -174,6 +209,8 @@ class PaymentApiTest {
                 .body("errorMessage", equalTo("결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요."))
                 .body("$", not(hasKey("code")));
 
+        verify(paymentGateway).findByOrderId(payment.getOrderId().value());
+        verify(paymentGateway, never()).findByPaymentKey(anyString());
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(testHelper.findReservationStatus(payment.getReservationId())).isEqualTo("PAYMENT_PENDING");
             softly.assertThat(testHelper.findPaymentStatus(payment.getOrderId().value())).isEqualTo("PENDING");
