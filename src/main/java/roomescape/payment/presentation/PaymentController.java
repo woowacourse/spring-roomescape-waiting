@@ -53,7 +53,7 @@ public class PaymentController {
     public String fail(
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String message,
-            @RequestParam(required = false) String orderId,
+            @RequestParam String orderId,
             Model model
     ) {
         orderService.fail(orderId);
