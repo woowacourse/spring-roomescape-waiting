@@ -2,8 +2,6 @@ package roomescape.global.ratelimit;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -14,9 +12,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 @RequiredArgsConstructor
-public class RateLimitInterceptor implements HandlerInterceptor {
+public class InboundRateLimitInterceptor implements HandlerInterceptor {
 
-    private final RateLimitBuckets buckets;
+    private final RateLimiters rateLimiters;
 
     @Override
     public boolean preHandle(
@@ -25,11 +23,11 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             @NonNull Object handler
     ) {
         if (handler instanceof HandlerMethod handlerMethod) {
-            RateLimit rateLimit = findRateLimit(handlerMethod);
+            InboundRateLimit rateLimit = findRateLimit(handlerMethod);
             if (rateLimit == null) {
                 return true;
             }
-            RateLimitBucket bucket = buckets.getOrCreateByKey(rateLimit.key());
+            RateLimitBucket bucket = rateLimiters.getBucket(RateLimitType.INBOUND, rateLimit.key());
 
             if (!bucket.tryConsume()) {
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
@@ -41,12 +39,12 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private RateLimit findRateLimit(HandlerMethod handler) {
-        RateLimit rateLimit = handler.getMethodAnnotation(RateLimit.class);
+    private InboundRateLimit findRateLimit(HandlerMethod handler) {
+        InboundRateLimit rateLimit = handler.getMethodAnnotation(InboundRateLimit.class);
         if (rateLimit != null) {
             return rateLimit;
         }
 
-        return handler.getBeanType().getAnnotation(RateLimit.class);
+        return handler.getBeanType().getAnnotation(InboundRateLimit.class);
     }
 }

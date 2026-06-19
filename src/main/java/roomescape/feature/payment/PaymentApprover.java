@@ -17,6 +17,7 @@ import org.springframework.web.client.RestClientException;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
 import roomescape.feature.payment.dto.PaymentErrorResponse;
 import roomescape.feature.payment.dto.PaymentResponse;
+import roomescape.global.ratelimit.OutboundRateLimit;
 
 @RequiredArgsConstructor
 @Component
@@ -47,6 +48,7 @@ public class PaymentApprover {
             maxAttempts = MAX_ATTEMPTS,
             backoff = @Backoff(delay = BACKOFF_DELAY_MILLIS, multiplier = BACKOFF_MULTIPLIER)
     )
+    @OutboundRateLimit(key = "payment_outbound")
     public boolean approve(PaymentApproveRequest request) {
         try {
             PaymentResponse response = paymentRestClient.post()

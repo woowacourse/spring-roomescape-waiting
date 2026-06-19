@@ -13,9 +13,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
 
-class RateLimitInterceptorTest {
+class InboundRateLimitInterceptorTest {
 
-    private RateLimitInterceptor interceptor;
+    private InboundRateLimitInterceptor interceptor;
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
 
@@ -26,13 +26,12 @@ class RateLimitInterceptorTest {
 
         NanoClock mockClock = mock(NanoClock.class);
         when(mockClock.currentNanoseconds()).thenReturn(0L); // 초기 시간 0으로 고정
-        RateLimitBuckets buckets = new RateLimitBuckets(
-                capacity,
-                refillPerSecond,
-                mockClock
-        );
 
-        interceptor = new RateLimitInterceptor(buckets);
+        RateLimitProperties properties = new RateLimitProperties();
+        properties.getLimits().put(RateLimitType.INBOUND, new RateLimitProperties.Limit(capacity, refillPerSecond));
+        RateLimiters rateLimiters = new RateLimiters(properties, mockClock);
+
+        interceptor = new InboundRateLimitInterceptor(rateLimiters);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
     }
@@ -100,7 +99,7 @@ class RateLimitInterceptorTest {
     // --- 테스트를 위한 더미(Dummy) 컨트롤러 클래스들 ---
 
     static class DummyController {
-        @RateLimit(key = "method-limit")
+        @InboundRateLimit(key = "method-limit")
         public void methodLevelLimit() {
         }
 
@@ -108,7 +107,7 @@ class RateLimitInterceptorTest {
         }
     }
 
-    @RateLimit(key = "class-limit")
+    @InboundRateLimit(key = "class-limit")
     static class DummyClassLevelController {
         public void classLevelLimit() {
         }
