@@ -1,6 +1,7 @@
 package roomescape.payment.order;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +23,16 @@ public class OrderRepository {
       throw new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId);
     }
     return order;
+  }
+
+  public Optional<Order> findByReservationId(Long reservationId) {
+    return store.values().stream()
+        .filter(o -> o.getReservationId().equals(reservationId))
+        .findFirst();
+  }
+
+  public void updatePaymentKey(String orderId, String paymentKey) {
+    getByOrderId(orderId).setPaymentKey(paymentKey);
   }
 
 }
