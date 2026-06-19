@@ -14,11 +14,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.client.TossConfirmResultUnknownException;
 import roomescape.client.TossConnectionException;
 import roomescape.client.TossPaymentException;
-import roomescape.client.TossPaymentGateway;
-import roomescape.client.dto.TossPaymentResponse;
 import roomescape.controller.client.dto.response.PreparePaymentResponse;
 import roomescape.domain.PaymentOrder;
 import roomescape.domain.PaymentOrderStatus;
+import roomescape.domain.PaymentResult;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
@@ -49,7 +48,7 @@ class PaymentServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     private FakeThemeRepository themeRepository;
     private FakePaymentOrderRepository paymentOrderRepository;
-    private TossPaymentGateway tossPaymentGateway;
+    private PaymentGateway paymentGateway;
     private PaymentService paymentService;
 
     @BeforeEach
@@ -58,7 +57,7 @@ class PaymentServiceTest {
         this.reservationTimeRepository = new FakeReservationTimeRepository();
         this.themeRepository = new FakeThemeRepository();
         this.paymentOrderRepository = new FakePaymentOrderRepository();
-        this.tossPaymentGateway = Mockito.mock(TossPaymentGateway.class);
+        this.paymentGateway = Mockito.mock(PaymentGateway.class);
         ReservationQueryRepository reservationQueryRepository = Mockito.mock(ReservationQueryRepository.class);
         ReservationService reservationService = new ReservationService(
                 reservationRepository,
@@ -72,7 +71,7 @@ class PaymentServiceTest {
                 themeRepository,
                 reservationTimeRepository,
                 paymentOrderRepository,
-                tossPaymentGateway,
+                paymentGateway,
                 reservationService,
                 reservationQueryRepository,
                 TestDateTimes.fixedClock()
@@ -216,9 +215,8 @@ class PaymentServiceTest {
         // given
         Long amount = ThemeFixture.DEFAULT_PRICE;
         long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
-        TossPaymentResponse response = new TossPaymentResponse(
-                "payment-key-1", "order-1", "주문명", "DONE", amount, "카드", "2024-01-01T00:00:00");
-        when(tossPaymentGateway.confirm(any())).thenReturn(response);
+        PaymentResult response = new PaymentResult("order-1", "DONE", amount, "2024-01-01T00:00:00");
+        when(paymentGateway.confirm(any())).thenReturn(response);
 
         // when
         var result = paymentService.confirm("payment-key-1", "order-1", amount);
@@ -236,9 +234,8 @@ class PaymentServiceTest {
         // given
         Long amount = ThemeFixture.DEFAULT_PRICE;
         preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
-        TossPaymentResponse response = new TossPaymentResponse(
-                "payment-key-1", "order-1", "주문명", "DONE", amount, "카드", "2024-01-01T00:00:00");
-        when(tossPaymentGateway.confirm(any())).thenReturn(response);
+        PaymentResult response = new PaymentResult("order-1", "DONE", amount, "2024-01-01T00:00:00");
+        when(paymentGateway.confirm(any())).thenReturn(response);
 
         // when
         paymentService.confirm("payment-key-1", "order-1", amount);
@@ -254,7 +251,7 @@ class PaymentServiceTest {
         // given
         Long amount = ThemeFixture.DEFAULT_PRICE;
         long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
-        when(tossPaymentGateway.confirm(any()))
+        when(paymentGateway.confirm(any()))
                 .thenThrow(new TossConfirmResultUnknownException(new RuntimeException("read timeout")));
 
         // when & then
@@ -287,9 +284,8 @@ class PaymentServiceTest {
         // given: confirm()까지 성공해 RESERVED + CONFIRMED 상태
         Long amount = ThemeFixture.DEFAULT_PRICE;
         long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
-        TossPaymentResponse response = new TossPaymentResponse(
-                "payment-key-1", "order-1", "주문명", "DONE", amount, "카드", "2024-01-01T00:00:00");
-        when(tossPaymentGateway.confirm(any())).thenReturn(response);
+        PaymentResult response = new PaymentResult("order-1", "DONE", amount, "2024-01-01T00:00:00");
+        when(paymentGateway.confirm(any())).thenReturn(response);
         paymentService.confirm("payment-key-1", "order-1", amount);
 
         // when: 브라우저 뒤로가기 등으로 cancel이 뒤늦게 호출됨
@@ -308,7 +304,7 @@ class PaymentServiceTest {
         // given
         Long amount = ThemeFixture.DEFAULT_PRICE;
         long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
-        when(tossPaymentGateway.confirm(any()))
+        when(paymentGateway.confirm(any()))
                 .thenThrow(new TossConnectionException(new RuntimeException("connect timeout")));
 
         // when & then
@@ -346,7 +342,7 @@ class PaymentServiceTest {
         // given
         Long amount = ThemeFixture.DEFAULT_PRICE;
         long entryId = preparePendingEntry("이프", paymentOrderRepository, "order-1", amount);
-        when(tossPaymentGateway.confirm(any()))
+        when(paymentGateway.confirm(any()))
                 .thenThrow(new TossPaymentException.AlreadyProcessed("이미 처리된 결제입니다."));
 
         // when & then

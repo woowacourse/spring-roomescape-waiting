@@ -16,8 +16,8 @@ import org.springframework.web.context.WebApplicationContext;
 import roomescape.client.TossConfirmResultUnknownException;
 import roomescape.client.TossConnectionException;
 import roomescape.client.TossPaymentException;
-import roomescape.client.dto.TossPaymentResponse;
 import roomescape.controller.BaseControllerUnitTest;
+import roomescape.domain.PaymentResult;
 import roomescape.service.PaymentService;
 import roomescape.service.result.PaymentConfirmResult;
 
@@ -34,8 +34,7 @@ class PageControllerTest extends BaseControllerUnitTest {
 
     @Test
     void 결제_승인에_성공하면_성공_화면에_예약_정보가_노출된다() {
-        TossPaymentResponse response = new TossPaymentResponse(
-                "payment-key-1", "order-1", "주문명", "DONE", 30000L, "카드", "2024-01-01T00:00:00");
+        PaymentResult response = new PaymentResult("order-1", "DONE", 30000L, "2024-01-01T00:00:00");
         PaymentConfirmResult result = new PaymentConfirmResult(
                 response, "공포테마", "https://image.com/image.png", LocalDate.of(2024, 1, 2), LocalTime.of(10, 0));
         when(paymentService.confirm(any(), any(), any())).thenReturn(result);

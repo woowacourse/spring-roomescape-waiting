@@ -12,10 +12,12 @@ import org.springframework.web.client.RestClientException;
 import roomescape.client.dto.PaymentConfirmation;
 import roomescape.client.dto.TossErrorResponse;
 import roomescape.client.dto.TossPaymentResponse;
+import roomescape.domain.PaymentResult;
+import roomescape.service.PaymentGateway;
 
 @Slf4j
 @Component
-public class TossPaymentGateway {
+public class TossPaymentGateway implements PaymentGateway {
 
     private static final int MAX_CONNECTION_ATTEMPTS = 3;
     private static final long CONNECTION_RETRY_DELAY_MS = 300;
@@ -28,8 +30,10 @@ public class TossPaymentGateway {
         this.objectMapper = objectMapper;
     }
 
-    public TossPaymentResponse confirm(PaymentConfirmation confirmation) {
-        return withConnectionRetry(() -> doConfirm(confirmation));
+    @Override
+    public PaymentResult confirm(PaymentConfirmation confirmation) {
+        TossPaymentResponse response = withConnectionRetry(() -> doConfirm(confirmation));
+        return new PaymentResult(response.orderId(), response.status(), response.approvedAmount(), response.approvedAt());
     }
 
     private TossPaymentResponse doConfirm(PaymentConfirmation confirmation) {

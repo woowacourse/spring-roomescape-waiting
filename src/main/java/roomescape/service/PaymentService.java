@@ -13,11 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.client.TossConfirmResultUnknownException;
 import roomescape.client.TossConnectionException;
-import roomescape.client.TossPaymentGateway;
 import roomescape.client.dto.PaymentConfirmation;
-import roomescape.client.dto.TossPaymentResponse;
 import roomescape.controller.client.dto.response.PreparePaymentResponse;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentResult;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
@@ -43,7 +42,7 @@ public class PaymentService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final PaymentOrderRepository paymentOrderRepository;
-    private final TossPaymentGateway tossPaymentGateway;
+    private final PaymentGateway paymentGateway;
     private final ReservationService reservationService;
     private final ReservationQueryRepository reservationQueryRepository;
     private final Clock clock;
@@ -67,9 +66,9 @@ public class PaymentService {
         }
 
         log.info("[결제 승인 요청] orderId={} paymentKey={} amount={}", orderId, paymentKey, amount);
-        TossPaymentResponse response;
+        PaymentResult response;
         try {
-            response = tossPaymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+            response = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
         } catch (TossConfirmResultUnknownException e) {
             // 응답을 받지 못해 승인 여부 불명 - 상태만 기록하고 entry는 PENDING으로 유지(재시도 가능). 예외는 그대로 전파.
             paymentOrderRepository.update(paymentOrder.resultUnknown());
