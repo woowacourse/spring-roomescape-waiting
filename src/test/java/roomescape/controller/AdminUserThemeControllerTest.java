@@ -55,7 +55,8 @@ class AdminUserThemeControllerTest {
                                 {
                                   "name": "잠긴 방",
                                   "description": "설명",
-                                  "thumbnailUrl": "https://example.com/theme.jpg"
+                                  "thumbnailUrl": "https://example.com/theme.jpg",
+                                  "price": 20000
                                 }
                                 """))
                 .andExpect(status().isCreated())

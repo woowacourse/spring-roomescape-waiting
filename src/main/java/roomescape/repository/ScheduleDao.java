@@ -23,7 +23,8 @@ public class ScheduleDao {
                     rs.getLong("theme_id"),
                     rs.getString("theme_name"),
                     rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail")
+                    rs.getString("theme_thumbnail"),
+                    rs.getInt("theme_price")
             ),
             rs.getDate("date").toLocalDate(),
             new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime())
@@ -56,7 +57,8 @@ public class ScheduleDao {
                    th.id  AS theme_id,
                    th.name AS theme_name,
                    th.description AS theme_description,
-                   th.thumbnail_url AS theme_thumbnail
+                   th.thumbnail_url AS theme_thumbnail,
+                   th.price AS theme_price
             FROM schedule AS s
             INNER JOIN reservation_time AS t  ON s.time_id  = t.id
             INNER JOIN theme            AS th ON s.theme_id = th.id
@@ -91,7 +93,8 @@ public class ScheduleDao {
                    th.id AS theme_id,
                    th.name AS theme_name,
                    th.description AS theme_description,
-                   th.thumbnail_url AS theme_thumbnail
+                   th.thumbnail_url AS theme_thumbnail,
+                   th.price AS theme_price
             FROM schedule AS s
             INNER JOIN reservation_time AS t
                     ON s.time_id = t.id

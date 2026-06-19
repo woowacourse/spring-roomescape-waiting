@@ -14,7 +14,7 @@ import roomescape.domain.exception.RoomescapeException;
 
 class ScheduleTest {
 
-    private final Theme theme = new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg");
+    private final Theme theme = new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg", 20000);
     private final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
 
     @DisplayName("스케줄은 테마, 날짜, 시간을 저장한다.")

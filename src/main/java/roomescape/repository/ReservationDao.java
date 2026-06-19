@@ -27,7 +27,8 @@ public class ReservationDao {
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
                 rs.getString("theme_description"),
-                rs.getString("theme_thumbnail")
+                rs.getString("theme_thumbnail"),
+                rs.getInt("theme_price")
         );
         Schedule schedule = new Schedule(
                 rs.getLong("schedule_id"),
@@ -113,7 +114,8 @@ public class ReservationDao {
                     th.id          AS theme_id,
                     th.name        AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail_url AS theme_thumbnail
+                    th.thumbnail_url AS theme_thumbnail,
+                    th.price AS theme_price
                 FROM reservation AS r
                 INNER JOIN users            AS u  ON r.user_id     = u.id
                 INNER JOIN schedule         AS s  ON r.schedule_id = s.id
@@ -149,7 +151,8 @@ public class ReservationDao {
                    th.id            AS theme_id,
                    th.name          AS theme_name,
                    th.description   AS theme_description,
-                   th.thumbnail_url AS theme_thumbnail
+                   th.thumbnail_url AS theme_thumbnail,
+                   th.price         AS theme_price
             FROM reservation AS r
             INNER JOIN users            AS u  ON r.user_id     = u.id
             INNER JOIN schedule         AS s  ON r.schedule_id = s.id
@@ -192,6 +195,7 @@ public class ReservationDao {
                    th.name          AS theme_name,
                    th.description   AS theme_description,
                    th.thumbnail_url AS theme_thumbnail,
+                   th.price         AS theme_price,
                    COALESCE(ao.waiting_order, 0) AS waiting_order
             FROM reservation AS r
             INNER JOIN users            AS u  ON r.user_id     = u.id
@@ -233,6 +237,7 @@ public class ReservationDao {
                    th.name          AS theme_name,
                    th.description   AS theme_description,
                    th.thumbnail_url AS theme_thumbnail,
+                   th.price         AS theme_price,
                    COALESCE(ao.waiting_order, 0) AS waiting_order
             FROM reservation AS r
             INNER JOIN users            AS u  ON r.user_id     = u.id

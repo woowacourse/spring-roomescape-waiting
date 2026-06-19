@@ -16,7 +16,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import roomescape.controller.dto.LoginMemberResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.global.auth.AdminAuthorizationInterceptor;
@@ -43,7 +42,7 @@ class AdminMemberControllerTest {
     void findUsers() throws Exception {
         given(authService.getLoginMember(7L)).willReturn(new Member(7L, "admin", "관리자", "password", Role.ADMIN));
         given(memberService.findUsers()).willReturn(List.of(
-                new LoginMemberResponse(1L, "roro", "러로", Role.USER)
+                new Member(1L, "roro", "러로", "password", Role.USER)
         ));
 
         mockMvc.perform(get("/admin/members").session(adminSession()))

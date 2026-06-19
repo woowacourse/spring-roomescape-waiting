@@ -20,9 +20,7 @@
 #
 #   (1) You need a POSIX-compliant shell to ru# See the License for the specific language governing permissions and
                                               # limitations under the License.
-                                              #
-
-n this script. If your /bin/sh is
+                                              # n this script. If your /bin/sh is
 #       noncompliant, but you have some other compliant shell such as ksh or
 #       bash, then to run this script, type that shell name before the whole
 #       command line, like:

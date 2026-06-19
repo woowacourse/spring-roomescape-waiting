@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RoomEscape</title>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -209,6 +210,13 @@
       font-size: 13px;
       color: var(--muted);
       line-height: 1.5;
+    }
+
+    .theme-card-price {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
     }
 
     /* Popular theme rank badge */
@@ -732,7 +740,7 @@
             <span>예약자</span><span id="confirm-reserver">-</span>
           </div>
           <div class="btn-row" id="confirm-actions" style="margin-top:20px">
-            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">예약 확정</button>
+            <button class="btn btn-accent" onclick="submitPayment()" id="submit-reservationSlot-btn">결제하기</button>
             <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
           </div>
         </div>
@@ -781,7 +789,7 @@
 
     username = loginMember.name;
     document.getElementById('headerName').textContent = username;
-    switchSection('popular');
+    handlePaymentRedirect();
   }
 
   async function logout() {
@@ -794,6 +802,26 @@
     t.textContent = msg;
     t.className = `toast ${type} show`;
     setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  function handlePaymentRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    if (payment === 'success') {
+      switchSection('my');
+      showToast('예약이 확정되었습니다.');
+      window.history.replaceState({}, document.title, '/user.html');
+      return;
+    }
+    if (payment === 'fail') {
+      switchSection('booking');
+      const code = params.get('code');
+      const message = params.get('message') || '결제에 실패했습니다.';
+      showToast(code ? `${code}: ${message}` : message, 'error');
+      window.history.replaceState({}, document.title, '/user.html');
+      return;
+    }
+    switchSection('popular');
   }
 
   async function readErrorMessage(res, fallback) {
@@ -873,6 +901,7 @@
             <div class="${rankClass(i+1)} rank-badge">${i+1}</div>
             <div class="theme-card-name">${t.name}</div>
             <div class="theme-card-desc">${t.description}</div>
+            <div class="theme-card-price">${formatMoney(t.price)}</div>
           </div>
         </div>
       `).join('');
@@ -911,6 +940,7 @@
           <div class="theme-card-body">
             <div class="theme-card-name">${t.name}</div>
             <div class="theme-card-desc">${t.description}</div>
+            <div class="theme-card-price">${formatMoney(t.price)}</div>
           </div>
         </div>
       `).join('');
@@ -927,7 +957,7 @@
     document.getElementById('confirm-box-title').textContent = '예약 확인';
     document.getElementById('confirm-id-row').style.display = 'none';
     document.getElementById('confirm-actions').innerHTML = `
-      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">예약 확정</button>
+      <button class="btn btn-accent" onclick="submitPayment()" id="submit-reservationSlot-btn">결제하기</button>
       <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
     `;
   }
@@ -956,6 +986,7 @@
       <div>
         <h3>${theme.name}</h3>
         <p>${theme.description}</p>
+        <p>${formatMoney(theme.price)}</p>
       </div>
     `;
     document.getElementById('selected-theme-info').innerHTML = themeInfoHtml;
@@ -1104,6 +1135,54 @@
       showToast(e.message, 'error');
       recoverReservationFlow(e);
     }
+  }
+
+  async function submitPayment() {
+    try {
+      const order = await fetchJson(`${API}/payments/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: selectedDate || null,
+          timeId: selectedTime?.id || null,
+          themeId: selectedTheme.id
+        })
+      }, '결제 주문 생성에 실패했습니다.');
+
+      const tossPayments = TossPayments(order.clientKey);
+      const payment = tossPayments.payment({ customerKey: TossPayments.ANONYMOUS });
+      await payment.requestPayment({
+        method: 'CARD',
+        amount: {
+          currency: 'KRW',
+          value: order.amount
+        },
+        orderId: order.orderId,
+        orderName: order.orderName,
+        customerName: username,
+        successUrl: order.successUrl,
+        failUrl: order.failUrl
+      });
+    } catch (e) {
+      console.error('Toss payment error', e);
+      showToast(paymentErrorMessage(e), 'error');
+      recoverReservationFlow(e);
+    }
+  }
+
+  function paymentErrorMessage(error) {
+    const code = error?.code || error?.errorCode || error?.data?.code;
+    const message = error?.message || error?.errorMessage || error?.data?.message;
+    if (code && message) {
+      return `${code}: ${message}`;
+    }
+    if (message) {
+      return message;
+    }
+    if (code) {
+      return `${code}: 결제창을 열 수 없습니다.`;
+    }
+    return 'Toss 결제창을 열 수 없습니다. 클라이언트 키를 확인해주세요.';
   }
 
   async function recoverReservationFlow(error) {
@@ -1299,6 +1378,10 @@
     const d = new Date(dateStr + 'T00:00:00');
     const days = ['일','월','화','수','목','금','토'];
     return `${dateStr} (${days[d.getDay()]})`;
+  }
+
+  function formatMoney(amount) {
+    return `${Number(amount ?? 0).toLocaleString('ko-KR')}원`;
   }
 
   init();

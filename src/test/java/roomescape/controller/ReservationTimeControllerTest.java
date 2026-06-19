@@ -23,8 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import roomescape.controller.dto.ReservationTimeResponse;
 import roomescape.domain.Member;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
@@ -52,7 +52,7 @@ class ReservationTimeControllerTest {
     void findAll() throws Exception {
         given(authService.getLoginMember(7L)).willReturn(admin());
         given(reservationTimeService.findAll()).willReturn(List.of(
-                new ReservationTimeResponse(1L, LocalTime.of(10, 0))
+                new ReservationTime(1L, LocalTime.of(10, 0))
         ));
 
         mockMvc.perform(get("/admin/times").session(adminSession()))

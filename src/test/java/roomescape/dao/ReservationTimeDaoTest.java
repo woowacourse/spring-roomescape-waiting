@@ -103,10 +103,11 @@ class ReservationTimeDaoTest {
 
     private Long insertTheme(String name) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
                 name,
                 name + " 설명",
-                "https://example.com/" + name + ".jpg"
+                "https://example.com/" + name + ".jpg",
+                20000
         );
         return jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, name);
     }
