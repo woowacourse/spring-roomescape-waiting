@@ -16,7 +16,8 @@ public class PaymentHistoryDao {
 
     public void save(PaymentHistory paymentHistory) {
         String sql = """
-                INSERT INTO payment_history (order_id, payment_key, amount, status, created_at)
+                MERGE INTO payment_history (order_id, payment_key, amount, status, created_at)
+                KEY (order_id)
                 VALUES (?, ?, ?, ?, ?)
                 """;
 

@@ -43,16 +43,19 @@ export default class SearchResultView extends View {
             const item = createElement("div", "reservation-item");
             const isWaiting = slot.status === "WAITING";
             const cancellationRestricted = !isWaiting && this.isCancellationRestricted(slot.date);
+            const paymentLabel = this.paymentLabel(slot);
+            const paymentClass = this.paymentClass(slot);
 
             item.dataset.id = slot.id;
 
             item.innerHTML = `
-                <div>
+                <div class="res-main">
                     <div class="res-title-row">
                         <div class="res-theme">${slot.theme}</div>
                         <span class="res-status ${isWaiting ? "waiting" : "reserved"}">
                             ${isWaiting ? `대기 ${slot.waitingRank}번` : "예약"}
                         </span>
+                        <span class="payment-status ${paymentClass}">${paymentLabel}</span>
                     </div>
 
                     <div class="res-details">
@@ -61,6 +64,12 @@ export default class SearchResultView extends View {
                         ${slot.startAt.slice(0, 5)}
                         ·
                         ${slot.name}
+                    </div>
+
+                    <div class="payment-details">
+                        <span>주문번호 ${slot.orderId || "-"}</span>
+                        <span>결제키 ${slot.paymentKey || "-"}</span>
+                        <span>금액 ${slot.paymentAmount ? Number(slot.paymentAmount).toLocaleString("ko-KR") + "원" : "-"}</span>
                     </div>
                 </div>
 
@@ -84,6 +93,32 @@ export default class SearchResultView extends View {
 
             this.element.appendChild(item);
         });
+    }
+
+    paymentLabel(slot) {
+        if (slot.paymentStatus === "DONE" || slot.orderStatus === "PAID") {
+            return "결제 확정";
+        }
+        if (slot.paymentStatus === "CHECK_REQUIRED") {
+            return "확인 필요";
+        }
+        if (slot.paymentStatus === "FAILED" || slot.orderStatus === "FAILED") {
+            return "결제 실패";
+        }
+        return "결제 대기";
+    }
+
+    paymentClass(slot) {
+        if (slot.paymentStatus === "DONE" || slot.orderStatus === "PAID") {
+            return "paid";
+        }
+        if (slot.paymentStatus === "CHECK_REQUIRED") {
+            return "check-required";
+        }
+        if (slot.paymentStatus === "FAILED" || slot.orderStatus === "FAILED") {
+            return "failed";
+        }
+        return "pending";
     }
 
     isCancellationRestricted(date) {

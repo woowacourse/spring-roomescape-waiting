@@ -5,11 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.service.command.PaymentConfirmCommand;
 import roomescape.domain.payment.PaymentHistory;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.event.publisher.EventPublisher;
 import roomescape.exception.PaymentException;
 import roomescape.persistence.PaymentHistoryRepository;
 import roomescape.pg.PaymentConfirmation;
 import roomescape.pg.PaymentGateway;
+import roomescape.pg.PaymentGatewayResult;
 import roomescape.pg.PaymentResult;
 
 @Service
@@ -23,8 +25,38 @@ public class PaymentService {
 
     @Transactional
     public PaymentResult confirm(PaymentConfirmCommand command, long expectedAmount) {
-        PaymentResult payment = confirmToPayGateway(command, expectedAmount);
-        PaymentHistory paymentHistory = PaymentHistory.approved(
+        validatePaymentAmount(command, expectedAmount);
+        PaymentGatewayResult result = paymentGateway.confirm(new PaymentConfirmation(
+                command.paymentKey(),
+                command.orderId(),
+                command.amount()
+        ));
+        return handleGatewayResult(command, result);
+    }
+
+    private void validatePaymentAmount(PaymentConfirmCommand command, long expectedAmount) {
+        if (expectedAmount != command.amount()) {
+            record(command, PaymentStatus.FAILED);
+            throw new PaymentException.AmountMismatch(expectedAmount, command.amount());
+        }
+    }
+
+    private PaymentResult handleGatewayResult(PaymentConfirmCommand command, PaymentGatewayResult result) {
+        return switch (result) {
+            case PaymentGatewayResult.Approved approved -> approve(approved.payment());
+            case PaymentGatewayResult.Unknown ignored -> {
+                record(command, PaymentStatus.CHECK_REQUIRED);
+                throw new PaymentException.CheckRequired();
+            }
+            case PaymentGatewayResult.Rejected rejected -> {
+                record(command, PaymentStatus.FAILED);
+                throw new PaymentException.Rejected(rejected.message());
+            }
+        };
+    }
+
+    private PaymentResult approve(PaymentResult payment) {
+        PaymentHistory paymentHistory = PaymentHistory.record(
                 payment.orderId(),
                 payment.paymentKey(),
                 payment.approvedAmount(),
@@ -35,18 +67,13 @@ public class PaymentService {
         return payment;
     }
 
-    private PaymentResult confirmToPayGateway(PaymentConfirmCommand command, long expectedAmount) {
-        validatePaymentAmount(expectedAmount, command.amount());
-        return paymentGateway.confirm(new PaymentConfirmation(
-                command.paymentKey(),
+    private void record(PaymentConfirmCommand command, PaymentStatus status) {
+        paymentHistoryRepository.save(PaymentHistory.record(
                 command.orderId(),
-                command.amount()
+                command.paymentKey(),
+                command.amount(),
+                status
         ));
     }
 
-    private void validatePaymentAmount(long orderAmount, long amount) {
-        if (orderAmount != amount) {
-            throw new PaymentException.AmountMismatch(orderAmount, amount);
-        }
-    }
 }

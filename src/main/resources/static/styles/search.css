@@ -86,6 +86,7 @@ label {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 14px;
     padding: 14px;
     border: 1px solid #f2f4f6;
     border-radius: 12px;
@@ -100,6 +101,10 @@ label {
     font-size: 14px;
     font-weight: 600;
     color: #191f28;
+}
+
+.res-main {
+    min-width: 0;
 }
 
 .res-title-row {
@@ -128,13 +133,54 @@ label {
     color: #ad6800;
 }
 
+.payment-status {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.payment-status.pending {
+    background: #f2f4f6;
+    color: #4e5968;
+}
+
+.payment-status.paid {
+    background: #ecfdf3;
+    color: #0f8f45;
+}
+
+.payment-status.check-required {
+    background: #fff7e6;
+    color: #ad6800;
+}
+
+.payment-status.failed {
+    background: #fff1f0;
+    color: #cf1322;
+}
+
 .res-details {
     margin-top: 4px;
     font-size: 12px;
     color: #8b95a1;
 }
 
+.payment-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 8px;
+    color: #6b7684;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
 .res-actions {
+    flex: 0 0 auto;
     display: flex;
     gap: 6px;
 }

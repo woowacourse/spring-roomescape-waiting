@@ -62,7 +62,7 @@ CREATE TABLE orders (
 CREATE TABLE payment_history (
     id             BIGINT       NOT NULL AUTO_INCREMENT,
     order_id       VARCHAR(64)  NOT NULL,
-    payment_key    VARCHAR(200) NOT NULL,
+    payment_key    VARCHAR(200),
     amount         BIGINT       NOT NULL,
     status         VARCHAR(30)  NOT NULL,
     created_at     TIMESTAMP    NOT NULL,

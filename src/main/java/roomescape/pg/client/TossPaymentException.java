@@ -1,17 +1,19 @@
 package roomescape.pg.client;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import roomescape.global.web.ExternalApiException;
+import lombok.Getter;
 import roomescape.pg.client.dto.TossErrorResponse;
 
-public class TossPaymentException extends ExternalApiException {
+@Getter
+public class TossPaymentException extends RuntimeException {
 
-    public TossPaymentException(HttpStatusCode status, String code, String message) {
-        super(status, code, message);
+    private final String code;
+
+    public TossPaymentException(String code, String message) {
+        super(message);
+        this.code = code;
     }
 
-    public static TossPaymentException of(HttpStatusCode status, TossErrorResponse error) {
+    public static TossPaymentException of(TossErrorResponse error) {
         return switch (error.code()) {
             case "ALREADY_PROCESSED_PAYMENT" -> new AlreadyProcessed(error.message());
             case "DUPLICATED_ORDER_ID" -> new DuplicatedOrder(error.message());
@@ -21,14 +23,14 @@ public class TossPaymentException extends ExternalApiException {
             case "REJECT_CARD_PAYMENT" -> new CardRejected(error.message());
             case "NOT_FOUND_PAYMENT" -> new PaymentNotFound(error.message());
             case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> new Retryable(error.message());
-            default -> new TossPaymentException(status, error.code(), error.message());
+            default -> new TossPaymentException(error.code(), error.message());
         };
     }
 
     public static class AlreadyProcessed extends TossPaymentException {
 
         public AlreadyProcessed(String message) {
-            super(HttpStatus.BAD_REQUEST, "ALREADY_PROCESSED_PAYMENT", message);
+            super("ALREADY_PROCESSED_PAYMENT", message);
         }
 
     }
@@ -36,7 +38,7 @@ public class TossPaymentException extends ExternalApiException {
     public static class DuplicatedOrder extends TossPaymentException {
 
         public DuplicatedOrder(String message) {
-            super(HttpStatus.BAD_REQUEST, "DUPLICATED_ORDER_ID", message);
+            super("DUPLICATED_ORDER_ID", message);
         }
 
     }
@@ -44,7 +46,7 @@ public class TossPaymentException extends ExternalApiException {
     public static class SessionExpired extends TossPaymentException {
 
         public SessionExpired(String message) {
-            super(HttpStatus.BAD_REQUEST, "NOT_FOUND_PAYMENT_SESSION", message);
+            super("NOT_FOUND_PAYMENT_SESSION", message);
         }
 
     }
@@ -52,7 +54,7 @@ public class TossPaymentException extends ExternalApiException {
     public static class InvalidRequest extends TossPaymentException {
 
         public InvalidRequest(String message) {
-            super(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", message);
+            super("INVALID_REQUEST", message);
         }
 
     }
@@ -60,7 +62,7 @@ public class TossPaymentException extends ExternalApiException {
     public static class GatewayConfig extends TossPaymentException {
 
         public GatewayConfig(String message) {
-            super(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED_KEY", message);
+            super("UNAUTHORIZED_KEY", message);
         }
 
     }
@@ -68,7 +70,7 @@ public class TossPaymentException extends ExternalApiException {
     public static class CardRejected extends TossPaymentException {
 
         public CardRejected(String message) {
-            super(HttpStatus.FORBIDDEN, "REJECT_CARD_PAYMENT", message);
+            super("REJECT_CARD_PAYMENT", message);
         }
 
     }
@@ -76,7 +78,7 @@ public class TossPaymentException extends ExternalApiException {
     public static class PaymentNotFound extends TossPaymentException {
 
         public PaymentNotFound(String message) {
-            super(HttpStatus.NOT_FOUND, "NOT_FOUND_PAYMENT", message);
+            super("NOT_FOUND_PAYMENT", message);
         }
 
     }
@@ -84,7 +86,7 @@ public class TossPaymentException extends ExternalApiException {
     public static class Retryable extends TossPaymentException {
 
         public Retryable(String message) {
-            super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
+            super("FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
         }
 
     }

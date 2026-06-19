@@ -5,6 +5,6 @@ package roomescape.pg;
  */
 public interface PaymentGateway {
 
-  PaymentResult confirm(PaymentConfirmation confirmation);
+  PaymentGatewayResult confirm(PaymentConfirmation confirmation);
 
 }

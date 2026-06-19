@@ -17,7 +17,12 @@ public final class ReservationQueryRowMapper {
                     rs.getTime("res_start_at").toLocalTime(),
                     rs.getString("theme_name"),
                     rs.getString("res_status"),
-                    rs.getObject("waiting_rank", Integer.class)
+                    rs.getObject("waiting_rank", Integer.class),
+                    rs.getString("order_id"),
+                    rs.getString("order_status"),
+                    rs.getString("payment_key"),
+                    rs.getObject("payment_amount", Long.class),
+                    rs.getString("payment_status")
             );
 
     public static final RowMapper<ReservationDetailResponse> RESERVATION_DETAIL_ROW_MAPPER = (rs, rowNum) ->
