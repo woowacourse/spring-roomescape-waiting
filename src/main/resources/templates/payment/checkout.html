@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제하기 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <style>
+    .payment-wrap {
+      max-width: 520px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .payment-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .07);
+    }
+
+    .payment-card h2 {
+      font-size: 20px;
+      margin: 0 0 24px;
+    }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+
+    .order-row .label {
+      color: #888;
+    }
+
+    .order-row .value {
+      font-weight: 600;
+    }
+
+    .order-row code {
+      font-size: 12px;
+      color: #555;
+      word-break: break-all;
+    }
+
+    #payment-method,
+    #agreement {
+      margin-top: 16px;
+    }
+
+    #pay-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--accent, #3182f6);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    #pay-btn:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+
+    #pay-btn:disabled {
+      background: #c3d7f5;
+      cursor: not-allowed;
+    }
+
+    .pay-hint {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #888;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--accent, #3182f6);
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/admin/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <nav class="nav">
+      <a href="/">홈</a>
+      <a href="/popular">인기 테마</a>
+      <a href="/reservation" class="active">예약하기</a>
+      <a href="/my-reservations">예약 관리</a>
+    </nav>
+  </div>
+</header>
+
+<div class="payment-wrap">
+  <div class="payment-card">
+    <h2><i class="fas fa-credit-card" style="color:var(--accent,#3182f6);margin-right:8px;"></i>결제하기</h2>
+
+    <div class="order-row">
+      <span class="label">주문명</span>
+      <span class="value" th:text="${orderName}">방탈출 예약</span>
+    </div>
+    <div class="order-row">
+      <span class="label">주문번호</span>
+      <code th:text="${orderId}">order-xxxx</code>
+    </div>
+    <div class="order-row">
+      <span class="label">결제금액</span>
+      <span class="value">
+        <span th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}">50,000</span>원
+      </span>
+    </div>
+
+    <div id="payment-method"></div>
+    <div id="agreement"></div>
+
+    <button id="pay-btn" disabled>결제하기</button>
+    <p class="pay-hint">샌드박스 테스트 환경입니다. 실제 결제가 이루어지지 않습니다.</p>
+    <a href="/reservation" class="back-link"><i class="fas fa-arrow-left"></i> 예약 선택으로 돌아가기</a>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const clientKey = /*[[${clientKey}]]*/ "test_ck_xxx";
+  const orderId = /*[[${orderId}]]*/ "order-1";
+  const orderName = /*[[${orderName}]]*/ "방탈출 예약";
+  const amountValue = /*[[${amount}]]*/ 50000;
+
+  const tossPayments = TossPayments(clientKey);
+  const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
+  const payBtn = document.getElementById("pay-btn");
+
+  (async () => {
+    try {
+      await widgets.setAmount({currency: "KRW", value: amountValue});
+      await Promise.all([
+        widgets.renderPaymentMethods({selector: "#payment-method", variantKey: "DEFAULT"}),
+        widgets.renderAgreement({selector: "#agreement", variantKey: "AGREEMENT"})
+      ]);
+      payBtn.disabled = false;
+    } catch (error) {
+      document.querySelector(".pay-hint").textContent = "결제위젯 렌더링 실패: " + error.message;
+    }
+  })();
+
+  payBtn.addEventListener("click", async () => {
+    try {
+      await widgets.requestPayment({
+        orderId: orderId,
+        orderName: orderName,
+        successUrl: window.location.origin + "/payments/success",
+        failUrl: window.location.origin + "/payments/fail"
+      });
+    } catch (error) {
+      if (error.code !== "USER_CANCEL") {
+        document.querySelector(".pay-hint").textContent = "결제 요청 실패: " + error.message;
+      }
+    }
+  });
+  /*]]>*/
+</script>
+</body>
+</html>

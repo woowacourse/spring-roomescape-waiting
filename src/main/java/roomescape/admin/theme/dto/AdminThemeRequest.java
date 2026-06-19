@@ -1,6 +1,7 @@
 package roomescape.admin.theme.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record AdminThemeRequest(
@@ -12,7 +13,10 @@ public record AdminThemeRequest(
         String description,
 
         @Size(max = 255, message = "URL은 255자를 초과할 수 없습니다.")
-        String imageUrl
+        String imageUrl,
+
+        @Positive(message = "가격은 양수여야 합니다.")
+        long price
 ) {
 
 }

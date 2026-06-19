@@ -72,16 +72,22 @@ function closeForm() {
   document.getElementById('new-name').value = '';
   document.getElementById('new-desc').value = '';
   document.getElementById('new-image').value = '';
+  document.getElementById('new-price').value = '';
 }
 
 function saveTheme() {
   const body = {
     name: document.getElementById('new-name').value.trim(),
     description: document.getElementById('new-desc').value.trim(),
-    imageUrl: document.getElementById('new-image').value.trim()
+    imageUrl: document.getElementById('new-image').value.trim(),
+    price: parseInt(document.getElementById('new-price').value, 10) || 0
   };
   if (!body.name || !body.description) {
     alert('이름과 설명을 입력해주세요.');
+    return;
+  }
+  if (body.price <= 0) {
+    alert('가격을 1원 이상 입력해주세요.');
     return;
   }
   apiFetch(THEME_API, {

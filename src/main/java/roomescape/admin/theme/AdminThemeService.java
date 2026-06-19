@@ -32,7 +32,8 @@ public class AdminThemeService {
         Theme theme = Theme.of(
                 request.name(),
                 request.description(),
-                request.imageUrl()
+                request.imageUrl(),
+                request.price()
         );
 
         Theme saved = adminThemeRepository.save(theme);

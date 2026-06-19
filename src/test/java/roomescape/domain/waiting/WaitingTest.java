@@ -29,7 +29,7 @@ class WaitingTest {
     @BeforeEach
     void setUp() {
         time = ReservationTime.of(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        theme = Theme.of(1L, "테마1", "설명", "https://example.com/image.jpg");
+        theme = Theme.of(1L, "테마1", "설명", "https://example.com/image.jpg", 50_000L);
         waiting1 = Waiting.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
         waiting2 = Waiting.of(2L, "유저2", LocalDate.of(2099, 12, 31), time, theme);
         waiting3 = Waiting.of(3L, "유저3", LocalDate.of(2099, 12, 31), time, theme);

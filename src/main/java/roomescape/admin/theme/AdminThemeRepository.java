@@ -26,16 +26,18 @@ public class AdminThemeRepository {
             resultSet.getLong("id"),
             resultSet.getString("name"),
             resultSet.getString("description"),
-            resultSet.getString("image_url")
+            resultSet.getString("image_url"),
+            resultSet.getLong("price")
     );
 
     public Theme save(Theme theme) {
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("name", theme.getName())
                 .addValue("description", theme.getDescription())
-                .addValue("image_url", theme.getImageUrl());
+                .addValue("image_url", theme.getImageUrl())
+                .addValue("price", theme.getPrice());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return Theme.of(id, theme.getName(), theme.getDescription(), theme.getImageUrl());
+        return Theme.of(id, theme.getName(), theme.getDescription(), theme.getImageUrl(), theme.getPrice());
     }
 
     public void deleteById(Long id) {

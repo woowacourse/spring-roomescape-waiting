@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 실패 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <style>
+    .result-wrap {
+      max-width: 520px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .result-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .07);
+    }
+
+    .result-card h2 {
+      font-size: 20px;
+      margin: 0 0 24px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      gap: 16px;
+    }
+
+    .info-row .label {
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .info-row .value-error {
+      text-align: right;
+      word-break: break-all;
+      color: #e03131;
+      font-weight: 600;
+    }
+
+    .info-row .value {
+      text-align: right;
+      word-break: break-all;
+      color: #555;
+    }
+
+    .result-actions {
+      margin-top: 24px;
+    }
+
+    .result-actions a {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      background: var(--accent, #3182f6);
+      color: #fff;
+      transition: background .2s;
+    }
+
+    .result-actions a:hover {
+      filter: brightness(1.1);
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/admin/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <nav class="nav">
+      <a href="/">홈</a>
+      <a href="/popular">인기 테마</a>
+      <a href="/reservation">예약하기</a>
+      <a href="/my-reservations">예약 관리</a>
+    </nav>
+  </div>
+</header>
+
+<div class="result-wrap">
+  <div class="result-card">
+    <h2><i class="fas fa-times-circle" style="color:#e03131;margin-right:8px;"></i>결제를 실패했어요</h2>
+
+    <div class="info-row">
+      <span class="label">에러 코드</span>
+      <span class="value-error" th:text="${code} ?: '알 수 없음'">REJECT_CARD_PAYMENT</span>
+    </div>
+    <div class="info-row">
+      <span class="label">에러 메시지</span>
+      <span class="value-error" th:text="${message} ?: '알 수 없는 오류가 발생했습니다.'">에러 메시지</span>
+    </div>
+    <div class="info-row">
+      <span class="label">주문번호</span>
+      <span class="value" th:text="${orderId} ?: '(전달되지 않음)'">order-xxxx</span>
+    </div>
+
+    <div class="result-actions">
+      <a href="/reservation"><i class="fas fa-redo"></i> 다시 예약하기</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
