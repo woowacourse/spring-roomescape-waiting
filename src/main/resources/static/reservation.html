@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>예약하기</title>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -210,6 +211,48 @@
             line-height: 1.5;
         }
 
+        .payment-summary {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f3;
+            font-size: 14px;
+        }
+
+        .payment-row span {
+            color: #666;
+        }
+
+        .payment-row strong,
+        .payment-row code {
+            color: #1d1d1f;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .payment-row code {
+            font-size: 12px;
+        }
+
+        #payment-method,
+        #agreement {
+            margin-top: 12px;
+        }
+
+        .payment-hint {
+            margin: 14px 0 0;
+            color: #777;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         .hidden {
             display: none;
         }
@@ -241,7 +284,7 @@
 <body>
 <header>
     <h1>🔑 방탈출 예약</h1>
-    <a href="index.html">← 메인으로</a>
+    <a href="/">← 메인으로</a>
 </header>
 <main>
     <div id="toast" class="toast"></div>
@@ -268,20 +311,52 @@
         <p class="step-label">Step 3</p>
         <h3>예약자 이름</h3>
         <input type="text" id="name-input" placeholder="이름을 입력하세요" maxlength="30">
-        <button id="submit" class="submit-btn" disabled>예약하기</button>
         <div id="result"></div>
+    </div>
+
+    <div id="payment-step" class="step hidden">
+        <p class="step-label">Step 4</p>
+        <h3>결제</h3>
+        <div class="payment-summary">
+            <div class="payment-row">
+                <span>주문명</span>
+                <strong id="payment-order-name">방탈출 예약</strong>
+            </div>
+            <div class="payment-row">
+                <span>주문번호</span>
+                <code id="payment-order-id">-</code>
+            </div>
+            <div class="payment-row">
+                <span>결제금액</span>
+                <strong id="payment-amount">50,000원</strong>
+            </div>
+        </div>
+
+        <div id="payment-method"></div>
+        <div id="agreement"></div>
+
+        <button id="pay-button" class="submit-btn" disabled>결제창 열기</button>
+        <button id="submit" class="submit-btn" disabled>예약하기</button>
+        <p id="payment-hint" class="payment-hint"></p>
     </div>
 </main>
 
 <script>
     const params = new URLSearchParams(window.location.search);
     const themeId = params.get('themeId');
+    const PAYMENT_DRAFT_KEY = 'roomescape-payment-draft';
 
     let selectedTimeId = null;
     let selectedTimeStatus = null;
+    let paymentWidgets = null;
+    let paymentReady = null;
+    let paymentWidgetRendered = false;
+    let paymentWidgetRendering = null;
+    let paymentAuthenticated = false;
+    let currentTheme = null;
 
     if (!themeId) {
-        document.querySelector('main').innerHTML = '<p class="error">테마가 선택되지 않았습니다. <a href="index.html">메인으로</a></p>';
+        document.querySelector('main').innerHTML = '<p class="error">테마가 선택되지 않았습니다. <a href="/">메인으로</a></p>';
     } else {
         init();
     }
@@ -301,6 +376,7 @@
                 container.innerHTML = '<div class="theme-info-body"><p class="error">테마를 찾을 수 없습니다.</p></div>';
                 return;
             }
+            currentTheme = theme;
             container.innerHTML = `
                 <img src="${theme.thumbnailUrl}" alt="${theme.name}"
                      onerror="this.style.background='#e0e0e0'; this.removeAttribute('src');">
@@ -349,6 +425,7 @@
         selectedTimeId = null;
         selectedTimeStatus = null;
         document.getElementById('name-step').classList.add('hidden');
+        resetPaymentPreview();
         document.getElementById('result').innerHTML = '';
         document.getElementById('submit').textContent = '예약하기';
         document.getElementById('submit').classList.remove('waiting');
@@ -400,6 +477,7 @@
         btn.classList.add('selected');
         selectedTimeId = btn.dataset.id;
         selectedTimeStatus = btn.dataset.status;
+        resetPaymentPreview();
 
         const submitBtn = document.getElementById('submit');
         if (selectedTimeStatus === 'WAITING') {
@@ -411,14 +489,220 @@
         }
         document.getElementById('name-step').classList.remove('hidden');
         validateForm();
+        updatePaymentPreview();
     }
 
-    document.getElementById('name-input').addEventListener('input', validateForm);
+    document.getElementById('name-input').addEventListener('input', () => {
+        validateForm();
+        updatePaymentPreview();
+    });
     document.getElementById('submit').addEventListener('click', submit);
+    document.getElementById('pay-button').addEventListener('click', requestPayment);
 
     function validateForm() {
         const name = document.getElementById('name-input').value.trim();
-        document.getElementById('submit').disabled = !(name && selectedTimeId);
+        const requiresPayment = selectedTimeStatus === 'AVAILABLE';
+        document.getElementById('submit').disabled = !(name && selectedTimeId && (!requiresPayment || paymentAuthenticated));
+    }
+
+    async function updatePaymentPreview() {
+        const name = document.getElementById('name-input').value.trim();
+        if (!name) {
+            resetPaymentPreview();
+            return;
+        }
+
+        if (selectedTimeStatus === 'WAITING') {
+            document.getElementById('payment-step').classList.remove('hidden');
+            document.getElementById('payment-method').classList.add('hidden');
+            document.getElementById('agreement').classList.add('hidden');
+            document.getElementById('pay-button').classList.add('hidden');
+            document.getElementById('payment-hint').textContent = '대기 신청은 결제 없이 진행됩니다.';
+            return;
+        }
+
+        document.getElementById('payment-method').classList.remove('hidden');
+        document.getElementById('agreement').classList.remove('hidden');
+        document.getElementById('pay-button').classList.remove('hidden');
+
+        resetPaymentPreview();
+
+        document.getElementById('payment-step').classList.remove('hidden');
+        document.getElementById('payment-hint').textContent = paymentAuthenticated
+                ? '결제 인증이 완료되었습니다. 예약을 생성하는 중입니다.'
+                : '결제수단과 약관 영역을 준비하는 중입니다.';
+
+        try {
+            paymentReady = await loadPaymentReady();
+            renderPaymentSummary(paymentReady);
+            await renderPaymentWidgetOnce();
+            document.getElementById('pay-button').disabled = paymentAuthenticated;
+            document.getElementById('pay-button').classList.toggle('hidden', paymentAuthenticated);
+            if (!paymentAuthenticated) {
+                document.getElementById('payment-hint').textContent = '샌드박스 테스트 결제입니다. 실제 출금은 발생하지 않습니다.';
+            }
+        } catch (error) {
+            document.getElementById('payment-hint').textContent = `결제위젯 렌더링 실패: ${error.message}`;
+        }
+    }
+
+    async function renderPaymentWidgetOnce() {
+        if (paymentWidgetRendered) {
+            return;
+        }
+        if (paymentWidgetRendering) {
+            return paymentWidgetRendering;
+        }
+        if (!paymentReady) {
+            throw new Error('결제 준비 정보가 없습니다.');
+        }
+
+        paymentWidgetRendering = (async () => {
+            const tossPayments = TossPayments(paymentReady.clientKey);
+            paymentWidgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
+            await paymentWidgets.setAmount({currency: 'KRW', value: paymentReady.amount});
+            await Promise.all([
+                paymentWidgets.renderPaymentMethods({selector: '#payment-method', variantKey: 'DEFAULT'}),
+                paymentWidgets.renderAgreement({selector: '#agreement', variantKey: 'AGREEMENT'})
+            ]);
+            paymentWidgetRendered = true;
+        })();
+
+        try {
+            return await paymentWidgetRendering;
+        } finally {
+            paymentWidgetRendering = null;
+        }
+    }
+
+    async function loadPaymentReady() {
+        if (paymentReady) {
+            return paymentReady;
+        }
+
+        const reservationId = await createPendingReservation();
+        const response = await fetch(`/payments/ready?reservationId=${reservationId}`, {method: 'POST'});
+        if (!response.ok) {
+            const body = await response.json().catch(() => ({}));
+            throw new Error(body.message || '결제 준비에 실패했습니다.');
+        }
+        return await response.json();
+    }
+
+    async function createPendingReservation() {
+        const draft = getPaymentDraft();
+        if (draft?.reservationId) {
+            return draft.reservationId;
+        }
+
+        const response = await fetch('/user/reservations', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                name: document.getElementById('name-input').value.trim(),
+                date: document.getElementById('date-input').value,
+                timeId: Number(selectedTimeId),
+                themeId: Number(themeId)
+            })
+        });
+
+        if (!response.ok) {
+            const body = await response.json().catch(() => ({}));
+            throw new Error(body.message || '예약 생성에 실패했습니다.');
+        }
+
+        const reservation = await response.json();
+        return reservation.id;
+    }
+
+    function renderPaymentSummary(payment) {
+        document.getElementById('payment-order-name').textContent = payment.orderName;
+        document.getElementById('payment-order-id').textContent = payment.orderId;
+        document.getElementById('payment-amount').textContent = `${Number(payment.amount).toLocaleString()}원`;
+    }
+
+    function resetPaymentPreview() {
+        paymentReady = null;
+        paymentAuthenticated = false;
+        document.getElementById('payment-step').classList.add('hidden');
+        document.getElementById('pay-button').disabled = true;
+        document.getElementById('pay-button').classList.remove('hidden');
+        document.getElementById('payment-method').classList.remove('hidden');
+        document.getElementById('agreement').classList.remove('hidden');
+        document.getElementById('payment-hint').textContent = '';
+        document.getElementById('payment-order-id').textContent = '-';
+    }
+
+    async function requestPayment() {
+        const name = document.getElementById('name-input').value.trim();
+        const payButton = document.getElementById('pay-button');
+        const hint = document.getElementById('payment-hint');
+
+        if (!paymentWidgets || !paymentReady) {
+            hint.textContent = '결제 정보가 아직 준비되지 않았습니다.';
+            return;
+        }
+
+        payButton.disabled = true;
+        try {
+            savePaymentDraft();
+            await paymentWidgets.requestPayment({
+                orderId: paymentReady.orderId,
+                orderName: paymentReady.orderName,
+                customerName: name,
+                successUrl: paymentReturnUrl('success'),
+                failUrl: paymentReturnUrl('fail')
+            });
+        } catch (error) {
+            if (error.code === 'USER_CANCEL') {
+                const failUrl = new URL(paymentReturnUrl('fail'));
+                failUrl.searchParams.set('code', error.code);
+                failUrl.searchParams.set('message', error.message || '사용자가 결제를 취소했습니다.');
+                if (paymentReady?.orderId) {
+                    failUrl.searchParams.set('orderId', paymentReady.orderId);
+                }
+                window.location.href = failUrl.toString();
+                return;
+            }
+
+            hint.textContent = `결제 요청 실패: ${error.message}`;
+            payButton.disabled = false;
+        }
+    }
+
+    function savePaymentDraft() {
+        const draft = {
+            themeId,
+            date: document.getElementById('date-input').value,
+            timeId: selectedTimeId,
+            timeStartAt: selectedTimeText(),
+            name: document.getElementById('name-input').value.trim(),
+            themeName: currentTheme?.name,
+            reservationId: paymentReady?.reservationId,
+            payment: paymentReady
+        };
+        sessionStorage.setItem(PAYMENT_DRAFT_KEY, JSON.stringify(draft));
+    }
+
+    function getPaymentDraft() {
+        try {
+            const draft = JSON.parse(sessionStorage.getItem(PAYMENT_DRAFT_KEY));
+            return draft?.themeId === themeId ? draft : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function paymentReturnUrl(result) {
+        const origin = window.location.origin === 'null' ? 'http://localhost:8080' : window.location.origin;
+        const url = new URL(`/payments/${result}`, origin);
+        url.searchParams.set('themeId', themeId);
+        return url.toString();
+    }
+
+    function selectedTimeText() {
+        const selected = document.querySelector('.time-btn.selected');
+        return selected?.childNodes[0]?.textContent.trim() || '';
     }
 
     async function submit() {
@@ -428,6 +712,7 @@
         const submitBtn = document.getElementById('submit');
 
         submitBtn.disabled = true;
+        submitBtn.textContent = selectedTimeStatus === 'WAITING' ? '대기 신청 중...' : '예약 생성 중...';
         result.innerHTML = '';
 
         try {
@@ -449,10 +734,12 @@
                 const msg = body.message || `서버 오류 (${res.status})`;
                 result.innerHTML = `<p class="error">${actionName}에 실패했습니다. ${msg}</p>`;
                 submitBtn.disabled = false;
+                submitBtn.textContent = selectedTimeStatus === 'WAITING' ? '대기 신청하기' : '예약하기';
                 return;
             }
 
             const r = await res.json();
+            sessionStorage.removeItem(PAYMENT_DRAFT_KEY);
             if (selectedTimeStatus === 'WAITING') {
                 showToast(`${r.date} ${r.time.startAt} ${r.theme.name} 대기 ${r.order}번 신청 완료!`);
             } else {
@@ -464,6 +751,7 @@
         } catch (e) {
             result.innerHTML = `<p class="error">처리에 실패했습니다. ${e.message}</p>`;
             submitBtn.disabled = false;
+            submitBtn.textContent = selectedTimeStatus === 'WAITING' ? '대기 신청하기' : '예약하기';
         }
     }
 </script>

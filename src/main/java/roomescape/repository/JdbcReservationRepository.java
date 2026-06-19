@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -35,7 +36,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getString("reservation_name"),
                 rs.getDate("reservation_date").toLocalDate(),
                 time,
-                theme
+                theme,
+                ReservationStatus.valueOf(rs.getString("reservation_status"))
         );
     };
 
@@ -50,6 +52,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     th.id AS theme_id,
@@ -66,7 +69,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -75,6 +78,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             ps.setDate(2, Date.valueOf(reservation.getDate()));
             ps.setLong(3, reservation.getTime().getId());
             ps.setLong(4, reservation.getTheme().getId());
+            ps.setString(5, reservation.getStatus().name());
             return ps;
         }, keyHolder);
 
@@ -84,7 +88,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                reservation.getTheme()
+                reservation.getTheme(),
+                reservation.getStatus()
         );
     }
 
@@ -125,6 +130,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     th.id AS theme_id,
@@ -149,6 +155,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     th.id AS theme_id,
@@ -186,6 +193,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void updateStatus(Long id, ReservationStatus status) {
+        String sql = "UPDATE reservation SET status = ? WHERE id = ?";
+        jdbcTemplate.update(sql, status.name(), id);
+    }
+
+    @Override
     public boolean existsByThemeId(Long themeId) {
         String sql = """
                 SELECT EXISTS (
@@ -203,6 +216,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     th.id AS theme_id,

@@ -61,6 +61,4 @@ public class UserReservationController {
         ReservationResult updated = reservationService.updateByOwner(request.toCommand(id));
         return ReservationResponse.from(updated);
     }
-
-
 }
