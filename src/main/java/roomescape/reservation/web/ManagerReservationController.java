@@ -15,6 +15,8 @@ import roomescape.auth.service.ReservationAuthorizationService;
 import roomescape.member.Member;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.AdminReservationService;
+import roomescape.reservation.web.dto.AdminReservationResponseDto;
+import roomescape.reservation.web.dto.ReservationPatchDto;
 
 @RestController
 @RequestMapping("/manager/reservations")

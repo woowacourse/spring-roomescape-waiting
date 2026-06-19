@@ -32,8 +32,8 @@ import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.dao.ReservationJdbcDao;
 import roomescape.reservation.service.AdminReservationService;
 import roomescape.reservation.service.ReservationCreator;
-import roomescape.reservation.web.AdminReservationRequestDto;
-import roomescape.reservation.web.ReservationPatchDto;
+import roomescape.reservation.web.dto.AdminReservationRequestDto;
+import roomescape.reservation.web.dto.ReservationPatchDto;
 import roomescape.store.Store;
 import roomescape.store.dao.StoreJdbcDao;
 import roomescape.theme.Theme;
@@ -46,7 +46,7 @@ import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingDao;
 import roomescape.waiting.WaitingService;
 import roomescape.waiting.dao.WaitingJdbcDao;
-import roomescape.waiting.web.WaitingRequestDto;
+import roomescape.waiting.web.dto.WaitingRequestDto;
 import roomescape.worker.PromotionOutboxWorker;
 
 @JdbcTest

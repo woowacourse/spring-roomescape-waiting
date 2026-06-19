@@ -25,7 +25,7 @@ import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingDao;
 import roomescape.waiting.WaitingService;
 import roomescape.waiting.dao.WaitingJdbcDao;
-import roomescape.waiting.web.WaitingRequestDto;
+import roomescape.waiting.web.dto.WaitingRequestDto;
 
 @JdbcTest
 @Import({WaitingService.class, WaitingJdbcDao.class, ReservationJdbcDao.class})

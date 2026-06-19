@@ -18,6 +18,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.common.PageResponse;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.service.AdminReservationService;
+import roomescape.reservation.web.dto.AdminReservationRequestDto;
+import roomescape.reservation.web.dto.AdminReservationResponseDto;
+import roomescape.reservation.web.dto.ReservationPatchDto;
 
 @Validated
 @RestController

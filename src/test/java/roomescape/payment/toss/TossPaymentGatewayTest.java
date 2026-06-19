@@ -6,9 +6,12 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,8 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import roomescape.payment.PaymentApprovalStatus;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentResult;
+import roomescape.payment.exception.PaymentResultUnknownException;
 
 /**
  * 토스 승인 어댑터를 가짜 HTTP 서버(MockWebServer)로 검증한다.
@@ -49,6 +54,9 @@ class TossPaymentGatewayTest {
     static void tossProperties(DynamicPropertyRegistry registry) {
         registry.add("toss.base-url", () -> mockWebServer.url("/").toString());
         registry.add("toss.secret-key", () -> "test_sk_dummy");
+        // 타임아웃 테스트를 빠르게 돌리기 위해 짧게 둔다(즉시 응답하는 다른 테스트엔 영향 없음).
+        registry.add("toss.connect-timeout", () -> "500ms");
+        registry.add("toss.read-timeout", () -> "300ms");
     }
 
     @AfterAll
@@ -61,6 +69,12 @@ class TossPaymentGatewayTest {
                 .setResponseCode(statusCode)
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
+    }
+
+    private void drainRecordedRequests() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) {
+            // 공유 MockWebServer라 이전 테스트가 남긴 요청 기록을 비운다.
+        }
     }
 
     @Test
@@ -78,7 +92,7 @@ class TossPaymentGatewayTest {
                 """);
 
         PaymentResult result = tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 30000L));
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1"));
 
         assertThat(result.paymentKey()).isEqualTo("test_pk_1");
         assertThat(result.orderId()).isEqualTo("order-1");
@@ -87,13 +101,71 @@ class TossPaymentGatewayTest {
     }
 
     @Test
+    void confirm_요청에_주문의_Idempotency_Key를_헤더로_싣는다() throws InterruptedException {
+        drainRecordedRequests();
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "DONE", "totalAmount": 30000}
+                """);
+
+        tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-key-42"));
+
+        RecordedRequest recorded = mockWebServer.takeRequest(1, TimeUnit.SECONDS);
+        assertThat(recorded).isNotNull();
+        assertThat(recorded.getHeader("Idempotency-Key")).isEqualTo("idem-key-42");
+    }
+
+    @Test
+    void cancel_요청을_paymentKey_취소경로로_보내고_멱등키를_헤더로_싣는다() throws InterruptedException {
+        drainRecordedRequests();
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "CANCELED", "totalAmount": 30000}
+                """);
+
+        tossPaymentGateway.cancel("test_pk_1", "refund-idem-7");
+
+        RecordedRequest recorded = mockWebServer.takeRequest(1, TimeUnit.SECONDS);
+        assertThat(recorded).isNotNull();
+        assertThat(recorded.getPath()).isEqualTo("/v1/payments/test_pk_1/cancel");
+        assertThat(recorded.getHeader("Idempotency-Key")).isEqualTo("refund-idem-7");
+    }
+
+    @Test
     void 에러_상태인데_본문이_비어있어도_부서지지_않고_TossPaymentException으로_변환한다() {
         // 실제로 겪은 케이스: confirm-url 오설정 등으로 에러 status + 빈 본문이 올 때 핸들러가 터지면 안 된다.
         enqueue(404, "");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 30000L)))
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1")))
                 .isInstanceOf(TossPaymentException.class);
+    }
+
+    @Test
+    void read_timeout이면_결과를_모르는_예외로_번역한다() {
+        // connect는 성공(서버는 떠 있음)하지만 응답을 보내지 않아 read timeout을 유발한다.
+        // 결과가 불명확하므로 '확실히 안 됨'이 아니라 '모름'(PaymentResultUnknownException)으로 떨어져야 한다.
+        mockWebServer.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1")))
+                .isInstanceOf(PaymentResultUnknownException.class);
+    }
+
+    @Test
+    void 결제상태_조회가_DONE이면_APPROVED로_번역한다() {
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "DONE", "totalAmount": 30000}
+                """);
+
+        assertThat(tossPaymentGateway.findStatus("order-1")).isEqualTo(PaymentApprovalStatus.APPROVED);
+    }
+
+    @Test
+    void 결제상태_조회가_DONE이_아니면_NOT_APPROVED로_번역한다() {
+        enqueue(200, """
+                {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "READY", "totalAmount": 30000}
+                """);
+
+        assertThat(tossPaymentGateway.findStatus("order-1")).isEqualTo(PaymentApprovalStatus.NOT_APPROVED);
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")
@@ -102,7 +174,7 @@ class TossPaymentGatewayTest {
         enqueue(httpStatus, "{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 30000L)))
+                new PaymentConfirmation("test_pk_1", "order-1", 30000L, "idem-1")))
                 .isInstanceOf(expected);
     }
 

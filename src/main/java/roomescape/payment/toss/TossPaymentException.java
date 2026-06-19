@@ -2,6 +2,7 @@ package roomescape.payment.toss;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import roomescape.payment.toss.dto.TossErrorResponse;
 
 /**
  * 토스 결제 API 에러를 표현하는 예외. 토스 에러 응답({code, message})을 onStatus에서 이 예외로 변환한다.

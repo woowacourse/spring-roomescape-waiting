@@ -11,7 +11,7 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.Member;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationDao;
-import roomescape.waiting.web.WaitingRequestDto;
+import roomescape.waiting.web.dto.WaitingRequestDto;
 
 @Service
 @Transactional

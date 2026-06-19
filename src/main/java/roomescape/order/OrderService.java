@@ -27,7 +27,8 @@ public class OrderService {
      */
     public Order create(Long reservationId, long amount) {
         String orderId = UUID.randomUUID().toString();
-        return orderDao.insert(Order.create(orderId, reservationId, amount));
+        String idempotencyKey = UUID.randomUUID().toString();
+        return orderDao.insert(Order.create(orderId, idempotencyKey, reservationId, amount));
     }
 
     /**
@@ -55,13 +56,58 @@ public class OrderService {
         return orderDao.findByOrderId(orderId);
     }
 
-    public void complete(Order order, String paymentKey) {
-        order.complete(paymentKey);
-        orderDao.update(order);
+    /**
+     * 예약에 묶인 결제 완료(CONFIRMED) 주문을 찾는다. 결제된 예약을 취소할 때 환불 대상 주문을 집기 위함 —
+     * 결제 없이 확정된(어드민) 예약이면 비어 있다.
+     */
+    @Transactional(readOnly = true)
+    public Optional<Order> findConfirmedByReservationId(Long reservationId) {
+        return orderDao.findConfirmedByReservationId(reservationId);
     }
 
-    public void markFailed(Order order) {
+    @Transactional(readOnly = true)
+    public List<Order> findByReservationIds(List<Long> reservationIds) {
+        return orderDao.findByReservationIds(reservationIds);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> findNeedsCheckOrderIds() {
+        return orderDao.findNeedsCheck().stream().map(Order::getOrderId).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> findNeedsRefundOrderIds() {
+        return orderDao.findNeedsRefund().stream().map(Order::getOrderId).toList();
+    }
+
+    /**
+     * 주문을 확정한다. 전이 전 상태(expected)를 기억해 CAS로 갱신 — 동시에 다른 곳(recheck·reconcile·워커)이
+     * 이미 수렴시켰으면 0행이 돌아오고 false를 반환한다(졌음). 이긴 호출만 예약 확정 같은 후속을 진행해야 한다.
+     */
+    public boolean complete(Order order, String paymentKey) {
+        OrderStatus expected = order.getStatus();
+        order.complete(paymentKey);
+        return orderDao.compareAndUpdate(order, expected) == 1;
+    }
+
+    public boolean markFailed(Order order) {
+        OrderStatus expected = order.getStatus();
         order.markFailed();
+        return orderDao.compareAndUpdate(order, expected) == 1;
+    }
+
+    /**
+     * 결제는 됐는데 예약 확정에 실패한 주문을 환불 대기(NEEDS_REFUND)로 표시한다(보상 예약).
+     * 전이 전 상태를 기억해 CAS로 선점한 쪽만 true — 동시 수렴 시 한쪽만 이긴다.
+     */
+    public boolean markNeedsRefund(Order order) {
+        OrderStatus expected = order.getStatus();
+        order.markNeedsRefund();
+        return orderDao.compareAndUpdate(order, expected) == 1;
+    }
+
+    public void markNeedsCheck(Order order, String paymentKey) {
+        order.markNeedsCheck(paymentKey);
         orderDao.update(order);
     }
 

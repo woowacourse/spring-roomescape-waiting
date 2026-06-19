@@ -16,7 +16,7 @@ class OrderTest {
     @Test
     @DisplayName("저장된 금액과 다른 금액으로 검증하면 예외를 던진다")
     void validateAmountMismatch() {
-        Order order = Order.create("order-1", 1L, 30000L);
+        Order order = Order.create("order-1", "idem-1", 1L, 30000L);
 
         assertThatThrownBy(() -> order.validateAmount(20000L))
                 .isInstanceOf(PaymentAmountMismatchException.class);
@@ -25,7 +25,7 @@ class OrderTest {
     @Test
     @DisplayName("저장된 금액과 같은 금액으로 검증하면 통과한다")
     void validateAmountMatch() {
-        Order order = Order.create("order-1", 1L, 30000L);
+        Order order = Order.create("order-1", "idem-1", 1L, 30000L);
 
         assertThatCode(() -> order.validateAmount(30000L)).doesNotThrowAnyException();
     }
@@ -33,7 +33,7 @@ class OrderTest {
     @Test
     @DisplayName("승인 완료 시 paymentKey가 저장되고 상태가 CONFIRMED가 된다")
     void complete() {
-        Order order = Order.create("order-1", 1L, 30000L);
+        Order order = Order.create("order-1", "idem-1", 1L, 30000L);
 
         order.complete("payment-key-1");
 
@@ -44,7 +44,7 @@ class OrderTest {
     @Test
     @DisplayName("이미 완료된 주문을 다시 완료하면 예외를 던진다")
     void completeTwice() {
-        Order order = Order.create("order-1", 1L, 30000L);
+        Order order = Order.create("order-1", "idem-1", 1L, 30000L);
         order.complete("payment-key-1");
 
         assertThatThrownBy(() -> order.complete("payment-key-2"))

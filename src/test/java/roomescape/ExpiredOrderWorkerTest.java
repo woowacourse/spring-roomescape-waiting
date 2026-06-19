@@ -27,7 +27,7 @@ import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationDao;
 import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.web.ReservationRequestDto;
+import roomescape.reservation.web.dto.ReservationRequestDto;
 import roomescape.store.Store;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeDao;

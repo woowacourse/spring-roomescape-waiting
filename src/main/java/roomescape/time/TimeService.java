@@ -8,7 +8,7 @@ import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.ReservationDao;
-import roomescape.time.web.TimeRequestDto;
+import roomescape.time.web.dto.TimeRequestDto;
 
 @Service
 @Transactional
