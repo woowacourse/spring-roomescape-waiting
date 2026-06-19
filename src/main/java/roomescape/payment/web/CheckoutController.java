@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.payment.exception.OutboundRateLimitException;
 import roomescape.payment.exception.PaymentAmountMismatchException;
 import roomescape.payment.exception.PaymentConnectionFailedException;
 import roomescape.payment.exception.PaymentGatewayException;
@@ -51,6 +52,8 @@ public class CheckoutController {
             return "success";
         } catch (PaymentAmountMismatchException e) {
             return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId);
+        } catch (OutboundRateLimitException e) {
+            return failView(model, "OUTBOUND_RATE_LIMITED", e.getMessage(), orderId);
         } catch (PaymentGatewayException e) {
             return failView(model, "PAYMENT_FAILED", "결제 처리 중 오류가 발생했습니다.", orderId);
         } catch (PaymentConnectionFailedException e) {

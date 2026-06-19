@@ -1,5 +1,6 @@
 package roomescape.payment.client;
 
+import java.net.SocketTimeoutException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -44,10 +45,19 @@ public class TossPaymentGateway implements PaymentGateway {
         } catch (RestClientResponseException e) {
             throw new PaymentGatewayException(e);
         } catch (ResourceAccessException e) {
+            if (isReadTimeout(e)) {
+                throw new PaymentTimedOutException(e);
+            }
             throw new PaymentConnectionFailedException(e);
         } catch (RestClientException e) {
             throw new PaymentTimedOutException(e);
         }
+    }
+
+    private boolean isReadTimeout(ResourceAccessException e) {
+        return e.getCause() instanceof SocketTimeoutException ste
+                && ste.getMessage() != null
+                && ste.getMessage().toLowerCase().contains("read");
     }
 
     private PaymentResult toResult(TossPaymentResponse response) {
