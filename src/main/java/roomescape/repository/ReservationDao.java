@@ -158,24 +158,6 @@ public class ReservationDao {
                 .findFirst();
     }
 
-    public Optional<Reservation> findConfirmedBySlotForUpdate(Slot slot) {
-        String sql = SELECT_BASE + """
-                 WHERE reservation.date = :date
-                   AND reservation.time_id = :timeId
-                   AND reservation.theme_id = :themeId
-                   AND reservation.status = :status
-                 FOR UPDATE
-                """;
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", slot.date())
-                .addValue("timeId", slot.time().id())
-                .addValue("themeId", slot.theme().id())
-                .addValue("status", ReservationStatus.CONFIRMED.name());
-        return jdbcTemplate.query(sql, params, rowMapper)
-                .stream()
-                .findFirst();
-    }
-
     public Optional<Reservation> findByIdForUpdate(long id) {
         String sql = SELECT_BASE + " WHERE reservation.id = :id FOR UPDATE";
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper)

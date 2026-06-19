@@ -699,7 +699,7 @@
         if (available) return 'available';
         if (past) return 'unavailable';
         if (reservation?.status === '예약') return 'waiting';
-        if (reservation?.status === '결제대기') return 'pending';
+        if (reservation?.status === '결제대기') return 'waiting';
         return 'unavailable';
     }
 
@@ -852,7 +852,7 @@
         }
     }
 
-    async function handlePaymentFailure(payment, error, message = '결제가 취소되었습니다. 다시 시간을 선택해주세요.') {
+    async function handlePaymentFailure(payment, error, message = '결제가 취소되었습니다. 시간 상태를 다시 확인해주세요.') {
         await notifyPaymentFailure(payment, error);
         selectedTimeId = null;
         selectedTimeBooked = false;

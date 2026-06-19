@@ -23,11 +23,15 @@ import roomescape.payment.order.Order;
 import roomescape.payment.order.OrderRepository;
 import roomescape.RoomescapeApplication;
 import roomescape.controller.FixedClockConfig;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.Waiting;
 import roomescape.repository.ReservationDao;
+import roomescape.repository.WaitingDao;
 import roomescape.service.PendingReservation;
 import roomescape.service.ReservationCommandService;
+import roomescape.service.WaitingCommandService;
 
 @SpringBootTest(classes = RoomescapeApplication.class)
 @Import(FixedClockConfig.class)
@@ -42,6 +46,10 @@ class PaymentServiceTest {
     private OrderRepository orderRepository;
     @Autowired
     private ReservationDao reservationDao;
+    @Autowired
+    private WaitingCommandService waitingCommandService;
+    @Autowired
+    private WaitingDao waitingDao;
     @MockitoBean
     private PaymentGateway paymentGateway;
 
@@ -130,5 +138,23 @@ class PaymentServiceTest {
         paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", pending.orderId());
 
         assertThat(reservationDao.findById(pending.reservation().id())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("실패 콜백에서 같은 슬롯의 대기 1번을 결제대기 예약으로 전환한다.")
+    void failWithOrderIdPromotesNextWaiting() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "pending-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        Waiting waiting = waitingCommandService.create(
+                "waiting-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+
+        paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", pending.orderId());
+
+        assertThat(reservationDao.findById(pending.reservation().id())).isEmpty();
+        assertThat(waitingDao.findById(waiting.id())).isEmpty();
+        Reservation promoted = reservationDao.findAllByName(new Member("waiting-user")).getFirst();
+        assertThat(promoted.status()).isEqualTo(ReservationStatus.PENDING_PAYMENT);
+        assertThat(orderRepository.findAll())
+                .anySatisfy(order -> assertThat(order.reservationId()).isEqualTo(promoted.id()));
     }
 }

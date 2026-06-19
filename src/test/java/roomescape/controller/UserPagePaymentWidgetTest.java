@@ -34,6 +34,14 @@ class UserPagePaymentWidgetTest {
     }
 
     @Test
+    void userPageTreatsPendingPaymentTimeAsWaitable() throws IOException {
+        String page = Files.readString(USER_PAGE);
+
+        assertThat(page).contains("if (reservation?.status === '결제대기') return 'waiting';");
+        assertThat(page).doesNotContain("if (reservation?.status === '결제대기') return 'pending';");
+    }
+
+    @Test
     void userPageRendersPendingPaymentStatusSeparately() throws IOException {
         String page = Files.readString(USER_PAGE);
 
@@ -55,6 +63,7 @@ class UserPagePaymentWidgetTest {
         assertThat(page).contains("/payments/fail?");
         assertThat(page).contains("resetCheckout();");
         assertThat(page).contains("await loadTimes();");
-        assertThat(page).contains("결제가 취소되었습니다. 다시 시간을 선택해주세요.");
+        assertThat(page).contains("결제가 취소되었습니다. 시간 상태를 다시 확인해주세요.");
+        assertThat(page).doesNotContain("결제가 취소되었습니다. 같은 시간으로 다시 결제할 수 있습니다.");
     }
 }

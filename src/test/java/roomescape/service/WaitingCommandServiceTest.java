@@ -76,13 +76,14 @@ class WaitingCommandServiceTest {
     }
 
     @Test
-    @DisplayName("결제 대기 예약에는 예약 대기를 생성할 수 없다.")
+    @DisplayName("결제 대기 예약에도 다른 사용자는 예약 대기를 생성할 수 있다.")
     void create_pendingPaymentReservation() {
         reservationCommandService.createPendingPaymentReservation("pending-user", LocalDate.of(2026, 6, 5), 1L, 2L);
 
-        assertThatThrownBy(() ->
-                waitingCommandService.create("new-user", LocalDate.of(2026, 6, 5), 1L, 2L))
-                .isInstanceOf(ResourceNotFoundException.class);
+        Waiting created = waitingCommandService.create("new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+
+        assertThat(created.id()).isNotNull();
+        assertThat(created.owner().name()).isEqualTo("new-user");
     }
 
     @Test
