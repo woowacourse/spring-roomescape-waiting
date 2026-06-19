@@ -68,12 +68,9 @@ class TossClientTimeoutTest {
     @DisplayName("토스 응답이 지연되면 read timeout 시간만큼 기다린 뒤 실패합니다.")
     @Test
     void confirm_fails_after_read_timeout_when_toss_response_is_delayed() {
-        // 서버는 2초 뒤 응답하지만 read timeout(500ms)이 먼저 끊어야 한다.
-        mockWebServer.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .setHeader("Content-Type", "application/json")
-                .setBody(SUCCESS_BODY)
-                .setHeadersDelay(2, TimeUnit.SECONDS));
+        // 서버는 2초 뒤 응답하지만 read timeout(500ms)이 두 번의 승인 시도를 모두 먼저 끊어야 한다.
+        enqueueDelayedSuccess();
+        enqueueDelayedSuccess();
 
         long start = System.nanoTime();
 
@@ -82,24 +79,19 @@ class TossClientTimeoutTest {
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
-        // timeout이 없다면 2초 이상 기다리므로, 1.5초 미만이면 read timeout이 적용된 것이다.
-        assertThat(elapsedMs).isLessThan(1_500L);
+        // timeout이 없다면 첫 응답만으로도 2초 이상 기다리므로, 두 번 시도해도 2초 미만이면 read timeout이 적용된 것이다.
+        assertThat(elapsedMs).isLessThan(2_000L);
     }
 
     @DisplayName("느린 호출이 섞여도 timeout이 있으면 성공 TPS가 유지됩니다.")
     @Test
     void confirm_maintains_success_tps_when_slow_calls_are_mixed_with_fast_calls() {
-        // 느린 응답(2초)과 정상 응답이 번갈아 와서, 일부 호출만 느린 의존성에 물리는 상황을 만든다.
-        for (int i = 0; i < 3; i++) {
-            mockWebServer.enqueue(new MockResponse()
-                    .setResponseCode(200)
-                    .setHeader("Content-Type", "application/json")
-                    .setBody(SUCCESS_BODY)
-                    .setHeadersDelay(2, TimeUnit.SECONDS));
-            mockWebServer.enqueue(new MockResponse()
-                    .setResponseCode(200)
-                    .setHeader("Content-Type", "application/json")
-                    .setBody(SUCCESS_BODY));
+        // 느린 호출은 자동 재시도까지 두 번 timeout되고, 빠른 호출은 즉시 성공하는 상황을 만든다.
+        for (int i = 0; i < 2; i++) {
+            enqueueDelayedSuccess();
+            enqueueDelayedSuccess();
+            enqueueSuccess();
+            enqueueSuccess();
         }
 
         int succeeded = 0;
@@ -113,10 +105,10 @@ class TossClientTimeoutTest {
             }
         }
         double elapsedSeconds = (System.nanoTime() - start) / 1_000_000_000.0;
-        double tps = succeeded / elapsedSeconds;
 
-        // read timeout(500ms)이 있으면 느린 3건을 일찍 포기해서 정상 3건이 제때 처리된다.
-        assertThat(tps).isGreaterThan(1.1);
+        assertThat(succeeded).isEqualTo(4);
+        // timeout이 없다면 느린 응답 4개를 순서대로 기다려 8초 이상 걸리므로, 느린 호출을 일찍 포기해야 한다.
+        assertThat(elapsedSeconds).isLessThan(6.0);
     }
 
     @DisplayName("라우팅 불가 IP면 connect timeout 시간만큼 기다린 뒤 실패합니다.")
@@ -136,8 +128,23 @@ class TossClientTimeoutTest {
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
-        // connect timeout(500ms) 근처에서 끊겨야 하고, 네트워크 편차를 고려해 상한을 넉넉히 둔다.
-        assertThat(elapsedMs).isBetween(300L, 2_500L);
+        // connect timeout(500ms)이 두 번의 승인 시도에 각각 적용되어야 하고, 네트워크 편차를 고려해 상한을 둔다.
+        assertThat(elapsedMs).isBetween(700L, 4_500L);
+    }
+
+    private void enqueueDelayedSuccess() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(SUCCESS_BODY)
+                .setHeadersDelay(2, TimeUnit.SECONDS));
+    }
+
+    private void enqueueSuccess() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(SUCCESS_BODY));
     }
 
     private PaymentConfirmation paymentConfirmation() {

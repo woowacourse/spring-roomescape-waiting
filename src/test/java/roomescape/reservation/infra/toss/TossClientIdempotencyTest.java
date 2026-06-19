@@ -1,7 +1,6 @@
 package roomescape.reservation.infra.toss;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import roomescape.global.exception.RetryablePaymentGatewayException;
 import roomescape.reservation.application.port.out.payment.PaymentConfirmation;
 import roomescape.reservation.application.port.out.payment.PaymentResult;
 import roomescape.reservation.application.port.out.payment.PaymentStatus;
@@ -60,9 +58,6 @@ class TossClientIdempotencyTest {
         mockWebServer.setDispatcher(stub);
 
         PaymentConfirmation confirmation = paymentConfirmation();
-
-        assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation))
-                .isInstanceOf(RetryablePaymentGatewayException.class);
 
         PaymentResult result = tossPaymentGateway.confirm(confirmation);
 
