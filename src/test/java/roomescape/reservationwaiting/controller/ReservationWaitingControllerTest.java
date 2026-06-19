@@ -47,7 +47,7 @@ class ReservationWaitingControllerTest {
                 .post("/bookings")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("status", equalTo("RESERVED"));
+                .body("status", equalTo("PAYMENT_PENDING"));
 
         String user2Session = given()
                 .contentType(ContentType.JSON)

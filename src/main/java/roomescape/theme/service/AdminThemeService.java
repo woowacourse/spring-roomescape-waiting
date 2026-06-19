@@ -23,7 +23,7 @@ public class AdminThemeService {
 
     @Transactional
     public AdminThemeResponse createTheme(AdminThemeRequest request) {
-        Theme theme = Theme.of(request.name(), request.description(), request.imageUrl());
+        Theme theme = Theme.of(request.name(), request.description(), request.imageUrl(), request.price());
         Theme saved = themeRepository.save(theme);
         return AdminThemeResponse.from(saved);
     }

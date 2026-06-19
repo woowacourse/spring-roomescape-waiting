@@ -15,6 +15,8 @@ public interface ReservationRepository {
 
     void update(Long id, LocalDate date, Long timeId);
 
+    void confirm(Long id);
+
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);

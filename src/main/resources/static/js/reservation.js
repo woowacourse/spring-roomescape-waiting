@@ -207,10 +207,11 @@ function submitBooking() {
       return res.json().then(body => { throw new Error(body.message || '신청에 실패했습니다.'); });
     })
     .then(booking => {
-      const fallback = booking.status === 'WAITING'
-        ? '대기 신청이 완료되었습니다.'
-        : '예약이 완료되었습니다.';
-      showToast(booking.message || fallback, 'success');
+      if (booking.status === 'PAYMENT_PENDING') {
+        window.location.href = booking.redirectUrl;
+        return;
+      }
+      showToast(booking.message || '대기 신청이 완료되었습니다.', 'success');
       clearBookingBar();
       refreshTimes();
     })

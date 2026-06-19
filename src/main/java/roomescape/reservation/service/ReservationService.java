@@ -11,6 +11,7 @@ import roomescape.exception.business.BusinessException;
 import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.member.domain.Member;
+import roomescape.payment.service.PaymentService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationUpdateRequest;
@@ -30,17 +31,20 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final PaymentService paymentService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
             ThemeService themeService,
-            ReservationWaitingRepository reservationWaitingRepository
+            ReservationWaitingRepository reservationWaitingRepository,
+            PaymentService paymentService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.paymentService = paymentService;
     }
 
     @Transactional
@@ -60,7 +64,9 @@ public class ReservationService {
 
     private BookingResult reserveOrWaitOnConflict(Member member, LocalDate date, ReservationTime time, Theme theme) {
         try {
-            return BookingResult.reserved(reservationRepository.save(Reservation.of(member, date, time, theme)));
+            Reservation reservation = reservationRepository.save(Reservation.pending(member, date, time, theme));
+            String orderId = paymentService.prepare(reservation.getId(), theme.getPrice());
+            return BookingResult.pendingPayment(reservation, orderId, theme.getPrice());
         } catch (DataIntegrityViolationException e) {
             return BookingResult.waiting(saveWaiting(member, date, time, theme));
         }
@@ -103,8 +109,9 @@ public class ReservationService {
                         canceled.getDate(), canceled.getTime().getId(), canceled.getTheme().getId())
                 .ifPresent(waiting -> {
                     reservationWaitingRepository.deleteById(waiting.getId());
-                    reservationRepository.save(Reservation.of(
+                    Reservation promoted = reservationRepository.save(Reservation.pending(
                             waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
+                    paymentService.prepare(promoted.getId(), waiting.getTheme().getPrice());
                 });
     }
 

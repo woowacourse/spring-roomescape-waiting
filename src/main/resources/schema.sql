@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS reservation_waiting;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS member;
@@ -19,6 +20,7 @@ CREATE TABLE theme
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(500) NOT NULL,
     image_url   VARCHAR(255) NOT NULL,
+    price       BIGINT       NOT NULL DEFAULT 10000,
     PRIMARY KEY (id),
     CONSTRAINT unique_theme_name UNIQUE (name)
 );
@@ -36,11 +38,12 @@ CREATE TABLE member
 
 CREATE TABLE reservation
 (
-    id        BIGINT NOT NULL AUTO_INCREMENT,
-    member_id BIGINT NOT NULL,
-    date      DATE   NOT NULL,
-    time_id   BIGINT NOT NULL,
-    theme_id  BIGINT NOT NULL,
+    id        BIGINT      NOT NULL AUTO_INCREMENT,
+    member_id BIGINT      NOT NULL,
+    date      DATE        NOT NULL,
+    time_id   BIGINT      NOT NULL,
+    theme_id  BIGINT      NOT NULL,
+    status    VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
@@ -61,4 +64,17 @@ CREATE TABLE reservation_waiting
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     CONSTRAINT unique_waiting_date_time_theme_member UNIQUE (date, time_id, theme_id, member_id)
+);
+
+CREATE TABLE payment
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT       NOT NULL,
+    order_id       VARCHAR(64)  NOT NULL,
+    payment_key    VARCHAR(255),
+    amount         BIGINT       NOT NULL,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
+    CONSTRAINT unique_payment_order_id UNIQUE (order_id)
 );
