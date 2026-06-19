@@ -79,4 +79,8 @@ public class ActiveReservation {
                 .createdAt(LocalDateTime.now(clock))
                 .build();
     }
+
+    public String themeName() {
+        return slot.getTheme().getName();
+    }
 }

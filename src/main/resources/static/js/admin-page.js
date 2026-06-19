@@ -206,26 +206,55 @@ themeForm.addEventListener("submit", async (event) => {
     }
 });
 
+// [수정 후] 관리자 페이지 예약 리스트 클릭 이벤트 (삭제/취소 처리)
 reservationList.addEventListener("click", async (event) => {
     const target = event.target.closest('[data-action="delete-reservation"]');
-    if (!target) {
-        return;
-    }
+    if (!target) return;
 
-    if (!window.confirm("이 예약을 취소할까요?")) {
+    if (!window.confirm("이 예약을 취소할까요?\n결제 내역이 존재하면 자동으로 환불 처리됩니다.")) {
         return;
     }
 
     clearFeedback(reservationFeedback);
+    const reservationId = target.dataset.id;
+    const username = target.dataset.name;
+    const status = target.dataset.status;
 
     try {
-        const params = new URLSearchParams({
-            username: target.dataset.name,
-            status: target.dataset.status
-        });
-        await request(`/reservations/${target.dataset.id}?${params}`, { method: "DELETE" });
+        let orderId = null;
+        let orderData = null;
+        // 1단계: 주문 정보 확인
+        try {
+            orderData = await request(`/orders/${reservationId}`, { method: "GET" });
+            if (orderData && orderData.orderId) {
+                orderId = orderData.orderId;
+            }
+        } catch (e) {
+            console.warn("결제 내역이 없는 예약입니다.");
+        }
+
+        if (orderId) {
+            // 2-A: 결제 내역이 있으면 [환불 처리 API] 호출
+            const result = await request(`/payments/cancel/${orderId}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    cancelReason: "관리자 직권 취소",
+                    cancelAmount: orderData.amount,
+                    name: username
+                })
+            });
+            const params = new URLSearchParams({ username, status });
+            await request(`/reservations/${reservationId}?${params}`, { method: "DELETE" });
+            showFeedback(reservationFeedback, "success", `취소 및 환불(${result.canceledAmount}원)이 완료되었습니다.`);
+        } else {
+            // 2-B: 결제 내역이 없으면 [일반 삭제 API] 호출
+            const params = new URLSearchParams({ username, status });
+            await request(`/reservations/${reservationId}?${params}`, { method: "DELETE" });
+            showFeedback(reservationFeedback, "success", "예약이 취소되었습니다.");
+        }
+
+        // 목록 새로고침
         await refreshReservations();
-        showFeedback(reservationFeedback, "success", "예약이 취소되었습니다.");
     } catch (error) {
         showFeedback(reservationFeedback, "error", error.message);
     }

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 내역</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .card {
+      max-width: 760px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    p.desc {
+      color: #888;
+      margin: 0 0 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 9px 8px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+
+    th {
+      color: #888;
+      font-weight: 600;
+    }
+
+    td.time {
+      color: #aaa;
+      white-space: nowrap;
+    }
+
+    td.amount {
+      white-space: nowrap;
+    }
+
+    .tag {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .tag.ok {
+      color: #2b8a3e;
+    }
+
+    .tag.no {
+      color: #e03131;
+    }
+
+    .empty {
+      color: #aaa;
+      padding: 24px 0;
+      text-align: center;
+    }
+
+    .links {
+      margin-top: 24px;
+    }
+
+    .links a {
+      color: #3182f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>📜 결제 내역</h1>
+  <p class="desc">정상 승인과 함께, 이 모듈의 주제인 <b>Rate Limit 거부</b>(나가는 한도 차단 / 게이트웨이 거부)도 같은 내역에 남습니다.</p>
+
+  <table th:if="${!histories.isEmpty()}">
+    <thead>
+    <tr>
+      <th>시각</th>
+      <th>상태</th>
+      <th>주문번호</th>
+      <th>금액</th>
+      <th>설명</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="h : ${histories}">
+      <td class="time" th:text="${h.at()}">14:23:01</td>
+      <td><span class="tag" th:classappend="${h.success()} ? 'ok' : 'no'" th:text="${h.status()}">DONE</span></td>
+      <td th:text="${h.orderId()}">order-xxxx</td>
+      <td class="amount" th:text="${h.amount() != null ? #numbers.formatInteger(h.amount(), 0, 'COMMA') + '원' : '-'}">
+        50,000원
+      </td>
+      <td th:text="${h.detail()}">게이트웨이 승인</td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="empty" th:if="${histories.isEmpty()}">아직 결제 내역이 없습니다. 먼저 결제를 시도해 보세요.</div>
+
+  <div class="links"><a href="/">← 메인 화면으로</a></div>
+</div>
+</body>
+</html>

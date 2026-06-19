@@ -73,19 +73,28 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
 
     @Override
     public ActiveReservation insertWithId(ActiveReservation reservation) {
-        String sql = "INSERT INTO reservation(id, name, slot_id, created_at) "
-                + "VALUES(:id, :name, :slotId, :createdAt)";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", reservation.getId())
                 .addValue("name", reservation.getName())
                 .addValue("slotId", reservation.getSlot().getId())
                 .addValue("createdAt", reservation.getCreatedAt());
-        jdbcTemplate.update(sql, params);
+
+        String updateSql = "UPDATE reservation "
+                + "SET name = :name, slot_id = :slotId, created_at = :createdAt, is_deleted = 0 "
+                + "WHERE id = :id";
+
+        int affected = jdbcTemplate.update(updateSql, params);
+
+        if (affected == 0) {
+            String insertSql = "INSERT INTO reservation(id, name, slot_id, created_at) "
+                    + "VALUES(:id, :name, :slotId, :createdAt)";
+            jdbcTemplate.update(insertSql, params);
+        }
         return reservation;
     }
 
     @Override
-    public void update(final ActiveReservation reservation) {
+    public int update(final ActiveReservation reservation) {
         String sql = "UPDATE reservation "
                 + "SET slot_id = :slotId, created_at = :createdAt "
                 + "WHERE id = :id AND is_deleted = 0";
@@ -95,7 +104,7 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
                 .addValue("createdAt", reservation.getCreatedAt())
                 .addValue("id", reservation.getId());
 
-        jdbcTemplate.update(sql, params);
+        return jdbcTemplate.update(sql, params);
     }
 
     @Override
@@ -170,6 +179,25 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
     }
 
     @Override
+    public List<ActiveReservation> findAllByIdIn(List<Long> reservationIds) {
+        String sql = "SELECT "
+                + "r.id AS r_id, r.name AS r_name, r.is_deleted AS r_is_deleted, r.created_at AS r_created_at, "
+                + "ts.id AS ts_id, ts.date AS ts_date, "
+                + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
+                + "t.description AS t_description, t.duration_time AS t_duration_time, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "FROM reservation r "
+                + "INNER JOIN time_slot ts ON r.slot_id = ts.id "
+                + "INNER JOIN theme t ON ts.theme_id = t.id "
+                + "INNER JOIN reservation_time rt ON ts.time_id = rt.id "
+                + "WHERE r.id IN (:ids) AND r.is_deleted = 0 "
+                + "ORDER BY ts.date ASC, rt.start_at ASC";
+
+        SqlParameterSource params = new MapSqlParameterSource("ids", reservationIds);
+        return jdbcTemplate.query(sql, params, rowMapper);
+    }
+
+    @Override
     public boolean existsByReservationTime(final Long timeId) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation r "
                 + "INNER JOIN time_slot ts ON r.slot_id = ts.id "
@@ -213,8 +241,8 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
     }
 
     @Override
-    public void cancel(final ActiveReservation reservation) {
-        String sql = "UPDATE reservation SET is_deleted=:id WHERE id = :id ";
-        jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
+    public int cancel(final ActiveReservation reservation) {
+        String sql = "UPDATE reservation SET is_deleted=:id WHERE id = :id AND is_deleted = 0";
+        return jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
     }
 }

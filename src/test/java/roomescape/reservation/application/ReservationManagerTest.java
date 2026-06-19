@@ -184,7 +184,7 @@ class ReservationManagerTest {
     }
 
     @Test
-    @DisplayName("10명의 사용자가 동시에 같은 예약을 시도하면 1명만 확정(ACTIVE)되고 9명은 대기(PENDING) 상태가 된다.")
+    @DisplayName("20명의 사용자가 동시에 같은 예약을 시도하면 1명만 확정(ACTIVE)되고 19명은 대기(PENDING) 상태가 된다.")
     void concurrentAddReservationTest() throws InterruptedException {
         int threadCount = 20;
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);

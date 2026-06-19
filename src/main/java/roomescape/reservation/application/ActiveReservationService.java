@@ -10,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
+import roomescape.reservation.application.exception.ReservationAlreadyChangedException;
 import roomescape.reservation.application.exception.ReservationInUseException;
 import roomescape.reservation.domain.ActiveReservation;
 import roomescape.reservation.domain.ActiveReservationRepository;
 import roomescape.reservation.domain.TimeSlot;
+import roomescape.reservation.infra.exception.ReservationAlreadyCancelledException;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,6 @@ public class ActiveReservationService {
         }
     }
 
-    @Transactional
     public ReservationInfo transferReservation(final Long id, final TimeSlot slot, final ReservationCreateCommand command) {
         if (reservationRepository.existsByActiveSlotId(slot.getId())) {
             throw new ReservationInUseException("이미 확정 예약이 존재합니다.");
@@ -54,7 +55,10 @@ public class ActiveReservationService {
     public Long cancel(final Long id, final String name) {
         ActiveReservation reservation = reservationRepository.getById(id);
         ActiveReservation cancelled = reservation.cancel(name, clock);
-        reservationRepository.cancel(cancelled);
+        int affected = reservationRepository.cancel(cancelled);
+        if (affected == 0) {
+            throw new ReservationAlreadyCancelledException("이미 취소된 예약입니다.");
+        }
         return reservation.getSlot().getId();
     }
 
@@ -72,7 +76,10 @@ public class ActiveReservationService {
         try {
             ActiveReservation reservation = reservationRepository.getById(id);
             ActiveReservation changedReservation = reservation.changeTime(name, slot, clock);
-            reservationRepository.update(changedReservation);
+            int affected = reservationRepository.update(changedReservation);
+            if(affected == 0) {
+                throw new ReservationAlreadyChangedException("이미 변경된 예약입니다.");
+            }
             return ReservationInfo.from(changedReservation);
         } catch (DataIntegrityViolationException e) {
             throw new ReservationInUseException("변경 하려는 시간에 이미 예약이 존재합니다.");

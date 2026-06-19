@@ -1,6 +1,7 @@
 package roomescape.reservation.application;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -10,12 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
+import roomescape.reservation.application.exception.ReservationAlreadyChangedException;
 import roomescape.reservation.application.exception.ReservationInUseException;
 import roomescape.reservation.domain.ActiveReservation;
 import roomescape.reservation.domain.PendingReservation;
 import roomescape.reservation.domain.PendingReservationRepository;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
+import roomescape.reservation.infra.exception.ReservationAlreadyCancelledException;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +59,10 @@ public class PendingReservationService {
     public void cancel(final Long id, final String name) {
         PendingReservation reservation = reservationRepository.getById(id);
         PendingReservation cancelled = reservation.cancel(name, clock);
-        reservationRepository.cancel(cancelled);
+        int affected = reservationRepository.cancel(cancelled);
+        if (affected == 0) {
+            throw new ReservationAlreadyCancelledException("이미 취소된 예약입니다.");
+        }
     }
 
     @Transactional
@@ -64,7 +70,10 @@ public class PendingReservationService {
         return reservationRepository.findNextPendingReservation(slotId)
                 .map(pending -> {
                     PendingReservation cancelled = pending.cancel(pending.getName(), clock);
-                    reservationRepository.cancel(cancelled);
+                    int affected = reservationRepository.cancel(cancelled);
+                    if (affected == 0) {
+                        throw new ReservationAlreadyCancelledException("승격 대상 예약이 이미 취소되었습니다.");
+                    }
                     return pending.active();
                 });
     }
@@ -74,7 +83,10 @@ public class PendingReservationService {
         try {
             PendingReservation reservation = reservationRepository.getById(id);
             PendingReservation changedReservation = reservation.changeTime(name, slot, clock);
-            reservationRepository.update(changedReservation);
+            int affected = reservationRepository.update(changedReservation);
+            if (affected == 0) {
+                throw new ReservationAlreadyChangedException("이미 변경된 예약입니다.");
+            }
             return ReservationInfo.from(changedReservation);
         } catch (DataIntegrityViolationException e) {
             throw new ReservationInUseException("예약을 변경 중 일시적인 문제가 발생했습니다.");
@@ -99,5 +111,9 @@ public class PendingReservationService {
                 .stream()
                 .map(ReservationPendingInfo::from)
                 .toList();
+    }
+
+    public List<PendingReservation> findExpiredReservations(LocalDate today) {
+        return reservationRepository.findExpiredReservations(today);
     }
 }

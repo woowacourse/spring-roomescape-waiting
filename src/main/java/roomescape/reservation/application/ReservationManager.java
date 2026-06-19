@@ -1,10 +1,12 @@
 package roomescape.reservation.application;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.application.OrderService;
 import roomescape.reservation.application.dto.ReservationCancelCommand;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
@@ -12,6 +14,7 @@ import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
 import roomescape.reservation.application.exception.ReservationInUseException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.ActiveReservation;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.domain.Theme;
@@ -28,6 +31,7 @@ public class ReservationManager {
     private final ReservationTimeService timeService;
     private final ThemeService themeService;
     private final TimeSlotService timeSlotService;
+    private final OrderService orderService;
 
     public List<ReservationInfo> getReservations() {
         List<ReservationInfo> activeReservations = activeReservationService.getReservations();
@@ -49,7 +53,9 @@ public class ReservationManager {
         Theme theme = themeService.getThemeById(command.themeId());
         TimeSlot slot = timeSlotService.getTimeSlot(command.date(), time, theme);
         try {
-            return activeReservationService.add(slot, command);
+            ReservationInfo reservation = activeReservationService.add(slot, command);
+            orderService.createOrder(reservation.id());
+            return reservation;
         } catch (ReservationInUseException e) {
             return pendingReservationService.add(slot, command);
         }
@@ -91,8 +97,17 @@ public class ReservationManager {
         if (isSlotFull) {
             return pendingReservationService.change(id, slot, command.name());
         }
-        pendingReservationService.cancel(id, command.name());
-        return activeReservationService.transferReservation(id, slot, command.toCreateCommand());
+        try {
+            ReservationInfo reservation = activeReservationService.transferReservation(id, slot,
+                    command.toCreateCommand());
+            pendingReservationService.cancel(id, command.name());
+            if (!orderService.existsByReservationId(id)) {
+                orderService.createOrder(id);
+            }
+            return reservation;
+        } catch (ReservationInUseException e) {
+            return pendingReservationService.change(id, slot, command.name());
+        }
     }
 
     private ReservationInfo changeActiveReservation(final Long id, final ReservationChangeCommand command,
@@ -113,14 +128,22 @@ public class ReservationManager {
         return changedInfo;
     }
 
-    private ReservationInfo fallbackToPending(Long id, ReservationChangeCommand command, TimeSlot slot) {
+    private ReservationInfo fallbackToPending(final Long id, final ReservationChangeCommand command, final TimeSlot slot) {
         Long oldSlotId = activeReservationService.cancel(id, command.name());
         promoteNextPending(oldSlotId);
         return pendingReservationService.transferReservation(id, slot, command.toCreateCommand());
     }
 
-    private void promoteNextPending(Long oldSlotId) {
-        pendingReservationService.popNextPendingAndPromote(oldSlotId)
-                .ifPresent(activeReservationService::savePromoted);
+    private void promoteNextPending(final Long oldSlotId) {
+        Optional<ActiveReservation> promotedOpt = pendingReservationService.popNextPendingAndPromote(oldSlotId);
+        if (promotedOpt.isEmpty()) {
+            return;
+        }
+        ActiveReservation reservation = promotedOpt.get();
+        activeReservationService.savePromoted(reservation);
+
+        if (!orderService.existsByReservationId(reservation.getId())) {
+            orderService.createOrder(reservation.getId());
+        }
     }
 }

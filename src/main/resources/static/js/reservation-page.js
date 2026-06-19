@@ -129,13 +129,15 @@ reservationForm.addEventListener("submit", async (event) => {
     };
 
     try {
-        await request("/reservations", { method: "POST", body: JSON.stringify(payload) });
+        const createdReservation = await request("/reservations", { method: "POST", body: JSON.stringify(payload) });
         showFeedback(reservationFeedback, "success", "예약이 등록되었습니다.");
         reservationNameInput.value = "";
         await loadTopAvailableTimes();
 
         // 내 예약 목록 갱신
         if (checkNameInput.value) checkForm.dispatchEvent(new Event("submit"));
+        const amount = 50000;
+        window.location.href = `/orders/checkout/${createdReservation.id}?amount=${amount}`;
     } catch (error) {
         showFeedback(reservationFeedback, "error", error.message);
     }
@@ -305,23 +307,42 @@ function renderMyReservations(reservations, username) {
             loadInlineTimes();
 
         } else {
+            const payButtonHtml = reservation.unpaid
+                ? `<button class="button primary checkout-btn" type="button">결제하기</button>`
+                : '';
+
+            const unpaidBadgeHtml = reservation.unpaid
+                ? `<span style="color: #e03131; font-size: 13px; font-weight: bold;">(결제 대기중)</span>`
+                : '';
+
+            // 💡 2. 모바일 화면에서도 깨지지 않도록 flex-wrap과 min-width를 추가했습니다.
             article.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                             <strong>${reservation.theme.name}</strong>
                             <span class="${statusClass(reservation.status)}">${formatStatus(reservation)}</span>
+                            ${unpaidBadgeHtml}
                         </div>
                         <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.875rem;">
                             ${reservation.date} · ${formatTime(reservation.time.startAt)}
                         </p>
                     </div>
-                    <div style="display: flex; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                        ${payButtonHtml}
                         <button class="button secondary inline-edit-btn" type="button">수정</button>
                         <button class="button danger inline-cancel-btn" type="button">취소</button>
                     </div>
                 </div>
             `;
+
+            // 💡 [결제하기] 버튼 이벤트
+            const checkoutBtn = article.querySelector('.checkout-btn');
+            if (checkoutBtn) {
+                checkoutBtn.onclick = () => {
+                    window.location.href = `/orders/checkout/${reservation.id}`;
+                };
+            }
 
             article.querySelector('.inline-edit-btn').onclick = () => {
                 inlineEditState.reservationId = reservation.id;
@@ -329,16 +350,48 @@ function renderMyReservations(reservations, username) {
                 renderMyReservations(reservations, username);
             };
 
+            // [수정 후] 내 예약 인라인 취소 버튼 로직
             article.querySelector('.inline-cancel-btn').onclick = async () => {
-                if (!window.confirm("이 예약을 정말 취소하시겠습니까?")) return;
+                if (!window.confirm("이 예약을 정말 취소하시겠습니까?\n결제된 예약인 경우 환불이 함께 진행됩니다.")) return;
+
                 clearFeedback(checkFeedback);
                 try {
-                    const params = new URLSearchParams({
-                        username,
-                        status: reservation.status
-                    });
-                    await request(`/reservations/${reservation.id}?${params}`, { method: "DELETE" });
-                    showFeedback(checkFeedback, "success", "예약이 성공적으로 취소되었습니다.");
+                    let orderId = null;
+                    let orderData = null;
+                    // 1단계: 주문 정보가 있는지 확인
+                    try {
+                        orderData = await request(`/orders/${reservation.id}`, { method: "GET" });
+                        if (orderData && orderData.orderId) {
+                            orderId = orderData.orderId;
+                        }
+                    } catch (e) {
+                        console.warn("결제 내역이 없거나 불러올 수 없는 예약입니다.");
+                    }
+
+                    if (orderId && orderData.status === 'COMPLETED') {
+                        // 2-A: 결제 내역이 있으면 [환불 처리 API] 호출
+                        const result = await request(`/payments/cancel/${orderId}`, {
+                            method: "POST",
+                            body: JSON.stringify({
+                                cancelReason: "고객 직접 취소",
+                                cancelAmount: orderData.amount,
+                                name: username
+                            })
+                        });
+                        const params = new URLSearchParams({ username, status: reservation.status });
+                        await request(`/reservations/${reservation.id}?${params}`, { method: "DELETE" });
+                        showFeedback(checkFeedback, "success", `예약이 취소되었습니다. (환불 금액: ${result.canceledAmount}원)`);
+                    } else {
+                        // 2-B: 결제 내역이 없으면 (예: 대기 예약, 구형 데이터) [일반 삭제 API] 호출
+                        const params = new URLSearchParams({
+                            username,
+                            status: reservation.status
+                        });
+                        await request(`/reservations/${reservation.id}?${params}`, { method: "DELETE" });
+                        showFeedback(checkFeedback, "success", "예약이 성공적으로 취소되었습니다.");
+                    }
+
+                    // 목록 다시 불러오기
                     checkForm.dispatchEvent(new Event("submit"));
                     loadTopAvailableTimes();
                 } catch (error) {
@@ -359,8 +412,39 @@ checkForm.addEventListener("submit", async (event) => {
     const name = checkNameInput.value.trim();
     try {
         const reservations = await request(`/reservations?username=${encodeURIComponent(name)}`, { method: "GET" });
-        renderMyReservations(reservations, name);
+
+        // 💡 [추가] 각 예약마다 주문 정보를 조회하여 '미결제 상태'인지 확인합니다.
+        const enrichedReservations = await Promise.all(reservations.map(async (res) => {
+            try {
+                const orderData = await request(`/orders/${res.id}`, { method: "GET" });
+
+                res.unpaid = (orderData && orderData.status === 'PENDING');
+            } catch (e) {
+                res.unpaid = false;
+            }
+            return res;
+        }));
+
+        renderMyReservations(enrichedReservations, name);
     } catch (error) {
         showFeedback(checkFeedback, "error", error.message);
     }
 });
+
+const historySearchBtn = document.getElementById("history-search-btn");
+
+if (historySearchBtn) {
+    historySearchBtn.addEventListener("click", () => {
+        const name = checkNameInput.value.trim();
+
+        // 이름이 비어있으면 경고창 띄우고 포커스 주기
+        if (!name) {
+            alert("결제 내역을 조회할 예약자 이름을 입력해주세요.");
+            checkNameInput.focus();
+            return;
+        }
+
+        // 이름이 입력되어 있다면 결제 내역 페이지로 이동
+        window.location.href = `/orders/history?name=${encodeURIComponent(name)}`;
+    });
+}

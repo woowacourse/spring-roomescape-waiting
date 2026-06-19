@@ -52,6 +52,17 @@ CREATE TABLE pending
     FOREIGN KEY (slot_id) REFERENCES time_slot (id)
 );
 
+CREATE TABLE `order`
+(
+    id      VARCHAR(255) NOT NULL,
+    amount  BIGINT,
+    reservation_id BIGINT,
+    status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP,
+    payment_key VARCHAR(255),
+    PRIMARY KEY (id)
+);
+
 CREATE UNIQUE INDEX unique_theme_name
     ON theme (name, deleted_at);
 
