@@ -3,7 +3,7 @@ package roomescape.payment.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.payment.client.PaymentGateway;
+import roomescape.payment.client.gateway.PaymentGateway;
 import roomescape.payment.domain.Payment;
 import roomescape.payment.exception.TossPaymentException;
 import roomescape.payment.repository.PaymentRepository;
