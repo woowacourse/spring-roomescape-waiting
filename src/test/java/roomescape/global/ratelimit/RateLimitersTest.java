@@ -26,12 +26,6 @@ class RateLimitersTest {
         }
     }
 
-    private RateLimiters rateLimitersWith(RateLimitType type, int capacity, double refillPerSecond, NanoClock clock) {
-        RateLimitProperties properties = new RateLimitProperties();
-        properties.getLimits().put(type, new RateLimitProperties.Limit(capacity, refillPerSecond));
-        return new RateLimiters(properties, clock);
-    }
-
     @Nested
     class 종류별로_독립된_한도를_적용한다 {
 
@@ -39,10 +33,11 @@ class RateLimitersTest {
         void 인바운드와_아웃바운드는_같은_키여도_서로_다른_시점에_거부된다() {
             // given: 같은 키를 쓰되 인바운드 허용량 2, 아웃바운드 허용량 1
             FakeNanoClock clock = new FakeNanoClock();
-            RateLimitProperties properties = new RateLimitProperties();
-            properties.getLimits().put(RateLimitType.INBOUND, new RateLimitProperties.Limit(2, 1.0));
-            properties.getLimits().put(RateLimitType.OUTBOUND, new RateLimitProperties.Limit(1, 1.0));
-            RateLimiters rateLimiters = new RateLimiters(properties, clock);
+            RateLimiters rateLimiters = new RateLimiters(
+                    new InboundRateLimitProperties(2, 1.0),
+                    new OutboundRateLimitProperties(1, 1.0),
+                    clock
+            );
 
             String key = "shared-key";
 
@@ -64,7 +59,11 @@ class RateLimitersTest {
         void 아웃바운드_한도를_초과하면_거부되고_시간이_지나_보충되면_다시_통과한다() {
             // given: 아웃바운드 허용량 1, 초당 1개 보충
             FakeNanoClock clock = new FakeNanoClock();
-            RateLimiters rateLimiters = rateLimitersWith(RateLimitType.OUTBOUND, 1, 1.0, clock);
+            RateLimiters rateLimiters = new RateLimiters(
+                    new InboundRateLimitProperties(null, null),
+                    new OutboundRateLimitProperties(1, 1.0),
+                    clock
+            );
             String key = "payment_outbound";
 
             // when: 첫 호출은 통과, 두 번째는 한도 초과로 거부
@@ -84,9 +83,13 @@ class RateLimitersTest {
 
         @Test
         void 오버라이드가_없으면_RateLimitType의_기본_허용량을_사용한다() {
-            // given: 아무 설정도 주지 않음
+            // given: 아무 설정도 주지 않음 (모든 값 null)
             FakeNanoClock clock = new FakeNanoClock();
-            RateLimiters rateLimiters = new RateLimiters(new RateLimitProperties(), clock);
+            RateLimiters rateLimiters = new RateLimiters(
+                    new InboundRateLimitProperties(null, null),
+                    new OutboundRateLimitProperties(null, null),
+                    clock
+            );
             String key = "any";
 
             // then: OUTBOUND 기본 허용량(5)만큼 통과한 뒤 거부된다

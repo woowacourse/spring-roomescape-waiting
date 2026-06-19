@@ -4,6 +4,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(RateLimitProperties.class)
+@EnableConfigurationProperties({InboundRateLimitProperties.class, OutboundRateLimitProperties.class})
 public class RateLimitConfig {
 }

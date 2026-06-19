@@ -27,9 +27,11 @@ class InboundRateLimitInterceptorTest {
         NanoClock mockClock = mock(NanoClock.class);
         when(mockClock.currentNanoseconds()).thenReturn(0L); // 초기 시간 0으로 고정
 
-        RateLimitProperties properties = new RateLimitProperties();
-        properties.getLimits().put(RateLimitType.INBOUND, new RateLimitProperties.Limit(capacity, refillPerSecond));
-        RateLimiters rateLimiters = new RateLimiters(properties, mockClock);
+        RateLimiters rateLimiters = new RateLimiters(
+                new InboundRateLimitProperties(capacity, refillPerSecond),
+                new OutboundRateLimitProperties(null, null),
+                mockClock
+        );
 
         interceptor = new InboundRateLimitInterceptor(rateLimiters);
         request = new MockHttpServletRequest();
