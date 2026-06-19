@@ -141,6 +141,23 @@ function renderReservations(reservations) {
                 <p>상태: ${formatStatus(reservation.status, reservation.paymentStatus)}</p>
                 ${waitingTurnText}
 
+                <div class="reservation-order-details">
+                    <div class="order-detail-item">
+                        <span class="order-detail-label">결제금액</span>
+                        <span class="theme-price" style="font-size: 14px;">${(reservation.amount || 0).toLocaleString()}원</span>
+                    </div>
+                    <div class="order-detail-item">
+                        <span class="order-detail-label">주문번호</span>
+                        <span>${reservation.orderId}</span>
+                    </div>
+                    ${reservation.paymentKey ? `
+                        <div class="order-detail-item">
+                            <span class="order-detail-label">결제키</span>
+                            <span>${reservation.paymentKey}</span>
+                        </div>
+                    ` : ""}
+                </div>
+
                 <div class="button-group">
                     <button
                         class="payment-retry-button reschedule-button"
@@ -390,6 +407,9 @@ function formatTime(value) {
 }
 
 function formatStatus(status, paymentStatus) {
+    if (paymentStatus === "UNKNOWN") {
+        return "확인필요";
+    }
     if (status === "RESERVED") {
         return "결제 완료";
     }
@@ -397,14 +417,14 @@ function formatStatus(status, paymentStatus) {
         return "예약 대기";
     }
     if (status === "CANCELED") {
+        if (paymentStatus === "FAILED") {
+            return "결제 실패";
+        }
         return "예약 취소";
     }
     if (status === "PENDING_PAYMENT") {
         if (paymentStatus === "FAILED") {
             return "결제 실패";
-        }
-        if (paymentStatus === "UNKNOWN") {
-            return "결제 대기(확인 중)";
         }
         return "결제 대기";
     }

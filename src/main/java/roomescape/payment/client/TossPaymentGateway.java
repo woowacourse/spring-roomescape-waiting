@@ -3,8 +3,11 @@ package roomescape.payment.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.payment.client.dto.TossPaymentResponse;
 import roomescape.payment.exception.TossErrorResponse;
 import roomescape.payment.exception.TossPaymentException;
@@ -27,24 +30,35 @@ public class TossPaymentGateway implements PaymentGateway {
     }
 
     @Override
+    @Retryable(
+            exceptionExpression = "#root.retryable",
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000, multiplier = 2) // TODO 기준 공부 후 적용
+    )
     public PaymentResult confirm(PaymentConfirmation confirmation) {
-        TossPaymentResponse resp = tossRestClient.post()
-                .uri("/v1/payments/confirm")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(confirmation)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    var error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
-                    throw TossPaymentException.of(response.getStatusCode(), error);
-                })
-                .body(TossPaymentResponse.class);
+        System.out.println(confirmation.toString());
+        try {
+            TossPaymentResponse tossResponse = tossRestClient.post()
+                    .uri("/v1/payments/confirm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.orderId())
+                    .body(confirmation)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        var error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
+                        throw TossPaymentException.of(response.getStatusCode(), error);
+                    })
+                    .body(TossPaymentResponse.class);
 
-        return new PaymentResult(
-                resp.paymentKey(),
-                resp.orderId(),
-                PaymentStatus.from(resp.status()),
-                resp.totalAmount()
-        );
+            return new PaymentResult(
+                    tossResponse.paymentKey(),
+                    tossResponse.orderId(),
+                    PaymentStatus.from(tossResponse.status()),
+                    tossResponse.totalAmount()
+            );
+        } catch (RestClientException e) {
+            throw new TossPaymentException.Retryable(e.getMessage());
+        }
     }
 
 }

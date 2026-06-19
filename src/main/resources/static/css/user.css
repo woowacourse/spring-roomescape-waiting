@@ -744,3 +744,22 @@ body {
     background: #8d7d31;
     color: #080808;
 }
+
+.reservation-order-details {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #1e2228;
+}
+
+.order-detail-item {
+    margin: 4px 0;
+    color: #8b8f97;
+    font-size: 13px;
+    display: flex;
+    gap: 8px;
+}
+
+.order-detail-label {
+    color: #61666e;
+    min-width: 65px;
+}
