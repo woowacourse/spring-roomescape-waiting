@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 실패</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 24px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 16px;
+    }
+
+    .row .label {
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .row .val {
+      text-align: right;
+      word-break: break-all;
+      color: #e03131;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      color: #3182f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>❌ 결제를 실패했어요</h1>
+
+  <div class="row"><span class="label">에러코드</span>
+    <span class="val" th:text="${code}">REJECT_CARD_PAYMENT</span></div>
+  <div class="row"><span class="label">에러메시지</span>
+    <span class="val" th:text="${message}">에러 메시지</span></div>
+  <div class="row"><span class="label">주문번호</span>
+    <span class="val" style="color:#555" th:text="${orderId} ?: '(취소되어 전달되지 않음)'">order-xxxx</span></div>
+
+  <a href="/">← 다시 시도하기</a>
+</div>
+</body>
+</html>

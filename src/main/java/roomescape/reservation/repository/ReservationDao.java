@@ -45,7 +45,8 @@ public class ReservationDao {
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 slot,
-                resultSet.getTimestamp("updated_at").toLocalDateTime()
+                resultSet.getTimestamp("updated_at").toLocalDateTime(),
+                resultSet.getBoolean("confirmed")
         );
     };
 
@@ -57,8 +58,8 @@ public class ReservationDao {
 
     public Reservation save(Reservation reservation) {
         String sql = """
-                INSERT INTO reservation (name, reservation_date, time_id, theme_id, updated_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO reservation (name, reservation_date, time_id, theme_id, updated_at, confirmed)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -70,6 +71,7 @@ public class ReservationDao {
             ps.setLong(3, reservation.getTime().getId());
             ps.setLong(4, reservation.getTheme().getId());
             ps.setTimestamp(5, valueOf(reservation.getUpdatedAt()));
+            ps.setBoolean(6, reservation.isConfirmed());
             return ps;
         }, keyHolder);
 
@@ -79,7 +81,8 @@ public class ReservationDao {
                 id,
                 reservation.getName(),
                 new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme()),
-                reservation.getUpdatedAt()
+                reservation.getUpdatedAt(),
+                reservation.isConfirmed()
         );
     }
 
@@ -94,7 +97,8 @@ public class ReservationDao {
                        h.name AS theme_name,
                        h.description AS theme_description,
                        h.thumbnail_url AS theme_thumbnail_url,
-                       r.updated_at
+                       r.updated_at,
+                       r.confirmed
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -116,7 +120,8 @@ public class ReservationDao {
                        h.name AS theme_name,
                        h.description AS theme_description,
                        h.thumbnail_url AS theme_thumbnail_url,
-                       r.updated_at
+                       r.updated_at,
+                       r.confirmed
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -139,7 +144,8 @@ public class ReservationDao {
                        h.name AS theme_name,
                        h.description AS theme_description,
                        h.thumbnail_url AS theme_thumbnail_url,
-                       r.updated_at
+                       r.updated_at,
+                       r.confirmed
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -163,7 +169,8 @@ public class ReservationDao {
                        h.name AS theme_name,
                        h.description AS theme_description,
                        h.thumbnail_url AS theme_thumbnail_url,
-                       r.updated_at
+                       r.updated_at,
+                       r.confirmed
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -179,7 +186,7 @@ public class ReservationDao {
     public void update(Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET name = ?, reservation_date = ?, time_id = ?, theme_id = ?, updated_at = ?
+                SET name = ?, reservation_date = ?, time_id = ?, theme_id = ?, updated_at = ?, confirmed = ?
                 WHERE id = ?
                 """;
 
@@ -190,6 +197,7 @@ public class ReservationDao {
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
                 valueOf(reservation.getUpdatedAt()),
+                reservation.isConfirmed(),
                 reservation.getId()
         );
         if (affected == 0) {

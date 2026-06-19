@@ -12,7 +12,8 @@ public record ReservationWithStatusResponse(
         ReservationTime time,
         Theme theme,
         String status,
-        Long waitingOrder
+        Long waitingOrder,
+        String orderId
 ) {
 
     public static ReservationWithStatusResponse from(ReservationWithStatusResult result) {
@@ -23,7 +24,8 @@ public record ReservationWithStatusResponse(
                 result.time(),
                 result.theme(),
                 result.status().name().toLowerCase(),
-                result.waitingOrder()
+                result.waitingOrder(),
+                result.orderId()
         );
     }
 }

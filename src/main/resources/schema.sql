@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS reservation;
 
 DROP TABLE IF EXISTS reservation_waiting;
@@ -26,11 +27,25 @@ CREATE TABLE reservation (
     time_id            BIGINT          NOT NULL,
     theme_id           BIGINT          NOT NULL,
     updated_at         TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    confirmed          BOOLEAN         NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     UNIQUE (reservation_date, time_id, theme_id),
     UNIQUE (name, reservation_date, time_id)
+);
+
+CREATE TABLE payment (
+    id                 BIGINT          NOT NULL AUTO_INCREMENT,
+    reservation_id     BIGINT          NOT NULL,
+    order_id           VARCHAR(64)     NOT NULL UNIQUE,
+    payment_key        VARCHAR(255),
+    amount             BIGINT          NOT NULL,
+    status             VARCHAR(20)     NOT NULL,
+    created_at         TIMESTAMP       NOT NULL,
+    updated_at         TIMESTAMP       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
 
 CREATE TABLE reservation_waiting (

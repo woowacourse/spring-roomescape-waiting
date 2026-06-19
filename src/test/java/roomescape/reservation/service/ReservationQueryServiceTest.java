@@ -39,6 +39,9 @@ class ReservationQueryServiceTest {
     @Mock
     private ReservationQueryDao reservationQueryDao;
 
+    @Mock
+    private roomescape.payment.repository.PaymentRepository paymentRepository;
+
     @InjectMocks
     private ReservationQueryService reservationQueryService;
 
@@ -50,7 +53,7 @@ class ReservationQueryServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDateTime.now());
+                LocalDateTime.now(), true);
 
         given(reservationRepository.findAll()).willReturn(List.of(reservation));
 
@@ -74,9 +77,9 @@ class ReservationQueryServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
 
         Reservation fixedReservation1 = new Reservation(1L, name,
-                new ReservationSlot(LocalDate.now().plusDays(1), time1, theme), LocalDateTime.now());
+                new ReservationSlot(LocalDate.now().plusDays(1), time1, theme), LocalDateTime.now(), true);
         Reservation fixedReservation2 = new Reservation(2L, name,
-                new ReservationSlot(LocalDate.now().plusDays(1), time2, theme), LocalDateTime.now());
+                new ReservationSlot(LocalDate.now().plusDays(1), time2, theme), LocalDateTime.now(), true);
 
         given(reservationRepository.findAllByName(name)).willReturn(List.of(fixedReservation1, fixedReservation2));
         given(reservationWaitingRepository.findAllByName(name)).willReturn(List.of());
@@ -106,7 +109,7 @@ class ReservationQueryServiceTest {
         LocalDate dayAfterTomorrow = tomorrow.plusDays(1);
 
         ReservationSlot confirmedSlot = new ReservationSlot(dayAfterTomorrow, timeAt12, theme);
-        Reservation confirmedReservation = new Reservation(1L, name, confirmedSlot, LocalDateTime.now());
+        Reservation confirmedReservation = new Reservation(1L, name, confirmedSlot, LocalDateTime.now(), true);
 
         ReservationSlot waitingSlotOnDayAfterTomorrow = new ReservationSlot(dayAfterTomorrow, timeAt10, theme);
         ReservationWaiting userWaitingOnDayAfterTomorrow = new ReservationWaiting(
@@ -135,6 +138,29 @@ class ReservationQueryServiceTest {
         then(reservationRepository).should().findAllByName(name);
         then(reservationWaitingRepository).should().findAllByName(name);
         then(reservationWaitingRepository).should().findAllBySlots(any());
+    }
+
+    @Test
+    @DisplayName("결제 대기 중인 예약은 결제 주문번호를 함께 노출한다.")
+    void findAllByName_pendingPayment_exposesOrderId() {
+        // given
+        String name = "브라운";
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "테마", "설명", "url");
+        Reservation pendingReservation = new Reservation(1L, name,
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDateTime.now(), false);
+
+        given(reservationRepository.findAllByName(name)).willReturn(List.of(pendingReservation));
+        given(reservationWaitingRepository.findAllByName(name)).willReturn(List.of());
+        given(paymentRepository.findByReservationId(1L))
+                .willReturn(java.util.Optional.of(roomescape.payment.domain.Payment.pending(1L, "order_xyz", 50000L, LocalDateTime.now())));
+
+        // when
+        List<ReservationWithStatusResult> results = reservationQueryService.findAllByName(name);
+
+        // then
+        assertThat(results).hasSize(1);
+        assertThat(results.getFirst().orderId()).isEqualTo("order_xyz");
     }
 
     @Test

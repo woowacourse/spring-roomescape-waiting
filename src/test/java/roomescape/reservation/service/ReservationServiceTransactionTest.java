@@ -57,6 +57,7 @@ public class ReservationServiceTransactionTest {
 
     @AfterEach
     void tearDown() {
+        jdbcTemplate.update("DELETE FROM payment");
         jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");

@@ -66,7 +66,7 @@ class ReservationTest {
         // given
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
 
         // when & then
         assertThatCode(() -> reservation.validateDeletableByUser("브라운", LocalDateTime.now()))
@@ -79,7 +79,7 @@ class ReservationTest {
         // given
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
 
         // when & then
         assertThatThrownBy(() -> reservation.validateDeletableByUser("코니", java.time.LocalDateTime.now()))
@@ -93,7 +93,7 @@ class ReservationTest {
         // given
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme),
-                LocalDate.now().minusDays(1).atStartOfDay());
+                LocalDate.now().minusDays(1).atStartOfDay(), true);
         LocalDateTime requestTime = LocalDateTime.now();
 
         // when & then
@@ -110,7 +110,7 @@ class ReservationTest {
         LocalTime pastTimeVal = LocalTime.of(10, 0);
         ReservationTime pastTime = new ReservationTime(2L, pastTimeVal);
         Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(today, pastTime, theme),
-                today.atTime(9, 0));
+                today.atTime(9, 0), true);
         LocalDateTime requestTime = today.atTime(11, 0);
 
         // when & then
@@ -125,7 +125,7 @@ class ReservationTest {
         // given
         Reservation original = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         LocalDate newDate = LocalDate.now().plusDays(2);
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
         LocalDateTime requestTime = LocalDateTime.now();
@@ -144,7 +144,7 @@ class ReservationTest {
         // given
         Reservation original = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         LocalDateTime requestTime = LocalDateTime.now();
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
 
@@ -160,7 +160,7 @@ class ReservationTest {
         // given
         Reservation original = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme),
-                LocalDate.now().minusDays(1).atStartOfDay());
+                LocalDate.now().minusDays(1).atStartOfDay(), true);
         LocalDateTime requestTime = LocalDateTime.now();
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
 
@@ -176,7 +176,7 @@ class ReservationTest {
         // given
         Reservation original = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         LocalDateTime requestTime = LocalDateTime.now();
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
 

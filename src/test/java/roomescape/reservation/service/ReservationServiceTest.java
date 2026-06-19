@@ -22,6 +22,8 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.service.PaymentService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
@@ -54,12 +56,42 @@ class ReservationServiceTest {
     @Mock
     private ReservationQueryDao reservationQueryDao;
 
+    @Mock
+    private PaymentService paymentService;
+
+    @Mock
+    private roomescape.payment.repository.PaymentRepository paymentRepository;
 
     @InjectMocks
     private ReservationService reservationService;
 
     @InjectMocks
     private ReservationQueryService reservationQueryService;
+
+    @Test
+    @DisplayName("예약 생성에 성공하면 결제 대기를 발급하고 주문번호를 응답에 포함한다.")
+    void save_success_issuesPendingPaymentAndReturnsOrderId() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "테마", "설명", "url");
+        ReservationCommand command = new ReservationCommand("브라운", LocalDate.now().plusDays(1), 1L, 1L);
+        Reservation saved = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
+                LocalDate.now().plusDays(1).atStartOfDay(), false);
+
+        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(themeService.findById(1L)).willReturn(theme);
+        given(reservationRepository.save(any())).willReturn(saved);
+        given(paymentService.issuePendingPayment(saved))
+                .willReturn(Payment.pending(1L, "order_abc123", 50000L, now()));
+
+        // when
+        var result = reservationService.save(command, now());
+
+        // then
+        org.assertj.core.api.Assertions.assertThat(result.orderId()).isEqualTo("order_abc123");
+        then(paymentService).should().issuePendingPayment(saved);
+    }
 
     @Test
     @DisplayName("예약 생성 시 슬롯 중복으로 DB 예외가 발생하면 ConflictException을 던진다.")
@@ -186,7 +218,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "포비",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, "브라운", LocalDate.now().plusDays(2), 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -205,7 +237,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().minusDays(1), time, theme),
-                LocalDate.now().minusDays(1).atStartOfDay());
+                LocalDate.now().minusDays(1).atStartOfDay(), true);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, "브라운", LocalDate.now().plusDays(1), 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -224,7 +256,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, "브라운", LocalDate.now().minusDays(1), 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -244,7 +276,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, "브라운", LocalDate.now().plusDays(1), 999L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -264,7 +296,7 @@ class ReservationServiceTest {
         LocalDate targetDate = LocalDate.now().plusDays(2);
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, "브라운", targetDate, 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -287,7 +319,7 @@ class ReservationServiceTest {
         LocalDate targetDate = LocalDate.now().plusDays(2);
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, "브라운", targetDate, 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -323,7 +355,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "포비",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -341,7 +373,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "포비",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
-                LocalDate.now().plusDays(1).atStartOfDay());
+                LocalDate.now().plusDays(1).atStartOfDay(), true);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationWaitingRepository.queryAllBySlotForUpdate(any(ReservationSlot.class)))
@@ -352,6 +384,7 @@ class ReservationServiceTest {
 
         // then
         then(reservationRepository).should().delete(reservation);
+        then(paymentService).should().deleteByReservationId(1L);
     }
 
     @Test
@@ -362,7 +395,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "브라운",
                 new ReservationSlot(LocalDate.now().minusDays(1), time, theme),
-                LocalDate.now().minusDays(1).atStartOfDay());
+                LocalDate.now().minusDays(1).atStartOfDay(), true);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -380,7 +413,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation targetReservation = new Reservation(1L, "브라운", new ReservationSlot(date, time, theme),
-                date.atStartOfDay());
+                date.atStartOfDay(), true);
 
         ReservationWaiting w1 = new ReservationWaiting(10L, "중복대기자", new ReservationSlot(date, time, theme),
                 date.atStartOfDay());
@@ -402,7 +435,9 @@ class ReservationServiceTest {
         then(reservationWaitingRepository).should().queryAllBySlotForUpdate(any(ReservationSlot.class));
         then(reservationWaitingRepository).should().delete(w2);
         then(reservationRepository).should()
-                .save(new Reservation(null, "정상대기자", new ReservationSlot(date, time, theme), date.atStartOfDay()));
+                .save(new Reservation(null, "정상대기자", new ReservationSlot(date, time, theme), date.atStartOfDay(), false));
+        then(paymentService).should().deleteByReservationId(1L);
+        then(paymentService).should().issuePendingPayment(any());
     }
 
 
