@@ -49,9 +49,6 @@ public class ReservationOrder {
         return new ReservationOrder(this.id, this.amount, paymentKey, this.reservationId, OrderStatus.CONFIRMED);
     }
 
-    /**
-     * read timeout 등으로 승인 결과가 불명확한 상태. "결제 실패"로 단정하지 않고, 멱등키로 안전하게 재시도할 수 있다.
-     */
     public ReservationOrder markUnknown() {
         if (isConfirmed()) {
             return this;

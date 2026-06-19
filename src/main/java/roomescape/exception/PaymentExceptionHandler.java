@@ -14,6 +14,7 @@ import roomescape.exception.PaymentException.PaymentAuthException;
 import roomescape.exception.PaymentException.PaymentConfirmException;
 import roomescape.exception.PaymentException.PaymentInternalException;
 import roomescape.exception.PaymentException.PaymentNotFoundException;
+import roomescape.exception.PaymentException.PaymentRateLimitException;
 import roomescape.exception.PaymentException.PaymentResultUnknownException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -72,5 +73,11 @@ public class PaymentExceptionHandler {
     public ResponseEntity<ErrorResponse> handle(PaymentConfirmException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("PAYMENT_CONFIRM_FAILED", e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handle(PaymentRateLimitException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("PAYMENT_GATEWAY_RATE_LIMITED", e.getMessage()));
     }
 }

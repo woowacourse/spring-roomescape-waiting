@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.stream.Stream;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -40,7 +41,8 @@ class TossPaymentGatewayTest {
         requestFactory.setConnectTimeout(Duration.ofSeconds(1));
         requestFactory.setReadTimeout(Duration.ofSeconds(1));
 
-        gateway = new TossPaymentGateway(RestClient.builder(), requestFactory, new ObjectMapper(), baseUrl(), "test_sk");
+        gateway = new TossPaymentGateway(
+                RestClient.builder(), requestFactory, new ObjectMapper(), List.of(), baseUrl(), "test_sk");
     }
 
     @AfterEach
@@ -50,12 +52,9 @@ class TossPaymentGatewayTest {
 
     private String baseUrl() {
         String url = server.url("/").toString();
-        return url.substring(0, url.length() - 1); // 끝 슬래시 제거
+        return url.substring(0, url.length() - 1);
     }
 
-    // 참고: 401(UNAUTHORIZED) 코드 → PaymentAuthException 매핑은 TossExceptionHandlerTest(순수 단위)에서 검증한다.
-    // simple 팩토리(HttpURLConnection)는 401 응답을 특수 처리해 onStatus 에러 분기를 타지 않는 JDK 한계가 있어,
-    // 여기서는 HTTP 레벨로 검증하지 않는다.
     static Stream<Arguments> errorCases() {
         return Stream.of(
                 Arguments.of(HttpStatus.FORBIDDEN, "REJECT_CARD_PAYMENT", CardRejectedException.class),
@@ -72,7 +71,6 @@ class TossPaymentGatewayTest {
     @ParameterizedTest(name = "[{1}] -> {2}")
     @MethodSource("errorCases")
     void 토스_에러코드를_도메인_예외로_변환한다(HttpStatus status, String code, Class<? extends RuntimeException> expected) {
-        // 모든 요청에 동일한 에러 응답을 준다. (401 등에서 HttpURLConnection이 재요청해도 같은 에러를 받도록)
         server.setDispatcher(new Dispatcher() {
             @Override
             public MockResponse dispatch(RecordedRequest request) {
