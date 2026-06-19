@@ -30,7 +30,7 @@ public class ReservationResponse {
         Long rank = reservation.getRank() != null ? reservation.getRank().getValue() : null;
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getName().getValue(),
+                reservation.getMember().getName(),
                 slot.getDate().getDate(),
                 reservation.getStatus().getKoreanName(),
                 rank,

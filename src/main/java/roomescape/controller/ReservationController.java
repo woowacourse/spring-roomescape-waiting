@@ -46,9 +46,9 @@ public class ReservationController {
 
     @GetMapping("/reservations")
     public ResponseEntity<ReservationResponses> findList(
-            @RequestParam(required = false) String name
+            @RequestParam(required = false) Long memberId
     ) {
-        Reservations reservations = reservationService.findAll(name);
+        Reservations reservations = reservationService.findAll(memberId);
         return ResponseEntity.ok(ReservationResponses.toDto(reservations));
     }
 
@@ -58,12 +58,18 @@ public class ReservationController {
         return ResponseEntity.ok(ReservationResponse.toDto(reservation));
     }
 
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<ReservationResponses> findMine(@RequestParam Long memberId) {
+        Reservations reservations = reservationService.findMine(memberId);
+        return ResponseEntity.ok(ReservationResponses.toDto(reservations));
+    }
+
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable long id,
-            @RequestParam String name
+            @RequestParam Long memberId
     ) {
-        reservationService.cancel(id, name);
+        reservationService.cancel(id, memberId);
         return ResponseEntity.noContent().build();
     }
 

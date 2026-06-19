@@ -1,6 +1,8 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Component;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
@@ -18,35 +20,39 @@ import java.time.LocalDateTime;
 public class ReservationAssembler {
 
     private final Clock clock;
+    private final MemberRepository members;
     private final ReservationTimeRepository reservationTimes;
     private final ThemeRepository themes;
     private final SlotRepository slots;
 
     public ReservationAssembler(
             Clock clock,
+            MemberRepository members,
             ReservationTimeRepository reservationTimes,
             ThemeRepository themes,
             SlotRepository slots
     ) {
         this.clock = clock;
+        this.members = members;
         this.reservationTimes = reservationTimes;
         this.themes = themes;
         this.slots = slots;
     }
 
     public Reservation from(ReservationCreateCommand command) {
-        return of(command.getName(), command.getDate(), command.getTimeId(), command.getThemeId());
+        return of(command.getMemberId(), command.getDate(), command.getTimeId(), command.getThemeId());
     }
 
     public Reservation from(ReservationUpdateCommand command) {
-        return of(command.getName(), command.getDate(), command.getTimeId(), command.getThemeId());
+        return of(command.getMemberId(), command.getDate(), command.getTimeId(), command.getThemeId());
     }
 
-    private Reservation of(String name, LocalDate date, Long timeId, Long themeId) {
+    private Reservation of(Long memberId, LocalDate date, Long timeId, Long themeId) {
         LocalDateTime now = LocalDateTime.now(clock);
+        Member member = members.getById(memberId);
         ReservationTime time = reservationTimes.getById(timeId);
         Theme theme = themes.getById(themeId);
         Slot slot = slots.findOrCreate(new ReservationDate(date), time, theme, now);
-        return Reservation.create(name, slot);
+        return Reservation.create(member, slot);
     }
 }

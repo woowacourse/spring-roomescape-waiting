@@ -17,8 +17,8 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
 
     List<Slot> findByDateAndThemeId(ReservationDate date, Long themeId);
 
-    @Query("SELECT r.slot FROM Reservation r WHERE r.name.value = :name")
-    List<Slot> findAllByName(@Param("name") String name);
+    @Query("SELECT r.slot FROM Reservation r WHERE r.member.id = :memberId")
+    List<Slot> findAllByMemberId(@Param("memberId") Long memberId);
 
     boolean existsByTimeId(Long timeId);
 

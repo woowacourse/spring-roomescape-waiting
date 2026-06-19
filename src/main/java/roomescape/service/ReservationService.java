@@ -2,8 +2,10 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.RoomEscapeException;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
@@ -12,21 +14,26 @@ import roomescape.domain.reservation.Status;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
+import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
+
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
     private final Clock clock;
     private final ReservationAssembler assembler;
     private final ReservationRepository reservationRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationService(
             Clock clock,
             ReservationAssembler assembler,
-            ReservationRepository reservationRepository
+            ReservationRepository reservationRepository,
+            MemberRepository memberRepository
     ) {
         this.clock = clock;
         this.assembler = assembler;
         this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository;
     }
 
     @Transactional
@@ -45,11 +52,20 @@ public class ReservationService {
         return reservation.withRank(slotReservations.rankOf(reservation));
     }
 
-    public Reservations findAll(String name) {
-        if (name == null) {
+    public Reservations findAll(Long memberId) {
+        if (memberId == null) {
             return new Reservations(reservationRepository.findAll());
         }
-        return new Reservations(reservationRepository.findAllByName(new ReservationName(name)));
+        Member member = memberRepository.getById(memberId);
+        return new Reservations(reservationRepository.findAllByMember(member));
+    }
+
+    public Reservations findMine(Long memberId) {
+        if(!memberRepository.existsById(memberId)){
+            throw new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 회원을 찾을 수 없습니다. : " + memberId);
+        }
+
+        return new Reservations(reservationRepository.findMineWithDetails(memberId));
     }
 
     @Transactional
@@ -76,12 +92,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancel(long reservationId, String name) {
+    public void cancel(long reservationId, Long memberId) {
         Reservation reservation = reservationRepository.getById(reservationId);
         LocalDateTime now = LocalDateTime.now(clock);
 
         reservation.validateCancellable(now);
-        reservation.validateOwner(name);
+        reservation.validateOwner(memberId);
 
         reservationRepository.deleteById(reservationId);
 

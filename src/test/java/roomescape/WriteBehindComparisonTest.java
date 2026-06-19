@@ -89,7 +89,7 @@ public class WriteBehindComparisonTest {
 
     /**
      * 결정적 비교 — 여러 개 persist 후 한 번에 flush
-     *     -  SEQUENCE는 INSERT 3개가 flush 때 몰려서 나가고, IDENTITY는 persist마다 INSERT가 흩어져 나간다.
+     *     - SEQUENCE는 INSERT 3개가 flush 때 몰려서 나가고, IDENTITY는 persist마다 INSERT가 흩어져 나간다.
      */
     @Test
     @DisplayName("다건: SEQUENCE는 flush 때 INSERT 몰림, IDENTITY는 persist마다 흩어짐")

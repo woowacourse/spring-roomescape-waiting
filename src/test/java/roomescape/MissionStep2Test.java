@@ -12,7 +12,6 @@ import roomescape.controller.dto.response.ReservationResponses;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +29,7 @@ public class MissionStep2Test {
         jdbcTemplate.update("insert into reservation_time(start_at) values ('10:00')");
         jdbcTemplate.update(
                 "insert into theme(name, description, thumbnail_url) values ('공포', '무서워요', 'https://zeze.com')");
+        jdbcTemplate.update("insert into member(name) values ('브라운')");  // id=1
     }
 
     @Test
@@ -46,7 +46,7 @@ public class MissionStep2Test {
     @Test
     void DB_조회_API_전환() {
         jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, ?, ?)", "2023-08-05", 1, 1);
-        jdbcTemplate.update("INSERT INTO reservation (slot_id, name, status) VALUES (?, ?, ?)", 1, "브라운", "APPROVED");
+        jdbcTemplate.update("INSERT INTO reservation (slot_id, member_id, status) VALUES (?, ?, ?)", 1, 1, "APPROVED");
 
         ReservationResponses reservations = RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -65,11 +65,10 @@ public class MissionStep2Test {
     @Test
     void DB_추가_삭제_API_전환() {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
+        params.put("memberId", 1L);
         params.put("date", "2099-08-05");
         params.put("timeId", 1);
         params.put("themeId", 1);
-        params.put("createdAt", LocalDateTime.now().toString());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -82,7 +81,7 @@ public class MissionStep2Test {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
-                .param("name", "브라운")
+                .param("memberId", 1)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);

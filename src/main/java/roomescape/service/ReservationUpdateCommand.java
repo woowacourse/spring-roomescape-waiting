@@ -5,13 +5,13 @@ import roomescape.controller.dto.request.ReservationUpdateRequest;
 import java.time.LocalDate;
 
 public class ReservationUpdateCommand {
-    private final String name;
+    private final Long memberId;
     private final LocalDate date;
     private final Long timeId;
     private final Long themeId;
 
-    public ReservationUpdateCommand(String name, LocalDate date, Long timeId, Long themeId) {
-        this.name = name;
+    public ReservationUpdateCommand(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        this.memberId = memberId;
         this.date = date;
         this.timeId = timeId;
         this.themeId = themeId;
@@ -19,15 +19,15 @@ public class ReservationUpdateCommand {
 
     public static ReservationUpdateCommand from(ReservationUpdateRequest request) {
         return new ReservationUpdateCommand(
-                request.getName(),
+                request.getMemberId(),
                 request.getDate(),
                 request.getTimeId(),
                 request.getThemeId()
         );
     }
 
-    public String getName() {
-        return name;
+    public Long getMemberId() {
+        return memberId;
     }
 
     public LocalDate getDate() {

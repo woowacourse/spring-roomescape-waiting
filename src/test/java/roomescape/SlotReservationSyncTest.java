@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataAccessException;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
@@ -48,6 +50,7 @@ public class SlotReservationSyncTest {
     @Autowired private ReservationRepository reservationRepository;
     @Autowired private ReservationTimeRepository timeRepository;
     @Autowired private ThemeRepository themeRepository;
+    @Autowired private MemberRepository memberRepository;
     @Autowired private EntityManager em;
 
     private ReservationTime givenTime(int hour) {
@@ -68,7 +71,8 @@ public class SlotReservationSyncTest {
         Theme theme = givenTheme("테스트 테마");
 
         Slot slot = slotRepository.save(Slot.create(new ReservationDate(TODAY), time, theme, LocalDateTime.now(FIXED_CLOCK)));
-        Reservation reservation = Reservation.create("김철수", slot);
+        Member member = memberRepository.save(Member.create("김철수"));
+        Reservation reservation = Reservation.create(member, slot);
 
         slot.getReservations().add(reservation);
 
@@ -85,7 +89,8 @@ public class SlotReservationSyncTest {
         Theme theme = givenTheme("테스트 테마");
 
         Slot slot = slotRepository.save(Slot.create(new ReservationDate(TODAY), time, theme, LocalDateTime.now(FIXED_CLOCK)));
-        Reservation reservation = Reservation.create("김철수", slot);
+        Member member = memberRepository.save(Member.create("김철수"));
+        Reservation reservation = Reservation.create(member, slot);
 
         reservationRepository.save(reservation);
 

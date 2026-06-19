@@ -4,6 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
@@ -50,6 +52,9 @@ class SlotRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     private ReservationTime givenTime(int hour) {
         return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
@@ -60,6 +65,10 @@ class SlotRepositoryTest {
 
     private Slot givenSlot(ReservationDate date, ReservationTime time, Theme theme) {
         return slotRepository.save(Slot.create(date, time, theme, LocalDateTime.now(FIXED_CLOCK)));
+    }
+
+    private Member givenMember(String name) {
+        return memberRepository.save(Member.create(name));
     }
 
     @Test
@@ -184,15 +193,17 @@ class SlotRepositoryTest {
     }
 
     @Test
-    @DisplayName("이름으로 슬롯 조회")
-    void findAllByName() {
+    @DisplayName("회원ID로 슬롯 조회")
+    void findAllByMemberId() {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        reservationRepository.save(Reservation.create("유저1", slot).withStatus(Status.APPROVED));
-        reservationRepository.save(Reservation.create("유저2", slot).withStatus(Status.WAITING));
+        Member member1 = givenMember("유저1");
+        Member member2 = givenMember("유저2");
+        reservationRepository.save(Reservation.create(member1, slot).withStatus(Status.APPROVED));
+        reservationRepository.save(Reservation.create(member2, slot).withStatus(Status.WAITING));
 
-        List<Slot> slots = slotRepository.findAllByName("유저1");
+        List<Slot> slots = slotRepository.findAllByMemberId(member1.getId());
 
         assertThat(slots).hasSize(1);
         assertThat(slots.get(0).getId()).isEqualTo(slot.getId());

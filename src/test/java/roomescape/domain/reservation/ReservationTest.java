@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import org.junit.jupiter.api.Test;
 import roomescape.domain.RoomEscapeException;
+import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
@@ -19,16 +20,17 @@ public class ReservationTest {
     }
 
     @Test
-    void 이름이_NULL이면_예외가_발생한다() {
+    void 회원이_NULL이면_예외가_발생한다() {
         assertThatThrownBy(() -> Reservation.create(null, validSlot()))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 정상적인_예약_생성은_성공한다() {
-        Reservation reservation = Reservation.create("zeze", validSlot()).withStatus(Status.APPROVED);
+        Member member = new Member(1L, "zeze");
+        Reservation reservation = Reservation.create(member, validSlot()).withStatus(Status.APPROVED);
 
-        assertThat(reservation.getName().getValue()).isEqualTo("zeze");
+        assertThat(reservation.getMember().getName()).isEqualTo("zeze");
         assertThat(reservation.getStatus()).isEqualTo(Status.APPROVED);
     }
 }

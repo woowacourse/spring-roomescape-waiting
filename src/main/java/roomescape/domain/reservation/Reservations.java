@@ -14,7 +14,7 @@ public class Reservations {
     }
 
     public Reservation join(Reservation assembled) {
-        conflictByName(assembled);
+        conflictByMember(assembled);
         Reservation withStatus = assembled.withStatus(nextStatus());
         return withStatus.withRank(rankOf(withStatus));
     }
@@ -23,15 +23,15 @@ public class Reservations {
         return values.stream().anyMatch(Reservation::isApproved) ? Status.WAITING : Status.APPROVED;
     }
 
-    public void conflictByName(Reservation reservation) {
-        if (hasByName(reservation)) {
-            throw new RoomEscapeException(DomainErrorCode.ALREADY_EXISTS, "이미 같은 슬롯에 예약이 존재합니다: " + reservation.getName().getValue());
+    public void conflictByMember(Reservation reservation) {
+        if (hasByMember(reservation)) {
+            throw new RoomEscapeException(DomainErrorCode.ALREADY_EXISTS, "이미 같은 슬롯에 예약이 존재합니다: " + reservation.getMember().getName());
         }
     }
 
-    public boolean hasByName(Reservation other) {
+    public boolean hasByMember(Reservation other) {
         return values.stream()
-                .anyMatch(r -> r.isSameName(other));
+                .anyMatch(r -> r.isSameMember(other));
     }
 
     public Reservations excluding(Long id) {
