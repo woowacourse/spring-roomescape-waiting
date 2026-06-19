@@ -1,5 +1,7 @@
 package roomescape.dto.reservation;
 
+import roomescape.domain.payment.Order;
+import roomescape.domain.payment.PaymentStatus;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
@@ -15,8 +17,14 @@ public class MyReservationResponse {
     private final ThemeResponse theme;
     private final ReservationStatus status;
     private final Long sequence;
+    private final String orderId;
+    private final String paymentKey;
+    private final Long amount;
+    private final PaymentStatus paymentStatus;
 
-    public MyReservationResponse(Long reservationId, Long waitingId, LocalDate date, ReservationTimeResponse time, ThemeResponse theme, ReservationStatus status, Long sequence) {
+    public MyReservationResponse(Long reservationId, Long waitingId, LocalDate date, ReservationTimeResponse time,
+                                 ThemeResponse theme, ReservationStatus status, Long sequence,
+                                 String orderId, String paymentKey, Long amount, PaymentStatus paymentStatus) {
         this.reservationId = reservationId;
         this.waitingId = waitingId;
         this.date = date;
@@ -24,9 +32,13 @@ public class MyReservationResponse {
         this.theme = theme;
         this.status = status;
         this.sequence = sequence;
+        this.orderId = orderId;
+        this.paymentKey = paymentKey;
+        this.amount = amount;
+        this.paymentStatus = paymentStatus;
     }
 
-    public static MyReservationResponse fromReservation(Reservation reservation) {
+    public static MyReservationResponse fromReservation(Reservation reservation, Order order) {
         return new MyReservationResponse(
                 reservation.getId(),
                 null,
@@ -34,7 +46,24 @@ public class MyReservationResponse {
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
                 ReservationStatus.RESERVED,
-                null
+                null,
+                order.getOrderId(),
+                order.getPaymentKey(),
+                order.getAmount(),
+                order.getPaymentStatus()
+        );
+    }
+
+    public static MyReservationResponse fromReservationWithoutOrder(Reservation reservation) {
+        return new MyReservationResponse(
+                reservation.getId(),
+                null,
+                reservation.getDate(),
+                ReservationTimeResponse.from(reservation.getTime()),
+                ThemeResponse.from(reservation.getTheme()),
+                ReservationStatus.RESERVED,
+                null,
+                null, null, null, null
         );
     }
 
@@ -46,7 +75,8 @@ public class MyReservationResponse {
                 ReservationTimeResponse.from(reservationWaiting.getTime()),
                 ThemeResponse.from(reservationWaiting.getTheme()),
                 ReservationStatus.WAITING,
-                sequence
+                sequence,
+                null, null, null, null
         );
     }
 
@@ -76,5 +106,21 @@ public class MyReservationResponse {
 
     public Long getSequence() {
         return sequence;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
+    }
+
+    public Long getAmount() {
+        return amount;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
     }
 }

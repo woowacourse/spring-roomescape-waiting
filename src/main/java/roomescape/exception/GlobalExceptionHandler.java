@@ -87,4 +87,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getStatus())
                 .body(new ErrorResponse(e.getCode(), e.getMessage()));
     }
+
+    @ExceptionHandler(PaymentConnectionException.class)
+    public ResponseEntity<ErrorResponse> handle(PaymentConnectionException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("PAYMENT_CONNECTION_FAILED", e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentUncertainException.class)
+    public ResponseEntity<ErrorResponse> handle(PaymentUncertainException e) {
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
+                .body(new ErrorResponse("PAYMENT_UNCERTAIN", e.getMessage()));
+    }
 }
