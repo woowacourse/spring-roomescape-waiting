@@ -63,6 +63,19 @@ class TossClientTimeoutTest {
     }
 
     @Test
+    void confirm_호출시_Idempotency_Key_헤더에_orderId가_그대로_전달된다() throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(SUCCESS_BODY));
+
+        tossPaymentGateway.confirm(confirmation());
+
+        var recordedRequest = mockWebServer.takeRequest();
+        assertThat(recordedRequest.getHeader("Idempotency-Key")).isEqualTo("order-1");
+    }
+
+    @Test
     void 읽기타임아웃이면_readTimeout만큼만_기다렸다가_RestClient예외로_실패한다() {
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(200)
