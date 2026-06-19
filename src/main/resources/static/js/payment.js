@@ -247,7 +247,7 @@ export async function approveTossRedirectPayment(params) {
         .catch((error) => {
             const retryable = isRetryablePaymentApprovalError(error);
             const message = error.message || (retryable
-                ? "결제 승인 요청이 지연되고 있습니다. 잠시 후 다시 시도해 주세요."
+                ? "결제 상태 확인이 지연되고 있습니다. 잠시 후 다시 확인해 주세요."
                 : "결제 승인을 완료하지 못했습니다.");
             state.payment.processing = {
                 status: retryable ? "retryable-failed" : "failed",
