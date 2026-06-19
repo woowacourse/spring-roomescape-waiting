@@ -17,7 +17,7 @@ import roomescape.feature.payment.dto.PaymentResponse;
 /**
  * 토스 결제 API와 통신하는 HTTP 클라이언트.
  *
- * baseUrl·인증을 이 클라이언트가 소유한다.
+ * baseUrl·인증, 그리고 429 Retry-After 정책({@link RetryAfterInterceptor})을 이 클라이언트가 소유한다.
  * 전송 타임아웃(requestFactory)은 주입받은 {@code tossRestClientBuilder}에 이미 적용돼 있으며,
  * 이 클라이언트는 {@code requestFactory}를 호출하지 않는다 — {@code MockRestServiceServer} 테스트 seam을 보존하기 위함.
  */
@@ -34,11 +34,13 @@ public class TossPaymentClient {
     public TossPaymentClient(
             RestClient.Builder tossRestClientBuilder,
             TossPaymentProperties properties,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            RetryAfterInterceptor retryAfterInterceptor
     ) {
         this.restClient = tossRestClientBuilder
                 .baseUrl(properties.baseUrl())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, basicAuthorizationHeader(properties.secretKey()))
+                .requestInterceptor(retryAfterInterceptor)   // 429 Retry-After 처리가 이 파일에서 드러난다
                 .build();
         this.objectMapper = objectMapper;
     }

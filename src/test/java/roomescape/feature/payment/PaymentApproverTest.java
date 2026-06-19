@@ -47,7 +47,9 @@ class PaymentApproverTest {
 
         TossPaymentProperties properties = new TossPaymentProperties(
                 BASE_URL, "test_secret_key", Duration.ofSeconds(5), Duration.ofSeconds(10));
-        TossPaymentClient tossPaymentClient = new TossPaymentClient(builder, properties, new ObjectMapper());
+        RetryAfterInterceptor retryAfterInterceptor = new RetryAfterInterceptor(new FakeSleeper(), 3, Duration.ofSeconds(1));
+        TossPaymentClient tossPaymentClient =
+                new TossPaymentClient(builder, properties, new ObjectMapper(), retryAfterInterceptor);
 
         paymentApprover = new PaymentApprover(tossPaymentClient);
     }
