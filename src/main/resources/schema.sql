@@ -42,11 +42,12 @@ CREATE TABLE reservation
 CREATE TABLE payment
 (
     id             BIGINT       NOT NULL AUTO_INCREMENT,
-    payment_key    VARCHAR(200) NOT NULL UNIQUE,
-    order_id       VARCHAR(64)  NOT NULL UNIQUE,
-    amount         BIGINT       NOT NULL,
-    status         VARCHAR(20)  NOT NULL,
-    reservation_id BIGINT       NOT NULL,
+    payment_key      VARCHAR(200) NOT NULL UNIQUE,
+    order_id         VARCHAR(64)  NOT NULL UNIQUE,
+    amount           BIGINT       NOT NULL,
+    status           VARCHAR(20)  NOT NULL,
+    cancel_attempts  INT          NOT NULL DEFAULT 0,
+    reservation_id   BIGINT       NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );

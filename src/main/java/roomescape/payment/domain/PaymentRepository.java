@@ -14,11 +14,12 @@ public class PaymentRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    private static final RowMapper<Payment> ROW_MAPPER = (rs, rowNum) -> Payment.of(
+    private static final RowMapper<Payment> ROW_MAPPER = (rs, rowNum) -> Payment.fromRow(
             rs.getString("payment_key"),
             rs.getString("order_id"),
             rs.getLong("amount"),
             rs.getString("status"),
+            rs.getInt("cancel_attempts"),
             rs.getLong("reservation_id")
     );
 
@@ -48,5 +49,12 @@ public class PaymentRepository {
 
     public void deleteByReservationId(Long reservationId) {
         jdbcTemplate.update("DELETE FROM payment WHERE reservation_id = ?", reservationId);
+    }
+
+    public void incrementCancelAttempts(Long reservationId) {
+        jdbcTemplate.update(
+                "UPDATE payment SET cancel_attempts = cancel_attempts + 1 WHERE reservation_id = ?",
+                reservationId
+        );
     }
 }
