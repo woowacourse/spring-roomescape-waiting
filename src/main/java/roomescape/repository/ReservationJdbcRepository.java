@@ -119,7 +119,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
                  where u.id = ?
                  order by case r.status
                               when 'RESERVED' then 0
-                              when 'WAITING' then 1
+                              when 'PAYMENT_PENDING' then 1
+                              when 'PAYMENT_FAILED' then 2
+                              when 'WAITING' then 3
                               else 2
                           end,
                           r.date,
@@ -251,6 +253,15 @@ public class ReservationJdbcRepository implements ReservationRepository {
     public int updateStatus(Long id, ReservationStatus status) {
         String sql = "update reservation set status = ? where id = ?";
         return jdbcTemplate.update(sql, status.name(), id);
+    }
+
+    @Override
+    public int updateWaitingToReserved(Reservation reservation) {
+        String sql = "update reservation set status = ? where id = ? and status = ?";
+        return jdbcTemplate.update(sql,
+                ReservationStatus.RESERVED.name(),
+                reservation.getId(),
+                ReservationStatus.WAITING.name());
     }
 
     @Override

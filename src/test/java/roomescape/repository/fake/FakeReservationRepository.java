@@ -102,6 +102,10 @@ public class FakeReservationRepository implements ReservationRepository {
         return store.remove(id) == null ? 0 : 1;
     }
 
+    public void failDeleteOnce() {
+        failDeleteOnce = true;
+    }
+
     @Override
     public int update(Reservation reservation) {
         if (!store.containsKey(reservation.getId())) {
@@ -119,6 +123,24 @@ public class FakeReservationRepository implements ReservationRepository {
         }
         store.put(id, reservation.withStatus(status));
         return 1;
+    }
+
+    @Override
+    public int updateWaitingToReserved(Reservation reservation) {
+        if (failUpdateWaitingToReservedOnce) {
+            failUpdateWaitingToReservedOnce = false;
+            return 0;
+        }
+        Reservation existing = store.get(reservation.getId());
+        if (existing == null || !existing.isWaiting()) {
+            return 0;
+        }
+        store.put(reservation.getId(), reservation);
+        return 1;
+    }
+
+    public void failUpdateWaitingToReservedOnce() {
+        failUpdateWaitingToReservedOnce = true;
     }
 
     @Override

@@ -3,6 +3,8 @@ package roomescape.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -33,6 +35,7 @@ import roomescape.repository.StoreRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.UserRepository;
 import roomescape.repository.PaymentOrderRepository;
+import roomescape.service.payment.IdempotencyKeyGenerator;
 import roomescape.service.payment.OrderIdGenerator;
 
 @Service
@@ -45,6 +48,7 @@ public class ReservationService {
     private final StoreRepository storeRepository;
     private final PaymentOrderRepository paymentOrderRepository;
     private final OrderIdGenerator orderIdGenerator;
+    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final TimeProvider timeProvider;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -54,6 +58,7 @@ public class ReservationService {
                               StoreRepository storeRepository,
                               PaymentOrderRepository paymentOrderRepository,
                               OrderIdGenerator orderIdGenerator,
+                              IdempotencyKeyGenerator idempotencyKeyGenerator,
                               TimeProvider timeProvider) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
@@ -62,6 +67,7 @@ public class ReservationService {
         this.storeRepository = storeRepository;
         this.paymentOrderRepository = paymentOrderRepository;
         this.orderIdGenerator = orderIdGenerator;
+        this.idempotencyKeyGenerator = idempotencyKeyGenerator;
         this.timeProvider = timeProvider;
     }
 
@@ -74,13 +80,20 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public ReservationWithStatusResponses getMyReservations(Long userId) {
         List<Reservation> reservations = reservationRepository.findAllByUserId(userId).stream()
-                .filter(Reservation::isReserved)
+                .filter(reservation -> !reservation.isWaiting())
                 .toList();
+        Map<Long, PaymentOrder> paymentOrdersByReservationId = paymentOrderRepository.findAllByReservationIds(
+                        reservations.stream()
+                                .map(Reservation::getId)
+                                .toList())
+                .stream()
+                .collect(Collectors.toMap(PaymentOrder::getReservationId, Function.identity()));
 
         Map<Reservation, Integer> waitingReservations =
                 reservationRepository.findWaitingReservationsWithOrderByUserId(userId);
 
-        return ReservationWithStatusResponses.of(reservations, waitingReservations, false);
+        return ReservationWithStatusResponses.of(reservations, waitingReservations, paymentOrdersByReservationId,
+                false);
     }
 
     @Transactional
@@ -92,7 +105,9 @@ public class ReservationService {
 
         Long newReservationId = reservationRepository.save(newReservation);
         String orderId = orderIdGenerator.generate();
-        paymentOrderRepository.save(new PaymentOrder(null, newReservationId, orderId, command.amount()));
+        String idempotencyKey = idempotencyKeyGenerator.generate();
+        paymentOrderRepository.save(new PaymentOrder(null, newReservationId, orderId, command.amount(), null,
+                idempotencyKey));
         return new ReservationPaymentResponse(newReservationId, orderId, command.amount());
     }
 

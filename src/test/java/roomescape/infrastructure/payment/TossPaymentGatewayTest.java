@@ -8,12 +8,17 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,11 +36,14 @@ class TossPaymentGatewayTest {
         String secretKey = "test_sk_secret";
         String authorization = "Basic " + Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
-        TossPaymentGateway gateway = new TossPaymentGateway(builder, new ObjectMapper(), "https://api.tosspayments.com",
-                secretKey);
+        RestClient restClient = builder.baseUrl("https://api.tosspayments.com")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, authorization)
+                .build();
+        TossPaymentGateway gateway = new TossPaymentGateway(restClient, new ObjectMapper());
         server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Authorization", authorization))
+                .andExpect(header("Idempotency-Key", "idempotency-key-123"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("""
                         {
@@ -52,7 +60,8 @@ class TossPaymentGatewayTest {
                         }
                         """, MediaType.APPLICATION_JSON));
 
-        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L));
+        PaymentResult result = gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L,
+                "idempotency-key-123"));
 
         assertThat(result.paymentKey()).isEqualTo("payment_key");
         assertThat(result.orderId()).isEqualTo("order_123456");
@@ -101,12 +110,33 @@ class TossPaymentGatewayTest {
         assertErrorMapped("UNKNOWN_CODE", HttpStatus.BAD_GATEWAY, TossPaymentException.class);
     }
 
+    @Test
+    void confirm_연결_실패는_결제_연결_실패_예외로_변환한다() {
+        assertNetworkFailureMapped(new ConnectException("Connection refused"),
+                TossPaymentException.ConnectionFailed.class,
+                "TOSS_CONNECTION_FAILED");
+    }
+
+    @Test
+    void confirm_연결_타임아웃은_결제_연결_실패_예외로_변환한다() {
+        assertNetworkFailureMapped(new SocketTimeoutException("Connect timed out"),
+                TossPaymentException.ConnectionFailed.class,
+                "TOSS_CONNECTION_FAILED");
+    }
+
+    @Test
+    void confirm_응답_읽기_타임아웃은_승인_결과_불명확_예외로_변환한다() {
+        assertNetworkFailureMapped(new SocketTimeoutException("Read timed out"),
+                TossPaymentException.ConfirmationUnknown.class,
+                "TOSS_CONFIRMATION_UNKNOWN");
+    }
+
     private void assertErrorMapped(String code, HttpStatus status,
                                    Class<? extends RuntimeException> expectedExceptionType) {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        TossPaymentGateway gateway = new TossPaymentGateway(builder, new ObjectMapper(), "https://api.tosspayments.com",
-                "test_sk_secret");
+        RestClient restClient = builder.baseUrl("https://api.tosspayments.com").build();
+        TossPaymentGateway gateway = new TossPaymentGateway(restClient, new ObjectMapper());
         server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andRespond(withStatus(status)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -117,8 +147,27 @@ class TossPaymentGatewayTest {
                                 }
                                 """.formatted(code)));
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L,
+                "idempotency-key-123")))
                 .isInstanceOf(expectedExceptionType);
+        server.verify();
+    }
+
+    private void assertNetworkFailureMapped(IOException exception,
+                                            Class<? extends TossPaymentException> expectedExceptionType,
+                                            String expectedCode) {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        RestClient restClient = builder.baseUrl("https://api.tosspayments.com").build();
+        TossPaymentGateway gateway = new TossPaymentGateway(restClient, new ObjectMapper());
+        server.expect(once(), requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andRespond(withException(exception));
+
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 37_000L,
+                "idempotency-key-123")))
+                .isInstanceOf(expectedExceptionType)
+                .extracting("code")
+                .isEqualTo(expectedCode);
         server.verify();
     }
 }

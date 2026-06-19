@@ -1,6 +1,7 @@
 package roomescape.repository.fake;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.payment.PaymentOrder;
@@ -23,6 +24,13 @@ public class FakePaymentOrderRepository implements PaymentOrderRepository {
         return store.values().stream()
                 .filter(paymentOrder -> paymentOrder.getOrderId().equals(orderId))
                 .findFirst();
+    }
+
+    @Override
+    public List<PaymentOrder> findAllByReservationIds(List<Long> reservationIds) {
+        return store.values().stream()
+                .filter(paymentOrder -> reservationIds.contains(paymentOrder.getReservationId()))
+                .toList();
     }
 
     @Override

@@ -8,6 +8,7 @@ import roomescape.domain.payment.PaymentOrder;
 import roomescape.domain.payment.PaymentResult;
 import roomescape.exception.PaymentAmountMismatchException;
 import roomescape.exception.PaymentOrderNotFoundException;
+import roomescape.infrastructure.payment.TossPaymentException;
 import roomescape.repository.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.payment.port.PaymentGateway;
@@ -27,17 +28,23 @@ public class PaymentService {
         this.paymentGateway = paymentGateway;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = TossPaymentException.ConfirmationUnknown.class)
     public PaymentResult confirmPayment(String paymentKey, String orderId, long amount) {
         PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentOrderNotFoundException(orderId));
 
         validateAmount(amount, paymentOrder);
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-        paymentOrderRepository.updatePaymentKey(orderId, result.paymentKey());
-        reservationRepository.updateStatus(paymentOrder.getReservationId(), ReservationStatus.RESERVED);
-        return result;
+        try {
+            PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount,
+                    paymentOrder.getIdempotencyKey()));
+            paymentOrderRepository.updatePaymentKey(orderId, result.paymentKey());
+            reservationRepository.updateStatus(paymentOrder.getReservationId(), ReservationStatus.RESERVED);
+            return result;
+        } catch (TossPaymentException.ConfirmationUnknown e) {
+            paymentOrderRepository.updatePaymentKey(orderId, paymentKey);
+            throw e;
+        }
     }
 
     @Transactional
@@ -47,17 +54,15 @@ public class PaymentService {
         }
 
         paymentOrderRepository.findByOrderId(orderId)
-                .ifPresent(this::deletePendingPaymentOrder);
+                .ifPresent(this::markPendingPaymentOrderFailed);
     }
 
-    private void deletePendingPaymentOrder(PaymentOrder paymentOrder) {
+    private void markPendingPaymentOrderFailed(PaymentOrder paymentOrder) {
         reservationRepository.findById(paymentOrder.getReservationId())
                 .filter(reservation -> reservation.getStatus() == ReservationStatus.PAYMENT_PENDING)
                 .filter(reservation -> paymentOrder.getPaymentKey() == null)
-                .ifPresent(reservation -> {
-                    paymentOrderRepository.deleteByOrderId(paymentOrder.getOrderId());
-                    reservationRepository.deleteById(reservation.getId());
-                });
+                .ifPresent(reservation -> reservationRepository.updateStatus(
+                        reservation.getId(), ReservationStatus.PAYMENT_FAILED));
     }
 
     private void validateAmount(long amount, PaymentOrder paymentOrder) {
