@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS reservation (
     date DATE NOT NULL,
     time_id BIGINT,
     theme_id BIGINT,
+    status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
@@ -40,3 +41,12 @@ CREATE TABLE IF NOT EXISTS waiting (
 
 CREATE INDEX IF NOT EXISTS idx_waiting_schedule ON waiting (theme_id, date, time_id, id);
 CREATE INDEX IF NOT EXISTS idx_waiting_name ON waiting (name);
+
+CREATE TABLE IF NOT EXISTS payment_order (
+    order_id VARCHAR(64) NOT NULL,
+    reservation_id BIGINT NOT NULL,
+    amount BIGINT NOT NULL,
+    payment_key VARCHAR(255),
+    PRIMARY KEY (order_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
+);

@@ -24,5 +24,9 @@ public interface ReservationRepository {
 
     void update(Reservation reservation);
 
+    void confirm(long id);
+
     boolean delete(Reservation reservation);
+
+    boolean deletePendingById(long id);
 }

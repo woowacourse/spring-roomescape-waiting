@@ -11,25 +11,35 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final Schedule schedule;
+    private final ReservationStatus status;
 
     public Reservation(Long id, String name, Schedule schedule) {
+        this(id, name, schedule, ReservationStatus.CONFIRMED);
+    }
+
+    public Reservation(Long id, String name, Schedule schedule, ReservationStatus status) {
         if (name == null || name.isBlank()) {
             throw new DomainRuleViolationException("예약자 이름은 비어 있을 수 없습니다.");
         }
         this.id = id;
         this.name = name;
         this.schedule = schedule;
+        this.status = status;
     }
 
-    private Reservation(String name, Schedule schedule) {
-        this(null, name, schedule);
+    private Reservation(String name, Schedule schedule, ReservationStatus status) {
+        this(null, name, schedule, status);
     }
 
     public static Reservation create(String name, Schedule schedule, LocalDateTime now) {
         if(schedule.isPast(now)) {
             throw new DomainConflictException("지난 시간으로는 예약할 수 없습니다.");
         }
-        return new Reservation(name, schedule);
+        return new Reservation(name, schedule, ReservationStatus.PENDING);
+    }
+
+    public Reservation confirm() {
+        return new Reservation(id, name, schedule, ReservationStatus.CONFIRMED);
     }
 
     public Reservation changeSchedule(LocalDate newDate, ReservationTime newTime, String requester, LocalDateTime now) {
@@ -40,7 +50,7 @@ public class Reservation {
         if (newTime.isPast(newDate, now)) {
             throw new DomainConflictException("과거로는 변경할 수 없습니다.");
         }
-        return new Reservation(id, name, new Schedule(newDate, newTime, schedule.getTheme()));
+        return new Reservation(id, name, new Schedule(newDate, newTime, schedule.getTheme()), status);
     }
 
     public void checkCancellable(String requester, LocalDateTime now) {
@@ -74,5 +84,9 @@ public class Reservation {
 
     public Schedule getSchedule() {
         return schedule;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }

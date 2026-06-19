@@ -19,7 +19,8 @@ public class FakeReservationRepository implements ReservationRepository {
         Reservation saved = new Reservation(
                 sequence.incrementAndGet(),
                 reservation.getName(),
-                reservation.getSchedule());
+                reservation.getSchedule(),
+                reservation.getStatus());
         reservations.add(saved);
         return saved;
     }
@@ -74,7 +75,17 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void confirm(long id) {
+        findById(id).ifPresent(reservation -> update(reservation.confirm()));
+    }
+
+    @Override
     public boolean delete(Reservation reservation) {
         return reservations.removeIf(r -> r.getId().equals(reservation.getId()));
+    }
+
+    @Override
+    public boolean deletePendingById(long id) {
+        return reservations.removeIf(r -> r.getId().equals(id) && r.getStatus().name().equals("PENDING"));
     }
 }
