@@ -1,7 +1,7 @@
 package roomescape.apitest.member;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.config.FixedClockConfig.TODAY;
+import static roomescape.common.config.FixedClockConfig.TODAY;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeApiTest {
 

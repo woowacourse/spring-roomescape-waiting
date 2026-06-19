@@ -2,8 +2,8 @@ package roomescape.domain.waiting;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static roomescape.config.FixedClockConfig.NOW_TIME;
-import static roomescape.config.FixedClockConfig.TODAY;
+import static roomescape.common.config.FixedClockConfig.NOW_TIME;
+import static roomescape.common.config.FixedClockConfig.TODAY;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

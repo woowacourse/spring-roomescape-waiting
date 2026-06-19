@@ -1,7 +1,7 @@
 package roomescape.service.concurrency;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.config.FixedClockConfig.FUTURE_DATE;
+import static roomescape.common.config.FixedClockConfig.FUTURE_DATE;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

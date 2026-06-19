@@ -59,9 +59,14 @@ VALUES ('브라운', '2026-05-01', 1, 11, 'CONFIRMED'),
 
        ('브라운', '2026-05-11', 2, 12, 'CONFIRMED'),
 
-       ('브라운', '2026-05-12', 5, 1, 'CONFIRMED');
+       ('브라운', '2026-05-12', 5, 1, 'CONFIRMED'),
+
+       ('브라운', '2026-05-12', 6, 1, 'PENDING');
 
 
 INSERT INTO waiting (name, date, time_id, theme_id, created_at)
 VALUES ('토리', '2026-05-12', 5, 1, '2026-05-10T09:00'),
        ('로운', '2026-05-12', 5, 1, '2026-05-10T09:00');
+
+INSERT INTO orders (id, amount, reservation_id)
+VALUES ('test_order_id', 50000, 26);

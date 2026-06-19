@@ -11,10 +11,22 @@ import roomescape.common.exception.BadRequestException;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.OutboundRateLimitException;
+import roomescape.common.exception.PaymentAmountMismatchException;
+import roomescape.common.exception.PaymentGatewayException;
 import roomescape.common.exception.UnprocessableEntityException;
+import roomescape.domain.history.PaymentHistory;
+import roomescape.domain.history.PaymentHistoryRepository;
+import roomescape.infrastructure.payment.toss.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final PaymentHistoryRepository historyRepository;
+
+    public GlobalExceptionHandler(PaymentHistoryRepository historyRepository) {
+        this.historyRepository = historyRepository;
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<GlobalErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
@@ -80,6 +92,44 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GlobalErrorResponse> handleNullPointerException(NullPointerException e) {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    public ResponseEntity<GlobalErrorResponse> handlePaymentAmountMismatchException(PaymentAmountMismatchException e) {
+        historyRepository.save(PaymentHistory.of(
+                false, e.getOrderId(), e.getAmount(), e.getPaymentKey(), "금액 불일치", e.getMessage()
+        ));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<GlobalErrorResponse> handleOutboundRateLimitException(OutboundRateLimitException e) {
+        historyRepository.save(PaymentHistory.of(
+                false, e.getOrderId(), e.getAmount(), e.getPaymentKey(), "나가는 한도 차단", e.getMessage()
+        ));
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentGatewayException.class)
+    public ResponseEntity<GlobalErrorResponse> handleTossPaymentGatewayException(PaymentGatewayException e) {
+        historyRepository.save(PaymentHistory.of(
+                false, e.getOrderId(), e.getAmount(), e.getPaymentKey(), "게이트웨이 거부/통신에러",
+                e.getCause().getClass().getSimpleName()
+        ));
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<GlobalErrorResponse> handleTossPaymentException(TossPaymentException e) {
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(GlobalErrorResponse.from(e.getMessage()));
     }
 }

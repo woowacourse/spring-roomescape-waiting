@@ -1,7 +1,7 @@
 package roomescape.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.config.FixedClockConfig.TODAY;
+import static roomescape.common.config.FixedClockConfig.TODAY;
 
 import java.time.LocalDate;
 import java.util.List;

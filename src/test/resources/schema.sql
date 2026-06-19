@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS waiting;
 DROP TABLE IF EXISTS reservation_time;
@@ -43,4 +44,13 @@ CREATE TABLE IF NOT EXISTS waiting
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
-    )
+);
+
+CREATE TABLE IF NOT EXISTS orders
+(
+    id             VARCHAR(255) NOT NULL,
+    amount         INT          NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+);

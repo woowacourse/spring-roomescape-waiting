@@ -2,7 +2,7 @@ package roomescape.service.rollback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static roomescape.config.FixedClockConfig.FUTURE_DATE;
+import static roomescape.common.config.FixedClockConfig.FUTURE_DATE;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
