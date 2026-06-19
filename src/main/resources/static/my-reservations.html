@@ -617,7 +617,9 @@
         $('#search-button').disabled = true;
         $('#search-button').textContent = '조회 중...';
 
-        fetch(`/reservations?name=${encodeURIComponent(name)}`)
+        fetch(`/members?name=${encodeURIComponent(name)}`)
+            .then(toJson)
+            .then(member => fetch(`/reservations-mine?memberId=${member.id}`))
             .then(toJson)
             .then(items => {
                 state.items = items;

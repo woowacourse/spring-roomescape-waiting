@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -9,25 +9,27 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-@JdbcTest
-@Import({ThemeDao.class, ReservationTimeDao.class, ReservationDao.class})
-class ThemeDaoTest {
+@DataJpaTest
+class ThemeRepositoryTest {
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationTimeDao timeDao;
+    private ReservationTimeRepository timeDao;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void 테마를_등록한다() {
@@ -50,7 +52,7 @@ class ThemeDaoTest {
         saveTheme("방탈출2", "설명2", "https://thumb2.com");
 
         // when
-        List<Theme> themes = themeDao.selectAll();
+        List<Theme> themes = themeRepository.findAll();
 
         // then
         assertThat(themes).hasSize(2);
@@ -62,7 +64,7 @@ class ThemeDaoTest {
         Theme saved = saveTheme("방탈출1", "로지와 러키의 신나는 방탈출", "https://abc.asdfdsa");
 
         // when
-        Optional<Theme> found = themeDao.selectById(saved.getId());
+        Optional<Theme> found = themeRepository.findById(saved.getId());
 
         // then
         assertAll(
@@ -82,7 +84,7 @@ class ThemeDaoTest {
         LocalDate endDate = LocalDate.of(2026, 5, 5);
 
         // when
-        List<Theme> popular = themeDao.selectPopularThemesByPeriod(startDate, endDate);
+        List<Theme> popular = themeRepository.findPopularThemesByPeriod(startDate, endDate);
 
         // then
         assertAll(
@@ -102,7 +104,7 @@ class ThemeDaoTest {
     @Test
     void 아이디에_맞는_테마가_없으면_빈_객체를_반환한다() {
         // when
-        Optional<Theme> found = themeDao.selectById(900L);
+        Optional<Theme> found = themeRepository.findById(900L);
 
         // then
         assertThat(found).isEmpty();
@@ -114,10 +116,10 @@ class ThemeDaoTest {
         Theme saved = saveTheme("방탈출1", "설명", "https://thumb.com");
 
         // when
-        int deleted = themeDao.delete(saved.getId());
+        themeRepository.deleteById(saved.getId());
 
         // then
-        assertThat(deleted).isEqualTo(1);
+        assertThat(themeRepository.findAll()).isEmpty();
     }
 
     private void setupPopularThemesData() {
@@ -255,14 +257,15 @@ class ThemeDaoTest {
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return timeDao.save(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 
     private void saveReservation(LocalDate date, ReservationTime time, Theme theme) {
-        reservationDao.insert(Reservation.createWithoutId("예약자", new ReservationSlot(date, time, theme)));
+        Member member = memberRepository.save(Member.createWithoutId("예약자"));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(date, time, theme)));
     }
 }

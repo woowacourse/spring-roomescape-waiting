@@ -1,13 +1,27 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Embeddable
 public class ReservationSlot {
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    protected ReservationSlot() {
+    }
 
     public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {
         Objects.requireNonNull(date, "예약 날짜는 필수값 입니다.");

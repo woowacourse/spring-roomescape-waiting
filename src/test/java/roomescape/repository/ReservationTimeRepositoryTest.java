@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -8,16 +8,14 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.ReservationTime;
 
-@JdbcTest
-@Import(ReservationTimeDao.class)
-class ReservationTimeDaoTest {
+@DataJpaTest
+class ReservationTimeRepositoryTest {
 
     @Autowired
-    private ReservationTimeDao timeDao;
+    private ReservationTimeRepository timeDao;
 
     @Test
     void 예약_시간을_생성한다() {
@@ -41,7 +39,7 @@ class ReservationTimeDaoTest {
         saveTime(14, 0);
 
         // when
-        List<ReservationTime> times = timeDao.selectAll();
+        List<ReservationTime> times = timeDao.findAll();
 
         // then
         assertAll(
@@ -60,7 +58,7 @@ class ReservationTimeDaoTest {
         ReservationTime saved = saveTime(10, 0);
 
         // when
-        Optional<ReservationTime> found = timeDao.selectById(saved.getId());
+        Optional<ReservationTime> found = timeDao.findById(saved.getId());
 
         // then
         assertAll(
@@ -72,7 +70,7 @@ class ReservationTimeDaoTest {
     @Test
     void 아이디에_맞는_예약_시간이_존재하지_않으면_빈_값을_반환한다() {
         // when
-        Optional<ReservationTime> found = timeDao.selectById(0L);
+        Optional<ReservationTime> found = timeDao.findById(0L);
 
         // then
         assertThat(found).isEmpty();
@@ -84,13 +82,13 @@ class ReservationTimeDaoTest {
         ReservationTime saved = saveTime(10, 0);
 
         // when
-        timeDao.delete(saved.getId());
+        timeDao.deleteById(saved.getId());
 
         // then
-        assertThat(timeDao.selectAll()).isEmpty();
+        assertThat(timeDao.findAll()).isEmpty();
     }
 
     private ReservationTime saveTime(int hour, int minute) {
-        return timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
+        return timeDao.save(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
 }
