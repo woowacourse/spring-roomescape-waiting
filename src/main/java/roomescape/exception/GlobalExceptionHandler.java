@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.payment.NetworkUncertain;
 import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.client.TossPaymentException;
 
@@ -39,6 +40,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TossPaymentException.Retryable.class)
     public ResponseEntity<ErrorResponse> handleTossRetryable(TossPaymentException.Retryable exception) {
         log.error("[운영 알람] Toss 내부 오류 재시도 초과 code={} message={}", exception.getCode(), exception.getMessage());
+        return ResponseEntity
+                .status(exception.getStatus())
+                .body(ErrorResponse.of(exception.getMessage()));
+    }
+
+    @ExceptionHandler(NetworkUncertain.class)
+    public ResponseEntity<ErrorResponse> handleTossNetworkUncertain(NetworkUncertain exception) {
+        log.error("[운영 알람] 결제 네트워크 오류 - 승인 여부 불명확 {}", exception.getMessage());
         return ResponseEntity
                 .status(exception.getStatus())
                 .body(ErrorResponse.of(exception.getMessage()));

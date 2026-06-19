@@ -51,7 +51,9 @@ public class ReservationRepository {
             resultSet.getTime("time_start_at").toLocalTime(),
             resultSet.getString("theme_name"),
             ReservationStatus.valueOf(resultSet.getString("status")),
-            resultSet.getString("order_id")
+            resultSet.getString("order_id"),
+            resultSet.getString("payment_key"),
+            resultSet.getObject("amount", Long.class)
     );
 
     public ReservationRepository(JdbcTemplate jdbcTemplate) {
@@ -122,10 +124,12 @@ public class ReservationRepository {
         String query = """
                 SELECT r.id AS reservation_id, r.name, r.date, r.status, r.order_id,
                        t.start_at AS time_start_at,
-                       th.name AS theme_name
+                       th.name AS theme_name,
+                       p.payment_key, p.amount
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme th ON r.theme_id = th.id
+                LEFT JOIN payment p ON p.reservation_id = r.id
                 WHERE r.name = ?
                 """;
         return jdbcTemplate.query(query, summaryMapper, name);

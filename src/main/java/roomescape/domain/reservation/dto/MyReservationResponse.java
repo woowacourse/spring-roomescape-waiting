@@ -12,7 +12,9 @@ public record MyReservationResponse(
         LocalTime time,
         String themeName,
         ReservationStatus status,
-        String orderId
+        String orderId,
+        String paymentKey,
+        Long amount
 ) {
 
     public static MyReservationResponse from(ReservationSummary summary) {
@@ -23,7 +25,9 @@ public record MyReservationResponse(
                 summary.startAt(),
                 summary.themeName(),
                 summary.status(),
-                summary.orderId()
+                summary.orderId(),
+                summary.paymentKey(),
+                summary.amount()
         );
     }
 }
