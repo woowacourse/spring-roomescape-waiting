@@ -9,6 +9,7 @@ public class PaymentOrder {
     private final Long memberId;
     private final Long scheduleId;
     private final int amount;
+    private final String idempotencyKey;
     private final PaymentOrderStatus status;
     private final String paymentKey;
     private final Long reservationId;
@@ -23,6 +24,7 @@ public class PaymentOrder {
             Long memberId,
             Long scheduleId,
             int amount,
+            String idempotencyKey,
             PaymentOrderStatus status,
             String paymentKey,
             Long reservationId,
@@ -36,6 +38,7 @@ public class PaymentOrder {
         this.memberId = memberId;
         this.scheduleId = scheduleId;
         this.amount = amount;
+        this.idempotencyKey = idempotencyKey;
         this.status = status;
         this.paymentKey = paymentKey;
         this.reservationId = reservationId;
@@ -50,6 +53,7 @@ public class PaymentOrder {
             Long memberId,
             Long scheduleId,
             int amount,
+            String idempotencyKey,
             LocalDateTime now
     ) {
         return new PaymentOrder(
@@ -58,6 +62,7 @@ public class PaymentOrder {
                 memberId,
                 scheduleId,
                 amount,
+                idempotencyKey,
                 PaymentOrderStatus.PENDING,
                 null,
                 null,
@@ -90,6 +95,10 @@ public class PaymentOrder {
 
     public int getAmount() {
         return amount;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     public PaymentOrderStatus getStatus() {

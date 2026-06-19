@@ -1,5 +1,8 @@
 package roomescape.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -14,14 +17,15 @@ import org.springframework.web.util.UriUtils;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import roomescape.controller.dto.payment.PaymentFailResponse;
+import roomescape.controller.dto.payment.PaymentOrderHistoryResponse;
 import roomescape.controller.dto.payment.PaymentOrderRequest;
 import roomescape.controller.dto.payment.PaymentOrderResponse;
 import roomescape.domain.Member;
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomescapeException;
 import roomescape.global.auth.LoginMember;
 import roomescape.payment.PaymentOrder;
 import roomescape.service.PaymentService;
-
-import java.nio.charset.StandardCharsets;
 
 @RequestMapping("/payments")
 @RestController
@@ -50,13 +54,31 @@ public class PaymentController {
         ));
     }
 
+    @GetMapping("/orders")
+    public ResponseEntity<List<PaymentOrderHistoryResponse>> findOrders(@LoginMember Member member) {
+        List<PaymentOrderHistoryResponse> responses = paymentService.findOrdersByMember(member).stream()
+                .map(PaymentOrderHistoryResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
+    }
+
     @GetMapping("/success")
     public ResponseEntity<Void> success(
             @RequestParam String paymentKey,
             @RequestParam String orderId,
             @RequestParam int amount
     ) {
-        paymentService.confirm(paymentKey, orderId, amount);
+        try {
+            paymentService.confirm(paymentKey, orderId, amount);
+        } catch (RoomescapeException e) {
+            if (e.getCode() == DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN) {
+                return ResponseEntity.status(303)
+                        .location(java.net.URI.create("/user.html?payment=unknown&message=" + encode(e.getMessage())))
+                        .build();
+            }
+            throw e;
+        }
+
         return ResponseEntity.status(303)
                 .location(java.net.URI.create("/user.html?payment=success"))
                 .build();

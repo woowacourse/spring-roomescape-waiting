@@ -1,6 +1,8 @@
 package roomescape.payment.toss;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -9,6 +11,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,30 +28,62 @@ public class TossPaymentGateway implements PaymentGateway {
     private final ObjectMapper objectMapper;
     private final TossPaymentProperties properties;
 
-    public TossPaymentGateway(RestClient.Builder restClientBuilder, ObjectMapper objectMapper, TossPaymentProperties properties) {
-        this.restClient = restClientBuilder.build();
+    public TossPaymentGateway(RestClient tossRestClient, ObjectMapper objectMapper, TossPaymentProperties properties) {
+        this.restClient = tossRestClient;
         this.objectMapper = objectMapper;
         this.properties = properties;
     }
 
     @Override
     public PaymentResult confirm(PaymentConfirmation confirmation) {
-        TossConfirmResponse response = restClient.post()
-                .uri(properties.getConfirmUrl())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, authorization())
-                .body(TossConfirmRequest.from(confirmation))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, clientResponse) -> {
-                    TossErrorResponse errorResponse = readErrorResponse(clientResponse.getBody().readAllBytes());
-                    throw toDomainException(errorResponse);
-                })
-                .body(TossConfirmResponse.class);
+        TossConfirmResponse response;
+        try {
+            response = restClient.post()
+                    .uri(properties.getConfirmUrl())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.AUTHORIZATION, authorization())
+                    .header("Idempotency-Key", confirmation.idempotencyKey())
+                    .body(TossConfirmRequest.from(confirmation))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, clientResponse) -> {
+                        TossErrorResponse errorResponse = readErrorResponse(clientResponse.getBody().readAllBytes());
+                        throw toDomainException(errorResponse);
+                    })
+                    .body(TossConfirmResponse.class);
+        } catch (RestClientException e) {
+            throw toNetworkException(e);
+        }
 
         if (response == null) {
             throw new RoomescapeException(DomainErrorCode.PAYMENT_GATEWAY_ERROR, "결제 승인 응답을 확인할 수 없습니다.");
         }
         return response.toResult();
+    }
+
+    private RoomescapeException toNetworkException(RestClientException exception) {
+        Throwable rootCause = rootCause(exception);
+        if (rootCause instanceof ConnectException) {
+            return new RoomescapeException(DomainErrorCode.PAYMENT_RETRYABLE, "결제 승인 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.");
+        }
+        if (rootCause instanceof SocketTimeoutException) {
+            if (isReadTimeout(rootCause)) {
+                return new RoomescapeException(DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN, "결제 승인 응답을 받지 못했습니다. 결제 결과 확인이 필요합니다.");
+            }
+            return new RoomescapeException(DomainErrorCode.PAYMENT_RETRYABLE, "결제 승인 서버 연결 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.");
+        }
+        return new RoomescapeException(DomainErrorCode.PAYMENT_GATEWAY_ERROR, "결제 승인 서버 응답을 처리할 수 없습니다.");
+    }
+
+    private boolean isReadTimeout(Throwable throwable) {
+        return throwable.getMessage() != null && throwable.getMessage().toLowerCase().contains("read");
+    }
+
+    private Throwable rootCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+        return current;
     }
 
     private String authorization() {

@@ -34,6 +34,7 @@ import roomescape.domain.exception.RoomescapeException;
 import roomescape.payment.PaymentCheckoutProperties;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentIdempotencyKeyGenerator;
 import roomescape.payment.PaymentOrder;
 import roomescape.payment.PaymentOrderIdGenerator;
 import roomescape.payment.PaymentOrderStatus;
@@ -47,6 +48,9 @@ class PaymentServiceTest {
     private PaymentOrderDao paymentOrderDao;
 
     @Mock
+    private PaymentOrderStatusService paymentOrderStatusService;
+
+    @Mock
     private ScheduleService scheduleService;
 
     @Mock
@@ -58,6 +62,9 @@ class PaymentServiceTest {
     @Mock
     private PaymentOrderIdGenerator orderIdGenerator;
 
+    @Mock
+    private PaymentIdempotencyKeyGenerator idempotencyKeyGenerator;
+
     private final PaymentCheckoutProperties checkoutProperties = new PaymentCheckoutProperties("test_ck_123");
 
     private PaymentService paymentService;
@@ -66,10 +73,12 @@ class PaymentServiceTest {
     void setUp() {
         paymentService = new PaymentService(
                 paymentOrderDao,
+                paymentOrderStatusService,
                 scheduleService,
                 reservationService,
                 paymentGateway,
                 orderIdGenerator,
+                idempotencyKeyGenerator,
                 checkoutProperties
         );
     }
@@ -82,7 +91,10 @@ class PaymentServiceTest {
         PaymentOrderRequest request = request(schedule);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
+        given(paymentOrderDao.findReusableByMemberIdAndScheduleId(member.getId(), schedule.getId()))
+                .willReturn(Optional.empty());
         given(orderIdGenerator.generate()).willReturn("order-123456");
+        given(idempotencyKeyGenerator.generate()).willReturn("fixed-idempotency-key");
         ArgumentCaptor<PaymentOrder> orderCaptor = ArgumentCaptor.forClass(PaymentOrder.class);
 
         PaymentOrder response = paymentService.createOrder(request, member);
@@ -92,7 +104,49 @@ class PaymentServiceTest {
         verify(reservationService).validatePaymentOrderCreatable(eq(member), eq(schedule), any(LocalDateTime.class));
         verify(paymentOrderDao).save(orderCaptor.capture());
         assertThat(orderCaptor.getValue().getAmount()).isEqualTo(23000);
+        assertThat(orderCaptor.getValue().getIdempotencyKey()).isEqualTo("fixed-idempotency-key");
         assertThat(orderCaptor.getValue().getStatus()).isEqualTo(PaymentOrderStatus.PENDING);
+    }
+
+    @DisplayName("진행 중인 결제 주문이 있으면 새 멱등키를 만들지 않고 기존 주문을 반환한다.")
+    @Test
+    void createOrderReusesPendingOrder() {
+        Member member = member(1L);
+        Schedule schedule = schedule(10L, 23000);
+        PaymentOrderRequest request = request(schedule);
+        PaymentOrder existingOrder = pendingOrder(23000);
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(paymentOrderDao.findReusableByMemberIdAndScheduleId(member.getId(), schedule.getId()))
+                .willReturn(Optional.of(existingOrder));
+
+        PaymentOrder response = paymentService.createOrder(request, member);
+
+        assertThat(response).isEqualTo(existingOrder);
+        verify(orderIdGenerator, never()).generate();
+        verify(idempotencyKeyGenerator, never()).generate();
+        verify(paymentOrderDao, never()).save(any(PaymentOrder.class));
+    }
+
+    @DisplayName("확인 필요 주문이 있으면 새 주문을 만들지 않고 같은 멱등키를 재사용한다.")
+    @Test
+    void createOrderReusesConfirmUnknownOrder() {
+        Member member = member(1L);
+        Schedule schedule = schedule(10L, 23000);
+        PaymentOrderRequest request = request(schedule);
+        PaymentOrder existingOrder = order(23000, PaymentOrderStatus.CONFIRM_UNKNOWN, null, null);
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(paymentOrderDao.findReusableByMemberIdAndScheduleId(member.getId(), schedule.getId()))
+                .willReturn(Optional.of(existingOrder));
+
+        PaymentOrder response = paymentService.createOrder(request, member);
+
+        assertThat(response.getOrderId()).isEqualTo(existingOrder.getOrderId());
+        assertThat(response.getIdempotencyKey()).isEqualTo(existingOrder.getIdempotencyKey());
+        verify(orderIdGenerator, never()).generate();
+        verify(idempotencyKeyGenerator, never()).generate();
+        verify(paymentOrderDao, never()).save(any(PaymentOrder.class));
     }
 
     @DisplayName("과거 스케줄은 결제 주문 생성 전에 차단한다.")
@@ -280,6 +334,46 @@ class PaymentServiceTest {
         verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
     }
 
+    @DisplayName("승인 응답 확인이 불명확하면 주문을 확인 필요 상태로 표시한다.")
+    @Test
+    void confirmUnknownGatewayResult() {
+        PaymentOrder order = pendingOrder(23000);
+        given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
+        given(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .willThrow(new RoomescapeException(DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN, "결제 승인 응답을 받지 못했습니다."));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", order.getOrderId(), order.getAmount()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN);
+
+        verify(paymentOrderStatusService).markConfirmUnknown(
+                eq(order.getOrderId()),
+                eq(DomainErrorCode.PAYMENT_CONFIRM_UNKNOWN.name()),
+                eq("결제 승인 응답을 받지 못했습니다.")
+        );
+        verify(reservationService, never()).saveConfirmedReservationByPayment(anyLong(), anyLong());
+        verify(paymentOrderDao, never()).confirm(any(), any(), any(), any(LocalDateTime.class));
+    }
+
+    @DisplayName("확인 필요 상태의 같은 주문은 저장된 멱등키로 승인 재시도를 수행한다.")
+    @Test
+    void retryConfirmUnknownOrder() {
+        PaymentOrder order = order(23000, PaymentOrderStatus.CONFIRM_UNKNOWN, null, null);
+        given(paymentOrderDao.findByOrderId(order.getOrderId())).willReturn(Optional.of(order));
+        given(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .willReturn(new PaymentResult("payment-key", order.getOrderId(), order.getAmount(), "DONE"));
+        given(reservationService.saveConfirmedReservationByPayment(order.getScheduleId(), order.getMemberId()))
+                .willReturn(99L);
+        ArgumentCaptor<PaymentConfirmation> confirmationCaptor = ArgumentCaptor.forClass(PaymentConfirmation.class);
+
+        paymentService.confirm("payment-key", order.getOrderId(), order.getAmount());
+
+        verify(paymentGateway).confirm(confirmationCaptor.capture());
+        assertThat(confirmationCaptor.getValue().idempotencyKey()).isEqualTo(order.getIdempotencyKey());
+        verify(paymentOrderDao).confirm(eq(order.getOrderId()), eq("payment-key"), eq(99L), any(LocalDateTime.class));
+    }
+
     @DisplayName("승인 API 성공 후 확정 예약을 저장하고 주문을 CONFIRMED로 변경한다.")
     @Test
     void confirmSuccess() {
@@ -299,6 +393,7 @@ class PaymentServiceTest {
         assertThat(confirmation.paymentKey()).isEqualTo("payment-key");
         assertThat(confirmation.orderId()).isEqualTo(order.getOrderId());
         assertThat(confirmation.amount()).isEqualTo(order.getAmount());
+        assertThat(confirmation.idempotencyKey()).isEqualTo(order.getIdempotencyKey());
         verify(paymentOrderDao).confirm(eq(order.getOrderId()), eq("payment-key"), eq(99L), any(LocalDateTime.class));
     }
 
@@ -344,6 +439,7 @@ class PaymentServiceTest {
                 1L,
                 10L,
                 amount,
+                "fixed-idempotency-key",
                 LocalDateTime.now()
         );
     }
@@ -360,6 +456,7 @@ class PaymentServiceTest {
                 1L,
                 10L,
                 amount,
+                "fixed-idempotency-key",
                 status,
                 paymentKey,
                 reservationId,
