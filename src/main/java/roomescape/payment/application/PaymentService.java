@@ -36,7 +36,7 @@ public class PaymentService {
 
         PaymentResult result = executeConfirm(paymentKey, orderId, amount);
 
-        OrderStatus actualStatus = OrderStatus.fromToss(result.status());
+        OrderStatus actualStatus = result.status();
         if (!actualStatus.equals(OrderStatus.COMPLETED)) {
             orderService.fail(orderId);
             throw new OrderUpdateException("결제가 정상적으로 완료되지 않았습니다. 현재 상태: " + actualStatus.name());

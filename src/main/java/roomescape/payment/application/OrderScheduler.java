@@ -13,7 +13,6 @@ import roomescape.payment.application.dto.OrderInfo;
 import roomescape.payment.application.dto.PaymentResult;
 import roomescape.payment.domain.Order;
 import roomescape.payment.domain.OrderStatus;
-import roomescape.payment.infra.client.PaymentStatus;
 import roomescape.payment.infra.client.exception.TossBusinessException.PaymentNotFound;
 import roomescape.reservation.application.ReservationManager;
 import roomescape.reservation.application.ReservationReader;
@@ -94,7 +93,7 @@ public class OrderScheduler {
     }
 
     private void checkTossPayDone(Order order, PaymentResult tossStatus) {
-        if (tossStatus.status() == PaymentStatus.DONE) {
+        if (tossStatus.status() == OrderStatus.COMPLETED) {
             log.warn("[CRITICAL] 미결제로 방치된 주문이 토스에서는 결제 성공 상태입니다! 즉시 자동 환불합니다. OrderId: {}", order.getOrderId());
             paymentService.cancelBySystem(order.getOrderId(), "결제 완료 후 시스템 지연/이탈로 인한 자동 환불");
         }

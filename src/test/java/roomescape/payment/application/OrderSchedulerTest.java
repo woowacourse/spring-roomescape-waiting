@@ -240,7 +240,7 @@ class OrderSchedulerTest {
 
         PaymentResult tossResult = PaymentResult.builder()
                 .paymentKey("test-payment-key")
-                .status(PaymentStatus.DONE)
+                .status(OrderStatus.COMPLETED)
                 .approvedAmount(50000L)
                 .build();
         given(paymentGateway.getStatus("order-1")).willReturn(tossResult);
