@@ -1,6 +1,6 @@
 package roomescape.service.dto;
 
-public enum ReservationStatus {
+public enum ReservationTimeStatus {
     RESERVATION,
     WAITING_LIST
 }

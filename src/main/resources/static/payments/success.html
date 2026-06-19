@@ -88,7 +88,7 @@
 
     try {
       // 백엔드의 결제 승인 API 호출
-      const response = await fetch('/payments/confirm', {
+      const response = await fetch('/payments/success', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paymentKey, orderId, amount })

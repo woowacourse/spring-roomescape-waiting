@@ -12,7 +12,7 @@ public record PaymentReadyResult(
     public static PaymentReadyResult from(final Payment payment) {
         return new PaymentReadyResult(
                 payment.getId(),
-                payment.getOrderId(),
+                payment.getOrderId().id(),
                 payment.getReservationId(),
                 payment.getAmount()
         );

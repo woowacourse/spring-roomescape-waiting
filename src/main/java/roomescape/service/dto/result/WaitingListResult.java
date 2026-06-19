@@ -1,7 +1,7 @@
 package roomescape.service.dto.result;
 
 import roomescape.domain.WaitingList;
-import roomescape.service.dto.ReservationStatus;
+import roomescape.service.dto.ReservationTimeStatus;
 
 import java.time.LocalDate;
 
@@ -12,7 +12,7 @@ public record WaitingListResult(
         Long timeId,
         Long themeId,
         int waitingOrder,
-        ReservationStatus status
+        ReservationTimeStatus status
 ) {
     public static WaitingListResult from(final WaitingList waitingList, final int waitingOrder) {
         return new WaitingListResult(
@@ -22,7 +22,7 @@ public record WaitingListResult(
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId(),
                 waitingOrder,
-                ReservationStatus.WAITING_LIST
+                ReservationTimeStatus.WAITING_LIST
         );
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
@@ -38,7 +39,7 @@ public class ReservationRepository {
         }
     }
 
-    public void updateDateAndTime(final Reservation reservation) {
+    public void update(final Reservation reservation) {
         final String sql = """
                 UPDATE reservation
                 SET date = ?, time_id = ?
@@ -50,6 +51,20 @@ public class ReservationRepository {
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getId()
+        );
+    }
+
+    public void updateStatusById(final Long reservationId, final ReservationStatus reservationStatus) {
+        final String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(
+                sql,
+                reservationStatus.name(),
+                reservationId
         );
     }
 
@@ -68,6 +83,7 @@ public class ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
@@ -93,6 +109,7 @@ public class ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
@@ -119,6 +136,7 @@ public class ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
@@ -227,8 +245,8 @@ public class ReservationRepository {
 
     private long insertReservation(final Reservation reservation) {
         final String sql = """
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, date, time_id, theme_id, status)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -243,6 +261,7 @@ public class ReservationRepository {
             preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
             preparedStatement.setLong(3, reservation.getTime().getId());
             preparedStatement.setLong(4, reservation.getTheme().getId());
+            preparedStatement.setString(5, reservation.getStatus().name());
 
             return preparedStatement;
         }, keyHolder);
@@ -268,12 +287,13 @@ public class ReservationRepository {
                 resultSet.getLong("theme_price")
         );
 
-        return Reservation.createWithId(
+        return Reservation.from(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 resultSet.getDate("reservation_date").toLocalDate(),
                 reservationTime,
-                theme
+                theme,
+                ReservationStatus.valueOf(resultSet.getString("reservation_status"))
         );
     }
 

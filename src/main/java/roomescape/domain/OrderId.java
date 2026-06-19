@@ -1,19 +1,15 @@
 package roomescape.domain;
 
-import lombok.Getter;
-
 import java.util.UUID;
 
-@Getter
-public class OrderId {
+public record OrderId(
+        String id
+) {
 
     private static final String PREFIX = "order-";
 
-    private final String id;
-
-    public OrderId(final String id) {
+    public OrderId {
         validate(id);
-        this.id = id;
     }
 
     public static OrderId generate() {

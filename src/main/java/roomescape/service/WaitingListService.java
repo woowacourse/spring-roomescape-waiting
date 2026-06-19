@@ -94,7 +94,7 @@ public class WaitingListService {
             }
 
             final WaitingList waiting = nextWaiting.get();
-            final Reservation newReservation = Reservation.create(
+            final Reservation newReservation = Reservation.prepare(
                     waiting.getName(),
                     waiting.getReservationDate().date(),
                     waiting.getReservationTime(),

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.PaymentService;
 import roomescape.service.dto.command.PaymentCreateCommand;
+import roomescape.service.dto.command.PaymentSuccessCommand;
+import roomescape.service.dto.result.PaymentConfirmResult;
 import roomescape.service.dto.result.PaymentReadyResult;
 
 import java.net.URI;
@@ -26,6 +28,15 @@ public class PaymentController {
     ) {
         final PaymentReadyResult result = paymentService.create(request);
         return ResponseEntity.created(URI.create("/payments/" + result.id()))
+                .body(result);
+    }
+
+    @PostMapping("/success")
+    public ResponseEntity<PaymentConfirmResult> confirm(
+            @Valid @RequestBody final PaymentSuccessCommand request
+    ) {
+        final PaymentConfirmResult result = paymentService.confirm(request);
+        return ResponseEntity.ok()
                 .body(result);
     }
 }

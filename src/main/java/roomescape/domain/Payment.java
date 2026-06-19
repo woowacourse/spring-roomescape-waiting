@@ -13,6 +13,7 @@ public class Payment {
     private final Long reservationId;
     private final Long amount;
     private final String paymentKey;
+    private final PaymentStatus status;
 
     private static void validateId(final Long id) {
         if (id == null) {
@@ -39,7 +40,8 @@ public class Payment {
                 orderId,
                 reservationId,
                 amount,
-                null
+                null,
+                PaymentStatus.READY
         );
     }
 
@@ -48,10 +50,11 @@ public class Payment {
             final OrderId orderId,
             final Long reservationId,
             final Long amount,
-            final String paymentKey
+            final String paymentKey,
+            final PaymentStatus status
     ) {
         validateId(id);
-        return new Payment(id, orderId, reservationId, amount, paymentKey);
+        return new Payment(id, orderId, reservationId, amount, paymentKey, status);
     }
 
     public Payment confirm(final String paymentKey) {
@@ -61,7 +64,20 @@ public class Payment {
                 this.orderId,
                 this.reservationId,
                 this.amount,
-                paymentKey
+                paymentKey,
+                PaymentStatus.DONE
+        );
+    }
+
+    public Payment abort(final String paymentKey) {
+        validatePaymentKey(paymentKey);
+        return new Payment(
+                this.id,
+                this.orderId,
+                this.reservationId,
+                this.amount,
+                paymentKey,
+                PaymentStatus.ABORTED
         );
     }
 
@@ -72,11 +88,12 @@ public class Payment {
                 this.orderId,
                 this.reservationId,
                 this.amount,
-                this.paymentKey
+                this.paymentKey,
+                this.status
         );
     }
 
-    public String getOrderId() {
-        return this.orderId.getId();
+    public boolean isSameAmount(final Long amount) {
+        return this.amount.equals(amount);
     }
 }

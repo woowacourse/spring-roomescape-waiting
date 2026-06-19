@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS reservation
     date           DATE         NOT NULL,
     time_id        BIGINT       NOT NULL,
     theme_id       BIGINT       NOT NULL,
-    payment_status VARCHAR(255) NOT NULL DEFAULT 'PENDING',
+    status         VARCHAR(255) NOT NULL DEFAULT 'PENDING',
     -- 추후 일정 시간이 지나도 결제 완료 처리가 되지 않을 시 삭제 처리 할 수 있도록 created_at 추가 요망
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS payment
     order_id       VARCHAR(255) NOT NULL,
     reservation_id BIGINT       NOT NULL,
     amount         BIGINT       NOT NULL,
-    payment_key     VARCHAR(255) NULL,
+    payment_key    VARCHAR(255) NULL,
+    status         VARCHAR(255) NOT NULL DEFAULT 'READY',
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
 );

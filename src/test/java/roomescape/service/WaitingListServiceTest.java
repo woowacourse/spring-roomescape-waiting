@@ -17,7 +17,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
 import roomescape.service.dto.ReservationAvailableEvent;
-import roomescape.service.dto.ReservationStatus;
+import roomescape.service.dto.ReservationTimeStatus;
 import roomescape.service.dto.command.WaitingListCreateCommand;
 import roomescape.service.dto.command.WaitingListDeleteCommand;
 import roomescape.service.dto.result.WaitingListResult;
@@ -422,7 +422,7 @@ class WaitingListServiceTest {
         // then
         assertThat(responses).hasSize(1);
         assertThat(responses.getFirst().name()).isEqualTo(name);
-        assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.WAITING_LIST);
+        assertThat(responses.getFirst().status()).isEqualTo(ReservationTimeStatus.WAITING_LIST);
         assertThat(responses.getFirst().waitingOrder()).isEqualTo(2);
     }
 }

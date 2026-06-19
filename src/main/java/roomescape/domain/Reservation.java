@@ -16,6 +16,7 @@ public class Reservation {
     private final ReservationDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final ReservationStatus status;
 
     private static void validateId(final Long id) {
         if (id == null) {
@@ -23,29 +24,33 @@ public class Reservation {
         }
     }
 
-    public static Reservation create(final String name, final LocalDate date, final ReservationTime time, final Theme theme) {
+    public static Reservation prepare(final String name, final LocalDate date, final ReservationTime time, final Theme theme) {
         return new Reservation(
                 null,
                 new PersonName(name),
                 new ReservationDate(date),
                 time,
-                theme
+                theme,
+                ReservationStatus.PENDING
         );
     }
 
-    public static Reservation createWithId(
+    public static Reservation from(
             final Long id,
             final String name,
             final LocalDate date,
             final ReservationTime time,
-            final Theme theme) {
+            final Theme theme,
+            final ReservationStatus status
+    ) {
         validateId(id);
         return new Reservation(
                 id,
                 new PersonName(name),
                 new ReservationDate(date),
                 time,
-                theme
+                theme,
+                status
         );
     }
 
@@ -56,17 +61,19 @@ public class Reservation {
                 this.name,
                 this.date,
                 this.time,
-                this.theme
+                this.theme,
+                this.status
         );
     }
 
-    public Reservation modify(final LocalDate newDate, final ReservationTime newReservationTime) {
+    public Reservation modifyDateAndTime(final LocalDate newDate, final ReservationTime newReservationTime) {
         return new Reservation(
                 this.id,
                 this.name,
                 new ReservationDate(newDate),
                 Objects.requireNonNullElse(newReservationTime, this.time),
-                this.theme
+                this.theme,
+                this.status
         );
     }
 

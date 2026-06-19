@@ -22,7 +22,7 @@ VALUES (1, '잃어버린 시간의 방', '멈춰버린 시계탑에서 사라진
        (11, '마녀의 숲', '깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마', 'https://example.com/images/witch-forest.jpg'),
        (12, '사라진 열차', '한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마', 'https://example.com/images/missing-train.jpg');
 
-INSERT INTO reservation (id, name, date, time_id, theme_id, payment_status)
+INSERT INTO reservation (id, name, date, time_id, theme_id, status)
 VALUES
     -- 2026-05-01
     (1, '김민준', DATEADD('DAY', -7, CURRENT_DATE), 1, 1, 'CONFIRMED'),
@@ -68,7 +68,7 @@ VALUES
     (29, '차윤재', DATEADD('DAY', -1, CURRENT_DATE), 3, 9, 'CONFIRMED'),
     (30, '나예린', DATEADD('DAY', -1, CURRENT_DATE), 4, 10, 'CONFIRMED');
 
-INSERT INTO reservation (id, name, date, time_id, theme_id, payment_status)
+INSERT INTO reservation (id, name, date, time_id, theme_id, status)
 VALUES (31, '테스트1', DATEADD('DAY', -8, CURRENT_DATE), 1, 12, 'CONFIRMED'),
        (32, '테스트2', DATEADD('DAY', -9, CURRENT_DATE), 2, 12, 'CONFIRMED'),
        (33, '테스트3', DATEADD('DAY', -10, CURRENT_DATE), 1, 12, 'CONFIRMED'),

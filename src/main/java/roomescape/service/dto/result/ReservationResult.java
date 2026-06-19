@@ -3,7 +3,7 @@ package roomescape.service.dto.result;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.service.dto.ReservationStatus;
+import roomescape.service.dto.ReservationTimeStatus;
 
 import java.time.LocalDate;
 
@@ -13,7 +13,7 @@ public record ReservationResult (
         LocalDate date,
         ReservationTimeResult time,
         ThemeResult theme,
-        ReservationStatus status
+        ReservationTimeStatus status
 ) {
 
     public static ReservationResult from(final Reservation reservation) {
@@ -26,7 +26,7 @@ public record ReservationResult (
                 reservation.getDate(),
                 ReservationTimeResult.from(reservationTime),
                 ThemeResult.from(theme),
-                ReservationStatus.RESERVATION
+                ReservationTimeStatus.RESERVATION
         );
     }
 }
