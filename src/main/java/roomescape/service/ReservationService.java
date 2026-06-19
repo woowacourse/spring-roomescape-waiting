@@ -11,6 +11,7 @@ import roomescape.domain.reservationWaiting.ReservationWaitingRepository;
 import roomescape.domain.reservationOrder.ReservationOrder;
 import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.SlotDomainService;
+import roomescape.dto.reservation.ReservationWithPaymentResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationOrder.OrderResponse;
@@ -83,6 +84,14 @@ public class ReservationService {
     public List<ReservationResponse> readByName(String name) {
         return reservationRepository.findAllByName(name).stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationWithPaymentResponse> readReservationsWithPayment(String name) {
+        return reservationRepository.findAllByName(name).stream()
+                .map(reservation -> ReservationWithPaymentResponse.of(
+                        reservation,
+                        reservationOrderService.findByReservationId(reservation.getId()).orElse(null)))
                 .toList();
     }
 

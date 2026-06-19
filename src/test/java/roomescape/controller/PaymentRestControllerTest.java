@@ -32,6 +32,7 @@ import roomescape.exception.PaymentException.PaymentAuthException;
 import roomescape.exception.PaymentException.PaymentConfirmException;
 import roomescape.exception.PaymentException.PaymentInternalException;
 import roomescape.exception.PaymentException.PaymentNotFoundException;
+import roomescape.exception.PaymentException.PaymentResultUnknownException;
 import roomescape.service.PaymentService;
 
 @WebMvcTest(PaymentRestController.class)
@@ -131,5 +132,13 @@ class PaymentRestControllerTest {
 
         perform().andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.errorCode").value("PAYMENT_CONFIRM_FAILED"));
+    }
+
+    @Test
+    void 결과가_불명확하면_504와_PAYMENT_RESULT_UNKNOWN을_반환한다() throws Exception {
+        willThrow(new PaymentResultUnknownException("확인 필요")).given(paymentService).confirm(any());
+
+        perform().andExpect(status().isGatewayTimeout())
+                .andExpect(jsonPath("$.errorCode").value("PAYMENT_RESULT_UNKNOWN"));
     }
 }

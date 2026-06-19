@@ -11,6 +11,7 @@ import roomescape.dto.payment.PaymentConfirmRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.PaymentException.AlreadyProcessedException;
+import roomescape.exception.PaymentException.PaymentResultUnknownException;
 
 @Service
 public class PaymentService {
@@ -37,12 +38,21 @@ public class PaymentService {
         order.verifyAmount(request.amount());
         verifyReservationPayable(order.getReservationId());
 
-        PaymentResult result = paymentGateway.confirm(request.paymentKey(), request.orderId(), request.amount());
+        PaymentResult result = confirmWithGateway(order, request);
 
         try {
             return transactionTemplate.execute(status -> ReservationResponse.from(complete(order, result.paymentKey())));
         } catch (RuntimeException e) {
             /* refund */
+            throw e;
+        }
+    }
+
+    private PaymentResult confirmWithGateway(ReservationOrder order, PaymentConfirmRequest request) {
+        try {
+            return paymentGateway.confirm(request.paymentKey(), request.orderId(), request.amount());
+        } catch (PaymentResultUnknownException e) {
+            reservationOrderService.markUnknown(order);
             throw e;
         }
     }
