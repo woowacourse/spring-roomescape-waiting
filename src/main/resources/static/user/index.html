@@ -593,7 +593,24 @@
     let agreementWidget = null;
     let pendingCheckout = null;
     let checkoutCustomerName = null;
+    let paymentRequestInProgress = false;
+    let paymentWindowWasOpened = false;
+    let paymentReturnCancelInProgress = false;
     const TOSS_SDK_URL = 'https://js.tosspayments.com/v2/standard';
+
+    window.addEventListener('pagehide', markPaymentWindowOpened);
+    window.addEventListener('blur', markPaymentWindowOpened);
+    window.addEventListener('pageshow', cancelPaymentIfReturnedFromPaymentWindow);
+    window.addEventListener('focus', cancelPaymentIfReturnedFromPaymentWindow);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            markPaymentWindowOpened();
+            return;
+        }
+        if (document.visibilityState === 'visible') {
+            cancelPaymentIfReturnedFromPaymentWindow();
+        }
+    });
 
     function showTab(name) {
         document.querySelectorAll('.tab').forEach((t, i) => {
@@ -629,13 +646,15 @@
         resetCheckout();
     }
 
-    async function loadTimes() {
+    async function loadTimes(options = {}) {
         const date = document.getElementById('date').value;
         if (!date || !selectedThemeId) {
             alert('날짜와 테마를 모두 선택해주세요.');
             return;
         }
 
+        const preserveSelection = options.preserveSelection === true;
+        const previousSelectedTimeId = preserveSelection ? selectedTimeId : null;
         const list = document.getElementById('timeList');
         list.innerHTML = '';
         selectedTimeId = null;
@@ -675,6 +694,11 @@
                         if (btn.disabled) return;
                         selectTime(btn, t.id, t.status === 'waiting');
                     };
+                    if (t.id === previousSelectedTimeId && !btn.disabled) {
+                        btn.classList.add('selected');
+                        selectedTimeId = t.id;
+                        selectedTimeBooked = t.status === 'waiting';
+                    }
                     list.appendChild(btn);
                 });
             }
@@ -684,6 +708,7 @@
             showAlert(error?.message ?? '시간 정보를 불러오지 못했습니다.', 'error');
         }
 
+        toggleSubmitButtons();
         document.getElementById('step2').classList.remove('hidden');
     }
 
@@ -742,13 +767,18 @@
         const reserveBtn = document.getElementById('reserveBtn');
         const name = document.getElementById('name').value.trim();
         const date = document.getElementById('date').value;
-        let createdPayment = null;
         if (!name) return showAlert('이름을 입력해주세요.', 'error');
 
         if (pendingCheckout && paymentWidgets) {
             await requestPendingPayment(reserveBtn);
             return;
         }
+
+        await startReservationCheckout(name, date, reserveBtn);
+    }
+
+    async function startReservationCheckout(name, date, reserveBtn, retryAfterCancel = false) {
+        let createdPayment = null;
 
         reserveBtn.disabled = true;
         reserveBtn.textContent = '결제 준비 중...';
@@ -765,6 +795,10 @@
 
             if (!res.ok) {
                 const err = await res.json().catch(() => ({message: '예약에 실패했습니다.'}));
+                if (!retryAfterCancel && isPendingPaymentConflict(res, err)) {
+                    await handleExistingPendingPaymentConflict(name, date, reserveBtn);
+                    return;
+                }
                 showAlert(err.message, 'error');
                 return;
             }
@@ -800,6 +834,41 @@
         }
     }
 
+    function isPendingPaymentConflict(res, err) {
+        return res.status === 409 && (err.message ?? '').includes('이미 결제 대기 중인 예약이 있습니다');
+    }
+
+    async function handleExistingPendingPaymentConflict(name, date, reserveBtn) {
+        const pending = await findPendingPaymentItem(name);
+        if (!pending?.payment?.orderId) {
+            showAlert('기존 결제대기 예약을 찾지 못했습니다. 내 예약에서 확인해주세요.', 'error');
+            return;
+        }
+
+        if (!confirm('이미 결제 대기 중인 예약이 있습니다. 기존 결제대기를 취소하고 새 예약을 진행할까요?')) {
+            showAlert('기존 결제를 완료하거나 취소 후 다시 시도해주세요.', 'error');
+            return;
+        }
+
+        const canceled = await cancelPendingPaymentOrder(
+            pending.payment.orderId,
+            'REPLACE_PENDING_PAYMENT',
+            '새 예약을 위해 기존 결제대기를 취소했습니다.'
+        );
+        if (!canceled) {
+            showAlert('기존 결제대기 취소에 실패했습니다. 내 예약에서 확인해주세요.', 'error');
+            return;
+        }
+
+        await loadTimes({preserveSelection: true});
+        await startReservationCheckout(name, date, reserveBtn, true);
+    }
+
+    async function findPendingPaymentItem(name) {
+        const items = await fetchOrEmpty(`/reservations?name=${encodeURIComponent(name)}`);
+        return items.find(item => item.status === '결제대기');
+    }
+
     async function renderPaymentWidget(payment) {
         resetPaymentWidget();
 
@@ -832,6 +901,8 @@
         reserveBtn.disabled = true;
         reserveBtn.textContent = '결제 요청 중...';
         showAlert('결제창으로 이동합니다.', 'info');
+        paymentRequestInProgress = true;
+        paymentWindowWasOpened = false;
 
         try {
             await paymentWidgets.requestPayment({
@@ -846,21 +917,43 @@
                 await handlePaymentFailure(pendingCheckout, error);
                 return;
             }
+            paymentRequestInProgress = false;
+            paymentWindowWasOpened = false;
             showAlert(error?.message ?? '결제창을 열지 못했습니다.', 'error');
             reserveBtn.disabled = false;
             reserveBtn.textContent = '결제 요청하기';
         }
     }
 
+    function markPaymentWindowOpened() {
+        if (paymentRequestInProgress) {
+            paymentWindowWasOpened = true;
+        }
+    }
+
+    async function cancelPaymentIfReturnedFromPaymentWindow() {
+        if (!paymentRequestInProgress || !paymentWindowWasOpened || !pendingCheckout || paymentReturnCancelInProgress) {
+            return;
+        }
+
+        paymentReturnCancelInProgress = true;
+        try {
+            await handlePaymentFailure(
+                pendingCheckout,
+                {code: 'PAYMENT_WINDOW_RETURNED', message: '결제창에서 돌아왔습니다.'},
+                '결제창에서 돌아와 결제가 취소되었습니다. 다시 시도해주세요.'
+            );
+        } finally {
+            paymentReturnCancelInProgress = false;
+        }
+    }
+
     async function handlePaymentFailure(payment, error, message = '결제가 취소되었습니다. 시간 상태를 다시 확인해주세요.') {
         await notifyPaymentFailure(payment, error);
-        selectedTimeId = null;
-        selectedTimeBooked = false;
         resetCheckout();
-        toggleSubmitButtons();
 
         try {
-            await loadTimes();
+            await loadTimes({preserveSelection: true});
         } catch (_) {
             // loadTimes already renders its own error message.
         }
@@ -875,7 +968,22 @@
             code: error?.code ?? 'PAY_PROCESS_CANCELED',
             message: error?.message ?? '결제가 취소되었습니다.'
         });
-        await fetch(`/payments/fail?${params.toString()}`);
+        await cancelPendingPaymentOrder(payment.orderId, params.get('code'), params.get('message'));
+    }
+
+    async function cancelPendingPaymentOrder(orderId, code, message) {
+        if (!orderId) return false;
+
+        const params = new URLSearchParams({orderId});
+        if (code) params.append('code', code);
+        if (message) params.append('message', message);
+
+        try {
+            const res = await fetch(`/payments/cancel?${params.toString()}`, {method: 'POST'});
+            return res.ok;
+        } catch (_) {
+            return false;
+        }
     }
 
     function isPaymentCancelError(error) {
@@ -887,11 +995,18 @@
     function resetCheckout() {
         pendingCheckout = null;
         checkoutCustomerName = null;
+        paymentRequestInProgress = false;
+        paymentWindowWasOpened = false;
         resetPaymentWidget();
 
         const reserveBtn = document.getElementById('reserveBtn');
         if (reserveBtn) {
             reserveBtn.textContent = '결제하고 예약하기';
+            reserveBtn.disabled = false;
+        }
+        const waitingBtn = document.getElementById('waitingBtn');
+        if (waitingBtn) {
+            waitingBtn.disabled = false;
         }
     }
 
@@ -1042,6 +1157,7 @@
                         </div>
                         <div class="reservation-actions">
                             <button class="btn-success" onclick="resumePendingPayment(${item.id}, '${encodeURIComponent(name)}')">${paymentActionLabel(item)}</button>
+                            <button class="btn-danger" onclick="cancelPendingPayment('${item.payment?.orderId ?? ''}')">취소</button>
                         </div>
                     </div>
                 </div>
@@ -1199,6 +1315,31 @@
         } else {
             const err = await res.json().catch(() => ({message: '대기 취소에 실패했습니다.'}));
             showMyAlert(err.message, 'error');
+        }
+    }
+
+    async function cancelPendingPayment(orderId) {
+        if (!orderId) {
+            showMyAlert('취소할 결제 주문을 찾지 못했습니다.', 'error');
+            return;
+        }
+        if (!confirm('결제대기 예약을 취소하시겠습니까?')) return;
+
+        const canceled = await cancelPendingPaymentOrder(orderId, 'USER_CANCEL', '사용자가 결제를 취소했습니다.');
+        if (!canceled) {
+            showMyAlert('결제대기 예약 취소에 실패했습니다.', 'error');
+            return;
+        }
+
+        showMyAlert('결제대기 예약이 취소되었습니다.', 'success');
+        await loadMyList();
+
+        try {
+            if (document.getElementById('date')?.value && selectedThemeId) {
+                await loadTimes({preserveSelection: true});
+            }
+        } catch (_) {
+            // Reservation form might not have a selected date/theme.
         }
     }
 

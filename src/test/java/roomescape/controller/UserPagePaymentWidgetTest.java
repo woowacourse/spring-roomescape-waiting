@@ -52,7 +52,32 @@ class UserPagePaymentWidgetTest {
         assertThat(page).contains("payment.paymentKey");
         assertThat(page).contains("payment.amount");
         assertThat(page).contains("resumePendingPayment");
+        assertThat(page).contains("cancelPendingPayment");
         assertThat(page).contains("/payment?name=");
+    }
+
+    @Test
+    void userPageCanCancelPendingPaymentFromMyReservations() throws IOException {
+        String page = Files.readString(USER_PAGE);
+
+        assertThat(page).contains("onclick=\"cancelPendingPayment('${item.payment?.orderId ?? ''}')\"");
+        assertThat(page).contains("async function cancelPendingPayment(orderId)");
+        assertThat(page).contains("await cancelPendingPaymentOrder(orderId, 'USER_CANCEL', '사용자가 결제를 취소했습니다.');");
+        assertThat(page).contains("결제대기 예약이 취소되었습니다.");
+        assertThat(page).contains("await loadMyList();");
+    }
+
+    @Test
+    void userPageCanReplaceExistingPendingPaymentBeforeNewReservation() throws IOException {
+        String page = Files.readString(USER_PAGE);
+
+        assertThat(page).contains("async function handleExistingPendingPaymentConflict(name, date, reserveBtn)");
+        assertThat(page).contains("이미 결제 대기 중인 예약이 있습니다");
+        assertThat(page).contains("기존 결제대기를 취소하고 새 예약을 진행할까요?");
+        assertThat(page).contains("async function findPendingPaymentItem(name)");
+        assertThat(page).contains("pending.payment.orderId,");
+        assertThat(page).contains("'REPLACE_PENDING_PAYMENT',");
+        assertThat(page).contains("await startReservationCheckout(name, date, reserveBtn, true);");
     }
 
     @Test
@@ -60,10 +85,26 @@ class UserPagePaymentWidgetTest {
         String page = Files.readString(USER_PAGE);
 
         assertThat(page).contains("notifyPaymentFailure");
-        assertThat(page).contains("/payments/fail?");
+        assertThat(page).contains("fetch(`/payments/cancel?${params.toString()}`, {method: 'POST'});");
         assertThat(page).contains("resetCheckout();");
-        assertThat(page).contains("await loadTimes();");
+        assertThat(page).contains("await loadTimes({preserveSelection: true});");
+        assertThat(page).contains("reserveBtn.disabled = false;");
+        assertThat(page).contains("waitingBtn.disabled = false;");
         assertThat(page).contains("결제가 취소되었습니다. 시간 상태를 다시 확인해주세요.");
         assertThat(page).doesNotContain("결제가 취소되었습니다. 같은 시간으로 다시 결제할 수 있습니다.");
+    }
+
+    @Test
+    void userPageCancelsPaymentWhenReturningFromPaymentWindow() throws IOException {
+        String page = Files.readString(USER_PAGE);
+
+        assertThat(page).contains("let paymentRequestInProgress = false;");
+        assertThat(page).contains("let paymentWindowWasOpened = false;");
+        assertThat(page).contains("function markPaymentWindowOpened()");
+        assertThat(page).contains("async function cancelPaymentIfReturnedFromPaymentWindow()");
+        assertThat(page).contains("PAYMENT_WINDOW_RETURNED");
+        assertThat(page).contains("window.addEventListener('pagehide', markPaymentWindowOpened);");
+        assertThat(page).contains("window.addEventListener('pageshow', cancelPaymentIfReturnedFromPaymentWindow);");
+        assertThat(page).contains("document.addEventListener('visibilitychange'");
     }
 }
