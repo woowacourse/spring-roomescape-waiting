@@ -127,6 +127,7 @@ class TossPaymentGatewayTest {
     void confirm_maps_retryable_toss_error_to_retryable_payment_gateway_exception(String responseBody) {
         expectRetryableTossError(responseBody);
         expectRetryableTossError(responseBody);
+        expectRetryableTossError(responseBody);
 
         assertThatThrownBy(() -> gateway.confirm(paymentConfirmation()))
                 .isInstanceOf(RetryablePaymentGatewayException.class)

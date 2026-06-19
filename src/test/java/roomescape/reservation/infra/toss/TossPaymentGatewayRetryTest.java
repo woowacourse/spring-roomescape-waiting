@@ -65,14 +65,15 @@ class TossPaymentGatewayRetryTest {
         });
     }
 
-    @DisplayName("토스 결제 승인에서 재시도 가능한 오류가 반복되면 두 번만 요청하고 예외를 던집니다.")
+    @DisplayName("토스 결제 승인에서 재시도 가능한 오류가 반복되면 세 번만 요청하고 예외를 던집니다.")
     @Test
     void confirm_retries_retryable_toss_error_once_and_throws_when_second_attempt_fails() {
-        // Given: 같은 주문번호의 멱등키로 두 번 모두 재시도 가능한 토스 오류가 응답되도록 준비합니다.
+        // Given: 같은 주문번호의 멱등키로 세 번 모두 재시도 가능한 토스 오류가 응답되도록 준비합니다.
+        expectRetryableTossError();
         expectRetryableTossError();
         expectRetryableTossError();
 
-        // When & Then: 결제 승인은 최초 요청과 한 번의 자동 재시도 후 재시도 가능 예외로 종료됩니다.
+        // When & Then: 결제 승인은 최초 요청과 두 번의 자동 재시도 후 재시도 가능 예외로 종료됩니다.
         assertThatThrownBy(() -> gateway.confirm(paymentConfirmation()))
                 .isInstanceOf(RetryablePaymentGatewayException.class)
                 .hasMessage("결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요.");
