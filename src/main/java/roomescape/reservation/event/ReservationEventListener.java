@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import roomescape.reservation.application.service.PromotionService;
+import roomescape.reservation.domain.PromotionSource;
 import roomescape.reservation.event.schema.PromotionFailed;
 import roomescape.reservation.event.schema.ReservationCancelRequested;
 
@@ -18,7 +19,7 @@ public class ReservationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleReservationCancelRequested(ReservationCancelRequested event) {
-        promotionService.promoteFromWaiting(event.date(), event.themeId(), event.timeId());
+        promotionService.promoteFromWaiting(event.date(), event.themeId(), event.timeId(), PromotionSource.CANCELLATION);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -30,6 +31,6 @@ public class ReservationEventListener {
                     event.timeId());
             return;
         }
-        promotionService.promoteFromWaiting(event.date(), event.themeId(), event.timeId(), event.retryCount());
+        promotionService.promoteFromWaiting(event.date(), event.themeId(), event.timeId(), event.retryCount(), event.source());
     }
 }

@@ -35,7 +35,7 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     private final Theme theme = Theme.builder()
-            .id(1L).name("theme name").description("theme description").thumbnailImgUrl("theme img url")
+            .id(1L).name("theme name").description("theme description").thumbnailImgUrl("theme img url").price(30000L)
             .build();
 
     @DisplayName("테마의 정상 추가를 테스트합니다.")
@@ -44,7 +44,7 @@ class ThemeServiceTest {
         when(themeRepository.existsByNameAndDescription(any())).thenReturn(false);
         when(themeRepository.save(any())).thenReturn(theme);
 
-        ThemeResponse result = themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url"));
+        ThemeResponse result = themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url", 30000L));
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.id()).isEqualTo(1L);
@@ -59,7 +59,7 @@ class ThemeServiceTest {
     void save_duplicated_theme_exception() {
         when(themeRepository.existsByNameAndDescription(any())).thenReturn(true);
 
-        assertThatThrownBy(() -> themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url")))
+        assertThatThrownBy(() -> themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url", 30000L)))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("이미 존재하는 테마 이름입니다.");
     }
@@ -101,9 +101,9 @@ class ThemeServiceTest {
     @Test
     void find_all_themes() {
         List<Theme> themes = List.of(
-                Theme.builder().id(1L).name("theme name1").description("theme description1").thumbnailImgUrl("theme img url1").build(),
-                Theme.builder().id(2L).name("theme name2").description("theme description2").thumbnailImgUrl("theme img url2").build(),
-                Theme.builder().id(3L).name("theme name3").description("theme description3").thumbnailImgUrl("theme img url3").build()
+                Theme.builder().id(1L).name("theme name1").description("theme description1").thumbnailImgUrl("theme img url1").price(30000L).build(),
+                Theme.builder().id(2L).name("theme name2").description("theme description2").thumbnailImgUrl("theme img url2").price(30000L).build(),
+                Theme.builder().id(3L).name("theme name3").description("theme description3").thumbnailImgUrl("theme img url3").price(30000L).build()
         );
         when(themeRepository.findAll()).thenReturn(themes);
 
@@ -112,9 +112,9 @@ class ThemeServiceTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result).hasSize(3);
             softly.assertThat(result).containsExactly(
-                    new ThemeResponse(1L, "theme name1", "theme description1", "theme img url1"),
-                    new ThemeResponse(2L, "theme name2", "theme description2", "theme img url2"),
-                    new ThemeResponse(3L, "theme name3", "theme description3", "theme img url3")
+                    new ThemeResponse(1L, "theme name1", "theme description1", "theme img url1", 30000L),
+                    new ThemeResponse(2L, "theme name2", "theme description2", "theme img url2", 30000L),
+                    new ThemeResponse(3L, "theme name3", "theme description3", "theme img url3", 30000L)
             );
         });
     }
@@ -126,7 +126,7 @@ class ThemeServiceTest {
         ArgumentCaptor<LocalDate> toCaptor = ArgumentCaptor.forClass(LocalDate.class);
 
         when(themeRepository.findSortedPopularThemes(any(), any(), anyInt())).thenReturn(List.of(
-                Theme.builder().id(1L).name("theme name").description("theme description").thumbnailImgUrl("theme img url").build()
+                Theme.builder().id(1L).name("theme name").description("theme description").thumbnailImgUrl("theme img url").price(30000L).build()
         ));
 
         LocalDate from = LocalDate.of(2026, 4, 29);
@@ -139,7 +139,7 @@ class ThemeServiceTest {
             softly.assertThat(fromCaptor.getValue()).isEqualTo(LocalDate.of(2026, 4, 29));
             softly.assertThat(toCaptor.getValue()).isEqualTo(LocalDate.of(2026, 5, 5));
             softly.assertThat(result).containsExactly(
-                    new ThemeResponse(1L, "theme name", "theme description", "theme img url")
+                    new ThemeResponse(1L, "theme name", "theme description", "theme img url", 30000L)
             );
         });
     }

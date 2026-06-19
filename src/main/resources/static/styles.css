@@ -1120,6 +1120,26 @@ input:focus-visible {
     font-weight: 700;
 }
 
+.uncertain-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: rgba(255, 170, 0, 0.15);
+    color: #ffaa00;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.payment-detail {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 400;
+    line-height: 1.5;
+    word-break: break-all;
+}
+
 .booking-summary {
     display: grid;
     gap: 10px;
@@ -1338,6 +1358,11 @@ input:focus-visible {
     grid-template-columns: 1fr 1.4fr 1.2fr 80px 88px;
 }
 
+.status-table .table-head,
+.status-table .table-row {
+    grid-template-columns: 1fr 1.4fr 1.2fr 72px 120px;
+}
+
 .table-head {
     color: var(--muted);
     background: var(--surface-muted);
@@ -1364,6 +1389,7 @@ input:focus-visible {
 
 .table-actions .secondary-button,
 .table-actions .danger-button,
+.table-actions .primary-button,
 .booking-header-actions .secondary-button {
     min-height: 34px;
     padding: 0 12px;

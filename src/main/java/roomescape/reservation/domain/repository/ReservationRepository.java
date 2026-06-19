@@ -27,4 +27,8 @@ public interface ReservationRepository {
     Boolean existsByDateAndThemeAndTimeExcludingId(LocalDate date, Long themeId, Long timeId, Long id);
 
     boolean insertFromOldestWaiting(LocalDate date, Long themeId, Long timeId);
+
+    boolean confirmPayment(Long reservationId);
+
+    boolean markAsUncertain(Long reservationId);
 }

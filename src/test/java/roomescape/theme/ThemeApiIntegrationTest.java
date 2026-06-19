@@ -34,10 +34,11 @@ public class ThemeApiIntegrationTest {
     @DisplayName("테마 생성 API를 테스트합니다.")
     @Test
     void create_theme() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "theme name");
         params.put("description", "theme description");
         params.put("thumbnailImgUrl", "theme img url");
+        params.put("price", 30000L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -50,10 +51,11 @@ public class ThemeApiIntegrationTest {
     @DisplayName("테마 삭제 API를 테스트합니다.")
     @Test
     void delete_theme() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "theme name");
         params.put("description", "theme description");
         params.put("thumbnailImgUrl", "theme img url");
+        params.put("price", 30000L);
 
         Integer themeId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

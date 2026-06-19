@@ -14,6 +14,10 @@ boot();
 
 async function boot() {
     applyRoute();
+    const nameFromUrl = new URLSearchParams(location.search).get("name");
+    if (nameFromUrl) {
+        state.guestName = nameFromUrl;
+    }
     state.loading.boot = true;
     render();
 
@@ -367,9 +371,11 @@ async function submitTheme(form) {
     const name = String(formData.get("name") || "").trim();
     const description = String(formData.get("description") || "").trim();
     const thumbnailImgUrl = String(formData.get("thumbnailImgUrl") || "").trim();
+    const priceRaw = String(formData.get("price") || "").trim();
+    const price = priceRaw ? Number(priceRaw) : null;
 
-    if (!name || !description || !thumbnailImgUrl) {
-        showToast("테마명, 설명, 이미지 URL을 입력해 주세요.", "error");
+    if (!name || !description || !thumbnailImgUrl || price === null || isNaN(price)) {
+        showToast("테마명, 설명, 이미지 URL, 가격을 모두 입력해 주세요.", "error");
         return;
     }
 
@@ -379,7 +385,7 @@ async function submitTheme(form) {
     try {
         const createdTheme = await api("/admin/themes", {
             method: "POST",
-            body: {name, description, thumbnailImgUrl}
+            body: {name, description, thumbnailImgUrl, price}
         });
 
         state.selectedThemeId = createdTheme.id;
@@ -578,6 +584,7 @@ async function loadReservations(options = {}) {
             api(`/reservations?${params.toString()}`),
             api(`/waitings?${params.toString()}`)
         ]);
+
     } catch (error) {
         state.myReservations = [];
         state.myWaitings = [];

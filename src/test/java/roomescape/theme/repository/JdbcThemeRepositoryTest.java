@@ -44,6 +44,7 @@ public class JdbcThemeRepositoryTest {
                 .name("theme name")
                 .description("theme description")
                 .thumbnailImgUrl("theme img url")
+                .price(30000L)
                 .build();
 
         Theme savedTheme = themeRepository.save(theme);
@@ -64,6 +65,7 @@ public class JdbcThemeRepositoryTest {
                 .name("theme name")
                 .description("theme description")
                 .thumbnailImgUrl("theme img url")
+                .price(30000L)
                 .build();
 
         Boolean alreadyExists = themeRepository.existsByNameAndDescription(theme);
@@ -78,6 +80,7 @@ public class JdbcThemeRepositoryTest {
                 .name("theme name")
                 .description("theme description")
                 .thumbnailImgUrl("theme img url")
+                .price(30000L)
                 .build();
         themeRepository.save(theme1);
 
@@ -85,6 +88,7 @@ public class JdbcThemeRepositoryTest {
                 .name("theme name")
                 .description("theme description")
                 .thumbnailImgUrl("theme img url")
+                .price(30000L)
                 .build();
         Boolean alreadyExists = themeRepository.existsByNameAndDescription(theme2);
         assertThat(alreadyExists).isTrue();
@@ -97,6 +101,7 @@ public class JdbcThemeRepositoryTest {
                 .name("theme name")
                 .description("theme description")
                 .thumbnailImgUrl("theme img url")
+                .price(30000L)
                 .build());
 
         assertThatCode(() -> themeRepository.delete(savedTheme.getId())).doesNotThrowAnyException();
@@ -109,18 +114,21 @@ public class JdbcThemeRepositoryTest {
                 .name("theme name 1")
                 .description("theme description 1")
                 .thumbnailImgUrl("theme img url 1")
+                .price(30000L)
                 .build()
         );
         themeRepository.save(Theme.builder()
                 .name("theme name 2")
                 .description("theme description 2")
                 .thumbnailImgUrl("theme img url 2")
+                .price(30000L)
                 .build()
         );
         themeRepository.save(Theme.builder()
                 .name("theme name 3")
                 .description("theme description 3")
                 .thumbnailImgUrl("theme img url 3")
+                .price(30000L)
                 .build()
         );
 
@@ -139,9 +147,9 @@ public class JdbcThemeRepositoryTest {
 
         LocalDate yesterday = LocalDate.now().minusDays(1);
         Theme theme1 = themeRepository.save(Theme.builder().name("theme name 1").description("theme description 1")
-                .thumbnailImgUrl("theme img url 1").build());
+                .thumbnailImgUrl("theme img url 1").price(30000L).build());
         Theme theme2 = themeRepository.save(Theme.builder().name("theme name 2").description("theme description 2")
-                .thumbnailImgUrl("theme img url 2").build());
+                .thumbnailImgUrl("theme img url 2").price(30000L).build());
 
         testHelper.insertReservation("스타크", yesterday, theme1.getId(), time1.getId());
         testHelper.insertReservation("카야", yesterday, theme2.getId(), time2.getId());
