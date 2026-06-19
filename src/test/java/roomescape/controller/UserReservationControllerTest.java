@@ -111,7 +111,7 @@ void update_past_reservation() throws Exception {
         return new ReservationResult(
                 1L, "브라운", LocalDate.of(2099, 12, 31),
                 new ReservationTimeResult(1L, LocalTime.of(10, 0)),
-                new ThemeResult(1L, "무인도 탈출", "설명", "https://example.com/thumb.jpg"),
+                new ThemeResult(1L, "무인도 탈출", "설명", "https://example.com/thumb.jpg", 0L),
                 0L
         );
     }

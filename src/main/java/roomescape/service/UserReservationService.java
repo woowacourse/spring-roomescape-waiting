@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -50,7 +51,11 @@ public class UserReservationService {
                     return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), time.getStartAt(), "과거 시점에는 예약할 수 없습니다");
-        return reservationService.create(command);
+
+        boolean slotTaken = reservationRepository.existsByDateAndTimeIdAndThemeId(
+                command.date(), command.timeId(), command.themeId());
+        ReservationStatus status = slotTaken ? ReservationStatus.WAITING : ReservationStatus.PENDING;
+        return reservationService.create(command, status);
     }
 
     public List<ReservationResult> findByName(String name) {
@@ -93,7 +98,8 @@ public class UserReservationService {
         Reservation updated = new Reservation(
                 reservation.getId(),
                 reservation.getName(),
-                new ReservationSlot(null, command.date(), newTime, reservation.getTheme())
+                new ReservationSlot(null, command.date(), newTime, reservation.getTheme()),
+                reservation.getStatus()
         );
         return ReservationResult.from(reservationRepository.update(updated));
     }

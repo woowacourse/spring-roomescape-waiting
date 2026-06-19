@@ -15,9 +15,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.service.exception.ResourceConflictException;
 import roomescape.service.exception.ResourceNotFoundException;
 
 @Repository
@@ -27,6 +29,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT
                 r.id AS reservation_id,
                 r.name AS reservation_name,
+                r.status AS reservation_status,
                 s.id AS slot_id,
                 d.date AS reservation_date,
                 t.id AS time_id,
@@ -82,7 +85,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                     rs.getString("theme_description"),
                                     rs.getString("theme_thumbnail")
                             )
-                    )
+                    ),
+                    ReservationStatus.valueOf(rs.getString("reservation_status"))
             );
 
     private final RowMapper<ReservationWithWaitingOrder> reservationWithWaitingOrderRowMapper =
@@ -137,8 +141,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public ReservationWithWaitingOrder save(Reservation reservation) {
         String sql = """
-                INSERT INTO reservation (name, slot_id)
-                SELECT ?, s.id
+                INSERT INTO reservation (name, slot_id, status)
+                SELECT ?, s.id, ?
                 FROM reservation_slot s
                 JOIN reservation_date d ON s.date_id = d.id
                 WHERE d.date = ? AND s.time_id = ? AND s.theme_id = ?
@@ -148,9 +152,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         int affectedRows = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
-            ps.setDate(2, Date.valueOf(reservation.getSlot().getDate()));
-            ps.setLong(3, reservation.getSlot().getTime().getId());
-            ps.setLong(4, reservation.getSlot().getTheme().getId());
+            ps.setString(2, reservation.getStatus().name());
+            ps.setDate(3, Date.valueOf(reservation.getSlot().getDate()));
+            ps.setLong(4, reservation.getSlot().getTime().getId());
+            ps.setLong(5, reservation.getSlot().getTheme().getId());
             return ps;
         }, keyHolder);
 
@@ -192,6 +197,18 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void confirm(Long id) {
+        int affectedRows = jdbcTemplate.update(
+                "UPDATE reservation SET status = ? WHERE id = ? AND status = ?",
+                ReservationStatus.CONFIRMED.name(), id, ReservationStatus.PENDING.name()
+        );
+        if (affectedRows == 0) {
+            throw new ResourceConflictException(
+                    "결제 대기(PENDING) 상태의 예약이 아니어서 확정할 수 없습니다: reservationId=" + id);
+        }
+    }
+
+    @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
@@ -220,6 +237,24 @@ public class JdbcReservationRepository implements ReservationRepository {
                 sql,
                 Boolean.class,
                 name, Date.valueOf(date), timeId, themeId
+        );
+        return Boolean.TRUE.equals(exists);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation r
+                    JOIN reservation_slot s ON r.slot_id = s.id
+                    JOIN reservation_date d ON s.date_id = d.id
+                    WHERE d.date = ? AND s.time_id = ? AND s.theme_id = ?
+                )
+                """;
+        Boolean exists = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                Date.valueOf(date), timeId, themeId
         );
         return Boolean.TRUE.equals(exists);
     }

@@ -59,7 +59,7 @@ class ThemeServiceTest {
 
         ThemeResult created = themeService.create(command);
 
-        assertThat(created).isEqualTo(new ThemeResult(1L, "테마", "설명", "url"));
+        assertThat(created).isEqualTo(new ThemeResult(1L, "테마", "설명", "url", 0L));
     }
 
     @Test

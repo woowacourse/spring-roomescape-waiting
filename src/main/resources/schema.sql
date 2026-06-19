@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_slot;
 DROP TABLE IF EXISTS reservation_date;
@@ -26,6 +27,7 @@ CREATE TABLE theme
     name          VARCHAR(30)  NOT NULL UNIQUE,
     description   VARCHAR(255) NOT NULL,
     thumbnail_url VARCHAR(255) NOT NULL,
+    price         BIGINT       NOT NULL DEFAULT 0,
     is_deleted BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (id)
 );
@@ -49,8 +51,19 @@ CREATE TABLE reservation
     id      BIGINT      NOT NULL AUTO_INCREMENT,
     name    VARCHAR(30) NOT NULL,
     slot_id BIGINT      NOT NULL,
+    status  VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
     PRIMARY KEY (id),
     UNIQUE (slot_id, name)
 );
 
 CREATE INDEX idx_reservation_name ON reservation (name);
+
+CREATE TABLE payment
+(
+    id             BIGINT      NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT      NOT NULL UNIQUE,
+    order_id       VARCHAR(64) NOT NULL UNIQUE,
+    amount         BIGINT      NOT NULL,
+    payment_key    VARCHAR(200),
+    PRIMARY KEY (id)
+);

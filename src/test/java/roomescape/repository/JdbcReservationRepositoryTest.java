@@ -15,9 +15,11 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.service.exception.ResourceConflictException;
 
 @JdbcTest
 @Import(JdbcReservationRepository.class)
@@ -83,6 +85,34 @@ class JdbcReservationRepositoryTest {
 
         Reservation updated = reservationRepository.findById(saved.getId()).orElseThrow();
         assertThat(updated.getDate()).isEqualTo(newDate);
+    }
+
+    @Test
+    @DisplayName("PENDING 예약을 확정하면 CONFIRMED로 전이된다")
+    void confirm() {
+        ReservationTime time = insertTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("무인도 탈출");
+        insertSlot(DATE, time, theme);
+        ReservationWithWaitingOrder saved = reservationRepository.save(
+                new Reservation(null, "브라운", new ReservationSlot(null, DATE, time, theme), ReservationStatus.PENDING));
+
+        reservationRepository.confirm(saved.id());
+
+        Reservation confirmed = reservationRepository.findById(saved.id()).orElseThrow();
+        assertThat(confirmed.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("PENDING 상태가 아닌 예약을 확정하려 하면 예외가 발생한다")
+    void confirm_notPending() {
+        ReservationTime time = insertTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("무인도 탈출");
+        Reservation alreadyConfirmed = insertReservation("브라운", DATE, time, theme);
+
+        assertThatThrownBy(() -> reservationRepository.confirm(alreadyConfirmed.getId()))
+                .isInstanceOf(ResourceConflictException.class);
+        assertThatThrownBy(() -> reservationRepository.confirm(999L))
+                .isInstanceOf(ResourceConflictException.class);
     }
 
     @Test

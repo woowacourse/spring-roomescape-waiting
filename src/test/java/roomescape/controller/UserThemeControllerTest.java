@@ -67,6 +67,6 @@ class UserThemeControllerTest {
     }
 
     private ThemeResult sampleTheme() {
-        return new ThemeResult(1L, "무인도 탈출", "설명", "https://example.com/thumb.jpg");
+        return new ThemeResult(1L, "무인도 탈출", "설명", "https://example.com/thumb.jpg", 0L);
     }
 }
