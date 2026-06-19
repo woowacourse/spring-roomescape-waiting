@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>주문/결제 내역</title>
+    <link href="/styles/common.css" rel="stylesheet"/>
+    <link href="/styles/search.css" rel="stylesheet"/>
+    <link href="/styles/orders.css" rel="stylesheet"/>
+</head>
+<body>
+<nav class="top-nav">
+    <div class="nav-inner">
+        <a class="nav-logo" href="/">RoomEscape</a>
+        <div class="nav-links">
+            <a href="/">홈</a>
+            <a href="/reserve">예약하기</a>
+            <a href="/search">예약확인</a>
+            <a class="active" href="/orders">주문내역</a>
+            <a href="/admin">관리자</a>
+        </div>
+    </div>
+</nav>
+<main class="search-page">
+    <h1 class="page-title">주문/결제 내역</h1>
+
+    <section class="search-card">
+        <form data-role="orders-form">
+            <label>예약자 이름</label>
+
+            <div class="search-row">
+                <input
+                        class="search-input"
+                        name="name"
+                        placeholder="이름을 입력하세요"
+                        required
+                />
+                <button class="search-btn">조회</button>
+            </div>
+        </form>
+    </section>
+
+    <section
+            class="result-card"
+            data-role="orders-results"
+    ></section>
+
+    <div data-role="toast"></div>
+</main>
+
+<script src="/js/orders/main.js" type="module"></script>
+</body>
+</html>

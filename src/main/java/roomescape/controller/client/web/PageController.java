@@ -40,6 +40,11 @@ public class PageController {
         return "forward:/search.html";
     }
 
+    @GetMapping("/orders")
+    public String orders() {
+        return "forward:/orders.html";
+    }
+
     @GetMapping("/payment/checkout")
     public String paymentCheckout(
             @RequestParam String orderId,
