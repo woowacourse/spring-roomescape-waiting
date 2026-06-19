@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.order.service.OrderService;
+import roomescape.payment.service.PaymentService;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
@@ -32,12 +33,14 @@ class ReservationFacadeTest {
   ReservationTimeService reservationTimeService;
   @Mock
   OrderService orderService;
+  @Mock
+  PaymentService paymentService;
 
   ReservationFacade facade;
 
   @BeforeEach
   void setUp() {
-    facade = new ReservationFacade(reservationService, reservationTimeService, orderService);
+    facade = new ReservationFacade(reservationService, reservationTimeService, orderService, paymentService);
   }
 
   @Nested

@@ -1,10 +1,13 @@
 package roomescape.order.dao;
 
 import java.sql.PreparedStatement;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import roomescape.exception.NotFoundException;
+import roomescape.order.dao.dto.OrderRow;
 import roomescape.order.domain.Order;
 
 @Component
@@ -30,4 +33,19 @@ public class OrderDao {
 
     return new Order(keyHolder.getKey().longValue(), orderId, amount);
   }
+
+  public OrderRow findByOrderId(String orderId) {
+    try {
+      String sql = "SELECT id, reservation_id, order_id, amount FROM orders WHERE order_id = ?";
+      return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new OrderRow(
+          rs.getLong("id"),
+          rs.getLong("reservation_id"),
+          rs.getString("order_id"),
+          rs.getLong("amount")
+      ), orderId);
+    } catch (EmptyResultDataAccessException e) {
+      throw new NotFoundException("존재하지 않는 주문입니다. orderId = " + orderId);
+    }
+  }
+
 }

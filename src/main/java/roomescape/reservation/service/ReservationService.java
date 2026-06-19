@@ -161,6 +161,10 @@ public class ReservationService {
         }
     }
 
+    public void confirm(Long reservationId) {
+        reservationDao.updateStatus(reservationId, ReservationStatus.CONFIRMED);
+    }
+
     private void isReservationExists(LocalDate date, Long timeId, Long themeId) {
         boolean reservationExist = reservationDao.existsByTimeIdAndThemeId(date, timeId, themeId);
         if (reservationExist) {

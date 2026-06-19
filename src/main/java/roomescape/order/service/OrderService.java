@@ -2,6 +2,7 @@ package roomescape.order.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.order.dao.OrderDao;
+import roomescape.order.dao.dto.OrderRow;
 import roomescape.order.domain.Order;
 
 @Service
@@ -15,5 +16,9 @@ public class OrderService {
 
   public Order save(Long reservationId, String orderId, Long amount) {
     return orderDao.insert(reservationId, orderId, amount);
+  }
+
+  public OrderRow findByOrderId(String orderId) {
+    return orderDao.findByOrderId(orderId);
   }
 }
