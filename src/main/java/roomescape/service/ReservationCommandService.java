@@ -6,12 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.payment.OrderTicket;
+import roomescape.payment.PaymentOrderPort;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -19,6 +22,7 @@ import roomescape.repository.ThemeDao;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -26,6 +30,7 @@ import java.time.LocalDateTime;
 public class ReservationCommandService {
 
     private final WaitingCommandService waitingCommandService;
+    private final PaymentOrderPort paymentOrderPort;
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -38,15 +43,77 @@ public class ReservationCommandService {
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
         Reservation reservation = Reservation.forNew(member, slot);
 
-        slot.validateNotPast(now);
-        validateNoDuplicate(slot);
+        validateCreatable(now, slot);
 
+        return save(reservation);
+    }
+
+    public PendingReservation createPendingPaymentReservation(String name, LocalDate date, long timeId, long themeId) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        Member member = new Member(name);
+        Theme theme = findThemeReference(themeId);
+        Slot slot = new Slot(date, findTimeReference(timeId), theme);
+        Reservation reservation = Reservation.forPendingPayment(member, slot);
+
+        slot.validateNotPast(now);
+        Optional<PendingReservation> existingPending = findReusablePendingReservation(slot, member);
+        if (existingPending.isPresent()) {
+            return existingPending.get();
+        }
+        validateNoPendingPaymentForMember(member);
+
+        Reservation savedReservation = save(reservation);
+        OrderTicket ticket = paymentOrderPort.placeOrder(savedReservation.id());
+
+        return PendingReservation.of(savedReservation, ticket);
+    }
+
+    private Optional<PendingReservation> findReusablePendingReservation(Slot slot, Member member) {
+        Optional<Reservation> existing = reservationDao.findBySlotForUpdate(slot);
+        if (existing.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(validateAndBuildPending(existing.get(), member));
+    }
+
+    private PendingReservation validateAndBuildPending(Reservation existing, Member member) {
+        if (existing.status() != ReservationStatus.PENDING_PAYMENT) {
+            throw duplicateReservationException();
+        }
+        if (!existing.isOwnedBy(member)) {
+            throw pendingPaymentInProgressException();
+        }
+        OrderTicket ticket = paymentOrderPort.findTicket(existing.id())
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
+        return PendingReservation.of(existing, ticket);
+    }
+
+    public PendingReservation getPendingPaymentReservation(long reservationId, String name) {
+        Member member = new Member(name);
+        Reservation reservation = findReservation(reservationId);
+
+        reservation.validateOwnedBy(member);
+        if (reservation.status() != ReservationStatus.PENDING_PAYMENT) {
+            throw new ResourceNotFoundException("결제 대기 예약을 찾을 수 없습니다.");
+        }
+
+        OrderTicket ticket = paymentOrderPort.findTicket(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 결제 주문을 찾을 수 없습니다."));
+
+        return PendingReservation.of(reservation, ticket);
+    }
+
+    private Reservation save(Reservation reservation) {
         try {
             return reservationDao.save(reservation);
         } catch (DataIntegrityViolationException e) {
             throw duplicateReservationException();
         }
+    }
 
+    private void validateCreatable(LocalDateTime now, Slot slot) {
+        slot.validateNotPast(now);
+        validateNoDuplicate(slot);
     }
 
     public void delete(long reservationId) {
@@ -105,8 +172,18 @@ public class ReservationCommandService {
                 });
     }
 
+    private void validateNoPendingPaymentForMember(Member member) {
+        if (reservationDao.existsPendingPaymentByOwner(member)) {
+            throw new DuplicateException("이미 결제 대기 중인 예약이 있습니다. 결제를 완료하거나 취소 후 다시 시도해주세요.");
+        }
+    }
+
     private DuplicateException duplicateReservationException() {
         return new DuplicateException("해당 시간에 이미 예약이 존재합니다.");
+    }
+
+    private DuplicateException pendingPaymentInProgressException() {
+        return new DuplicateException("해당 시간은 현재 결제 진행 중입니다. 잠시 후 다시 시도해주세요.");
     }
 
     private ReservationTime findTimeReference(long timeId) {
@@ -123,4 +200,5 @@ public class ReservationCommandService {
         return reservationDao.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
     }
+
 }

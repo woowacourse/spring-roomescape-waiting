@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -40,6 +41,83 @@ class UserReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(0));
+    }
+
+    @Test
+    @DisplayName("예약 요청 시 결제 대기 예약과 결제창 정보를 생성한다.")
+    void createPendingReservationWithPaymentCheckout() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "new-user");
+        params.put("date", "2026-06-05");
+        params.put("timeId", 1L);
+        params.put("themeId", 2L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("name", is("new-user"))
+                .body("date", is("2026-06-05"))
+                .body("time.id", is(1))
+                .body("theme.id", is(2))
+                .body("status", is("PENDING_PAYMENT"))
+                .body("payment.amount", is(5_000))
+                .body("payment.orderName", is("예약없는테마 예약"));
+    }
+
+    @Test
+    @DisplayName("결제 대기 예약은 내 예약 목록에 결제대기로 노출한다.")
+    void pendingReservationIsShownInMyReservations() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "pending-user");
+        params.put("date", "2026-06-05");
+        params.put("timeId", 1L);
+        params.put("themeId", 2L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "pending-user")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].status", is("결제대기"));
+    }
+
+    @Test
+    @DisplayName("결제 대기 예약의 결제창 정보를 다시 조회한다.")
+    void getPendingReservationPaymentCheckout() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "pending-user");
+        params.put("date", "2026-06-05");
+        params.put("timeId", 1L);
+        params.put("themeId", 2L);
+
+        int reservationId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract().path("reservationId");
+
+        RestAssured.given().log().all()
+                .queryParam("name", "pending-user")
+                .when().get("/reservations/" + reservationId + "/payment")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservationId", is(reservationId))
+                .body("status", is("PENDING_PAYMENT"))
+                .body("payment.orderId", notNullValue())
+                .body("payment.amount", is(5_000));
     }
 
     @Test
@@ -113,7 +191,7 @@ class UserReservationTest {
     }
 
     @Test
-    @DisplayName("예약 취소 후 대기 1번이 내 예약 목록에서 예약으로 조회된다.")
+    @DisplayName("예약 취소 후 대기 1번이 내 예약 목록에서 결제대기로 조회된다.")
     void cancelPromotesWaitingInMyReservations() {
         RestAssured.given().log().all()
                 .queryParam("name", "user_c")
@@ -127,7 +205,7 @@ class UserReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("예약"))
+                .body("[0].status", is("결제대기"))
                 .body("[0].rank", nullValue());
 
         RestAssured.given().log().all()
@@ -136,5 +214,32 @@ class UserReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("find { it.status == '예약대기' }.rank", is(1));
+    }
+
+    @Test
+    @DisplayName("예약 취소로 승격된 결제대기 예약의 결제창 정보를 조회한다.")
+    void getPromotedWaitingPaymentCheckout() {
+        RestAssured.given().log().all()
+                .queryParam("name", "user_c")
+                .when().delete("/reservations/3")
+                .then().log().all()
+                .statusCode(204);
+
+        int reservationId = RestAssured.given().log().all()
+                .queryParam("name", "user_e")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .extract().path("[0].id");
+
+        RestAssured.given().log().all()
+                .queryParam("name", "user_e")
+                .when().get("/reservations/" + reservationId + "/payment")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservationId", is(reservationId))
+                .body("status", is("PENDING_PAYMENT"))
+                .body("payment.orderId", notNullValue())
+                .body("payment.amount", is(5_000));
     }
 }

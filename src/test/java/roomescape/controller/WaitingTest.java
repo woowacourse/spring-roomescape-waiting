@@ -43,6 +43,16 @@ public class WaitingTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 예약 대기를 취소하면 404를 반환한다.")
+    public void cancelNonExistentWaitingTest() {
+        RestAssured.given().log().all()
+                .queryParam("name", "user_d")
+                .when().delete("/reservations/waitings/999")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    @Test
     @DisplayName("지나간 시간에는 예약 대기를 생성할 수 없다.")
     void createPastWaitingTest() {
         Map<String, Object> params = new HashMap<>();

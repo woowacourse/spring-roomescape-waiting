@@ -22,7 +22,7 @@ class ReservationFlowTest {
     @DisplayName("예약 가능 시간 조회 → 예약 생성 → 다시 조회 시 빠짐")
     void reservationFlow() {
         RestAssured.given().log().all()
-                .queryParam("date", "2026-04-28")
+                .queryParam("date", "2026-06-28")
                 .queryParam("themeId", 2L)
                 .when().get("/times")
                 .then().log().all()

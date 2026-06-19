@@ -14,6 +14,7 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.TemporaryConflictException;
+import roomescape.payment.PaymentOrderPort;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -27,19 +28,21 @@ import java.time.LocalDateTime;
 @Transactional
 @RequiredArgsConstructor
 public class WaitingCommandService {
+
     private final WaitingDao waitingDao;
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
+    private final PaymentOrderPort paymentOrderPort;
     private final Clock clock;
 
     public Waiting create(String name, LocalDate date, long timeId, long themeId) {
         LocalDateTime now = LocalDateTime.now(clock);
         Member member = new Member(name);
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
-        Reservation reservation = findReservationBySlot(slot);
 
         slot.validateNotPast(now);
+        Reservation reservation = findConfirmedReservationBySlot(slot);
         validateNotOwnReservation(reservation, member);
         validateNoDuplicateWaiting(slot, member);
 
@@ -60,9 +63,9 @@ public class WaitingCommandService {
         waitingDao.deleteById(waitingId);
     }
 
-    private Reservation findReservationBySlot(Slot slot) {
-        return reservationDao.findBySlotForUpdate(slot)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다."));
+    private Reservation findConfirmedReservationBySlot(Slot slot) {
+        return reservationDao.findConfirmedBySlotForUpdate(slot)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 확정된 예약이 존재하지 않습니다."));
     }
 
     private void validateNotOwnReservation(Reservation reservation, Member member) {
@@ -79,7 +82,7 @@ public class WaitingCommandService {
 
     private Waiting findWaitingReference(long waitingId) {
         return waitingDao.findById(waitingId)
-                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 예약 대기입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약 대기입니다."));
     }
 
     private ReservationTime findTimeReference(long timeId) {
@@ -103,7 +106,8 @@ public class WaitingCommandService {
     private void promoteWaiting(Waiting waiting) {
         waitingDao.deleteById(waiting.id());
         try {
-            reservationDao.save(Reservation.forNew(waiting.owner(), waiting.slot()));
+            Reservation reservation = reservationDao.save(Reservation.forPendingPayment(waiting.owner(), waiting.slot()));
+            paymentOrderPort.placeOrder(reservation.id());
         } catch (DataIntegrityViolationException e) {
             throw new TemporaryConflictException("일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }

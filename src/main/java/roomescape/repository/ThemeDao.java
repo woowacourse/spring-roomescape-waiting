@@ -55,6 +55,14 @@ public class ThemeDao {
                 .findFirst();
     }
 
+    public boolean existsById(long themeId) {
+        String sql = """
+                SELECT COUNT(*) FROM theme WHERE id = :id
+                """;
+        Integer count = jdbcTemplate.queryForObject(sql, Map.of("id", themeId), Integer.class);
+        return count != null && count > 0;
+    }
+
     public List<Theme> findAll() {
         String sql = """
                 SELECT * FROM theme

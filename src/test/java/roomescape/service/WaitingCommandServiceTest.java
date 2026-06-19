@@ -13,11 +13,13 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.FixedClockConfig;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidReferenceException;
+import roomescape.exception.PastReservationException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.payment.order.OrderRepository;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.WaitingDao;
 
@@ -33,9 +35,13 @@ class WaitingCommandServiceTest {
     @Autowired
     private WaitingCommandService waitingCommandService;
     @Autowired
+    private ReservationCommandService reservationCommandService;
+    @Autowired
     private ReservationDao reservationDao;
     @Autowired
     private WaitingDao waitingDao;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Test
     @DisplayName("기존 예약이 없는 슬롯에는 대기를 생성할 수 없다.")
@@ -43,6 +49,14 @@ class WaitingCommandServiceTest {
         assertThatThrownBy(() ->
                 waitingCommandService.create("new-user", LocalDate.of(2026, 6, 6), 1L, 1L))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("지난 빈 슬롯에는 대기를 생성할 수 없다.")
+    void create_pastWithoutReservation() {
+        assertThatThrownBy(() ->
+                waitingCommandService.create("new-user", LocalDate.of(2026, 4, 28), 1L, 2L))
+                .isInstanceOf(PastReservationException.class);
     }
 
     @Test
@@ -62,6 +76,16 @@ class WaitingCommandServiceTest {
     }
 
     @Test
+    @DisplayName("결제 대기 예약에는 예약 대기를 생성할 수 없다.")
+    void create_pendingPaymentReservation() {
+        reservationCommandService.createPendingPaymentReservation("pending-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+
+        assertThatThrownBy(() ->
+                waitingCommandService.create("new-user", LocalDate.of(2026, 6, 5), 1L, 2L))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
     @DisplayName("예약이 존재하고 자신의 대기가 없으면 대기 생성에 성공한다.")
     void create_success() {
         Waiting created = waitingCommandService.create("new-user", LocalDate.of(2026, 6, 5), 1L, 1L);
@@ -74,11 +98,11 @@ class WaitingCommandServiceTest {
     @DisplayName("존재하지 않는 대기는 취소할 수 없다.")
     void cancel_nonExistent() {
         assertThatThrownBy(() -> waitingCommandService.cancel(999L, "user_d"))
-                .isInstanceOf(InvalidReferenceException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    @DisplayName("빈 슬롯의 다음 대기 1번을 예약으로 전환한다.")
+    @DisplayName("빈 슬롯의 다음 대기 1번을 결제대기 예약으로 전환한다.")
     void promoteNextWaitingIn_promotesFirstWaiting() {
         Reservation reservation = reservationDao.findById(3L).orElseThrow();
         Slot slot = reservation.slot();
@@ -86,7 +110,10 @@ class WaitingCommandServiceTest {
 
         waitingCommandService.promoteNextWaitingIn(slot);
 
-        assertThat(reservationDao.findAllByName(new Member("user_e"))).hasSize(1);
+        Reservation promoted = reservationDao.findAllByName(new Member("user_e")).getFirst();
+        assertThat(promoted.status()).isEqualTo(ReservationStatus.PENDING_PAYMENT);
+        assertThat(orderRepository.findAll())
+                .anySatisfy(order -> assertThat(order.reservationId()).isEqualTo(promoted.id()));
         assertThat(waitingDao.findById(3L)).isEmpty();
         assertThat(waitingDao.findById(4L)).isPresent();
     }
