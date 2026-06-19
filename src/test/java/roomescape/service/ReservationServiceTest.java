@@ -306,6 +306,39 @@ class ReservationServiceTest {
                 .isEqualTo(ReservationStatus.DELETED);
     }
 
+    @Test
+    void PENDING_엔트리를_확정하면_RESERVED로_바뀌고_예약_결과가_반환된다() {
+        // given: PENDING 상태의 엔트리가 저장되어 있음
+        saveDefaultThemeAndTime();
+        ReservationTime time = ReservationTimeFixture.createDefault();
+        Theme theme = ThemeFixture.createThemeWithId();
+        LocalDate date = FIXED.toLocalDate().plusDays(1);
+        Reservation slot = Reservation.createSlot(date, theme, time);
+        slot.addPendingEntry("이프", ThemeFixture.DEFAULT_PRICE, FIXED);
+        Reservation saved = reservationRepository.save(slot);
+        long entryId = saved.findEntryByNameAndStatus("이프", ReservationStatus.PENDING).getId();
+
+        // when
+        ReservationResult result = reservationService.confirmPendingEntry(entryId);
+
+        // then
+        assertThat(result.entry().status()).isEqualTo("RESERVED");
+        assertThat(reservationRepository.findByEntryId(entryId).orElseThrow().findActiveEntry(entryId).getStatus())
+                .isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void PENDING_상태가_아닌_엔트리를_확정하려하면_예외가_발생한다() {
+        // given: 이미 RESERVED 상태인 엔트리
+        Reservation saved = reservationRepository.save(createDefaultReservationWithName("웨지"));
+        long entryId = reservedEntryId(saved);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.confirmPendingEntry(entryId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("결제 중인 예약 정보를 찾을 수 없습니다.");
+    }
+
     private void saveDefaultThemeAndTime() {
         themeRepository.save(ThemeFixture.createDefaultTheme());
         reservationTimeRepository.save(ReservationTimeFixture.createDefault());
