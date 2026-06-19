@@ -47,7 +47,15 @@ export default class Controller {
 
         this.views.formView.on("@submit", async () => {
             try {
-                const wasWaiting = this.store.submitMode() === "waiting";
+                const mode = this.store.submitMode();
+
+                if (mode === "reserve") {
+                    const prepare = await this.store.prepare();
+                    location.href = `/payment/checkout?orderId=${prepare.orderId}&amount=${prepare.amount}&orderName=${encodeURIComponent(prepare.orderName)}&clientKey=${prepare.clientKey}`;
+                    return;
+                }
+
+                const wasWaiting = mode === "waiting";
                 const result = await this.store.submit();
                 const isReserved = result.entry.status === "RESERVED";
 
@@ -55,7 +63,7 @@ export default class Controller {
                     this.store.reservationId
                         ? isReserved ? "예약이 변경되었습니다." : "대기가 등록되었습니다."
                         : wasWaiting && isReserved ? "기존 예약이 취소되어 예약으로 전환되었습니다."
-                            : isReserved ? "예약이 완료되었습니다." : "대기가 등록되었습니다."
+                            : "대기가 등록되었습니다."
                 );
 
                 location.href = this.store.reservationId ? "/search" : "/";
@@ -88,6 +96,7 @@ export default class Controller {
 
         this.views.formView.sync({
             selectedThemeId: this.store.selectedThemeId,
+            selectedThemePrice: this.store.selectedThemePrice,
             selectedDate: this.store.selectedDate,
             name: this.store.name,
             canSubmit: this.store.canSubmit(),

@@ -25,6 +25,10 @@ public abstract class ReservationEntry {
         return of(null, reserverName, ReservationStatus.WAITING, createdAt);
     }
 
+    public static ReservationEntry pending(String reserverName, LocalDateTime createdAt) {
+        return PendingEntry.of(reserverName, createdAt);
+    }
+
     public static ReservationEntry restore(Long id, String reserverName, ReservationStatus status,
                                            LocalDateTime createdAt) {
         return of(Objects.requireNonNull(id, "복원 시 id 값은 필수입니다"), reserverName, status, createdAt);
@@ -33,6 +37,7 @@ public abstract class ReservationEntry {
     private static ReservationEntry of(Long id, String reserverName, ReservationStatus status,
                                        LocalDateTime createdAt) {
         return switch (status) {
+            case PENDING -> PendingEntry.restore(id, reserverName, createdAt);
             case RESERVED -> ReservedEntry.restore(id, reserverName, createdAt);
             case WAITING -> WaitingEntry.restore(id, reserverName, createdAt);
             case DELETED -> DeletedEntry.restore(id, reserverName, createdAt);
@@ -44,6 +49,10 @@ public abstract class ReservationEntry {
     public abstract boolean isReserved();
 
     public abstract boolean isWaiting();
+
+    public boolean isPending() {
+        return false;
+    }
 
     public abstract boolean isActive();
 

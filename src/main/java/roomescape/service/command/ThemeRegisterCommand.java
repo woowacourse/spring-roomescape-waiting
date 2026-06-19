@@ -5,6 +5,8 @@ public record ThemeRegisterCommand(
 
         String description,
 
-        String thumbnailImageUrl
+        String thumbnailImageUrl,
+
+        Long price
 ) {
 }

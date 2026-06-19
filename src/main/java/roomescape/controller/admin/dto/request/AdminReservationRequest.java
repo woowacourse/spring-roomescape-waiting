@@ -18,10 +18,13 @@ public record AdminReservationRequest(
         Long themeId,
         @NotNull(message = "예약 시간 식별자는 필수 값입니다.")
         @Positive(message = "예약 시간 식별자는 식별 가능한 양수입니다.")
-        Long timeId
+        Long timeId,
+        @NotNull(message = "결제 금액은 필수 값입니다.")
+        @Positive(message = "결제 금액은 양수여야 합니다.")
+        Long amount
 ) {
 
     public ReservationCommand toCommand() {
-        return new ReservationCommand(name, date, themeId, timeId);
+        return new ReservationCommand(name, date, themeId, timeId, amount);
     }
 }

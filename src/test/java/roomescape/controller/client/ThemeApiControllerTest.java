@@ -71,7 +71,7 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
     void 테마_목록_조회_요청에_성공하면_정상_응답이_반환된다() {
         // given
         ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "공포테마", "어마무시한 공포 테마입니다.",
-                "https://image.com/image.png", true);
+                "https://image.com/image.png", 30000L, true);
         when(themeService.getAllActiveThemes()).thenReturn(List.of(themeResult));
 
         // when & then
@@ -89,7 +89,7 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
     void 인기_테마_목록_조회_요청에_성공하면_정상_응답이_반환된다() {
         // given
         ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "공포테마", "어마무시한 공포 테마입니다.",
-                "https://image.com/image.png", true);
+                "https://image.com/image.png", 30000L, true);
         when(themeService.getPopularThemes(any(LocalDate.class), any(LocalDate.class))).thenReturn(
                 List.of(themeResult));
 

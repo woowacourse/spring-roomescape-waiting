@@ -41,3 +41,11 @@ export function cancelReservation(id) {
         method: "DELETE"
     });
 }
+
+export function preparePayment(payload) {
+    return requestJson("/api/payments/prepare", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    });
+}

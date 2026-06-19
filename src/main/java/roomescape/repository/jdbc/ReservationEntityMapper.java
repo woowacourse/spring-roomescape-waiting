@@ -35,6 +35,7 @@ public final class ReservationEntityMapper {
                 rs.getString("theme_name"),
                 rs.getString("description"),
                 rs.getString("thumbnail_image_url"),
+                rs.getLong("price"),
                 rs.getBoolean("is_active")
         );
         return Reservation.restore(

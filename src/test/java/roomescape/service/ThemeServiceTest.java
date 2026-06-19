@@ -27,7 +27,7 @@ class ThemeServiceTest {
     @Test
     void 새로운_테마를_정상적으로_등록한다() {
         // given: 관리자 권한과 등록 정보가 주어짐
-        ThemeRegisterCommand command = new ThemeRegisterCommand("공포테마", "무서운 테마입니다.", "http://image.png");
+        ThemeRegisterCommand command = new ThemeRegisterCommand("공포테마", "무서운 테마입니다.", "http://image.png", 30000L);
 
         // when: 테마 등록 진행
         ThemeRegisterResult result = themeService.register(command);
@@ -38,17 +38,18 @@ class ThemeServiceTest {
                         ThemeRegisterResult::id,
                         ThemeRegisterResult::name,
                         ThemeRegisterResult::description,
-                        ThemeRegisterResult::thumbnailImageUrl
+                        ThemeRegisterResult::thumbnailImageUrl,
+                        ThemeRegisterResult::price
                 )
-                .containsExactly(1L, "공포테마", "무서운 테마입니다.", "http://image.png");
+                .containsExactly(1L, "공포테마", "무서운 테마입니다.", "http://image.png", 30000L);
     }
 
     @Test
     void 이미_존재하는_이름으로_테마_등록을_시도하면_예외가_발생한다() {
         // given: '공포테마'가 이미 등록되어 있음
-        themeService.register(new ThemeRegisterCommand("공포테마", "설명", "http://image.png"));
+        themeService.register(new ThemeRegisterCommand("공포테마", "설명", "http://image.png", 30000L));
 
-        ThemeRegisterCommand duplicateCommand = new ThemeRegisterCommand("공포테마", "다른 설명", "http://image2.png");
+        ThemeRegisterCommand duplicateCommand = new ThemeRegisterCommand("공포테마", "다른 설명", "http://image2.png", 30000L);
 
         // when & then: DuplicateEntityException 발생 확인
         assertThatThrownBy(() -> themeService.register(duplicateCommand))
@@ -59,7 +60,7 @@ class ThemeServiceTest {
     @Test
     void 테마_식별자로_테마를_비활성화_할_수_있다() {
         // given
-        ThemeRegisterCommand command = new ThemeRegisterCommand("공포테마", "설명", "http://image.png");
+        ThemeRegisterCommand command = new ThemeRegisterCommand("공포테마", "설명", "http://image.png", 30000L);
         ThemeRegisterResult registerResult = themeService.register(command);
 
         // when
@@ -72,7 +73,7 @@ class ThemeServiceTest {
     @Test
     void 테마_식별자로_테마를_활성화_할_수_있다() {
         // given
-        ThemeRegisterCommand command = new ThemeRegisterCommand("공포테마", "설명", "http://image.png");
+        ThemeRegisterCommand command = new ThemeRegisterCommand("공포테마", "설명", "http://image.png", 30000L);
         ThemeRegisterResult registerResult = themeService.register(command);
         themeService.deactivate(registerResult.id());
 

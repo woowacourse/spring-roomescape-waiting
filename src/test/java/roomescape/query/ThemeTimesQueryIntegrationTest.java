@@ -20,7 +20,7 @@ import roomescape.support.TestDateTimes;
 @Sql("/integration-fixture.sql")
 class ThemeTimesQueryIntegrationTest {
 
-    private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", true);
+    private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", 30000L, true);
     private final ReservationTime time = ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE);
     @Autowired
     private ThemeQueryRepository themeQueryRepository;

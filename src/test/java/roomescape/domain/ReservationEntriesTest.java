@@ -49,6 +49,21 @@ class ReservationEntriesTest {
                     .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                     .containsExactly("이프", ReservationStatus.WAITING);
         }
+
+        @Test
+        void 결제_대기_엔트리를_추가한다() {
+            // given
+            ReservationEntries entries = new ReservationEntries(List.of());
+
+            // when
+            entries.addPending("이프", FIXED);
+
+            // then
+            assertThat(entries.getEntries())
+                    .singleElement()
+                    .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
+                    .containsExactly("이프", ReservationStatus.PENDING);
+        }
     }
 
     @Nested
@@ -75,6 +90,17 @@ class ReservationEntriesTest {
 
             // when & then
             assertThat(entries.hasReservedEntry()).isFalse();
+        }
+
+        @Test
+        void 결제_대기_엔트리가_있으면_hasReservedEntry가_true를_반환한다() {
+            // given: PENDING 상태는 슬롯을 선점한다
+            ReservationEntries entries = new ReservationEntries(List.of(
+                    entry(1L, "이프", ReservationStatus.PENDING, FIXED)
+            ));
+
+            // when & then
+            assertThat(entries.hasReservedEntry()).isTrue();
         }
 
         @Test

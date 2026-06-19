@@ -42,7 +42,7 @@ export default class Controller {
     }
 
     async createTheme(payload) {
-        if (!payload.name || !payload.description || !payload.thumbnailImageUrl) {
+        if (!payload.name || !payload.description || !payload.thumbnailImageUrl || !payload.price) {
             this.views.toastView.show("모든 항목을 입력하세요.", "error");
             return;
         }
@@ -78,8 +78,17 @@ export default class Controller {
             return;
         }
 
+        const theme = this.store.themes.find((t) => t.id === payload.themeId);
+        if (!theme) {
+            this.views.toastView.show("선택한 테마가 유효하지 않습니다.", "error");
+            return;
+        }
+
         try {
-            await this.store.addReservation(payload);
+            await this.store.addReservation({
+                ...payload,
+                amount: theme.price
+            });
             this.views.reservationSectionView.resetForm();
             this.views.toastView.show("예약이 추가되었습니다.", "success");
             await this.refreshAll();

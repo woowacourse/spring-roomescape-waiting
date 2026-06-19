@@ -39,14 +39,14 @@ public class ReservationService {
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
         Reservation reservation = findOrCreateSlotForUpdate(command);
-        reservation.reserve(command.name(), LocalDateTime.now(clock));
+        reservation.reserve(command.name(), command.amount(), LocalDateTime.now(clock));
         return ReservationResult.from(reservationRepository.save(reservation));
     }
 
     @Transactional
     public ReservationResult addWaiting(ReservationCommand command) {
         Reservation reservation = findOrCreateSlotForUpdate(command);
-        ReservationEntry added = reservation.reserveOrWait(command.name(), LocalDateTime.now(clock));
+        ReservationEntry added = reservation.reserveOrWait(command.name(), command.amount(), LocalDateTime.now(clock));
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
     }

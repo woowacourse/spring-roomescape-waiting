@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 완료</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    p.desc { color: #888; margin: 0 0 24px; font-size: 14px; line-height: 1.6; }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 16px;
+    }
+    .row .label { color: #888; white-space: nowrap; }
+    .row .val { text-align: right; word-break: break-all; }
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      color: #3182f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>✅ 결제를 완료했어요</h1>
+  <p class="desc">브라우저 인증 후, <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 결제를 확정했습니다.</p>
+
+  <div style="text-align: center; margin-bottom: 24px;">
+    <img th:src="${result?.themeThumbnailUrl()}" th:alt="${result?.themeName()}" style="max-width: 100%; border-radius: 8px; margin-bottom: 12px;"/>
+    <h2 th:text="${result?.themeName()}" style="font-size: 18px; margin: 0 0 8px;">Theme Name</h2>
+    <p style="color: #666; font-size: 14px; margin: 0;" th:text="${result?.reservationDate()} + ' ' + ${result?.reservationTime()}">2024-01-01 10:00</p>
+  </div>
+
+  <div class="row"><span class="label">결제 상태</span>
+    <span class="val" th:text="${result != null ? result.response().status() : '미구현 — confirm() 을 구현하세요'}">DONE</span></div>
+  <div class="row"><span class="label">주문번호</span>
+    <span class="val" th:text="${result?.response()?.orderId()}">order-xxxx</span></div>
+  <div class="row"><span class="label">승인 금액</span>
+    <span class="val"
+          th:text="${result != null ? #numbers.formatInteger(result.response().approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
+  </div>
+
+  <a href="/">← 홈으로 돌아가기</a>
+</div>
+</body>
+</html>

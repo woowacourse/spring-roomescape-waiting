@@ -28,7 +28,7 @@ class ReservationServiceIntegrationTest {
     @Test
     void 동시에_2명이_예약하면_1명만_성공해야_한다() throws InterruptedException {
         // given
-        ReservationCommand command = new ReservationCommand("이프", TestDateTimes.tomorrow(), 1L, 1L);
+        ReservationCommand command = new ReservationCommand("이프", TestDateTimes.tomorrow(), 1L, 1L, 30000L);
         int threadCount = 2;
         CountDownLatch latch = new CountDownLatch(threadCount);
         AtomicInteger errorCount = new AtomicInteger(0);

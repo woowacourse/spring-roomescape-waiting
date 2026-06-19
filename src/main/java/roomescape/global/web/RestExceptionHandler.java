@@ -13,6 +13,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
 import roomescape.exception.RoomEscapeException;
@@ -83,6 +84,11 @@ public class RestExceptionHandler {
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ex.getParameterName() + " 파라미터가 누락 되었습니다.");
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Void> handleNoResourceFoundException() {
+        return ResponseEntity.notFound().build();
     }
 
     @ExceptionHandler(exception = Exception.class)

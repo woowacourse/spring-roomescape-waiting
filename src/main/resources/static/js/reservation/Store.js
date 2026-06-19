@@ -5,7 +5,8 @@ import {
     createWaitingReservation,
     fetchReservation,
     fetchThemes,
-    fetchThemeSlots
+    fetchThemeSlots,
+    preparePayment
 } from "./api.js";
 
 export default class Store {
@@ -70,6 +71,11 @@ export default class Store {
         this.selectedTimeId = timeId;
     }
 
+    get selectedThemePrice() {
+        const theme = this.themes.find((t) => String(t.id) === String(this.selectedThemeId));
+        return theme ? theme.price : null;
+    }
+
     canSubmit() {
         const slot = this.selectedSlot();
         return Boolean(
@@ -106,13 +112,23 @@ export default class Store {
         );
     }
 
-    async submit() {
-        const payload = {
+    buildPayload() {
+        const theme = this.themes.find((t) => String(t.id) === String(this.selectedThemeId));
+        return {
             name: this.name,
             date: this.selectedDate,
             themeId: Number(this.selectedThemeId),
-            timeId: this.selectedTimeId
+            timeId: this.selectedTimeId,
+            amount: theme ? theme.price : 0
         };
+    }
+
+    async prepare() {
+        return preparePayment(this.buildPayload());
+    }
+
+    async submit() {
+        const payload = this.buildPayload();
 
         if (this.reservationId) {
             return changeReservation(this.reservationId, {

@@ -10,6 +10,7 @@ public final class ThemeEntityMapper {
             rs.getString("name"),
             rs.getString("description"),
             rs.getString("thumbnail_image_url"),
+            rs.getLong("price"),
             rs.getBoolean("is_active")
     );
 

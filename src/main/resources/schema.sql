@@ -4,6 +4,7 @@ CREATE TABLE theme
     name                VARCHAR(20)  NOT NULL,
     description         VARCHAR(255) NOT NULL,
     thumbnail_image_url VARCHAR(500) NOT NULL,
+    price               BIGINT       NOT NULL,
     is_active           TINYINT      NOT NULL DEFAULT 1,
     PRIMARY KEY (id),
     CONSTRAINT uk_theme_name UNIQUE (name)
@@ -39,4 +40,16 @@ CREATE TABLE reservation_entry
     created_at     TIMESTAMP   NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+);
+
+CREATE TABLE payment_order
+(
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    order_id   VARCHAR(50) NOT NULL,
+    amount     BIGINT      NOT NULL,
+    entry_id   BIGINT      NOT NULL,
+    created_at TIMESTAMP   NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_payment_order_order_id UNIQUE (order_id),
+    FOREIGN KEY (entry_id) REFERENCES reservation_entry (id)
 );

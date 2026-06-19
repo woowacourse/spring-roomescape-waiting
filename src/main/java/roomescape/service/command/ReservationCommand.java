@@ -7,7 +7,8 @@ public record ReservationCommand(
         String name,
         LocalDate date,
         Long themeId,
-        Long timeId
+        Long timeId,
+        Long amount
 ) {
 
     public ReservationCondition toCondition() {

@@ -114,7 +114,6 @@ select {
     cursor: not-allowed;
 }
 
-ㅊ
 .slot-time {
     display: block;
 }
@@ -132,6 +131,12 @@ select {
     font-size: 13px;
     padding: 20px 0;
     text-align: center;
+}
+
+.price-display {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
 }
 
 .btn-submit {

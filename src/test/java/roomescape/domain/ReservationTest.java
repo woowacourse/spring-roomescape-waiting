@@ -150,6 +150,73 @@ class ReservationTest {
     }
 
     @Test
+    void 결제_준비_시_PENDING_엔트리가_추가된다() {
+        // given
+        LocalDate date = FIXED.plusDays(1).toLocalDate();
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+
+        // when
+        reservation.addPendingEntry("이프", 30000L, FIXED);
+
+        // then
+        assertThat(reservation.getEntries())
+                .singleElement()
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
+                .containsExactly("이프", ReservationStatus.PENDING);
+    }
+
+    @Test
+    void 이미_예약된_슬롯에_결제_준비하면_예외가_발생한다() {
+        // given
+        LocalDate date = FIXED.plusDays(1).toLocalDate();
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+        reservation.reserve("기존예약자", FIXED);
+
+        // when & then
+        assertThatThrownBy(() -> reservation.addPendingEntry("이프", 30000L, FIXED))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 결제 중인 날짜입니다.");
+    }
+
+    @Test
+    void 이미_결제_중인_슬롯에_결제_준비하면_예외가_발생한다() {
+        // given: 다른 사용자가 이미 PENDING으로 선점
+        LocalDate date = FIXED.plusDays(1).toLocalDate();
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+        reservation.addPendingEntry("기존예약자", 30000L, FIXED);
+
+        // when & then
+        assertThatThrownBy(() -> reservation.addPendingEntry("이프", 30000L, FIXED))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 결제 중인 날짜입니다.");
+    }
+
+    @Test
+    void 결제_준비_시_동일_이름이면_예외가_발생한다() {
+        // given
+        LocalDate date = FIXED.plusDays(1).toLocalDate();
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+        reservation.addPendingEntry("이프", 30000L, FIXED);
+
+        // when & then
+        assertThatThrownBy(() -> reservation.addPendingEntry("이프", 30000L, FIXED))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
+    }
+
+    @Test
+    void 결제_준비_시_금액이_맞지_않으면_예외가_발생한다() {
+        // given
+        LocalDate date = FIXED.plusDays(1).toLocalDate();
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+
+        // when & then
+        assertThatThrownBy(() -> reservation.addPendingEntry("이프", 9999L, FIXED))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessageContaining("결제 금액이 테마 금액과 일치하지 않습니다.");
+    }
+
+    @Test
     void 예약된_엔트리를_식별자로_조회한다() {
         // given
         Reservation reservation = createReservationWithEntries(List.of(

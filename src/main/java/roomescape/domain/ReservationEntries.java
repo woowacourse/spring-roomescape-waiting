@@ -29,6 +29,12 @@ public class ReservationEntries {
         return entry;
     }
 
+    public ReservationEntry addPending(String name, LocalDateTime createdAt) {
+        ReservationEntry entry = ReservationEntry.pending(name, createdAt);
+        entries.add(entry);
+        return entry;
+    }
+
     public boolean hasActiveEntryByName(String name) {
         return entries.stream()
                 .filter(ReservationEntry::isActive)
@@ -37,7 +43,7 @@ public class ReservationEntries {
 
     public boolean hasReservedEntry() {
         return entries.stream()
-                .anyMatch(ReservationEntry::isReserved);
+                .anyMatch(e -> e.isReserved() || e.isPending());
     }
 
     public List<ReservationEntry> getEntries() {
@@ -63,8 +69,21 @@ public class ReservationEntries {
         replace(id, entry.cancel());
     }
 
+    public void cancelIfPending(long id) {
+        findById(id)
+                .filter(ReservationEntry::isPending)
+                .ifPresent(entry -> replace(id, entry.cancel()));
+    }
+
     private void replace(long id, ReservationEntry replacement) {
         entries.replaceAll(e -> e.isSameId(id) ? replacement : e);
+    }
+
+    public void promotePending(long id) {
+        ReservationEntry entry = findById(id)
+                .filter(ReservationEntry::isPending)
+                .orElseThrow(() -> new EntityNotFoundException("결제 중인 예약 정보를 찾을 수 없습니다."));
+        replace(id, entry.promote());
     }
 
     public void promoteFirstWaiting() {

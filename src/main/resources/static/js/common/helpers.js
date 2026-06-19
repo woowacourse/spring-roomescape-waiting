@@ -59,6 +59,13 @@ export function formatTime(startAt) {
     return startAt.substring(0, 5);
 }
 
+export function formatCurrency(value) {
+    return new Intl.NumberFormat("ko-KR", {
+        style: "currency",
+        currency: "KRW"
+    }).format(value);
+}
+
 export function getSearchParam(name) {
     return new URLSearchParams(window.location.search).get(name);
 }

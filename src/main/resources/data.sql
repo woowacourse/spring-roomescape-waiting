@@ -1,23 +1,23 @@
-INSERT INTO theme (name, description, thumbnail_image_url, is_active)
+INSERT INTO theme (name, description, thumbnail_image_url, price, is_active)
 VALUES ('화이트노이즈', '실험실에 남겨진 단서를 수집해 기묘한 송출 사고의 원인을 밝혀내는 SF 추리 테마', 'https://picsum.photos/seed/whitenoise/800/600',
-        1),
+        30000, 1),
        ('클락워크 호텔', '멈춰버린 호텔 시계를 다시 움직이기 위해 숨겨진 객실 기록을 파헤치는 미스터리 테마',
-        'https://picsum.photos/seed/clockworkhotel/800/600', 1),
-       ('선셋 다이브', '붉은 노을 아래 폐쇄 직전의 해양 연구소에서 탈출하는 어드벤처 테마', 'https://picsum.photos/seed/sunsetdive/800/600', 1),
-       ('스모크 스테이지', '무대 붕괴 직전의 공연장을 복구하며 공연을 완성하는 퍼포먼스 테마', 'https://picsum.photos/seed/smokestage/800/600', 1),
-       ('문라이트 아카이브', '봉인된 기록보관소에서 잃어버린 이름을 되찾는 감성 판타지 테마', 'https://picsum.photos/seed/moonlightarchive/800/600', 1),
+        'https://picsum.photos/seed/clockworkhotel/800/600', 30000, 1),
+       ('선셋 다이브', '붉은 노을 아래 폐쇄 직전의 해양 연구소에서 탈출하는 어드벤처 테마', 'https://picsum.photos/seed/sunsetdive/800/600', 25000, 1),
+       ('스모크 스테이지', '무대 붕괴 직전의 공연장을 복구하며 공연을 완성하는 퍼포먼스 테마', 'https://picsum.photos/seed/smokestage/800/600', 25000, 1),
+       ('문라이트 아카이브', '봉인된 기록보관소에서 잃어버린 이름을 되찾는 감성 판타지 테마', 'https://picsum.photos/seed/moonlightarchive/800/600', 28000, 1),
        ('네온 디스트릭트', '통제 불능이 된 미래 도시의 전력망을 복구하며 진실을 추적하는 사이버펑크 테마', 'https://picsum.photos/seed/neondistrict/800/600',
-        1),
-       ('블랙아웃 터널', '정전된 지하 터널 속에서 실종된 탐사대의 흔적을 따라가는 스릴러 테마', 'https://picsum.photos/seed/blackouttunnel/800/600', 1),
-       ('윈터 캐빈', '폭설로 고립된 산장 안에서 숨겨진 사건의 진실을 밝혀내는 서스펜스 테마', 'https://picsum.photos/seed/wintercabin/800/600', 1),
-       ('페이퍼 뮤지엄', '사라진 전시 작품과 왜곡된 기록을 복원하는 추리형 아트 테마', 'https://picsum.photos/seed/papermuseum/800/600', 1),
-       ('스톰 브레이커', '거대한 폭풍이 다가오는 항구 도시에서 재난을 막아내는 액션 테마', 'https://picsum.photos/seed/stormbreaker/800/600', 1),
-       ('크림슨 룸', '붉게 물든 밀실 속 단서를 조합해 연쇄 사건의 범인을 추적하는 범죄 추리 테마', 'https://picsum.photos/seed/crimsonroom/800/600', 1),
-       ('에코 플래닛', '붕괴 직전의 생태 행성에서 마지막 생명 신호를 복원하는 SF 탐험 테마', 'https://picsum.photos/seed/echoplanet/800/600', 1),
+        32000, 1),
+       ('블랙아웃 터널', '정전된 지하 터널 속에서 실종된 탐사대의 흔적을 따라가는 스릴러 테마', 'https://picsum.photos/seed/blackouttunnel/800/600', 27000, 1),
+       ('윈터 캐빈', '폭설로 고립된 산장 안에서 숨겨진 사건의 진실을 밝혀내는 서스펜스 테마', 'https://picsum.photos/seed/wintercabin/800/600', 26000, 1),
+       ('페이퍼 뮤지엄', '사라진 전시 작품과 왜곡된 기록을 복원하는 추리형 아트 테마', 'https://picsum.photos/seed/papermuseum/800/600', 24000, 1),
+       ('스톰 브레이커', '거대한 폭풍이 다가오는 항구 도시에서 재난을 막아내는 액션 테마', 'https://picsum.photos/seed/stormbreaker/800/600', 33000, 1),
+       ('크림슨 룸', '붉게 물든 밀실 속 단서를 조합해 연쇄 사건의 범인을 추적하는 범죄 추리 테마', 'https://picsum.photos/seed/crimsonroom/800/600', 29000, 1),
+       ('에코 플래닛', '붕괴 직전의 생태 행성에서 마지막 생명 신호를 복원하는 SF 탐험 테마', 'https://picsum.photos/seed/echoplanet/800/600', 31000, 1),
        ('라스트 브로드캐스트', '끊어진 라디오 송출을 복구하며 숨겨진 메시지를 해독하는 레트로 감성 테마',
-        'https://picsum.photos/seed/lastbroadcast/800/600', 1),
-       ('오로라 캠프', '극지 탐사 기지에서 벌어진 미스터리 사건을 조사하는 생존 테마', 'https://picsum.photos/seed/auroracamp/800/600', 1),
-       ('더스트 팩토리', '버려진 공장의 생산 라인을 재가동하며 숨겨진 실험 기록을 찾는 산업 스릴러 테마', 'https://picsum.photos/seed/dustfactory/800/600', 1);
+        'https://picsum.photos/seed/lastbroadcast/800/600', 26000, 1),
+       ('오로라 캠프', '극지 탐사 기지에서 벌어진 미스터리 사건을 조사하는 생존 테마', 'https://picsum.photos/seed/auroracamp/800/600', 28000, 1),
+       ('더스트 팩토리', '버려진 공장의 생산 라인을 재가동하며 숨겨진 실험 기록을 찾는 산업 스릴러 테마', 'https://picsum.photos/seed/dustfactory/800/600', 27000, 1);
 
 
 INSERT INTO reservation_time (start_at, status)

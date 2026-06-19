@@ -51,6 +51,21 @@ public class Reservation {
         return this.schedule.equals(Schedule.of(date, time));
     }
 
+    public void addPendingEntry(String name, Long amount, LocalDateTime now) {
+        theme.validatePaymentAmount(amount);
+        validateNotPast(now);
+        validateDuplicateEntry(name);
+        if (entries.hasReservedEntry()) {
+            throw new DuplicateEntityException("이미 예약 또는 결제 중인 날짜입니다. (%s %s)", schedule.getDate(), schedule.getStartAt());
+        }
+        entries.addPending(name, now);
+    }
+
+    public ReservationEntry reserve(String name, Long amount, LocalDateTime now) {
+        theme.validatePaymentAmount(amount);
+        return reserve(name, now);
+    }
+
     public ReservationEntry reserve(String name, LocalDateTime now) {
         validateNotPast(now);
         validateDuplicateEntry(name);
@@ -58,6 +73,11 @@ public class Reservation {
             throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", schedule.getDate(), schedule.getStartAt());
         }
         return entries.addReserved(name, now);
+    }
+
+    public ReservationEntry reserveOrWait(String name, Long amount, LocalDateTime now) {
+        theme.validatePaymentAmount(amount);
+        return reserveOrWait(name, now);
     }
 
     public ReservationEntry reserveOrWait(String name, LocalDateTime now) {
@@ -96,12 +116,20 @@ public class Reservation {
                 .orElseThrow(() -> new EntityNotFoundException("저장된 예약 엔트리를 찾을 수 없습니다."));
     }
 
+    public void confirmPendingEntry(long entryId) {
+        entries.promotePending(entryId);
+    }
+
     public void cancelEntry(long entryId) {
         entries.cancel(entryId);
 
         if (!entries.hasReservedEntry()) {
             entries.promoteFirstWaiting();
         }
+    }
+
+    public void cancelPendingEntry(long entryId) {
+        entries.cancelIfPending(entryId);
     }
 
     public LocalDate getDate() {
