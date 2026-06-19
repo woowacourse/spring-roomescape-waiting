@@ -18,7 +18,11 @@ public class OutboundRateLimitAspect {
         RateLimitBucket bucket = rateLimiters.getBucket(RateLimitType.OUTBOUND, outboundRateLimit.key());
 
         if (!bucket.tryConsume()) {
-            throw new RateLimitException("아웃바운드 요청 속도 제한 초과. 재시도 시간: " + bucket.retryAfterSeconds() + "초");
+            long retryAfterSeconds = bucket.retryAfterSeconds();
+            throw new RateLimitException(
+                    "아웃바운드 요청 속도 제한 초과. 재시도 시간: " + retryAfterSeconds + "초",
+                    retryAfterSeconds
+            );
         }
 
         return joinPoint.proceed();
