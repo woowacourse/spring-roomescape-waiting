@@ -20,9 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 
-import roomescape.controller.dto.AvailableTimeResponse;
 import roomescape.controller.dto.ReservationTimeRequest;
-import roomescape.controller.dto.ReservationTimeResponse;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.exception.DomainErrorCode;
@@ -109,19 +107,19 @@ class ReservationTimeServiceTest {
                 .isEqualTo(DomainErrorCode.REFERENTIAL_INTEGRITY);
     }
 
-    @DisplayName("예약 시간 목록을 응답 DTO로 변환한다.")
+    @DisplayName("예약 시간 목록을 조회한다.")
     @Test
     void findAll() {
         given(reservationTimeDao.findAll()).willReturn(List.of(new ReservationTime(1L, LocalTime.of(10, 0))));
 
-        List<ReservationTimeResponse> responses = reservationTimeService.findAll();
+        List<ReservationTime> times = reservationTimeService.findAll();
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).id()).isEqualTo(1L);
-        assertThat(responses.get(0).startAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(times).hasSize(1);
+        assertThat(times.get(0).getId()).isEqualTo(1L);
+        assertThat(times.get(0).getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
-    @DisplayName("예약 수를 이용 가능 여부와 대기 인원으로 변환한다.")
+    @DisplayName("시간별 예약 수를 조회한다.")
     @Test
     void findAvailableTimes() {
         LocalDate date = LocalDate.of(2026, 7, 1);
@@ -132,14 +130,9 @@ class ReservationTimeServiceTest {
                         new AvailableTimeResult(3L, LocalTime.of(12, 0), 3)
                 ));
 
-        List<AvailableTimeResponse> responses = reservationTimeService.findAvailableTimes(1L, date);
+        List<AvailableTimeResult> results = reservationTimeService.findAvailableTimes(1L, date);
 
-        assertThat(responses).hasSize(3);
-        assertThat(responses.get(0).isAvailable()).isTrue();
-        assertThat(responses.get(0).waitNumber()).isZero();
-        assertThat(responses.get(1).isAvailable()).isFalse();
-        assertThat(responses.get(1).waitNumber()).isZero();
-        assertThat(responses.get(2).isAvailable()).isFalse();
-        assertThat(responses.get(2).waitNumber()).isEqualTo(2);
+        assertThat(results).extracting(AvailableTimeResult::reservationCount)
+                .containsExactly(0, 1, 3);
     }
 }

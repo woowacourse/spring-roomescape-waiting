@@ -9,10 +9,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.controller.dto.AvailableTimeResponse;
 import roomescape.domain.ReservationStatus;
 import roomescape.controller.dto.ReservationTimeRequest;
-import roomescape.controller.dto.ReservationTimeResponse;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeDao;
@@ -56,35 +55,15 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ReservationTimeResponse> findAll() {
-        return reservationTimeDao.findAll().stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
+    public List<ReservationTime> findAll() {
+        return reservationTimeDao.findAll();
     }
 
-    public List<AvailableTimeResponse> findAvailableTimes(long themeId, LocalDate date) {
-        List<AvailableTimeResult> results =
-                reservationTimeDao.findAvailableTimes(
-                        themeId,
-                        date,
-                        ReservationStatus.CANCELED
-                );
-
-        return results.stream()
-                .map(this::toAvailableTimeResponse)
-                .toList();
-    }
-
-    private AvailableTimeResponse toAvailableTimeResponse(AvailableTimeResult result) {
-        int reservationCount = result.reservationCount();
-        boolean isAvailable = reservationCount == 0;
-        int waitNumber = Math.max(reservationCount - 1, 0);
-
-        return new AvailableTimeResponse(
-                result.id(),
-                result.startAt(),
-                isAvailable,
-                waitNumber
+    public List<AvailableTimeResult> findAvailableTimes(long themeId, LocalDate date) {
+        return reservationTimeDao.findAvailableTimes(
+                themeId,
+                date,
+                ReservationStatus.CANCELED
         );
     }
 

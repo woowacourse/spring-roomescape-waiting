@@ -31,7 +31,10 @@ public class AdminReservationTimeController {
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> findAll() {
-        return ResponseEntity.ok(reservationTimeService.findAll());
+        List<ReservationTimeResponse> responses = reservationTimeService.findAll().stream()
+                .map(ReservationTimeResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping

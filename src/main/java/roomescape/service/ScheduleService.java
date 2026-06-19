@@ -54,7 +54,7 @@ public class ScheduleService {
         }
     }
 
-    private Schedule getById(Long id) {
+    public Schedule getById(Long id) {
         return scheduleDao.findById(id).orElseThrow(()
                 -> new RoomescapeException(DomainErrorCode.NOT_FOUND_SCHEDULE, "해당 ID의 스케줄이 존재하지 않습니다. ID: " + id)
         );

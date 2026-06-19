@@ -42,7 +42,7 @@ class ReservationDaoTest {
         Long scheduleId = insertSchedule(LocalDate.of(2026, 7, 1), timeId, themeId);
         Schedule schedule = new Schedule(
                 scheduleId,
-                new Theme(themeId, "잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg"),
+                new Theme(themeId, "잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg", 20000),
                 LocalDate.of(2026, 7, 1),
                 new ReservationTime(timeId, LocalTime.of(10, 0))
         );
@@ -228,10 +228,11 @@ class ReservationDaoTest {
 
     private Long insertTheme(String name) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
                 name,
                 name + " 설명",
-                "https://example.com/" + name + ".jpg"
+                "https://example.com/" + name + ".jpg",
+                20000
         );
         return jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, name);
     }

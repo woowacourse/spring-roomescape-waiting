@@ -25,7 +25,7 @@ class MemberServiceTest {
     @InjectMocks
     private MemberService memberService;
 
-    @DisplayName("일반 회원 목록만 응답 DTO로 변환한다.")
+    @DisplayName("일반 회원 목록만 조회한다.")
     @Test
     void findUsers() {
         given(memberDao.findByRole(Role.USER)).willReturn(List.of(
@@ -33,7 +33,7 @@ class MemberServiceTest {
         ));
 
         assertThat(memberService.findUsers())
-                .extracting(response -> response.name())
+                .extracting(Member::getName)
                 .containsExactly("러로");
     }
 }

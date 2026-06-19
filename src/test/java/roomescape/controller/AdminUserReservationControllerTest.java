@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -24,10 +25,13 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import roomescape.controller.dto.DisplayStatus;
-import roomescape.controller.dto.ReservationResponse;
 import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Schedule;
+import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.global.auth.AdminAuthorizationInterceptor;
@@ -35,6 +39,7 @@ import roomescape.global.exception.DomainErrorHttpMapper;
 import roomescape.global.config.WebConfig;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @WebMvcTest(AdminReservationController.class)
 @Import({DomainErrorHttpMapper.class, AdminAuthorizationInterceptor.class, WebConfig.class})
@@ -54,17 +59,7 @@ class AdminUserReservationControllerTest {
     void findAll() throws Exception {
         given(authService.getLoginMember(7L)).willReturn(admin());
         given(reservationService.findAll()).willReturn(List.of(
-                new ReservationResponse(
-                        1L,
-                        "러로",
-                        DisplayStatus.RESERVED,
-                        LocalDate.of(2026, 7, 1),
-                        "잠긴 방",
-                        "설명",
-                        "https://example.com/theme.jpg",
-                        LocalTime.of(10, 0),
-                        0
-                )
+                new ReservationWithWaitingOrder(reservation(), 0)
         ));
 
         mockMvc.perform(get("/admin/reservations").session(adminSession()))
@@ -152,5 +147,16 @@ class AdminUserReservationControllerTest {
 
     private Member admin() {
         return new Member(7L, "admin", "관리자", "password", Role.ADMIN);
+    }
+
+    private Reservation reservation() {
+        Member member = new Member(1L, "roro", "러로", "password", Role.USER);
+        Schedule schedule = new Schedule(
+                1L,
+                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg", 20000),
+                LocalDate.of(2026, 7, 1),
+                new ReservationTime(1L, LocalTime.of(10, 0))
+        );
+        return new Reservation(1L, member, schedule, ReservationStatus.RESERVED, LocalDateTime.now());
     }
 }

@@ -1,7 +1,7 @@
 package roomescape.controller;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -24,11 +25,14 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import roomescape.controller.dto.DisplayStatus;
-import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Schedule;
+import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.global.exception.DomainErrorHttpMapper;
@@ -36,6 +40,7 @@ import roomescape.global.auth.LoginMemberArgumentResolver;
 import roomescape.global.config.WebConfig;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @WebMvcTest(UserReservationController.class)
 @Import({DomainErrorHttpMapper.class, LoginMemberArgumentResolver.class, WebConfig.class})
@@ -50,12 +55,12 @@ class UserReservationControllerTest {
     @MockitoBean
     private AuthService authService;
 
-    @DisplayName("사용자 예약 생성 요청은 201과 Location 헤더를 반환한다.")
+    @DisplayName("사용자는 결제가 필요한 빈 슬롯 대신 이미 예약된 슬롯에 대기를 등록한다.")
     @Test
-    void create() throws Exception {
+    void createWaiting() throws Exception {
         Member member = member();
         given(authService.getLoginMember(1L)).willReturn(member);
-        given(reservationService.saveReservationByMember(any(UserReservationRequest.class), any(Member.class))).willReturn(1L);
+        given(reservationService.saveWaitingReservation(any(UserReservationRequest.class), any(Member.class))).willReturn(2L);
 
         mockMvc.perform(post("/reservations")
                         .session(loginSession())
@@ -68,24 +73,9 @@ class UserReservationControllerTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/reservations/1"));
-    }
+                .andExpect(header().string("Location", "/reservations/2"));
 
-    @DisplayName("예약 생성 요청 값이 올바르지 않으면 400을 반환한다.")
-    @Test
-    void createInvalidRequest() throws Exception {
-        mockMvc.perform(post("/reservations")
-                        .session(loginSession())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "date": "2026-07-01",
-                                  "timeId": null,
-                                  "themeId": 1
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+        verify(reservationService).saveWaitingReservation(any(UserReservationRequest.class), any(Member.class));
     }
 
     @DisplayName("사용자 예약 목록을 JSON으로 반환한다.")
@@ -94,17 +84,7 @@ class UserReservationControllerTest {
         Member member = member();
         given(authService.getLoginMember(1L)).willReturn(member);
         given(reservationService.findByMember(member)).willReturn(List.of(
-                new ReservationResponse(
-                        1L,
-                        "러로",
-                        DisplayStatus.WAITING,
-                        LocalDate.of(2026, 7, 1),
-                        "잠긴 방",
-                        "닫힌 문을 여는 테마",
-                        "https://example.com/theme.jpg",
-                        LocalTime.of(10, 0),
-                        1
-                )
+                new ReservationWithWaitingOrder(reservation(member), 1)
         ));
 
         mockMvc.perform(get("/reservations").session(loginSession()))
@@ -163,5 +143,15 @@ class UserReservationControllerTest {
 
     private Member member() {
         return new Member(1L, "roro", "러로", "password", Role.USER);
+    }
+
+    private Reservation reservation(Member member) {
+        Schedule schedule = new Schedule(
+                1L,
+                new Theme(1L, "잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg", 20000),
+                LocalDate.of(2026, 7, 1),
+                new ReservationTime(1L, LocalTime.of(10, 0))
+        );
+        return new Reservation(1L, member, schedule, ReservationStatus.WAITING, LocalDateTime.now());
     }
 }

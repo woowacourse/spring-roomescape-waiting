@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.AdminReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @RequestMapping("/admin/reservations")
 @RestController
@@ -23,7 +25,11 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAll() {
-        return ResponseEntity.ok(reservationService.findAll());
+        LocalDateTime now = LocalDateTime.now();
+        List<ReservationResponse> responses = reservationService.findAll().stream()
+                .map(result -> toResponse(result, now))
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping
@@ -39,5 +45,9 @@ public class AdminReservationController {
     public ResponseEntity<Void> cancel(@PathVariable Long id) {
         reservationService.cancelReservationByAdmin(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private ReservationResponse toResponse(ReservationWithWaitingOrder result, LocalDateTime now) {
+        return ReservationResponse.from(result.reservation(), result.order(), now);
     }
 }

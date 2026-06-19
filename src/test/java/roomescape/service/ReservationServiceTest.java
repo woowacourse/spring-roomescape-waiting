@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import roomescape.controller.dto.AdminReservationRequest;
-import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -34,7 +33,6 @@ import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
-import roomescape.repository.MemberDao;
 import roomescape.repository.ReservationDao;
 import roomescape.service.dto.ReservationWithWaitingOrder;
 
@@ -45,7 +43,7 @@ class ReservationServiceTest {
     private ReservationDao reservationDao;
 
     @Mock
-    private MemberDao memberDao;
+    private MemberService memberService;
 
     @Mock
     private ScheduleService scheduleService;
@@ -59,7 +57,7 @@ class ReservationServiceTest {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Member member = member(1L, "러로");
         AdminReservationRequest request = new AdminReservationRequest(member.getId(), schedule.getDate(), 1L, 1L);
-        given(memberDao.findById(member.getId())).willReturn(Optional.of(member));
+        given(memberService.getMemberById(member.getId())).willReturn(member);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
@@ -83,7 +81,7 @@ class ReservationServiceTest {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Member member = member(2L, "현미밥");
         AdminReservationRequest request = new AdminReservationRequest(member.getId(), schedule.getDate(), 1L, 1L);
-        given(memberDao.findById(member.getId())).willReturn(Optional.of(member));
+        given(memberService.getMemberById(member.getId())).willReturn(member);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
@@ -97,33 +95,13 @@ class ReservationServiceTest {
         assertThat(reservationCaptor.getValue().getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
-    @DisplayName("로그인 회원으로 예약을 생성하면 회원 조회 없이 저장한다.")
-    @Test
-    void saveReservationByAdminByLoginMember() {
-        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
-        Member member = member(1L, "러로");
-        UserReservationRequest request = new UserReservationRequest(schedule.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
-                .willReturn(schedule);
-        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
-        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
-        given(reservationDao.save(any(Reservation.class))).willReturn(1L);
-        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
-
-        reservationService.saveReservationByMember(request, member);
-
-        verify(reservationDao).save(reservationCaptor.capture());
-        assertThat(reservationCaptor.getValue().getMember()).isEqualTo(member);
-        verify(memberDao, never()).findById(any());
-    }
-
     @DisplayName("같은 사용자가 같은 슬롯에 취소되지 않은 예약을 가지고 있으면 생성할 수 없다.")
     @Test
     void saveDuplicateReservation() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Member member = member(1L, "러로");
         AdminReservationRequest request = new AdminReservationRequest(member.getId(), schedule.getDate(), 1L, 1L);
-        given(memberDao.findById(member.getId())).willReturn(Optional.of(member));
+        given(memberService.getMemberById(member.getId())).willReturn(member);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(true);
@@ -142,7 +120,7 @@ class ReservationServiceTest {
         Schedule schedule = futureSchedule(1L, LocalDate.now().minusDays(1), LocalTime.of(10, 0));
         Member member = member(1L, "러로");
         AdminReservationRequest request = new AdminReservationRequest(member.getId(), schedule.getDate(), 1L, 1L);
-        given(memberDao.findById(member.getId())).willReturn(Optional.of(member));
+        given(memberService.getMemberById(member.getId())).willReturn(member);
         given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
@@ -152,6 +130,48 @@ class ReservationServiceTest {
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.PAST_RESERVATION);
+    }
+
+    @DisplayName("사용자는 이미 확정 예약이 있는 슬롯에 대기를 등록한다.")
+    @Test
+    void saveWaitingReservationByUser() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Member member = member(2L, "현미밥");
+        UserReservationRequest request = new UserReservationRequest(schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(1);
+        given(reservationDao.save(any(Reservation.class))).willReturn(2L);
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+
+        Long reservationId = reservationService.saveWaitingReservation(request, member);
+
+        assertThat(reservationId).isEqualTo(2L);
+        verify(reservationDao).save(reservationCaptor.capture());
+        Reservation saved = reservationCaptor.getValue();
+        assertThat(saved.getMember()).isEqualTo(member);
+        assertThat(saved.getSchedule()).isEqualTo(schedule);
+        assertThat(saved.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @DisplayName("사용자는 빈 슬롯에 대기를 등록해 결제를 우회할 수 없다.")
+    @Test
+    void saveWaitingReservationOnEmptySlot() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Member member = member(1L, "러로");
+        UserReservationRequest request = new UserReservationRequest(schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
+
+        assertThatThrownBy(() -> reservationService.saveWaitingReservation(request, member))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.INVALID_INPUT);
+
+        verify(reservationDao, never()).save(any());
     }
 
     @DisplayName("RESERVED 예약을 취소하면 취소 시각을 기록하고 첫 번째 대기를 승격한다.")
@@ -270,11 +290,85 @@ class ReservationServiceTest {
         Reservation reservation = reservation(1L, member, schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
         given(reservationDao.findByMemberId(member.getId())).willReturn(List.of(new ReservationWithWaitingOrder(reservation, 1)));
 
-        List<ReservationResponse> responses = reservationService.findByMember(member);
+        List<ReservationWithWaitingOrder> results = reservationService.findByMember(member);
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).name()).isEqualTo("러로");
-        assertThat(responses.get(0).order()).isEqualTo(1);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).reservation()).isEqualTo(reservation);
+        assertThat(results.get(0).order()).isEqualTo(1);
+    }
+
+    @DisplayName("결제 확정 예약은 슬롯을 잠그고 RESERVED 상태로 저장한다.")
+    @Test
+    void saveConfirmedReservationByPayment() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Member member = member(1L, "러로");
+        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
+        given(memberService.getMemberById(member.getId())).willReturn(member);
+        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
+        given(reservationDao.save(any(Reservation.class))).willReturn(10L);
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+
+        Long reservationId = reservationService.saveConfirmedReservationByPayment(schedule.getId(), member.getId());
+
+        assertThat(reservationId).isEqualTo(10L);
+        verify(scheduleService).lockById(schedule.getId());
+        verify(reservationDao).save(reservationCaptor.capture());
+        Reservation saved = reservationCaptor.getValue();
+        assertThat(saved.getMember()).isEqualTo(member);
+        assertThat(saved.getSchedule()).isEqualTo(schedule);
+        assertThat(saved.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @DisplayName("결제 확정 전 과거 스케줄이면 예외를 던진다.")
+    @Test
+    void validateBeforeConfirmPastSchedule() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().minusDays(1), LocalTime.of(10, 0));
+        Member member = member(1L, "러로");
+        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
+        given(memberService.getMemberById(member.getId())).willReturn(member);
+
+        assertThatThrownBy(() -> reservationService.validateBeforeConfirm(member.getId(), schedule.getId(), LocalDateTime.now()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.PAST_RESERVATION);
+
+        verify(reservationDao, never()).save(any());
+    }
+
+    @DisplayName("결제 확정 전 본인 활성 예약이 있으면 예외를 던진다.")
+    @Test
+    void validateBeforeConfirmDuplicateReservation() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Member member = member(1L, "러로");
+        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
+        given(memberService.getMemberById(member.getId())).willReturn(member);
+        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(true);
+
+        assertThatThrownBy(() -> reservationService.validateBeforeConfirm(member.getId(), schedule.getId(), LocalDateTime.now()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
+
+        verify(reservationDao, never()).save(any());
+    }
+
+    @DisplayName("결제 확정 전 대기를 포함한 활성 예약이 있으면 예외를 던진다.")
+    @Test
+    void validateBeforeConfirmActiveReservationExists() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Member member = member(1L, "러로");
+        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
+        given(memberService.getMemberById(member.getId())).willReturn(member);
+        given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(1);
+
+        assertThatThrownBy(() -> reservationService.validateBeforeConfirm(member.getId(), schedule.getId(), LocalDateTime.now()))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.PAYMENT_SLOT_UNAVAILABLE);
+
+        verify(reservationDao, never()).save(any());
     }
 
     private Reservation reservation(
@@ -294,7 +388,7 @@ class ReservationServiceTest {
     private Schedule futureSchedule(Long id, LocalDate date, LocalTime time) {
         return new Schedule(
                 id,
-                new Theme(1L, "테마", "설명", "https://example.com/theme.jpg"),
+                new Theme(1L, "테마", "설명", "https://example.com/theme.jpg", 20000),
                 date,
                 new ReservationTime(1L, time)
         );

@@ -154,7 +154,7 @@ class ReservationTest {
     private Schedule scheduleAt(LocalDate date, LocalTime time) {
         return new Schedule(
                 1L,
-                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg"),
+                new Theme(1L, "잠긴 방", "설명", "https://example.com/theme.jpg", 20000),
                 date,
                 new ReservationTime(1L, time)
         );

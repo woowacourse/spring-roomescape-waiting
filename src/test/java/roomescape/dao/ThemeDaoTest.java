@@ -33,7 +33,7 @@ class ThemeDaoTest {
     @DisplayName("테마를 저장하고 전체 조회하면 도메인 객체로 매핑된다.")
     @Test
     void saveAndFindAll() {
-        Long id = themeDao.save("잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg");
+        Long id = themeDao.save("잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg", 20000);
 
         List<Theme> themes = themeDao.findAll();
 
@@ -47,16 +47,16 @@ class ThemeDaoTest {
     @DisplayName("테마 이름은 유니크 제약조건을 가진다.")
     @Test
     void uniqueName() {
-        themeDao.save("중복 테마", "설명", "https://example.com/theme.jpg");
+        themeDao.save("중복 테마", "설명", "https://example.com/theme.jpg", 20000);
 
-        assertThatThrownBy(() -> themeDao.save("중복 테마", "다른 설명", "https://example.com/other.jpg"))
+        assertThatThrownBy(() -> themeDao.save("중복 테마", "다른 설명", "https://example.com/other.jpg", 20000))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @DisplayName("이름으로 테마 존재 여부를 조회한다.")
     @Test
     void existsByName() {
-        themeDao.save("탐정 사무소", "사건을 해결하는 테마", "https://example.com/detective.jpg");
+        themeDao.save("탐정 사무소", "사건을 해결하는 테마", "https://example.com/detective.jpg", 20000);
 
         assertThat(themeDao.existsByName("탐정 사무소")).isTrue();
         assertThat(themeDao.existsByName("없는 테마")).isFalse();
@@ -94,7 +94,7 @@ class ThemeDaoTest {
     @DisplayName("테마를 삭제하면 조회 결과에서 제외된다.")
     @Test
     void delete() {
-        Long id = themeDao.save("삭제할 테마", "설명", "https://example.com/delete.jpg");
+        Long id = themeDao.save("삭제할 테마", "설명", "https://example.com/delete.jpg", 20000);
 
         themeDao.delete(id);
 
@@ -102,7 +102,7 @@ class ThemeDaoTest {
     }
 
     private Long insertTheme(String name) {
-        return themeDao.save(name, name + " 설명", "https://example.com/" + name + ".jpg");
+        return themeDao.save(name, name + " 설명", "https://example.com/" + name + ".jpg", 20000);
     }
 
     private Long insertReservationTime(LocalTime startAt) {
