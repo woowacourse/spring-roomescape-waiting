@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -119,6 +120,44 @@ class PaymentServiceTest {
         assertThatThrownBy(confirm).isInstanceOf(RuntimeException.class);
         Order order = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
         assertThat(order.status()).isEqualTo(PaymentStatus.UNKNOWN);
+        assertThat(reservationDao.findById(pending.reservation().id()).orElseThrow().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
+    }
+
+    @Test
+    @DisplayName("연결 실패면 주문을 확인 필요로 바꾸지 않고 연결 실패로 안내한다.")
+    void connectionFailureKeepsOrderReady() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new ResourceAccessException("Connection refused", new ConnectException("Connection refused")));
+
+        ThrowingCallable confirm = () -> paymentService.confirm("payment-key", pending.orderId(), 5_000L);
+
+        assertThatThrownBy(confirm)
+                .isInstanceOf(PaymentGatewayConnectionException.class)
+                .hasMessage("결제 승인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.");
+        Order order = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        assertThat(order.status()).isEqualTo(PaymentStatus.READY);
+        assertThat(reservationDao.findById(pending.reservation().id()).orElseThrow().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
+    }
+
+    @Test
+    @DisplayName("connect timeout이면 주문을 확인 필요로 바꾸지 않고 연결 실패로 안내한다.")
+    void connectTimeoutKeepsOrderReady() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new ResourceAccessException("connect timed out", new SocketTimeoutException("connect timed out")));
+
+        ThrowingCallable confirm = () -> paymentService.confirm("payment-key", pending.orderId(), 5_000L);
+
+        assertThatThrownBy(confirm)
+                .isInstanceOf(PaymentGatewayConnectionException.class)
+                .hasMessage("결제 승인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.");
+        Order order = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        assertThat(order.status()).isEqualTo(PaymentStatus.READY);
         assertThat(reservationDao.findById(pending.reservation().id()).orElseThrow().status())
                 .isEqualTo(ReservationStatus.PENDING_PAYMENT);
     }
