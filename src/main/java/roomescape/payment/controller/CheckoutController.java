@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.payment.client.PaymentConnectionException;
+import roomescape.payment.client.PaymentErrorCode;
 import roomescape.payment.client.PaymentTimeoutException;
 import roomescape.payment.client.TossPaymentException;
 import roomescape.payment.domain.Payment;
@@ -64,7 +65,7 @@ public class CheckoutController {
         } catch (PaymentConnectionException e) {
             return failView(model, "GATEWAY_CONNECTION", e.getMessage(), orderId);
         } catch (TossPaymentException e) {
-            return failView(model, e.getCode(), e.getMessage(), orderId);
+            return failView(model, e.getErrorCode().name(), e.getMessage(), orderId);
         }
     }
 
@@ -76,7 +77,7 @@ public class CheckoutController {
             Model model
     ) {
         paymentService.cancelPending(orderId);
-        return failView(model, code, message, orderId);
+        return failView(model, PaymentErrorCode.fromTossCode(code).name(), message, orderId);
     }
 
     private String failView(Model model, String code, String message, String orderId) {
