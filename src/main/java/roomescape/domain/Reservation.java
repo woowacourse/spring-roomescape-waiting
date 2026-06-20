@@ -13,10 +13,11 @@ public class Reservation {
     private Long id;
     private Slot slot;
     private String name;
+    private ReservationStatus status;
 
     public static Reservation createFutureReservation(String name, Slot slot, LocalDateTime now) {
         validateNotPastDateTime(slot, now);
-        return new Reservation(null, slot, name);
+        return new Reservation(null, slot, name, ReservationStatus.PAYMENT_PENDING);
     }
 
     private static void validateNotPastDateTime(Slot slot, LocalDateTime now) {
@@ -27,21 +28,22 @@ public class Reservation {
     }
 
     public Reservation(Slot slot, String name) {
-        this(null, slot, name);
+        this(null, slot, name, ReservationStatus.CONFIRMED);
     }
 
-    public Reservation(Long id, Slot slot, String name) {
+    public Reservation(Long id, Slot slot, String name, ReservationStatus status) {
         this.id = id;
         this.slot = slot;
         this.name = name;
+        this.status = status;
     }
 
     public Reservation createWithId(long id) {
-        return new Reservation(id, this.slot, this.name);
+        return new Reservation(id, this.slot, this.name, this.status);
     }
 
     public Reservation updateReservation(Slot slot) {
-        return new Reservation(this.id, slot, this.name);
+        return new Reservation(this.id, slot, this.name, this.status);
     }
 
     public boolean isNotModifiableAt(LocalDateTime now) {
@@ -75,6 +77,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return slot.getTheme();
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override
