@@ -2,6 +2,7 @@ package roomescape.ratelimit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -20,6 +21,7 @@ public class RateLimitWebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new RateLimitInterceptor(rateLimiter))
-                .addPathPatterns("/bookings/**", "/payments/**");
+                .addPathPatterns("/bookings/**", "/payments/**")
+                .order(Ordered.HIGHEST_PRECEDENCE);
     }
 }
