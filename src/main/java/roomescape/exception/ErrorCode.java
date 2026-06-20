@@ -37,6 +37,7 @@ public enum ErrorCode {
     PAYMENT_CONFIRM_UNKNOWN(CONFLICT, "결제 승인 결과를 확인할 수 없습니다. 내 예약에서 상태를 확인하거나 다시 시도해 주세요."),
 
     PAYMENT_GATEWAY_UNAVAILABLE(SERVICE_UNAVAILABLE, "결제 승인 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."),
+    OUTBOUND_RATE_LIMIT_EXCEEDED(TOO_MANY_REQUESTS, "외부 결제 승인 호출량이 많습니다. 잠시 후 다시 시도해 주세요."),
     ;
 
     private final HttpStatus status;
