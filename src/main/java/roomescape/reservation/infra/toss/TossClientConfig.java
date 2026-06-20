@@ -37,8 +37,8 @@ public class TossClientConfig {
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .requestFactory(requestFactory)
-                .requestInterceptor(new RetryAfterInterceptor(retryAfterMaxAttempts))
                 .requestInterceptor(new OutboundRateLimitInterceptor(outboundRateLimiter))
+                .requestInterceptor(new RetryAfterInterceptor(retryAfterMaxAttempts))
                 .build();
     }
 }

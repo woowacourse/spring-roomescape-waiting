@@ -67,18 +67,17 @@ class OutboundRateLimitInterceptorTest {
         assertThat(mockWebServer.getRequestCount()).isEqualTo(2);
     }
 
-    @DisplayName("Retry-After 재시도 요청도 outbound 토큰을 소비한다.")
+    @DisplayName("Retry-After 재시도 요청은 같은 승인 시도 안에서 처리되어 outbound 토큰을 추가로 소비하지 않는다.")
     @Test
-    void retry_after_retry_also_consumes_outbound_token() {
+    void retry_after_retry_does_not_consume_additional_outbound_token() {
         // Given: 첫 Toss 응답은 429이고 outbound 토큰은 1개뿐입니다.
         mockWebServer.enqueue(tooManyRequests());
         mockWebServer.enqueue(done());
         RestClient client = retryAfterClientWith(new TokenBucketRateLimiter(1, 1.0, () -> 0L));
 
-        // When & Then: Retry-After 재시도 시도도 outbound limit을 통과해야 하므로 외부 요청은 1번만 나갑니다.
-        assertThatThrownBy(() -> confirm(client))
-                .isInstanceOf(OutboundRateLimitException.class);
-        assertThat(mockWebServer.getRequestCount()).isEqualTo(1);
+        // When & Then: 최초 승인 시도만 outbound limit을 통과하고 Retry-After 재시도는 같은 시도 안에서 처리됩니다.
+        assertThat(confirm(client)).contains("DONE");
+        assertThat(mockWebServer.getRequestCount()).isEqualTo(2);
     }
 
     private RestClient clientWith(TokenBucketRateLimiter rateLimiter) {
@@ -91,8 +90,8 @@ class OutboundRateLimitInterceptorTest {
     private RestClient retryAfterClientWith(TokenBucketRateLimiter rateLimiter) {
         return RestClient.builder()
                 .baseUrl(mockWebServer.url("/").toString())
-                .requestInterceptor(new RetryAfterInterceptor(2))
                 .requestInterceptor(new OutboundRateLimitInterceptor(rateLimiter))
+                .requestInterceptor(new RetryAfterInterceptor(2))
                 .build();
     }
 
