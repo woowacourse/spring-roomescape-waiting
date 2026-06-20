@@ -10,6 +10,7 @@ public enum PaymentErrorCode {
     CARD_REJECTED,
     PAYMENT_NOT_FOUND,
     RETRYABLE,
+    GATEWAY_BUSY,
     UNKNOWN;
 
     public static PaymentErrorCode fromTossCode(String tossCode) {

@@ -86,4 +86,11 @@ public class TossPaymentException extends BusinessException {
             super(HttpStatus.INTERNAL_SERVER_ERROR, PaymentErrorCode.RETRYABLE, message);
         }
     }
+
+    public static class GatewayBusy extends TossPaymentException {
+
+        public GatewayBusy(String message) {
+            super(HttpStatus.SERVICE_UNAVAILABLE, PaymentErrorCode.GATEWAY_BUSY, message);
+        }
+    }
 }
