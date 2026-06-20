@@ -102,6 +102,7 @@ class PaymentControllerTest {
     void 금액이_검증되면_결제를_승인한다() {
         Long reservationId = 1L;
 
+        // 샌드박스에서 결제 인증을 마친 후 successUrl에 있는 정보를 입력
         String paymentKey = "test-paymentKey-result";
         String orderId = "order-1";
         Long price = 50000L;
