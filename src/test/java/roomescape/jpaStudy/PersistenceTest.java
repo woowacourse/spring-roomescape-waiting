@@ -3,6 +3,8 @@ package roomescape.jpaStudy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.resource.jdbc.spi.StatementInspector;
@@ -10,9 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.transaction.TestTransaction;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @DataJpaTest
@@ -23,14 +31,17 @@ import roomescape.repository.ThemeRepository;
 })
 public class PersistenceTest {
 
-    private final ThemeRepository themeRepository;
-    private final EntityManager entityManager;
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @Autowired
-    public PersistenceTest(ThemeRepository themeRepository, EntityManager entityManager) {
-        this.themeRepository = themeRepository;
-        this.entityManager = entityManager;
-    }
+    private TestEntityManager testEntityManager;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private SlotRepository slotRepository;
 
     @BeforeEach
     void setUp() {
@@ -198,5 +209,53 @@ public class PersistenceTest {
         static List<String> sqls() {
             return List.copyOf(SQLS);
         }
+    }
+
+    @Test
+    void fetch_join_없이_조회한_뒤_DTO_변환에서_추가_SQL이_나가는지_본다() {
+        // given
+        Member member = testEntityManager.persist(new Member("브라운"));
+
+        ReservationTime time1 = testEntityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime time2 = testEntityManager.persist(new ReservationTime(LocalTime.of(12, 0)));
+
+        Theme theme1 = testEntityManager.persist(new Theme("테마1", "설명1", "image1.png"));
+        Theme theme2 = testEntityManager.persist(new Theme("테마2", "설명2", "image2.png"));
+
+        Slot slot1 = slotRepository.getOrCreate(
+            Slot.of(LocalDate.now().plusDays(1), time1, theme1)
+        );
+
+        Slot slot2 = slotRepository.getOrCreate(
+            Slot.of(LocalDate.now().plusDays(2), time2, theme2)
+        );
+
+        entityManager.persist(new Reservation(member, slot1));
+        entityManager.persist(new Reservation(member, slot2));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        SqlCollector.start();
+
+        // when
+        List<Reservation> reservations = entityManager.createQuery("""
+                select r
+                from Reservation r
+                where r.member.name = :name
+                """, Reservation.class)
+            .setParameter("name", "브라운")
+            .getResultList();
+
+        // when
+        for (Reservation reservation : reservations) {
+            reservation.getTheme().getName();
+            reservation.getTime().getStartAt();
+        }
+
+        SqlCollector.stop();
+
+        // then
+        SqlCollector.sqls().forEach(System.out::println);
     }
 }

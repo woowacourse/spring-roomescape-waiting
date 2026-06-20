@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,15 +39,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         """)
     Optional<Reservation> findById(@Param("id") Long id);
 
+    @EntityGraph(attributePaths = {
+        "member",
+        "slot",
+        "slot.time",
+        "slot.theme"
+    })
     @Query("""
         SELECT r
         FROM Reservation r
-        JOIN FETCH r.member m
-        JOIN FETCH r.slot s
-        JOIN FETCH s.time t
-        JOIN FETCH s.theme
-        WHERE m.name = :name
-        ORDER BY s.date DESC, t.startAt ASC
+        WHERE r.member.name = :name
+        ORDER BY r.slot.date DESC, r.slot.time.startAt ASC
         """)
     List<Reservation> findByName(@Param("name") String name);
 
