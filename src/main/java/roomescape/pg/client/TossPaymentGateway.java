@@ -50,6 +50,9 @@ public class TossPaymentGateway implements PaymentGateway {
     } catch (RestClientException e) {
       log.error("Failed to confirm payment request", e);
       return unknown();
+    } catch (OutboundRateLimitException e) {
+      log.error("Skipped payment request by outbound rate limit", e);
+      return unknown();
     } catch (TossPaymentException e) {
       log.error("Failed to confirm payment request", e);
       return handleTossException(e);
