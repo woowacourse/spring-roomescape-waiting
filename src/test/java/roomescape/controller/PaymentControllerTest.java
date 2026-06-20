@@ -165,4 +165,25 @@ class PaymentControllerTest {
         String paymentStatus = jdbcTemplate.queryForObject("SELECT status FROM payment WHERE order_id = ?", String.class, orderId);
         assertThat(paymentStatus).isEqualTo(PaymentStatus.READY.name());
     }
+
+    @Test
+    void 결제가_실패하면_결제를_삭제처리한다() {
+        Long reservationId = 1L;
+
+        String orderId = "order-1";
+        Long price = 50000L;
+
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", price);
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2024-01-01", "1", "1");
+        jdbcTemplate.update("INSERT INTO payment (order_id, reservation_id, amount) VALUES (?, ?, ?)", orderId, reservationId, price);
+
+        RestAssured.given().log().all()
+                .when().delete("/payments/" + orderId)
+                .then().log().all()
+                .statusCode(200);
+
+        Integer paymentCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM payment", Integer.class);
+        assertThat(paymentCount).isZero();
+    }
 }

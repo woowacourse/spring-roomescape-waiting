@@ -113,7 +113,7 @@
                         orderId: orderId,
                         orderName: "방탈출 예약",
                         successUrl: window.location.origin + "/page/payments/success",
-                        failUrl: window.location.origin + "/page/payments/fail"
+                        failUrl: window.location.origin + `/page/payments/fail?reservationId=${reservationId}`
                     });
                 } catch (error) {
                     if (error.code !== "USER_CANCEL") {

@@ -329,7 +329,7 @@ async function submitPrePayment() {
       reservationId: state.reservationId,
       price: state.selectedThemePrice
     });
-    closeBookingModal();
+    $('pre-payment-modal').classList.remove('open');
     showToast('예약이 접수되었습니다. 결제 페이지로 이동합니다.', 'success');
     state.selectedTimeId = null; state.selectedTimeLabel = null;
 

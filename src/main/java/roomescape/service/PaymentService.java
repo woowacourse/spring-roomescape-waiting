@@ -65,4 +65,14 @@ public class PaymentService {
 
         return new PaymentConfirmResult(paymentResult.orderId(), paymentResult.approvedAmount(), paymentResult.paymentKey());
     }
+
+    public void fail(final String orderId) {
+        if (orderId == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+        final boolean deleted = paymentRepository.deleteByOrderId(new OrderId(orderId));
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+    }
 }

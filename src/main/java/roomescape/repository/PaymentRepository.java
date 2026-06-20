@@ -67,6 +67,15 @@ public class PaymentRepository {
         );
     }
 
+    public boolean deleteByOrderId(final OrderId orderId) {
+        final String sql = """
+                DELETE FROM payment
+                WHERE order_id = ?
+                """;
+
+        return jdbcTemplate.update(sql, orderId.id()) > 0;
+    }
+
     public Optional<Payment> findByOrderId(final OrderId orderId) {
         final String sql = """
                 SELECT id, order_id, reservation_id, amount, payment_key, status

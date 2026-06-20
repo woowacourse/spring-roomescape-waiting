@@ -171,4 +171,17 @@ class PaymentServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         verify(eventPublisher, never()).publishEvent(any(ReservationConfirmationEvent.class));
     }
+
+    @Test
+    void 결제정보를_삭제한다() {
+        // given
+        String orderIdString = "order-99";
+        given(paymentRepository.deleteByOrderId(any(OrderId.class))).willReturn(true);
+
+        // when
+        paymentService.fail(orderIdString);
+
+        // then
+        verify(paymentRepository).deleteByOrderId(any(OrderId.class));
+    }
 }

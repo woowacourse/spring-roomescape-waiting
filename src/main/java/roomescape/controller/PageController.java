@@ -25,16 +25,16 @@ public class PageController {
 
     @GetMapping("/payments/checkout")
     public String paymentCheckoutPage() {
-        return "forward:/payments/checkout.html";
+        return "forward:/checkout.html";
     }
 
     @GetMapping("/payments/success")
     public String paymentSuccessPage() {
-        return "forward:/payments/success.html";
+        return "forward:/success.html";
     }
 
     @GetMapping("/payments/fail")
     public String paymentFailPage() {
-        return "forward:/payments/fail.html";
+        return "forward:/fail.html";
     }
 }

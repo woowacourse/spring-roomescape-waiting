@@ -65,11 +65,22 @@
 </main>
 
 <script>
+  async function processFailure(orderId, reservationId) {
+    await fetch(`/payments/${orderId}`, {
+      method: 'DELETE'
+    });
+
+    await fetch(`/admin/reservations/${reservationId}`, {
+      method: `DELETE`
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const message = urlParams.get('message');
     const orderId = urlParams.get('orderId');
+    const reservationId = urlParams.get('reservationId');
 
     const $failMessage = document.getElementById('fail-message');
 
@@ -79,9 +90,7 @@
       $failMessage.textContent = '사용자가 결제를 취소했습니다.';
     }
 
-    // 실패한 예약(PENDING 상태)을 즉시 삭제하거나 취소 처리
-    // orderId를 기반으로 서버에 취소 API를 호출하는 로직을 추가
-    // fetch(`/payments/fail?orderId=${orderId}`, { method: 'POST' });
+    processFailure(orderId, reservationId);
   });
 </script>
 </body>
