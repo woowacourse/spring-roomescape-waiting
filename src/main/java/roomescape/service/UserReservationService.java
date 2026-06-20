@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,11 +15,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.payment.Payment;
+import roomescape.repository.PaymentRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -32,15 +38,18 @@ public class UserReservationService {
     private final AdminReservationService reservationService;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final PaymentRepository paymentRepository;
 
     public UserReservationService(
             AdminReservationService reservationService,
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository
+            ReservationTimeRepository reservationTimeRepository,
+            PaymentRepository paymentRepository
     ) {
         this.reservationService = reservationService;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
@@ -59,8 +68,16 @@ public class UserReservationService {
     }
 
     public List<ReservationResult> findByName(String name) {
-        return reservationRepository.findByName(name).stream()
-                .map(ReservationResult::from)
+        List<ReservationWithWaitingOrder> reservations = reservationRepository.findByName(name);
+        List<Long> reservationIds = reservations.stream()
+                .map(ReservationWithWaitingOrder::id)
+                .toList();
+        Map<Long, Payment> paymentsByReservationId = paymentRepository.findByReservationIds(reservationIds).stream()
+                .collect(Collectors.toMap(Payment::reservationId, Function.identity()));
+
+        return reservations.stream()
+                .map(reservation -> ReservationResult.from(
+                        reservation, paymentsByReservationId.get(reservation.id())))
                 .toList();
     }
 

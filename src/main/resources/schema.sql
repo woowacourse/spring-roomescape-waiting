@@ -65,5 +65,6 @@ CREATE TABLE payment
     order_id       VARCHAR(64) NOT NULL UNIQUE,
     amount         BIGINT      NOT NULL,
     payment_key    VARCHAR(200),
+    status         VARCHAR(32) NOT NULL DEFAULT 'PENDING',
     PRIMARY KEY (id)
 );

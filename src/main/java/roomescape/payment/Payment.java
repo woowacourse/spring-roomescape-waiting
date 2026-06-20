@@ -9,6 +9,7 @@ public record Payment(
         Long reservationId,
         String orderId,
         Long amount,
-        String paymentKey
+        String paymentKey,
+        PaymentOrderStatus status
 ) {
 }

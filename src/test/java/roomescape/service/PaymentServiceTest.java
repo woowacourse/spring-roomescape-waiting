@@ -20,7 +20,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import roomescape.payment.Payment;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentOrderStatus;
 import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentResultUnknownException;
 import roomescape.payment.PaymentStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -65,7 +67,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("같은 예약에 미승인 주문이 남아 있으면 새로 만들지 않고 재사용한다")
     void createOrder_reusesPendingOrder() {
-        Payment existing = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        Payment existing = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null, PaymentOrderStatus.PENDING);
         given(paymentRepository.findByReservationId(RESERVATION_ID)).willReturn(Optional.of(existing));
 
         Payment order = paymentService.createOrder(RESERVATION_ID, AMOUNT);
@@ -77,7 +79,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("이미 승인된 주문만 있으면 새 주문을 생성한다")
     void createOrder_createsNewWhenExistingConfirmed() {
-        Payment confirmed = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, PAYMENT_KEY);
+        Payment confirmed = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, PAYMENT_KEY, PaymentOrderStatus.CONFIRMED);
         given(paymentRepository.findByReservationId(RESERVATION_ID)).willReturn(Optional.of(confirmed));
         given(paymentRepository.save(any(Payment.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
@@ -92,7 +94,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("금액이 일치하면 승인 후 payment_key 저장과 예약 확정이 일어난다")
     void confirm() {
-        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null, PaymentOrderStatus.PENDING);
         PaymentResult result = new PaymentResult(PAYMENT_KEY, ORDER_ID, PaymentStatus.DONE, AMOUNT);
         given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
         given(paymentGateway.confirm(any(PaymentConfirmation.class))).willReturn(result);
@@ -101,7 +103,24 @@ class PaymentServiceTest {
 
         assertThat(actual).isEqualTo(result);
         verify(paymentRepository).updatePaymentKey(ORDER_ID, PAYMENT_KEY);
+        verify(paymentRepository).updateStatus(ORDER_ID, PaymentOrderStatus.CONFIRMED);
         verify(reservationRepository).confirm(RESERVATION_ID);
+    }
+
+    @Test
+    @DisplayName("read timeout으로 결과가 불명확하면 NEEDS_CONFIRMATION 으로 표시하고 예외를 다시 던진다")
+    void confirm_resultUnknown() {
+        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null, PaymentOrderStatus.PENDING);
+        given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
+        given(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .willThrow(new PaymentResultUnknownException("결과를 확인하지 못했습니다", new RuntimeException()));
+
+        assertThatThrownBy(() -> paymentService.confirm(PAYMENT_KEY, ORDER_ID, AMOUNT))
+                .isInstanceOf(PaymentResultUnknownException.class);
+
+        verify(paymentRepository).updateStatus(ORDER_ID, PaymentOrderStatus.NEEDS_CONFIRMATION);
+        verify(paymentRepository, never()).updatePaymentKey(any(), any());
+        verify(reservationRepository, never()).confirm(any());
     }
 
     @Test
@@ -118,7 +137,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("금액이 다르면 게이트웨이 호출 전에 PaymentAmountMismatchException 으로 차단한다")
     void confirm_amountMismatch() {
-        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null, PaymentOrderStatus.PENDING);
         given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
 
         assertThatThrownBy(() -> paymentService.confirm(PAYMENT_KEY, ORDER_ID, 9_999L))
@@ -132,7 +151,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("결제 실패 정리 시 PENDING 예약과 주문을 삭제한다")
     void cancelOrder_pending() {
-        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null, PaymentOrderStatus.PENDING);
         Reservation reservation = mock(Reservation.class);
         given(reservation.getStatus()).willReturn(ReservationStatus.PENDING);
         given(reservation.getId()).willReturn(RESERVATION_ID);
@@ -148,7 +167,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("결제 실패 정리 시 확정된 예약은 삭제하지 않는다")
     void cancelOrder_confirmed() {
-        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null);
+        Payment order = new Payment(10L, RESERVATION_ID, ORDER_ID, AMOUNT, null, PaymentOrderStatus.PENDING);
         Reservation reservation = mock(Reservation.class);
         given(reservation.getStatus()).willReturn(ReservationStatus.CONFIRMED);
         given(paymentRepository.findByOrderId(ORDER_ID)).willReturn(Optional.of(order));
