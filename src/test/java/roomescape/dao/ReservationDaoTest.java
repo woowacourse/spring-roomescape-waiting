@@ -257,7 +257,8 @@ class ReservationDaoTest {
         Reservation changedReservation = new Reservation(
                 savedReservation.getId(),
                 changedSlot,
-                "브라운"
+                "브라운",
+                roomescape.domain.ReservationStatus.CONFIRMED
         );
 
         // when

@@ -26,6 +26,7 @@ public class ReservationControllerTest extends AcceptanceTest {
         params.put("date", reservationDate.toString());
         params.put("timeId", timeId);
         params.put("themeId", themeId);
+        params.put("amount", 10000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -52,7 +53,8 @@ public class ReservationControllerTest extends AcceptanceTest {
                         "name", "로지",
                         "date", reservationDate.toString(),
                         "timeId", timeId,
-                        "themeId", themeId1
+                        "themeId", themeId1,
+                        "amount", 10000
                 ))
                 .when().post("/reservations")
                 .then().log().all()
@@ -65,7 +67,8 @@ public class ReservationControllerTest extends AcceptanceTest {
                         "name", "러키",
                         "date", reservationDate.toString(),
                         "timeId", timeId,
-                        "themeId", themeId2
+                        "themeId", themeId2,
+                        "amount", 10000
                 ))
                 .when().post("/reservations")
                 .then().log().all()
