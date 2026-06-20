@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
@@ -12,6 +13,8 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
 
     List<Reservation> findByMemberId(Long memberId);
+
+    List<Reservation> findPendingCreatedBefore(LocalDateTime cutoff);
 
     void update(Long id, LocalDate date, Long timeId);
 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -214,6 +215,32 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.getById(reservationId))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
+    }
+
+    @Test
+    @DisplayName("기준 시각 이전에 생성된 미결제 예약은 만료되고 1순위 대기가 승격된다")
+    void 만료된_미결제_예약은_삭제되고_대기가_승격된다() {
+        Long pendingId = reservationService.book(
+                member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
+        Member waiter = memberRepository.save(Member.of("waiter", "waiter@test.com", "1234"));
+        ReservationWaiting waiting = waitingRepository.save(ReservationWaiting.of(waiter, futureDate, time, theme));
+
+        reservationService.expirePendingCreatedBefore(LocalDateTime.now().plusDays(1));
+
+        assertThat(reservationRepository.findById(pendingId)).isEmpty();
+        assertThat(waitingRepository.findById(waiting.getId())).isEmpty();
+        assertThat(reservationRepository.findByMemberId(waiter.getId())).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("기준 시각 이후에 생성된 미결제 예약은 만료되지 않는다")
+    void 기준_시각_이후_미결제_예약은_만료되지_않는다() {
+        Long pendingId = reservationService.book(
+                member, new ReservationRequest(futureDate, time.getId(), theme.getId())).reservation().getId();
+
+        reservationService.expirePendingCreatedBefore(LocalDateTime.now().minusDays(1));
+
+        assertThat(reservationRepository.findById(pendingId)).isPresent();
     }
 
     @Test

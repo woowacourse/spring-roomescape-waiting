@@ -38,12 +38,13 @@ CREATE TABLE member
 
 CREATE TABLE reservation
 (
-    id        BIGINT      NOT NULL AUTO_INCREMENT,
-    member_id BIGINT      NOT NULL,
-    date      DATE        NOT NULL,
-    time_id   BIGINT      NOT NULL,
-    theme_id  BIGINT      NOT NULL,
-    status    VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    member_id  BIGINT      NOT NULL,
+    date       DATE        NOT NULL,
+    time_id    BIGINT      NOT NULL,
+    theme_id   BIGINT      NOT NULL,
+    status     VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

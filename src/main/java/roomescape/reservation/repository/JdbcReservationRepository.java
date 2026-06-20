@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,6 +53,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingColumns("member_id", "date", "time_id", "theme_id", "status")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -99,6 +101,22 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ORDER BY r.date DESC, rt.start_at DESC
                 """;
         return jdbcTemplate.query(query, rowMapper, memberId);
+    }
+
+    @Override
+    public List<Reservation> findPendingCreatedBefore(LocalDateTime cutoff) {
+        String query = """
+                SELECT r.id AS reservation_id, r.date, r.status,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url, t.price AS theme_price
+                FROM reservation r
+                JOIN member m ON r.member_id = m.id
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                WHERE r.status = 'PENDING' AND r.created_at < ?
+                """;
+        return jdbcTemplate.query(query, rowMapper, cutoff);
     }
 
     @Override
