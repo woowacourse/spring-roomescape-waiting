@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -50,8 +51,9 @@ class ReservationFindByIdSqlTest {
     void findById로_조회한_예약의_시간을_꺼낼_때_발생하는_SQL을_확인한다() {
         ReservationTime time = testEntityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = testEntityManager.persist(new Theme("방탈출", "설명", "image.png"));
+        Member member = testEntityManager.persist(new Member("브라운"));
         Slot slot = slotRepository.getOrCreate(Slot.of(LocalDate.now().plusDays(1), time, theme));
-        Reservation reservation = reservationRepository.save(new Reservation("브라운", slot));
+        Reservation reservation = reservationRepository.save(new Reservation(member, slot));
 
         entityManager.flush();
         entityManager.clear();

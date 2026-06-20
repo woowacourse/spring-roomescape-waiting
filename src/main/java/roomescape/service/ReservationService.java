@@ -1,10 +1,9 @@
 package roomescape.service;
 
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
+import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.RESERVATION_TIME_NOT_FOUND;
 import static roomescape.domain.exception.DomainErrorCode.THEME_NOT_FOUND;
-
-import jakarta.annotation.Nonnull;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -132,19 +130,20 @@ public class ReservationService {
     }
 
     public ReservationWithStatus reserveOrWait(ReservationRequest request) {
-        Reservation reservation = createReservation(
-            request,
-            getReservationTime(request.timeId()),
-            getTheme(request.themeId()));
-
+        ReservationTime reservationTime = getReservationTime(request.timeId());
+        Theme theme = getTheme(request.themeId());
+        Slot requestedSlot = Slot.of(request.date(), reservationTime, theme);
         LocalDateTime now = LocalDateTime.now(clock);
-        reservation.verifyReservable(now);
+
+        if (requestedSlot.isPast(now)) {
+            throw new RoomEscapeException(PAST_RESERVATION, "과거 시점에 예약할 수 없습니다.");
+        }
 
         try {
-            Reservation saved = reservationWriter.save(reservation);
+            Reservation saved = reservationWriter.save(request.name(), requestedSlot);
             return ReservationWithStatus.reserved(saved);
         } catch (DataIntegrityViolationException e) {
-            return waitlistWriter.save(reservation);
+            return waitlistWriter.save(request.name(), requestedSlot);
         }
     }
 
@@ -162,14 +161,6 @@ public class ReservationService {
                 THEME_NOT_FOUND,
                 "예약할 수 없는 테마입니다."
             ));
-    }
-
-    @Nonnull
-    private Reservation createReservation(ReservationRequest request, ReservationTime reservationTime, Theme theme) {
-        return new Reservation(
-            request.name(),
-            Slot.of(request.date(), reservationTime, theme)
-        );
     }
 
     @Transactional
@@ -199,7 +190,7 @@ public class ReservationService {
         Waitlist promotedReservation = firstWaitlist.get();
 
         Reservation updated = new Reservation(
-            promotedReservation.getName(),
+            promotedReservation.getMember(),
             promotedReservation.getSlot()
         );
 
@@ -219,7 +210,7 @@ public class ReservationService {
         verifyNoConflict(updated);
         Slot slot = slotRepository.getOrCreate(updated.getSlot());
 
-        return reservationRepository.save(new Reservation(updated.getId(), updated.getName(), slot));
+        return reservationRepository.save(new Reservation(updated.getId(), updated.getMember(), slot));
     }
 
     private void verifyNoConflict(Reservation reservation) {

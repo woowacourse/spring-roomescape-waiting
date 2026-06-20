@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Slot;
@@ -26,32 +27,36 @@ public class WaitlistWriter {
     private final SlotRepository slotRepository;
     private final WaitlistOrderPolicy waitlistOrderPolicy;
     private final Clock clock;
+    private final MemberResolver memberResolver;
 
     public WaitlistWriter(
         ReservationRepository reservationRepository,
         WaitlistRepository waitlistRepository,
         SlotRepository slotRepository,
         WaitlistOrderPolicy waitlistOrderPolicy,
-        Clock clock
-    ) {
+        Clock clock,
+        MemberResolver memberResolver) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
         this.slotRepository = slotRepository;
         this.waitlistOrderPolicy = waitlistOrderPolicy;
         this.clock = clock;
+        this.memberResolver = memberResolver;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ReservationWithStatus save(Reservation reservation) {
-        Slot slot = slotRepository.getOrCreate(reservation.getSlot());
-        slotRepository.lockById(slot.getId());
+    public ReservationWithStatus save(String name, Slot slot) {
+        Member member = memberResolver.resolve(name);
+        Slot foundSlot = slotRepository.getOrCreate(slot);
 
-        Reservation reservationWithSlot = new Reservation(reservation.getName(), slot);
+        slotRepository.lockById(foundSlot.getId());
+
+        Reservation reservationWithSlot = new Reservation(member, foundSlot);
         verifyNoDuplicateReservation(reservationWithSlot);
 
         LocalDateTime createdAt = LocalDateTime.now(clock);
         Long savedId = waitlistRepository.save(reservationWithSlot, createdAt);
-        
+
         Waitlist waitlist = waitlistRepository.getById(savedId, "존재하지 않는 예약 대기입니다.");
         int waitingOrder = calculateWaitingOrder(waitlist);
 

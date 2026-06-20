@@ -11,12 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationTimeRequest;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
@@ -38,6 +40,9 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private SlotRepository slotRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void 예약시간을_추가한다() {
@@ -109,6 +114,8 @@ class ReservationTimeServiceTest {
 
     private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         Slot slot = slotRepository.getOrCreate(Slot.of(date, time, theme));
-        return new Reservation(name, slot);
+        Member member = memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(new Member(name)));
+        return new Reservation(member, slot);
     }
 }

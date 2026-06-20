@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -40,7 +41,10 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
         );
         return new Waitlist(
             rs.getLong("waitlist_id"),
-            rs.getString("name"),
+            new Member(
+                rs.getLong("member_id"),
+                rs.getString("member_name")
+            ),
             Slot.saved(
                 rs.getLong("slot_id"),
                 rs.getDate("date").toLocalDate(),
@@ -54,11 +58,13 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     @Override
     public Optional<Waitlist> findById(Long id) {
         String sql = """
-            SELECT w.id as waitlist_id, w.name, s.id as slot_id, s.date, w.created_at,
+            SELECT w.id as waitlist_id, m.id as member_id, m.name as member_name,
+                   s.id as slot_id, s.date, w.created_at,
                    t.id as time_id, t.start_at as time_value,
                    th.id as theme_id, th.name as theme_name,
                    th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
             FROM waitlist as w
+            INNER JOIN member as m ON w.member_id = m.id
             INNER JOIN slot as s ON w.slot_id = s.id
             INNER JOIN reservation_time as t ON s.time_id = t.id
             INNER JOIN theme as th ON s.theme_id = th.id
@@ -72,11 +78,13 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     @Override
     public List<Waitlist> findAll() {
         String sql = """
-            SELECT w.id as waitlist_id, w.name, s.id as slot_id, s.date, w.created_at,
+            SELECT w.id as waitlist_id, m.id as member_id, m.name as member_name,
+                   s.id as slot_id, s.date, w.created_at,
                    t.id as time_id, t.start_at as time_value,
                    th.id as theme_id, th.name as theme_name,
                    th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
             FROM waitlist as w
+            INNER JOIN member as m ON w.member_id = m.id
             INNER JOIN slot as s ON w.slot_id = s.id
             INNER JOIN reservation_time as t ON s.time_id = t.id
             INNER JOIN theme as th ON s.theme_id = th.id
@@ -92,12 +100,12 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
             SELECT COUNT(*)
             FROM waitlist as w
             INNER JOIN slot as s ON w.slot_id = s.id
-            WHERE w.name = ? AND s.date = ? AND s.time_id = ? AND s.theme_id = ?;
+            WHERE w.member_id = ? AND s.date = ? AND s.time_id = ? AND s.theme_id = ?;
             """;
         Integer count = jdbcTemplate.queryForObject(
             sql,
             Integer.class,
-            reservation.getName(),
+            getMemberId(reservation),
             reservation.getDate(),
             reservation.getTime().getId(),
             reservation.getTheme().getId()
@@ -107,12 +115,12 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
 
     @Override
     public Long save(Reservation reservation, LocalDateTime createdAt) {
-        String sql = "INSERT INTO waitlist (name, created_at, slot_id) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO waitlist (member_id, created_at, slot_id) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservation.getName());
+            ps.setLong(1, getMemberId(reservation));
             ps.setTimestamp(2, Timestamp.valueOf(createdAt));
             ps.setLong(3, getSlotId(reservation));
             return ps;
@@ -129,15 +137,17 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     @Override
     public List<Waitlist> findByName(String name) {
         String sql = """
-            SELECT w.id as waitlist_id, w.name, s.id as slot_id, s.date, w.created_at,
+            SELECT w.id as waitlist_id, m.id as member_id, m.name as member_name,
+                   s.id as slot_id, s.date, w.created_at,
                    t.id as time_id, t.start_at as time_value,
                    th.id as theme_id, th.name as theme_name,
                    th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
             FROM waitlist as w
+            INNER JOIN member as m ON w.member_id = m.id
             INNER JOIN slot as s ON w.slot_id = s.id
             INNER JOIN reservation_time as t ON s.time_id = t.id
             INNER JOIN theme as th ON s.theme_id = th.id
-            WHERE w.name = ?
+            WHERE m.name = ?
             ORDER BY s.date DESC, t.start_at ASC;
             """;
 
@@ -147,11 +157,13 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     @Override
     public List<Waitlist> findBySlotId(Long slotId) {
         String sql = """
-            SELECT w.id as waitlist_id, w.name, s.id as slot_id, s.date, w.created_at,
+            SELECT w.id as waitlist_id, m.id as member_id, m.name as member_name,
+                   s.id as slot_id, s.date, w.created_at,
                    t.id as time_id, t.start_at as time_value,
                    th.id as theme_id, th.name as theme_name,
                    th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
             FROM waitlist as w
+            INNER JOIN member as m ON w.member_id = m.id
             INNER JOIN slot as s ON w.slot_id = s.id
             INNER JOIN reservation_time as t ON s.time_id = t.id
             INNER JOIN theme as th ON s.theme_id = th.id
@@ -170,11 +182,13 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
 
         String placeholders = String.join(", ", Collections.nCopies(slotIds.size(), "?"));
         String sql = """
-            SELECT w.id as waitlist_id, w.name, s.id as slot_id, s.date, w.created_at,
+            SELECT w.id as waitlist_id, m.id as member_id, m.name as member_name,
+                   s.id as slot_id, s.date, w.created_at,
                    t.id as time_id, t.start_at as time_value,
                    th.id as theme_id, th.name as theme_name,
                    th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
             FROM waitlist as w
+            INNER JOIN member as m ON w.member_id = m.id
             INNER JOIN slot as s ON w.slot_id = s.id
             INNER JOIN reservation_time as t ON s.time_id = t.id
             INNER JOIN theme as th ON s.theme_id = th.id
@@ -183,6 +197,14 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
             """.formatted(placeholders);
 
         return jdbcTemplate.query(sql, wailtListRowMapper, slotIds.toArray());
+    }
+
+    private Long getMemberId(Reservation reservation) {
+        Long memberId = reservation.getMember().getId();
+        if (memberId == null) {
+            throw new IllegalArgumentException("대기를 저장하려면 회원 id가 필요합니다.");
+        }
+        return memberId;
     }
 
     private Long getSlotId(Reservation reservation) {

@@ -26,23 +26,33 @@ CREATE TABLE slot
     UNIQUE (date, time_id, theme_id)
 );
 
+CREATE TABLE member
+(
+    id   BIGINT       NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (name)
+);
+
 CREATE TABLE reservation
 (
-    id      BIGINT       NOT NULL AUTO_INCREMENT,
-    name    VARCHAR(255) NOT NULL,
-    slot_id BIGINT       NOT NULL,
+    id        BIGINT NOT NULL AUTO_INCREMENT,
+    member_id BIGINT NOT NULL,
+    slot_id   BIGINT NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id),
     UNIQUE (slot_id)
 );
 
 CREATE TABLE waitlist
 (
-    id         BIGINT       NOT NULL AUTO_INCREMENT,
-    name       VARCHAR(255) NOT NULL,
-    slot_id    BIGINT       NOT NULL,
-    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id         BIGINT   NOT NULL AUTO_INCREMENT,
+    member_id  BIGINT   NOT NULL,
+    slot_id    BIGINT   NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id),
-    UNIQUE (name, slot_id)
+    UNIQUE (member_id, slot_id)
 );

@@ -60,151 +60,244 @@ VALUES ('은행 금고', '삼엄한 경비를 뚫고 금고에서 탈출하세�
 -- 윈도우 내 (기존)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -1, CURRENT_DATE), 3, 1);
-INSERT INTO reservation (name, slot_id)
-VALUES ('네오', (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 3 AND theme_id = 1));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('네오');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '네오'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 3 AND theme_id = 1));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -1, CURRENT_DATE), 5, 2);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브라운', (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 5 AND theme_id = 2));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브라운');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브라운'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 5 AND theme_id = 2));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -2, CURRENT_DATE), 7, 3);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브리', (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 7 AND theme_id = 3));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브리');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브리'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 7 AND theme_id = 3));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -2, CURRENT_DATE), 4, 1);
-INSERT INTO reservation (name, slot_id)
-VALUES ('준', (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 4 AND theme_id = 1));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('준');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '준'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 4 AND theme_id = 1));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -3, CURRENT_DATE), 6, 5);
-INSERT INTO reservation (name, slot_id)
-VALUES ('포비', (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 6 AND theme_id = 5));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('포비');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '포비'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 6 AND theme_id = 5));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -3, CURRENT_DATE), 8, 4);
-INSERT INTO reservation (name, slot_id)
-VALUES ('워니', (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 8 AND theme_id = 4));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('워니');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '워니'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 8 AND theme_id = 4));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -4, CURRENT_DATE), 2, 7);
-INSERT INTO reservation (name, slot_id)
-VALUES ('네오', (SELECT id FROM slot WHERE date = DATEADD('DAY', -4, CURRENT_DATE) AND time_id = 2 AND theme_id = 7));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('네오');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '네오'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -4, CURRENT_DATE) AND time_id = 2 AND theme_id = 7));
 
 -- 윈도우 내 (theme 1: +3건 → 총 5건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -7, CURRENT_DATE), 3, 1);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브라운', (SELECT id FROM slot WHERE date = DATEADD('DAY', -7, CURRENT_DATE) AND time_id = 3 AND theme_id = 1));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브라운');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브라운'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -7, CURRENT_DATE) AND time_id = 3 AND theme_id = 1));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -6, CURRENT_DATE), 2, 1);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브리', (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 2 AND theme_id = 1));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브리');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브리'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 2 AND theme_id = 1));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -5, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, slot_id)
-VALUES ('준', (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 1 AND theme_id = 1));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('준');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '준'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 1 AND theme_id = 1));
 
 -- 윈도우 내 (theme 5: +3건 → 총 4건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 5);
-INSERT INTO reservation (name, slot_id)
-VALUES ('포비', (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 1 AND theme_id = 5));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('포비');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '포비'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 1 AND theme_id = 5));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -2, CURRENT_DATE), 2, 5);
-INSERT INTO reservation (name, slot_id)
-VALUES ('워니', (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 2 AND theme_id = 5));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('워니');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '워니'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 2 AND theme_id = 5));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -4, CURRENT_DATE), 3, 5);
-INSERT INTO reservation (name, slot_id)
-VALUES ('네오', (SELECT id FROM slot WHERE date = DATEADD('DAY', -4, CURRENT_DATE) AND time_id = 3 AND theme_id = 5));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('네오');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '네오'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -4, CURRENT_DATE) AND time_id = 3 AND theme_id = 5));
 
 -- 윈도우 내 (theme 8: +4건 → 총 4건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -6, CURRENT_DATE), 3, 8);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브라운', (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 3 AND theme_id = 8));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브라운');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브라운'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 3 AND theme_id = 8));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -5, CURRENT_DATE), 2, 8);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브리', (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 2 AND theme_id = 8));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브리');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브리'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 2 AND theme_id = 8));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 8);
-INSERT INTO reservation (name, slot_id)
-VALUES ('준', (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 1 AND theme_id = 8));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('준');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '준'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 1 AND theme_id = 8));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -1, CURRENT_DATE), 9, 8);
-INSERT INTO reservation (name, slot_id)
-VALUES ('포비', (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 9 AND theme_id = 8));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('포비');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '포비'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 9 AND theme_id = 8));
 
 -- 윈도우 내 (theme 3: +2건 → 총 3건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -4, CURRENT_DATE), 8, 3);
-INSERT INTO reservation (name, slot_id)
-VALUES ('워니', (SELECT id FROM slot WHERE date = DATEADD('DAY', -4, CURRENT_DATE) AND time_id = 8 AND theme_id = 3));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('워니');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '워니'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -4, CURRENT_DATE) AND time_id = 8 AND theme_id = 3));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -1, CURRENT_DATE), 7, 3);
-INSERT INTO reservation (name, slot_id)
-VALUES ('네오', (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 7 AND theme_id = 3));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('네오');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '네오'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -1, CURRENT_DATE) AND time_id = 7 AND theme_id = 3));
 
 -- 윈도우 내 (theme 4: +2건 → 총 3건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -5, CURRENT_DATE), 4, 4);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브라운', (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 4 AND theme_id = 4));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브라운');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브라운'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 4 AND theme_id = 4));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -2, CURRENT_DATE), 8, 4);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브리', (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 8 AND theme_id = 4));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브리');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브리'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 8 AND theme_id = 4));
 
 -- 윈도우 내 (theme 2: +1건 → 총 2건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -2, CURRENT_DATE), 6, 2);
-INSERT INTO reservation (name, slot_id)
-VALUES ('준', (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 6 AND theme_id = 2));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('준');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '준'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -2, CURRENT_DATE) AND time_id = 6 AND theme_id = 2));
 
 -- 윈도우 내 (theme 7: +1건 → 총 2건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -6, CURRENT_DATE), 5, 7);
-INSERT INTO reservation (name, slot_id)
-VALUES ('포비', (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 5 AND theme_id = 7));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('포비');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '포비'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 5 AND theme_id = 7));
 
 -- 윈도우 내 (theme 6: +1건 → 총 1건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 6);
-INSERT INTO reservation (name, slot_id)
-VALUES ('워니', (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 4 AND theme_id = 6));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('워니');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '워니'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -3, CURRENT_DATE) AND time_id = 4 AND theme_id = 6));
 
 -- 윈도우 내 (theme 9: +1건 → 총 1건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -5, CURRENT_DATE), 5, 9);
-INSERT INTO reservation (name, slot_id)
-VALUES ('네오', (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 5 AND theme_id = 9));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('네오');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '네오'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -5, CURRENT_DATE) AND time_id = 5 AND theme_id = 9));
 
 -- 윈도우 내 (theme 10: +1건 → 총 1건)
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -6, CURRENT_DATE), 6, 10);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브라운', (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 6 AND theme_id = 10));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브라운');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브라운'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -6, CURRENT_DATE) AND time_id = 6 AND theme_id = 10));
 
 -- 윈도우 직전 (CURRENT_DATE - 8일) — 카운트에 포함되면 안 됨
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', -8, CURRENT_DATE), 7, 1);
-INSERT INTO reservation (name, slot_id)
-VALUES ('브리', (SELECT id FROM slot WHERE date = DATEADD('DAY', -8, CURRENT_DATE) AND time_id = 7 AND theme_id = 1));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('브리');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '브리'), (SELECT id FROM slot WHERE date = DATEADD('DAY', -8, CURRENT_DATE) AND time_id = 7 AND theme_id = 1));
 
 -- 오늘 (CURRENT_DATE) — end가 어제(CURRENT_DATE - 1일)이므로 카운트에서 제외되어야 함
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (CURRENT_DATE, 8, 5);
-INSERT INTO reservation (name, slot_id)
-VALUES ('준', (SELECT id FROM slot WHERE date = CURRENT_DATE AND time_id = 8 AND theme_id = 5));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('준');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '준'), (SELECT id FROM slot WHERE date = CURRENT_DATE AND time_id = 8 AND theme_id = 5));
 
 -- 미래 — 윈도우 밖
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', 8, CURRENT_DATE), 9, 8);
-INSERT INTO reservation (name, slot_id)
-VALUES ('포비', (SELECT id FROM slot WHERE date = DATEADD('DAY', 8, CURRENT_DATE) AND time_id = 9 AND theme_id = 8));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('포비');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '포비'), (SELECT id FROM slot WHERE date = DATEADD('DAY', 8, CURRENT_DATE) AND time_id = 9 AND theme_id = 8));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', 8, CURRENT_DATE), 5, 6);
-INSERT INTO reservation (name, slot_id)
-VALUES ('워니', (SELECT id FROM slot WHERE date = DATEADD('DAY', 8, CURRENT_DATE) AND time_id = 5 AND theme_id = 6));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('워니');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '워니'), (SELECT id FROM slot WHERE date = DATEADD('DAY', 8, CURRENT_DATE) AND time_id = 5 AND theme_id = 6));
 INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', 9, CURRENT_DATE), 6, 10);
-INSERT INTO reservation (name, slot_id)
-VALUES ('네오', (SELECT id FROM slot WHERE date = DATEADD('DAY', 9, CURRENT_DATE) AND time_id = 6 AND theme_id = 10));
+MERGE INTO member (name)
+KEY (name)
+VALUES ('네오');
+INSERT INTO reservation (member_id, slot_id)
+VALUES ((SELECT id FROM member WHERE name = '네오'), (SELECT id FROM slot WHERE date = DATEADD('DAY', 9, CURRENT_DATE) AND time_id = 6 AND theme_id = 10));

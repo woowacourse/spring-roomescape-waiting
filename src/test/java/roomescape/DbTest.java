@@ -50,7 +50,9 @@ public class DbTest {
         jdbcTemplate.update("INSERT INTO slot (date, time_id, theme_id) VALUES (?, ?, ?)", FUTURE_FIRST_DATE, timeId,
             themeId);
         Long slotId = jdbcTemplate.queryForObject("SELECT id from slot limit 1", Long.class);
-        jdbcTemplate.update("INSERT INTO reservation (name, slot_id) VALUES (?, ?)", "브라운", slotId);
+        jdbcTemplate.update("INSERT INTO member (name) VALUES (?)", "브라운");
+        Long memberId = jdbcTemplate.queryForObject("SELECT id from member limit 1", Long.class);
+        jdbcTemplate.update("INSERT INTO reservation (member_id, slot_id) VALUES (?, ?)", memberId, slotId);
 
         List<Map> reservations = RestAssured.given().log().all()
             .when().get("/reservations")

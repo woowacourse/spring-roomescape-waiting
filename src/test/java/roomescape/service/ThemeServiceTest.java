@@ -12,12 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ThemeRequest;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
@@ -41,6 +43,9 @@ class ThemeServiceTest {
 
     @Autowired
     private SlotRepository slotRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void 테마를_추가한다() {
@@ -161,6 +166,8 @@ class ThemeServiceTest {
 
     private Reservation createReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         Slot slot = slotRepository.getOrCreate(Slot.of(date, time, theme));
-        return new Reservation(name, slot);
+        Member member = memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(new Member(name)));
+        return new Reservation(member, slot);
     }
 }

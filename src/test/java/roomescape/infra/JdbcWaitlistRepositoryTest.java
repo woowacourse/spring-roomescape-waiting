@@ -10,11 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
@@ -42,15 +44,18 @@ class JdbcWaitlistRepositoryTest {
     @Autowired
     private SlotRepository slotRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     @Test
     void 같은_슬롯의_대기_목록을_조회한다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
         Slot slot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE, reservationTime, theme));
 
-        Long brieId = waitlistRepository.save(new Reservation("브리", slot), CREATED_AT);
-        Long pobiId = waitlistRepository.save(new Reservation("포비", slot), CREATED_AT);
-        Long neoId = waitlistRepository.save(new Reservation("네오", slot), CREATED_AT);
+        Long brieId = waitlistRepository.save(createReservation("브리", slot), CREATED_AT);
+        Long pobiId = waitlistRepository.save(createReservation("포비", slot), CREATED_AT);
+        Long neoId = waitlistRepository.save(createReservation("네오", slot), CREATED_AT);
 
         List<Waitlist> waitlists = waitlistRepository.findBySlotId(slot.getId());
 
@@ -66,9 +71,9 @@ class JdbcWaitlistRepositoryTest {
         Slot firstSlot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE, reservationTime, theme));
         Slot secondSlot = slotRepository.getOrCreate(Slot.of(FUTURE_SECOND_DATE.plusDays(1), reservationTime, theme));
 
-        Long brieId = waitlistRepository.save(new Reservation("브리", firstSlot), CREATED_AT);
-        Long pobiId = waitlistRepository.save(new Reservation("포비", firstSlot), CREATED_AT.plusMinutes(1));
-        Long neoId = waitlistRepository.save(new Reservation("네오", secondSlot), CREATED_AT);
+        Long brieId = waitlistRepository.save(createReservation("브리", firstSlot), CREATED_AT);
+        Long pobiId = waitlistRepository.save(createReservation("포비", firstSlot), CREATED_AT.plusMinutes(1));
+        Long neoId = waitlistRepository.save(createReservation("네오", secondSlot), CREATED_AT);
 
         List<Waitlist> waitlists = waitlistRepository.findBySlotIds(List.of(firstSlot.getId(), secondSlot.getId()));
 
@@ -94,4 +99,9 @@ class JdbcWaitlistRepositoryTest {
         );
     }
 
+    private Reservation createReservation(String name, Slot slot) {
+        Member member = memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(new Member(name)));
+        return new Reservation(member, slot);
+    }
 }

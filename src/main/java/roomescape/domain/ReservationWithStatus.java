@@ -33,7 +33,7 @@ public class ReservationWithStatus {
     public static ReservationWithStatus reserved(Reservation reservation) {
         return new ReservationWithStatus(
             reservation.getId(),
-            reservation.getName(),
+            reservation.getMember().getName(),
             reservation.getDate(),
             reservation.getTime(),
             reservation.getTheme(),
@@ -45,7 +45,7 @@ public class ReservationWithStatus {
     public static ReservationWithStatus waiting(Waitlist waitlist, int waitingOrder) {
         return new ReservationWithStatus(
             waitlist.getId(),
-            waitlist.getName(),
+            waitlist.getMember().getName(),
             waitlist.getDate(),
             waitlist.getTime(),
             waitlist.getTheme(),

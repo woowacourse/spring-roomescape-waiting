@@ -22,6 +22,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionTemplate;
 import roomescape.config.TestClockConfig;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -30,6 +31,7 @@ import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
 import roomescape.dto.ReservationRequest;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
@@ -58,6 +60,8 @@ public class ReserveOrWaitRaceConditionTest {
     private SlotRepository slotRepository;
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     void 동시에_같은_빈_슬롯을_예약하면_하나는_예약되고_나머지는_대기된다() throws InterruptedException {
@@ -238,8 +242,10 @@ public class ReserveOrWaitRaceConditionTest {
 
     private Reservation createReservation(String name, ReservationTime reservationTime, Theme theme) {
         Slot slot = slotRepository.getOrCreate(Slot.of(FUTURE_FIRST_DATE, reservationTime, theme));
+        Member member = memberRepository.findByName(name)
+            .orElseGet(() -> memberRepository.save(new Member(name)));
         return new Reservation(
-            name,
+            member,
             slot
         );
     }

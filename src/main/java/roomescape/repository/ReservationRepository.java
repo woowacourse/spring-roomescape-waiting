@@ -18,6 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
         SELECT r
         FROM Reservation r
+        JOIN FETCH r.member
         JOIN FETCH r.slot s
         JOIN FETCH s.time t
         JOIN FETCH s.theme
@@ -29,6 +30,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
         SELECT r
         FROM Reservation r
+        JOIN FETCH r.member
         JOIN FETCH r.slot s
         JOIN FETCH s.time
         JOIN FETCH s.theme
@@ -39,10 +41,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
         SELECT r
         FROM Reservation r
+        JOIN FETCH r.member m
         JOIN FETCH r.slot s
         JOIN FETCH s.time t
         JOIN FETCH s.theme
-        WHERE r.name = :name
+        WHERE m.name = :name
         ORDER BY s.date DESC, t.startAt ASC
         """)
     List<Reservation> findByName(@Param("name") String name);
@@ -79,7 +82,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
         SELECT COUNT(r) > 0
         FROM Reservation r
-        WHERE r.name = :name
+        WHERE r.member.name = :name
           AND r.slot.date = :date
           AND r.slot.time.id = :timeId
           AND r.slot.theme.id = :themeId
@@ -101,7 +104,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     default boolean existsBySameUser(Reservation reservation) {
         return existsByNameAndSlot(
-            reservation.getName(),
+            reservation.getMember().getName(),
             reservation.getDate(),
             reservation.getTime().getId(),
             reservation.getTheme().getId()

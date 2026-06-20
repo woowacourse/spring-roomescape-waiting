@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
@@ -22,20 +23,23 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id", unique = true)
     private Slot slot;
 
-    public Reservation(Long id, String name, Slot slot) {
+    public Reservation(Long id, Member member, Slot slot) {
         this.id = id;
-        this.name = name;
+        this.member = member;
         this.slot = slot;
     }
 
-    public Reservation(String name, Slot slot) {
-        this(null, name, slot);
+    public Reservation(Member member, Slot slot) {
+        this(null, member, slot);
     }
 
     protected Reservation() {
@@ -71,11 +75,11 @@ public class Reservation {
             throw new RoomEscapeException(PAST_RESERVATION, "과거 시점으로 변경할 수 없습니다.");
         }
 
-        return new Reservation(id, this.name, newSlot);
+        return new Reservation(id, member, newSlot);
     }
 
     private void verifyReservedBy(String other, String message) {
-        if (!this.name.equals(other)) {
+        if (!this.member.getName().equals(other)) {
             throw new RoomEscapeException(UNAUTHORIZED_RESERVATION, message);
         }
     }
@@ -84,8 +88,12 @@ public class Reservation {
         return id;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
     public String getName() {
-        return name;
+        return member.getName();
     }
 
     public Slot getSlot() {

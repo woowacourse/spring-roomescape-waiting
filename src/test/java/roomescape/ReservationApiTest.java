@@ -34,7 +34,7 @@ class ReservationApiTest {
     void 자신의_이름으로_예약_목록을_조회() {
         String findName = "김민수";
         RestAssured.given().log().all()
-            .when().get("/reservations?name=" + findName)
+            .when().get("/reservations-mine?name=" + findName)
             .then().log().all()
             .statusCode(200)
             .body("size()", is(3));

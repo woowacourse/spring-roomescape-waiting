@@ -119,7 +119,7 @@ class ReservationTest {
     }
 
     private Reservation createReservation(LocalDate date, ReservationTime time) {
-        return new Reservation(NAME, Slot.of(date, time, THEME));
+        return new Reservation(new Member(NAME), Slot.of(date, time, THEME));
     }
 
 }

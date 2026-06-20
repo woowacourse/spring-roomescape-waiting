@@ -9,19 +9,19 @@ import roomescape.domain.exception.RoomEscapeException;
 public class Waitlist {
 
     private final Long id;
-    private final String name;
+    private final Member member;
     private final LocalDateTime createdAt;
     private final Slot slot;
 
-    public Waitlist(Long id, String name, Slot slot, LocalDateTime createdAt) {
+    public Waitlist(Long id, Member member, Slot slot, LocalDateTime createdAt) {
         this.id = id;
-        this.name = name;
+        this.member = member;
         this.createdAt = createdAt;
         this.slot = slot;
     }
 
-    public Waitlist(String name, Slot slot, LocalDateTime createdAt) {
-        this(null, name, slot, createdAt);
+    public Waitlist(Member member, Slot slot, LocalDateTime createdAt) {
+        this(null, member, slot, createdAt);
     }
 
     public void verifyCancelableBy(String name) {
@@ -29,7 +29,7 @@ public class Waitlist {
     }
 
     private void verifyReservedBy(String other, String message) {
-        if (!this.name.equals(other)) {
+        if (!this.member.getName().equals(other)) {
             throw new RoomEscapeException(UNAUTHORIZED_RESERVATION, message);
         }
     }
@@ -38,8 +38,12 @@ public class Waitlist {
         return id;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
     public String getName() {
-        return name;
+        return member.getName();
     }
 
     public Slot getSlot() {
