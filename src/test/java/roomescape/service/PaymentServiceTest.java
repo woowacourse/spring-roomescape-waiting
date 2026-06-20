@@ -6,8 +6,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import roomescape.client.TossPaymentGateway;
 import roomescape.domain.OrderId;
 import roomescape.domain.Payment;
+import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
@@ -39,6 +42,9 @@ class PaymentServiceTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private TossPaymentGateway paymentGateway;
 
     @InjectMocks
     private PaymentService paymentService;
@@ -103,6 +109,9 @@ class PaymentServiceTest {
 
         Payment retrievedPayment = Payment.from(1L, orderId, reservationId, price, null, PaymentStatus.READY);
         given(paymentRepository.findByOrderId(orderId)).willReturn(Optional.of(retrievedPayment));
+        given(paymentGateway.confirm(any(PaymentConfirmation.class))).willReturn(new PaymentResult(
+                paymentKey, orderIdString, PaymentStatus.DONE, price
+        ));
 
         // when
         PaymentConfirmResult result = paymentService.confirm(command);
@@ -135,6 +144,7 @@ class PaymentServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_NOT_FOUND);
         verify(paymentRepository, never()).update(any(Payment.class));
         verify(eventPublisher, never()).publishEvent(any(ReservationConfirmationEvent.class));
+        verify(paymentGateway, never()).confirm(any(PaymentConfirmation.class));
     }
 
     @Test

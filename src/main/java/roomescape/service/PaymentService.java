@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.OrderId;
 import roomescape.domain.Payment;
+import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.PaymentGateway;
+import roomescape.domain.PaymentResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.PaymentRepository;
@@ -23,6 +26,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final PaymentGateway paymentGateway;
 
     public PaymentReadyResult create(final PaymentCreateCommand command) {
         if (!reservationRepository.existsById(command.reservationId())) {
@@ -44,7 +48,7 @@ public class PaymentService {
         final Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
         final String paymentKey = command.paymentKey();
-        if (!payment.isSameAmount(command.price())) {
+        if (!payment.isSameAmount(command.amount())) {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
         final Payment updatedPayment = payment.confirm(paymentKey);
@@ -54,6 +58,11 @@ public class PaymentService {
                 updatedPayment.getReservationId()
         ));
 
-        return new PaymentConfirmResult(updatedPayment.getOrderId().id(), updatedPayment.getAmount(), updatedPayment.getPaymentKey());
+        final PaymentConfirmation confirmation = new PaymentConfirmation(
+                updatedPayment.getPaymentKey(), updatedPayment.getOrderId().id(), updatedPayment.getAmount()
+        );
+        final PaymentResult paymentResult = paymentGateway.confirm(confirmation);
+
+        return new PaymentConfirmResult(paymentResult.orderId(), paymentResult.approvedAmount(), paymentResult.paymentKey());
     }
 }
