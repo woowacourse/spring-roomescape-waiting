@@ -66,6 +66,34 @@ public class OrderRepository {
         }
     }
 
+    public Optional<Order> findByOrderId(final String orderId) {
+        final String sql = """
+                SELECT id, order_id, amount, payment_key, reservation_id, status
+                FROM orders
+                WHERE order_id = :orderId
+                """;
+        try {
+            final MapSqlParameterSource param = new MapSqlParameterSource()
+                    .addValue("orderId", orderId);
+            final Order order = jdbcTemplate.queryForObject(sql, param, orderRowMapper());
+            return Optional.of(order);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public void confirm(final Long id, final String paymentKey) {
+        final String sql = """
+                UPDATE orders
+                SET payment_key = :paymentKey, status = 'COMPLETED'
+                WHERE id = :id
+                """;
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("paymentKey", paymentKey)
+                .addValue("id", id);
+        jdbcTemplate.update(sql, param);
+    }
+
     private RowMapper<Order> orderRowMapper() {
         return (rs, rowNum) -> Order.createWithId(
                 rs.getLong("id"),

@@ -275,20 +275,21 @@ async function submitBooking() {
     return;
   }
 
+  const AMOUNT = 50000;
+
   const btn = $('confirm-booking-btn');
   btn.disabled = true; btn.textContent = '예약 중...';
   try {
-    await api.post('/reservations', {
+    const result = await api.post('/reservations', {
       name, date: state.selectedDate,
       timeId: state.selectedTimeId, themeId: state.selectedThemeId,
+      amount: AMOUNT,
     });
     closeModal();
-    showToast('예약이 완료되었습니다! 🎉', 'success');
-    state.selectedTimeId = null; state.selectedTimeLabel = null;
-    loadTimeSlots(); updateCTAInfo();
+    const orderName = encodeURIComponent(`[${state.selectedThemeName}] 방탈출 예약`);
+    location.href = `/payments/checkout?orderId=${encodeURIComponent(result.orderId)}&amount=${AMOUNT}&orderName=${orderName}`;
   } catch (e) {
     showToast(e.message, 'error');
-  } finally {
     btn.disabled = false; btn.textContent = '예약하기';
   }
 }

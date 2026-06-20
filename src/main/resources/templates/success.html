@@ -21,10 +21,7 @@
       box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
     }
 
-    h1 {
-      font-size: 20px;
-      margin: 0 0 8px;
-    }
+    h1 { font-size: 20px; margin: 0 0 8px; }
 
     p.desc {
       color: #888;
@@ -41,15 +38,8 @@
       gap: 16px;
     }
 
-    .row .label {
-      color: #888;
-      white-space: nowrap;
-    }
-
-    .row .val {
-      text-align: right;
-      word-break: break-all;
-    }
+    .row .label { color: #888; white-space: nowrap; }
+    .row .val { text-align: right; word-break: break-all; }
 
     a {
       display: inline-block;
@@ -58,25 +48,64 @@
       text-decoration: none;
       font-weight: 600;
     }
+
+    .error { color: #e03131; }
   </style>
 </head>
 <body>
 <div class="card">
-  <h1>✅ 결제를 완료했어요</h1>
-  <p class="desc">브라우저 인증 후, <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 결제를 확정했습니다.</p>
-
-  <div class="row"><span class="label">결제 상태</span>
-    <span class="val" th:text="${result != null ? result.status() : '미구현 — confirm() 을 구현하세요'}">DONE</span></div>
-  <div class="row"><span class="label">주문번호</span>
-    <span class="val" th:text="${result?.orderId()}">order-xxxx</span></div>
-  <div class="row"><span class="label">승인 금액</span>
-    <span class="val"
-          th:text="${result != null ? #numbers.formatInteger(result.approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
+  <div id="loading">
+    <p style="color:#888;font-size:14px">승인 처리 중입니다...</p>
   </div>
-  <div class="row"><span class="label">paymentKey</span>
-    <span class="val" th:text="${paymentKey}">tviva...</span></div>
 
-  <a href="/">← 다시 결제하기</a>
+  <div id="success-content" style="display:none">
+    <h1>✅ 결제를 완료했어요</h1>
+    <p class="desc">서버가 Toss 결제 승인 API를 직접 호출해 결제를 확정했습니다.</p>
+    <div class="row"><span class="label">결제 상태</span><span class="val" id="result-status"></span></div>
+    <div class="row"><span class="label">주문번호</span><span class="val" id="result-order-id"></span></div>
+    <div class="row"><span class="label">승인 금액</span><span class="val" id="result-amount"></span></div>
+    <div class="row"><span class="label">paymentKey</span><span class="val" id="result-payment-key"></span></div>
+    <a href="/">← 다시 결제하기</a>
+  </div>
+
+  <div id="error-content" style="display:none">
+    <h1>❌ 승인 실패</h1>
+    <p class="desc error" id="error-msg"></p>
+    <a href="/">← 다시 시도하기</a>
+  </div>
 </div>
+
+<script>
+  (async () => {
+    const params = new URLSearchParams(location.search);
+    const paymentKey = params.get('paymentKey');
+    const orderId = params.get('orderId');
+    const amount = Number(params.get('amount'));
+
+    try {
+      const res = await fetch('/payments/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentKey, orderId, amount }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || data.message || '승인 실패');
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('success-content').style.display = '';
+      document.getElementById('result-status').textContent = data.status;
+      document.getElementById('result-order-id').textContent = data.orderId;
+      document.getElementById('result-amount').textContent = Number(data.approvedAmount).toLocaleString() + '원';
+      document.getElementById('result-payment-key').textContent = data.paymentKey;
+    } catch (e) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-content').style.display = '';
+      document.getElementById('error-msg').textContent = e.message;
+    }
+  })();
+</script>
 </body>
 </html>
