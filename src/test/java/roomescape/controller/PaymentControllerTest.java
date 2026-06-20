@@ -4,7 +4,13 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.client.TossPaymentException;
+import roomescape.domain.PaymentGateway;
+import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
 import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.command.PaymentCreateCommand;
@@ -23,6 +29,30 @@ class PaymentControllerTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    /**
+     * Toss 실호출 없이 결제 흐름을 검증하기 위한 스텁 게이트웨이. 승인 요청을 그대로 성공(DONE) 결과로 되돌린다.
+     */
+    @TestConfiguration
+    static class StubPaymentGatewayConfig {
+
+        @Bean
+        @Primary
+        PaymentGateway stubPaymentGateway() {
+            return confirmation -> {
+                // paymentKey 가 "reject" 면 카드 거절을 흉내 내 승인 실패 경로를 검증한다.
+                if ("reject".equals(confirmation.paymentKey())) {
+                    throw new TossPaymentException.CardRejected("카드가 거절되었습니다");
+                }
+                return new PaymentResult(
+                        confirmation.paymentKey(),
+                        confirmation.orderId(),
+                        PaymentStatus.DONE,
+                        confirmation.amount()
+                );
+            };
+        }
+    }
 
     @Test
     void 주문정보_생성() {
@@ -74,7 +104,7 @@ class PaymentControllerTest {
 
         String paymentKey = "test-paymentKey-result";
         String orderId = "order-1";
-        Long price = 30000L;
+        Long price = 50000L;
 
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", price);

@@ -7,7 +7,7 @@ public record PaymentSuccessCommand(
         String orderId,
 
         @NotNull(message = "주문 금액은 비워둘 수 없습니다.")
-        Long price,
+        Long amount,
 
         @NotNull(message = "결제 키는 비워둘 수 없습니다.")
         String paymentKey
