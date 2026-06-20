@@ -69,7 +69,8 @@ public class PaymentService {
 
         PaymentResult result;
         try {
-            result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+            result = paymentGateway.confirm(
+                    new PaymentConfirmation(paymentKey, payment.orderId(), payment.amount()));
         } catch (PaymentResultUnknownException e) {
             paymentRepository.updateStatus(orderId, PaymentOrderStatus.NEEDS_CONFIRMATION);
             throw e;
