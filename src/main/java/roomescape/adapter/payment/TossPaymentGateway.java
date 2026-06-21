@@ -2,6 +2,8 @@ package roomescape.adapter.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -23,6 +25,8 @@ import roomescape.exception.server.PaymentGatewayException;
  */
 @Component
 public class TossPaymentGateway implements PaymentGateway {
+
+    private static final Logger log = LoggerFactory.getLogger(TossPaymentGateway.class);
 
     private final RestClient tossRestClient;
     private final ObjectMapper objectMapper;
@@ -73,7 +77,10 @@ public class TossPaymentGateway implements PaymentGateway {
                     new PaymentRejectedException("결제 요청이 올바르지 않거나 만료되었습니다. 다시 시도해 주세요.");
             case "UNAUTHORIZED_KEY", "INVALID_API_KEY", "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" ->
                     new PaymentGatewayException("결제 게이트웨이 오류 [" + error.code() + "]: " + error.message());
-            default -> new PaymentGatewayException("정의되지 않은 결제 오류 [" + error.code() + "]: " + error.message());
+            default -> {
+                log.warn("정의되지 않은 토스 결제 에러 - code={}, message={}", error.code(), error.message());
+                yield new PaymentGatewayException("정의되지 않은 결제 오류 [" + error.code() + "]: " + error.message());
+            }
         };
     }
 
