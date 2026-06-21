@@ -39,10 +39,10 @@ public class PaymentController {
     ) {
         if (orderId == null) {
             log.info("결제 취소(orderId 없음): code={}, message={}", code, message);
-            return ResponseEntity.ok().build();
+        } else {
+            log.info("결제 실패: orderId={}, code={}, message={}", orderId, code, message);
+            paymentService.cancel(orderId);
         }
-        log.info("결제 실패: orderId={}, code={}, message={}", orderId, code, message);
-        paymentService.cancel(orderId);
         return ResponseEntity.ok().build();
     }
 }

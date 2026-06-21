@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import io.restassured.RestAssured;
 import java.util.stream.Stream;
@@ -19,8 +19,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.DatabaseCleaner;
 import roomescape.exception.code.PaymentErrorCode;
 import roomescape.exception.domain.PaymentException;
@@ -78,17 +78,17 @@ class PaymentControllerTest {
 
     static Stream<Arguments> paymentErrorCases() {
         return Stream.of(
-                arguments(PaymentErrorCode.PAYMENT_AMOUNT_MISMATCH, 400),       // 서버 검증 차단
-                arguments(PaymentErrorCode.ALREADY_PROCESSED_PAYMENT, 400),     // 이미 처리됨
-                arguments(PaymentErrorCode.REJECT_CARD_PAYMENT, 400),           // 카드 거절
-                arguments(PaymentErrorCode.UNAUTHORIZED_KEY, 500),              // 키 오류
-                arguments(PaymentErrorCode.FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING, 500), // 재시도 대상
-                arguments(PaymentErrorCode.PAYMENT_GATEWAY_ERROR, 500)          // 미정의 코드
+                arguments(PaymentErrorCode.PAYMENT_AMOUNT_MISMATCH, 400),
+                arguments(PaymentErrorCode.ALREADY_PROCESSED_PAYMENT, 400),
+                arguments(PaymentErrorCode.REJECT_CARD_PAYMENT, 400),
+                arguments(PaymentErrorCode.UNAUTHORIZED_KEY, 500),
+                arguments(PaymentErrorCode.FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING, 500),
+                arguments(PaymentErrorCode.PAYMENT_GATEWAY_ERROR, 500)
         );
     }
 
     @Test
-    void failUrl_orderId_없는_취소_요청은_cancel을_호출하지_않고_200을_반환한다() {
+    void failUrl_orderId_없는_취소는_cancel을_호출하지_않고_200을_반환한다() {
         RestAssured.given().log().all()
                 .queryParam("code", "PAY_PROCESS_CANCELED")
                 .queryParam("message", "사용자가 결제를 취소했습니다.")
@@ -100,7 +100,7 @@ class PaymentControllerTest {
     }
 
     @Test
-    void failUrl_orderId_있는_실패_요청은_cancel을_호출하고_200을_반환한다() {
+    void failUrl_orderId_있는_실패는_cancel을_호출하고_200을_반환한다() {
         String orderId = "order-abc123";
 
         RestAssured.given().log().all()
