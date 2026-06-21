@@ -19,7 +19,7 @@ class ReservationTest {
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 5, 8, 10, 30);
     private static final ReservationTime PAST_TIME = ReservationTime.of(1L, LocalTime.of(10, 0));
     private static final ReservationTime FUTURE_TIME = ReservationTime.of(2L, LocalTime.of(11, 0));
-    private static final Theme THEME = Theme.of(1L, "링", "공포 테마", "http:~");
+    private static final Theme THEME = Theme.of(1L, "링", "공포 테마", "http:~", 10000);
 
     @Test
     @DisplayName("현재 이전 시간으로 예약을 생성할 수 없다")

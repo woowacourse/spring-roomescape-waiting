@@ -33,7 +33,7 @@ class JdbcReservationSlotRepositoryTest {
     @DisplayName("예약 슬롯을 조회한다")
     void findReservationSlot() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservationSlot("2026-08-05", 1L, 1L);
 
         Optional<ReservationSlot> slot = reservationSlotRepository.findByDateAndTimeIdAndThemeId(
@@ -50,13 +50,13 @@ class JdbcReservationSlotRepositoryTest {
     @DisplayName("같은 날짜, 시간, 테마의 슬롯이 이미 있으면 기존 슬롯을 반환한다")
     void findExistingSlotWhenCreatingDuplicatedSlot() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         Long savedSlotId = insertReservationSlot("2026-08-05", 1L, 1L);
 
         ReservationSlot slot = reservationSlotRepository.findOrCreate(
                 LocalDate.of(2026, 8, 5),
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
+                Theme.of(1L, "링", "공포 테마", "http:~", 10000)
         );
 
         assertThat(slot.getId()).isEqualTo(savedSlotId);
@@ -66,7 +66,7 @@ class JdbcReservationSlotRepositoryTest {
     @DisplayName("예약 슬롯을 id로 조회하면서 잠근다")
     void findReservationSlotByIdForUpdate() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         Long savedSlotId = insertReservationSlot("2026-08-05", 1L, 1L);
 
         Optional<ReservationSlot> slot = reservationSlotRepository.findByIdForUpdate(savedSlotId);
@@ -90,12 +90,18 @@ class JdbcReservationSlotRepositoryTest {
         );
     }
 
-    private void insertTheme(final String name, final String description, final String thumbnailUrl) {
+    private void insertTheme(
+            final String name,
+            final String description,
+            final String thumbnailUrl,
+            final int price
+    ) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
                 name,
                 description,
-                thumbnailUrl
+                thumbnailUrl,
+                price
         );
     }
 

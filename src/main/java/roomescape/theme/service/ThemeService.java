@@ -27,7 +27,8 @@ public class ThemeService {
         final Theme themeWithoutId = Theme.create(
                 request.name(),
                 request.description(),
-                request.thumbnailUrl()
+                request.thumbnailUrl(),
+                request.price()
         );
 
         Theme theme = themeRepository.save(themeWithoutId);

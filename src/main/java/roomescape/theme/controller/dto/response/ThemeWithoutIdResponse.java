@@ -5,13 +5,15 @@ import roomescape.theme.domain.Theme;
 public record ThemeWithoutIdResponse(
         String name,
         String description,
-        String thumbnailUrl
+        String thumbnailUrl,
+        int price
 ) {
     public static ThemeWithoutIdResponse from(final Theme theme) {
         return new ThemeWithoutIdResponse(
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnailUrl()
+                theme.getThumbnailUrl(),
+                theme.getPrice()
         );
     }
 }

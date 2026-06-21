@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS theme
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     thumbnail_url VARCHAR(255) NOT NULL,
+    price INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS reservation
     customer_name    VARCHAR(10) NOT NULL,
     customer_email VARCHAR(255) NOT NULL,
     slot_id BIGINT NOT NULL,
+    status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),

@@ -6,14 +6,16 @@ public record ThemeResponse(
         Long id,
         String name,
         String description,
-        String thumbnailUrl
+        String thumbnailUrl,
+        int price
 ) {
     public static ThemeResponse from(final Theme theme) {
         return new ThemeResponse(
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnailUrl()
+                theme.getThumbnailUrl(),
+                theme.getPrice()
         );
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.repository.entity.ReservationEntity;
@@ -35,6 +36,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS reservation_id,
                     r.customer_name AS reservation_name,
                     r.customer_email AS reservation_email,
+                    r.status AS reservation_status,
                     s.id AS slot_id,
                     s.reservation_date AS reservation_date,
                     t.id AS time_id,
@@ -42,7 +44,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     h.id AS theme_id,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_slot s ON r.slot_id = s.id
                 JOIN reservation_time t ON s.time_id = t.id
@@ -66,6 +69,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS reservation_id,
                     r.customer_name AS reservation_name,
                     r.customer_email AS reservation_email,
+                    r.status AS reservation_status,
                     s.id AS slot_id,
                     s.reservation_date AS reservation_date,
                     t.id AS time_id,
@@ -73,13 +77,15 @@ public class JdbcReservationRepository implements ReservationRepository {
                     h.id AS theme_id,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_slot s ON r.slot_id = s.id
                 JOIN reservation_time t ON s.time_id = t.id
                 JOIN theme h ON s.theme_id = h.id
                 WHERE r.customer_name = ?
                   AND r.customer_email = ?
+                  AND r.status = 'CONFIRMED'
                   AND (s.reservation_date > ? OR (s.reservation_date = ? AND t.start_at > ?))
                 ORDER BY s.reservation_date ASC
                 """;
@@ -103,6 +109,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS reservation_id,
                     r.customer_name AS reservation_name,
                     r.customer_email AS reservation_email,
+                    r.status AS reservation_status,
                     s.id AS slot_id,
                     s.reservation_date AS reservation_date,
                     t.id AS time_id,
@@ -110,7 +117,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     h.id AS theme_id,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_slot s ON r.slot_id = s.id
                 JOIN reservation_time t ON s.time_id = t.id
@@ -135,7 +143,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 newReservationId,
                 newReservation.getCustomerName(),
                 newReservation.getCustomerEmail(),
-                newReservation.getSlot()
+                newReservation.getSlot(),
+                newReservation.getStatus()
         );
     }
 
@@ -201,8 +210,8 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private long insertReservation(final ReservationEntity reservationEntity) {
         final String sql = """
-                INSERT INTO reservation (customer_name, customer_email, slot_id)
-                VALUES (?, ?, ?)
+                INSERT INTO reservation (customer_name, customer_email, slot_id, status)
+                VALUES (?, ?, ?, ?)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -216,6 +225,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             preparedStatement.setString(1, reservationEntity.name());
             preparedStatement.setString(2, reservationEntity.email());
             preparedStatement.setLong(3, reservationEntity.slotId());
+            preparedStatement.setString(4, reservationEntity.status());
 
             return preparedStatement;
         }, keyHolder);
@@ -244,7 +254,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail_url")
+                resultSet.getString("theme_thumbnail_url"),
+                resultSet.getInt("theme_price")
         );
 
         final ReservationSlot slot = ReservationSlot.of(
@@ -258,7 +269,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 resultSet.getString("reservation_email"),
-                slot
+                slot,
+                ReservationStatus.valueOf(resultSet.getString("reservation_status"))
         );
     }
 
@@ -267,7 +279,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getId(),
                 reservation.getCustomerName(),
                 reservation.getCustomerEmail(),
-                reservation.getSlotId()
+                reservation.getSlotId(),
+                reservation.getStatus().name()
         );
     }
 

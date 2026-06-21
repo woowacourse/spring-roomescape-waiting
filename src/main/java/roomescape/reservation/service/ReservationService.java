@@ -10,6 +10,7 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.CustomerEmail;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
@@ -52,6 +53,7 @@ public class ReservationService {
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll()
                 .stream()
+                .filter(Reservation::isConfirmed)
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -202,7 +204,8 @@ public class ReservationService {
                             null,
                             waiting.getCustomerName().name(),
                             waiting.getCustomerEmail(),
-                            waiting.getSlot()
+                            waiting.getSlot(),
+                            ReservationStatus.PENDING
                     );
 
                     saveReservation(promotedReservation);

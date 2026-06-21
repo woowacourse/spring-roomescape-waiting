@@ -39,7 +39,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
                         rs.getLong("th_id"),
                         rs.getString("th_name"),
                         rs.getString("th_description"),
-                        rs.getString("th_thumbnail_url")
+                        rs.getString("th_thumbnail_url"),
+                        rs.getInt("th_price")
                 );
                 final ReservationSlot slot = ReservationSlot.of(
                         rs.getLong("slot_id"),
@@ -116,7 +117,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 SELECT w.id, w.customer_name, w.customer_email, w.created_at,
                        s.id AS slot_id, s.reservation_date,
                        t.id AS t_id, t.start_at AS t_time,
-                       th.id AS th_id, th.name AS th_name, th.description AS th_description, th.thumbnail_url AS th_thumbnail_url
+                       th.id AS th_id, th.name AS th_name, th.description AS th_description,
+                       th.thumbnail_url AS th_thumbnail_url, th.price AS th_price
                 FROM waiting w
                 JOIN reservation_slot s ON w.slot_id = s.id
                 JOIN reservation_time t ON s.time_id = t.id
@@ -141,7 +143,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 SELECT w.id, w.customer_name, w.customer_email, w.created_at,
                        s.id AS slot_id, s.reservation_date,
                        t.id AS t_id, t.start_at AS t_time,
-                       th.id AS th_id, th.name AS th_name, th.description AS th_description, th.thumbnail_url AS th_thumbnail_url
+                       th.id AS th_id, th.name AS th_name, th.description AS th_description,
+                       th.thumbnail_url AS th_thumbnail_url, th.price AS th_price
                 FROM waiting w
                 JOIN reservation_slot s ON w.slot_id = s.id
                 JOIN reservation_time t ON s.time_id = t.id
@@ -195,6 +198,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     th.name AS th_name,
                     th.description AS th_description,
                     th.thumbnail_url AS th_thumbnail_url,
+                    th.price AS th_price,
                     rw.waiting_rank
                 FROM ranked_waiting rw
                 JOIN reservation_slot s ON rw.slot_id = s.id

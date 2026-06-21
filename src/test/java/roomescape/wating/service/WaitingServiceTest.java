@@ -55,7 +55,7 @@ class WaitingServiceTest {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final ReservationTime time = saveReservationTime("11:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         saveReservation("브라운", "brown@example.com", tomorrow, time, theme);
 
         // when
@@ -77,7 +77,7 @@ class WaitingServiceTest {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final ReservationTime time = saveReservationTime("11:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         reservationSlotRepository.findOrCreate(tomorrow, time, theme);
 
         // when & then
@@ -94,7 +94,7 @@ class WaitingServiceTest {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final ReservationTime time = saveReservationTime("11:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         saveReservation("브라운", "brown@example.com", tomorrow, time, theme);
         waitingService.create(new WaitingCreateRequest("재키", "jaekkii@example.com", tomorrow, time.getId(), theme.getId()));
 
@@ -110,7 +110,7 @@ class WaitingServiceTest {
     @DisplayName("존재하지 않는 시간으로 대기를 등록하면 예외가 발생한다")
     void throwExceptionWhenCreatingWaitingWithNonExistingTime() {
         // given
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
 
         // when & then
         assertThatThrownBy(() -> waitingService.create(
@@ -138,7 +138,7 @@ class WaitingServiceTest {
         // given
         final LocalDate yesterday = LocalDate.now().minusDays(1);
         final ReservationTime time = saveReservationTime("11:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         saveReservation("브라운", "brown@example.com", yesterday, time, theme);
 
         // when & then
@@ -155,7 +155,7 @@ class WaitingServiceTest {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final ReservationTime time = saveReservationTime("11:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         final Reservation reservation = saveReservation("브라운", "brown@example.com", tomorrow, time, theme);
         final long waitingId = saveWaiting("재키", "jaekkii@example.com", reservation.getSlot());
 
@@ -180,7 +180,7 @@ class WaitingServiceTest {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final ReservationTime time = saveReservationTime("11:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         final Reservation reservation = saveReservation("브라운", "brown@example.com", tomorrow, time, theme);
         final long waitingId = saveWaiting("재키", "jaekkii@example.com", reservation.getSlot());
 
@@ -196,7 +196,7 @@ class WaitingServiceTest {
         // given
         final LocalDate yesterday = LocalDate.now().minusDays(1);
         final ReservationTime time = saveReservationTime("11:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         final Reservation reservation = saveReservation("브라운", "brown@example.com", yesterday, time, theme);
         final long waitingId = saveWaiting("재키", "jaekkii@example.com", reservation.getSlot());
 
@@ -213,9 +213,10 @@ class WaitingServiceTest {
     private Theme saveTheme(
             final String name,
             final String description,
-            final String thumbnailUrl
+            final String thumbnailUrl,
+            final int price
     ) {
-        return themeRepository.save(Theme.create(name, description, thumbnailUrl));
+        return themeRepository.save(Theme.create(name, description, thumbnailUrl, price));
     }
 
     private Reservation saveReservation(

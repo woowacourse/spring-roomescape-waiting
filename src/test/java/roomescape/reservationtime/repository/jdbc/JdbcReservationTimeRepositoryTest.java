@@ -85,10 +85,11 @@ class JdbcReservationTimeRepositoryTest {
     void cannotDeleteReservationTimeInUse() {
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
                 "링",
                 "공포 테마",
-                "http:~"
+                "http:~",
+                10000
         );
         jdbcTemplate.update(
                 "INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)",
@@ -97,10 +98,11 @@ class JdbcReservationTimeRepositoryTest {
                 1L
         );
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)",
                 "브라운",
                 "brown@example.com",
-                1L
+                1L,
+                "CONFIRMED"
         );
 
         assertThatThrownBy(() -> reservationTimeRepository.delete(savedTime.getId()))

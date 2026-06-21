@@ -51,7 +51,7 @@ class AdminReservationControllerTest {
     void findReservations() {
         final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", futureDate, 1L, 1L);
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
@@ -70,7 +70,7 @@ class AdminReservationControllerTest {
     void findCreatedReservationInAdminList() {
         final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -100,7 +100,7 @@ class AdminReservationControllerTest {
         final String tomorrow = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", today, 1L, 1L);
 
         RestAssured.given().log().all()
@@ -135,7 +135,7 @@ class AdminReservationControllerTest {
     void adminCanCancelReservation() {
         final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", futureDate, 1L, 1L);
 
         RestAssured.given().log().all()
@@ -161,10 +161,11 @@ class AdminReservationControllerTest {
     private void insertReservation(final String name, final String date, final long timeId, final long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)",
                 name,
                 emailFromName(name),
-                slotId
+                slotId,
+                "CONFIRMED"
         );
     }
 
