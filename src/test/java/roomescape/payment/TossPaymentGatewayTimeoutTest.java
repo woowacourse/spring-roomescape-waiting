@@ -115,7 +115,7 @@ class TossPaymentGatewayTimeoutTest {
     @Timeout(value = 3, unit = TimeUnit.SECONDS, threadMode = ThreadMode.SEPARATE_THREAD)
     void 라우팅불가_IP면_connectTimeout만큼만_기다렸다가_ResourceAccessException으로_실패한다() {
         TossPaymentGateway gatewayWithBlackhole = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500, 1),
                 objectMapper
         );
 
