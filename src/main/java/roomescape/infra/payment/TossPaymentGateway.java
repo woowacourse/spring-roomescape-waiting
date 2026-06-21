@@ -18,6 +18,8 @@ import roomescape.exception.server.PaymentUnavailableException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
+import roomescape.ratelimit.OutboundRateLimitInterceptor;
+import roomescape.ratelimit.TokenBucketRateLimiter;
 
 @Component
 public class TossPaymentGateway implements PaymentGateway {
@@ -32,6 +34,8 @@ public class TossPaymentGateway implements PaymentGateway {
             @Value("${toss.read-timeout}") Duration readTimeout,
             @Value("${toss.rate-limit.max-attempts}") int maxAttempts,
             @Value("${toss.rate-limit.fallback-retry-after}") Duration fallbackRetryAfter,
+            @Value("${outbound-rate-limit.capacity}") long outboundCapacity,
+            @Value("${outbound-rate-limit.refill-per-sec}") double outboundRefillPerSec,
             ObjectMapper objectMapper
     ) {
         String basic = Base64.getEncoder()
@@ -45,6 +49,9 @@ public class TossPaymentGateway implements PaymentGateway {
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .requestFactory(requestFactory)
                 .requestInterceptor(new TossRateLimitRetryInterceptor(maxAttempts, fallbackRetryAfter))
+                .requestInterceptor(new OutboundRateLimitInterceptor(
+                        new TokenBucketRateLimiter(outboundCapacity, outboundRefillPerSec, System::nanoTime)
+                ))
                 .build();
         this.objectMapper = objectMapper;
     }
