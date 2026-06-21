@@ -4,12 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-import roomescape.reservation.service.ReservationService;
+import roomescape.payment.controller.dto.response.PaymentReadyResponse;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
-import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
+import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
+import roomescape.reservation.service.ReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -47,10 +47,10 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> create(
+    public ResponseEntity<PaymentReadyResponse> create(
             @Valid @RequestBody ReservationCreateRequest request
     ) {
-        final ReservationResponse result = reservationService.create(request);
+        final PaymentReadyResponse result = reservationService.preparePayment(request);
         return ResponseEntity.created(URI.create("/reservations"))
                 .body(result);
     }

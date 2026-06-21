@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.payment.controller.dto.response.PaymentReadyResponse;
+import roomescape.payment.domain.OrderIdGenerator;
+import roomescape.payment.domain.PaymentOrder;
+import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.CustomerEmail;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
@@ -49,6 +53,8 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final WaitingRepository waitingRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
+    private final OrderIdGenerator orderIdGenerator;
 
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll()
@@ -99,6 +105,27 @@ public class ReservationService {
         final Reservation savedReservation = saveReservation(reservation);
 
         return ReservationResponse.from(savedReservation);
+    }
+
+    @Transactional
+    public PaymentReadyResponse preparePayment(final ReservationCreateRequest data) {
+        final ReservationTime reservationTime = getReservationTime(data.timeId());
+        final Theme theme = getTheme(data.themeId());
+        final ReservationSlot slot = findOrCreateSlot(data.date(), reservationTime, theme);
+
+        final Reservation reservation = Reservation.createPending(
+                data.name(),
+                data.email(),
+                slot,
+                LocalDateTime.now()
+        );
+        final Reservation savedReservation = saveReservation(reservation);
+
+        final PaymentOrder paymentOrder = paymentOrderRepository.save(
+                PaymentOrder.create(orderIdGenerator.generate(), theme.getPrice(), savedReservation.getId())
+        );
+
+        return PaymentReadyResponse.of(savedReservation, paymentOrder);
     }
 
     public ReservationResponse updateByAdmin(final Long reservationId, final ReservationUpdateRequest data) {
