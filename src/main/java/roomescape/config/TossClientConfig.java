@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
+import roomescape.ratelimit.RetryAfterInterceptor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -18,7 +19,8 @@ public class TossClientConfig {
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.base-url}") String baseUrl,
             @Value("${toss.connect-timeout}") int connectTimeout,
-            @Value("${toss.read-timeout}") int readTimeout) {
+            @Value("${toss.read-timeout}") int readTimeout,
+            @Value("${toss.retry-max-attempts:3}") int retryMaxAttempts) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(connectTimeout);
         factory.setReadTimeout(readTimeout);
@@ -29,6 +31,7 @@ public class TossClientConfig {
                 .baseUrl(baseUrl)
                 .requestFactory(factory)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoded)
+                .requestInterceptor(new RetryAfterInterceptor(retryMaxAttempts))
                 .build();
     }
 }
