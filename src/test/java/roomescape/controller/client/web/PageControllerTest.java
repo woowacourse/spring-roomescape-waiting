@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.client.TossConfirmResultUnknownException;
@@ -22,6 +23,10 @@ import roomescape.service.PaymentService;
 import roomescape.service.result.PaymentConfirmResult;
 
 @WebMvcTest(PageController.class)
+@TestPropertySource(properties = {
+        "rate-limit.capacity=1000000",
+        "rate-limit.refill-per-second=1000000"
+})
 class PageControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
