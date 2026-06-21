@@ -2,9 +2,11 @@ package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import roomescape.domain.Order;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.exception.GatewayTimeoutException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
@@ -25,10 +27,14 @@ public class PaymentService {
             throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
-
-        orderRepository.confirm(order.getId(), result.paymentKey());
-
-        return result;
+        try {
+            PaymentResult result = paymentGateway.confirm(
+                    new PaymentConfirmation(paymentKey, orderId, order.getIdempotencyKey(), amount));
+            orderRepository.confirm(order.getId(), result.paymentKey());
+            return result;
+        } catch (ResourceAccessException e) {
+            orderRepository.markUncertain(order.getId());
+            throw new GatewayTimeoutException(e);
+        }
     }
 }

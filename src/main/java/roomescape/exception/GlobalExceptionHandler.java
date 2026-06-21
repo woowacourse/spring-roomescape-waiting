@@ -9,10 +9,15 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.exception.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(GatewayTimeoutException.class)
+    public ResponseEntity<ErrorResponse> handleGatewayTimeoutException(GatewayTimeoutException e) {
+        final ErrorResponse response = new ErrorResponse("GATEWAY_TIMEOUT", e.getMessage());
+        return ResponseEntity.status(504).body(response);
+    }
 
     @ExceptionHandler(TossPaymentException.class)
     public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException e) {
