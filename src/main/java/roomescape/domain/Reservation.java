@@ -55,6 +55,10 @@ public class Reservation {
         return ReservationDateTime.of(date, time.getStartAt());
     }
 
+    public ReservationDateTime dateTime() {
+        return ReservationDateTime.of(date, time.getStartAt());
+    }
+
     private static void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateName(name);
         validateDate(date);
