@@ -85,6 +85,37 @@ const api = {
   }
 };
 
+function paymentStatusBadge(orderStatus, orderId, amount) {
+  if (orderStatus === 'COMPLETED') {
+    return '<span style="color:#2b8a3e;font-weight:600">결제 확정</span>';
+  }
+  if (orderStatus === 'UNCERTAIN') {
+    return `<span style="color:#e67700;font-weight:600">확인 필요</span>
+            <button class="btn-ghost" style="padding:2px 8px;font-size:11px;margin-left:4px"
+              onclick="retryConfirm('${orderId}', ${amount})">재시도</button>`;
+  }
+  return '<span style="color:#868e96">결제 대기</span>';
+}
+
+async function retryConfirm(orderId, amount) {
+  const paymentKey = prompt('결제창에서 받은 paymentKey를 입력해주세요:');
+  if (!paymentKey) return;
+
+  try {
+    const res = await fetch('/payments/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentKey, orderId, amount }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || data.message || '재시도 실패');
+    showToast('결제가 확정되었습니다.', 'success');
+    loadMyData();
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
 function formatTime(t) {
   if (!t) return '';
   if (Array.isArray(t)) return `${String(t[0]).padStart(2,'0')}:${String(t[1]).padStart(2,'0')}`;
@@ -118,7 +149,7 @@ async function loadMyData() {
   const resTbody = $('my-reservations-tbody');
   const waitTbody = $('my-waiting-tbody');
   
-  resTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
+  resTbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
   waitTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
   
   try {
@@ -129,18 +160,23 @@ async function loadMyData() {
 
     // Render Reservations
     if (!reservations || reservations.length === 0) {
-      resTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역이 없습니다.</td></tr>`;
+      resTbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역이 없습니다.</td></tr>`;
     } else {
-      resTbody.innerHTML = reservations.map(r => `
+      resTbody.innerHTML = reservations.map(r => {
+        const paymentBadge = paymentStatusBadge(r.orderStatus, r.orderId, r.amount);
+        return `
         <tr>
           <td>${r.id}</td>
           <td>${r.date}</td>
           <td>${formatTime(r.time.startAt)}</td>
           <td>${r.theme.name}</td>
+          <td style="font-size:11px;color:var(--text-muted)">${r.orderId ?? '—'}</td>
+          <td style="font-size:11px;color:var(--text-muted)">${r.paymentKey ?? '—'}</td>
+          <td>${paymentBadge}</td>
           <td><button class="btn-ghost" style="padding:4px 12px;font-size:11px" onclick="openModifyModal(${r.id}, '${r.theme.name}', ${r.theme.id})">변경</button></td>
           <td><button class="btn-delete" onclick="deleteReservation(${r.id})">취소</button></td>
         </tr>
-      `).join('');
+      `}).join('');
     }
 
     // Render Waiting Lists
@@ -163,7 +199,7 @@ async function loadMyData() {
     }
 
   } catch(e) {
-    resTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역을 불러오지 못했습니다.</td></tr>`;
+    resTbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역을 불러오지 못했습니다.</td></tr>`;
     waitTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">대기 내역을 불러오지 못했습니다.</td></tr>`;
     showToast(e.message, 'error');
   }
