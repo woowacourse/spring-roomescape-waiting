@@ -131,4 +131,15 @@ public class TossPaymentException extends RuntimeException {
 
   }
 
+  /**
+   * 429 - 게이트웨이 호출 한도 초과.
+   */
+  public static class RateLimited extends TossPaymentException {
+
+    public RateLimited(String message) {
+      super(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", message);
+    }
+
+  }
+
 }

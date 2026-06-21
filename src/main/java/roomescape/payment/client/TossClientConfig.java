@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import roomescape.ratelimit.TokenBucketRateLimiter;
 
 /**
  * Toss 결제 API 호출용 RestClient 빈 설정. 인증은 Basic(시크릿키 + ":" 의 Base64)이다.
@@ -21,10 +22,16 @@ public class TossClientConfig {
       @Value("${toss.base-url}") String baseUrl,
       @Value("${toss.secret-key}") String secretKey,
       @Value("${toss.connect-timeout-ms}") int connectTimeoutMs,
-      @Value("${toss.read-timeout-ms}") int readTimeoutMs
+      @Value("${toss.read-timeout-ms}") int readTimeoutMs,
+      @Value("${toss.max-attempts}") int maxAttempts,
+      @Value("${toss.retry-after-fallback-seconds}") long retryAfterFallbackSeconds,
+      @Value("${outbound-rate-limit.capacity}") long outboundCapacity,
+      @Value("${outbound-rate-limit.refill-per-second}") double outboundRefillPerSecond
   ) {
     var basic = Base64.getEncoder()
         .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+    var outboundRateLimiter = new TokenBucketRateLimiter(
+        outboundCapacity, outboundRefillPerSecond, System::nanoTime);
     var factory = new SimpleClientHttpRequestFactory();
     factory.setConnectTimeout(connectTimeoutMs);
     factory.setReadTimeout(readTimeoutMs);
@@ -33,6 +40,8 @@ public class TossClientConfig {
         .baseUrl(baseUrl)
         .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
         .requestFactory(factory)
+        .requestInterceptor(new RetryAfterInterceptor(maxAttempts, retryAfterFallbackSeconds))
+        .requestInterceptor(new OutboundRateLimitInterceptor(outboundRateLimiter))
         .build();
   }
 

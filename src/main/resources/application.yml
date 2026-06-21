@@ -17,3 +17,13 @@ toss:
   secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
   connect-timeout-ms: 1000
   read-timeout-ms: 3000
+  max-attempts: 3
+  retry-after-fallback-seconds: 1
+
+rate-limit:
+  capacity: 100
+  refill-per-second: 100
+
+outbound-rate-limit:
+  capacity: 100
+  refill-per-second: 100
