@@ -1,3 +1,10 @@
+-- 여러 테스트 컨텍스트가 같은 in-memory DB 를 공유할 때 재실행돼도 안전하도록 FK 역순으로 먼저 비운다.
+DROP TABLE IF EXISTS reservation_waiting;
+DROP TABLE IF EXISTS payment_order;
+DROP TABLE IF EXISTS reservation;
+DROP TABLE IF EXISTS reservation_time;
+DROP TABLE IF EXISTS theme;
+
 CREATE TABLE theme (
     id      BIGINT       NOT NULL AUTO_INCREMENT,
     name    VARCHAR(255) NOT NULL,

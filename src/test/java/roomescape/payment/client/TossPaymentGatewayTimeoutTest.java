@@ -90,7 +90,7 @@ class TossPaymentGatewayTimeoutTest {
     @Timeout(3)
     void 라우팅불가_IP면_connectTimeout만큼_기다렸다가_연결실패_예외로_실패한다() {
         TossPaymentGateway gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500, 1, 100, 100.0),
                 new ObjectMapper());
 
         assertThatThrownBy(() -> gateway.confirm(confirmation()))

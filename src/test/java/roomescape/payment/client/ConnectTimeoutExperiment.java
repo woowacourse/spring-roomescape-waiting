@@ -39,7 +39,7 @@ class ConnectTimeoutExperiment {
 
     private TossPaymentGateway gateway(String baseUrl, int connectMs, int readMs) {
         return new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(baseUrl, "test_gsk_dummy", connectMs, readMs),
+                new TossClientConfig().tossRestClient(baseUrl, "test_gsk_dummy", connectMs, readMs, 1, 100, 100.0),
                 new ObjectMapper());
     }
 
