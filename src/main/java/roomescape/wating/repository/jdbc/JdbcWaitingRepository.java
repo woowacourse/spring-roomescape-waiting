@@ -26,9 +26,6 @@ import roomescape.wating.repository.dto.WaitingWithRank;
 @RequiredArgsConstructor
 public class JdbcWaitingRepository implements WaitingRepository {
 
-    private static final String NO_RESERVATION_FOR_WAITING_MESSAGE = "예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다.";
-    private static final String WAITING_CREATION_FAILED_MESSAGE = "대기 생성에 실패했습니다.";
-
     private static final RowMapper<Waiting> WAITING_ROW_MAPPER = ((rs, rowNum) ->
             {
                 final ReservationTime reservationTime = ReservationTime.of(
@@ -90,12 +87,12 @@ public class JdbcWaitingRepository implements WaitingRepository {
         }, keyHolder);
 
         if (updateCount == 0) {
-            throw new UnprocessableContentException(NO_RESERVATION_FOR_WAITING_MESSAGE);
+            throw new UnprocessableContentException("예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다.");
         }
 
         Number key = keyHolder.getKey();
         if (key == null) {
-            throw new IllegalStateException(WAITING_CREATION_FAILED_MESSAGE);
+            throw new IllegalStateException("대기 생성에 실패했습니다.");
         }
         return key.longValue();
     }
