@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomescape — 결제 완료</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body data-payment-result="success">
+<header class="site-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <a class="logo" href="/">Room<span>escape</span></a>
+      <nav class="nav-tabs">
+        <a class="nav-tab" href="/">홈</a>
+        <a class="nav-tab" href="/reservation">예약</a>
+        <a class="nav-tab" href="/my-reservations">내 예약</a>
+      </nav>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="app-container">
+    <div class="my-res-header">
+      <h1 class="my-res-title" id="payment-result-title">결제 승인 중</h1>
+      <p class="my-res-sub" id="payment-result-message">예약 확정을 처리하고 있습니다.</p>
+      <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn-primary" href="/my-reservations">내 예약 확인</a>
+        <a class="btn-ghost" href="/reservation">예약으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="/payment-result.js"></script>
+</body>
+</html>

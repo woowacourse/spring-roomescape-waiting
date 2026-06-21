@@ -4,6 +4,7 @@ const state = {
   selectedDate: null,
   selectedThemeId: null,
   selectedThemeName: null,
+  selectedThemePrice: null,
   selectedTimeId: null,
   selectedTimeLabel: null,
   waitingMode: false,
@@ -22,6 +23,12 @@ function showToast(msg, type = 'default') {
   el.textContent = msg;
   $('toast-container').appendChild(el);
   setTimeout(() => el.remove(), 3100);
+}
+
+function formatWon(amount) {
+  if (!amount) return '';
+
+  return `${amount.toLocaleString('ko-KR')}원`;
 }
 
 // ===== API =====
@@ -146,6 +153,7 @@ function renderThemes() {
       <div class="theme-card-body">
         <div class="theme-card-name">${theme.name}</div>
         <div class="theme-card-desc">${theme.description}</div>
+        <div class="theme-card-desc">${formatWon(theme.price)}</div>
       </div>
     `;
     card.addEventListener('click', () => selectTheme(theme, card));
@@ -156,6 +164,7 @@ function renderThemes() {
 function selectTheme(theme, card) {
   state.selectedThemeId = theme.id;
   state.selectedThemeName = theme.name;
+  state.selectedThemePrice = theme.price;
   document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -330,13 +339,30 @@ async function submitBooking() {
       closeModal();
       showToast('대기가 신청되었습니다! 📄', 'success');
     } else {
-      // POST /reservations
-      await api.post('/reservations', {
+      btn.textContent = '결제창 여는 중...';
+      const payment = await api.post('/reservations', {
         name, email, date: state.selectedDate,
         timeId: state.selectedTimeId, themeId: state.selectedThemeId,
       });
-      closeModal();
-      showToast('예약이 완료되었습니다! 🎉', 'success');
+
+      const config = await api.get('/payments/config');
+      if (!config.clientKey) {
+        throw new Error('결제 클라이언트 키가 설정되어 있지 않습니다.');
+      }
+      if (!window.TossPayments) {
+        throw new Error('결제창 SDK를 불러오지 못했습니다.');
+      }
+
+      const tossPayments = TossPayments(config.clientKey);
+      await tossPayments.requestPayment('카드', {
+        amount: payment.amount,
+        orderId: payment.orderId,
+        orderName: payment.orderName,
+        customerName: payment.customerName,
+        customerEmail: payment.customerEmail,
+        successUrl: `${window.location.origin}/payment-success`,
+        failUrl: `${window.location.origin}/payment-fail`,
+      });
     }
     state.selectedTimeId = null; state.selectedTimeLabel = null; state.waitingMode = false;
     loadTimeSlots(); updateCTAInfo();
