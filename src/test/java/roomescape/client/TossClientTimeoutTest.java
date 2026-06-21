@@ -51,6 +51,10 @@ class TossClientTimeoutTest {
         registry.add("toss.secret-key", () -> "test_gsk_dummy");
         registry.add("toss.connect-timeout-ms", () -> "500");
         registry.add("toss.read-timeout-ms", () -> "500");
+        // 이 테스트는 connect/read timeout 동작을 검증할 뿐 rate limit 대상이 아니므로, 같은 컨텍스트를 공유하는
+        // 여러 테스트 메서드의 누적 호출에 outbound rate limit이 끼어들지 않도록 사실상 무제한으로 둔다.
+        registry.add("outbound-rate-limit.capacity", () -> "1000000");
+        registry.add("outbound-rate-limit.refill-per-second", () -> "1000000");
     }
 
     @AfterAll
@@ -133,7 +137,7 @@ class TossClientTimeoutTest {
         // 학생이 채운 tossRestClient 의 connect timeout 을 그대로 검증한다.
         // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(5초)이 끊어 실패시킨다.
         var gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500, 3, 1000, 1000.0),
                 new ObjectMapper());
 
         var start = System.nanoTime();
