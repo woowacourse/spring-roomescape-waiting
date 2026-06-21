@@ -310,6 +310,7 @@ async function submitReservation(form) {
     let submitted = false;
 
     state.guestName = name;
+    rememberGuestName(name);
 
     if (!canSubmitReservation()) {
         showToast("테마, 날짜, 시간, 예약자를 모두 입력해 주세요.", "error");
@@ -659,7 +660,16 @@ async function loadReservations(options = {}) {
 async function submitReservationLookup(form) {
     const formData = new FormData(form);
     state.guestName = String(formData.get("name") || "").trim();
+    rememberGuestName(state.guestName);
     await loadReservations();
+}
+
+function rememberGuestName(name) {
+    if (name) {
+        sessionStorage.setItem("roomescape.guestName", name);
+        return;
+    }
+    sessionStorage.removeItem("roomescape.guestName");
 }
 
 function openConfirm(title, body, onConfirm) {

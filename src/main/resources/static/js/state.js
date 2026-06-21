@@ -14,7 +14,7 @@ export const state = {
     selectedDate: tomorrowString(),
     selectedTimeId: null,
     editingReservationId: null,
-    guestName: "",
+    guestName: sessionStorage.getItem("roomescape.guestName") || "",
     themeQuery: "",
     loading: {
         boot: false,
