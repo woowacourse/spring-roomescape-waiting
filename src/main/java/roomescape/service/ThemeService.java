@@ -35,6 +35,6 @@ public class ThemeService {
     }
 
     public List<AvailableTimeResponse> getAvailableTimeResponses(Long themId, String date) {
-        return themeRepository.findAvailableTimeById(themId, date);
+        return themeRepository.findAvailableTimeById(themId, LocalDate.parse(date));
     }
 }

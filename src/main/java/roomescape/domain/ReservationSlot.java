@@ -33,12 +33,12 @@ public class ReservationSlot {
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    @OneToMany
-    @JoinColumn(name = "reservation_slot_id")
+    @OneToMany(mappedBy = "reservationSlot", cascade = CascadeType.PERSIST)
     @OrderBy("updateAt ASC, id ASC")
     private List<Reservation> reservations = new ArrayList<>();
 
-    protected ReservationSlot(){}
+    protected ReservationSlot() {
+    }
 
     public ReservationSlot(
             LocalDate date,
@@ -56,7 +56,7 @@ public class ReservationSlot {
         validateUniqueReservation(name);
         validateNotPastReservation(now, ErrorCode.PAST_DATE_RESERVATION);
 
-        Reservation reservation = new Reservation(name, calculateStatus(), now);
+        Reservation reservation = new Reservation(this, name, calculateStatus(), now);
         reservations.add(reservation);
         return reservation;
     }

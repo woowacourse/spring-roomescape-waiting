@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationQueryRepository;
+import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.domain.vo.LockedReservationSlots;
 import roomescape.dto.ReservationRequest;
@@ -22,22 +22,22 @@ import roomescape.exception.ErrorCode;
 @Service
 public class ReservationService {
     private final ReservationSlotRepository reservationSlotRepository;
-    private final ReservationQueryRepository reservationQueryRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationQueryRepository reservationQueryRepository) {
+    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationRepository reservationRepository) {
         this.reservationSlotRepository = reservationSlotRepository;
-        this.reservationQueryRepository = reservationQueryRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
     public ReservationResponse save(LocalDateTime now, ReservationRequest request) {
         Long reservationSlotId = getOrCreateReservationSlotId(request);
-
         ReservationSlot reservationSlot = reservationSlotRepository.findByIdForUpdate(reservationSlotId)
-                .orElseThrow();
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
         Reservation newReservation = reservationSlot.reserve(request.name(), now);
-        int order = reservationSlot.calculateOrder(newReservation);
         reservationSlotRepository.flush();
+
+        int order = reservationSlot.calculateOrder(newReservation);
         return ReservationResponse.from(newReservation, reservationSlot, order);
     }
 
@@ -52,7 +52,7 @@ public class ReservationService {
         ReservationSlot currentSlot = lockedSlots.currentSlot();
         ReservationSlot newSlot = lockedSlots.newSlot();
 
-        validateSameTheme(currentSlot.getTheme(), newSlot.getTheme());
+        validateSameTheme(currentSlot.getTheme().getName(), newSlot.getTheme().getName());
 
         Reservation reservation = currentSlot.moveOut(reservationId, request.name(), now);
         newSlot.moveIn(reservation, request.name(), now);
@@ -67,7 +67,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllByName(String username) {
-        return reservationQueryRepository.findByUserName(username);
+        return reservationRepository.findByUserName(username);
     }
 
     private Long getOrCreateReservationSlotId(ReservationRequest request) {
@@ -93,15 +93,15 @@ public class ReservationService {
         }
     }
 
-    private void validateSameTheme(Theme reservationTheme, Theme newReservationTheme) {
-        if (!reservationTheme.equals(newReservationTheme)) {
+    private void validateSameTheme(String reservationThemeName, String newReservationThemeName) {
+        if (!reservationThemeName.equals(newReservationThemeName)) {
             throw new CustomException(ErrorCode.UNALLOWED_CHANGE_RESERVATION_THEME);
         }
     }
 
     private LockedReservationSlots findBothSlotsForUpdate(Long currentSlotId, Long newSlotId) {
-        Long firstLockId = Math.min(currentSlotId, newSlotId);
-        Long secondLockId = Math.max(currentSlotId, newSlotId);
+        long firstLockId = Math.min(currentSlotId, newSlotId);
+        long secondLockId = Math.max(currentSlotId, newSlotId);
 
         ReservationSlot first = reservationSlotRepository.findByIdForUpdate(firstLockId).orElseThrow();
         ReservationSlot second = reservationSlotRepository.findByIdForUpdate(secondLockId).orElseThrow();

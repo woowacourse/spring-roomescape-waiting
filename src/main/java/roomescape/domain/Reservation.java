@@ -13,6 +13,10 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "reservation_slot_id")
+    private ReservationSlot reservationSlot;
+
     @Column(nullable = false)
     private String name;
 
@@ -25,8 +29,9 @@ public class Reservation {
 
     protected Reservation(){}
 
-    public Reservation(String name, Status status, LocalDateTime updateAt) {
+    public Reservation(ReservationSlot reservationSlot, String name, Status status, LocalDateTime updateAt) {
         validateName(name);
+        this.reservationSlot = reservationSlot;
         this.name = name;
         this.status = status;
         this.updateAt = updateAt;
@@ -99,4 +104,7 @@ public class Reservation {
         return updateAt;
     }
 
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
+    }
 }
