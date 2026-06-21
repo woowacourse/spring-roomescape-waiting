@@ -11,6 +11,7 @@ import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentResult;
 import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
+import roomescape.infrastructure.payment.PaymentUnknownException;
 import roomescape.repository.OrderRepository;
 import roomescape.repository.ReservationRepository;
 
@@ -32,12 +33,21 @@ public class PaymentService {
         Order order = findOrder(orderId);
         validateAmount(order, amount);
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        PaymentResult result = confirmWithGateway(order, paymentKey, amount);
         orderRepository.updatePayment(order.getOrderId(), result.status(), result.paymentKey());
         if (result.status() == PaymentStatus.DONE) {
             reservationRepository.updateStatus(order.getReservationId(), ReservationStatus.RESERVED);
         }
         return result;
+    }
+
+    private PaymentResult confirmWithGateway(Order order, String paymentKey, Long amount) {
+        try {
+            return paymentGateway.confirm(new PaymentConfirmation(paymentKey, order.getOrderId().getValue(), amount));
+        } catch (PaymentUnknownException e) {
+            orderRepository.updatePayment(order.getOrderId(), PaymentStatus.UNCONFIRMED, paymentKey);
+            throw e;
+        }
     }
 
     @Transactional
