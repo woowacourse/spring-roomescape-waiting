@@ -4,7 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.DatabaseCleaner;
+import roomescape.dto.response.PaymentConfirmResponse;
 import roomescape.exception.code.PaymentErrorCode;
 import roomescape.exception.domain.PaymentException;
 import roomescape.service.PaymentService;
@@ -45,8 +46,9 @@ class PaymentControllerTest {
     }
 
     @Test
-    void 결제_성공_콜백은_200을_반환한다() {
-        doNothing().when(paymentService).confirm(anyString(), anyString(), anyLong());
+    void 결제_승인_완료_시_200을_반환한다() {
+        given(paymentService.confirm(anyString(), anyString(), anyLong()))
+                .willReturn(PaymentConfirmResponse.confirmed());
 
         RestAssured.given().log().all()
                 .queryParam("paymentKey", "test_pk")
@@ -57,13 +59,27 @@ class PaymentControllerTest {
                 .statusCode(200);
     }
 
+    @Test
+    void read_timeout으로_결제_결과_불명확_시_202를_반환한다() {
+        given(paymentService.confirm(anyString(), anyString(), anyLong()))
+                .willReturn(PaymentConfirmResponse.uncertain());
+
+        RestAssured.given().log().all()
+                .queryParam("paymentKey", "test_pk")
+                .queryParam("orderId", "order-1")
+                .queryParam("amount", 10000)
+                .when().get("/payments/success")
+                .then().log().all()
+                .statusCode(202);
+    }
+
     @ParameterizedTest(name = "[{0}] → HTTP {1}")
     @MethodSource("paymentErrorCases")
     void 에러코드별_HTTP_상태코드와_응답_body가_올바르게_반환된다(
             PaymentErrorCode errorCode, int expectedHttpStatus) {
 
-        doThrow(new PaymentException(errorCode))
-                .when(paymentService).confirm(anyString(), anyString(), anyLong());
+        given(paymentService.confirm(anyString(), anyString(), anyLong()))
+                .willThrow(new PaymentException(errorCode));
 
         RestAssured.given().log().all()
                 .queryParam("paymentKey", "test_pk")
@@ -83,7 +99,8 @@ class PaymentControllerTest {
                 arguments(PaymentErrorCode.REJECT_CARD_PAYMENT, 400),
                 arguments(PaymentErrorCode.UNAUTHORIZED_KEY, 500),
                 arguments(PaymentErrorCode.FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING, 500),
-                arguments(PaymentErrorCode.PAYMENT_GATEWAY_ERROR, 500)
+                arguments(PaymentErrorCode.PAYMENT_GATEWAY_ERROR, 500),
+                arguments(PaymentErrorCode.PAYMENT_CONNECT_FAILED, 503)
         );
     }
 
