@@ -17,7 +17,8 @@ public class TossClientConfig {
             @Value("${toss.base-url}") String baseUrl,
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.connect-timeout}") int connectTimeout,
-            @Value("${toss.read-timeout}") int readTimeout
+            @Value("${toss.read-timeout}") int readTimeout,
+            @Value("${toss.max-attempts}") int maxAttempts
     ) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(connectTimeout);
@@ -29,6 +30,7 @@ public class TossClientConfig {
                 .baseUrl(baseUrl)
                 .requestFactory(factory)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
+                .requestInterceptor(new RetryAfterInterceptor(maxAttempts))
                 .build();
     }
 }
