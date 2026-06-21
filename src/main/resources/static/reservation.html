@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>Roomescape - 예약하기</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://js.tosspayments.com/v2/standard"></script>
     <style>
         body { background-color: #f8f9fa; }
-
         .reservation-container {
             max-width: 800px;
             margin: 3rem auto;
@@ -15,39 +15,12 @@
             border-radius: 10px;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         }
-
-        .theme-selected {
-            border: 3px solid #0d6efd !important;
-            transform: scale(1.02);
-            z-index: 1;
-        }
-
-        .theme-item {
-            transition: all 0.2s;
-            border: 1px solid #dee2e6;
-        }
-
-        .theme-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .time-slot {
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid #dee2e6;
-        }
-
-        .time-slot:not(.disabled):hover {
-            background-color: #e9ecef;
-            border-color: #0d6efd;
-        }
-
-        .time-slot.selected {
-            background-color: #0d6efd !important;
-            color: white !important;
-            border-color: #0d6efd !important;
-        }
+        .theme-selected { border: 3px solid #0d6efd !important; transform: scale(1.02); z-index: 1; }
+        .theme-item { transition: all 0.2s; border: 1px solid #dee2e6; }
+        .theme-item:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .time-slot { cursor: pointer; transition: all 0.2s; border: 1px solid #dee2e6; }
+        .time-slot:not(.disabled):hover { background-color: #e9ecef; border-color: #0d6efd; }
+        .time-slot.selected { background-color: #0d6efd !important; color: white !important; border-color: #0d6efd !important; }
     </style>
 </head>
 <body>
@@ -64,81 +37,93 @@
 
 <div class="container">
     <div class="reservation-container shadow">
-        <h2 class="text-center mb-4">방탈출 예약</h2>
 
-        <div class="mb-4">
-            <h5>1. 테마 선택</h5>
-            <div id="theme-list" class="row g-3 mt-1">
-                <!-- 테마 목록 -->
+        <!-- ① 예약 정보 입력 -->
+        <div id="reservation-form">
+            <h2 class="text-center mb-4">방탈출 예약</h2>
+
+            <div class="mb-4">
+                <h5>1. 테마 선택</h5>
+                <div id="theme-list" class="row g-3 mt-1"></div>
             </div>
-        </div>
 
-        <div class="mb-4">
-            <h5>2. 날짜 선택</h5>
-            <input type="date" id="reservation-date" class="form-control" min="">
-        </div>
-
-        <div class="mb-4">
-            <h5>3. 시간 선택</h5>
-            <div id="time-list" class="row g-2 mt-1">
-                <p class="text-muted">테마와 날짜를 먼저 선택해주세요.</p>
+            <div class="mb-4">
+                <h5>2. 날짜 선택</h5>
+                <input type="date" id="reservation-date" class="form-control" min="">
             </div>
+
+            <div class="mb-4">
+                <h5>3. 시간 선택</h5>
+                <div id="time-list" class="row g-2 mt-1">
+                    <p class="text-muted">테마와 날짜를 먼저 선택해주세요.</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>4. 예약자 정보</h5>
+                <input type="text" id="reservation-name" class="form-control" placeholder="이름을 입력하세요">
+            </div>
+
+            <button id="submit-reservation" class="btn btn-primary w-100 btn-lg" disabled>
+                결제하고 예약하기
+            </button>
         </div>
 
-        <div class="mb-4">
-            <h5>4. 예약자 정보</h5>
-            <input type="text" id="reservation-name" class="form-control" placeholder="이름을 입력하세요">
+        <!-- ② 결제위젯 (예약 생성 후 표시) -->
+        <div id="payment-section" class="d-none">
+            <div class="d-flex align-items-center mb-4">
+                <button id="back-button" class="btn btn-outline-secondary btn-sm me-3">← 뒤로</button>
+                <h2 class="mb-0">결제 수단 선택</h2>
+            </div>
+
+            <div id="payment-method"></div>
+            <div id="agreement" class="mt-3"></div>
+
+            <button id="pay-button" class="btn btn-primary w-100 btn-lg mt-4">결제하기</button>
         </div>
 
-        <button id="submit-reservation" class="btn btn-primary w-100 btn-lg" disabled>예약 완료</button>
     </div>
 </div>
 
 <script>
+    const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+    const RESERVATION_AMOUNT = 10_000;
+
     let selectedThemeId = null;
     let selectedTimeId = null;
+    let selectedTimeReserved = false;
+    let tossWidgets = null;
+    let pendingOrderId = null;
 
+    // ── 초기화 ──────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
         const dateInput = document.getElementById('reservation-date');
-
         const now = new Date();
-        const offset = now.getTimezoneOffset() * 60000;
-        const localISOTime = new Date(now - offset).toISOString().slice(0, 10);
-
-        dateInput.min = localISOTime;
-        dateInput.value = localISOTime;
+        const localDate = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        dateInput.min = localDate;
+        dateInput.value = localDate;
 
         fetchThemes();
-
         dateInput.addEventListener('change', fetchTimes);
-        document.getElementById('submit-reservation').addEventListener('click', submitReservation);
         document.getElementById('reservation-name').addEventListener('input', checkValidation);
+        document.getElementById('submit-reservation').addEventListener('click', onSubmitClick);
+        document.getElementById('pay-button').addEventListener('click', onPayClick);
+        document.getElementById('back-button').addEventListener('click', onBackClick);
     });
 
+    // ── 테마 조회 ────────────────────────────────────────────
     function fetchThemes() {
         fetch('/themes')
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(error => {
-                        throw error;
-                    });
-                }
-                return response.json();
-            })
+            .then(r => r.ok ? r.json() : r.json().then(e => { throw e; }))
             .then(themes => {
-                const themeList = document.getElementById('theme-list');
-
-                themeList.innerHTML = themes.map(theme => `
+                document.getElementById('theme-list').innerHTML = themes.map(theme => `
                     <div class="col-md-4">
-                        <div class="card h-100 theme-item shadow-sm" data-id="${theme.id}" style="cursor: pointer;">
-                            <img src="${theme.thumbnail}"
-                                 class="card-img-top"
-                                 alt="${theme.name}"
-                                 height="150"
-                                 style="object-fit: cover;"
-                                 onerror="this.onerror=null; this.src='https://picsum.photos/seed/no-image/300/200'">
+                        <div class="card h-100 theme-item shadow-sm" data-id="${theme.id}" style="cursor:pointer">
+                            <img src="${theme.thumbnail}" class="card-img-top" alt="${theme.name}" height="150"
+                                 style="object-fit:cover"
+                                 onerror="this.onerror=null;this.src='https://picsum.photos/seed/no-image/300/200'">
                             <div class="card-body p-2 text-center bg-light">
-                                <h6 class="card-title mb-0 font-weight-bold">${theme.name}</h6>
+                                <h6 class="card-title mb-0">${theme.name}</h6>
                             </div>
                         </div>
                     </div>
@@ -148,10 +133,8 @@
                     item.addEventListener('click', function () {
                         document.querySelectorAll('.theme-item').forEach(i => i.classList.remove('theme-selected'));
                         this.classList.add('theme-selected');
-
                         selectedThemeId = this.dataset.id;
                         selectedTimeId = null;
-
                         fetchTimes();
                         checkValidation();
                     });
@@ -160,84 +143,58 @@
             .catch(handleError);
     }
 
-    function formatTime(time) {
-        if (Array.isArray(time)) {
-            return String(time[0]).padStart(2, '0') + ':' + String(time[1]).padStart(2, '0');
-        }
-
-        return time;
-    }
-
+    // ── 시간 조회 ────────────────────────────────────────────
     function fetchTimes() {
         const date = document.getElementById('reservation-date').value;
-
-        if (!selectedThemeId || !date) {
-            return;
-        }
+        if (!selectedThemeId || !date) return;
 
         fetch(`/times?themeId=${selectedThemeId}&baseDate=${date}`)
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(error => {
-                        throw error;
-                    });
-                }
-                return response.json();
-            })
+            .then(r => r.ok ? r.json() : r.json().then(e => { throw e; }))
             .then(times => {
                 const timeList = document.getElementById('time-list');
-
                 if (times.length === 0) {
-                    timeList.innerHTML = '<p class="text-danger">등록된 예약 시간이 없습니다. 관리자 페이지에서 시간을 먼저 등록해주세요.</p>';
+                    timeList.innerHTML = '<p class="text-danger">등록된 예약 시간이 없습니다.</p>';
                     return;
                 }
 
                 selectedTimeId = null;
                 checkValidation();
-
                 timeList.innerHTML = '';
 
                 times.forEach(time => {
                     const isReserved = time.reserved === true;
-
                     const slot = document.createElement('div');
                     slot.className = 'col-4';
                     slot.innerHTML = `
-                        <div class="border rounded p-2 text-center time-slot ${!isReserved ? 'bg-white' : 'bg-light text-muted'}"
-                             data-id="${time.id}" data-reserved="${isReserved}"
-                             style="cursor: pointer;">
+                        <div class="border rounded p-2 text-center time-slot ${isReserved ? 'bg-light text-muted' : 'bg-white'}"
+                             data-id="${time.id}" data-reserved="${isReserved}">
                             <strong>${formatTime(time.startAt)}</strong>
-                            ${isReserved ? '<br><small class="text-danger">(대기 가능)</small>' : '<br><small class="text-primary">(예약 가능)</small>'}
-                        </div>
-                    `;
+                            ${isReserved
+                                ? '<br><small class="text-danger">(대기 가능)</small>'
+                                : '<br><small class="text-primary">(예약 가능)</small>'}
+                        </div>`;
 
                     slot.querySelector('.time-slot').addEventListener('click', function () {
                         document.querySelectorAll('.time-slot').forEach(s => {
                             s.classList.remove('selected', 'btn-primary', 'text-white');
-                            if (s.dataset.reserved === 'true') {
-                                s.classList.add('bg-light', 'text-muted');
-                                s.classList.remove('bg-white');
-                            } else {
-                                s.classList.add('bg-white');
-                                s.classList.remove('bg-light', 'text-muted');
-                            }
+                            s.classList.toggle('bg-light', s.dataset.reserved === 'true');
+                            s.classList.toggle('text-muted', s.dataset.reserved === 'true');
+                            s.classList.toggle('bg-white', s.dataset.reserved !== 'true');
                         });
-
                         this.classList.remove('bg-white', 'bg-light', 'text-muted');
                         this.classList.add('selected', 'btn-primary', 'text-white');
 
                         selectedTimeId = this.dataset.id;
                         selectedTimeReserved = this.dataset.reserved === 'true';
-                        
-                        const submitBtn = document.getElementById('submit-reservation');
+
+                        const btn = document.getElementById('submit-reservation');
                         if (selectedTimeReserved) {
-                            submitBtn.textContent = '대기 신청하기';
-                            submitBtn.classList.replace('btn-primary', 'btn-warning');
+                            btn.textContent = '대기 신청하기';
+                            btn.classList.replace('btn-primary', 'btn-warning');
                         } else {
-                            submitBtn.textContent = '예약 완료';
-                            submitBtn.classList.replace('btn-warning', 'btn-primary');
+                            btn.textContent = '결제하고 예약하기';
+                            btn.classList.replace('btn-warning', 'btn-primary');
                         }
-                        
                         checkValidation();
                     });
 
@@ -247,66 +204,136 @@
             .catch(handleError);
     }
 
-    function handleError(error) {
-        console.error(error);
-
-        const code = error.exceptionCode;
-        const message = error.message;
-
-        if (code === 'RESERVATION_ALREADY_EXISTS') {
-            alert('⚠️ 이미 예약된 시간입니다. 다른 시간을 선택해주세요.');
-        } else if (code === 'WAITING_ALREADY_EXISTS') {
-            alert('⚠️ 이미 대기 신청한 슬롯입니다.');
-        } else if (code === 'CANNOT_WAIT_OWN_RESERVATION') {
-            alert('🚫 본인이 이미 예약한 슬롯에는 대기를 신청할 수 없습니다.');
-        } else if (code === 'PAST_DATE_NOT_ALLOWED') {
-            alert('🚫 지난 날짜는 예약할 수 없습니다.');
-        } else if (code === 'THEME_NOT_FOUND') {
-            alert('❓ 존재하지 않는 테마입니다.');
-        } else if (code === 'RESERVATION_TIME_NOT_FOUND') {
-            alert('❓ 존재하지 않는 예약 시간입니다.');
-        } else {
-            alert('❌ 처리 중 오류가 발생했습니다: ' + (message || '알 수 없는 오류'));
-        }
-    }
-
+    // ── 버튼 활성화 검증 ─────────────────────────────────────
     function checkValidation() {
         const name = document.getElementById('reservation-name').value;
         document.getElementById('submit-reservation').disabled = !(selectedThemeId && selectedTimeId && name);
     }
 
-    let selectedTimeReserved = false;
-
-    function submitReservation() {
+    // ── 예약하기 버튼 클릭 ───────────────────────────────────
+    async function onSubmitClick() {
         const name = document.getElementById('reservation-name').value;
         const date = document.getElementById('reservation-date').value;
 
-        const payload = {
-            name: name,
-            date: date,
-            timeId: parseInt(selectedTimeId),
-            themeId: parseInt(selectedThemeId)
+        if (selectedTimeReserved) {
+            await submitWaiting(name, date);
+        } else {
+            await submitReservationWithWidget(name, date);
+        }
+    }
+
+    // ── 대기 신청 ────────────────────────────────────────────
+    async function submitWaiting(name, date) {
+        try {
+            const res = await fetch('/waitings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, date, timeId: parseInt(selectedTimeId), themeId: parseInt(selectedThemeId) }),
+            });
+            if (!res.ok) throw await res.json();
+            alert('🎉 대기 신청이 완료되었습니다!');
+            location.href = '/my-reservation.html';
+        } catch (e) {
+            handleError(e);
+        }
+    }
+
+    // ── 예약 생성 + 결제위젯 렌더링 ─────────────────────────
+    async function submitReservationWithWidget(name, date) {
+        const btn = document.getElementById('submit-reservation');
+        btn.disabled = true;
+        btn.textContent = '처리 중...';
+
+        try {
+            // 1. 예약 생성 (PAYMENT_PENDING) — 서버에서 orderId·amount 확정
+            const res = await fetch('/reservations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name, date,
+                    timeId: parseInt(selectedTimeId),
+                    themeId: parseInt(selectedThemeId),
+                    amount: RESERVATION_AMOUNT,
+                }),
+            });
+            if (!res.ok) throw await res.json();
+            const { orderId, amount } = await res.json();
+            pendingOrderId = orderId;
+
+            // 2. 결제위젯 초기화
+            const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+            tossWidgets = tossPayments.widgets({ customerKey: crypto.randomUUID() });
+            await tossWidgets.setAmount({ currency: 'KRW', value: amount });
+
+            // 3. 폼 숨기고 위젯 렌더링
+            document.getElementById('reservation-form').classList.add('d-none');
+            document.getElementById('payment-section').classList.remove('d-none');
+
+            await Promise.all([
+                tossWidgets.renderPaymentMethods({ selector: '#payment-method', variantKey: 'DEFAULT' }),
+                tossWidgets.renderAgreement({ selector: '#agreement', variantKey: 'AGREEMENT' }),
+            ]);
+
+        } catch (e) {
+            handleError(e);
+            btn.disabled = false;
+            btn.textContent = '결제하고 예약하기';
+        }
+    }
+
+    // ── 결제 버튼 클릭 ───────────────────────────────────────
+    async function onPayClick() {
+        if (!tossWidgets || !pendingOrderId) return;
+        try {
+            await tossWidgets.requestPayment({
+                orderId: pendingOrderId,
+                orderName: '방탈출 예약',
+                successUrl: `${window.location.origin}/payment-result.html`,
+                failUrl: `${window.location.origin}/payment-result.html`,
+            });
+        } catch (e) {
+            handleError(e);
+        }
+    }
+
+    // ── 뒤로 가기 ────────────────────────────────────────────
+    async function onBackClick() {
+        if (pendingOrderId) {
+            // 대기 중인 예약 정리
+            await fetch(`/payments/fail?code=USER_BACK&message=예약정보변경&orderId=${pendingOrderId}`)
+                .catch(() => {});
+            pendingOrderId = null;
+        }
+        tossWidgets = null;
+        document.getElementById('payment-section').classList.add('d-none');
+        document.getElementById('reservation-form').classList.remove('d-none');
+
+        const btn = document.getElementById('submit-reservation');
+        btn.disabled = false;
+        btn.textContent = '결제하고 예약하기';
+    }
+
+    // ── 에러 처리 ────────────────────────────────────────────
+    function handleError(error) {
+        console.error(error);
+        const code = error.exceptionCode || error.code;
+        const message = error.message;
+
+        const messages = {
+            RESERVATION_ALREADY_EXISTS: '⚠️ 이미 예약된 시간입니다. 다른 시간을 선택해주세요.',
+            WAITING_ALREADY_EXISTS: '⚠️ 이미 대기 신청한 슬롯입니다.',
+            CANNOT_WAIT_OWN_RESERVATION: '🚫 본인이 이미 예약한 슬롯에는 대기를 신청할 수 없습니다.',
+            PAST_DATE_NOT_ALLOWED: '🚫 지난 날짜는 예약할 수 없습니다.',
+            THEME_NOT_FOUND: '❓ 존재하지 않는 테마입니다.',
+            RESERVATION_TIME_NOT_FOUND: '❓ 존재하지 않는 예약 시간입니다.',
         };
 
-        const url = selectedTimeReserved ? '/waitings' : '/reservations';
+        alert(messages[code] ?? `❌ 오류: ${message || '알 수 없는 오류가 발생했습니다.'}`);
+    }
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert(selectedTimeReserved ? '🎉 대기 신청이 완료되었습니다!' : '🎉 예약이 완료되었습니다!');
-                    location.href = '/my-reservation.html';
-                    return;
-                }
-
-                return response.json().then(error => {
-                    throw error;
-                });
-            })
-            .catch(handleError);
+    function formatTime(time) {
+        if (Array.isArray(time)) return `${String(time[0]).padStart(2, '0')}:${String(time[1]).padStart(2, '0')}`;
+        return time;
     }
 </script>
 </body>

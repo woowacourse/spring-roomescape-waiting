@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Roomescape - 결제 처리 중</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .result-box {
+            max-width: 480px;
+            margin: 6rem auto;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="result-box">
+    <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">처리 중...</span>
+    </div>
+    <p class="text-muted mb-0">결제를 처리하고 있습니다. 잠시만 기다려 주세요.</p>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.has('paymentKey')) {
+        // Toss가 결제 성공 후 이 페이지로 리다이렉트한 경우
+        confirmPayment(
+            params.get('paymentKey'),
+            params.get('orderId'),
+            Number(params.get('amount'))
+        );
+    } else {
+        // Toss가 결제 실패/취소 후 이 페이지로 리다이렉트한 경우
+        cancelPayment(
+            params.get('code'),
+            params.get('message'),
+            params.get('orderId') // PAY_PROCESS_CANCELED 시 없을 수 있다
+        );
+    }
+
+    async function confirmPayment(paymentKey, orderId, amount) {
+        const url = `/payments/success?paymentKey=${encodeURIComponent(paymentKey)}`
+            + `&orderId=${encodeURIComponent(orderId)}`
+            + `&amount=${amount}`;
+
+        try {
+            const res = await fetch(url);
+
+            if (res.ok) {
+                location.replace('/my-reservation.html');
+                return;
+            }
+
+            // 승인 실패 — 대기 중인 예약을 정리하고 예약 페이지로 돌아간다
+            const error = await res.json().catch(() => ({}));
+            console.error('결제 승인 실패:', error);
+            await cancelPayment('CONFIRM_FAILED', error.message ?? '결제 승인에 실패했습니다.', orderId);
+        } catch (e) {
+            console.error('네트워크 오류:', e);
+            await cancelPayment('NETWORK_ERROR', '네트워크 오류가 발생했습니다.', orderId);
+        }
+    }
+
+    async function cancelPayment(code, message, orderId) {
+        let url = `/payments/fail?code=${encodeURIComponent(code)}&message=${encodeURIComponent(message ?? '')}`;
+        if (orderId) {
+            url += `&orderId=${encodeURIComponent(orderId)}`;
+        }
+
+        await fetch(url).catch(() => {}); // 정리 실패해도 페이지는 이동한다
+        location.replace('/reservation.html');
+    }
+</script>
+</body>
+</html>
