@@ -1181,6 +1181,11 @@
             showToast(`${code}: ${message || '결제에 실패했습니다.'}`);
         }
 
+        if (payment === 'unknown') {
+            const code = params.get('code') || 'PAYMENT_CONFIRM_UNKNOWN';
+            showToast(`${code}: ${message || '결제 승인 결과를 확인하지 못했습니다. 내 예약에서 결제 상태를 확인해주세요.'}`);
+        }
+
         history.replaceState(null, '', window.location.pathname);
     }
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.client.PaymentGatewayException;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
 import roomescape.service.PaymentService;
@@ -51,6 +52,34 @@ class PaymentCallbackControllerTest {
                         .param("amount", "9000"))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrlPattern("/reservation.html?payment=fail&code=AMOUNT_MISMATCH&message=*&orderId=order-1&amount=9000"));
+    }
+
+    @Test
+    void 결제_승인_응답_읽기_타임아웃이면_확인_필요_결과로_리다이렉트한다() throws Exception {
+        willThrow(new PaymentGatewayException.ReadTimeout(new RuntimeException("read timeout")))
+                .given(paymentService)
+                .confirm(anyString(), anyString(), anyLong());
+
+        mockMvc.perform(get("/payments/success")
+                        .param("paymentKey", "payment-key")
+                        .param("orderId", "order-1")
+                        .param("amount", "10000"))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrlPattern("/reservation.html?payment=unknown&code=PAYMENT_GATEWAY_READ_TIMEOUT&message=*&orderId=order-1&amount=10000"));
+    }
+
+    @Test
+    void 결제_승인_연결_실패면_실패_결과로_리다이렉트한다() throws Exception {
+        willThrow(new PaymentGatewayException.ConnectionFailed(new RuntimeException("connection failed")))
+                .given(paymentService)
+                .confirm(anyString(), anyString(), anyLong());
+
+        mockMvc.perform(get("/payments/success")
+                        .param("paymentKey", "payment-key")
+                        .param("orderId", "order-1")
+                        .param("amount", "10000"))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrlPattern("/reservation.html?payment=fail&code=PAYMENT_GATEWAY_CONNECTION_FAILED&message=*&orderId=order-1&amount=10000"));
     }
 
     @Test

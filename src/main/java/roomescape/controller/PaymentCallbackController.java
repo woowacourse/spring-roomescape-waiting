@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import roomescape.client.PaymentGatewayException;
 import roomescape.client.TossPaymentException;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
@@ -30,6 +31,10 @@ public class PaymentCallbackController {
         } catch (RoomEscapeException exception) {
             addRedirectAttributes(redirectAttributes, "fail", paymentCode(exception), exception.getErrorCode().getMessage(), orderId, amount);
         } catch (TossPaymentException exception) {
+            addRedirectAttributes(redirectAttributes, "fail", exception.getCode(), exception.getMessage(), orderId, amount);
+        } catch (PaymentGatewayException.ReadTimeout exception) {
+            addRedirectAttributes(redirectAttributes, "unknown", exception.getCode(), exception.getMessage(), orderId, amount);
+        } catch (PaymentGatewayException exception) {
             addRedirectAttributes(redirectAttributes, "fail", exception.getCode(), exception.getMessage(), orderId, amount);
         }
 
