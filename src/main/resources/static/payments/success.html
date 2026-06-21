@@ -27,6 +27,7 @@
     const orderId = urlParams.get('orderId');
     const amount = urlParams.get('amount');
     const reservationId = urlParams.get('reservationId');
+    const customerName = urlParams.get('customerName');
 
     async function confirm() {
         const response = await fetch('/payments/confirm', {
@@ -43,8 +44,11 @@
             if (json.code === 'PAYMENT_RESULT_UNKNOWN') {
                 document.getElementById('title').textContent = '결제 결과 확인 필요';
                 document.getElementById('orderId').textContent = json.message;
+                const historyUrl = customerName
+                    ? `/payments/history.html?name=${encodeURIComponent(customerName)}`
+                    : '/payments/history.html';
                 document.getElementById('amount').innerHTML =
-                    '<a href="/payments/history.html" class="primary-button">결제 내역에서 확인하기</a>';
+                    `<a href="${historyUrl}" class="primary-button">결제 내역에서 확인하기</a>`;
                 return;
             }
             // 그 외(토스 거절/연결 실패) → fail 페이지로 이동 (선점한 PENDING 예약 정리)

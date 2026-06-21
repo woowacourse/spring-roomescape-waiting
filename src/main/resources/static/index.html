@@ -457,6 +457,7 @@
                 orderId,
                 amount: String(amount),
                 orderName,
+                customerName: reservationName,
             });
             location.href = `/payments/checkout.html?${query}`;
         } catch (error) {
