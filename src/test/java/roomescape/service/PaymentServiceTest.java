@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import static org.mockito.BDDMockito.willThrow;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentResult;
 import roomescape.exception.RoomescapeException;
+import roomescape.infrastructure.payment.PaymentUnknownException;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.OrderRepository;
@@ -69,6 +72,22 @@ class PaymentServiceTest extends ServiceIntegrationTest {
     void confirmThrowsWhenOrderNotFound() {
         assertThatThrownBy(() -> paymentService.confirm("payment-key", "non-existent-order", 50000L))
                 .isInstanceOf(RoomescapeException.class);
+    }
+
+    @Test
+    @DisplayName("승인 결과가 불명확하면(read timeout) 주문을 UNCONFIRMED로 남기고 예외를 다시 던진다")
+    void confirmMarksUnconfirmedWhenResultUnknown() {
+        Order order = createOrder();
+        String orderId = order.getOrderId().getValue();
+        willThrow(new PaymentUnknownException("결제 결과를 확인하지 못했습니다.", null))
+                .given(paymentGateway).confirm(any(PaymentConfirmation.class));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", orderId, 50000L))
+                .isInstanceOf(PaymentUnknownException.class);
+
+        Order updated = orderRepository.findByOrderId(order.getOrderId()).orElseThrow();
+        assertThat(updated.getStatus()).isEqualTo(PaymentStatus.UNCONFIRMED);
+        assertThat(updated.getPaymentKey()).isEqualTo("payment-key");
     }
 
     @Test
