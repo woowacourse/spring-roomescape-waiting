@@ -49,6 +49,9 @@ public class TossPaymentGateway implements PaymentGateway {
                     .body(TossPaymentResponse.class);
             return toResult(response);
         } catch (ResourceAccessException e) {
+            if (hasCause(e, SocketTimeoutException.class) && hasMessage(e, "Read timed out")) {
+                throw new PaymentConfirmUnknownException("토스 결제 승인 응답을 받지 못했습니다. 결제 내역에서 결과를 확인해 주세요.", e);
+            }
             throw new PaymentConnectionException("토스 결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.", e);
         } catch (RestClientException e) {
             if (hasCause(e, SocketTimeoutException.class)) {
@@ -71,6 +74,17 @@ public class TossPaymentGateway implements PaymentGateway {
         Throwable current = throwable;
         while (current != null) {
             if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private boolean hasMessage(Throwable throwable, String message) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current.getMessage() != null && current.getMessage().contains(message)) {
                 return true;
             }
             current = current.getCause();
