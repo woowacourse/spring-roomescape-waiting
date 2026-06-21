@@ -1,23 +1,33 @@
 package roomescape.domain;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
+import jakarta.persistence.*;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
+@Entity
+@Table(name = "reservation")
 public class Reservation {
-    private final Long id;
-    private final String name;
-    private long reservationSlotId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
+
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updateAt;
 
-    public Reservation(Long id, String name, Long reservationSlotId, Status status, LocalDateTime updateAt) {
+    protected Reservation(){}
+
+    public Reservation(String name, Status status, LocalDateTime updateAt) {
         validateName(name);
-        this.id = id;
         this.name = name;
-        this.reservationSlotId = reservationSlotId;
         this.status = status;
         this.updateAt = updateAt;
     }
@@ -41,10 +51,9 @@ public class Reservation {
         this.status = Status.RESERVED;
     }
 
-    public void update(LocalDateTime now, long reservationSlotId, Status status) {
+    public void update(LocalDateTime now, Status status) {
         validateUpdateAt(now);
         validateNotCanceledStatus();
-        this.reservationSlotId = reservationSlotId;
         this.status = status;
         this.updateAt = now;
     }
@@ -82,10 +91,6 @@ public class Reservation {
         return name;
     }
 
-    public long getReservationSlotId() {
-        return reservationSlotId;
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -94,15 +99,4 @@ public class Reservation {
         return updateAt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Reservation that = (Reservation) o;
-        return reservationSlotId == that.reservationSlotId && Objects.equals(name, that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, reservationSlotId);
-    }
 }

@@ -1,22 +1,54 @@
 package roomescape.domain;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.*;
 import roomescape.domain.vo.ReservationDeletion;
-import roomescape.domain.vo.ReservationSlotInfo;
-import roomescape.domain.vo.ReservationUpdate;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
+@Entity
+@Table(
+        name = "reservation_slot",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
+)
 public class ReservationSlot {
-    private final ReservationSlotInfo slot;
-    private final List<Reservation> reservations;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public ReservationSlot(ReservationSlotInfo slot, List<Reservation> reservations) {
-        this.slot = slot;
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id", nullable = false)
+    private Time time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
+
+    @OneToMany
+    @JoinColumn(name = "reservation_slot_id")
+    @OrderBy("updateAt ASC, id ASC")
+    private List<Reservation> reservations = new ArrayList<>();
+
+    protected ReservationSlot(){}
+
+    public ReservationSlot(
+            LocalDate date,
+            Time time,
+            Theme theme,
+            List<Reservation> reservations
+    ) {
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
         this.reservations = new ArrayList<>(reservations);
     }
 
@@ -24,9 +56,9 @@ public class ReservationSlot {
         validateUniqueReservation(name);
         validateNotPastReservation(now, ErrorCode.PAST_DATE_RESERVATION);
 
-        Reservation newReservation = new Reservation(null, name, slot.slotId(), calculateStatus(), now);
-        reservations.add(newReservation);
-        return newReservation;
+        Reservation reservation = new Reservation(name, calculateStatus(), now);
+        reservations.add(reservation);
+        return reservation;
     }
 
     public Reservation moveIn(Reservation reservation, String name, LocalDateTime now) {
@@ -34,19 +66,19 @@ public class ReservationSlot {
         validateUniqueReservation(name);
         validateNotPastReservation(now, ErrorCode.UNALLOWED_UPDATE_PAST_RESERVATION);
 
-        reservation.update(now, slot.slotId(), calculateStatus());
+        reservation.update(now, calculateStatus());
         reservations.add(reservation);
         return reservation;
     }
 
-    public ReservationUpdate moveOut(long reservationId, String name, LocalDateTime now) {
+    public Reservation moveOut(long reservationId, String name, LocalDateTime now) {
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(reservation, name);
         validateNotPastReservation(now, ErrorCode.UNALLOWED_UPDATE_PAST_RESERVATION);
 
-        Optional<Reservation> promotedReservation = promoteReservation(reservation);
+        promoteReservation(reservation);
         reservations.remove(reservation);
-        return new ReservationUpdate(reservation,promotedReservation);
+        return reservation;
     }
 
     private Status calculateStatus() {
@@ -100,7 +132,7 @@ public class ReservationSlot {
     }
 
     private void validateNotPastReservation(LocalDateTime now, ErrorCode code) {
-        LocalDateTime reservationTime = LocalDateTime.of(slot.date(), slot.time().getStartAt());
+        LocalDateTime reservationTime = LocalDateTime.of(date, time.getStartAt());
         if (reservationTime.isBefore(now)) {
             throw new CustomException(code);
         }
@@ -121,7 +153,23 @@ public class ReservationSlot {
         }
     }
 
-    public ReservationSlotInfo getSlot() {
-        return slot;
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public Time getTime() {
+        return time;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public List<Reservation> getReservations() {
+        return Collections.unmodifiableList(reservations);
     }
 }

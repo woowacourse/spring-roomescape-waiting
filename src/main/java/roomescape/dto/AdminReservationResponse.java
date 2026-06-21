@@ -5,9 +5,7 @@ import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
-import roomescape.domain.vo.ReservationSlotInfo;
+import roomescape.domain.ReservationSlot;
 
 public record AdminReservationResponse(
         long id,
@@ -16,14 +14,12 @@ public record AdminReservationResponse(
 
         @JsonFormat(pattern = "HH:mm")
         LocalTime time) {
-    public static AdminReservationResponse from(ReservationSlotInfo slot) {
-        Theme theme = slot.theme();
-        Time time = slot.time();
+    public static AdminReservationResponse from(ReservationSlot slot) {
         return new AdminReservationResponse(
-                slot.slotId(),
-                slot.date(),
-                theme.getName(),
-                time.getStartAt()
+                slot.getId(),
+                slot.getDate(),
+                slot.getTheme().getName(),
+                slot.getTime().getStartAt()
         );
     }
 }
