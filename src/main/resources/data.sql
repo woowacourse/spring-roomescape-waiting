@@ -47,4 +47,4 @@ INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('김
 INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('이영희', '2026-06-19', '2026-06-17 00:00:00', 5, 2);
 INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('김철수', '2026-06-20', '2026-06-17 00:00:00', 7, 4);
 INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('박민준', '2026-06-21', '2026-06-17 00:00:00', 9, 3);
-INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('최수진', '2026-06-22', '2026-06-17 00:00:00', 1, 1);
+INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('최수진', '2026-06-17', '2026-06-17 00:00:00', 1, 1);
