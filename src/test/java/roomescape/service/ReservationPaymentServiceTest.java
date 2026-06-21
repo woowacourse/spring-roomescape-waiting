@@ -143,14 +143,16 @@ class ReservationPaymentServiceTest {
         LocalDate date = fixedNow.toLocalDate().plusDays(1);
         ReservationPayment payment = payment("order_123456", 10000L, date);
         given(reservationPaymentDao.findByOrderId("order_123456")).willReturn(Optional.of(payment));
-        given(paymentGateway.confirm(new PaymentConfirmation("payment_key", "order_123456", 10000L)))
+        given(paymentGateway.confirm(new PaymentConfirmation(
+                "payment_key", "order_123456", 10000L, payment.getIdempotencyKey())))
                 .willReturn(new PaymentResult("payment_key", "order_123456", "DONE", 10000L));
         given(reservationDao.save(payment.getReservation())).willReturn(payment.getReservation());
 
         var reservation = reservationPaymentService.confirm("payment_key", "order_123456", 10000L);
 
         assertThat(reservation.getName()).isEqualTo("브라운");
-        then(paymentGateway).should().confirm(new PaymentConfirmation("payment_key", "order_123456", 10000L));
+        then(paymentGateway).should().confirm(new PaymentConfirmation(
+                "payment_key", "order_123456", 10000L, payment.getIdempotencyKey()));
         then(reservationPaymentDao).should().updatePaymentKey("order_123456", "payment_key");
         then(reservationDao).should().save(payment.getReservation());
     }

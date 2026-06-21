@@ -84,7 +84,12 @@ public class ReservationPaymentService {
             throw new PaymentAmountMismatchException(payment.getAmount(), amount);
         }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(
+                paymentKey,
+                orderId,
+                amount,
+                payment.getIdempotencyKey()
+        ));
         reservationPaymentDao.updatePaymentKey(orderId, result.paymentKey());
         try {
             return reservationDao.save(payment.getReservation());

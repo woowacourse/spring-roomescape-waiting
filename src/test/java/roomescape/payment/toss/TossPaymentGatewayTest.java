@@ -48,6 +48,7 @@ class TossPaymentGatewayTest {
         server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, basicAuthHeader()))
+                .andExpect(header("Idempotency-Key", "idempotency-key-1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andRespond(withSuccess("""
                         {
@@ -59,7 +60,7 @@ class TossPaymentGatewayTest {
                         """, MediaType.APPLICATION_JSON));
 
         var result = tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_payment_key", "order-1", 10000L));
+                new PaymentConfirmation("test_payment_key", "order-1", 10000L, "idempotency-key-1"));
 
         assertThat(result.paymentKey()).isEqualTo("test_payment_key");
         assertThat(result.orderId()).isEqualTo("order-1");
@@ -77,7 +78,7 @@ class TossPaymentGatewayTest {
                         .body("{\"code\":\"" + code + "\",\"message\":\"에러 메시지\"}"));
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_payment_key", "order-1", 10000L)))
+                new PaymentConfirmation("test_payment_key", "order-1", 10000L, "idempotency-key-1")))
                 .isInstanceOf(expected)
                 .hasMessage("에러 메시지");
         server.verify();
