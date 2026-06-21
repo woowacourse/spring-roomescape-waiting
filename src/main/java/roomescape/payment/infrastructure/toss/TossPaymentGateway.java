@@ -49,7 +49,7 @@ public class TossPaymentGateway implements PaymentGateway {
                     })
                     .body(TossPaymentConfirmResponse.class);
 
-            return toPaymentResult(confirmation, response);
+            return toPaymentResult(response);
         } catch (RestClientException exception) {
             throw new IllegalStateException("결제 승인 서버와 통신하지 못했습니다.", exception);
         }
@@ -68,21 +68,20 @@ public class TossPaymentGateway implements PaymentGateway {
     }
 
     private PaymentResult toPaymentResult(
-            final PaymentConfirmation confirmation,
             final TossPaymentConfirmResponse response
     ) {
         if (response == null) {
             throw new IllegalStateException("결제 승인 서버와 통신하지 못했습니다.");
         }
 
-        final int approvedAmount = response.totalAmount() == null
-                ? confirmation.amount()
-                : response.totalAmount();
+        if (response.totalAmount() == null) {
+            throw new IllegalStateException("결제 승인 응답에 금액 정보가 없습니다.");
+        }
 
         return new PaymentResult(
                 response.paymentKey(),
                 response.orderId(),
-                approvedAmount
+                response.totalAmount()
         );
     }
 }
