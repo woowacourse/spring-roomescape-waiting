@@ -14,6 +14,7 @@ import roomescape.waiting.WaitingForPromotion;
 import roomescape.waiting.dao.ReservationWaitingDao;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.List;
 
 import static roomescape.global.exception.ErrorCode.*;
@@ -64,7 +65,10 @@ public class ReservationService {
         Reservation newReservation = new Reservation(name, themeId, date, time);
         try {
             Reservation saved = reservationDao.insert(newReservation);
-            paymentOrderDao.insert(orderId, amount, saved.getId());
+            // 주문 생성 시점에 주문당 고정 멱등키(UUID, 36자)를 만들어 저장한다.
+            // confirm 재시도/새로고침 시 이 값을 그대로 다시 보내, 토스가 중복을 인지해 이중 승인을 막는다.
+            String idempotencyKey = UUID.randomUUID().toString();
+            paymentOrderDao.insert(orderId, amount, saved.getId(), idempotencyKey);
             return saved;
         } catch (DuplicateKeyException e) {
             throw new RoomescapeException(RESERVATION_ALREADY_EXISTS);
