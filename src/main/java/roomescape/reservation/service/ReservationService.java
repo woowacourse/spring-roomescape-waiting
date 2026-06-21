@@ -84,23 +84,6 @@ public class ReservationService {
         return reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, themeId);
     }
 
-    public ReservationResponse create(final ReservationCreateRequest data) {
-        final ReservationTime reservationTime = getReservationTime(data.timeId());
-        final Theme theme = getTheme(data.themeId());
-        final ReservationSlot slot = findOrCreateSlot(data.date(), reservationTime, theme);
-
-        final Reservation reservation = Reservation.create(
-                data.name(),
-                data.email(),
-                slot,
-                LocalDateTime.now()
-        );
-
-        final Reservation savedReservation = saveReservation(reservation);
-
-        return ReservationResponse.from(savedReservation);
-    }
-
     @Transactional
     public PaymentReadyResponse preparePayment(final ReservationCreateRequest data) {
         final ReservationTime reservationTime = getReservationTime(data.timeId());
