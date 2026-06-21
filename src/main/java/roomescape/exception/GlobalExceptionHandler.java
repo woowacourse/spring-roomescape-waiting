@@ -14,7 +14,10 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import roomescape.infrastructure.payment.PaymentConnectionException;
+import roomescape.infrastructure.payment.PaymentUnknownException;
 import roomescape.infrastructure.payment.TossPaymentException;
 
 @RestControllerAdvice
@@ -31,6 +34,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException e) {
         return ResponseEntity.status(e.getStatus())
                 .body(new ErrorResponse(e.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentConnectionException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentConnection(PaymentConnectionException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("PAYMENT_GATEWAY_UNREACHABLE",
+                        "결제 서버에 연결하지 못했습니다. 다시 시도해주세요."));
+    }
+
+    @ExceptionHandler(PaymentUnknownException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentUnknown(PaymentUnknownException e) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(new ErrorResponse("PAYMENT_RESULT_UNKNOWN",
+                        "결제 결과를 확인 중입니다. 내 예약에서 상태를 확인하거나 다시 시도해주세요."));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
