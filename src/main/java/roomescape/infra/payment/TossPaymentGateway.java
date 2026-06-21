@@ -30,6 +30,8 @@ public class TossPaymentGateway implements PaymentGateway {
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.connect-timeout}") Duration connectTimeout,
             @Value("${toss.read-timeout}") Duration readTimeout,
+            @Value("${toss.rate-limit.max-attempts}") int maxAttempts,
+            @Value("${toss.rate-limit.fallback-retry-after}") Duration fallbackRetryAfter,
             ObjectMapper objectMapper
     ) {
         String basic = Base64.getEncoder()
@@ -42,6 +44,7 @@ public class TossPaymentGateway implements PaymentGateway {
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .requestFactory(requestFactory)
+                .requestInterceptor(new TossRateLimitRetryInterceptor(maxAttempts, fallbackRetryAfter))
                 .build();
         this.objectMapper = objectMapper;
     }

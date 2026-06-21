@@ -36,7 +36,7 @@ public class PaymentController {
     public PaymentController(
             OrderService orderService,
             PaymentService paymentService,
-            @Value("${toss.client-key:}") String clientKey
+            @Value("${toss.client-key}") String clientKey
     ) {
         this.orderService = orderService;
         this.paymentService = paymentService;
