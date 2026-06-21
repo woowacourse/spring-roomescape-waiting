@@ -19,7 +19,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -79,8 +81,18 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(String name) {
-        List<MyReservationResponse> reservations = reservationDao.selectByName(name).stream()
-                .map(MyReservationResponse::fromReservation)
+        List<Reservation> foundReservations = reservationDao.selectByName(name);
+        List<Long> reservationIds = foundReservations.stream()
+                .map(Reservation::getId)
+                .toList();
+        Map<Long, PaymentOrder> paymentOrdersByReservationId = paymentOrderDao.selectByReservationIds(reservationIds).stream()
+                .collect(Collectors.toMap(PaymentOrder::getReservationId, paymentOrder -> paymentOrder));
+
+        List<MyReservationResponse> reservations = foundReservations.stream()
+                .map(reservation -> MyReservationResponse.fromReservation(
+                        reservation,
+                        paymentOrdersByReservationId.get(reservation.getId())
+                ))
                 .toList();
 
         List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByName(name).stream()

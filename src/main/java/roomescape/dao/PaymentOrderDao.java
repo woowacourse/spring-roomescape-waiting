@@ -9,6 +9,8 @@ import roomescape.domain.PaymentOrder;
 import roomescape.domain.PaymentOrderStatus;
 
 import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -69,6 +71,21 @@ public class PaymentOrderDao {
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
         }
+    }
+
+    public List<PaymentOrder> selectByReservationIds(List<Long> reservationIds) {
+        if (reservationIds.isEmpty()) {
+            return List.of();
+        }
+
+        String placeholders = String.join(", ", Collections.nCopies(reservationIds.size(), "?"));
+        String sql = """
+                SELECT id, order_id, reservation_id, amount, idempotency_key, status, created_at
+                FROM payment_order
+                WHERE reservation_id IN (%s)
+                """.formatted(placeholders);
+
+        return jdbcTemplate.query(sql, ROW_MAPPER, reservationIds.toArray());
     }
 
     public int deleteByReservationId(Long reservationId) {

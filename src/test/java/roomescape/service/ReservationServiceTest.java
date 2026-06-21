@@ -188,6 +188,47 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 내_예약_조회에_결제_정보를_포함한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명1", "https://thumbnail1.com");
+        Reservation reservation = saveReservation("브라운", LocalDate.of(2026, 5, 10), time, theme);
+        reservationDao.updatePayment(new Reservation(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getSlot(),
+                ReservationState.CONFIRMED,
+                "payment-key"
+        ));
+        PaymentOrder paymentOrder = paymentOrderDao.insert(
+                PaymentOrder.createPendingWithoutId(
+                        "order-1",
+                        reservation.getId(),
+                        10_000L,
+                        "idempotency-key",
+                        LocalDateTime.of(2026, 5, 9, 10, 0)
+                )
+        );
+        paymentOrderDao.update(paymentOrder.confirm());
+
+        List<MyReservationResponse> responses = reservationService.getMyReservations("브라운");
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst())
+                .extracting(
+                        MyReservationResponse::paymentStatus,
+                        MyReservationResponse::orderId,
+                        MyReservationResponse::paymentKey,
+                        MyReservationResponse::amount
+                )
+                .containsExactly(
+                        PaymentOrderStatus.CONFIRMED,
+                        "order-1",
+                        "payment-key",
+                        10_000L
+                );
+    }
+
+    @Test
     void 내_예약과_대기가_날짜_순으로_정렬된다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme1 = saveTheme("방탈출1", "설명1", "https://thumbnail1.com");
