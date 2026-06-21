@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
+import roomescape.payment.ratelimit.TokenBucketRateLimiter;
 
 @Configuration
 public class TossClientConfig {
@@ -18,11 +19,16 @@ public class TossClientConfig {
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.connect-timeout}") int connectTimeout,
             @Value("${toss.read-timeout}") int readTimeout,
-            @Value("${toss.max-attempts}") int maxAttempts
+            @Value("${toss.max-attempts}") int maxAttempts,
+            @Value("${outbound-rate-limit.capacity}") long outboundCapacity,
+            @Value("${outbound-rate-limit.refill-per-second}") double outboundRefillPerSecond
     ) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(connectTimeout);
         factory.setReadTimeout(readTimeout);
+
+        TokenBucketRateLimiter outboundLimiter =
+                new TokenBucketRateLimiter(outboundCapacity, outboundRefillPerSecond, System::nanoTime);
 
         String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
@@ -30,6 +36,7 @@ public class TossClientConfig {
                 .baseUrl(baseUrl)
                 .requestFactory(factory)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
+                .requestInterceptor(new OutboundRateLimitInterceptor(outboundLimiter))
                 .requestInterceptor(new RetryAfterInterceptor(maxAttempts))
                 .build();
     }
