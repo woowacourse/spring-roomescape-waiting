@@ -60,3 +60,19 @@ CREATE TABLE IF NOT EXISTS reservation
 
 CREATE INDEX IF NOT EXISTS idx_reservation_customer_name_email
     ON reservation (customer_name, customer_email);
+
+CREATE TABLE IF NOT EXISTS payment_order
+(
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    order_id VARCHAR(64) NOT NULL,
+    amount INT NOT NULL,
+    payment_key VARCHAR(200),
+    status VARCHAR(20) NOT NULL,
+    reservation_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
+    CONSTRAINT unique_payment_order_order_id UNIQUE (order_id),
+    CONSTRAINT unique_payment_order_reservation_id UNIQUE (reservation_id),
+    CONSTRAINT unique_payment_order_payment_key UNIQUE (payment_key)
+);
