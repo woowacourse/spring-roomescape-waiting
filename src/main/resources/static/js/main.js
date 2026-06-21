@@ -28,6 +28,7 @@ async function boot() {
     } finally {
         state.loading.boot = false;
         render({animate: true});
+        showPaymentResult();
     }
 }
 
@@ -324,7 +325,7 @@ async function submitReservation(form) {
                     timeId: state.selectedTimeId
                 }
             });
-        } else {
+        } else if (selectedTime()?.available === false) {
             await api("/reservations", {
                 method: "POST",
                 body: {
@@ -334,6 +335,18 @@ async function submitReservation(form) {
                     timeId: state.selectedTimeId
                 }
             });
+        } else {
+            const order = await api("/payments/orders", {
+                method: "POST",
+                body: {
+                    name,
+                    date: state.selectedDate,
+                    themeId: state.selectedThemeId,
+                    timeId: state.selectedTimeId
+                }
+            });
+            await requestTossPayment(order, name);
+            return;
         }
 
         const wasWaiting = !selectedTime()?.available;
@@ -353,6 +366,44 @@ async function submitReservation(form) {
             scrollToPageTop();
         }
     }
+}
+
+async function requestTossPayment(order, customerName) {
+    if (!window.TossPayments) {
+        throw new Error("결제창을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    }
+
+    const tossPayments = window.TossPayments(order.clientKey);
+    const payment = tossPayments.payment({customerKey: window.TossPayments.ANONYMOUS});
+    const origin = window.location.origin;
+
+    await payment.requestPayment({
+        method: "CARD",
+        amount: {
+            currency: "KRW",
+            value: order.amount
+        },
+        orderId: order.orderId,
+        orderName: order.orderName,
+        customerName,
+        successUrl: `${origin}/payments/success`,
+        failUrl: `${origin}/payments/fail`
+    });
+}
+
+function showPaymentResult() {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    if (!payment) {
+        return;
+    }
+
+    if (payment === "success") {
+        showToast("결제가 승인되어 예약이 확정되었습니다.", "success");
+    } else {
+        showToast(params.get("message") || "결제가 완료되지 않았습니다.", "error");
+    }
+    history.replaceState(null, "", `${window.location.pathname}${window.location.hash}`);
 }
 
 async function submitTheme(form) {
