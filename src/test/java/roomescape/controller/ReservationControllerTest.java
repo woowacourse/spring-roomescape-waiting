@@ -77,9 +77,10 @@ class ReservationControllerTest {
     void 예약_생성_요청을_받으면_DTO의_이름_날짜_시간_id_테마_id를_Service에_전달하고_결과를_반환한다() throws Exception {
         Reservation created = new Reservation(1L, "레서", LocalDate.of(2026, 5, 6),
                 new ReservationTime(1L, LocalTime.of(18, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url"));
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.PAYMENT_PENDING, "order-abc", 50000L);
 
-        when(reservationService.createReservation(any(), any(), anyLong(), anyLong())).thenReturn(created);
+        when(reservationService.createReservation(any(), any(), anyLong(), anyLong(), anyLong())).thenReturn(created);
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -87,7 +88,8 @@ class ReservationControllerTest {
                                     "name": "레서",
                                     "date": "2026-05-06",
                                     "timeId": 1,
-                                    "themeId": 1
+                                    "themeId": 1,
+                                    "amount": 50000
                                   }
                                 """))
                 .andExpect(status().isCreated())
@@ -106,7 +108,8 @@ class ReservationControllerTest {
     void 예약_변경_요청을_받으면_id와_이름_날짜_시간_id를_Service에_전달하고_결과를_반환한다() throws Exception {
         Reservation updated = new Reservation(1L, "레서", LocalDate.of(2026, 5, 7),
                 new ReservationTime(2L, LocalTime.of(20, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url"));
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.CONFIRMED, null, null);
 
         when(reservationService.updateReservation(anyLong(), any(), any(), anyLong())).thenReturn(updated);
 

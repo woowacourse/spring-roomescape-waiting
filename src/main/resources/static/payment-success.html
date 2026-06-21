@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>결제 완료</title>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #0b1220; color: #f1f5f9; }
+    .box { text-align: center; }
+    h1 { color: #2ecc71; margin-bottom: 1rem; }
+    a { color: #f59e0b; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>예약이 완료되었습니다!</h1>
+    <p id="msg"></p>
+    <br>
+    <a href="/index.html">홈으로 돌아가기</a>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    document.getElementById('msg').textContent = '주문번호: ' + (params.get('orderId') ?? '');
+  </script>
+</body>
+</html>

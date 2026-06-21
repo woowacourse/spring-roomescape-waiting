@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -30,6 +31,9 @@ public class ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
+                       r.order_id    AS reservation_order_id,
+                       r.amount      AS reservation_amount,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id    AS theme_id,
@@ -51,6 +55,9 @@ public class ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
+                       r.order_id    AS reservation_order_id,
+                       r.amount      AS reservation_amount,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id         AS theme_id,
@@ -75,6 +82,9 @@ public class ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
+                       r.order_id    AS reservation_order_id,
+                       r.amount      AS reservation_amount,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id    AS theme_id,
@@ -97,6 +107,9 @@ public class ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
+                       r.order_id    AS reservation_order_id,
+                       r.amount      AS reservation_amount,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id    AS theme_id,
@@ -117,6 +130,9 @@ public class ReservationRepository {
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
+                       r.status      AS reservation_status,
+                       r.order_id    AS reservation_order_id,
+                       r.amount      AS reservation_amount,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
                        th.id         AS theme_id,
@@ -142,7 +158,7 @@ public class ReservationRepository {
     }
 
     public Reservation save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (name, date, time_id, theme_id, status, order_id, amount) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -151,6 +167,9 @@ public class ReservationRepository {
             ps.setObject(2, reservation.getDate());
             ps.setObject(3, reservation.getTime().getId());
             ps.setObject(4, reservation.getTheme().getId());
+            ps.setString(5, reservation.getStatus().name());
+            ps.setString(6, reservation.getOrderId());
+            ps.setObject(7, reservation.getAmount());
             return ps;
         }, keyHolder);
         long id = keyHolder.getKey().longValue();
@@ -159,7 +178,42 @@ public class ReservationRepository {
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                reservation.getTheme());
+                reservation.getTheme(),
+                reservation.getStatus(),
+                reservation.getOrderId(),
+                reservation.getAmount());
+    }
+
+    public Optional<Reservation> findByOrderId(String orderId) {
+        String sql = """
+                SELECT r.id          AS reservation_id,
+                       r.name        AS reservation_name,
+                       r.date        AS reservation_date,
+                       r.status      AS reservation_status,
+                       r.order_id    AS reservation_order_id,
+                       r.amount      AS reservation_amount,
+                       t.id          AS time_id,
+                       t.start_at    AS time_start_at,
+                       th.id         AS theme_id,
+                       th.name       AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail  AS theme_thumbnail
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme th ON r.theme_id = th.id
+                WHERE r.order_id = ?
+                """;
+        try {
+            Reservation reservation = jdbcTemplate.queryForObject(sql, reservationRowsMapper(), orderId);
+            return Optional.ofNullable(reservation);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public void confirm(long id) {
+        String sql = "UPDATE reservation SET status = ? WHERE id = ?";
+        jdbcTemplate.update(sql, ReservationStatus.CONFIRMED.name(), id);
     }
 
     public boolean existsByTimeId(long id) {
@@ -200,7 +254,10 @@ public class ReservationRepository {
                     rs.getString("reservation_name"),
                     LocalDate.parse(rs.getString("reservation_date")),
                     time,
-                    theme
+                    theme,
+                    ReservationStatus.valueOf(rs.getString("reservation_status")),
+                    rs.getString("reservation_order_id"),
+                    rs.getObject("reservation_amount", Long.class)
             );
         };
     }

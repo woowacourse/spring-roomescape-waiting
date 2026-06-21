@@ -41,7 +41,8 @@ public class ReservationController {
                 request.name(),
                 request.date(),
                 request.timeId(),
-                request.themeId());
+                request.themeId(),
+                request.amount());
         ReservationResponse response = ReservationResponse.from(reservation);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

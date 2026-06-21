@@ -4,15 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>예약하기 · 방탈출</title>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background:
-                radial-gradient(900px 500px at 90% -10%, #f59e0b14, transparent 60%),
-                radial-gradient(700px 400px at -10% 20%, #6366f114, transparent 60%),
-                #0b1220;
+            background: radial-gradient(900px 500px at 90% -10%, #f59e0b14, transparent 60%),
+            radial-gradient(700px 400px at -10% 20%, #6366f114, transparent 60%),
+            #0b1220;
             color: #f1f5f9;
             min-height: 100vh;
         }
@@ -49,7 +53,10 @@
             gap: 0.4rem;
             transition: color 0.15s;
         }
-        .btn-back:hover { color: #f1f5f9; }
+
+        .btn-back:hover {
+            color: #f1f5f9;
+        }
 
         main {
             max-width: 720px;
@@ -142,16 +149,19 @@
             flex-shrink: 0;
             transition: background 0.25s, color 0.25s, box-shadow 0.25s;
         }
+
         .step-card.active .step-num {
             background: linear-gradient(135deg, #f59e0b, #fbbf24);
             color: #0f172a;
             box-shadow: 0 4px 14px #f59e0b55;
         }
+
         .step-card.done .step-num {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             font-size: 0; /* 숫자 숨기고 ::before 체크마크만 */
         }
+
         .step-card.done .step-num::before {
             content: '✓';
             font-size: 0.95rem;
@@ -162,12 +172,20 @@
             font-weight: 700;
             color: #94a3b8;
         }
-        .step-card.active .step-title,
-        .step-card.done .step-title { color: #f1f5f9; }
 
-        .step-content { display: none; }
+        .step-card.active .step-title,
+        .step-card.done .step-title {
+            color: #f1f5f9;
+        }
+
+        .step-content {
+            display: none;
+        }
+
         .step-card.active .step-content,
-        .step-card.done .step-content { display: block; }
+        .step-card.done .step-content {
+            display: block;
+        }
 
         /* ── 날짜 입력 ── */
         input[type="date"] {
@@ -183,7 +201,10 @@
             outline: none;
             transition: border-color 0.15s;
         }
-        input[type="date"]:focus { border-color: #f59e0b; }
+
+        input[type="date"]:focus {
+            border-color: #f59e0b;
+        }
 
         /* ── 시간 슬롯 ── */
         .time-grid {
@@ -205,20 +226,24 @@
             transition: border-color 0.15s, background 0.15s, transform 0.1s;
             user-select: none;
         }
+
         .time-slot:hover {
             transform: translateY(-2px);
         }
+
         /* 예약 가능 (isAvailable = true) → 초록 계열 */
         .time-slot.available:hover {
             border-color: #22c55e;
             background: #1e293b;
         }
+
         .time-slot.available.selected {
             border-color: #22c55e;
             background: linear-gradient(135deg, #22c55e22, #16a34a22);
             color: #4ade80;
             box-shadow: 0 4px 14px #22c55e33;
         }
+
         .time-slot.available::after {
             content: '예약 가능';
             display: block;
@@ -232,16 +257,19 @@
         .time-slot.waiting {
             border-color: #3b82f655;
         }
+
         .time-slot.waiting:hover {
             border-color: #3b82f6;
             background: #1e293b;
         }
+
         .time-slot.waiting.selected {
             border-color: #3b82f6;
             background: linear-gradient(135deg, #3b82f622, #60a5fa22);
             color: #60a5fa;
             box-shadow: 0 4px 14px #3b82f633;
         }
+
         .time-slot.waiting::after {
             content: '예약 대기';
             display: block;
@@ -270,8 +298,14 @@
             outline: none;
             transition: border-color 0.15s;
         }
-        input[type="text"]::placeholder { color: #475569; }
-        input[type="text"]:focus { border-color: #f59e0b; }
+
+        input[type="text"]::placeholder {
+            color: #475569;
+        }
+
+        input[type="text"]:focus {
+            border-color: #f59e0b;
+        }
 
         /* ── 예약하기 버튼 ── */
         .btn-submit {
@@ -289,8 +323,16 @@
             box-shadow: 0 6px 20px #f59e0b44;
             letter-spacing: 0.3px;
         }
-        .btn-submit:hover { filter: brightness(1.08); box-shadow: 0 8px 24px #f59e0b66; }
-        .btn-submit:active { transform: translateY(1px); }
+
+        .btn-submit:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 8px 24px #f59e0b66;
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+
         .btn-submit:disabled {
             background: #334155;
             color: #94a3b8;
@@ -304,9 +346,23 @@
             text-align: center;
             padding: 3rem 1rem;
         }
-        .success-box .icon { font-size: 3.5rem; margin-bottom: 1rem; }
-        .success-box h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .success-box p { color: #94a3b8; margin-bottom: 1.5rem; }
+
+        .success-box .icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-box h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-box p {
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+        }
+
         .btn-home {
             display: inline-block;
             padding: 0.75rem 1.5rem;
@@ -375,6 +431,10 @@
 </main>
 
 <script>
+    /* ── Toss 클라이언트 키 & 결제 금액 ── */
+    const TOSS_CLIENT_KEY = 'test_ck_PBal2vxj81zGmn9QZoQG35RQgOAN';
+    const PAYMENT_AMOUNT = 50000;
+
     /* ── 상태 ── */
     const state = {
         theme: null,
@@ -387,10 +447,13 @@
     /* ── 테마 로드 (sessionStorage) ── */
     function initTheme() {
         const raw = sessionStorage.getItem('selectedTheme');
-        if (!raw) { location.href = '/'; return; }
+        if (!raw) {
+            location.href = '/';
+            return;
+        }
 
         state.theme = JSON.parse(raw);
-        const { name, description, thumbnail } = state.theme;
+        const {name, description, thumbnail} = state.theme;
 
         document.getElementById('theme-panel').innerHTML = `
             <img src="${thumbnail}" alt="${name}"
@@ -463,7 +526,8 @@
         try {
             const body = await res.json();
             if (body && body.message) return body.message;
-        } catch { /* ignore */ }
+        } catch { /* ignore */
+        }
         return fallback;
     }
 
@@ -482,15 +546,14 @@
         errEl.style.display = 'none';
 
         try {
+            const body = waiting
+                ? {name, date: state.date, timeId: state.timeId, themeId: state.theme.id}
+                : {name, date: state.date, timeId: state.timeId, themeId: state.theme.id, amount: PAYMENT_AMOUNT};
+
             const res = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    date: state.date,
-                    timeId: state.timeId,
-                    themeId: state.theme.id,
-                }),
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body),
             });
 
             if (!res.ok) {
@@ -502,7 +565,32 @@
                 return;
             }
 
-            showSuccess(name, waiting);
+            if (waiting) {
+                showSuccess(name, true);
+                return;
+            }
+
+            // 예약 생성 성공 → Toss 결제창 오픈
+            const data = await res.json();
+            const orderId = data.orderId;
+            const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+            try {
+                await tossPayments.requestPayment('카드', {
+                    amount: PAYMENT_AMOUNT,
+                    orderId,
+                    orderName: `방탈출 예약 - ${state.theme.name}`,
+                    customerName: name,
+                    successUrl: `${window.location.origin}/payments/success`,
+                    failUrl: `${window.location.origin}/payments/fail`,
+                });
+            } catch {
+                // 사용자가 결제창을 닫거나 결제 취소 → 대기 예약 삭제
+                await fetch(`/payments/fail?orderId=${orderId}&code=USER_CANCEL&message=결제가 취소되었습니다`);
+                errEl.textContent = '결제가 취소되었습니다.';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = defaultLabel;
+            }
         } catch (e) {
             errEl.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
             errEl.style.display = 'block';
@@ -513,7 +601,7 @@
 
     /* ── 성공 화면 ── */
     function showSuccess(name, waiting) {
-        const { theme, date, timeName } = state;
+        const {theme, date, timeName} = state;
         const icon = waiting ? '⏳' : '🎉';
         const title = waiting ? '예약 대기가 등록되었습니다!' : '예약이 완료되었습니다!';
         const detail = waiting

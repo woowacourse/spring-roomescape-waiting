@@ -75,7 +75,7 @@ class ReservationServiceTest {
         when(reservationTimeRepository.findById(anyLong())).thenReturn(Optional.of(newTime));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
 
-        assertThatThrownBy(() -> reservationService.createReservation("레서", LocalDate.of(2026, 4, 1), 1L, 1L))
+        assertThatThrownBy(() -> reservationService.createReservation("레서", LocalDate.of(2026, 4, 1), 1L, 1L, 50000L))
                 .isInstanceOf(DomainConflictException.class);
 
         verify(reservationRepository, never()).save(any(Reservation.class));
@@ -89,9 +89,10 @@ class ReservationServiceTest {
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
         when(reservationRepository.findBySchedule(any(LocalDate.class), anyLong(), anyLong()))
                 .thenReturn(Optional.of(new Reservation(
-                        1L, "브라운", LocalDate.of(2026, 5, 13), newTime, theme)));
+                        1L, "브라운", LocalDate.of(2026, 5, 13), newTime, theme,
+                        ReservationStatus.CONFIRMED, null, null)));
 
-        assertThatThrownBy(() -> reservationService.createReservation("레서", LocalDate.of(2026, 5, 13), 1L, 1L))
+        assertThatThrownBy(() -> reservationService.createReservation("레서", LocalDate.of(2026, 5, 13), 1L, 1L, 50000L))
                 .isInstanceOf(BusinessConflictException.class)
                 .extracting(e -> ((BusinessException) e).getErrorCode())
                 .isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
@@ -102,7 +103,7 @@ class ReservationServiceTest {
         when(reservationTimeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(
-                "브라운", LocalDate.of(2026, 5, 10), 999L, 2L))
+                "브라운", LocalDate.of(2026, 5, 10), 999L, 2L, 50000L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .extracting(e -> ((BusinessException) e).getErrorCode())
                 .isEqualTo(ErrorCode.RESERVATION_TIME_NOT_FOUND);
@@ -118,7 +119,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(
-                "브라운", LocalDate.of(2026, 5, 10), 1L, 999L))
+                "브라운", LocalDate.of(2026, 5, 10), 1L, 999L, 50000L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .extracting(e -> ((BusinessException) e).getErrorCode())
                 .isEqualTo(ErrorCode.THEME_NOT_FOUND);
@@ -144,7 +145,8 @@ class ReservationServiceTest {
         ReservationTime originalTime = new ReservationTime(1L, LocalTime.of(10, 0));
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(12, 0));
         Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
-        Reservation reservation = new Reservation(7L, "브라운", LocalDate.of(2026, 5, 10), originalTime, theme);
+        Reservation reservation = new Reservation(7L, "브라운", LocalDate.of(2026, 5, 10), originalTime, theme,
+                ReservationStatus.CONFIRMED, null, null);
 
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(newTime));
@@ -162,7 +164,8 @@ class ReservationServiceTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.CONFIRMED, null, null
         );
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(999L)).thenReturn(Optional.empty());
@@ -183,7 +186,8 @@ class ReservationServiceTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.CONFIRMED, null, null
         );
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(newTime));
@@ -193,7 +197,8 @@ class ReservationServiceTest {
                         "어셔",
                         LocalDate.of(2026, 5, 11),
                         newTime,
-                        reservation.getTheme()
+                        reservation.getTheme(),
+                        ReservationStatus.CONFIRMED, null, null
                 )));
 
         assertThatThrownBy(() -> reservationService.updateReservation(7L, "브라운", LocalDate.of(2026, 5, 11), 2L))
@@ -223,7 +228,8 @@ class ReservationServiceTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.CONFIRMED, null, null
         );
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
 
@@ -271,7 +277,8 @@ class ReservationServiceTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.CONFIRMED, null, null
         );
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
@@ -291,7 +298,8 @@ class ReservationServiceTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 new ReservationTime(1L, LocalTime.of(12, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.CONFIRMED, null, null
         );
 
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
@@ -319,7 +327,8 @@ class ReservationServiceTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 new ReservationTime(1L, LocalTime.of(12, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                ReservationStatus.CONFIRMED, null, null
         );
 
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));

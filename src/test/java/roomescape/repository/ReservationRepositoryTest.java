@@ -57,7 +57,8 @@ class ReservationRepositoryTest {
     @Test
     void 예약_전체를_조회한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         List<Reservation> result = reservationRepository.findAll(0, 10);
 
@@ -76,11 +77,14 @@ class ReservationRepositoryTest {
     @Test
     void 예약_목록을_페이지_단위로_조회한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "어셔", LocalDate.of(2026, 5, 11), time, theme));
+                null, "어셔", LocalDate.of(2026, 5, 11), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "레서", LocalDate.of(2026, 5, 12), time, theme));
+                null, "레서", LocalDate.of(2026, 5, 12), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         List<Reservation> result = reservationRepository.findAll(1, 2);
 
@@ -91,11 +95,14 @@ class ReservationRepositoryTest {
     @Test
     void 이름으로_사용자_예약_목록을_페이지_단위로_조회한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "어셔", LocalDate.of(2026, 5, 11), time, theme));
+                null, "어셔", LocalDate.of(2026, 5, 11), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 12), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 12), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         List<Reservation> result = reservationRepository.findByName("브라운", 0, 10);
 
@@ -111,11 +118,14 @@ class ReservationRepositoryTest {
     @Test
     void 이름으로_사용자_예약_목록을_조회할_때_페이지를_적용한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 11), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 11), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 12), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 12), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         List<Reservation> result = reservationRepository.findByName("브라운", 1, 2);
 
@@ -126,7 +136,8 @@ class ReservationRepositoryTest {
     @Test
     void 예약을_저장한다() {
         Reservation saved = reservationRepository.save(
-                new Reservation(null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                new Reservation(null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                        ReservationStatus.CONFIRMED, null, null));
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM reservation WHERE id = ?", Integer.class, saved.getId());
@@ -136,7 +147,8 @@ class ReservationRepositoryTest {
     @Test
     void id로_예약을_조회한다() {
         Reservation savedReservation = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         Reservation result = reservationRepository.findById(savedReservation.getId()).get();
 
@@ -163,9 +175,11 @@ class ReservationRepositoryTest {
                 "12:00"
         );
         Reservation savedReservation = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         Reservation updated = new Reservation(
-                savedReservation.getId(), "브라운", LocalDate.of(2026, 5, 11), newTime, theme);
+                savedReservation.getId(), "브라운", LocalDate.of(2026, 5, 11), newTime, theme,
+                ReservationStatus.CONFIRMED, null, null);
 
         reservationRepository.update(updated);
 
@@ -178,7 +192,8 @@ class ReservationRepositoryTest {
     @Test
     void 같은_날짜_시간_테마의_예약을_조회한다() {
         Reservation first = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         Optional<Reservation> result = reservationRepository.findBySchedule(
                 first.getDate(), first.getTime().getId(), first.getTheme().getId());
@@ -190,7 +205,8 @@ class ReservationRepositoryTest {
     @Test
     void 같은_날짜_시간_테마의_예약이_없으면_빈_Optional을_반환한다() {
         Reservation reservation = new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme);
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null);
 
         Optional<Reservation> result = reservationRepository.findBySchedule(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
@@ -201,11 +217,14 @@ class ReservationRepositoryTest {
     @Test
     void 이름으로_예약_목록을_조회한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 11), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 11), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
         reservationRepository.save(new Reservation(
-                null, "밍구", LocalDate.of(2026, 5, 12), time, theme));
+                null, "밍구", LocalDate.of(2026, 5, 12), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         List<Reservation> result = reservationRepository.findByName("브라운");
 
@@ -216,7 +235,8 @@ class ReservationRepositoryTest {
     @Test
     void 예약을_삭제한다() {
         Reservation savedReservation = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme,
+                ReservationStatus.CONFIRMED, null, null));
 
         reservationRepository.delete(savedReservation);
 
