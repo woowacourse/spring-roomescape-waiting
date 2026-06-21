@@ -2,19 +2,18 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.RoomEscapeException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-
-import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -42,14 +41,12 @@ public class ReservationService {
         Slot slot = assembled.getSlot();
 
         Reservations existing = new Reservations(reservationRepository.findBySlot_Id(slot.getId()));
-        Reservation join = existing.join(assembled);
-        return reservationRepository.save(join);
+        Reservation joined = existing.join(assembled);
+        return reservationRepository.save(joined);
     }
 
-    public Reservation find(long id) {
-        Reservation reservation = reservationRepository.getById(id);
-        Reservations slotReservations = new Reservations(reservationRepository.findBySlot_Id(reservation.getSlotId()));
-        return reservation.withRank(slotReservations.rankOf(reservation));
+    public ReservationWithRank find(long id) {
+        return reservationRepository.getByIdWithRank(id);
     }
 
     public Reservations findAll(Long memberId) {
@@ -60,16 +57,13 @@ public class ReservationService {
         return new Reservations(reservationRepository.findAllByMember(member));
     }
 
-    public Reservations findMine(Long memberId) {
-        if(!memberRepository.existsById(memberId)){
-            throw new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 회원을 찾을 수 없습니다. : " + memberId);
-        }
-
-        return new Reservations(reservationRepository.findByMemberId(memberId));
+    public List<ReservationWithRank> findMine(Long memberId) {
+        memberRepository.getById(memberId); // 존재 여부 확인
+        return reservationRepository.findAllByMemberIdWithRank(memberId);
     }
 
     @Transactional
-    public Reservation update(ReservationUpdateCommand command, long id) {
+    public ReservationWithRank update(ReservationUpdateCommand command, long id) {
         Reservation existing = reservationRepository.getById(id);
         Reservation assembled = assembler.from(command);
 

@@ -15,6 +15,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
@@ -269,16 +270,15 @@ class ReservationServiceTest {
 
     @Test
     void 단건_조회시_존재하는_ID면_결과를_반환한다() {
-        given(reservationRepository.getById(EXISTS_ID)).willReturn(DUMMY);
-        given(reservationRepository.findBySlot_Id(EXISTS_ID)).willReturn(List.of(DUMMY));
-        Reservation result = reservationService.find(EXISTS_ID);
+        given(reservationRepository.getByIdWithRank(EXISTS_ID)).willReturn(new ReservationWithRank(DUMMY, 0L));
+        ReservationWithRank result = reservationService.find(EXISTS_ID);
 
-        Assertions.assertThat(result.getId()).isEqualTo(EXISTS_ID);
+        Assertions.assertThat(result.reservation().getId()).isEqualTo(EXISTS_ID);
     }
 
     @Test
     void 단건_조회시_존재하지_않는_ID면_예외가_발생한다() {
-        given(reservationRepository.getById(NOT_EXISTS_ID)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "test"));
+        given(reservationRepository.getByIdWithRank(NOT_EXISTS_ID)).willThrow(new RoomEscapeException(DomainErrorCode.RESOURCE_NOT_FOUND, "test"));
         Assertions.assertThatThrownBy(() -> reservationService.find(NOT_EXISTS_ID))
                 .isInstanceOf(RoomEscapeException.class);
     }
@@ -306,10 +306,9 @@ class ReservationServiceTest {
 
     @Test
     void 첫번째_예약은_승인_상태이다() {
-        given(reservationRepository.getById(EXISTS_ID)).willReturn(DUMMY);
-        given(reservationRepository.findBySlot_Id(EXISTS_ID)).willReturn(List.of(DUMMY));
-        Reservation result = reservationService.find(EXISTS_ID);
+        given(reservationRepository.getByIdWithRank(EXISTS_ID)).willReturn(new ReservationWithRank(DUMMY, 0L));
+        ReservationWithRank result = reservationService.find(EXISTS_ID);
 
-        Assertions.assertThat(result.getStatus()).isEqualTo(Status.APPROVED);
+        Assertions.assertThat(result.reservation().getStatus()).isEqualTo(Status.APPROVED);
     }
 }

@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
@@ -41,9 +40,6 @@ public class Reservation {
     @JoinColumn(name = "slot_id")
     private Slot slot;
 
-    @Transient
-    private Rank rank;
-
     @Column(name = "created_at", insertable = false, updatable = false,
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
@@ -67,12 +63,6 @@ public class Reservation {
 
     public Reservation withStatus(Status status) {
         return new Reservation(id, member, status, slot);
-    }
-
-    public Reservation withRank(Rank rank) {
-        Reservation copy = new Reservation(id, member, status, slot);
-        copy.rank = rank;
-        return copy;
     }
 
     public void changeStatus(Status status) {
@@ -123,10 +113,6 @@ public class Reservation {
 
     public Long getSlotId() {
         return slot.getId();
-    }
-
-    public Rank getRank() {
-        return rank;
     }
 
     @Override

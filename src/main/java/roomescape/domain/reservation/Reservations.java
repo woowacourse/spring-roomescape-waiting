@@ -4,6 +4,7 @@ import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class Reservations {
@@ -15,8 +16,7 @@ public class Reservations {
 
     public Reservation join(Reservation assembled) {
         conflictByMember(assembled);
-        Reservation withStatus = assembled.withStatus(nextStatus());
-        return withStatus.withRank(rankOf(withStatus));
+        return assembled.withStatus(nextStatus());
     }
 
     private Status nextStatus() {
@@ -44,13 +44,10 @@ public class Reservations {
                 .findFirst();
     }
 
-    public Rank rankOf(Reservation reservation) {
-        if (reservation.isApproved()) {
-            return new Rank(0);
-        }
-        List<Reservation> waitings = values.stream().filter(Reservation::isWaiting).toList();
-        int position = waitings.indexOf(reservation);
-        return position == -1 ? new Rank(waitings.size() + 1) : new Rank(position + 1);
+    public List<ReservationWithRank> withRanks(Map<Long, Long> rankMap) {
+        return values.stream()
+                .map(r -> new ReservationWithRank(r, rankMap.getOrDefault(r.getId(), 0L)))
+                .toList();
     }
 
     public List<Reservation> getValues() {

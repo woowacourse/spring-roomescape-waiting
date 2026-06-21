@@ -14,6 +14,7 @@ import roomescape.domain.RoomEscapeException;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
@@ -45,24 +46,32 @@ class ReservationControllerTest {
     @MockitoBean
     private ReservationService reservationService;
 
-    private Reservation approvedReservation() {
+    private Reservation approvedReservationEntity() {
         ReservationTime time = ReservationTime.load(1L, LocalTime.of(10, 0));
         Theme theme = Theme.load(1L, "공포", "무서워요", "https://zeze.com");
         Slot slot = Slot.load(1L, LocalDate.of(2099, 1, 1), time, theme);
         return new Reservation(1L, new Member(1L, "zeze"), Status.APPROVED, slot);
     }
 
-    private Reservation waitingReservation() {
+    private Reservation waitingReservationEntity() {
         ReservationTime time = ReservationTime.load(1L, LocalTime.of(10, 0));
         Theme theme = Theme.load(1L, "공포", "무서워요", "https://zeze.com");
         Slot slot = Slot.load(1L, LocalDate.of(2099, 1, 1), time, theme);
         return new Reservation(2L, new Member(2L, "mingu"), Status.WAITING, slot);
     }
 
+    private ReservationWithRank approvedReservation() {
+        return new ReservationWithRank(approvedReservationEntity(), 0L);
+    }
+
+    private ReservationWithRank waitingReservation() {
+        return new ReservationWithRank(waitingReservationEntity(), 1L);
+    }
+
     @Test
     void 예약_생성_성공시_201을_반환한다() throws Exception {
         ReservationCreateRequest request = new ReservationCreateRequest(1L, LocalDate.of(2099, 1, 1), 1L, 1L);
-        given(reservationService.reserve(any())).willReturn(approvedReservation());
+        given(reservationService.reserve(any())).willReturn(approvedReservationEntity());
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +134,7 @@ class ReservationControllerTest {
     @Test
     void 예약_전체_목록_조회_성공시_200을_반환한다() throws Exception {
         given(reservationService.findAll(any()))
-                .willReturn(new Reservations(List.of(approvedReservation(), waitingReservation())));
+                .willReturn(new Reservations(List.of(approvedReservationEntity(), waitingReservationEntity())));
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservations.length()").value(2));
@@ -134,7 +143,7 @@ class ReservationControllerTest {
     @Test
     void memberId로_예약_목록_조회_성공시_200을_반환한다() throws Exception {
         given(reservationService.findAll(any()))
-                .willReturn(new Reservations(List.of(approvedReservation())));
+                .willReturn(new Reservations(List.of(approvedReservationEntity())));
         mockMvc.perform(get("/reservations").param("memberId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservations.length()").value(1))

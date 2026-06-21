@@ -16,12 +16,14 @@ import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationResponses;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.domain.reservation.Reservations;
 import roomescape.service.ReservationCreateCommand;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationUpdateCommand;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 public class ReservationController {
@@ -54,14 +56,14 @@ public class ReservationController {
 
     @GetMapping("/reservations/{id}")
     public ResponseEntity<ReservationResponse> find(@PathVariable long id) {
-        Reservation reservation = reservationService.find(id);
-        return ResponseEntity.ok(ReservationResponse.toDto(reservation));
+        ReservationWithRank reservationWithRank = reservationService.find(id);
+        return ResponseEntity.ok(ReservationResponse.toDto(reservationWithRank));
     }
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<ReservationResponses> findMine(@RequestParam Long memberId) {
-        Reservations reservations = reservationService.findMine(memberId);
-        return ResponseEntity.ok(ReservationResponses.toDto(reservations));
+        List<ReservationWithRank> reservations = reservationService.findMine(memberId);
+        return ResponseEntity.ok(ReservationResponses.toDtoWithRank(reservations));
     }
 
     @DeleteMapping("/reservations/{id}")
@@ -78,7 +80,7 @@ public class ReservationController {
             @Valid @RequestBody ReservationUpdateRequest request,
             @PathVariable long id
     ) {
-        Reservation updated = reservationService.update(ReservationUpdateCommand.from(request), id);
+        ReservationWithRank updated = reservationService.update(ReservationUpdateCommand.from(request), id);
         return ResponseEntity.ok(ReservationResponse.toDto(updated));
     }
 }
