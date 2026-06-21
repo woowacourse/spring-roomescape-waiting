@@ -1,6 +1,6 @@
 package roomescape.payment.toss;
 
-import java.net.ConnectException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.SocketTimeoutException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentConnectionException;
 import roomescape.payment.PaymentConfirmUnknownException;
@@ -50,13 +49,7 @@ public class TossPaymentGateway implements PaymentGateway {
                     .body(TossPaymentResponse.class);
             return toResult(response);
         } catch (ResourceAccessException e) {
-            if (hasCause(e, ConnectException.class)) {
-                throw new PaymentConnectionException("토스 결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.", e);
-            }
-            if (hasCause(e, SocketTimeoutException.class)) {
-                throw new PaymentConfirmUnknownException("토스 결제 승인 응답을 받지 못했습니다. 결제 내역에서 결과를 확인해 주세요.", e);
-            }
-            throw e;
+            throw new PaymentConnectionException("토스 결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.", e);
         } catch (RestClientException e) {
             if (hasCause(e, SocketTimeoutException.class)) {
                 throw new PaymentConfirmUnknownException("토스 결제 승인 응답을 받지 못했습니다. 결제 내역에서 결과를 확인해 주세요.", e);
