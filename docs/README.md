@@ -275,3 +275,11 @@ ReservationSlot 하나를 기준으로 관리
 1. 모니터링
 https://github.com/woowacourse/spring-roomescape-waiting/pull/510#discussion_r3393603770
 
+------
+
+# 선택 미션
+### 1단계 - JPA 전환
+- [x] build.gradle 설정에 jpa로 수정
+- [x] Time과 Theme의 영속성 관리를 JPA로 전환
+- [x] ReservationSlot과 Reservation의 영속성 관리를 JPA로 전환
+- [x] Reservation과 ReservationSlot을 양방향 매핑으로 수정
