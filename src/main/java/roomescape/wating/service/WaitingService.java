@@ -23,13 +23,6 @@ import roomescape.wating.controller.dto.request.WaitingCreateRequest;
 @RequiredArgsConstructor
 public class WaitingService {
 
-    private static final String WAITING_NOT_FOUND_MESSAGE = "존재하지 않는 대기입니다.";
-    private static final String THEME_NOT_FOUND_MESSAGE = "존재하지 않는 테마입니다.";
-    private static final String RESERVATION_TIME_NOT_FOUND_MESSAGE = "존재하지 않는 예약 시간입니다.";
-    private static final String NO_RESERVATION_FOR_WAITING_MESSAGE = "예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다.";
-    private static final String WAITING_SLOT_DUPLICATE_MESSAGE = "해당 시간에 이미 대기가 존재합니다.";
-    private static final String PAST_RESERVATION_WAITING_CANCELLATION_MESSAGE = "과거 시간 예약의 대기를 삭제할 수 없습니다.";
-
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -38,14 +31,14 @@ public class WaitingService {
     @Transactional
     public long create(final WaitingCreateRequest request) {
         final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException(THEME_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
         final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException(RESERVATION_TIME_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
         final ReservationSlot slot = reservationSlotRepository.findByDateAndTimeIdAndThemeIdForUpdate(
                 request.date(),
                 reservationTime.getId(),
                 theme.getId()
-        ).orElseThrow(() -> new UnprocessableContentException(NO_RESERVATION_FOR_WAITING_MESSAGE));
+        ).orElseThrow(() -> new UnprocessableContentException("예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다."));
 
         final Waiting waiting = Waiting.create(
                 request.name(),
@@ -56,24 +49,24 @@ public class WaitingService {
         try {
             return waitingRepository.save(waiting);
         } catch (DuplicateKeyException exception) {
-            throw new ConflictException(WAITING_SLOT_DUPLICATE_MESSAGE, exception);
+            throw new ConflictException("해당 시간에 이미 대기가 존재합니다.", exception);
         }
     }
 
     @Transactional
     public void deleteByIdAndCustomer(final long waitingId, final String customerName, final String customerEmail) {
         final Waiting waiting = waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new NotFoundException(WAITING_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
 
         reservationSlotRepository.findByIdForUpdate(waiting.getSlotId())
-                .orElseThrow(() -> new NotFoundException(WAITING_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
 
         final Waiting lockedWaiting = waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new NotFoundException(WAITING_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
         validateCancelableByCustomer(lockedWaiting, customerName, customerEmail);
 
         if (!waitingRepository.deleteById(waitingId)) {
-            throw new NotFoundException(WAITING_NOT_FOUND_MESSAGE);
+            throw new NotFoundException("존재하지 않는 대기입니다.");
         }
     }
 
@@ -83,10 +76,10 @@ public class WaitingService {
             final String customerEmail
     ) {
         if (!waiting.isOwnedBy(customerName, customerEmail)) {
-            throw new NotFoundException(WAITING_NOT_FOUND_MESSAGE);
+            throw new NotFoundException("존재하지 않는 대기입니다.");
         }
         if (!waiting.isCancelable(LocalDateTime.now())) {
-            throw new UnprocessableContentException(PAST_RESERVATION_WAITING_CANCELLATION_MESSAGE);
+            throw new UnprocessableContentException("과거 시간 예약의 대기를 삭제할 수 없습니다.");
         }
     }
 }
