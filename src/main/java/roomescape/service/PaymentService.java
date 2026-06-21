@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.client.PaymentGatewayException;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
 import roomescape.common.exception.code.ReservationErrorCode;
@@ -22,7 +23,7 @@ public class PaymentService {
         this.reservationDao = reservationDao;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = PaymentGatewayException.ReadTimeout.class)
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         PaymentOrder paymentOrder = paymentOrderDao.selectByOrderId(orderId)
                 .orElseThrow(() -> new RoomEscapeException(PaymentErrorCode.ORDER_NOT_FOUND));
@@ -31,8 +32,19 @@ public class PaymentService {
             throw new RoomEscapeException(PaymentErrorCode.AMOUNT_MISMATCH);
         }
 
-        PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
-        PaymentResult result = paymentGateway.confirm(confirmation);
+        PaymentResult result;
+        try {
+            PaymentConfirmation confirmation = new PaymentConfirmation(
+                    paymentKey,
+                    orderId,
+                    amount,
+                    paymentOrder.getIdempotencyKey()
+            );
+            result = paymentGateway.confirm(confirmation);
+        } catch (PaymentGatewayException.ReadTimeout exception) {
+            paymentOrderDao.update(paymentOrder.unknown());
+            throw exception;
+        }
 
         Reservation reservation = reservationDao.selectById(paymentOrder.getReservationId())
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
