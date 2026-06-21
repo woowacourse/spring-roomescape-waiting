@@ -65,7 +65,7 @@ public class ReservationService {
             throw new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 회원을 찾을 수 없습니다. : " + memberId);
         }
 
-        return new Reservations(reservationRepository.findMineWithDetails(memberId));
+        return new Reservations(reservationRepository.findByMemberId(memberId));
     }
 
     @Transactional

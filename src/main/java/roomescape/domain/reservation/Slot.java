@@ -37,7 +37,7 @@ public class Slot {
     @Embedded
     private ReservationDate date;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
     private ReservationTime time;
 

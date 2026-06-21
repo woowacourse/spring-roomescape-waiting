@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findBySlot_Id(Long slotId);
 
+    @EntityGraph(attributePaths = {"member", "slot", "slot.theme", "slot.time"})
     List<Reservation> findByMemberId(Long memberId);
 
     @Query("select r from Reservation r " +
