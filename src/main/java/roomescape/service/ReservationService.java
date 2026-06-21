@@ -60,9 +60,10 @@ public class ReservationService {
             Reservation savedReservation = reservationDao.insert(reservation);
 
             String orderId = generateOrderId();
+            String idempotencyKey = generateIdempotencyKey();
             long amount = RESERVATION_AMOUNT;
 
-            PaymentOrder paymentOrder = PaymentOrder.createPendingWithoutId(orderId, savedReservation.getId(), amount, now);
+            PaymentOrder paymentOrder = PaymentOrder.createPendingWithoutId(orderId, savedReservation.getId(), amount, idempotencyKey, now);
             paymentOrderDao.insert(paymentOrder);
 
             return ReservationPaymentResponse.from(savedReservation, orderId, amount);
@@ -190,6 +191,10 @@ public class ReservationService {
     }
 
     private String generateOrderId() {
+        return UUID.randomUUID().toString();
+    }
+
+    private String generateIdempotencyKey() {
         return UUID.randomUUID().toString();
     }
 }

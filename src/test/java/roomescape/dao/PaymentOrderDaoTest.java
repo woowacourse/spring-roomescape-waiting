@@ -40,6 +40,7 @@ public class PaymentOrderDaoTest {
                 "order_123",
                 reservation.getId(),
                 10_000L,
+                "idempotency-key",
                 createdAt
         );
 
@@ -50,6 +51,7 @@ public class PaymentOrderDaoTest {
                 () -> assertThat(saved.getOrderId()).isEqualTo("order_123"),
                 () -> assertThat(saved.getReservationId()).isEqualTo(reservation.getId()),
                 () -> assertThat(saved.getAmount()).isEqualTo(10_000L),
+                () -> assertThat(saved.getIdempotencyKey()).isEqualTo("idempotency-key"),
                 () -> assertThat(saved.getStatus()).isEqualTo(PaymentOrderStatus.PENDING),
                 () -> assertThat(saved.getCreatedAt()).isEqualTo(createdAt)
         );
@@ -65,6 +67,7 @@ public class PaymentOrderDaoTest {
                         "order_123",
                         reservation.getId(),
                         10_000L,
+                        "idempotency-key",
                         LocalDateTime.of(2026, 6, 17, 10, 0)
                 )
         );
@@ -78,6 +81,7 @@ public class PaymentOrderDaoTest {
                         PaymentOrder::getOrderId,
                         PaymentOrder::getReservationId,
                         PaymentOrder::getAmount,
+                        PaymentOrder::getIdempotencyKey,
                         PaymentOrder::getStatus,
                         PaymentOrder::getCreatedAt
                 )
@@ -86,6 +90,7 @@ public class PaymentOrderDaoTest {
                         saved.getOrderId(),
                         saved.getReservationId(),
                         saved.getAmount(),
+                        saved.getIdempotencyKey(),
                         saved.getStatus(),
                         saved.getCreatedAt()
                 );

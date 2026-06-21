@@ -36,6 +36,8 @@ class TossPaymentGatewayTest {
     static void tossProperties(DynamicPropertyRegistry registry) {
         registry.add("toss.base-url", () -> mockWebServer.url("/").toString());
         registry.add("toss.secret-key", () -> "test_sk_dummy");
+        registry.add("toss.connect-timeout-ms", () -> "500");
+        registry.add("toss.read-timeout-ms", () -> "500");
     }
 
     @AfterAll
@@ -55,7 +57,7 @@ class TossPaymentGatewayTest {
                 """);
 
         PaymentResult result = tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment-key", "order-1", 10_000L)
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
         );
 
         assertThat(result)
@@ -77,7 +79,7 @@ class TossPaymentGatewayTest {
                 """);
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment-key", "order-1", 10_000L)
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
         )).isInstanceOf(TossPaymentException.AlreadyProcessed.class);
     }
 
@@ -91,7 +93,7 @@ class TossPaymentGatewayTest {
                 """);
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment-key", "order-1", 10_000L)
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
         )).isInstanceOf(TossPaymentException.CardRejected.class);
     }
 
@@ -105,7 +107,7 @@ class TossPaymentGatewayTest {
                 """);
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment-key", "order-1", 10_000L)
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
         )).isInstanceOf(TossPaymentException.GatewayConfig.class);
     }
 
@@ -119,7 +121,7 @@ class TossPaymentGatewayTest {
                 """);
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment-key", "order-1", 10_000L)
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
         )).isInstanceOf(TossPaymentException.Retryable.class);
     }
 
@@ -133,7 +135,7 @@ class TossPaymentGatewayTest {
                 """);
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment-key", "order-1", 10_000L)
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
         ))
                 .isInstanceOf(TossPaymentException.class)
                 .isNotInstanceOf(TossPaymentException.AlreadyProcessed.class)
@@ -145,16 +147,16 @@ class TossPaymentGatewayTest {
     @Test
     void 결제_승인_API에_필요한_요청을_보낸다() throws Exception {
         enqueue(200, """
-            {
-              "paymentKey": "payment-key",
-              "orderId": "order-1",
-              "status": "DONE",
-              "totalAmount": 10000
-            }
-            """);
+                {
+                  "paymentKey": "payment-key",
+                  "orderId": "order-1",
+                  "status": "DONE",
+                  "totalAmount": 10000
+                }
+                """);
 
         tossPaymentGateway.confirm(
-                new PaymentConfirmation("payment-key", "order-1", 10_000L)
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
         );
 
         var request = mockWebServer.takeRequest();
@@ -163,6 +165,7 @@ class TossPaymentGatewayTest {
         assertThat(request.getPath()).isEqualTo("/v1/payments/confirm");
         assertThat(request.getHeader("Content-Type")).contains("application/json");
         assertThat(request.getHeader("Authorization")).startsWith("Basic ");
+        assertThat(request.getHeader("Idempotency-Key")).isEqualTo("idempotency-key");
 
         assertThat(request.getBody().readUtf8())
                 .contains("\"paymentKey\":\"payment-key\"")
