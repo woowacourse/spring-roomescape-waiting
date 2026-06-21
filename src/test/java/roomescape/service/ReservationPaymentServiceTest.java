@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.net.SocketTimeoutException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import roomescape.domain.Theme;
 import roomescape.payment.OrderIdGenerator;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentConfirmUnknownException;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
 import roomescape.service.exception.ReservationConflictException;
@@ -153,8 +155,29 @@ class ReservationPaymentServiceTest {
         assertThat(reservation.getName()).isEqualTo("브라운");
         then(paymentGateway).should().confirm(new PaymentConfirmation(
                 "payment_key", "order_123456", 10000L, payment.getIdempotencyKey()));
-        then(reservationPaymentDao).should().updatePaymentKey("order_123456", "payment_key");
+        then(reservationPaymentDao).should().markConfirmed("order_123456", "payment_key");
         then(reservationDao).should().save(payment.getReservation());
+    }
+
+    @Test
+    void confirm_readTimeout이면_확인_필요_상태로_저장한다() {
+        LocalDate date = fixedNow.toLocalDate().plusDays(1);
+        ReservationPayment payment = payment("order_123456", 10000L, date);
+        PaymentConfirmUnknownException exception = new PaymentConfirmUnknownException(
+                "토스 결제 승인 응답을 받지 못했습니다.",
+                new SocketTimeoutException("Read timed out")
+        );
+        given(reservationPaymentDao.findByOrderId("order_123456")).willReturn(Optional.of(payment));
+        given(paymentGateway.confirm(new PaymentConfirmation(
+                "payment_key", "order_123456", 10000L, payment.getIdempotencyKey())))
+                .willThrow(exception);
+
+        assertThatThrownBy(() -> reservationPaymentService.confirm("payment_key", "order_123456", 10000L))
+                .isSameAs(exception);
+
+        then(reservationPaymentDao).should()
+                .markConfirmUnknown("order_123456", "CONFIRM_TIMEOUT", "토스 결제 승인 응답을 받지 못했습니다.");
+        then(reservationDao).should(never()).save(any());
     }
 
     @Test

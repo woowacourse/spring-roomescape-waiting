@@ -88,6 +88,30 @@ public class ReservationPaymentDao {
         jdbcTemplate.update("UPDATE reservation_payment SET payment_key = ? WHERE order_id = ?", paymentKey, orderId);
     }
 
+    public void markConfirmed(String orderId, String paymentKey) {
+        jdbcTemplate.update("""
+                UPDATE reservation_payment
+                SET payment_key = ?, payment_status = ?, failure_code = NULL, failure_message = NULL
+                WHERE order_id = ?
+                """, paymentKey, PaymentStatus.CONFIRMED.name(), orderId);
+    }
+
+    public void markFailed(String orderId, String failureCode, String failureMessage) {
+        jdbcTemplate.update("""
+                UPDATE reservation_payment
+                SET payment_status = ?, failure_code = ?, failure_message = ?
+                WHERE order_id = ?
+                """, PaymentStatus.FAILED.name(), failureCode, failureMessage, orderId);
+    }
+
+    public void markConfirmUnknown(String orderId, String failureCode, String failureMessage) {
+        jdbcTemplate.update("""
+                UPDATE reservation_payment
+                SET payment_status = ?, failure_code = ?, failure_message = ?
+                WHERE order_id = ?
+                """, PaymentStatus.CONFIRM_UNKNOWN.name(), failureCode, failureMessage, orderId);
+    }
+
     public int deleteByOrderId(String orderId) {
         return jdbcTemplate.update("DELETE FROM reservation_payment WHERE order_id = ?", orderId);
     }

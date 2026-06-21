@@ -11,6 +11,7 @@ import roomescape.dao.ReservationPaymentDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.exception.DataConflictException;
+import roomescape.domain.PaymentStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationPayment;
 import roomescape.domain.ReservationTime;
@@ -19,9 +20,12 @@ import roomescape.payment.OrderIdGenerator;
 import roomescape.payment.PaymentFailure;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentConfirmUnknownException;
+import roomescape.payment.PaymentConnectionException;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentOrderNotFoundException;
 import roomescape.payment.PaymentResult;
+import roomescape.payment.toss.TossPaymentException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
@@ -83,14 +87,28 @@ public class ReservationPaymentService {
         if (payment.getAmount() != amount) {
             throw new PaymentAmountMismatchException(payment.getAmount(), amount);
         }
+        if (payment.getPaymentStatus() == PaymentStatus.CONFIRMED) {
+            return payment.getReservation();
+        }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(
-                paymentKey,
-                orderId,
-                amount,
-                payment.getIdempotencyKey()
-        ));
-        reservationPaymentDao.updatePaymentKey(orderId, result.paymentKey());
+        PaymentResult result;
+        try {
+            result = paymentGateway.confirm(new PaymentConfirmation(
+                    paymentKey,
+                    orderId,
+                    amount,
+                    payment.getIdempotencyKey()
+            ));
+        } catch (PaymentConfirmUnknownException e) {
+            reservationPaymentDao.markConfirmUnknown(orderId, "CONFIRM_TIMEOUT", e.getMessage());
+            throw e;
+        } catch (PaymentConnectionException e) {
+            throw e;
+        } catch (TossPaymentException e) {
+            reservationPaymentDao.markFailed(orderId, e.getCode(), e.getMessage());
+            throw e;
+        }
+        reservationPaymentDao.markConfirmed(orderId, result.paymentKey());
         try {
             return reservationDao.save(payment.getReservation());
         } catch (DataConflictException e) {
