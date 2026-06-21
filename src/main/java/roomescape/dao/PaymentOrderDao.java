@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -47,11 +48,11 @@ public class PaymentOrderDao {
 
     public Optional<PaymentOrder> findByOrderId(String orderId) {
         String sql = """
-                SELECT id, 
+                SELECT id,
                        order_id,
-                       amount, 
-                       status, 
-                       payment_key, 
+                       amount,
+                       status,
+                       payment_key,
                        reservation_id
                 FROM payment_order
                 WHERE order_id = ?
@@ -61,6 +62,42 @@ public class PaymentOrderDao {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public Optional<PaymentOrder> findByReservationId(long reservationId) {
+        String sql = """
+                SELECT id,
+                       order_id,
+                       amount,
+                       status,
+                       payment_key,
+                       reservation_id
+                FROM payment_order
+                WHERE reservation_id = ?
+                """;
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, reservationId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    public List<PaymentOrder> findAllByReservationIds(List<Long> reservationIds) {
+        if (reservationIds.isEmpty()) {
+            return List.of();
+        }
+        String placeholders = reservationIds.stream().map(id -> "?").reduce((a, b) -> a + "," + b).orElse("?");
+        String sql = """
+                SELECT id,
+                       order_id,
+                       amount,
+                       status,
+                       payment_key,
+                       reservation_id
+                FROM payment_order
+                WHERE reservation_id IN (%s)
+                """.formatted(placeholders);
+        return jdbcTemplate.query(sql, ROW_MAPPER, reservationIds.toArray());
     }
 
     public void confirm(PaymentOrder paymentOrder) {
@@ -74,6 +111,15 @@ public class PaymentOrderDao {
                 PaymentStatus.CONFIRMED.name(),
                 paymentOrder.getPaymentKey(),
                 paymentOrder.getId());
+    }
+
+    public void markUncertain(PaymentOrder paymentOrder) {
+        String sql = """
+                UPDATE payment_order
+                SET status = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, PaymentStatus.PAYMENT_UNCERTAIN.name(), paymentOrder.getId());
     }
 
     public void deleteByReservationId(long reservationId) {

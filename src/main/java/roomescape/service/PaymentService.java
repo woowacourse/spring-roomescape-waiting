@@ -9,6 +9,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.domain.PaymentOrder;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.payment.PaymentConfirmation;
+import roomescape.dto.response.PaymentConfirmResponse;
 import roomescape.domain.payment.PaymentGateway;
 import roomescape.domain.payment.PaymentResult;
 import roomescape.exception.code.PaymentErrorCode;
@@ -31,19 +32,42 @@ public class PaymentService {
     }
 
     @Transactional
-    public void confirm(String paymentKey, String orderId, long amount) {
+    public PaymentConfirmResponse confirm(String paymentKey, String orderId, long amount) {
         PaymentOrder paymentOrder = getPaymentOrder(orderId);
         validateAmount(paymentOrder, amount);
+        try {
+            return processConfirm(paymentKey, orderId, amount, paymentOrder);
+        } catch (PaymentException e) {
+            return handlePaymentException(e, paymentOrder);
+        }
+    }
 
-        PaymentResult result = paymentGateway.confirm(
-                new PaymentConfirmation(paymentKey, orderId, amount)
-        );
+    private PaymentConfirmResponse processConfirm(String paymentKey, String orderId, long amount,
+                                                  PaymentOrder paymentOrder) {
+        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        applyConfirmed(paymentOrder, result);
+        return PaymentConfirmResponse.confirmed();
+    }
 
+    private void applyConfirmed(PaymentOrder paymentOrder, PaymentResult result) {
         paymentOrderDao.confirm(paymentOrder.confirm(result.paymentKey()));
         reservationDao.updateStatus(paymentOrder.getReservationId(), ReservationStatus.CONFIRMED);
-
         log.info("결제 승인 완료: orderId={}, reservationId={}, paymentKey={}",
-                orderId, paymentOrder.getReservationId(), result.paymentKey());
+                paymentOrder.getOrderId(), paymentOrder.getReservationId(), result.paymentKey());
+    }
+
+    private PaymentConfirmResponse handlePaymentException(PaymentException e, PaymentOrder paymentOrder) {
+        if (e.getExceptionCode() != PaymentErrorCode.PAYMENT_READ_TIMEOUT) {
+            throw e;
+        }
+        applyUncertain(paymentOrder);
+        return PaymentConfirmResponse.uncertain();
+    }
+
+    private void applyUncertain(PaymentOrder paymentOrder) {
+        paymentOrderDao.markUncertain(paymentOrder);
+        log.warn("결제 결과 불명확(read timeout) — 예약 유지, 상태=PAYMENT_UNCERTAIN: orderId={}, reservationId={}",
+                paymentOrder.getOrderId(), paymentOrder.getReservationId());
     }
 
     private PaymentOrder getPaymentOrder(String orderId) {

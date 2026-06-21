@@ -52,7 +52,16 @@
         try {
             const res = await fetch(url);
 
-            if (res.ok) {
+            if (res.status === 200) {
+                // 결제 확정 완료
+                location.replace('/my-reservation.html');
+                return;
+            }
+
+            if (res.status === 202) {
+                // read timeout — 결제 결과 불명확. 예약은 유지됨.
+                // 멱등키 덕분에 새로고침·재시도해도 이중 청구되지 않는다.
+                console.warn('결제 결과 불명확(read timeout). 내 예약 페이지에서 확인하세요.');
                 location.replace('/my-reservation.html');
                 return;
             }
