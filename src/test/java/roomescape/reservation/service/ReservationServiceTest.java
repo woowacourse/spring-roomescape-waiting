@@ -7,12 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.payment.controller.dto.response.PaymentReadyResponse;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.repository.ReservationSlotRepository;
@@ -53,23 +55,27 @@ class ReservationServiceTest {
     WaitingRepository waitingRepository;
 
     @Test
-    @DisplayName("예약을 생성한다")
-    void createReservation() {
+    @DisplayName("예약 요청 시 결제 대기 예약이 생성된다")
+    void createPendingReservationOnPaymentPrepare() {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final long timeId = insertReservationTime("11:00:00");
         final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
 
         // when
-        ReservationResponse response = reservationService.create(
+        final PaymentReadyResponse response = reservationService.preparePayment(
                 new ReservationCreateRequest("브라운", "customer@example.com", tomorrow, timeId, themeId)
         );
 
         // then
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo("브라운");
-        assertThat(response.date()).isEqualTo(tomorrow);
+        assertThat(response.customerName()).isEqualTo("브라운");
+        assertThat(response.amount()).isEqualTo(10000);
         assertThat(reservationRepository.findAll()).hasSize(1);
+        assertThat(reservationRepository.findById(response.reservationId()))
+                .get()
+                .satisfies(reservation ->
+                        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING)
+                );
     }
 
     @Test
@@ -113,7 +119,7 @@ class ReservationServiceTest {
         final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest("브라운", "customer@example.com", yesterday, timeId, themeId)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -127,7 +133,7 @@ class ReservationServiceTest {
         final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest(
                         "브라운",
                         "customer@example.com",
@@ -147,7 +153,7 @@ class ReservationServiceTest {
         final long unsavedThemeId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest(
                         "브라운",
                         "customer@example.com",
@@ -166,7 +172,7 @@ class ReservationServiceTest {
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final long timeId = insertReservationTime("11:00:00");
         final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
-        reservationService.create(new ReservationCreateRequest(
+        reservationService.preparePayment(new ReservationCreateRequest(
                 "브라운",
                 "brown@example.com",
                 tomorrow,
@@ -175,7 +181,7 @@ class ReservationServiceTest {
         ));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest("재키", "jaekkii@example.com", tomorrow, timeId, themeId)
         ))
                 .isInstanceOf(ConflictException.class)
