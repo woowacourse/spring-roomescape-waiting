@@ -18,6 +18,10 @@ public interface ReservationRepository {
 
     boolean update(Reservation updatedReservation);
 
+    boolean confirm(Long reservationId);
+
+    boolean deletePendingById(Long reservationId);
+
     boolean deleteByIdAndSlotId(Long reservationId, Long slotId);
 
     List<ReservationTimesWithStatus> findReservationTimeStatusesByDateAndThemeId(LocalDate date, Long themeId);

@@ -166,6 +166,36 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean confirm(final Long reservationId) {
+        final String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE id = ? AND status = ?
+                """;
+
+        return jdbcTemplate.update(
+                sql,
+                ReservationStatus.CONFIRMED.name(),
+                reservationId,
+                ReservationStatus.PENDING.name()
+        ) > 0;
+    }
+
+    @Override
+    public boolean deletePendingById(final Long reservationId) {
+        final String sql = """
+                DELETE FROM reservation
+                WHERE id = ? AND status = ?
+                """;
+
+        return jdbcTemplate.update(
+                sql,
+                reservationId,
+                ReservationStatus.PENDING.name()
+        ) > 0;
+    }
+
+    @Override
     public boolean deleteByIdAndSlotId(final Long reservationId, final Long slotId) {
         final String sql = """
                 DELETE FROM reservation
