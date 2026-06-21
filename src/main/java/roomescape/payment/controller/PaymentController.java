@@ -9,7 +9,6 @@ import roomescape.payment.controller.dto.request.PaymentFailRequest;
 import roomescape.payment.controller.dto.response.PaymentConfigResponse;
 import roomescape.payment.controller.dto.response.PaymentConfirmResponse;
 import roomescape.payment.controller.dto.response.PaymentFailResponse;
-import roomescape.payment.infrastructure.toss.TossPaymentProperties;
 import roomescape.payment.service.PaymentService;
 
 @RestController
@@ -18,11 +17,10 @@ import roomescape.payment.service.PaymentService;
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final TossPaymentProperties tossPaymentProperties;
 
     @GetMapping("/config")
     public ResponseEntity<PaymentConfigResponse> getConfig() {
-        return ResponseEntity.ok(new PaymentConfigResponse(tossPaymentProperties.clientKey()));
+        return ResponseEntity.ok(new PaymentConfigResponse(paymentService.getClientKey()));
     }
 
     @PostMapping("/confirm")

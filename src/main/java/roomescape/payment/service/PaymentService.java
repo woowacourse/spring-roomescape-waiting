@@ -65,6 +65,10 @@ public class PaymentService {
         return new PaymentFailResponse(request.code(), request.message(), request.orderId());
     }
 
+    public String getClientKey() {
+        return paymentGateway.clientKey();
+    }
+
     private PaymentOrder getPaymentOrder(final String orderId) {
         return paymentOrderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 결제 주문입니다."));

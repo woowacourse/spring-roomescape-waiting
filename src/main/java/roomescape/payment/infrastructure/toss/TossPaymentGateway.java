@@ -58,6 +58,11 @@ public class TossPaymentGateway implements PaymentGateway {
         }
     }
 
+    @Override
+    public String clientKey() {
+        return properties.clientKey();
+    }
+
     private void validateSecretKey() {
         if (properties.secretKey() == null || properties.secretKey().isBlank()) {
             throw new IllegalStateException("결제 시크릿 키가 설정되어 있지 않습니다.");
