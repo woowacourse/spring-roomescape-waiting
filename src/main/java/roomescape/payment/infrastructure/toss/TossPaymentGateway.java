@@ -51,6 +51,9 @@ public class TossPaymentGateway implements PaymentGateway {
 
             return toPaymentResult(response);
         } catch (RestClientException exception) {
+            if (exception.getCause() instanceof RuntimeException cause) {
+                throw cause;
+            }
             throw new IllegalStateException("결제 승인 서버와 통신하지 못했습니다.", exception);
         }
     }
