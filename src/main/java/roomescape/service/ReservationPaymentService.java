@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,6 +123,10 @@ public class ReservationPaymentService {
             reservationPaymentDao.deleteByOrderId(orderId);
         }
         return new PaymentFailure(code, message, orderId);
+    }
+
+    public List<ReservationPayment> findPaymentsByName(String name) {
+        return reservationPaymentDao.findAllByName(name);
     }
 
     private ReservationTime validateReservationTime(long timeId) {

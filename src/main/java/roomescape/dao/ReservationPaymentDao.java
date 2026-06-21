@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,6 +83,21 @@ public class ReservationPaymentDao {
                 WHERE rp.order_id = ?
                 """;
         return jdbcTemplate.query(sql, reservationPaymentRowMapper, orderId).stream().findFirst();
+    }
+
+    public List<ReservationPayment> findAllByName(String name) {
+        String sql = """
+                SELECT rp.id AS payment_id, rp.order_id, rp.idempotency_key, rp.amount, rp.payment_key,
+                       rp.payment_status, rp.failure_code, rp.failure_message,
+                       rp.id AS reservation_id, rp.name, rp.date, rp.created_at,
+                       t.id AS time_id, t.start_at AS time_value,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
+                FROM reservation_payment AS rp
+                INNER JOIN reservation_time AS t ON rp.time_id = t.id
+                INNER JOIN theme AS th ON rp.theme_id = th.id
+                WHERE rp.name = ?
+                """;
+        return jdbcTemplate.query(sql, reservationPaymentRowMapper, name);
     }
 
     public void updatePaymentKey(String orderId, String paymentKey) {

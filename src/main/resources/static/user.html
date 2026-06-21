@@ -804,6 +804,12 @@
       clearPaymentQuery();
       return;
     }
+    if (payment === 'unknown' || payment === 'connection-fail') {
+      switchSection('my');
+      showToast(params.get('message') || '결제 상태를 확인해주세요.', 'error');
+      clearPaymentQuery();
+      return;
+    }
     if (window.location.hash === '#my') {
       switchSection('my');
       return;
@@ -1143,23 +1149,28 @@
       const list = document.getElementById('my-list');
       list.innerHTML = all.map(item => {
         const isWaiting = item.reservationStatus === 'WAITING';
-        const type = isWaiting ? 'waiting' : 'reservation';
+        const isPayment = item.reservationStatus === 'PAYMENT_PENDING';
+        const type = isWaiting ? 'waiting' : isPayment ? 'payment' : 'reservation';
         const isConverted = convertedSlots.has(reservationSlotKey(item));
-        const badge = isWaiting
+        const badge = isPayment ? reservationBadge(item, isConverted) : isWaiting
           ? `<span class="status-badge badge-waiting">${item.waitingNumber}번째 대기</span>`
           : `<span class="status-badge badge-reserved">${isConverted ? '예약 전환됨' : '예약'}</span>`;
-        const actions = isWaiting
+        const actions = isPayment
+          ? ''
+          : isWaiting
           ? `<button class="btn btn-danger" onclick="deleteItem(${item.id}, 'waiting')">취소</button>`
           : `
             <button class="btn btn-ghost" onclick="openEditModal(${item.id})">변경</button>
             <button class="btn btn-danger" onclick="deleteItem(${item.id}, 'reservation')">삭제</button>
           `;
+        const paymentMeta = paymentSummary(item);
         return `
           <div class="reservation-item ${isConverted ? 'converted' : ''}" id="item-${type}-${item.id}">
             <img src="${item.themeThumbnailUrl}" alt="${item.themeName}" onerror="this.style.background='#1f2937'">
             <div class="reservation-info">
               <div class="reservation-theme">${item.themeName}</div>
               <div class="reservation-meta">📅 ${formatDate(item.date)} &nbsp; ⏰ ${item.time}</div>
+              ${paymentMeta}
             </div>
             ${badge}
             <div class="reservation-actions">${actions}</div>
@@ -1175,6 +1186,34 @@
       document.getElementById('my-loading').style.display = 'none';
       showToast('예약 목록을 불러올 수 없습니다.', 'error');
     }
+  }
+
+  function reservationBadge(item, isConverted) {
+    if (item.reservationStatus === 'PAYMENT_PENDING') {
+      const badgeClass = item.paymentStatus === 'CONFIRM_UNKNOWN' ? 'badge-waiting'
+        : item.paymentStatus === 'FAILED' ? 'btn-danger'
+        : 'badge-reserved';
+      return `<span class="status-badge ${badgeClass}">${paymentStatusLabel(item.paymentStatus)}</span>`;
+    }
+    return `<span class="status-badge badge-reserved">${isConverted ? '예약 전환됨' : '예약'}</span>`;
+  }
+
+  function paymentSummary(item) {
+    if (!item.orderId && !item.paymentKey && !item.amount) {
+      return '';
+    }
+    const parts = [];
+    if (item.orderId) parts.push(`orderId: ${item.orderId}`);
+    if (item.paymentKey) parts.push(`paymentKey: ${item.paymentKey}`);
+    if (item.amount) parts.push(`${Number(item.amount).toLocaleString()}원`);
+    return `<div class="reservation-meta">${parts.join(' · ')}</div>`;
+  }
+
+  function paymentStatusLabel(status) {
+    if (status === 'CONFIRMED') return '결제 확정';
+    if (status === 'FAILED') return '결제 실패';
+    if (status === 'CONFIRM_UNKNOWN') return '확인 필요';
+    return '결제 대기';
   }
 
   function findConvertedSlots(previous, current) {
