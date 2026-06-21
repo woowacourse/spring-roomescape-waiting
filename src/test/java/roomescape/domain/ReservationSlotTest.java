@@ -11,9 +11,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import roomescape.domain.vo.ReservationDeletion;
-import roomescape.domain.vo.ReservationSlotInfo;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
@@ -106,7 +106,7 @@ class ReservationSlotTest {
         Reservation reservation = createReservation("브라운", Status.RESERVED, now);
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(reservation)));
 
-        ReservationDeletion deletedReservation = reservationSlot.deleteReservation(1L, "브라운", now.plusMinutes(1));
+        ReservationDeletion deletedReservation = reservationSlot.deleteReservation(reservation.getId(), "브라운", now.plusMinutes(1));
 
         assertThat(deletedReservation.deletedReservation().getStatus()).isEqualTo(Status.CANCELED);
     }
@@ -123,29 +123,33 @@ class ReservationSlotTest {
                 secondWaiting
         )));
 
-        reservationSlot.deleteReservation(1L, "브라운", now.plusMinutes(3));
+        reservationSlot.deleteReservation(reservationSlot.getReservations().getFirst().getId(), "브라운", now.plusMinutes(3));
 
         assertThat(firstWaiting.getStatus()).isEqualTo(Status.RESERVED);
         assertThat(secondWaiting.getStatus()).isEqualTo(Status.WAITING);
     }
 
-    private ReservationSlot createReservationSlot(
+    static ReservationSlot createReservationSlot(
             LocalDateTime now,
             List<Reservation> reservations
     ) {
         return new ReservationSlot(
-                now.toLocalDate(),
+                now.plusDays(1).toLocalDate(),
                 new Time(RESERVATION_TIME),
                 createTheme(),
                 reservations
         );
     }
 
-    private Reservation createReservation(String name, Status status, LocalDateTime updateAt) {
-        return new Reservation(name, status, updateAt);
+    static Reservation createReservation(String name, Status status, LocalDateTime updateAt) {
+        LocalDateTime now = LocalDateTime.now();
+        ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>());
+        Reservation reservation = new Reservation(reservationSlot, name, status, updateAt);
+        ReflectionTestUtils.setField(reservation, "id", (long) name.hashCode());
+        return reservation;
     }
 
-    private Theme createTheme() {
+    static Theme createTheme() {
         return new Theme(
                 "공포의 저택",
                 "버려진 저택에서 탈출하라",
