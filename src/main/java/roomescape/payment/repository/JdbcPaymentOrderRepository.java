@@ -27,6 +27,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     private final RowMapper<PaymentOrder> paymentOrderRowMapper = (resultSet, rowNum) -> new PaymentOrder(
             resultSet.getLong("id"),
             resultSet.getString("order_id"),
+            resultSet.getString("idempotency_key"),
             resultSet.getLong("amount"),
             PaymentOrderStatus.valueOf(resultSet.getString("status")),
             resultSet.getString("name"),
@@ -130,6 +131,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         String sql = """
                 SELECT id,
                        order_id,
+                       idempotency_key,
                        amount,
                        status,
                        name,
@@ -187,6 +189,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         String sql = """
                 INSERT INTO payment_order (
                     order_id,
+                    idempotency_key,
                     amount,
                     status,
                     name,
@@ -196,20 +199,21 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                     created_at,
                     updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         return jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
             preparedStatement.setString(1, paymentOrder.getOrderId());
-            preparedStatement.setLong(2, paymentOrder.getAmount());
-            preparedStatement.setString(3, paymentOrder.getStatus().name());
-            preparedStatement.setString(4, paymentOrder.getName());
-            preparedStatement.setDate(5, Date.valueOf(paymentOrder.getDate()));
-            preparedStatement.setLong(6, paymentOrder.getTimeId());
-            preparedStatement.setLong(7, paymentOrder.getThemeId());
-            preparedStatement.setTimestamp(8, Timestamp.valueOf(paymentOrder.getCreatedAt()));
-            preparedStatement.setTimestamp(9, Timestamp.valueOf(paymentOrder.getUpdatedAt()));
+            preparedStatement.setString(2, paymentOrder.getIdempotencyKey());
+            preparedStatement.setLong(3, paymentOrder.getAmount());
+            preparedStatement.setString(4, paymentOrder.getStatus().name());
+            preparedStatement.setString(5, paymentOrder.getName());
+            preparedStatement.setDate(6, Date.valueOf(paymentOrder.getDate()));
+            preparedStatement.setLong(7, paymentOrder.getTimeId());
+            preparedStatement.setLong(8, paymentOrder.getThemeId());
+            preparedStatement.setTimestamp(9, Timestamp.valueOf(paymentOrder.getCreatedAt()));
+            preparedStatement.setTimestamp(10, Timestamp.valueOf(paymentOrder.getUpdatedAt()));
             return preparedStatement;
         }, keyHolder);
     }

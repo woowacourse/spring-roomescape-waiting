@@ -3,6 +3,8 @@ package roomescape.payment.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 @Component
 @ConfigurationProperties(prefix = "payment")
 public class PaymentProperties {
@@ -29,6 +31,8 @@ public class PaymentProperties {
         private String baseUrl = "https://api.tosspayments.com";
         private String clientKey = "";
         private String secretKey = "";
+        private Duration connectTimeout = Duration.ofSeconds(1);
+        private Duration readTimeout = Duration.ofSeconds(2);
 
         public String baseUrl() {
             return baseUrl;
@@ -52,6 +56,22 @@ public class PaymentProperties {
 
         public void setSecretKey(String secretKey) {
             this.secretKey = secretKey;
+        }
+
+        public Duration connectTimeout() {
+            return connectTimeout;
+        }
+
+        public void setConnectTimeout(Duration connectTimeout) {
+            this.connectTimeout = connectTimeout;
+        }
+
+        public Duration readTimeout() {
+            return readTimeout;
+        }
+
+        public void setReadTimeout(Duration readTimeout) {
+            this.readTimeout = readTimeout;
         }
     }
 }

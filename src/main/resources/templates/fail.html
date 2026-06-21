@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>결제 실패</title>
+  <title th:text="${heading}">결제 실패</title>
   <style>
     body {
       font-family: -apple-system, "Segoe UI", sans-serif;
@@ -56,7 +56,7 @@
 </head>
 <body>
 <div class="card">
-  <h1>결제를 실패했어요</h1>
+  <h1 th:text="${heading}">결제를 실패했어요</h1>
 
   <div class="row"><span class="label">에러코드</span>
     <span class="val" th:text="${code}">REJECT_CARD_PAYMENT</span></div>

@@ -2,6 +2,7 @@ package roomescape.payment.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,6 +18,7 @@ import roomescape.payment.domain.PaymentOrderStatus;
 import roomescape.payment.domain.PaymentResult;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
 import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.Reservation;
@@ -27,16 +29,18 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
+import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,6 +84,9 @@ class PaymentServiceTest {
         PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow();
         assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.READY);
         assertThat(paymentOrder.getAmount()).isEqualTo(1_000L);
+        assertThat(paymentOrder.getIdempotencyKey()).hasSizeLessThanOrEqualTo(300);
+        assertThat(UUID.fromString(paymentOrder.getIdempotencyKey()).toString())
+                .isEqualTo(paymentOrder.getIdempotencyKey());
         assertThat(countAllReservations()).isZero();
     }
 
@@ -112,6 +119,52 @@ class PaymentServiceTest {
         assertThat(paymentOrder.getPaymentKey()).isEqualTo("payment-key-123");
         assertThat(paymentOrder.getReservationId()).isEqualTo(reservation.getId());
         assertThat(countAllReservations()).isEqualTo(1);
+
+        ArgumentCaptor<PaymentConfirmation> captor = ArgumentCaptor.forClass(PaymentConfirmation.class);
+        verify(paymentGateway).confirm(captor.capture());
+        assertThat(captor.getValue().idempotencyKey()).isEqualTo(paymentOrder.getIdempotencyKey());
+    }
+
+    @Test
+    @DisplayName("승인 응답을 받지 못한 뒤 같은 주문을 다시 승인하면 같은 멱등키를 사용한다.")
+    void confirm_retry_afterPendingUsesSameIdempotencyKey() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder paymentReadyOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+        PaymentOrder readyOrder = paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow();
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new PaymentConfirmationPendingException(
+                        "결제 승인 요청에 응답이 없습니다. 승인 여부가 확인되지 않았습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.",
+                        new SocketTimeoutException("Read timed out")
+                ))
+                .thenAnswer(invocation -> {
+                    PaymentConfirmation confirmation = invocation.getArgument(0);
+                    return new PaymentResult(
+                            confirmation.paymentKey(),
+                            confirmation.orderId(),
+                            confirmation.amount()
+                    );
+                });
+
+        assertThatThrownBy(() -> paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        ))
+                .isInstanceOf(PaymentConfirmationPendingException.class);
+
+        paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        );
+
+        ArgumentCaptor<PaymentConfirmation> captor = ArgumentCaptor.forClass(PaymentConfirmation.class);
+        verify(paymentGateway, times(2)).confirm(captor.capture());
+        assertThat(captor.getAllValues())
+                .extracting(PaymentConfirmation::idempotencyKey)
+                .containsExactly(readyOrder.getIdempotencyKey(), readyOrder.getIdempotencyKey());
     }
 
     @Test
@@ -322,6 +375,34 @@ class PaymentServiceTest {
         assertThat(countAllReservations()).isZero();
         assertThat(paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow().getStatus())
                 .isEqualTo(PaymentOrderStatus.READY);
+    }
+
+    @Test
+    @DisplayName("결제 승인 응답이 없으면 실패로 확정하지 않고 주문을 대기 상태로 유지한다.")
+    void confirm_pending_whenGatewayHasNoAnswerDoesNotMarkOrderFailed() {
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+        PaymentReadyOrder paymentReadyOrder = paymentService.prepare(NAME, FUTURE_DATE, time.getId(), theme.getId());
+
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new PaymentConfirmationPendingException(
+                        "결제 승인 요청에 응답이 없습니다. 승인 여부가 확인되지 않았습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.",
+                        new SocketTimeoutException("Read timed out")
+                ));
+
+        assertThatThrownBy(() -> paymentService.confirm(
+                "payment-key-123",
+                paymentReadyOrder.orderId(),
+                paymentReadyOrder.amount()
+        ))
+                .isInstanceOf(PaymentConfirmationPendingException.class)
+                .hasMessage("결제 승인 요청에 응답이 없습니다. 승인 여부가 확인되지 않았습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.");
+
+        PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow();
+        assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.READY);
+        assertThat(paymentOrder.getFailureCode()).isNull();
+        assertThat(paymentOrder.getFailureMessage()).isNull();
+        assertThat(countAllReservations()).isZero();
     }
 
     @Test

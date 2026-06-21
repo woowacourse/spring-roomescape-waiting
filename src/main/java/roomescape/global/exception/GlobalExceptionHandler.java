@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
 import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentRetryableException;
 
@@ -62,6 +63,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(PaymentRetryableException.class)
     public ResponseEntity<ProblemDetail> handlePaymentRetryableException(PaymentRetryableException exception) {
         return problem(HttpStatus.SERVICE_UNAVAILABLE, exception.getMessage());
+    }
+
+    @ExceptionHandler(PaymentConfirmationPendingException.class)
+    public ResponseEntity<ProblemDetail> handlePaymentConfirmationPendingException(
+            PaymentConfirmationPendingException exception
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                exception.getMessage()
+        );
+        problemDetail.setProperty("code", PaymentConfirmationPendingException.CODE);
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(problemDetail);
     }
 
     @ExceptionHandler(PaymentGatewayException.class)

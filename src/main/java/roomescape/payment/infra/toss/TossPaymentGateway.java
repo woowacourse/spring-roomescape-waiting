@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
@@ -14,11 +16,14 @@ import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentKeyConfigurationException;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Component
 public class TossPaymentGateway implements PaymentGateway {
+    private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
+
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
     private final PaymentProperties paymentProperties;
@@ -30,6 +35,7 @@ public class TossPaymentGateway implements PaymentGateway {
     ) {
         this.restClient = restClientBuilder
                 .baseUrl(paymentProperties.toss().baseUrl())
+                .requestFactory(tossRequestFactory(paymentProperties.toss()))
                 .build();
         this.objectMapper = objectMapper;
         this.paymentProperties = paymentProperties;
@@ -37,21 +43,27 @@ public class TossPaymentGateway implements PaymentGateway {
 
     @Override
     public PaymentResult confirm(PaymentConfirmation confirmation) {
-        TossPaymentConfirmResponse response = restClient.post()
-                .uri("/v1/payments/confirm")
-                .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new TossPaymentConfirmRequest(
-                        confirmation.paymentKey(),
-                        confirmation.orderId(),
-                        confirmation.amount()
-                ))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, clientResponse) -> {
-                    TossErrorResponse errorResponse = readErrorResponse(clientResponse.getBody());
-                    throw TossPaymentExceptionMapper.map(clientResponse.getStatusCode(), errorResponse);
-                })
-                .body(TossPaymentConfirmResponse.class);
+        TossPaymentConfirmResponse response;
+        try {
+            response = restClient.post()
+                    .uri("/v1/payments/confirm")
+                    .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
+                    .header(IDEMPOTENCY_KEY_HEADER, confirmation.idempotencyKey())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new TossPaymentConfirmRequest(
+                            confirmation.paymentKey(),
+                            confirmation.orderId(),
+                            confirmation.amount()
+                    ))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, clientResponse) -> {
+                        TossErrorResponse errorResponse = readErrorResponse(clientResponse.getBody());
+                        throw TossPaymentExceptionMapper.map(clientResponse.getStatusCode(), errorResponse);
+                    })
+                    .body(TossPaymentConfirmResponse.class);
+        } catch (RestClientException exception) {
+            throw TossPaymentExceptionMapper.map(exception);
+        }
 
         if (response == null) {
             throw new PaymentGatewayException("결제 승인 응답이 비어 있습니다.");
@@ -60,9 +72,18 @@ public class TossPaymentGateway implements PaymentGateway {
         return new PaymentResult(response.paymentKey(), response.orderId(), response.totalAmount());
     }
 
+    private SimpleClientHttpRequestFactory tossRequestFactory(PaymentProperties.Toss tossProperties) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(tossProperties.connectTimeout());
+        factory.setReadTimeout(tossProperties.readTimeout());
+        return factory;
+    }
+
     private TossErrorResponse readErrorResponse(java.io.InputStream body) {
         try {
             return objectMapper.readValue(body, TossErrorResponse.class);
+        } catch (SocketTimeoutException exception) {
+            throw TossPaymentExceptionMapper.pendingForTimeout(exception);
         } catch (IOException exception) {
             throw new PaymentGatewayException("결제 승인 실패 응답을 해석하지 못했습니다.");
         }

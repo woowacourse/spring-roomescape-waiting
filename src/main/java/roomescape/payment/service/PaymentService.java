@@ -50,6 +50,7 @@ public class PaymentService {
 
         PaymentOrder paymentOrder = PaymentOrder.ready(
                 generateOrderId(),
+                generateIdempotencyKey(),
                 paymentProperties.reservationAmount(),
                 name,
                 date,
@@ -84,7 +85,12 @@ public class PaymentService {
 
         PaymentResult paymentResult;
         try {
-            paymentResult = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+            paymentResult = paymentGateway.confirm(new PaymentConfirmation(
+                    paymentKey,
+                    orderId,
+                    amount,
+                    paymentOrder.getIdempotencyKey()
+            ));
         } catch (PaymentAlreadyProcessedException exception) {
             return confirmAlreadyProcessedOrder(orderId, paymentKey, amount, exception);
         }
@@ -171,5 +177,9 @@ public class PaymentService {
 
     private String generateOrderId() {
         return ORDER_ID_PREFIX + UUID.randomUUID();
+    }
+
+    private String generateIdempotencyKey() {
+        return UUID.randomUUID().toString();
     }
 }

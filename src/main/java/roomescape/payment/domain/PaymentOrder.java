@@ -11,9 +11,11 @@ import java.util.regex.Pattern;
 @Getter
 public class PaymentOrder {
     private static final Pattern ORDER_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{6,64}$");
+    private static final int IDEMPOTENCY_KEY_MAX_LENGTH = 300;
 
     private final Long id;
     private final String orderId;
+    private final String idempotencyKey;
     private final long amount;
     private final PaymentOrderStatus status;
 
@@ -34,6 +36,7 @@ public class PaymentOrder {
 
     public static PaymentOrder ready(
             String orderId,
+            String idempotencyKey,
             long amount,
             String name,
             LocalDate date,
@@ -44,6 +47,7 @@ public class PaymentOrder {
         return new PaymentOrder(
                 null,
                 orderId,
+                idempotencyKey,
                 amount,
                 PaymentOrderStatus.READY,
                 name,
@@ -63,6 +67,7 @@ public class PaymentOrder {
     public PaymentOrder(
             Long id,
             String orderId,
+            String idempotencyKey,
             long amount,
             PaymentOrderStatus status,
             String name,
@@ -77,9 +82,10 @@ public class PaymentOrder {
             LocalDateTime updatedAt,
             LocalDateTime confirmedAt
     ) {
-        validate(orderId, amount, status, name, date, timeId, themeId, createdAt, updatedAt);
+        validate(orderId, idempotencyKey, amount, status, name, date, timeId, themeId, createdAt, updatedAt);
         this.id = id;
         this.orderId = orderId;
+        this.idempotencyKey = idempotencyKey;
         this.amount = amount;
         this.status = status;
         this.name = name;
@@ -106,6 +112,7 @@ public class PaymentOrder {
         return new PaymentOrder(
                 id,
                 orderId,
+                idempotencyKey,
                 amount,
                 status,
                 name,
@@ -133,6 +140,7 @@ public class PaymentOrder {
         return new PaymentOrder(
                 id,
                 orderId,
+                idempotencyKey,
                 amount,
                 PaymentOrderStatus.CONFIRMED,
                 name,
@@ -153,6 +161,7 @@ public class PaymentOrder {
         return new PaymentOrder(
                 id,
                 orderId,
+                idempotencyKey,
                 amount,
                 PaymentOrderStatus.FAILED,
                 name,
@@ -183,6 +192,7 @@ public class PaymentOrder {
 
     private void validate(
             String orderId,
+            String idempotencyKey,
             long amount,
             PaymentOrderStatus status,
             String name,
@@ -194,6 +204,12 @@ public class PaymentOrder {
     ) {
         if (orderId == null || !ORDER_ID_PATTERN.matcher(orderId).matches()) {
             throw new InvalidRequestException("주문번호는 6~64자의 영문, 숫자, -, _만 사용할 수 있습니다.");
+        }
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            throw new InvalidRequestException("멱등키는 비어 있을 수 없습니다.");
+        }
+        if (idempotencyKey.length() > IDEMPOTENCY_KEY_MAX_LENGTH) {
+            throw new InvalidRequestException("멱등키는 300자 이하여야 합니다.");
         }
         if (amount <= 0) {
             throw new InvalidRequestException("결제 금액은 1원 이상이어야 합니다.");

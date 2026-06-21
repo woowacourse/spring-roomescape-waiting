@@ -78,12 +78,82 @@ VALUES (1, 'guest-1', '2026-04-29', 1, 1, 1, CURRENT_TIMESTAMP),
        (55, 'guest-55', '2026-04-29', 1, 10, 55, CURRENT_TIMESTAMP),
        (56, 'guest-56', '2026-05-06', 1, 11, 56, CURRENT_TIMESTAMP),
        (57, 'guest-57', '2026-05-06', 2, 11, 57, CURRENT_TIMESTAMP),
-       (58, 'guest-58', '2026-04-28', 1, 11, 58, CURRENT_TIMESTAMP);
+       (58, 'guest-58', '2026-04-28', 1, 11, 58, CURRENT_TIMESTAMP),
+       (59, '브라운', '2026-07-01', 1, 12, 59, CURRENT_TIMESTAMP);
+
+INSERT INTO payment_order (
+    id,
+    order_id,
+    idempotency_key,
+    amount,
+    status,
+    name,
+    date,
+    time_id,
+    theme_id,
+    payment_key,
+    reservation_id,
+    failure_code,
+    failure_message,
+    created_at,
+    updated_at,
+    confirmed_at
+)
+VALUES (1,
+        'SEED_READY_ORDER',
+        '11111111-1111-4111-8111-111111111111',
+        1000,
+        'READY',
+        '브라운',
+        '2026-07-01',
+        2,
+        12,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
+        NULL),
+       (2,
+        'SEED_CONFIRMED_ORDER',
+        '22222222-2222-4222-8222-222222222222',
+        1000,
+        'CONFIRMED',
+        '브라운',
+        '2026-07-01',
+        1,
+        12,
+        'seed-payment-key-confirmed',
+        59,
+        NULL,
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP),
+       (3,
+        'SEED_FAILED_ORDER',
+        '33333333-3333-4333-8333-333333333333',
+        1000,
+        'FAILED',
+        '브라운',
+        '2026-07-01',
+        3,
+        12,
+        NULL,
+        NULL,
+        'REJECT_CARD_PAYMENT',
+        '카드 결제가 거절되었습니다.',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
+        NULL);
 
 ALTER TABLE theme
     ALTER COLUMN id RESTART WITH 13;
 ALTER TABLE reservation_time
     ALTER COLUMN id RESTART WITH 7;
 ALTER TABLE reservation
-    ALTER COLUMN id RESTART WITH 59;
-ALTER SEQUENCE reservation_request_order_seq RESTART WITH 59;
+    ALTER COLUMN id RESTART WITH 60;
+ALTER TABLE payment_order
+    ALTER COLUMN id RESTART WITH 4;
+ALTER SEQUENCE reservation_request_order_seq RESTART WITH 60;

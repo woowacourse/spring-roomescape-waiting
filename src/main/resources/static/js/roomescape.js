@@ -342,7 +342,7 @@ async function initPaymentSuccess() {
         localStorage.setItem("roomflow.name", reservation.name);
         renderPaymentSuccess(reservation);
     } catch (error) {
-        renderPaymentFailure(error.message, "PAYMENT_CONFIRM_FAILED");
+        renderPaymentFailure(error.message, error.code || "PAYMENT_CONFIRM_FAILED");
     }
 }
 
@@ -396,17 +396,24 @@ function renderPaymentFailure(message, code) {
         return;
     }
 
-    root.classList.add("is-failed");
+    const pending = code === "PAYMENT_CONFIRM_PENDING";
+    document.title = pending ? "Roomflow | 결제 확인 필요" : "Roomflow | 결제 실패";
+    root.classList.toggle("is-failed", !pending);
     root.innerHTML = `
         <p class="eyebrow">PAYMENT</p>
-        <h1>결제 실패</h1>
+        <h1>${pending ? "결제 확인 필요" : "결제 실패"}</h1>
         <p>${escapeHtml(message)}</p>
         <div class="payment-summary">
             <span>코드 ${escapeHtml(code)}</span>
         </div>
         <div class="hero-actions">
-            <a class="button primary" href="/">다시 예약하기</a>
-            <a class="button ghost" href="/payments.html">결제 내역</a>
+            ${pending ? `
+                <a class="button primary" href="/payments.html">결제 내역 확인</a>
+                <a class="button ghost" href="/">다시 예약하기</a>
+            ` : `
+                <a class="button primary" href="/">다시 예약하기</a>
+                <a class="button ghost" href="/payments.html">결제 내역</a>
+            `}
         </div>
     `;
 }
@@ -867,7 +874,10 @@ async function api(path, options = {}) {
     const data = text ? JSON.parse(text) : null;
 
     if (!response.ok) {
-        throw new Error(problemMessage(data, response));
+        const error = new Error(problemMessage(data, response));
+        error.status = response.status;
+        error.code = data && data.code ? data.code : null;
+        throw error;
     }
 
     return data;
