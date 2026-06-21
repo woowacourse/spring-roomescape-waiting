@@ -11,7 +11,7 @@ public record ReservationWithStatusResponses(
     public static ReservationWithStatusResponses of(
             List<ReservationWithWaitingOrder> reservationWithWaitingOrders, boolean hasNext) {
         List<ReservationResponse> reservations = reservationWithWaitingOrders.stream()
-                .filter(ReservationWithWaitingOrder::isReserved)
+                .filter(reservationWithWaitingOrder -> !reservationWithWaitingOrder.isWaiting())
                 .map(reservationWithWaitingOrder ->
                         ReservationResponse.from(reservationWithWaitingOrder.reservation()))
                 .toList();
