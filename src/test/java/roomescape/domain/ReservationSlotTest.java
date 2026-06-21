@@ -3,6 +3,7 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ class ReservationSlotTest {
         Reservation reservation = reservationSlot.reserve("브라운", now);
 
         assertThat(reservation.getName()).isEqualTo("브라운");
-        assertThat(reservation.getReservationSlotId()).isEqualTo(1L);
         assertThat(reservation.getStatus()).isEqualTo(Status.RESERVED);
         assertThat(reservation.getUpdateAt()).isEqualTo(now);
     }
@@ -39,7 +39,7 @@ class ReservationSlotTest {
     void 확정_예약_존재시_대기() {
         LocalDateTime now = LocalDateTime.now();
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
-                createReservation(1L, "브라운", Status.RESERVED, now)
+                createReservation("브라운", Status.RESERVED, now)
         )));
 
         Reservation reservation = reservationSlot.reserve("도니", now.plusMinutes(1));
@@ -51,7 +51,7 @@ class ReservationSlotTest {
     @DisplayName("확정 예약의 대기 순서는 0이다")
     void 확정_예약_순서() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = createReservation(1L, "브라운", Status.RESERVED, now);
+        Reservation reservation = createReservation("브라운", Status.RESERVED, now);
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(reservation)));
 
         int order = reservationSlot.calculateOrder(reservation);
@@ -63,10 +63,10 @@ class ReservationSlotTest {
     @DisplayName("대기 예약의 순서를 계산한다")
     void 대기_예약_순서() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation firstWaiting = createReservation(2L, "도니", Status.WAITING, now.plusMinutes(1));
-        Reservation secondWaiting = createReservation(3L, "모디", Status.WAITING, now.plusMinutes(2));
+        Reservation firstWaiting = createReservation("도니", Status.WAITING, now.plusMinutes(1));
+        Reservation secondWaiting = createReservation("모디", Status.WAITING, now.plusMinutes(2));
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
-                createReservation(1L, "브라운", Status.RESERVED, now),
+                createReservation("브라운", Status.RESERVED, now),
                 firstWaiting,
                 secondWaiting
         )));
@@ -81,7 +81,7 @@ class ReservationSlotTest {
     void 같은_이름_예약_예외() {
         LocalDateTime now = LocalDateTime.now();
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
-                createReservation(1L, "브라운", Status.RESERVED, now)
+                createReservation("브라운", Status.RESERVED, now)
         )));
 
         assertThatThrownBy(() -> reservationSlot.reserve("브라운", now.plusMinutes(1)))
@@ -103,7 +103,7 @@ class ReservationSlotTest {
     @DisplayName("확정 예약을 삭제하면 예약이 취소된다")
     void 확정_예약_삭제() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = createReservation(1L, "브라운", Status.RESERVED, now);
+        Reservation reservation = createReservation("브라운", Status.RESERVED, now);
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(reservation)));
 
         ReservationDeletion deletedReservation = reservationSlot.deleteReservation(1L, "브라운", now.plusMinutes(1));
@@ -115,10 +115,10 @@ class ReservationSlotTest {
     @DisplayName("확정 예약을 삭제하면 첫 번째 대기 예약이 확정으로 승격된다")
     void 확정_삭제시_대기_승격() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation firstWaiting = createReservation(2L, "도니", Status.WAITING, now.plusMinutes(1));
-        Reservation secondWaiting = createReservation(3L, "모디", Status.WAITING, now.plusMinutes(2));
+        Reservation firstWaiting = createReservation("도니", Status.WAITING, now.plusMinutes(1));
+        Reservation secondWaiting = createReservation("모디", Status.WAITING, now.plusMinutes(2));
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
-                createReservation(1L, "브라운", Status.RESERVED, now),
+                createReservation("브라운", Status.RESERVED, now),
                 firstWaiting,
                 secondWaiting
         )));
@@ -129,15 +129,20 @@ class ReservationSlotTest {
         assertThat(secondWaiting.getStatus()).isEqualTo(Status.WAITING);
     }
 
-    private ReservationSlot createReservationSlot(LocalDateTime now, List<Reservation> reservations) {
+    private ReservationSlot createReservationSlot(
+            LocalDateTime now,
+            List<Reservation> reservations
+    ) {
         return new ReservationSlot(
-                new ReservationSlotInfo(1L, now.plusDays(1).toLocalDate(), new Time(1L, RESERVATION_TIME), createTheme()),
-                new ArrayList<>(reservations)
+                now.toLocalDate(),
+                new Time(RESERVATION_TIME),
+                createTheme(),
+                reservations
         );
     }
 
-    private Reservation createReservation(Long id, String name, Status status, LocalDateTime updateAt) {
-        return new Reservation(id, name, 1L, status, updateAt);
+    private Reservation createReservation(String name, Status status, LocalDateTime updateAt) {
+        return new Reservation(name, status, updateAt);
     }
 
     private Theme createTheme() {

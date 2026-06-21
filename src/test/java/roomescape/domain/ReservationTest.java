@@ -18,11 +18,9 @@ class ReservationTest {
     void 예약_생성() {
         LocalDateTime now = LocalDateTime.now();
 
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.RESERVED, now);
+        Reservation reservation = new Reservation("브라운", Status.RESERVED, now);
 
-        assertThat(reservation.getId()).isEqualTo(1L);
         assertThat(reservation.getName()).isEqualTo("브라운");
-        assertThat(reservation.getReservationSlotId()).isEqualTo(1L);
         assertThat(reservation.getStatus()).isEqualTo(Status.RESERVED);
         assertThat(reservation.getUpdateAt()).isEqualTo(now);
     }
@@ -33,7 +31,7 @@ class ReservationTest {
         LocalDateTime now = LocalDateTime.now();
         String name = "가".repeat(256);
 
-        assertThatThrownBy(() -> new Reservation(1L, name, 1L, Status.RESERVED, now.plusDays(1)))
+        assertThatThrownBy(() -> new Reservation(name, Status.RESERVED, now.plusDays(1)))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RESERVATION_NAME_TOO_LONG.getMessage());
     }
@@ -41,7 +39,7 @@ class ReservationTest {
     @Test
     @DisplayName("확정 예약인지 확인한다")
     void 확정_예약_확인() {
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.RESERVED, LocalDateTime.now());
+        Reservation reservation = new Reservation("브라운",Status.RESERVED, LocalDateTime.now());
 
         assertThat(reservation.isReserved()).isTrue();
         assertThat(reservation.isWaiting()).isFalse();
@@ -50,7 +48,7 @@ class ReservationTest {
     @Test
     @DisplayName("대기 예약인지 확인한다")
     void 대기_예약_확인() {
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.WAITING, LocalDateTime.now());
+        Reservation reservation = new Reservation("브라운", Status.WAITING, LocalDateTime.now());
 
         assertThat(reservation.isWaiting()).isTrue();
         assertThat(reservation.isReserved()).isFalse();
@@ -60,8 +58,8 @@ class ReservationTest {
     @DisplayName("다른 예약보다 먼저 수정되었는지 확인한다")
     void 수정_시간_비교() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.WAITING, now);
-        Reservation other = new Reservation(2L, "도니", 1L, Status.WAITING, now.plusMinutes(1));
+        Reservation reservation = new Reservation("브라운", Status.WAITING, now);
+        Reservation other = new Reservation("도니", Status.WAITING, now.plusMinutes(1));
 
         assertThat(reservation.isUpdatedAtBefore(other)).isTrue();
     }
@@ -70,11 +68,10 @@ class ReservationTest {
     @DisplayName("확정 예약을 수정한다")
     void 확정_예약_수정() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.RESERVED, now);
+        Reservation reservation = new Reservation("브라운", Status.RESERVED, now);
 
-        reservation.update(now.plusMinutes(1), 2L, Status.WAITING);
+        reservation.update(now.plusMinutes(1), Status.WAITING);
 
-        assertThat(reservation.getReservationSlotId()).isEqualTo(2L);
         assertThat(reservation.getStatus()).isEqualTo(Status.WAITING);
         assertThat(reservation.getUpdateAt()).isEqualTo(now.plusMinutes(1));
     }
@@ -83,9 +80,9 @@ class ReservationTest {
     @DisplayName("예약 수정 시간이 기존 수정 시간보다 이전이면 예외가 발생한다")
     void 이전_시간_수정_예외() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.RESERVED, now);
+        Reservation reservation = new Reservation("브라운", Status.RESERVED, now);
 
-        assertThatThrownBy(() -> reservation.update(now.minusMinutes(1), 2L, Status.WAITING))
+        assertThatThrownBy(() -> reservation.update(now.minusMinutes(1), Status.WAITING))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RESERVATION_DATE_UNAVAILABLE.getMessage());
     }
@@ -94,9 +91,9 @@ class ReservationTest {
     @DisplayName("예약 상태가 아닌 예약을 수정하면 예외가 발생한다")
     void 예약_상태_아닌_예약_수정_예외() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.CANCELED, now);
+        Reservation reservation = new Reservation("브라운", Status.CANCELED, now);
 
-        assertThatThrownBy(() -> reservation.update(now.plusMinutes(1), 2L, Status.RESERVED))
+        assertThatThrownBy(() -> reservation.update(now.plusMinutes(1), Status.RESERVED))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RESERVATION_STATUS_UNAVAILABLE.getMessage());
     }
@@ -105,7 +102,7 @@ class ReservationTest {
     @DisplayName("확정 예약을 취소한다")
     void 확정_예약_취소() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.RESERVED, now);
+        Reservation reservation = new Reservation("브라운", Status.RESERVED, now);
 
         reservation.cancel(now.plusMinutes(1));
 
@@ -117,7 +114,7 @@ class ReservationTest {
     @DisplayName("예약 취소 시간이 기존 수정 시간보다 이전이면 예외가 발생한다")
     void 이전_시간_취소_예외() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.RESERVED, now);
+        Reservation reservation = new Reservation("브라운", Status.RESERVED, now);
 
         assertThatThrownBy(() -> reservation.cancel(now.minusMinutes(1)))
                 .isInstanceOf(CustomException.class)
@@ -128,7 +125,7 @@ class ReservationTest {
     @DisplayName("예약 상태가 아닌 예약을 취소하면 예외가 발생한다")
     void 예약_상태_아닌_예약_취소_예외() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.CANCELED, now);
+        Reservation reservation = new Reservation("브라운", Status.CANCELED, now);
 
         assertThatThrownBy(() -> reservation.cancel(now.plusMinutes(1)))
                 .isInstanceOf(CustomException.class)
@@ -138,7 +135,7 @@ class ReservationTest {
     @Test
     @DisplayName("대기 예약을 확정 예약으로 승격한다")
     void 대기_예약_승격() {
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.WAITING, LocalDateTime.now());
+        Reservation reservation = new Reservation("브라운", Status.WAITING, LocalDateTime.now());
 
         reservation.promote();
 
@@ -148,7 +145,7 @@ class ReservationTest {
     @Test
     @DisplayName("대기 상태가 아닌 예약을 승격하면 예외가 발생한다")
     void 대기_아닌_예약_승격_예외() {
-        Reservation reservation = new Reservation(1L, "브라운", 1L, Status.RESERVED, LocalDateTime.now());
+        Reservation reservation = new Reservation("브라운", Status.RESERVED, LocalDateTime.now());
 
         assertThatThrownBy(reservation::promote)
                 .isInstanceOf(CustomException.class)
