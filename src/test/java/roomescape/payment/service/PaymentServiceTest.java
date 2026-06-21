@@ -153,6 +153,8 @@ class PaymentServiceTest {
                 paymentReadyOrder.amount()
         ))
                 .isInstanceOf(PaymentConfirmationPendingException.class);
+        assertThat(paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow().getStatus())
+                .isEqualTo(PaymentOrderStatus.PENDING_CONFIRMATION);
 
         paymentService.confirm(
                 "payment-key-123",
@@ -165,6 +167,8 @@ class PaymentServiceTest {
         assertThat(captor.getAllValues())
                 .extracting(PaymentConfirmation::idempotencyKey)
                 .containsExactly(readyOrder.getIdempotencyKey(), readyOrder.getIdempotencyKey());
+        assertThat(paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow().getStatus())
+                .isEqualTo(PaymentOrderStatus.CONFIRMED);
     }
 
     @Test
@@ -378,7 +382,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("결제 승인 응답이 없으면 실패로 확정하지 않고 주문을 대기 상태로 유지한다.")
+    @DisplayName("결제 승인 응답이 없으면 실패로 확정하지 않고 확인 필요 상태로 남긴다.")
     void confirm_pending_whenGatewayHasNoAnswerDoesNotMarkOrderFailed() {
         ReservationTime time = saveReservationTime(10);
         Theme theme = saveTheme();
@@ -399,7 +403,7 @@ class PaymentServiceTest {
                 .hasMessage("결제 승인 요청에 응답이 없습니다. 승인 여부가 확인되지 않았습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.");
 
         PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(paymentReadyOrder.orderId()).orElseThrow();
-        assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.READY);
+        assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.PENDING_CONFIRMATION);
         assertThat(paymentOrder.getFailureCode()).isNull();
         assertThat(paymentOrder.getFailureMessage()).isNull();
         assertThat(countAllReservations()).isZero();
@@ -460,6 +464,7 @@ class PaymentServiceTest {
                 .containsExactly(PaymentOrderStatus.CONFIRMED, PaymentOrderStatus.FAILED);
         assertThat(orders.get(0).theme().getName()).isEqualTo("결제 탈출");
         assertThat(orders.get(0).time().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(orders.get(0).paymentKey()).isEqualTo("payment-key-123");
         assertThat(orders.get(1).failureMessage()).isEqualTo("카드 결제가 거절되었습니다.");
     }
 

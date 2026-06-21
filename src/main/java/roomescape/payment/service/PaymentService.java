@@ -9,9 +9,10 @@ import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentOrder;
 import roomescape.payment.domain.PaymentOrderDetails;
 import roomescape.payment.domain.PaymentResult;
-import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
+import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentInvalidRequestException;
 import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.Reservation;
@@ -62,7 +63,7 @@ public class PaymentService {
         return PaymentReadyOrder.from(paymentOrderRepository.save(paymentOrder));
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = PaymentConfirmationPendingException.class)
     public Reservation confirm(String paymentKey, String orderId, long amount) {
         PaymentOrder paymentOrder = findOrder(orderId);
 
@@ -72,8 +73,8 @@ public class PaymentService {
         if (paymentOrder.isConfirmed()) {
             return confirmIdempotently(paymentOrder, paymentKey);
         }
-        if (!paymentOrder.isReady()) {
-            throw new PaymentInvalidRequestException("결제 대기 중인 주문이 아닙니다.");
+        if (!paymentOrder.isConfirmable()) {
+            throw new PaymentInvalidRequestException("승인 확인이 가능한 주문이 아닙니다.");
         }
 
         reservationService.validateCreatable(
@@ -91,6 +92,9 @@ public class PaymentService {
                     amount,
                     paymentOrder.getIdempotencyKey()
             ));
+        } catch (PaymentConfirmationPendingException exception) {
+            paymentOrderRepository.update(paymentOrder.pendingConfirmation(LocalDateTime.now()));
+            throw exception;
         } catch (PaymentAlreadyProcessedException exception) {
             return confirmAlreadyProcessedOrder(orderId, paymentKey, amount, exception);
         }

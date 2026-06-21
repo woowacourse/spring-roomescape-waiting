@@ -46,14 +46,19 @@ final class TossPaymentExceptionMapper {
     }
 
     static RuntimeException map(RestClientException exception) {
-        if (hasCause(exception, ConnectException.class)) {
-            return new PaymentConfirmationPendingException(CONNECTION_UNAVAILABLE_MESSAGE, exception);
-        }
-        if (exception instanceof ResourceAccessException && hasConnectTimeoutCause(exception)) {
-            return new PaymentConfirmationPendingException(CONNECTION_UNAVAILABLE_MESSAGE, exception);
+        if (exception instanceof ResourceAccessException resourceAccessException) {
+            return mapResourceAccessException(resourceAccessException);
         }
         if (hasCause(exception, SocketTimeoutException.class)) {
             return pendingForTimeout(exception);
+        }
+
+        return exception;
+    }
+
+    private static RuntimeException mapResourceAccessException(ResourceAccessException exception) {
+        if (hasCause(exception, ConnectException.class) || hasConnectTimeoutCause(exception)) {
+            return new PaymentConfirmationPendingException(CONNECTION_UNAVAILABLE_MESSAGE, exception);
         }
 
         return exception;

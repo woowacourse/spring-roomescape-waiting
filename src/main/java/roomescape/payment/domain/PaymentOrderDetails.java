@@ -15,6 +15,7 @@ public record PaymentOrderDetails(
         ReservationTime time,
         Theme theme,
         Long reservationId,
+        String paymentKey,
         String failureCode,
         String failureMessage,
         LocalDateTime createdAt,

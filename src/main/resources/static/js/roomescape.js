@@ -105,7 +105,7 @@ async function initMyPage() {
 async function initPaymentOrdersPage() {
     const params = new URLSearchParams(window.location.search);
     const filter = params.get("filter");
-    if (["ready", "confirmed", "failed"].includes(filter)) {
+    if (["ready", "pending", "confirmed", "failed"].includes(filter)) {
         state.paymentFilter = filter;
     }
 
@@ -484,6 +484,9 @@ function renderPaymentOrders(orders) {
         if (state.paymentFilter === "ready") {
             return order.status === "READY";
         }
+        if (state.paymentFilter === "pending") {
+            return order.status === "PENDING_CONFIRMATION";
+        }
         if (state.paymentFilter === "confirmed") {
             return order.status === "CONFIRMED";
         }
@@ -495,6 +498,7 @@ function renderPaymentOrders(orders) {
 
     $("#paymentTotalCount").textContent = orders.length;
     $("#paymentReadyCount").textContent = orders.filter((order) => order.status === "READY").length;
+    $("#paymentPendingCount").textContent = orders.filter((order) => order.status === "PENDING_CONFIRMATION").length;
     $("#paymentConfirmedCount").textContent = orders.filter((order) => order.status === "CONFIRMED").length;
     $("#paymentFailedCount").textContent = orders.filter((order) => order.status === "FAILED").length;
 
@@ -514,7 +518,8 @@ function renderPaymentOrders(orders) {
 function paymentEmptyMessage() {
     const messages = {
         ready: "결제 대기 내역이 없습니다.",
-        confirmed: "결제 완료 내역이 없습니다.",
+        pending: "확인 필요한 결제 내역이 없습니다.",
+        confirmed: "결제 확정 내역이 없습니다.",
         failed: "결제 실패 내역이 없습니다."
     };
 
@@ -528,6 +533,12 @@ function paymentOrderCard(order) {
     const reservation = order.reservationId == null
         ? ""
         : `<span>예약 ID ${order.reservationId}</span>`;
+    const paymentKey = order.paymentKey
+        ? `<span><strong>paymentKey</strong>${escapeHtml(order.paymentKey)}</span>`
+        : "";
+    const pending = order.status === "PENDING_CONFIRMATION"
+        ? `<div class="payment-pending">승인 결과 확인 필요</div>`
+        : "";
 
     return `
         <article class="reservation-card payment-order-card">
@@ -543,7 +554,11 @@ function paymentOrderCard(order) {
                     <span>${formatCurrency(order.amount)}</span>
                     ${reservation}
                 </div>
-                <div class="payment-order-code">${escapeHtml(order.orderId)}</div>
+                <div class="payment-order-codes">
+                    <span><strong>orderId</strong>${escapeHtml(order.orderId)}</span>
+                    ${paymentKey}
+                </div>
+                ${pending}
                 ${failure}
             </div>
         </article>
@@ -911,8 +926,11 @@ function paymentStatusChip(status) {
     if (status === "READY") {
         return `<span class="status-chip waiting">결제 대기</span>`;
     }
+    if (status === "PENDING_CONFIRMATION") {
+        return `<span class="status-chip waiting">확인 필요</span>`;
+    }
     if (status === "CONFIRMED") {
-        return `<span class="status-chip reserved">결제 완료</span>`;
+        return `<span class="status-chip reserved">결제 확정</span>`;
     }
     if (status === "FAILED") {
         return `<span class="status-chip canceled">결제 실패</span>`;

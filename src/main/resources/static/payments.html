@@ -44,7 +44,11 @@
             <strong id="paymentReadyCount">0</strong>
         </div>
         <div class="metric">
-            <span>결제 완료</span>
+            <span>확인 필요</span>
+            <strong id="paymentPendingCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>결제 확정</span>
             <strong id="paymentConfirmedCount">0</strong>
         </div>
         <div class="metric">
@@ -53,10 +57,11 @@
         </div>
     </section>
 
-    <div class="segmented-tabs" aria-label="결제 목록 필터">
+    <div class="segmented-tabs payment-tabs" aria-label="결제 목록 필터">
         <button class="tab-button is-active" type="button" data-payment-filter="all">전체</button>
         <button class="tab-button" type="button" data-payment-filter="ready">대기</button>
-        <button class="tab-button" type="button" data-payment-filter="confirmed">완료</button>
+        <button class="tab-button" type="button" data-payment-filter="pending">확인 필요</button>
+        <button class="tab-button" type="button" data-payment-filter="confirmed">확정</button>
         <button class="tab-button" type="button" data-payment-filter="failed">실패</button>
     </div>
 

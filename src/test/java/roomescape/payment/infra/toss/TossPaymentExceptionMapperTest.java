@@ -106,15 +106,16 @@ class TossPaymentExceptionMapperTest {
     }
 
     @Test
-    @DisplayName("ResourceAccessException이라도 read timeout이면 응답 읽기 실패로 매핑한다.")
+    @DisplayName("ResourceAccessException의 read timeout은 연결 단계 분기에서 임의로 응답 읽기 실패로 바꾸지 않는다.")
     void map_resourceAccessReadTimeout() {
-        RuntimeException exception = TossPaymentExceptionMapper.map(
-                new ResourceAccessException("I/O error", new SocketTimeoutException("Read timed out"))
+        ResourceAccessException resourceAccessException = new ResourceAccessException(
+                "I/O error",
+                new SocketTimeoutException("Read timed out")
         );
 
-        assertThat(exception)
-                .isInstanceOf(PaymentConfirmationPendingException.class)
-                .hasMessage("결제 승인 요청에 응답이 없습니다. 승인 여부가 확인되지 않았습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.");
+        RuntimeException exception = TossPaymentExceptionMapper.map(resourceAccessException);
+
+        assertThat(exception).isSameAs(resourceAccessException);
     }
 
     @Test

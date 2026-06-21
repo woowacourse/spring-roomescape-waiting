@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Timeout;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
@@ -34,7 +35,7 @@ class TossPaymentGatewayTest {
     @DisplayName("응답 읽기 타임아웃은 결제 결과 확인 필요 예외로 안내한다.")
     void confirm_pending_whenReadTimeout() throws IOException {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        HttpServer server = delayedServer(Duration.ofMillis(300), executor);
+        HttpServer server = delayedBodyServer(Duration.ofMillis(300), executor);
         server.start();
 
         try {
@@ -170,10 +171,10 @@ class TossPaymentGatewayTest {
     }
 
     @Test
-    @DisplayName("실제 RestClient 느린 응답은 ResourceAccessException과 SocketTimeoutException 원인으로 표면화된다.")
+    @DisplayName("실제 RestClient 응답 본문 읽기 타임아웃은 RestClientException과 SocketTimeoutException 원인으로 표면화된다.")
     void restClient_exceptionShape_whenReadTimeout() throws IOException {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        HttpServer server = delayedServer(Duration.ofMillis(300), executor);
+        HttpServer server = delayedBodyServer(Duration.ofMillis(300), executor);
         server.start();
 
         try {
@@ -183,14 +184,14 @@ class TossPaymentGatewayTest {
                     Duration.ofMillis(50)
             );
 
-            Throwable throwable = catchThrowable(() -> confirmAsString(restClient));
+            Throwable throwable = catchThrowable(() -> confirmAsResponse(restClient));
 
             assertThat(throwable)
-                    .isInstanceOf(ResourceAccessException.class)
+                    .isExactlyInstanceOf(RestClientException.class)
                     .hasRootCauseInstanceOf(SocketTimeoutException.class);
             assertThat(causeTypeNames(throwable))
                     .containsExactly(
-                            ResourceAccessException.class.getName(),
+                            RestClientException.class.getName(),
                             SocketTimeoutException.class.getName()
                     );
             assertThat(rootCause(throwable).getMessage()).containsIgnoringCase("Read timed out");
@@ -229,6 +230,13 @@ class TossPaymentGatewayTest {
                 .uri("/v1/payments/confirm")
                 .retrieve()
                 .body(String.class);
+    }
+
+    private TossPaymentConfirmResponse confirmAsResponse(RestClient restClient) {
+        return restClient.post()
+                .uri("/v1/payments/confirm")
+                .retrieve()
+                .body(TossPaymentConfirmResponse.class);
     }
 
     private Throwable rootCause(Throwable throwable) {
@@ -284,17 +292,18 @@ class TossPaymentGatewayTest {
         return server;
     }
 
-    private HttpServer delayedServer(Duration delay, ExecutorService executor) throws IOException {
+    private HttpServer delayedBodyServer(Duration delay, ExecutorService executor) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.setExecutor(executor);
         server.createContext("/v1/payments/confirm", exchange -> {
             try {
-                Thread.sleep(delay.toMillis());
                 byte[] responseBody = """
                         {"paymentKey":"payment-key","orderId":"order-id","totalAmount":1000}
                         """.getBytes(StandardCharsets.UTF_8);
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, responseBody.length);
+                exchange.getResponseBody().flush();
+                Thread.sleep(delay.toMillis());
                 exchange.getResponseBody().write(responseBody);
             } catch (InterruptedException exception) {
                 Thread.currentThread().interrupt();

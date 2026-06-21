@@ -146,6 +146,22 @@ VALUES (1,
         '카드 결제가 거절되었습니다.',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
+        NULL),
+       (4,
+        'SEED_PENDING_ORDER',
+        '44444444-4444-4444-8444-444444444444',
+        1000,
+        'PENDING_CONFIRMATION',
+        '브라운',
+        '2026-07-01',
+        4,
+        12,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
         NULL);
 
 ALTER TABLE theme
@@ -155,5 +171,5 @@ ALTER TABLE reservation_time
 ALTER TABLE reservation
     ALTER COLUMN id RESTART WITH 60;
 ALTER TABLE payment_order
-    ALTER COLUMN id RESTART WITH 4;
+    ALTER COLUMN id RESTART WITH 5;
 ALTER SEQUENCE reservation_request_order_seq RESTART WITH 60;

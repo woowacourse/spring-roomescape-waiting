@@ -157,6 +157,27 @@ public class PaymentOrder {
         );
     }
 
+    public PaymentOrder pendingConfirmation(LocalDateTime now) {
+        return new PaymentOrder(
+                id,
+                orderId,
+                idempotencyKey,
+                amount,
+                PaymentOrderStatus.PENDING_CONFIRMATION,
+                name,
+                date,
+                timeId,
+                themeId,
+                paymentKey,
+                reservationId,
+                null,
+                null,
+                createdAt,
+                now,
+                confirmedAt
+        );
+    }
+
     public PaymentOrder fail(String code, String message, LocalDateTime now) {
         return new PaymentOrder(
                 id,
@@ -180,6 +201,10 @@ public class PaymentOrder {
 
     public boolean isReady() {
         return status == PaymentOrderStatus.READY;
+    }
+
+    public boolean isConfirmable() {
+        return status == PaymentOrderStatus.READY || status == PaymentOrderStatus.PENDING_CONFIRMATION;
     }
 
     public boolean isConfirmed() {
