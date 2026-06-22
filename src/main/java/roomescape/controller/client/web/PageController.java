@@ -2,15 +2,19 @@ package roomescape.controller.client.web;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import roomescape.client.TossConfirmResultUnknownException;
 import roomescape.client.TossConnectionException;
+import roomescape.client.TossOutboundRateLimitException;
 import roomescape.client.TossPaymentException;
+import roomescape.client.TossRateLimitExceededException;
 import roomescape.service.PaymentService;
 
 @Slf4j
@@ -102,6 +106,19 @@ public class PageController {
         // 요청 자체가 토스에 도달하지 못한 경우 - 미승인이 확실하므로 실패로 안내한다.
         log.warn("[결제 서버 연결 실패] orderId={} message={}", orderId, e.getMessage());
         model.addAttribute("code", "CONNECTION_FAILED");
+        model.addAttribute("message", e.getMessage());
+        model.addAttribute("orderId", orderId);
+        return "payment/fail";
+    }
+
+    @ExceptionHandler({TossOutboundRateLimitException.class, TossRateLimitExceededException.class})
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public String handleRateLimited(RuntimeException e, WebRequest request, Model model) {
+        String orderId = request.getParameter("orderId");
+        // 자체 한도 초과(나가는 요청 거부) 또는 토스 429 재시도 한도 초과 - 결제 승인을 시도조차 못 했거나
+        // 아직 처리되지 않은 상태이므로 실패로 안내한다.
+        log.warn("[결제 승인 한도 초과] orderId={} message={}", orderId, e.getMessage());
+        model.addAttribute("code", "RATE_LIMITED");
         model.addAttribute("message", e.getMessage());
         model.addAttribute("orderId", orderId);
         return "payment/fail";

@@ -25,4 +25,18 @@ class TossClientExceptionsTest {
         assertThat(exception.getCause()).isSameAs(cause);
         assertThat(exception.getMessage()).isEqualTo("결제 승인 결과를 확인하지 못했습니다. 결제가 완료되었을 수 있으니 예약 내역을 확인해주세요.");
     }
+
+    @Test
+    void TossRateLimitExceededException은_안내_메시지를_노출한다() {
+        TossRateLimitExceededException exception = new TossRateLimitExceededException();
+
+        assertThat(exception.getMessage()).isEqualTo("결제 승인 요청이 많아 토스 서버가 일시적으로 거부했습니다. 잠시 후 다시 시도해주세요.");
+    }
+
+    @Test
+    void TossOutboundRateLimitException은_안내_메시지를_노출한다() {
+        TossOutboundRateLimitException exception = new TossOutboundRateLimitException();
+
+        assertThat(exception.getMessage()).isEqualTo("결제 승인 요청이 많아 잠시 후 다시 시도해주세요.");
+    }
 }

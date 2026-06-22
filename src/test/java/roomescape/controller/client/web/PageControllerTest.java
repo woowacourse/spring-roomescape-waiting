@@ -11,17 +11,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.client.TossConfirmResultUnknownException;
 import roomescape.client.TossConnectionException;
+import roomescape.client.TossOutboundRateLimitException;
 import roomescape.client.TossPaymentException;
+import roomescape.client.TossRateLimitExceededException;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.domain.PaymentResult;
 import roomescape.service.PaymentService;
 import roomescape.service.result.PaymentConfirmResult;
 
 @WebMvcTest(PageController.class)
+@TestPropertySource(properties = {
+        "rate-limit.capacity=1000000",
+        "rate-limit.refill-per-second=1000000"
+})
 class PageControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
@@ -94,6 +101,36 @@ class PageControllerTest extends BaseControllerUnitTest {
                 .then()
                 .status(HttpStatus.OK)
                 .body(containsString("CONNECTION_FAILED"));
+    }
+
+    @Test
+    void 나가는_호출_자체_한도를_넘으면_503과_RATE_LIMITED_안내가_노출된다() {
+        when(paymentService.confirm(any(), any(), any()))
+                .thenThrow(new TossOutboundRateLimitException());
+
+        RestAssuredMockMvc.given().spec(defaultSpec())
+                .queryParam("paymentKey", "payment-key-1")
+                .queryParam("orderId", "order-1")
+                .queryParam("amount", 30000L)
+                .when().get("/payments/success")
+                .then()
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(containsString("RATE_LIMITED"));
+    }
+
+    @Test
+    void 토스_429_재시도_한도를_넘으면_503과_RATE_LIMITED_안내가_노출된다() {
+        when(paymentService.confirm(any(), any(), any()))
+                .thenThrow(new TossRateLimitExceededException());
+
+        RestAssuredMockMvc.given().spec(defaultSpec())
+                .queryParam("paymentKey", "payment-key-1")
+                .queryParam("orderId", "order-1")
+                .queryParam("amount", 30000L)
+                .when().get("/payments/success")
+                .then()
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(containsString("RATE_LIMITED"));
     }
 
     @Test
