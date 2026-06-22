@@ -46,6 +46,8 @@ class TossPaymentGatewayTest {
         registry.add("toss.base-url", () -> mockWebServer.url("/").toString());
         registry.add("toss.secret-key", () -> "test_sk_dummy");
         registry.add("toss.client-key", () -> "test_ck_dummy");
+        registry.add("outbound-rate-limit.capacity", () -> "100");
+        registry.add("outbound-rate-limit.refill-per-second", () -> "100");
     }
 
     @AfterAll

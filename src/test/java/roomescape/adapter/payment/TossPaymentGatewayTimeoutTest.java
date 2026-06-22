@@ -18,6 +18,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import roomescape.domain.payment.PaymentConfirmation;
 import roomescape.exception.server.PaymentConnectionException;
 import roomescape.exception.server.PaymentTimeoutException;
+import roomescape.ratelimit.OutboundRateLimitProperties;
 
 @SpringBootTest
 class TossPaymentGatewayTimeoutTest {
@@ -76,9 +77,10 @@ class TossPaymentGatewayTimeoutTest {
             closedPort = socket.getLocalPort();   // 열었다 닫아 '아무도 안 듣는' 포트 확보 → 연결 거부
         }
         TossProperties props = new TossProperties(
-                "http://localhost:" + closedPort, "test_sk_dummy", "test_ck_dummy", 500, 500);
+                "http://localhost:" + closedPort, "test_sk_dummy", "test_ck_dummy", 500, 500, 3);
+        OutboundRateLimitProperties outboundProps = new OutboundRateLimitProperties(10, 5);
         TossPaymentGateway gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(props), new ObjectMapper());
+                new TossClientConfig().tossRestClient(props, outboundProps), new ObjectMapper());
 
         assertThatThrownBy(() -> gateway.confirm(confirmation()))
                 .isInstanceOf(PaymentConnectionException.class);   // 도달 못 함 = 안전
