@@ -85,7 +85,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN theme h ON s.theme_id = h.id
                 WHERE r.customer_name = ?
                   AND r.customer_email = ?
-                  AND r.status = 'CONFIRMED'
                   AND (s.reservation_date > ? OR (s.reservation_date = ? AND t.start_at > ?))
                 ORDER BY s.reservation_date ASC
                 """;

@@ -20,6 +20,7 @@ import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
+import roomescape.reservation.controller.dto.response.ReservationPaymentResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -68,6 +69,12 @@ public class ReservationService {
                 validCustomerEmail.email(),
                 now
         );
+        final List<ReservationPaymentResponse> reservationResponses = reservations.stream()
+                .map(reservation -> ReservationPaymentResponse.from(
+                        reservation,
+                        paymentOrderRepository.findByReservationId(reservation.getId())
+                ))
+                .toList();
         final List<WaitingResponse> waitingsWithRank = waitingRepository.findAllWithRankByCustomerNameAndCustomerEmailAndReservationDateTimeAfter(
                         validCustomerName.name(),
                         validCustomerEmail.email(),
@@ -77,7 +84,7 @@ public class ReservationService {
                 .map(WaitingResponse::from)
                 .toList();
 
-        return ReservationsAndWaitingsResponse.from(reservations, waitingsWithRank);
+        return ReservationsAndWaitingsResponse.from(reservationResponses, waitingsWithRank);
     }
 
     public List<ReservationTimesWithStatus> getReservationTimeStatuses(final LocalDate date, final Long themeId) {

@@ -54,6 +54,21 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     }
 
     @Override
+    public Optional<PaymentOrder> findByReservationId(final Long reservationId) {
+        final String sql = """
+                SELECT id, order_id, amount, payment_key, idempotency_key, status, reservation_id
+                FROM payment_order
+                WHERE reservation_id = ?
+                """;
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapToDomain, reservationId));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public boolean complete(final String orderId, final String paymentKey) {
         final String sql = """
                 UPDATE payment_order

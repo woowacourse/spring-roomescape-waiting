@@ -501,8 +501,15 @@ main { padding: 48px 0 100px; }
 .data-table tbody tr:hover { background: var(--surface-2); }
 .data-table td { padding: 12px 15px; color: var(--text); vertical-align: middle; }
 .data-table td:last-child { text-align: right; }
+.mono-cell { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; color: var(--text-secondary); }
+.payment-status-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.payment-status-badge.confirmed { border-color: rgba(82, 196, 122, 0.35); color: #7bd88f; background: rgba(82, 196, 122, 0.08); }
+.payment-status-badge.ready { border-color: rgba(200, 184, 138, 0.35); color: var(--accent); background: rgba(200, 184, 138, 0.08); }
+.payment-status-badge.requires-confirmation { border-color: rgba(255, 178, 102, 0.4); color: #ffbd7a; background: rgba(255, 178, 102, 0.08); }
 .btn-delete { padding: 4px 12px; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; transition: all var(--tr); }
 .btn-delete:hover { border-color: var(--danger); color: var(--danger); }
+.btn-inline { padding: 4px 12px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-secondary); border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; transition: all var(--tr); }
+.btn-inline:hover { border-color: var(--accent); color: var(--accent); }
 .admin-form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 14px; }
 .admin-form-title { font-size: 13px; font-weight: 600; margin-bottom: 14px; }
 .admin-form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }

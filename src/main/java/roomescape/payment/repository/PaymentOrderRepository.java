@@ -10,6 +10,8 @@ public interface PaymentOrderRepository {
 
     Optional<PaymentOrder> findByOrderId(String orderId);
 
+    Optional<PaymentOrder> findByReservationId(Long reservationId);
+
     boolean complete(String orderId, String paymentKey);
 
     boolean requireConfirmation(String orderId, String paymentKey);
