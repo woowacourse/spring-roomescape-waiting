@@ -41,15 +41,15 @@
     .row .label { color: #888; white-space: nowrap; }
     .row .val { text-align: right; word-break: break-all; }
 
-    a {
+    a.link-btn {
       display: inline-block;
       margin-top: 24px;
       color: #3182f6;
       text-decoration: none;
       font-weight: 600;
     }
-
-    .error { color: #e03131; }
+    .error-val { color: #e03131; }
+    .warning-val { color: #e67700; }
   </style>
 </head>
 <body>
@@ -60,18 +60,25 @@
 
   <div id="success-content" style="display:none">
     <h1>✅ 결제를 완료했어요</h1>
-    <p class="desc">서버가 Toss 결제 승인 API를 직접 호출해 결제를 확정했습니다.</p>
+    <p class="desc">결제가 정상적으로 승인되었습니다.</p>
     <div class="row"><span class="label">결제 상태</span><span class="val" id="result-status"></span></div>
     <div class="row"><span class="label">주문번호</span><span class="val" id="result-order-id"></span></div>
     <div class="row"><span class="label">승인 금액</span><span class="val" id="result-amount"></span></div>
     <div class="row"><span class="label">paymentKey</span><span class="val" id="result-payment-key"></span></div>
-    <a href="/">← 다시 결제하기</a>
+    <a class="link-btn" href="/page/my-reservations">← 내 예약 확인하기</a>
+  </div>
+
+  <div id="uncertain-content" style="display:none">
+    <h1>⏳ 결제 결과를 확인 중이에요</h1>
+    <p class="desc">결제 서버와 통신 중 응답이 지연되어 승인 여부를 즉시 확인할 수 없습니다.<br/>잠시 후 내 예약에서 결제 상태를 확인해 주세요.</p>
+    <div class="row"><span class="label">주문번호</span><span class="val warning-val" id="uncertain-order-id"></span></div>
+    <a class="link-btn" href="/page/my-reservations">← 내 예약에서 확인하기</a>
   </div>
 
   <div id="error-content" style="display:none">
     <h1>❌ 승인 실패</h1>
-    <p class="desc error" id="error-msg"></p>
-    <a href="/">← 다시 시도하기</a>
+    <p class="desc error-val" id="error-msg"></p>
+    <a class="link-btn" href="/">← 홈으로 돌아가기</a>
   </div>
 </div>
 
@@ -90,11 +97,18 @@
       });
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.detail || data.message || '승인 실패');
+      document.getElementById('loading').style.display = 'none';
+
+      if (res.status === 504) {
+        document.getElementById('uncertain-content').style.display = '';
+        document.getElementById('uncertain-order-id').textContent = orderId;
+        return;
       }
 
-      document.getElementById('loading').style.display = 'none';
+      if (!res.ok) {
+        throw new Error(data.message || '승인 실패');
+      }
+
       document.getElementById('success-content').style.display = '';
       document.getElementById('result-status').textContent = data.status;
       document.getElementById('result-order-id').textContent = data.orderId;

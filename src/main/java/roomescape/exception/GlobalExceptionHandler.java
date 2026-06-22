@@ -14,6 +14,12 @@ import roomescape.exception.TossPaymentException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(GatewayTimeoutException.class)
+    public ResponseEntity<ErrorResponse> handleGatewayTimeoutException(GatewayTimeoutException e) {
+        final ErrorResponse response = new ErrorResponse("GATEWAY_TIMEOUT", e.getMessage());
+        return ResponseEntity.status(504).body(response);
+    }
+
     @ExceptionHandler(TossPaymentException.class)
     public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException e) {
         final ErrorResponse response = new ErrorResponse(e.getCode(), e.getMessage());

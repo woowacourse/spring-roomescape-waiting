@@ -4,13 +4,15 @@ import roomescape.domain.*;
 
 import java.time.LocalDate;
 
-public record ReservationResult (
+public record ReservationResult(
         Long id,
 
         String name,
         Long amount,
         String orderId,
 
+        String paymentKey,
+        String orderStatus,
         LocalDate date,
         ReservationTimeResult time,
         ThemeResult theme,
@@ -26,6 +28,8 @@ public record ReservationResult (
                 reservation.getName(),
                 order.getAmount(),
                 order.getOrderId(),
+                order.getPaymentKey(),
+                order.getStatus().name(),
                 reservation.getReservationDate().getDate(),
                 ReservationTimeResult.from(reservationTime),
                 ThemeResult.from(theme),

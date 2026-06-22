@@ -59,8 +59,8 @@ INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('이영희', DAT
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('박민준', DATEADD('DAY', 3, CURRENT_DATE), 5, 4);
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('최지우', DATEADD('DAY', 1, CURRENT_DATE), 4, 1);
 
-INSERT INTO orders (order_id, amount, payment_key, reservation_id, status) VALUES ('order-sample-001', 50000, null, 1, 'PENDING');
-INSERT INTO orders (order_id, amount, payment_key, reservation_id, status) VALUES ('order-sample-002', 50000, null, 2, 'PENDING');
-INSERT INTO orders (order_id, amount, payment_key, reservation_id, status) VALUES ('order-sample-003', 50000, null, 3, 'PENDING');
-INSERT INTO orders (order_id, amount, payment_key, reservation_id, status) VALUES ('order-sample-004', 50000, null, 4, 'PENDING');
-INSERT INTO orders (order_id, amount, payment_key, reservation_id, status) VALUES ('order-sample-005', 50000, null, 5, 'PENDING');
+INSERT INTO orders (order_id, idempotency_key, amount, payment_key, reservation_id, status) VALUES ('order-sample-001', 'idem-key-001', 50000, null, 1, 'PENDING');
+INSERT INTO orders (order_id, idempotency_key, amount, payment_key, reservation_id, status) VALUES ('order-sample-002', 'idem-key-002', 50000, null, 2, 'PENDING');
+INSERT INTO orders (order_id, idempotency_key, amount, payment_key, reservation_id, status) VALUES ('order-sample-003', 'idem-key-003', 50000, null, 3, 'PENDING');
+INSERT INTO orders (order_id, idempotency_key, amount, payment_key, reservation_id, status) VALUES ('order-sample-004', 'idem-key-004', 50000, null, 4, 'PENDING');
+INSERT INTO orders (order_id, idempotency_key, amount, payment_key, reservation_id, status) VALUES ('order-sample-005', 'idem-key-005', 50000, null, 5, 'PENDING');

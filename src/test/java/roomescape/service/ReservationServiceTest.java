@@ -63,7 +63,7 @@ class ReservationServiceTest {
         time = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
         theme = Theme.createWithId(1L, "테스트 테마", "테스트용 테마 설명입니다.", "https://test.com/img.jpg");
         futureDate = LocalDate.now().plusDays(1);
-        order = Order.createWithId(1L, "order-test", 1000L, null, 1L, OrderStatus.PENDING);
+        order = Order.createWithId(1L, "order-test", "idem-key-test", 1000L, null, 1L, OrderStatus.PENDING);
     }
 
     @Nested

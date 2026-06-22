@@ -26,14 +26,15 @@ public class OrderRepository {
 
     public Order save(final Order order) {
         final String sql = """
-                INSERT INTO orders (order_id, amount, reservation_id, status)
-                VALUES (:orderId, :amount, :reservationId, :status)
+                INSERT INTO orders (order_id, idempotency_key, amount, reservation_id, status)
+                VALUES (:orderId, :idempotencyKey, :amount, :reservationId, :status)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
         final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("orderId", order.getOrderId())
+                .addValue("idempotencyKey", order.getIdempotencyKey())
                 .addValue("amount", order.getAmount())
                 .addValue("reservationId", order.getReservationId())
                 .addValue("status", order.getStatus().name());
@@ -50,7 +51,7 @@ public class OrderRepository {
 
     public Optional<Order> findByReservationId(final Long reservationId) {
         final String sql = """
-                SELECT id, order_id, amount, payment_key, reservation_id, status
+                SELECT id, order_id, idempotency_key, amount, payment_key, reservation_id, status
                 FROM orders
                 WHERE reservation_id = :reservationId;
                 """;
@@ -68,7 +69,7 @@ public class OrderRepository {
 
     public Optional<Order> findByOrderId(final String orderId) {
         final String sql = """
-                SELECT id, order_id, amount, payment_key, reservation_id, status
+                SELECT id, order_id, idempotency_key, amount, payment_key, reservation_id, status
                 FROM orders
                 WHERE order_id = :orderId
                 """;
@@ -80,6 +81,13 @@ public class OrderRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public void markUncertain(final Long id) {
+        final String sql = """
+                UPDATE orders SET status = 'UNCERTAIN' WHERE id = :id
+                """;
+        jdbcTemplate.update(sql, new MapSqlParameterSource().addValue("id", id));
     }
 
     public void confirm(final Long id, final String paymentKey) {
@@ -98,6 +106,7 @@ public class OrderRepository {
         return (rs, rowNum) -> Order.createWithId(
                 rs.getLong("id"),
                 rs.getString("order_id"),
+                rs.getString("idempotency_key"),
                 rs.getLong("amount"),
                 rs.getString("payment_key"),
                 rs.getLong("reservation_id"),
