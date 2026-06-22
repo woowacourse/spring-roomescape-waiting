@@ -9,5 +9,6 @@ public enum ErrorCode {
     RESOURCE_NOT_FOUND,
     CONFLICT,
     FORBIDDEN,
+    TOO_MANY_REQUESTS,
     INTERNAL_SERVER_ERROR,
 }
