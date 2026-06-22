@@ -39,10 +39,10 @@ public record MyReservationResponse(
                 reservation.getTime().getStartAt(),
                 myReservation.waitingNumber(),
                 reservationStatus(myReservation),
-                payment == null ? null : payment.getPaymentStatus(),
-                payment == null ? null : payment.getOrderId(),
-                payment == null ? null : payment.getPaymentKey(),
-                payment == null ? null : payment.getAmount()
+                paymentStatus(payment),
+                orderId(payment),
+                paymentKey(payment),
+                amount(payment)
         );
     }
 
@@ -51,5 +51,21 @@ public record MyReservationResponse(
             return ReservationStatus.PAYMENT_PENDING;
         }
         return ReservationStatus.valueOf(myReservation.reservationType().name());
+    }
+
+    private static PaymentStatus paymentStatus(ReservationPayment payment) {
+        return payment == null ? null : payment.getPaymentStatus();
+    }
+
+    private static String orderId(ReservationPayment payment) {
+        return payment == null ? null : payment.getOrderId();
+    }
+
+    private static String paymentKey(ReservationPayment payment) {
+        return payment == null ? null : payment.getPaymentKey();
+    }
+
+    private static Long amount(ReservationPayment payment) {
+        return payment == null ? null : payment.getAmount();
     }
 }
