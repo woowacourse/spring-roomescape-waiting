@@ -35,6 +35,7 @@
     const amount = Number(params.get('amount'));
     const orderName = params.get('orderName');
     const reservationId = params.get('reservationId');
+    const customerName = params.get('customerName');
 
     document.getElementById('order-summary').textContent =
         `${orderName} / 결제 금액: ${amount.toLocaleString()}원`;
@@ -62,7 +63,7 @@
             await widgets.requestPayment({
                 orderId,
                 orderName,
-                successUrl: `${location.origin}/payments/success.html?reservationId=${reservationId}`,
+                successUrl: `${location.origin}/payments/success.html?reservationId=${reservationId}&customerName=${encodeURIComponent(customerName ?? '')}`,
                 failUrl: `${location.origin}/payments/fail.html?reservationId=${reservationId}`,
             });
         });

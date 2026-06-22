@@ -27,6 +27,7 @@
     const orderId = urlParams.get('orderId');
     const amount = urlParams.get('amount');
     const reservationId = urlParams.get('reservationId');
+    const customerName = urlParams.get('customerName');
 
     async function confirm() {
         const response = await fetch('/payments/confirm', {
@@ -38,7 +39,19 @@
         const json = await response.json();
 
         if (!response.ok) {
-            // 승인 실패 → fail 페이지로 이동 (PENDING 예약 정리 위해 reservationId 전달)
+            // read timeout: 승인 여부 불명("확인 필요"). 예약을 지우지 않고 내역에서 확인하도록 안내한다.
+            // (멱등키 덕분에 재시도해도 이중 승인되지 않는다)
+            if (json.code === 'PAYMENT_RESULT_UNKNOWN') {
+                document.getElementById('title').textContent = '결제 결과 확인 필요';
+                document.getElementById('orderId').textContent = json.message;
+                const historyUrl = customerName
+                    ? `/payments/history.html?name=${encodeURIComponent(customerName)}`
+                    : '/payments/history.html';
+                document.getElementById('amount').innerHTML =
+                    `<a href="${historyUrl}" class="primary-button">결제 내역에서 확인하기</a>`;
+                return;
+            }
+            // 그 외(토스 거절/연결 실패) → fail 페이지로 이동 (선점한 PENDING 예약 정리)
             location.href = `/payments/fail.html?reservationId=${reservationId}&code=${json.code}&message=${encodeURIComponent(json.message)}`;
             return;
         }

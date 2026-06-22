@@ -14,6 +14,7 @@
     </a>
     <nav class="nav-links" aria-label="주요 메뉴">
         <a class="active" href="/">예약</a>
+        <a href="/payments/history.html">결제 내역</a>
         <a href="/admin.html">관리자</a>
     </nav>
 </header>
@@ -456,6 +457,7 @@
                 orderId,
                 amount: String(amount),
                 orderName,
+                customerName: reservationName,
             });
             location.href = `/payments/checkout.html?${query}`;
         } catch (error) {
