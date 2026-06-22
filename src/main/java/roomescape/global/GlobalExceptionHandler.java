@@ -1,6 +1,7 @@
 package roomescape.global;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +11,7 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.ErrorResponse;
 import roomescape.exception.RoomescapeException;
 import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.ratelimit.OutboundRateLimitException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -47,5 +49,14 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse("PAYMENT_AMOUNT_MISMATCH", ex.getMessage());
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    protected ResponseEntity<ErrorResponse> handleOutboundRateLimitException(OutboundRateLimitException ex) {
+        ErrorCode error = ErrorCode.OUTBOUND_RATE_LIMIT_EXCEEDED;
+
+        return ResponseEntity.status(error.getStatus())
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ErrorResponse.of(error));
     }
 }
