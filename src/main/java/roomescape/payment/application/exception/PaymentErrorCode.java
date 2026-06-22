@@ -20,6 +20,18 @@ public enum PaymentErrorCode implements ErrorCode {
             HttpStatus.GATEWAY_TIMEOUT,
             "결제 승인 응답을 받지 못했습니다. 승인 여부를 확인하거나 같은 주문으로 다시 시도해 주세요."
     ),
+    GATEWAY_RATE_LIMIT_EXCEEDED(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "결제 서비스의 호출 한도를 초과했습니다. 잠시 후 다시 시도해 주세요."
+    ),
+    OUTBOUND_RATE_LIMIT_EXCEEDED(
+            HttpStatus.TOO_MANY_REQUESTS,
+            "결제 서비스 호출량이 자체 한도를 초과했습니다. 잠시 후 다시 시도해 주세요."
+    ),
+    GATEWAY_RETRY_INTERRUPTED(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "결제 서비스 재시도가 중단되었습니다."
+    ),
     UNKNOWN_GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "결제 승인 중 알 수 없는 오류가 발생했습니다."),
     PAYMENT_CANCELED(HttpStatus.BAD_REQUEST, "사용자가 결제를 취소했습니다.");
 
