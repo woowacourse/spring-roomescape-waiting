@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -102,6 +103,15 @@ public class ReservationService {
                 reservation.getTheme().getId());
         reservationRepository.deleteById(id);
         promoteFirstWaiting(reservation);
+    }
+
+    @Transactional
+    public void expirePendingCreatedBefore(LocalDateTime cutoff) {
+        for (Reservation stale : reservationRepository.findPendingCreatedBefore(cutoff)) {
+            reservationRepository.lockSlot(stale.getDate(), stale.getTime().getId(), stale.getTheme().getId());
+            reservationRepository.deleteById(stale.getId());
+            promoteFirstWaiting(stale);
+        }
     }
 
     private void promoteFirstWaiting(Reservation canceled) {
