@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
-import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.domain.vo.LockedReservationSlots;
