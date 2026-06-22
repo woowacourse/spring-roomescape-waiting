@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    @ExceptionHandler
+    public ErrorResponse handleOutboundRateLimit(OutboundRateLimitException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler
     public ErrorResponse handlePaymentGatewayConfiguration(PaymentGatewayConfigurationException e) {

@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.PaymentAlreadyProcessedException;
 import roomescape.global.exception.PaymentAmountMismatchException;
+import roomescape.global.exception.PaymentNotFoundException;
 import roomescape.global.exception.RetryablePaymentGatewayException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.global.exception.UniqueConstraintViolationException;
@@ -58,7 +60,7 @@ public class PaymentCommandService {
         try {
             return paymentGateway.confirm(
                     new PaymentConfirmation(command.paymentKey(), command.orderId(), command.amount()));
-        } catch (RetryablePaymentGatewayException e) {
+        } catch (RetryablePaymentGatewayException | PaymentAlreadyProcessedException e) {
             return reconcileIfAlreadyApproved(command, payment, e);
         }
     }
@@ -66,7 +68,7 @@ public class PaymentCommandService {
     private PaymentResult reconcileIfAlreadyApproved(
             PaymentConfirmCommand command,
             Payment payment,
-            RetryablePaymentGatewayException originalException
+            RuntimeException originalException
     ) {
         var result = findPaymentByOrderId(command, originalException);
         if (canConfirmInquiredPayment(payment, result)) {
@@ -77,11 +79,11 @@ public class PaymentCommandService {
 
     private PaymentResult findPaymentByOrderId(
             PaymentConfirmCommand command,
-            RetryablePaymentGatewayException originalException
+            RuntimeException originalException
     ) {
         try {
             return paymentGateway.findByOrderId(command.orderId());
-        } catch (NotFoundException e) {
+        } catch (PaymentNotFoundException e) {
             return findPaymentByPaymentKey(command, originalException);
         } catch (RuntimeException e) {
             throw originalException;
@@ -90,7 +92,7 @@ public class PaymentCommandService {
 
     private PaymentResult findPaymentByPaymentKey(
             PaymentConfirmCommand command,
-            RetryablePaymentGatewayException originalException
+            RuntimeException originalException
     ) {
         try {
             return paymentGateway.findByPaymentKey(command.paymentKey());
