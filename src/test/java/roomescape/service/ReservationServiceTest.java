@@ -247,8 +247,9 @@ class ReservationServiceTest {
 
         List<UserReservation> userReservations = List.of(
                 new UserReservation(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme, ReservationStatus.RESERVED,
-                        null),
-                new UserReservation(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme, ReservationStatus.WAITING, 2L)
+                        null, null, null, null),
+                new UserReservation(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme, ReservationStatus.WAITING, 2L,
+                        null, null, null)
         );
 
         when(userReservationRepository.findByName("브라운", 0, 10)).thenReturn(userReservations);

@@ -40,11 +40,11 @@ class ReservationControllerTest {
                 new UserReservation(1L, "레서", LocalDate.of(2026, 5, 6),
                         new ReservationTime(1L, LocalTime.of(18, 0)),
                         new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
-                        ReservationStatus.RESERVED, null),
+                        ReservationStatus.RESERVED, null, null, null, null),
                 new UserReservation(2L, "레서", LocalDate.of(2026, 5, 7),
                         new ReservationTime(2L, LocalTime.of(20, 0)),
                         new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"),
-                        ReservationStatus.WAITING, 2L)
+                        ReservationStatus.WAITING, 2L, null, null, null)
         );
         when(reservationService.findUserReservations("레서", 1, 5)).thenReturn(reservations);
 

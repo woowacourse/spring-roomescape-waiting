@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 예약 · 방탈출</title>
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background:
-                radial-gradient(900px 500px at 100% -10%, #f59e0b14, transparent 60%),
-                radial-gradient(700px 400px at -10% 30%, #6366f114, transparent 60%),
-                #0b1220;
+            background: radial-gradient(900px 500px at 100% -10%, #f59e0b14, transparent 60%),
+            radial-gradient(700px 400px at -10% 30%, #6366f114, transparent 60%),
+            #0b1220;
             color: #f1f5f9;
             min-height: 100vh;
         }
@@ -46,7 +49,10 @@
             font-size: 0.875rem;
             transition: color 0.15s;
         }
-        .btn-back:hover { color: #f1f5f9; }
+
+        .btn-back:hover {
+            color: #f1f5f9;
+        }
 
         main {
             max-width: 720px;
@@ -54,9 +60,20 @@
             padding: 3rem 2rem;
         }
 
-        .page-header { margin-bottom: 1.75rem; }
-        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.4rem; }
-        .page-sub { color: #94a3b8; font-size: 0.9rem; }
+        .page-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .page-sub {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
 
         /* ── 이름 검색 폼 ── */
         .lookup-form {
@@ -69,6 +86,7 @@
             margin-bottom: 1.5rem;
             box-shadow: 0 10px 30px #00000044;
         }
+
         .lookup-form input {
             flex: 1;
             background: #0b1220;
@@ -80,11 +98,16 @@
             outline: none;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .lookup-form input::placeholder { color: #475569; }
+
+        .lookup-form input::placeholder {
+            color: #475569;
+        }
+
         .lookup-form input:focus {
             border-color: #f59e0b;
             box-shadow: 0 0 0 3px #f59e0b22;
         }
+
         .lookup-form button {
             background: linear-gradient(135deg, #f59e0b, #fbbf24);
             color: #0f172a;
@@ -97,9 +120,23 @@
             transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
             box-shadow: 0 4px 14px #f59e0b33;
         }
-        .lookup-form button:hover { filter: brightness(1.08); box-shadow: 0 6px 20px #f59e0b55; }
-        .lookup-form button:active { transform: translateY(1px); }
-        .lookup-form button:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; box-shadow: none; filter: none; }
+
+        .lookup-form button:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 6px 20px #f59e0b55;
+        }
+
+        .lookup-form button:active {
+            transform: translateY(1px);
+        }
+
+        .lookup-form button:disabled {
+            background: #334155;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            filter: none;
+        }
 
         /* ── 토스트 ── */
         .toast {
@@ -109,16 +146,19 @@
             margin-bottom: 1.25rem;
             line-height: 1.5;
         }
+
         .toast-success {
             background: #14532d33;
             border: 1px solid #22c55e55;
             color: #86efac;
         }
+
         .toast-error {
             background: #7f1d1d33;
             border: 1px solid #ef444455;
             color: #fca5a5;
         }
+
         /* ── 예약 카드 ── */
         .res-list {
             display: flex;
@@ -137,6 +177,7 @@
             gap: 1rem;
             transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
         }
+
         .res-card:hover {
             border-color: #f59e0b55;
             transform: translateY(-2px);
@@ -187,15 +228,44 @@
             font-size: 0.75rem;
             font-weight: 700;
         }
+
         .res-status.reserved {
             background: #14532d33;
             border: 1px solid #22c55e55;
             color: #4ade80;
         }
+
         .res-status.waiting {
             background: #1e3a8a33;
             border: 1px solid #3b82f655;
             color: #60a5fa;
+        }
+
+        .res-status.pending {
+            background: #78350f33;
+            border: 1px solid #f59e0b55;
+            color: #fbbf24;
+        }
+
+        .res-status.unknown {
+            background: #7c2d1233;
+            border: 1px solid #fb923c55;
+            color: #fdba74;
+        }
+
+        /* ── 결제 정보 ── */
+        .res-payment {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem 0.85rem;
+            color: #64748b;
+            font-size: 0.78rem;
+            margin-top: 0.1rem;
+        }
+
+        .res-payment code {
+            color: #94a3b8;
+            font-family: ui-monospace, monospace;
         }
 
         .res-actions {
@@ -215,14 +285,26 @@
             cursor: pointer;
             transition: background 0.15s, color 0.15s, border-color 0.15s;
         }
-        .btn-action:hover { border-color: #f59e0b; color: #f59e0b; }
+
+        .btn-action:hover {
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
 
         .btn-action.danger {
             border-color: #ef4444aa;
             color: #fca5a5;
         }
-        .btn-action.danger:hover { background: #ef4444; color: #0f172a; }
-        .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-action.danger:hover {
+            background: #ef4444;
+            color: #0f172a;
+        }
+
+        .btn-action:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
 
         .state-msg {
             text-align: center;
@@ -243,7 +325,10 @@
             z-index: 100;
             padding: 1rem;
         }
-        .modal-backdrop.show { display: flex; }
+
+        .modal-backdrop.show {
+            display: flex;
+        }
 
         .modal {
             background: #1e293b;
@@ -258,6 +343,7 @@
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
+
         .modal .modal-target {
             color: #94a3b8;
             font-size: 0.9rem;
@@ -268,7 +354,10 @@
             border: 1px solid #334155;
             border-radius: 8px;
         }
-        .modal .modal-target strong { color: #f1f5f9; }
+
+        .modal .modal-target strong {
+            color: #f1f5f9;
+        }
 
         .form-row {
             display: flex;
@@ -276,11 +365,13 @@
             gap: 0.4rem;
             margin-bottom: 1rem;
         }
+
         .form-row label {
             font-size: 0.8rem;
             color: #94a3b8;
             font-weight: 700;
         }
+
         .form-row input[type="date"],
         .form-row select {
             background: #0f172a;
@@ -291,8 +382,11 @@
             padding: 0.6rem 0.85rem;
             outline: none;
         }
+
         .form-row input[type="date"]:focus,
-        .form-row select:focus { border-color: #f59e0b; }
+        .form-row select:focus {
+            border-color: #f59e0b;
+        }
 
         .modal-error {
             margin-bottom: 1rem;
@@ -310,6 +404,7 @@
             gap: 0.6rem;
             justify-content: flex-end;
         }
+
         .modal-actions button {
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
@@ -318,24 +413,53 @@
             font-weight: 700;
             cursor: pointer;
         }
-        .btn-secondary { background: #334155; color: #f1f5f9; }
-        .btn-secondary:hover { background: #475569; }
+
+        .btn-secondary {
+            background: #334155;
+            color: #f1f5f9;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
         .btn-primary {
             background: linear-gradient(135deg, #f59e0b, #fbbf24);
             color: #0f172a;
             box-shadow: 0 4px 14px #f59e0b33;
             transition: filter 0.15s, box-shadow 0.15s;
         }
-        .btn-primary:hover { filter: brightness(1.08); box-shadow: 0 6px 20px #f59e0b55; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; filter: none; box-shadow: none; }
+
+        .btn-primary:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 6px 20px #f59e0b55;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: none;
+            box-shadow: none;
+        }
+
         .btn-danger {
             background: linear-gradient(135deg, #ef4444, #f87171);
             color: #0f172a;
             box-shadow: 0 4px 14px #ef444433;
             transition: filter 0.15s, box-shadow 0.15s;
         }
-        .btn-danger:hover { filter: brightness(1.08); box-shadow: 0 6px 20px #ef444455; }
-        .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; filter: none; box-shadow: none; }
+
+        .btn-danger:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 6px 20px #ef444455;
+        }
+
+        .btn-danger:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: none;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -409,7 +533,8 @@
         try {
             const body = await res.json();
             if (body && body.message) return body.message;
-        } catch { /* ignore */ }
+        } catch { /* ignore */
+        }
         return fallback;
     }
 
@@ -417,6 +542,7 @@
         document.getElementById('toast').innerHTML =
             `<div class="toast toast-${type}">${text}</div>`;
     }
+
     function clearToast() {
         document.getElementById('toast').innerHTML = '';
     }
@@ -460,11 +586,28 @@
         }
     }
 
+    /* 결제 상태별 배지 (status → 표시 텍스트·색상) */
+    const STATUS_BADGE = {
+        WAITING: {cls: 'waiting', text: (r) => `예약 대기 ${r.rank}번째`},
+        CONFIRMED: {cls: 'reserved', text: () => '결제 확정'},
+        PAYMENT_PENDING: {cls: 'pending', text: () => '결제 대기'},
+        PAYMENT_UNKNOWN: {cls: 'unknown', text: () => '확인 필요'},
+        RESERVED: {cls: 'reserved', text: () => '예약 완료'},
+    };
+
     function createCard(r) {
         const isWaiting = r.status === 'WAITING';
-        const statusBadge = isWaiting
-            ? `<span class="res-status waiting">예약 대기 ${r.rank}번째</span>`
-            : `<span class="res-status reserved">예약 완료</span>`;
+        const badge = STATUS_BADGE[r.status] ?? STATUS_BADGE.RESERVED;
+        const statusBadge = `<span class="res-status ${badge.cls}">${badge.text(r)}</span>`;
+
+        // 결제 정보 (대기 건이나 결제 전이면 비어 있을 수 있다)
+        const paymentBits = [];
+        if (r.orderId) paymentBits.push(`주문 <code>${r.orderId}</code>`);
+        if (r.amount != null) paymentBits.push(`${r.amount.toLocaleString()}원`);
+        if (r.paymentKey) paymentBits.push(`결제키 <code>${r.paymentKey}</code>`);
+        const paymentHtml = paymentBits.length
+            ? `<div class="res-payment">${paymentBits.join('<span class="dot"></span>')}</div>`
+            : '';
 
         const card = document.createElement('div');
         card.className = 'res-card';
@@ -480,6 +623,7 @@
                     <span class="dot"></span>
                     ${statusBadge}
                 </div>
+                ${paymentHtml}
             </div>
             <div class="res-actions">
                 ${isWaiting ? '' : '<button class="btn-action edit">변경</button>'}
@@ -581,8 +725,8 @@
                 `/reservations/${editTarget.id}?name=${encodeURIComponent(currentName)}`,
                 {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ date, timeId }),
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({date, timeId}),
                 }
             );
 
@@ -621,10 +765,12 @@
         document.getElementById('cancel-confirm').textContent = '취소하기';
         document.getElementById('cancel-modal').classList.add('show');
     }
+
     function closeCancelModal() {
         cancelTarget = null;
         document.getElementById('cancel-modal').classList.remove('show');
     }
+
     document.getElementById('cancel-close').addEventListener('click', closeCancelModal);
     document.getElementById('cancel-modal').addEventListener('click', (e) => {
         if (e.target.id === 'cancel-modal') closeCancelModal();
@@ -645,7 +791,7 @@
         try {
             const res = await fetch(
                 `/${resource}/${r.id}?name=${encodeURIComponent(currentName)}`,
-                { method: 'DELETE' }
+                {method: 'DELETE'}
             );
 
             if (!res.ok) {

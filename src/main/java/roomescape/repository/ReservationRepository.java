@@ -212,8 +212,12 @@ public class ReservationRepository {
     }
 
     public void confirm(long id) {
+        updateStatus(id, ReservationStatus.CONFIRMED);
+    }
+
+    public void updateStatus(long id, ReservationStatus status) {
         String sql = "UPDATE reservation SET status = ? WHERE id = ?";
-        jdbcTemplate.update(sql, ReservationStatus.CONFIRMED.name(), id);
+        jdbcTemplate.update(sql, status.name(), id);
     }
 
     public boolean existsByTimeId(long id) {

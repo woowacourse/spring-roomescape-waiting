@@ -1,10 +1,10 @@
 package roomescape.service.dto;
 
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 import java.time.LocalDate;
-import roomescape.domain.ReservationStatus;
 
 public record UserReservation(
         Long id,
@@ -13,6 +13,9 @@ public record UserReservation(
         ReservationTime time,
         Theme theme,
         ReservationStatus status,
-        Long rank
+        Long rank,
+        String orderId,
+        String paymentKey,
+        Long amount
 ) {
 }

@@ -73,8 +73,8 @@ class WaitingE2ETest {
     @DisplayName("GET /reservations?name=... - 내 예약과 예약대기 목록을 함께 조회한다")
     void getMyReservations() {
         String futureDate = LocalDate.now().plusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                "레서", futureDate, 1L, 1L);
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES (?, ?, ?, ?, ?)",
+                "레서", futureDate, 1L, 1L, "CONFIRMED");
         jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 "밍구", futureDate, 1L, 1L);
         jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
@@ -86,7 +86,7 @@ class WaitingE2ETest {
                 .then().log().all()
                 .statusCode(200)
                 .body("userReservations.size()", is(2))
-                .body("userReservations[0].status", is("RESERVED"))
+                .body("userReservations[0].status", is("CONFIRMED"))
                 .body("userReservations[1].status", is("WAITING"))
                 .body("userReservations[1].rank", is(2));
     }
