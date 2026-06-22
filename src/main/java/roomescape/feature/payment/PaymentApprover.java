@@ -1,9 +1,6 @@
 package roomescape.feature.payment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
@@ -11,27 +8,20 @@ import org.springframework.stereotype.Component;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler;
 import org.springframework.web.client.RestClientException;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
-import roomescape.feature.payment.dto.PaymentErrorResponse;
 import roomescape.feature.payment.dto.PaymentResponse;
+import roomescape.global.ratelimit.OutboundRateLimit;
 
 @RequiredArgsConstructor
 @Component
 public class PaymentApprover {
 
-    private static final String APPROVE_URI = "/v1/payments/confirm";
-    private static final String PAYMENT_STATUS_URI = "/v1/payments/{paymentKey}";
-    private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
-
     private static final int MAX_ATTEMPTS = 3;
     private static final long BACKOFF_DELAY_MILLIS = 200L;
     private static final double BACKOFF_MULTIPLIER = 2.0;
 
-    private final RestClient paymentRestClient;
-    private final ObjectMapper objectMapper;
+    private final TossPaymentClient tossPaymentClient;
 
     /**
      * 토스 결제 승인을 요청한다.
@@ -40,23 +30,18 @@ public class PaymentApprover {
      * 연결 실패와 읽기 타임아웃은 재시도를 공유하되, 재시도 소진 후의 처리는 {@link #recover} 에서 갈린다.
      * 토스가 에러 코드를 응답한 경우({@link PaymentException})는 비즈니스 결과이므로 재시도하지 않는다.
      *
-     * Idempotency-Key 는 재시도마다 동일해야 하므로 주문 단위로 고정된 orderId 를 사용한다.
+     * 실제 HTTP 통신과 에러 코드 → {@link PaymentException} 변환은 {@link TossPaymentClient} 가 담당하고,
+     * 이 클래스는 재시도·결과 불명 처리(reconciliation)·멱등 판단 같은 정책에 집중한다.
      */
     @Retryable(
             retryFor = PaymentClientException.class,
             maxAttempts = MAX_ATTEMPTS,
             backoff = @Backoff(delay = BACKOFF_DELAY_MILLIS, multiplier = BACKOFF_MULTIPLIER)
     )
+    @OutboundRateLimit(key = "payment_outbound")
     public boolean approve(PaymentApproveRequest request) {
         try {
-            PaymentResponse response = paymentRestClient.post()
-                    .uri(APPROVE_URI)
-                    .header(IDEMPOTENCY_KEY_HEADER, request.orderId())
-                    .body(request)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, errorHandler())
-                    .body(PaymentResponse.class);
+            PaymentResponse response = tossPaymentClient.confirm(request);
 
             return isApproved(response);
         } catch (PaymentException e) {
@@ -105,11 +90,7 @@ public class PaymentApprover {
 
     private PaymentStatus queryPaymentStatus(String paymentKey) {
         try {
-            PaymentResponse response = paymentRestClient.get()
-                    .uri(PAYMENT_STATUS_URI, paymentKey)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, errorHandler())
-                    .body(PaymentResponse.class);
+            PaymentResponse response = tossPaymentClient.findPayment(paymentKey);
 
             return response == null ? null : response.status();
         } catch (RuntimeException e) {
@@ -120,14 +101,5 @@ public class PaymentApprover {
 
     private boolean isApproved(PaymentResponse response) {
         return response != null && response.status() == PaymentStatus.DONE;
-    }
-
-    private ErrorHandler errorHandler() {
-        return (request, response) -> {
-            PaymentErrorResponse errorResponse = objectMapper.readValue(response.getBody(), PaymentErrorResponse.class);
-            PaymentFailureType failureType = PaymentFailureType.from(errorResponse.code());
-
-            throw new PaymentException(failureType, errorResponse.code(), errorResponse.message());
-        };
     }
 }

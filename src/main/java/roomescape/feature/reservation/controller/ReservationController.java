@@ -24,6 +24,7 @@ import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.service.ReservationService;
+import roomescape.global.ratelimit.InboundRateLimit;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -59,6 +60,7 @@ public class ReservationController {
     }
 
     @PostMapping("/{id}/payment")
+    @InboundRateLimit(key = "payment_inbound")
     public ResponseEntity<Void> confirmReservation(
             @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
             @RequestBody PaymentApproveRequest requestDto

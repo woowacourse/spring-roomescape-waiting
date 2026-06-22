@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,8 +26,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import roomescape.feature.payment.PaymentConnectionException;
 import roomescape.feature.payment.PaymentException;
 import roomescape.feature.payment.PaymentFailureType;
+import roomescape.feature.payment.PaymentRateLimitedException;
 import roomescape.feature.payment.PaymentTimeoutException;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
+import roomescape.global.ratelimit.RateLimitException;
 import roomescape.global.error.dto.ErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponsesDto;
@@ -261,6 +264,32 @@ class GlobalExceptionHandlerTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
             assertThat(response.getBody().code()).isEqualTo("PAYMENT_RESULT_UNKNOWN");
+        }
+    }
+
+    @Nested
+    class RateLimit_처리 {
+
+        @Test
+        void 아웃바운드_한도_초과는_503과_Retry_After_헤더를_반환한다() {
+            RateLimitException exception = new RateLimitException("아웃바운드 요청 속도 제한 초과", 5L);
+
+            ResponseEntity<ErrorResponseDto> response = handler.handleRateLimitException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+            assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("5");
+            assertThat(response.getBody().code()).isEqualTo("RATE_LIMITED");
+        }
+
+        @Test
+        void 토스_429_소진은_503과_Retry_After_헤더를_반환한다() {
+            PaymentRateLimitedException exception = new PaymentRateLimitedException(3, 2L);
+
+            ResponseEntity<ErrorResponseDto> response = handler.handlePaymentRateLimitedException(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+            assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("2");
+            assertThat(response.getBody().code()).isEqualTo("PAYMENT_RATE_LIMITED");
         }
     }
 

@@ -15,7 +15,6 @@ import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.feature.reservation.domain.OrderStatus;
@@ -28,8 +27,9 @@ import roomescape.feature.time.dto.response.ReservationTimeResponseDto;
 import roomescape.fixture.ThemeFixture;
 import roomescape.fixture.TimeFixture;
 import roomescape.global.error.exception.GeneralException;
+import roomescape.support.WebMvcControllerTest;
 
-@WebMvcTest(AdminReservationController.class)
+@WebMvcControllerTest(controllers = AdminReservationController.class)
 class AdminReservationControllerTest {
 
     @Autowired

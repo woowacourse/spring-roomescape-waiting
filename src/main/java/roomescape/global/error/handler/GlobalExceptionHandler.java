@@ -3,6 +3,7 @@ package roomescape.global.error.handler;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,8 +19,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.feature.payment.PaymentConnectionException;
 import roomescape.feature.payment.PaymentException;
 import roomescape.feature.payment.PaymentFailureType;
+import roomescape.feature.payment.PaymentRateLimitedException;
 import roomescape.feature.payment.PaymentTimeoutException;
 import roomescape.global.error.dto.ErrorResponseDto;
+import roomescape.global.ratelimit.RateLimitException;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponsesDto;
 import roomescape.global.error.exception.GeneralException;
@@ -140,6 +143,22 @@ public class GlobalExceptionHandler {
         // 읽기 타임아웃: 결제 결과가 불명 → 실패로 단정하지 않고 '확인 중'으로 안내한다. (중복 결제는 멱등키로 방지)
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
             .body(new ErrorResponseDto("PAYMENT_RESULT_UNKNOWN", "결제 결과를 확인하고 있습니다. 잠시 후 다시 확인해주세요."));
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<ErrorResponseDto> handleRateLimitException(RateLimitException e) {
+        // 아웃바운드 자체 한도 소진: 클라이언트는 정상 요청 1건을 보냈고 서버 용량이 일시 부족 → 503 + Retry-After.
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header(HttpHeaders.RETRY_AFTER, String.valueOf(e.getRetryAfterSeconds()))
+            .body(new ErrorResponseDto("RATE_LIMITED", "요청이 많아 일시적으로 처리할 수 없습니다. 잠시 후 다시 시도해주세요."));
+    }
+
+    @ExceptionHandler(PaymentRateLimitedException.class)
+    public ResponseEntity<ErrorResponseDto> handlePaymentRateLimitedException(PaymentRateLimitedException e) {
+        // 토스가 429를 반복 → 다운스트림 스로틀. 클라이언트 잘못이 아니므로 503 + Retry-After.
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header(HttpHeaders.RETRY_AFTER, String.valueOf(e.getRetryAfterSeconds()))
+            .body(new ErrorResponseDto("PAYMENT_RATE_LIMITED", "결제 요청이 일시적으로 지연되고 있습니다. 잠시 후 다시 시도해주세요."));
     }
 
     @ExceptionHandler(Exception.class)

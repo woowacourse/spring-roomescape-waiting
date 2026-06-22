@@ -13,6 +13,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import roomescape.feature.payment.config.TossPaymentProperties;
 import roomescape.feature.payment.dto.PaymentApproveRequest;
 
 class PaymentApproverTest {
@@ -40,11 +42,16 @@ class PaymentApproverTest {
 
     @BeforeEach
     void setUp() {
-        RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
+        RestClient.Builder builder = RestClient.builder();
         mockTossServer = MockRestServiceServer.bindTo(builder).build();
-        RestClient paymentRestClient = builder.build();
 
-        paymentApprover = new PaymentApprover(paymentRestClient, new ObjectMapper());
+        TossPaymentProperties properties = new TossPaymentProperties(
+                BASE_URL, "test_secret_key", Duration.ofSeconds(5), Duration.ofSeconds(10));
+        RetryAfterInterceptor retryAfterInterceptor = new RetryAfterInterceptor(new FakeSleeper(), 3, Duration.ofSeconds(1));
+        TossPaymentClient tossPaymentClient =
+                new TossPaymentClient(builder, properties, new ObjectMapper(), retryAfterInterceptor);
+
+        paymentApprover = new PaymentApprover(tossPaymentClient);
     }
 
     @Test

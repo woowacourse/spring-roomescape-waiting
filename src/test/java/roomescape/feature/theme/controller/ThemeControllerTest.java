@@ -10,14 +10,14 @@ import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.feature.theme.dto.response.ThemeResponseDto;
 import roomescape.feature.theme.service.ThemeService;
 import roomescape.fixture.ThemeFixture;
+import roomescape.support.WebMvcControllerTest;
 
-@WebMvcTest(ThemeController.class)
+@WebMvcControllerTest(controllers = ThemeController.class)
 class ThemeControllerTest {
 
     @Autowired

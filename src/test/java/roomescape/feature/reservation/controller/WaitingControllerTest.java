@@ -27,8 +27,9 @@ import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.service.WaitingService;
 import roomescape.fixture.ReservationFixture;
 import roomescape.global.error.exception.GeneralException;
+import roomescape.support.WebMvcControllerTest;
 
-@WebMvcTest(WaitingController.class)
+@WebMvcControllerTest(controllers = WaitingController.class)
 class WaitingControllerTest {
 
     @Autowired
