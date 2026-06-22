@@ -33,6 +33,8 @@ public class PaymentProperties {
         private String secretKey = "";
         private Duration connectTimeout = Duration.ofSeconds(1);
         private Duration readTimeout = Duration.ofSeconds(2);
+        private int maxAttempts = 3;
+        private Duration retryAfterFallbackDelay = Duration.ofSeconds(1);
 
         public String baseUrl() {
             return baseUrl;
@@ -72,6 +74,22 @@ public class PaymentProperties {
 
         public void setReadTimeout(Duration readTimeout) {
             this.readTimeout = readTimeout;
+        }
+
+        public int maxAttempts() {
+            return maxAttempts;
+        }
+
+        public void setMaxAttempts(int maxAttempts) {
+            this.maxAttempts = maxAttempts;
+        }
+
+        public Duration retryAfterFallbackDelay() {
+            return retryAfterFallbackDelay;
+        }
+
+        public void setRetryAfterFallbackDelay(Duration retryAfterFallbackDelay) {
+            this.retryAfterFallbackDelay = retryAfterFallbackDelay;
         }
     }
 }

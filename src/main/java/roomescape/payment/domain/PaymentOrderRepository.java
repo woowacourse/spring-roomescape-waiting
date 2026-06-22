@@ -1,7 +1,4 @@
-package roomescape.payment.repository;
-
-import roomescape.payment.domain.PaymentOrder;
-import roomescape.payment.domain.PaymentOrderDetails;
+package roomescape.payment.domain;
 
 import java.util.List;
 import java.util.Optional;

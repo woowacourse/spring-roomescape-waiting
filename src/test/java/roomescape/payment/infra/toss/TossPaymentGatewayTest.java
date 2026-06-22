@@ -9,9 +9,12 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import roomescape.payment.config.OutboundRateLimitProperties;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.domain.PaymentConfirmation;
+import roomescape.payment.domain.PaymentResult;
 import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
+import roomescape.payment.domain.exception.PaymentRetryableException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,6 +126,64 @@ class TossPaymentGatewayTest {
     }
 
     @Test
+    @DisplayName("토스가 429와 Retry-After를 주면 같은 멱등키로 재시도해 최종 성공한다.")
+    void confirm_success_retriesTooManyRequestsWithSameIdempotencyKey() throws IOException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        List<String> idempotencyKeyHeaders = new ArrayList<>();
+        HttpServer server = tooManyRequestsThenSuccessServer(idempotencyKeyHeaders, executor);
+        server.start();
+
+        try {
+            TossPaymentGateway gateway = gateway(
+                    "http://127.0.0.1:" + server.getAddress().getPort(),
+                    Duration.ofMillis(100),
+                    Duration.ofMillis(100),
+                    3,
+                    Duration.ZERO
+            );
+
+            PaymentResult result = gateway.confirm(
+                    new PaymentConfirmation("payment-key", "order-id", 1000L, "fixed-idempotency-key")
+            );
+
+            assertThat(result.orderId()).isEqualTo("order-id");
+            assertThat(idempotencyKeyHeaders).containsExactly("fixed-idempotency-key", "fixed-idempotency-key");
+        } finally {
+            server.stop(0);
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    @DisplayName("토스 429가 maxAttempts 이후에도 계속되면 재시도 가능 도메인 예외로 실패한다.")
+    void confirm_fails_whenTooManyRequestsExceedsMaxAttempts() throws IOException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        AtomicInteger requestCount = new AtomicInteger();
+        HttpServer server = tooManyRequestsServer(requestCount, executor);
+        server.start();
+
+        try {
+            TossPaymentGateway gateway = gateway(
+                    "http://127.0.0.1:" + server.getAddress().getPort(),
+                    Duration.ofMillis(100),
+                    Duration.ofMillis(100),
+                    2,
+                    Duration.ZERO
+            );
+
+            assertThatThrownBy(() -> gateway.confirm(
+                    new PaymentConfirmation("payment-key", "order-id", 1000L, "fixed-idempotency-key")
+            ))
+                    .isInstanceOf(PaymentRetryableException.class)
+                    .hasMessage("결제 승인 요청이 결제사 Rate Limit을 초과했습니다. 잠시 후 다시 시도해주세요.");
+            assertThat(requestCount.get()).isEqualTo(2);
+        } finally {
+            server.stop(0);
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     @DisplayName("실제 RestClient 연결 거부는 ResourceAccessException과 ConnectException 원인으로 표면화된다.")
     void restClient_exceptionShape_whenConnectionRefused() throws IOException {
         RestClient restClient = restClient(
@@ -203,15 +265,30 @@ class TossPaymentGatewayTest {
     }
 
     private TossPaymentGateway gateway(String baseUrl, Duration connectTimeout, Duration readTimeout) {
+        return gateway(baseUrl, connectTimeout, readTimeout, 3, Duration.ZERO);
+    }
+
+    private TossPaymentGateway gateway(
+            String baseUrl,
+            Duration connectTimeout,
+            Duration readTimeout,
+            int maxAttempts,
+            Duration retryAfterFallbackDelay
+    ) {
         PaymentProperties properties = new PaymentProperties();
         PaymentProperties.Toss toss = new PaymentProperties.Toss();
         toss.setBaseUrl(baseUrl);
         toss.setSecretKey("test_secret");
         toss.setConnectTimeout(connectTimeout);
         toss.setReadTimeout(readTimeout);
+        toss.setMaxAttempts(maxAttempts);
+        toss.setRetryAfterFallbackDelay(retryAfterFallbackDelay);
         properties.setToss(toss);
 
-        return new TossPaymentGateway(RestClient.builder(), new ObjectMapper(), properties);
+        OutboundRateLimitProperties outboundRateLimitProperties = new OutboundRateLimitProperties();
+        outboundRateLimitProperties.setCapacity(100);
+        outboundRateLimitProperties.setRefillPerSec(100.0);
+        return new TossPaymentGateway(RestClient.builder(), new ObjectMapper(), properties, outboundRateLimitProperties);
     }
 
     private RestClient restClient(String baseUrl, Duration connectTimeout, Duration readTimeout) {
@@ -284,6 +361,55 @@ class TossPaymentGatewayTest {
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, responseBody.length);
                 exchange.getResponseBody().write(responseBody);
+            } catch (IOException ignored) {
+            } finally {
+                exchange.close();
+            }
+        });
+        return server;
+    }
+
+    private HttpServer tooManyRequestsThenSuccessServer(
+            List<String> idempotencyKeyHeaders,
+            ExecutorService executor
+    ) throws IOException {
+        AtomicInteger requestCount = new AtomicInteger();
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.setExecutor(executor);
+        server.createContext("/v1/payments/confirm", exchange -> {
+            try {
+                idempotencyKeyHeaders.add(exchange.getRequestHeaders().getFirst("Idempotency-Key"));
+                if (requestCount.incrementAndGet() == 1) {
+                    exchange.getResponseHeaders().add("Retry-After", "0");
+                    exchange.sendResponseHeaders(429, -1);
+                    return;
+                }
+
+                byte[] responseBody = """
+                        {"paymentKey":"payment-key","orderId":"order-id","totalAmount":1000}
+                        """.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, responseBody.length);
+                exchange.getResponseBody().write(responseBody);
+            } catch (IOException ignored) {
+            } finally {
+                exchange.close();
+            }
+        });
+        return server;
+    }
+
+    private HttpServer tooManyRequestsServer(
+            AtomicInteger requestCount,
+            ExecutorService executor
+    ) throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.setExecutor(executor);
+        server.createContext("/v1/payments/confirm", exchange -> {
+            try {
+                requestCount.incrementAndGet();
+                exchange.getResponseHeaders().add("Retry-After", "0");
+                exchange.sendResponseHeaders(429, -1);
             } catch (IOException ignored) {
             } finally {
                 exchange.close();

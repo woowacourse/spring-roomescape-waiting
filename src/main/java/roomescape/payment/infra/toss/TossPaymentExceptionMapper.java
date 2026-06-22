@@ -1,6 +1,7 @@
 package roomescape.payment.infra.toss;
 
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
@@ -27,6 +28,10 @@ final class TossPaymentExceptionMapper {
     }
 
     static RuntimeException map(HttpStatusCode statusCode, TossErrorResponse errorResponse) {
+        if (statusCode.isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
+            return new PaymentRetryableException("결제 승인 요청이 결제사 Rate Limit을 초과했습니다. 잠시 후 다시 시도해주세요.");
+        }
+
         String code = code(errorResponse);
         String message = message(errorResponse);
 
