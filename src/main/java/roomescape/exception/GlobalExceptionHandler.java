@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.dao.DuplicateKeyException;
+import roomescape.client.OutboundRateLimitException;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ResourceConflictException;
@@ -99,6 +100,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleDomainValidation(DomainValidationException e) {
         log.error("도메인 검증 실패 — 잘못된 값이 도메인 계층에 도달했습니다: {}", e.getMessage(), e);
         return new ErrorResponse(ErrorCode.DOMAIN_VALIDATION_FAILED.name(), INTERNAL_ERROR_MESSAGE);
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ErrorResponse handleOutboundRateLimit(OutboundRateLimitException e) {
+        log.warn("나가는 호출이 자체 한도를 넘어 외부로 보내지 않고 거부했습니다: {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.TOO_MANY_REQUESTS.name(), "요청이 많아 잠시 후 다시 시도해주세요.");
     }
 
     @ExceptionHandler(DuplicateKeyException.class)
