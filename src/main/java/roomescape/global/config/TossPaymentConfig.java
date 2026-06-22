@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.client.RestClient;
+import roomescape.infra.toss.OutboundRateLimitInterceptor;
+import roomescape.infra.toss.RetryAfterInterceptor;
 
 import java.util.Base64;
 
@@ -23,7 +25,8 @@ public class TossPaymentConfig {
     private int readTimeout;
 
     @Bean
-    public RestClient tossRestClient() {
+    public RestClient tossRestClient(OutboundRateLimitInterceptor outboundRateLimitInterceptor,
+                                     RetryAfterInterceptor retryAfterInterceptor) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(connectTimeout);
         factory.setReadTimeout(readTimeout);
@@ -34,6 +37,10 @@ public class TossPaymentConfig {
                 .baseUrl("https://api.tosspayments.com")
                 .defaultHeader("Authorization", "Basic " + encoded)
                 .defaultHeader("Content-Type", "application/json")
+                .requestInterceptors(interceptors -> {
+                    interceptors.add(outboundRateLimitInterceptor);
+                    interceptors.add(retryAfterInterceptor);
+                })
                 .build();
     }
 }

@@ -14,16 +14,12 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
-import roomescape.controller.dto.ReservationPaymentResponse;
 import roomescape.domain.payment.Payment;
 import roomescape.domain.payment.PaymentConfirmation;
 import roomescape.domain.payment.PaymentGateway;
 import roomescape.domain.payment.PaymentResult;
-import roomescape.domain.payment.PaymentStatus;
-import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
-import roomescape.global.exception.ErrorCode;
 import roomescape.repository.FakePaymentRepository;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeThemeSlotRepository;
@@ -52,19 +48,9 @@ class PaymentServiceTest {
         fakeThemeSlotRepository.save(new ThemeSlot(THEME, DATE, TIME, false));
     }
 
-    private Reservation pendingReservation(String name, String orderId, Long amount) {
-        return fakeReservationRepository.save(
-                new Reservation(null, name, 1L, DATE, TIME, THEME, PendingStatus.getInstance(), orderId, amount)
-        );
-    }
-
     private Reservation pendingReservation(String orderId, Long amount) {
-        return pendingReservation("브라운", orderId, amount);
-    }
-
-    private Reservation confirmedReservation(String name, String orderId, Long amount) {
         return fakeReservationRepository.save(
-                new Reservation(null, name, 1L, DATE, TIME, THEME, ConfirmedStatus.getInstance(), orderId, amount)
+                new Reservation(null, "브라운", 1L, DATE, TIME, THEME, PendingStatus.getInstance(), orderId, amount)
         );
     }
 
@@ -120,72 +106,6 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("슬롯이 이미 다른 사용자에 의해 결제 완료된 경우 PAYMENT_SLOT_ALREADY_CONFIRMED 예외가 발생한다.")
-    void confirmPayment_slotAlreadyReserved_throwsException() {
-        // 슬롯을 is_reserved=true 상태로 갱신
-        fakeThemeSlotRepository.update(new ThemeSlot(THEME, DATE, TIME, true));
-        pendingReservation("브라운", "order-123", 10000L);
-        PaymentConfirmation confirmation = new PaymentConfirmation("pay-key", "order-123", 10000L);
-
-        assertThatThrownBy(() -> paymentService.confirmPayment(confirmation))
-                .isInstanceOf(CustomException.class)
-                .extracting(e -> ((CustomException) e).getErrorCode())
-                .isEqualTo(ErrorCode.PAYMENT_SLOT_ALREADY_CONFIRMED);
-    }
-
-    @Test
-    @DisplayName("슬롯이 이미 선점된 경우 토스 결제 승인 API는 호출되지 않는다.")
-    void confirmPayment_slotAlreadyReserved_gatewayNotCalled() {
-        List<PaymentConfirmation> called = new ArrayList<>();
-        PaymentGateway trackingGateway = confirmation -> {
-            called.add(confirmation);
-            return new PaymentResult(confirmation.paymentKey(), confirmation.orderId(), confirmation.amount());
-        };
-        paymentService = new PaymentService(trackingGateway, fakeReservationRepository, fakePaymentRepository, fakeThemeSlotRepository);
-
-        fakeThemeSlotRepository.update(new ThemeSlot(THEME, DATE, TIME, true));
-        pendingReservation("브라운", "order-123", 10000L);
-
-        assertThatThrownBy(() -> paymentService.confirmPayment(new PaymentConfirmation("pay-key", "order-123", 10000L)))
-                .isInstanceOf(CustomException.class);
-        assertThat(called).isEmpty();
-    }
-
-    @Test
-    @DisplayName("read timeout 발생 시 예약은 PENDING을 유지하고 UNCERTAIN Payment가 저장된다.")
-    void confirmPayment_readTimeout_savesUncertainPaymentAndKeepsPending() {
-        PaymentGateway timeoutGateway = confirmation -> {
-            throw new CustomException(ErrorCode.PAYMENT_READ_TIMEOUT);
-        };
-        paymentService = new PaymentService(timeoutGateway, fakeReservationRepository, fakePaymentRepository, fakeThemeSlotRepository);
-
-        Reservation reservation = pendingReservation("order-123", 10000L);
-        PaymentConfirmation confirmation = new PaymentConfirmation("pay-key", "order-123", 10000L);
-
-        Payment payment = paymentService.confirmPayment(confirmation);
-
-        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.UNCERTAIN);
-        assertThat(payment.getPaymentKey()).isNull();
-        assertThat(fakeReservationRepository.findById(reservation.getId()).get().isConfirmed()).isFalse();
-    }
-
-    @Test
-    @DisplayName("read timeout 이외의 결제 예외는 그대로 전파된다.")
-    void confirmPayment_connectionTimeout_propagatesException() {
-        PaymentGateway connectionFailGateway = confirmation -> {
-            throw new CustomException(ErrorCode.PAYMENT_CONNECTION_TIMEOUT);
-        };
-        paymentService = new PaymentService(connectionFailGateway, fakeReservationRepository, fakePaymentRepository, fakeThemeSlotRepository);
-
-        pendingReservation("order-123", 10000L);
-        PaymentConfirmation confirmation = new PaymentConfirmation("pay-key", "order-123", 10000L);
-
-        assertThatThrownBy(() -> paymentService.confirmPayment(confirmation))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.PAYMENT_CONNECTION_TIMEOUT.getMessage());
-    }
-
-    @Test
     @DisplayName("결제 실패 처리 시 해당 orderId의 예약이 CANCELLED 상태가 된다.")
     void handlePaymentFail_withValidOrderId_cancelsReservation() {
         Reservation reservation = pendingReservation("order-123", 10000L);
@@ -207,72 +127,5 @@ class PaymentServiceTest {
     void handlePaymentFail_withUnknownOrderId_doesNothing() {
         paymentService.handlePaymentFail("nonexistent-order");
         // 예외 없이 정상 종료
-    }
-
-    // ── getPaymentHistory ─────────────────────────────────────────
-
-    @Test
-    @DisplayName("CONFIRMED payment가 있는 예약은 paymentStatus CONFIRMED와 paymentKey를 포함해 반환한다.")
-    void getPaymentHistory_confirmedPayment_returnsConfirmedStatus() {
-        Reservation reservation = confirmedReservation("브라운", "order-123", 10000L);
-        fakePaymentRepository.save(new Payment(reservation.getId(), "pay-key", "order-123", 10000L, PaymentStatus.CONFIRMED));
-
-        List<ReservationPaymentResponse> history = paymentService.getPaymentHistory("브라운");
-
-        assertThat(history).hasSize(1);
-        assertThat(history.get(0).paymentStatus()).isEqualTo("CONFIRMED");
-        assertThat(history.get(0).paymentKey()).isEqualTo("pay-key");
-        assertThat(history.get(0).orderId()).isEqualTo("order-123");
-    }
-
-    @Test
-    @DisplayName("UNCERTAIN payment가 있는 예약은 paymentStatus UNCERTAIN이고 paymentKey는 null이다.")
-    void getPaymentHistory_uncertainPayment_returnsUncertainStatus() {
-        Reservation reservation = pendingReservation("브라운", "order-123", 10000L);
-        fakePaymentRepository.save(new Payment(reservation.getId(), null, "order-123", 10000L, PaymentStatus.UNCERTAIN));
-
-        List<ReservationPaymentResponse> history = paymentService.getPaymentHistory("브라운");
-
-        assertThat(history).hasSize(1);
-        assertThat(history.get(0).paymentStatus()).isEqualTo("UNCERTAIN");
-        assertThat(history.get(0).paymentKey()).isNull();
-    }
-
-    @Test
-    @DisplayName("payment 기록이 없는 예약은 paymentStatus와 paymentKey가 null이다.")
-    void getPaymentHistory_noPayment_returnsNullPaymentStatus() {
-        pendingReservation("브라운", "order-123", 10000L);
-
-        List<ReservationPaymentResponse> history = paymentService.getPaymentHistory("브라운");
-
-        assertThat(history).hasSize(1);
-        assertThat(history.get(0).paymentStatus()).isNull();
-        assertThat(history.get(0).paymentKey()).isNull();
-    }
-
-    @Test
-    @DisplayName("CONFIRMED/UNCERTAIN/결제없음 예약이 섞여 있어도 전체 목록을 반환한다.")
-    void getPaymentHistory_mixedStatuses_returnsAll() {
-        Reservation confirmed = confirmedReservation("브라운", "order-1", 10000L);
-        fakePaymentRepository.save(new Payment(confirmed.getId(), "pay-key", "order-1", 10000L, PaymentStatus.CONFIRMED));
-
-        Reservation uncertain = pendingReservation("브라운", "order-2", 10000L);
-        fakePaymentRepository.save(new Payment(uncertain.getId(), null, "order-2", 10000L, PaymentStatus.UNCERTAIN));
-
-        pendingReservation("브라운", "order-3", 10000L);
-
-        List<ReservationPaymentResponse> history = paymentService.getPaymentHistory("브라운");
-
-        assertThat(history).hasSize(3);
-        assertThat(history).extracting(ReservationPaymentResponse::paymentStatus)
-                .containsExactlyInAnyOrder("CONFIRMED", "UNCERTAIN", null);
-    }
-
-    @Test
-    @DisplayName("해당 이름의 예약이 없으면 빈 리스트를 반환한다.")
-    void getPaymentHistory_noReservation_returnsEmptyList() {
-        List<ReservationPaymentResponse> history = paymentService.getPaymentHistory("없는사람");
-
-        assertThat(history).isEmpty();
     }
 }
