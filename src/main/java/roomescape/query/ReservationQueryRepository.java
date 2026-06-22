@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.service.command.ReservationSearchCommand;
+import roomescape.service.result.OrderHistoryResult;
 import roomescape.service.result.ReservationEntryResult;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationSearchResult;
@@ -55,7 +56,43 @@ public class ReservationQueryRepository {
                     rs.getObject("waiting_rank", Integer.class)
             );
 
+    private static final RowMapper<OrderHistoryResult> ORDER_HISTORY_ROW_MAPPER = (rs, rowNum) ->
+            new OrderHistoryResult(
+                    rs.getLong("reservation_id"),
+                    rs.getDate("reservation_date").toLocalDate(),
+                    rs.getTime("time_start_at").toLocalTime(),
+                    rs.getString("theme_name"),
+                    rs.getString("entry_status"),
+                    rs.getString("order_id"),
+                    rs.getString("payment_key"),
+                    rs.getObject("amount", Long.class),
+                    rs.getString("payment_status")
+            );
+
     private final JdbcTemplate jdbcTemplate;
+
+    public List<OrderHistoryResult> getOrderHistories(String name) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.date AS reservation_date,
+                    rt.start_at AS time_start_at,
+                    t.name AS theme_name,
+                    re.status AS entry_status,
+                    po.order_id AS order_id,
+                    po.payment_key AS payment_key,
+                    po.amount AS amount,
+                    po.status AS payment_status
+                FROM reservation r
+                JOIN theme t ON r.theme_id = t.id
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN reservation_entry re ON re.reservation_id = r.id
+                LEFT JOIN payment_order po ON po.entry_id = re.id
+                WHERE re.name = ? AND re.status != 'DELETED'
+                ORDER BY r.date DESC, rt.start_at DESC, re.id DESC
+                """;
+        return jdbcTemplate.query(sql, ORDER_HISTORY_ROW_MAPPER, name);
+    }
 
     public List<ReservationResult> getAllReservations() {
         String sql = """

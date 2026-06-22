@@ -2,10 +2,10 @@ package roomescape.service.result;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.client.dto.TossPaymentResponse;
+import roomescape.domain.PaymentResult;
 
 public record PaymentConfirmResult(
-        TossPaymentResponse response,
+        PaymentResult response,
         String themeName,
         String themeThumbnailUrl,
         LocalDate reservationDate,

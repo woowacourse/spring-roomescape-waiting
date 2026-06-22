@@ -90,6 +90,14 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
+    @Transactional
+    public ReservationResult confirmPendingEntry(long entryId) {
+        Reservation reservation = reservationRepository.getByEntryIdForUpdate(entryId);
+        reservation.confirmPendingEntry(entryId);
+        reservationRepository.update(reservation);
+        return ReservationResult.from(reservation, reservation.findActiveEntry(entryId));
+    }
+
     public ReservationResult getActiveReservationEntry(long entryId) {
         Reservation reservation = reservationRepository.getByEntryId(entryId);
         ReservationEntry reservationEntry = reservation.findActiveEntry(entryId);

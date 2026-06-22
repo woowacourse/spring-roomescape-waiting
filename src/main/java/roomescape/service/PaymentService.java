@@ -2,32 +2,39 @@ package roomescape.service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.client.TossPaymentGateway;
-import roomescape.client.dto.TossPaymentResponse;
+import roomescape.client.TossConfirmResultUnknownException;
+import roomescape.client.TossConnectionException;
+import roomescape.client.dto.PaymentConfirmation;
 import roomescape.controller.client.dto.response.PreparePaymentResponse;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentResult;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.EntityNotFoundException;
+import roomescape.query.ReservationQueryRepository;
 import roomescape.repository.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.command.ReservationCommand;
+import roomescape.service.result.OrderHistoryResult;
 import roomescape.service.result.PaymentConfirmResult;
+import roomescape.service.result.ReservationResult;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PaymentService {
 
@@ -35,8 +42,16 @@ public class PaymentService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final PaymentOrderRepository paymentOrderRepository;
-    private final TossPaymentGateway tossPaymentGateway;
+    private final PaymentGateway paymentGateway;
+    private final ReservationService reservationService;
+    private final ReservationQueryRepository reservationQueryRepository;
     private final Clock clock;
+
+    // 자기 자신의 트랜잭션 프록시를 통해 persistConfirmedPayment()를 호출하기 위한 self-injection.
+    // (같은 클래스 내부 호출은 @Transactional AOP를 우회하므로 프록시를 거치게 한다.)
+    @Autowired
+    @Lazy
+    private PaymentService self;
 
     @Value("${toss.client-key}")
     private String clientKey;
@@ -51,24 +66,48 @@ public class PaymentService {
         }
 
         log.info("[결제 승인 요청] orderId={} paymentKey={} amount={}", orderId, paymentKey, amount);
-        TossPaymentResponse response = tossPaymentGateway.confirm(paymentKey, orderId, amount);
-        log.info("[결제 승인 완료] orderId={} status={} approvedAt={}", response.orderId(), response.status(), response.approvedAt());
+        PaymentResult response;
+        try {
+            response = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        } catch (TossConfirmResultUnknownException e) {
+            // 응답을 받지 못해 승인 여부 불명 - 상태만 기록하고 entry는 PENDING으로 유지(재시도 가능). 예외는 그대로 전파.
+            paymentOrderRepository.update(paymentOrder.resultUnknown());
+            log.warn("[결제 승인 결과 확인 불가] orderId={} message={}", orderId, e.getMessage());
+            throw e;
+        } catch (TossConnectionException e) {
+            // 요청이 토스에 도달하지 못해 미승인이 확실한 경우 - FAILED로 기록. 예외는 그대로 전파.
+            paymentOrderRepository.update(paymentOrder.failed());
+            log.warn("[결제 서버 연결 실패] orderId={} message={}", orderId, e.getMessage());
+            throw e;
+        }
+        log.info("[결제 승인 완료] orderId={} status={} approvedAt={}", response.orderId(), response.status(),
+                response.approvedAt());
 
-        Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
-        reservation.confirmPendingEntry(paymentOrder.getEntryId());
-        reservationRepository.update(reservation);
+        // PaymentOrder 확정 기록과 예약 엔트리 확정을 하나의 트랜잭션으로 묶어 원자적으로 반영한다.
+        ReservationResult reservationResult = self.persistConfirmedPayment(paymentOrder, paymentKey);
 
         log.info("[예약 확정] entryId={} PENDING→RESERVED", paymentOrder.getEntryId());
-        
+
         return new PaymentConfirmResult(
                 response,
-                reservation.getTheme().getName(),
-                reservation.getTheme().getThumbnailImageUrl(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt()
+                reservationResult.theme().name(),
+                reservationResult.theme().thumbnailImageUrl(),
+                reservationResult.date(),
+                reservationResult.time().startAt()
         );
     }
 
+    public List<OrderHistoryResult> getOrderHistories(String name) {
+        return reservationQueryRepository.getOrderHistories(name);
+    }
+
+    @Transactional
+    public ReservationResult persistConfirmedPayment(PaymentOrder paymentOrder, String paymentKey) {
+        paymentOrderRepository.update(paymentOrder.confirmed(paymentKey));
+        return reservationService.confirmPendingEntry(paymentOrder.getEntryId());
+    }
+
+    @Transactional
     public void cancel(String orderId) {
         if (orderId == null) {
             return;
@@ -76,12 +115,20 @@ public class PaymentService {
 
         paymentOrderRepository.findByOrderId(orderId).ifPresent(paymentOrder -> {
             Reservation reservation = reservationRepository.getByEntryIdForUpdate(paymentOrder.getEntryId());
+            if (!reservation.findActiveEntry(paymentOrder.getEntryId()).isPending()) {
+                // 이미 confirm()으로 RESERVED까지 확정된 결제 - cancel이 뒤늦게 들어와도 상태를 덮어쓰지 않는다.
+                log.info("[결제 실패 정리 스킵] orderId={} entryId={} 이미 PENDING이 아님", orderId, paymentOrder.getEntryId());
+                return;
+            }
+
             reservation.cancelPendingEntry(paymentOrder.getEntryId());
             reservationRepository.update(reservation);
+            paymentOrderRepository.update(paymentOrder.failed());
             log.info("[결제 실패 정리] orderId={} entryId={} PENDING→DELETED", orderId, paymentOrder.getEntryId());
         });
     }
 
+    @Transactional
     public PreparePaymentResponse prepare(ReservationCommand command) {
         Reservation reservation = findOrCreateSlotForUpdate(command);
         reservation.addPendingEntry(command.name(), command.amount(), LocalDateTime.now(clock));

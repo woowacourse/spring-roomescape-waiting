@@ -40,6 +40,7 @@ out/
 .claude/
 .omc/
 CLAUDE.md
+**/AGENTS.md
 
 ### Local secrets ###
 application-local.properties

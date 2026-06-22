@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
@@ -14,11 +15,19 @@ public class TossClientConfig {
     @Bean
     public RestClient tossRestClient(
             @Value("${toss.base-url}") String baseUrl,
-            @Value("${toss.secret-key}") String secretKey
+            @Value("${toss.secret-key}") String secretKey,
+            @Value("${toss.connect-timeout-ms}") int connectTimeoutMs,
+            @Value("${toss.read-timeout-ms}") int readTimeoutMs
     ) {
         var basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
+
+        SimpleClientHttpRequestFactory clientRequestFactory = new SimpleClientHttpRequestFactory();
+        clientRequestFactory.setReadTimeout(readTimeoutMs);
+        clientRequestFactory.setConnectTimeout(connectTimeoutMs);
+
         return RestClient.builder()
+                .requestFactory(clientRequestFactory)
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .build();
