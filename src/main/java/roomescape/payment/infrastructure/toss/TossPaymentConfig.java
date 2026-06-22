@@ -13,8 +13,8 @@ public class TossPaymentConfig {
     @Bean
     public RestClient tossRestClient(final TossPaymentProperties properties) {
         final SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(3000);
-        requestFactory.setReadTimeout(5000);
+        requestFactory.setConnectTimeout((int) properties.connectTimeout().toMillis());
+        requestFactory.setReadTimeout((int) properties.readTimeout().toMillis());
 
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())
