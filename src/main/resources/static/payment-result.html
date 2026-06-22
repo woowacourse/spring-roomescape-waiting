@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 결과</title>
+</head>
+<body>
+<main style="max-width:480px;margin:80px auto;text-align:center;font-family:sans-serif">
+    <h1 id="title"></h1>
+    <p id="message" style="color:#666"></p>
+    <a href="index.html">메인으로</a>
+</main>
+<script>
+    const p = new URLSearchParams(location.search);
+    document.getElementById('title').textContent =
+        p.get('status') === 'success' ? '✅ 결제가 완료되었습니다' : '❌ 결제에 실패했습니다';
+    document.getElementById('message').textContent = p.get('message') || '';
+</script>
+</body>
+</html>

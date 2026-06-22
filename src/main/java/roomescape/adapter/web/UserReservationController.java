@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.adapter.web.dto.response.MyReservationResponse;
+import roomescape.adapter.payment.TossProperties;
 import roomescape.adapter.web.dto.request.ReservationRequest;
-import roomescape.adapter.web.dto.response.ReservationResponse;
 import roomescape.adapter.web.dto.request.ReservationUpdateRequest;
+import roomescape.adapter.web.dto.response.MyReservationResponse;
+import roomescape.adapter.web.dto.response.PaymentReadyResponse;
+import roomescape.adapter.web.dto.response.ReservationResponse;
 import roomescape.application.ReservationService;
+import roomescape.application.dto.result.ReservationOrderResult;
 import roomescape.application.dto.result.ReservationResult;
 
 @Validated
@@ -28,16 +31,19 @@ import roomescape.application.dto.result.ReservationResult;
 public class UserReservationController {
 
     private final ReservationService reservationService;
+    private final TossProperties tossProperties;
 
-    public UserReservationController(ReservationService reservationService) {
+    public UserReservationController(ReservationService reservationService,
+                                     TossProperties tossProperties) {
         this.reservationService = reservationService;
+        this.tossProperties = tossProperties;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponse create(@RequestBody @Valid ReservationRequest request) {
-        ReservationResult saved = reservationService.create(request.toCommand());
-        return ReservationResponse.from(saved);
+    public PaymentReadyResponse create(@RequestBody @Valid ReservationRequest request) {
+        ReservationOrderResult result = reservationService.reserveWithPayment(request.toCommand());
+        return PaymentReadyResponse.of(result, tossProperties.clientKey());
     }
 
     @GetMapping

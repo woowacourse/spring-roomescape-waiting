@@ -3,6 +3,7 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.ReservationStatus.CONFIRMED;
 import static roomescape.support.Fixtures.theme;
 import static roomescape.support.Fixtures.time;
 
@@ -48,7 +49,7 @@ class ReservationTest {
         @Test
         @DisplayName("이름이 null이면 예외")
         void 이름_null() {
-            assertThatThrownBy(() -> Reservation.withId(1L, null, DATE, time(1), theme(1)))
+            assertThatThrownBy(() -> Reservation.withId(1L, null, DATE, time(1), theme(1), CONFIRMED))
                     .isInstanceOf(InvalidDomainException.class)
                     .hasMessage("예약자 이름은 비어 있을 수 없습니다.");
         }
@@ -56,7 +57,7 @@ class ReservationTest {
         @Test
         @DisplayName("이름이 공백이면 예외")
         void 이름_공백() {
-            assertThatThrownBy(() -> Reservation.withId(1L, "  ", DATE, time(1), theme(1)))
+            assertThatThrownBy(() -> Reservation.withId(1L, "  ", DATE, time(1), theme(1), CONFIRMED))
                     .isInstanceOf(InvalidDomainException.class)
                     .hasMessage("예약자 이름은 비어 있을 수 없습니다.");
         }
@@ -65,7 +66,7 @@ class ReservationTest {
         @DisplayName("이름이 30자를 초과하면 예외")
         void 이름_길이_초과() {
             String tooLong = "가".repeat(31);
-            assertThatThrownBy(() -> Reservation.withId(1L, tooLong, DATE, time(1), theme(1)))
+            assertThatThrownBy(() -> Reservation.withId(1L, tooLong, DATE, time(1), theme(1), CONFIRMED))
                     .isInstanceOf(InvalidDomainException.class)
                     .hasMessage("예약자 이름은 30자를 초과할 수 없습니다.");
         }
@@ -74,7 +75,7 @@ class ReservationTest {
         @DisplayName("경계값: 정확히 30자는 허용")
         void 이름_경계값_허용() {
             String exactly30 = "가".repeat(30);
-            assertThatCode(() -> Reservation.withId(1L, exactly30, DATE, time(1), theme(1)))
+            assertThatCode(() -> Reservation.withId(1L, exactly30, DATE, time(1), theme(1), CONFIRMED))
                     .doesNotThrowAnyException();
         }
     }
@@ -86,7 +87,7 @@ class ReservationTest {
         @Test
         @DisplayName("날짜가 null이면 예외")
         void 날짜_null() {
-            assertThatThrownBy(() -> Reservation.withId(1L, "브라운", null, time(1), theme(1)))
+            assertThatThrownBy(() -> Reservation.withId(1L, "브라운", null, time(1), theme(1), CONFIRMED))
                     .isInstanceOf(InvalidDomainException.class)
                     .hasMessage("예약 날짜는 비어 있을 수 없습니다.");
         }
@@ -94,7 +95,7 @@ class ReservationTest {
         @Test
         @DisplayName("시간이 null이면 예외")
         void 시간_null() {
-            assertThatThrownBy(() -> Reservation.withId(1L, "브라운", DATE, null, theme(1)))
+            assertThatThrownBy(() -> Reservation.withId(1L, "브라운", DATE, null, theme(1), CONFIRMED))
                     .isInstanceOf(InvalidDomainException.class)
                     .hasMessage("예약 시간은 비어 있을 수 없습니다.");
         }
@@ -102,7 +103,7 @@ class ReservationTest {
         @Test
         @DisplayName("테마가 null이면 예외")
         void 테마_null() {
-            assertThatThrownBy(() -> Reservation.withId(1L, "브라운", DATE, time(1), null))
+            assertThatThrownBy(() -> Reservation.withId(1L, "브라운", DATE, time(1), null, CONFIRMED))
                     .isInstanceOf(InvalidDomainException.class)
                     .hasMessage("예약 테마는 비어 있을 수 없습니다.");
         }
@@ -116,7 +117,8 @@ class ReservationTest {
         @DisplayName("dateTime()은 예약의 날짜+시작시각을 시점으로 합성한다")
         void 시점_합성() {
             Reservation reservation = Reservation.withId(
-                    1L, "브라운", LocalDate.of(2050, 12, 31), time(1, LocalTime.of(10, 0)), theme(1));
+                    1L, "브라운", LocalDate.of(2050, 12, 31), time(1, LocalTime.of(10, 0)),
+                    theme(1), CONFIRMED);
 
             // 시점이 2050-12-31 10:00임을 행위로 확인 - getter로 들여다보지 않는다
             assertThat(reservation.dateTime()

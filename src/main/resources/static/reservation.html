@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>예약하기</title>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -421,6 +422,13 @@
         document.getElementById('submit').disabled = !(name && selectedTimeId);
     }
 
+    function generateCustomerKey() {
+        if (crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return 'customer-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+    }
+
     async function submit() {
         const name = document.getElementById('name-input').value.trim();
         const date = document.getElementById('date-input').value;
@@ -430,10 +438,40 @@
         submitBtn.disabled = true;
         result.innerHTML = '';
 
+        if (selectedTimeStatus === 'WAITING') {
+            try {
+                const res = await fetch('/user/waitings', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: name,
+                        date: date,
+                        timeId: Number(selectedTimeId),
+                        themeId: Number(themeId)
+                    })
+                });
+
+                if (!res.ok) {
+                    const body = await res.json().catch(() => ({}));
+                    result.innerHTML = `<p class="error">대기 신청에 실패했습니다. ${body.message || res.status}</p>`;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                const r = await res.json();
+                showToast(`${r.date} ${r.time.startAt} ${r.theme.name} 대기 ${r.order}번 신청 완료!`);
+                document.getElementById('name-input').value = '';
+                await loadAvailableTimes();
+            } catch (e) {
+                result.innerHTML = `<p class="error">처리에 실패했습니다. ${e.message}</p>`;
+                submitBtn.disabled = false;
+            }
+            return;
+        }
+
+        let order;
         try {
-            const endpoint = selectedTimeStatus === 'WAITING' ? '/user/waitings' : '/user/reservations';
-            const actionName = selectedTimeStatus === 'WAITING' ? '대기 신청' : '예약';
-            const res = await fetch(endpoint, {
+            const res = await fetch('/user/reservations', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -446,23 +484,34 @@
 
             if (!res.ok) {
                 const body = await res.json().catch(() => ({}));
-                const msg = body.message || `서버 오류 (${res.status})`;
-                result.innerHTML = `<p class="error">${actionName}에 실패했습니다. ${msg}</p>`;
+                result.innerHTML = `<p class="error">예약에 실패했습니다. ${body.message || res.status}</p>`;
                 submitBtn.disabled = false;
                 return;
             }
 
-            const r = await res.json();
-            if (selectedTimeStatus === 'WAITING') {
-                showToast(`${r.date} ${r.time.startAt} ${r.theme.name} 대기 ${r.order}번 신청 완료!`);
-            } else {
-                showToast(`${r.date} ${r.time.startAt} ${r.theme.name} 예약 완료!`);
-            }
-
-            document.getElementById('name-input').value = '';
-            await loadAvailableTimes();
+            order = await res.json();
+            const tossPayments = TossPayments(order.clientKey);
+            const payment = tossPayments.payment({ customerKey: generateCustomerKey() });
+            await payment.requestPayment({
+                method: 'CARD',
+                amount: { value: order.amount, currency: 'KRW' },
+                orderId: order.orderId,
+                orderName: order.orderName,
+                customerName: name,
+                successUrl: window.location.origin + '/payments/success',
+                failUrl: window.location.origin + `/payments/fail?orderId=${encodeURIComponent(order.orderId)}`,
+                windowTarget: 'self'
+            });
         } catch (e) {
-            result.innerHTML = `<p class="error">처리에 실패했습니다. ${e.message}</p>`;
+            if (order?.orderId) {
+                await fetch(`/payments/fail?orderId=${encodeURIComponent(order.orderId)}`).catch(() => {});
+            }
+            console.error('Toss payment failed', e, order);
+
+            const code = e.code || e.errorCode || e.name || '';
+            const message = e.message || e.errorMessage || '알 수 없는 에러가 발생했습니다.';
+            const detail = code ? `[${code}] ${message}` : message;
+            result.innerHTML = `<p class="error">결제가 취소되었거나 실패했습니다. ${detail}</p>`;
             submitBtn.disabled = false;
         }
     }

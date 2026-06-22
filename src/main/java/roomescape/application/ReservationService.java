@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.command.ReservationCreateCommand;
 import roomescape.application.dto.command.ReservationUpdateCommand;
 import roomescape.application.dto.result.MyReservationResult;
+import roomescape.application.dto.result.ReservationOrderResult;
 import roomescape.application.dto.result.ReservationResult;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDateTime;
@@ -28,25 +29,31 @@ import roomescape.exception.server.DataInconsistencyException;
 
 @Service
 public class ReservationService {
+    // D2: 고정 금액. 테마별 가격은 이번 미션 범위 밖(이월).
+    private static final long RESERVATION_AMOUNT = 1000L;
+
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationPolicy reservationPolicy;
     private final WaitingRepository waitingRepository;
+    private final PaymentService paymentService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             ReservationPolicy reservationPolicy,
-            WaitingRepository waitingRepository
+            WaitingRepository waitingRepository,
+            PaymentService paymentService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.reservationPolicy = reservationPolicy;
         this.waitingRepository = waitingRepository;
+        this.paymentService = paymentService;
     }
 
 
@@ -74,6 +81,27 @@ public class ReservationService {
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResult.from(saved);
     }
+
+
+    /**
+     * 사용자 예약 요청: '결제 대기' 예약 + 주문을 저장하고, 결제창에 필요한 정보를 돌려준다. 확정(CONFIRMED)은 successUrl 콜백의 PaymentService.confirm 에서
+     * 이뤄진다.
+     */
+    @Transactional
+    public ReservationOrderResult reserveWithPayment(ReservationCreateCommand command) {
+        ReservationTime time = findTimeOrThrow(command.getTimeId());
+        Theme theme = findThemeOrThrow(command.getThemeId());
+        validateNotDuplicated(command.getDate(), time.getId(), theme.getId());
+
+        Reservation reservation = Reservation.createPending(
+                command.getName(), command.getDate(), time, theme, reservationPolicy);
+        Reservation saved = reservationRepository.save(reservation);
+
+        String orderId = paymentService.prepare(saved.getId(), RESERVATION_AMOUNT);
+
+        return new ReservationOrderResult(saved.getId(), orderId, RESERVATION_AMOUNT, theme.getName());
+    }
+
 
     @Transactional
     public void delete(Long id) {

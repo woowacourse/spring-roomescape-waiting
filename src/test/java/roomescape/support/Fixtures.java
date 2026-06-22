@@ -3,6 +3,7 @@ package roomescape.support;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -41,8 +42,12 @@ public final class Fixtures {
     }
 
     public static Reservation reservation(long id, String name) {
+        return reservation(id, name, ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation reservation(long id, String name, ReservationStatus status) {
         // withId 경로는 정책 검증을 거치지 않는다(이미 저장된 것을 복원하는 용도).
-        return Reservation.withId(id, name, FUTURE_DATE, time(1), theme(1));
+        return Reservation.withId(id, name, FUTURE_DATE, time(1), theme(1), status);
     }
 
     public static Waiting waiting(long id, String name, int order) {

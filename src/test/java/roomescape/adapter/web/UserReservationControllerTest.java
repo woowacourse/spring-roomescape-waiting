@@ -5,19 +5,23 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.adapter.payment.TossProperties;
 import roomescape.application.ReservationService;
+import roomescape.application.dto.result.ReservationOrderResult;
 import roomescape.exception.client.ResourceNotFoundException;
 
 /**
@@ -38,9 +42,52 @@ class UserReservationControllerTest {
     @MockitoBean
     private ReservationService reservationService;
 
+    @MockitoBean
+    private TossProperties tossProperties;
+
     @BeforeEach
     void stubDefault() {
         given(reservationService.findMyReservationsAndWaitings(any())).willReturn(List.of());
+        given(tossProperties.clientKey()).willReturn("test_client_key");
+    }
+
+    @Nested
+    @DisplayName("예약 생성 POST /user/reservations")
+    class Create {
+
+        @Test
+        @DisplayName("정상 요청이면 201과 결제 준비 정보를 반환한다")
+        void 결제_준비_응답() throws Exception {
+            given(reservationService.reserveWithPayment(any()))
+                    .willReturn(new ReservationOrderResult(1L, "order_1", 1000L, "테마A"));
+
+            mockMvc.perform(post("/user/reservations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"name":"브라운","date":"2050-12-31","timeId":1,"themeId":1}
+                                    """))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.reservationId").value(1))
+                    .andExpect(jsonPath("$.orderId").value("order_1"))
+                    .andExpect(jsonPath("$.amount").value(1000))
+                    .andExpect(jsonPath("$.orderName").value("테마A"))
+                    .andExpect(jsonPath("$.clientKey").value("test_client_key"));
+        }
+
+        @Test
+        @DisplayName("[예외 변환] 존재하지 않는 테마면 404")
+        void 존재하지_않는_테마_404() throws Exception {
+            given(reservationService.reserveWithPayment(any()))
+                    .willThrow(new ResourceNotFoundException("존재하지 않는 테마입니다."));
+
+            mockMvc.perform(post("/user/reservations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"name":"브라운","date":"2050-12-31","timeId":1,"themeId":9999}
+                                    """))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 테마입니다."));
+        }
     }
 
     @Nested
