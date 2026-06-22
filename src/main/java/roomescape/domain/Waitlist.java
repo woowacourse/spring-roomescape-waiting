@@ -2,16 +2,41 @@ package roomescape.domain;
 
 import static roomescape.domain.exception.DomainErrorCode.UNAUTHORIZED_RESERVATION;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.domain.exception.RoomEscapeException;
 
+@Entity
+@Table(
+    name = "waitlist",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "slot_id"})
+)
 public class Waitlist {
 
-    private final Long id;
-    private final Member member;
-    private final LocalDateTime createdAt;
-    private final Slot slot;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "slot_id")
+    private Slot slot;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     public Waitlist(Long id, Member member, Slot slot, LocalDateTime createdAt) {
         this.id = id;
@@ -22,6 +47,9 @@ public class Waitlist {
 
     public Waitlist(Member member, Slot slot, LocalDateTime createdAt) {
         this(null, member, slot, createdAt);
+    }
+
+    protected Waitlist() {
     }
 
     public void verifyCancelableBy(String name) {

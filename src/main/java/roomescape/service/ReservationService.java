@@ -23,6 +23,7 @@ import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waitlist;
+import roomescape.domain.WaitlistWithRank;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
@@ -30,6 +31,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitlistRankRepository;
 import roomescape.repository.WaitlistRepository;
 
 @Service
@@ -38,6 +40,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final WaitlistRepository waitlistRepository;
+    private final WaitlistRankRepository waitlistRankRepository;
     private final SlotRepository slotRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
@@ -49,6 +52,7 @@ public class ReservationService {
     public ReservationService(
         ReservationRepository reservationRepository,
         WaitlistRepository waitlistRepository,
+        WaitlistRankRepository waitlistRankRepository,
         SlotRepository slotRepository,
         ReservationTimeRepository timeRepository,
         ThemeRepository themeRepository,
@@ -59,6 +63,7 @@ public class ReservationService {
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
+        this.waitlistRankRepository = waitlistRankRepository;
         this.slotRepository = slotRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
@@ -96,13 +101,12 @@ public class ReservationService {
             results.add(ReservationWithStatus.reserved(reservation));
         }
 
-        List<Waitlist> waitlists = waitlistRepository.findByName(name);
-        List<Long> slotIds = waitlists.stream()
-            .map(waitlist -> waitlist.getSlot().getId())
-            .distinct()
-            .toList();
-        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlotIds(slotIds);
-        addWaitingReservations(results, waitlists, sameSlotWaitlists);
+        for (WaitlistWithRank waitlistWithRank : waitlistRankRepository.findByMemberNameWithRank(name)) {
+            results.add(ReservationWithStatus.waiting(
+                waitlistWithRank.waitlist(),
+                waitlistWithRank.waitingOrderAsInt()
+            ));
+        }
 
         results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()
             .thenComparing(reservation -> reservation.getTime().getStartAt()));
