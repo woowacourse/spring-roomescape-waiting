@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -66,8 +67,7 @@ public class ReservationService {
         reservationValidator.validateUpdatableReservation(reservation, name);
         ReservationSlot deletedSlot = ReservationSlot.from(reservation);
 
-        reservationRepository.deleteById(id);
-        reservationRepository.flush();
+        deleteAndFlush(id);
         promoteFirstWaiting(deletedSlot);
     }
 
@@ -76,9 +76,8 @@ public class ReservationService {
         Reservation reservation = findReservation(id);
         ReservationSlot deletedSlot = ReservationSlot.from(reservation);
 
-        reservationRepository.deleteById(id);
+        deleteAndFlush(id);
         if (!reservation.isPast()) {
-            reservationRepository.flush();
             promoteFirstWaiting(deletedSlot);
         }
     }
@@ -97,6 +96,8 @@ public class ReservationService {
 
         try {
             reservationRepository.flush();
+        } catch (OptimisticLockingFailureException e) {
+            throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
@@ -109,6 +110,15 @@ public class ReservationService {
             return reservationRepository.save(reservation);
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
+        }
+    }
+
+    private void deleteAndFlush(Long id) {
+        try {
+            reservationRepository.deleteById(id);
+            reservationRepository.flush();
+        } catch (OptimisticLockingFailureException e) {
+            throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
         }
     }
 
