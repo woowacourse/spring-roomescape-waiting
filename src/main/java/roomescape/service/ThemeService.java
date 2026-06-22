@@ -7,8 +7,8 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.dto.ThemeCreateCommand;
-import roomescape.dto.ThemeResult;
+import roomescape.dto.request.ThemeCreateRequest;
+import roomescape.dto.response.ThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ThemeService {
 
     private static final int DATA_RANGE = 7;
 
-    public ThemeResult create(final ThemeCreateCommand command) {
+    public ThemeResult create(final ThemeCreateRequest command) {
         final Theme themeWithoutId = Theme.create(
                 command.name(),
                 command.description(),

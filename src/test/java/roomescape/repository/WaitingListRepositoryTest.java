@@ -11,7 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.WaitingListRow;
+import roomescape.repository.WaitingListRow;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

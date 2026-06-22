@@ -9,9 +9,16 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.exception.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException e) {
+        final ErrorResponse response = new ErrorResponse(e.getCode(), e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(response);
+    }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(BusinessException e) {

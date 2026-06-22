@@ -9,7 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.*;
+import roomescape.domain.ReservationStatus;
+import roomescape.dto.command.WaitingListDeleteCommand;
+import roomescape.dto.request.WaitingListCreateRequest;
+import roomescape.dto.response.WaitingListResult;
+import roomescape.repository.WaitingListRow;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -44,8 +48,8 @@ class WaitingListServiceTest {
 
     @InjectMocks WaitingListService waitingListService;
 
-    private WaitingListCreateCommand createCommand(LocalDate date) {
-        return new WaitingListCreateCommand(NAME, date, TIME_ID, THEME_ID);
+    private WaitingListCreateRequest createCommand(LocalDate date) {
+        return new WaitingListCreateRequest(NAME, date, TIME_ID, THEME_ID);
     }
 
     private WaitingListDeleteCommand deleteCommand(Long waitingListId) {

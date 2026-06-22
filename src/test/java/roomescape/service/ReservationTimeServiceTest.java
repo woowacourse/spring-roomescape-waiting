@@ -19,8 +19,8 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.dto.ReservationTimeCreateCommand;
-import roomescape.dto.ReservationTimeResult;
+import roomescape.dto.request.ReservationTimeCreateRequest;
+import roomescape.dto.response.ReservationTimeResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
@@ -57,7 +57,7 @@ class ReservationTimeServiceTest {
         // given
         LocalTime startAt = LocalTime.of(10, 0);
         LocalTime endAt = LocalTime.of(11, 0);
-        ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(startAt, endAt);
+        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(startAt, endAt);
 
         ReservationTime savedTime = ReservationTime.createWithId(1L, startAt, endAt);
         given(reservationTimeRepository.save(any(ReservationTime.class))).willReturn(savedTime);

@@ -23,13 +23,17 @@ public enum ErrorCode {
     TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약 시간 정보를 찾을 수 없습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약 정보를 찾을 수 없습니다."),
     WAITING_LIST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약 대기 정보를 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문 정보를 찾을 수 없습니다."),
 
     TIME_HAS_RESERVATION(HttpStatus.CONFLICT, "해당 시간대에 잔여 예약이 존재합니다."),
     THEME_HAS_RESERVATION(HttpStatus.CONFLICT, "해당 테마에 잔여 예약이 존재합니다."),
 
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 주문 금액과 일치하지 않습니다."),
+
     // 검증 에러
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "입력값이 유효하지 않습니다."),
 
+    AMOUNT_NULL(HttpStatus.BAD_REQUEST, "결제 금액은 비워둘 수 없습니다."),
     RESERVATION_ID_NULL(HttpStatus.BAD_REQUEST, "예약 ID는 비워둘 수 없습니다."),
     PERSON_NAME_NULL_OR_BLANK(HttpStatus.BAD_REQUEST, "예약자 이름은 비워둘 수 없습니다."),
     DATE_NULL(HttpStatus.BAD_REQUEST, "날짜는 비워둘 수 없습니다."),

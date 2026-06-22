@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationTimesWithStatus;
+import roomescape.dto.response.ReservationTimeStatusResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 
@@ -132,7 +132,7 @@ public class ReservationRepository {
         }
     }
 
-    public List<ReservationTimesWithStatus> findReservationTimeStatusesByDateAndThemeId(final LocalDate date, final Long themeId) {
+    public List<ReservationTimeStatusResult> findReservationTimeStatusesByDateAndThemeId(final LocalDate date, final Long themeId) {
         final String sql = """
                 SELECT
                     rt.id,
@@ -272,8 +272,8 @@ public class ReservationRepository {
         };
     }
 
-    private RowMapper<ReservationTimesWithStatus> timesWithStatusRowMapper() {
-        return (rs, rowNum) -> new ReservationTimesWithStatus(
+    private RowMapper<ReservationTimeStatusResult> timesWithStatusRowMapper() {
+        return (rs, rowNum) -> new ReservationTimeStatusResult(
                 rs.getLong("id"),
                 rs.getTime("start_at").toLocalTime(),
                 rs.getBoolean("reserved")

@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.repository;
 
 import roomescape.domain.WaitingList;
 

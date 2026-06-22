@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 완료</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    h1 { font-size: 20px; margin: 0 0 8px; }
+
+    p.desc {
+      color: #888;
+      margin: 0 0 24px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 16px;
+    }
+
+    .row .label { color: #888; white-space: nowrap; }
+    .row .val { text-align: right; word-break: break-all; }
+
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      color: #3182f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .error { color: #e03131; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div id="loading">
+    <p style="color:#888;font-size:14px">승인 처리 중입니다...</p>
+  </div>
+
+  <div id="success-content" style="display:none">
+    <h1>✅ 결제를 완료했어요</h1>
+    <p class="desc">서버가 Toss 결제 승인 API를 직접 호출해 결제를 확정했습니다.</p>
+    <div class="row"><span class="label">결제 상태</span><span class="val" id="result-status"></span></div>
+    <div class="row"><span class="label">주문번호</span><span class="val" id="result-order-id"></span></div>
+    <div class="row"><span class="label">승인 금액</span><span class="val" id="result-amount"></span></div>
+    <div class="row"><span class="label">paymentKey</span><span class="val" id="result-payment-key"></span></div>
+    <a href="/">← 다시 결제하기</a>
+  </div>
+
+  <div id="error-content" style="display:none">
+    <h1>❌ 승인 실패</h1>
+    <p class="desc error" id="error-msg"></p>
+    <a href="/">← 다시 시도하기</a>
+  </div>
+</div>
+
+<script>
+  (async () => {
+    const params = new URLSearchParams(location.search);
+    const paymentKey = params.get('paymentKey');
+    const orderId = params.get('orderId');
+    const amount = Number(params.get('amount'));
+
+    try {
+      const res = await fetch('/payments/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentKey, orderId, amount }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || data.message || '승인 실패');
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('success-content').style.display = '';
+      document.getElementById('result-status').textContent = data.status;
+      document.getElementById('result-order-id').textContent = data.orderId;
+      document.getElementById('result-amount').textContent = Number(data.approvedAmount).toLocaleString() + '원';
+      document.getElementById('result-payment-key').textContent = data.paymentKey;
+    } catch (e) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-content').style.display = '';
+      document.getElementById('error-msg').textContent = e.message;
+    }
+  })();
+</script>
+</body>
+</html>

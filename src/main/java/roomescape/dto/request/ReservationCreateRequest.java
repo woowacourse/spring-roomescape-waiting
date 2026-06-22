@@ -1,15 +1,17 @@
-package roomescape.dto;
+package roomescape.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
-
-public record WaitingListCreateCommand(
+public record ReservationCreateRequest(
         @NotNull(message = "PERSON_NAME_NULL_OR_BLANK")
         @NotBlank(message = "PERSON_NAME_NULL_OR_BLANK")
         String name,
+
+        @NotNull(message = "AMOUNT_NULL")
+        Long amount,
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         @NotNull(message = "DATE_NULL")

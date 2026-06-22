@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.ClearDbTest;
-import roomescape.dto.ReservationTimeResult;
-import roomescape.dto.ThemeResult;
-import roomescape.dto.WaitingListResult;
+import roomescape.dto.response.ReservationTimeResult;
+import roomescape.dto.response.ThemeResult;
+import roomescape.dto.response.WaitingListResult;
 
 import java.time.LocalDate;
 
@@ -65,6 +65,7 @@ class WaitingListControllerTest {
             reservationParams.put("date", STRING_TOMORROW);
             reservationParams.put("timeId", timeId);
             reservationParams.put("themeId", themeId);
+            reservationParams.put("amount", 50000);
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(reservationParams)
@@ -110,6 +111,7 @@ class WaitingListControllerTest {
             reservationParams.put("date", STRING_TOMORROW);
             reservationParams.put("timeId", timeId);
             reservationParams.put("themeId", themeId);
+            reservationParams.put("amount", 50000);
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(reservationParams)
@@ -153,6 +155,7 @@ class WaitingListControllerTest {
             reservationParams.put("date", STRING_TOMORROW);
             reservationParams.put("timeId", timeId);
             reservationParams.put("themeId", themeId);
+            reservationParams.put("amount", 50000);
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(reservationParams)
@@ -192,6 +195,7 @@ class WaitingListControllerTest {
             reservationParams.put("date", STRING_TOMORROW);
             reservationParams.put("timeId", timeId);
             reservationParams.put("themeId", themeId);
+            reservationParams.put("amount", 50000);
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(reservationParams)
@@ -283,6 +287,7 @@ class WaitingListControllerTest {
             reservationParams.put("date", STRING_TOMORROW);
             reservationParams.put("timeId", timeId);
             reservationParams.put("themeId", themeId);
+            reservationParams.put("amount", 50000);
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(reservationParams)
@@ -318,6 +323,7 @@ class WaitingListControllerTest {
             reservationParams2.put("date", STRING_TOMORROW);
             reservationParams2.put("timeId", timeId2);
             reservationParams2.put("themeId", themeId2);
+            reservationParams2.put("amount", 50000);
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(reservationParams2)

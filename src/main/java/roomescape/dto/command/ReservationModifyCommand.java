@@ -1,23 +1,23 @@
-package roomescape.dto;
+package roomescape.dto.command;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public record ReservationCreateCommand(
+public record ReservationModifyCommand(
+        @NotNull(message = "RESERVATION_ID_NULL")
+        Long reservationId,
+
         @NotNull(message = "PERSON_NAME_NULL_OR_BLANK")
         @NotBlank(message = "PERSON_NAME_NULL_OR_BLANK")
         String name,
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        @NotNull(message = "DATE_NULL")
         LocalDate date,
 
-        @NotNull(message = "TIME_ID_NULL")
         Long timeId,
 
-        @NotNull(message = "THEME_ID_NULL")
         Long themeId
 ) {
 }

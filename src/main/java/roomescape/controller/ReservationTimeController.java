@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ReservationTimeService;
-import roomescape.dto.ReservationTimeCreateCommand;
-import roomescape.dto.ReservationTimeResult;
+import roomescape.dto.request.ReservationTimeCreateRequest;
+import roomescape.dto.response.ReservationTimeResult;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class ReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResult> create(
-            @Valid @RequestBody ReservationTimeCreateCommand request
+            @Valid @RequestBody ReservationTimeCreateRequest request
     ) {
         final ReservationTimeResult result = reservationTimeService.create(request);
         return ResponseEntity.created(URI.create("/times/" + result.id()))
