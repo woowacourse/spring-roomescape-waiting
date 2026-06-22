@@ -11,6 +11,7 @@ public class Order {
 
     private final String orderId;
     private final String idempotencyKey;
+
     private final Long amount;
     private final String paymentKey;
 

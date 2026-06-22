@@ -169,7 +169,6 @@ class ReservationControllerTest {
             jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
             jdbcTemplate.update("INSERT INTO orders (order_id, idempotency_key, amount, reservation_id, status) VALUES (?, ?, ?, ?, ?)", "order-001", "idem-key-001", 50000, 1, "PENDING");
 
-
             List<ReservationResult> reservations = RestAssured.given().log().all()
                     .when().get("/reservations?name=브라운")
                     .then().log().all()
