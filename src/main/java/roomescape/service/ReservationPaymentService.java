@@ -68,17 +68,9 @@ public class ReservationPaymentService {
     public ReservationPayment prepare(String name, LocalDate date, long timeId, long themeId) {
         ReservationTime time = validateReservationTime(timeId);
         Theme theme = validateTheme(themeId);
-        if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)
-                || reservationPaymentDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new ReservationConflictException("이미 예약된 시간입니다.");
-        }
+        validateAvailableSlot(date, timeId, themeId);
         Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
-        ReservationPayment payment = new ReservationPayment(orderIdGenerator.generate(), reservationAmount, reservation);
-        try {
-            return reservationPaymentDao.save(payment);
-        } catch (DataConflictException e) {
-            throw new ReservationConflictException("이미 예약된 시간입니다.");
-        }
+        return savePayment(new ReservationPayment(orderIdGenerator.generate(), reservationAmount, reservation));
     }
 
     @Transactional
@@ -92,28 +84,27 @@ public class ReservationPaymentService {
             return payment.getReservation();
         }
 
-        PaymentResult result;
+        PaymentResult result = confirmPayment(paymentKey, orderId, amount, payment);
+        reservationPaymentDao.markConfirmed(orderId, result.paymentKey());
+        return saveReservation(payment.getReservation());
+    }
+
+    private PaymentResult confirmPayment(String paymentKey, String orderId, long amount, ReservationPayment payment) {
         try {
-            result = paymentGateway.confirm(new PaymentConfirmation(
+            return paymentGateway.confirm(new PaymentConfirmation(
                     paymentKey,
                     orderId,
                     amount,
                     payment.getIdempotencyKey()
             ));
         } catch (PaymentConfirmUnknownException e) {
-            reservationPaymentDao.markConfirmUnknown(orderId, "CONFIRM_TIMEOUT", e.getMessage());
+            markConfirmUnknown(orderId, e);
             throw e;
         } catch (PaymentConnectionException e) {
             throw e;
         } catch (TossPaymentException e) {
-            reservationPaymentDao.markFailed(orderId, e.getCode(), e.getMessage());
+            markFailed(orderId, e);
             throw e;
-        }
-        reservationPaymentDao.markConfirmed(orderId, result.paymentKey());
-        try {
-            return reservationDao.save(payment.getReservation());
-        } catch (DataConflictException e) {
-            throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
     }
 
@@ -137,6 +128,37 @@ public class ReservationPaymentService {
     private Theme validateTheme(long themeId) {
         return themeDao.findById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private void validateAvailableSlot(LocalDate date, long timeId, long themeId) {
+        if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                || reservationPaymentDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+    }
+
+    private ReservationPayment savePayment(ReservationPayment payment) {
+        try {
+            return reservationPaymentDao.save(payment);
+        } catch (DataConflictException e) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+    }
+
+    private Reservation saveReservation(Reservation reservation) {
+        try {
+            return reservationDao.save(reservation);
+        } catch (DataConflictException e) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+    }
+
+    private void markConfirmUnknown(String orderId, PaymentConfirmUnknownException e) {
+        reservationPaymentDao.markConfirmUnknown(orderId, "CONFIRM_TIMEOUT", e.getMessage());
+    }
+
+    private void markFailed(String orderId, TossPaymentException e) {
+        reservationPaymentDao.markFailed(orderId, e.getCode(), e.getMessage());
     }
 
     private boolean hasText(String value) {

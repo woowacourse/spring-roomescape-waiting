@@ -3,6 +3,7 @@ package roomescape.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,6 +18,7 @@ import roomescape.domain.exception.PastReservationException;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmUnknownException;
 import roomescape.payment.PaymentConnectionException;
+import roomescape.payment.OutboundRateLimitException;
 import roomescape.payment.toss.TossPaymentException;
 import roomescape.service.exception.ReservationConflictException;
 
@@ -64,6 +66,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PaymentConnectionException.class)
     public ResponseEntity<ErrorResponse> handlePaymentConnection(PaymentConnectionException e) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handleOutboundRateLimit(OutboundRateLimitException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(e.getRetryAfterSeconds()))
                 .body(new ErrorResponse(e.getMessage()));
     }
 

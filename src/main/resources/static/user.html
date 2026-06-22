@@ -865,22 +865,31 @@
         return;
       }
 
-      const grid = document.getElementById('popular-grid');
-      grid.innerHTML = themes.map((t, i) => `
-        <div class="theme-card">
-          <img src="${t.thumbnailUrl}" alt="${t.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22><rect fill=%22%231f2937%22 width=%22400%22 height=%22250%22/><text fill=%22%236b7280%22 x=%22200%22 y=%22130%22 text-anchor=%22middle%22 font-size=%2220%22>${t.name}</text></svg>'">
-          <div class="theme-card-body">
-            <div class="${rankClass(i+1)} rank-badge">${i+1}</div>
-            <div class="theme-card-name">${t.name}</div>
-            <div class="theme-card-desc">${t.description}</div>
-          </div>
-        </div>
-      `).join('');
-      grid.style.display = 'grid';
+      renderPopularThemes(themes);
     } catch (e) {
       document.getElementById('popular-loading').style.display = 'none';
       showToast('인기 테마를 불러올 수 없습니다.', 'error');
     }
+  }
+
+  function renderPopularThemes(themes) {
+    const grid = document.getElementById('popular-grid');
+    grid.innerHTML = themes.map(popularThemeCardHtml).join('');
+    grid.style.display = 'grid';
+  }
+
+  function popularThemeCardHtml(theme, index) {
+    const rank = index + 1;
+    return `
+      <div class="theme-card">
+        <img src="${theme.thumbnailUrl}" alt="${theme.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22><rect fill=%22%231f2937%22 width=%22400%22 height=%22250%22/><text fill=%22%236b7280%22 x=%22200%22 y=%22130%22 text-anchor=%22middle%22 font-size=%2220%22>${theme.name}</text></svg>'">
+        <div class="theme-card-body">
+          <div class="${rankClass(rank)} rank-badge">${rank}</div>
+          <div class="theme-card-name">${theme.name}</div>
+          <div class="theme-card-desc">${theme.description}</div>
+        </div>
+      </div>
+    `;
   }
 
   function rankClass(n) {
@@ -900,21 +909,29 @@
       themesByName = new Map(themes.map(theme => [theme.name, theme]));
 
       document.getElementById('booking-themes-loading').style.display = 'none';
-      const grid = document.getElementById('booking-themes-grid');
-      grid.innerHTML = themes.map(t => `
-        <div class="theme-card" onclick="selectTheme(${JSON.stringify(t).replace(/"/g,'&quot;')})">
-          <img src="${t.thumbnailUrl}" alt="${t.name}" onerror="this.style.background='#1f2937'">
-          <div class="theme-card-body">
-            <div class="theme-card-name">${t.name}</div>
-            <div class="theme-card-desc">${t.description}</div>
-          </div>
-        </div>
-      `).join('');
-      grid.style.display = 'grid';
+      renderBookingThemes(themes);
     } catch (e) {
       document.getElementById('booking-themes-loading').style.display = 'none';
       showToast('테마 목록을 불러올 수 없습니다.', 'error');
     }
+  }
+
+  function renderBookingThemes(themes) {
+    const grid = document.getElementById('booking-themes-grid');
+    grid.innerHTML = themes.map(bookingThemeCardHtml).join('');
+    grid.style.display = 'grid';
+  }
+
+  function bookingThemeCardHtml(theme) {
+    return `
+      <div class="theme-card" onclick="selectTheme(${JSON.stringify(theme).replace(/"/g,'&quot;')})">
+        <img src="${theme.thumbnailUrl}" alt="${theme.name}" onerror="this.style.background='#1f2937'">
+        <div class="theme-card-body">
+          <div class="theme-card-name">${theme.name}</div>
+          <div class="theme-card-desc">${theme.description}</div>
+        </div>
+      </div>
+    `;
   }
 
   function selectTheme(theme) {
@@ -948,33 +965,47 @@
     selectedTime = null;
 
     goToStep(3);
-    document.getElementById('times-loading').style.display = 'flex';
-    document.getElementById('time-slots').style.display = 'none';
-    document.getElementById('time-btn-row').style.display = 'none';
+    showTimesLoading();
 
     try {
       const res = await fetch(`${API}/themes/${selectedTheme.id}/times?date=${selectedDate}`);
       const { times } = await res.json();
 
-      document.getElementById('times-loading').style.display = 'none';
-      const container = document.getElementById('time-slots');
-      container.innerHTML = times.map(t => {
-        const available = t.isAvailable !== undefined ? t.isAvailable : t.available;
-        return `
-          <div class="time-slot ${available ? '' : 'unavailable'}"
-               onclick="pickTime(${t.id}, '${t.startAt}', ${available})"
-               id="slot-${t.id}">
-            ${t.startAt}
-            ${available ? '' : '<br><small style="font-size:10px;opacity:0.7">대기 가능</small>'}
-          </div>
-        `;
-      }).join('');
-      container.style.display = 'grid';
-      document.getElementById('time-btn-row').style.display = 'flex';
+      renderTimeSlots(times);
     } catch (e) {
       document.getElementById('times-loading').style.display = 'none';
       showToast('시간 정보를 불러올 수 없습니다.', 'error');
     }
+  }
+
+  function showTimesLoading() {
+    document.getElementById('times-loading').style.display = 'flex';
+    document.getElementById('time-slots').style.display = 'none';
+    document.getElementById('time-btn-row').style.display = 'none';
+  }
+
+  function renderTimeSlots(times) {
+    document.getElementById('times-loading').style.display = 'none';
+    const container = document.getElementById('time-slots');
+    container.innerHTML = times.map(timeSlotHtml).join('');
+    container.style.display = 'grid';
+    document.getElementById('time-btn-row').style.display = 'flex';
+  }
+
+  function timeSlotHtml(time) {
+    const available = isAvailable(time);
+    return `
+      <div class="time-slot ${available ? '' : 'unavailable'}"
+           onclick="pickTime(${time.id}, '${time.startAt}', ${available})"
+           id="slot-${time.id}">
+        ${time.startAt}
+        ${available ? '' : '<br><small style="font-size:10px;opacity:0.7">대기 가능</small>'}
+      </div>
+    `;
+  }
+
+  function isAvailable(time) {
+    return time.isAvailable !== undefined ? time.isAvailable : time.available;
   }
 
   function pickTime(id, startAt, available) {
@@ -1012,16 +1043,7 @@
     }
     let payment = null;
     try {
-      const res = await fetch(`${API}/reservations/payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: username,
-          date: selectedDate,
-          timeId: selectedTime.id,
-          themeId: selectedTheme.id
-        })
-      });
+      const res = await createReservationPayment();
       if (!res.ok) {
         const { message } = await res.json();
         showToast(message || '요청에 실패했습니다.', 'error');
@@ -1037,6 +1059,23 @@
       const message = e?.message ? `결제를 시작할 수 없습니다. ${e.message}` : '결제를 시작할 수 없습니다. 다시 시도해주세요.';
       showToast(message, 'error');
     }
+  }
+
+  function reservationRequestBody() {
+    return {
+      name: username,
+      date: selectedDate,
+      timeId: selectedTime.id,
+      themeId: selectedTheme.id
+    };
+  }
+
+  function createReservationPayment() {
+    return fetch(`${API}/reservations/payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reservationRequestBody())
+    });
   }
 
   async function requestTossPayment(payment) {
@@ -1083,12 +1122,7 @@
       const res = await fetch(`${API}/reservations/waiting`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: username,
-          date: selectedDate,
-          timeId: selectedTime.id,
-          themeId: selectedTheme.id
-        })
+        body: JSON.stringify(reservationRequestBody())
       });
 
       if (!res.ok) {
@@ -1140,44 +1174,7 @@
 
       document.getElementById('my-loading').style.display = 'none';
 
-      if (!all.length) {
-        lastMyReservations = all;
-        document.getElementById('my-empty').style.display = 'block';
-        return;
-      }
-
-      const list = document.getElementById('my-list');
-      list.innerHTML = all.map(item => {
-        const isWaiting = item.reservationStatus === 'WAITING';
-        const isPayment = item.reservationStatus === 'PAYMENT_PENDING';
-        const type = isWaiting ? 'waiting' : isPayment ? 'payment' : 'reservation';
-        const isConverted = convertedSlots.has(reservationSlotKey(item));
-        const badge = isPayment ? reservationBadge(item, isConverted) : isWaiting
-          ? `<span class="status-badge badge-waiting">${item.waitingNumber}번째 대기</span>`
-          : `<span class="status-badge badge-reserved">${isConverted ? '예약 전환됨' : '예약'}</span>`;
-        const actions = isPayment
-          ? ''
-          : isWaiting
-          ? `<button class="btn btn-danger" onclick="deleteItem(${item.id}, 'waiting')">취소</button>`
-          : `
-            <button class="btn btn-ghost" onclick="openEditModal(${item.id})">변경</button>
-            <button class="btn btn-danger" onclick="deleteItem(${item.id}, 'reservation')">삭제</button>
-          `;
-        const paymentMeta = paymentSummary(item);
-        return `
-          <div class="reservation-item ${isConverted ? 'converted' : ''}" id="item-${type}-${item.id}">
-            <img src="${item.themeThumbnailUrl}" alt="${item.themeName}" onerror="this.style.background='#1f2937'">
-            <div class="reservation-info">
-              <div class="reservation-theme">${item.themeName}</div>
-              <div class="reservation-meta">📅 ${formatDate(item.date)} &nbsp; ⏰ ${item.time}</div>
-              ${paymentMeta}
-            </div>
-            ${badge}
-            <div class="reservation-actions">${actions}</div>
-          </div>
-        `;
-      }).join('');
-      list.style.display = 'flex';
+      renderMyReservations(all, convertedSlots);
       if (convertedSlots.size > 0) {
         showToast('대기 중이던 예약이 확정되었습니다.');
       }
@@ -1186,6 +1183,52 @@
       document.getElementById('my-loading').style.display = 'none';
       showToast('예약 목록을 불러올 수 없습니다.', 'error');
     }
+  }
+
+  function renderMyReservations(reservations, convertedSlots) {
+    if (!reservations.length) {
+      document.getElementById('my-empty').style.display = 'block';
+      return;
+    }
+    const list = document.getElementById('my-list');
+    list.innerHTML = reservations.map(item => myReservationHtml(item, convertedSlots)).join('');
+    list.style.display = 'flex';
+  }
+
+  function myReservationHtml(item, convertedSlots) {
+    const type = reservationItemType(item);
+    const isConverted = convertedSlots.has(reservationSlotKey(item));
+    return `
+      <div class="reservation-item ${isConverted ? 'converted' : ''}" id="item-${type}-${item.id}">
+        <img src="${item.themeThumbnailUrl}" alt="${item.themeName}" onerror="this.style.background='#1f2937'">
+        <div class="reservation-info">
+          <div class="reservation-theme">${item.themeName}</div>
+          <div class="reservation-meta">📅 ${formatDate(item.date)} &nbsp; ⏰ ${item.time}</div>
+          ${paymentSummary(item)}
+        </div>
+        ${reservationBadge(item, isConverted)}
+        <div class="reservation-actions">${reservationActions(item)}</div>
+      </div>
+    `;
+  }
+
+  function reservationItemType(item) {
+    if (item.reservationStatus === 'WAITING') return 'waiting';
+    if (item.reservationStatus === 'PAYMENT_PENDING') return 'payment';
+    return 'reservation';
+  }
+
+  function reservationActions(item) {
+    if (item.reservationStatus === 'PAYMENT_PENDING') {
+      return '';
+    }
+    if (item.reservationStatus === 'WAITING') {
+      return `<button class="btn btn-danger" onclick="deleteItem(${item.id}, 'waiting')">취소</button>`;
+    }
+    return `
+      <button class="btn btn-ghost" onclick="openEditModal(${item.id})">변경</button>
+      <button class="btn btn-danger" onclick="deleteItem(${item.id}, 'reservation')">삭제</button>
+    `;
   }
 
   function reservationBadge(item, isConverted) {
@@ -1292,8 +1335,7 @@
     try {
       const theme = await findThemeByName(editingReservation?.themeName);
       if (!theme) {
-        select.innerHTML = '<option value="">테마 정보를 찾을 수 없습니다</option>';
-        help.textContent = '예약 정보를 다시 불러온 뒤 변경해주세요.';
+        showEditTimeMessage('테마 정보를 찾을 수 없습니다', '예약 정보를 다시 불러온 뒤 변경해주세요.');
         return;
       }
 
@@ -1302,16 +1344,27 @@
         throw new Error('Failed to load available times');
       }
       const { times } = await res.json();
-      select.innerHTML = '<option value="">시간을 선택하세요</option>' + times.map(timeOptionHtml).join('');
-      const availableCount = times.filter(t => t.isAvailable !== undefined ? t.isAvailable : t.available).length;
-      help.textContent = availableCount
-        ? '예약된 시간은 변경할 수 없습니다. 대기는 예약하기 화면에서 신청해주세요.'
-        : '변경 가능한 시간이 없습니다. 예약된 시간에는 대기 신청만 가능합니다.';
-      confirmButton.disabled = availableCount === 0;
+      renderEditTimes(times);
     } catch (e) {
-      select.innerHTML = '<option value="">시간 정보를 불러올 수 없습니다</option>';
-      help.textContent = '시간 정보를 다시 조회해주세요.';
+      showEditTimeMessage('시간 정보를 불러올 수 없습니다', '시간 정보를 다시 조회해주세요.');
     }
+  }
+
+  function renderEditTimes(times) {
+    const select = document.getElementById('edit-time');
+    const help = document.getElementById('edit-time-help');
+    const confirmButton = document.getElementById('edit-confirm-btn');
+    const availableCount = times.filter(isAvailable).length;
+    select.innerHTML = '<option value="">시간을 선택하세요</option>' + times.map(timeOptionHtml).join('');
+    help.textContent = availableCount
+      ? '예약된 시간은 변경할 수 없습니다. 대기는 예약하기 화면에서 신청해주세요.'
+      : '변경 가능한 시간이 없습니다. 예약된 시간에는 대기 신청만 가능합니다.';
+    confirmButton.disabled = availableCount === 0;
+  }
+
+  function showEditTimeMessage(optionMessage, helpMessage) {
+    document.getElementById('edit-time').innerHTML = `<option value="">${optionMessage}</option>`;
+    document.getElementById('edit-time-help').textContent = helpMessage;
   }
 
   async function findThemeByName(themeName) {
@@ -1330,7 +1383,7 @@
   }
 
   function timeOptionHtml(t) {
-    const available = t.isAvailable !== undefined ? t.isAvailable : t.available;
+    const available = isAvailable(t);
     const isCurrent = editingReservation
       && editingReservation.date === document.getElementById('edit-date').value
       && editingReservation.time === t.startAt;

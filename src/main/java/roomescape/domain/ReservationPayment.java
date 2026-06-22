@@ -105,18 +105,38 @@ public class ReservationPayment {
 
     private void validate(String orderId, String idempotencyKey, long amount, PaymentStatus paymentStatus,
                           Reservation reservation) {
+        validateOrderId(orderId);
+        validateIdempotencyKey(idempotencyKey);
+        validateAmount(amount);
+        validatePaymentStatus(paymentStatus);
+        validateReservation(reservation);
+    }
+
+    private void validateOrderId(String orderId) {
         if (orderId == null || !ORDER_ID_PATTERN.matcher(orderId).matches()) {
             throw new InvalidInputException("주문 번호는 6~64자의 영문, 숫자, 하이픈, 언더스코어만 사용할 수 있습니다.");
         }
+    }
+
+    private void validateIdempotencyKey(String idempotencyKey) {
         if (idempotencyKey == null || idempotencyKey.isBlank() || idempotencyKey.length() > 300) {
             throw new InvalidInputException("결제 멱등키는 1~300자여야 합니다.");
         }
+    }
+
+    private void validateAmount(long amount) {
         if (amount <= 0) {
             throw new InvalidInputException("결제 금액은 0보다 커야 합니다.");
         }
+    }
+
+    private void validatePaymentStatus(PaymentStatus paymentStatus) {
         if (paymentStatus == null) {
             throw new InvalidInputException("결제 상태는 필수입니다.");
         }
+    }
+
+    private void validateReservation(Reservation reservation) {
         if (reservation == null) {
             throw new InvalidInputException("예약 정보는 필수입니다.");
         }

@@ -12,6 +12,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +70,70 @@ class TossPaymentGatewayTest {
         server.verify();
     }
 
+    @Test
+    void confirm_429를_받으면_같은_멱등키로_재시도한다() {
+        String credential = Base64.getEncoder()
+                .encodeToString("test_sk_dummy:".getBytes(StandardCharsets.UTF_8));
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl("https://api.tosspayments.com")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + credential)
+                .requestInterceptor(new RetryAfterInterceptor(2, Duration.ZERO, delay -> {
+                }));
+        server = MockRestServiceServer.bindTo(builder).build();
+        tossPaymentGateway = new TossPaymentGateway(builder.build(), new ObjectMapper());
+        server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "idempotency-key-1"))
+                .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS)
+                        .header(HttpHeaders.RETRY_AFTER, "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"code\":\"TOO_MANY_REQUESTS\",\"message\":\"잠시 후 다시 시도해 주세요.\"}"));
+        server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "idempotency-key-1"))
+                .andRespond(withSuccess("""
+                        {
+                          "paymentKey": "test_payment_key",
+                          "orderId": "order-1",
+                          "status": "DONE",
+                          "totalAmount": 10000
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        var result = tossPaymentGateway.confirm(
+                new PaymentConfirmation("test_payment_key", "order-1", 10000L, "idempotency-key-1"));
+
+        assertThat(result.status()).isEqualTo("DONE");
+        server.verify();
+    }
+
+    @Test
+    void confirm_429가_최대_시도_횟수를_넘으면_도메인_예외로_실패한다() {
+        String credential = Base64.getEncoder()
+                .encodeToString("test_sk_dummy:".getBytes(StandardCharsets.UTF_8));
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl("https://api.tosspayments.com")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + credential)
+                .requestInterceptor(new RetryAfterInterceptor(2, Duration.ZERO, delay -> {
+                }));
+        server = MockRestServiceServer.bindTo(builder).build();
+        tossPaymentGateway = new TossPaymentGateway(builder.build(), new ObjectMapper());
+        server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"code\":\"TOO_MANY_REQUESTS\",\"message\":\"요청 한도를 초과했습니다.\"}"));
+        server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"code\":\"TOO_MANY_REQUESTS\",\"message\":\"요청 한도를 초과했습니다.\"}"));
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(
+                new PaymentConfirmation("test_payment_key", "order-1", 10000L, "idempotency-key-1")))
+                .isInstanceOf(TossPaymentException.RateLimited.class)
+                .hasMessage("요청 한도를 초과했습니다.");
+        server.verify();
+    }
+
     @ParameterizedTest(name = "{1} -> {2}")
     @MethodSource("errorCases")
     void confirm_에러코드별로_예외를_매핑한다(HttpStatus status, String code, Class<? extends Throwable> expected) {
@@ -95,6 +160,7 @@ class TossPaymentGatewayTest {
                 arguments(HttpStatus.FORBIDDEN, "REJECT_CARD_PAYMENT", TossPaymentException.CardRejected.class),
                 arguments(HttpStatus.NOT_FOUND, "NOT_FOUND_PAYMENT", TossPaymentException.PaymentNotFound.class),
                 arguments(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", TossPaymentException.Retryable.class),
+                arguments(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", TossPaymentException.RateLimited.class),
                 arguments(HttpStatus.BAD_REQUEST, "UNDEFINED_TOSS_ERROR", TossPaymentException.class)
         );
     }

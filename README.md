@@ -237,6 +237,92 @@
 
 ---
 
+## 방탈출 예약 외부 API 연동 third-party : 구현 기능 목록
+
+### 1단계 - Toss 결제 승인 연동
+
+- [x] **결제 승인 포트와 Toss 어댑터를 추가한다.**
+  - `PaymentGateway` 인터페이스로 결제 승인 의존성을 추상화한다.
+  - Toss 결제 승인 API 요청/응답 DTO를 분리한다.
+  - Toss 오류 응답 코드를 도메인에서 처리 가능한 예외로 변환한다.
+- [x] **예약 결제 대기 주문을 저장한다.**
+  - `reservation_payment` 테이블을 추가한다.
+  - 주문 번호(`orderId`), 결제 금액, 결제 키, 결제 상태를 저장한다.
+  - 예약 확정 전에는 결제 대기 상태로 관리한다.
+- [x] **예약 결제 대기 주문 생성 API를 추가한다.**
+  - `POST /reservations/payment`
+  - 예약 가능한 슬롯이면 결제 대기 주문을 생성한다.
+  - 이미 예약 또는 결제 대기 중인 슬롯이면 충돌로 거부한다.
+- [x] **Toss 결제 성공/실패 콜백을 처리한다.**
+  - `GET /payments/success`에서 결제 승인 후 예약을 확정한다.
+  - `GET /payments/fail`에서 실패한 결제 대기 주문을 정리한다.
+  - 사용자 화면에서 결제창을 열고 결과에 따라 예약 목록 또는 예약 화면으로 이동한다.
+
+### 2단계 - 타임아웃과 멱등키 대응
+
+- [x] **Toss RestClient 타임아웃을 설정한다.**
+  - 연결 타임아웃과 읽기 타임아웃을 설정값으로 분리한다.
+  - 느린 외부 API 호출이 서버 스레드를 오래 점유하지 않도록 제한한다.
+- [x] **주문별 멱등키를 저장하고 승인 요청에 전달한다.**
+  - 결제 대기 주문 생성 시 멱등키를 함께 생성해 저장한다.
+  - Toss 승인 요청마다 저장된 멱등키를 `Idempotency-Key` 헤더로 전달한다.
+  - 같은 주문을 재시도해도 중복 승인 위험을 줄인다.
+- [x] **결제 승인 결과 불명 상태를 관리한다.**
+  - 읽기 타임아웃은 결제 승인 성공 여부를 확정할 수 없으므로 `CONFIRM_UNKNOWN` 상태로 기록한다.
+  - 연결 실패는 외부 서버에 요청이 도달하지 못한 것으로 보고 사용자에게 재시도를 안내한다.
+  - 내 예약 목록에서 결제 상태와 주문 정보를 확인할 수 있도록 응답과 화면을 확장한다.
+
+### 3단계 - TPS와 Rate Limit 대응
+
+- [x] **토큰 버킷 기반 Rate Limiter를 직접 구현한다.**
+  - `capacity`만큼 버스트를 허용하고, `refillPerSec`만큼 초당 토큰을 보충한다.
+  - 시간 의존 로직은 `LongSupplier`를 주입받아 테스트에서 가짜 시계로 검증한다.
+  - 동시 요청에서도 정확히 허용 개수만 통과하도록 동기화한다.
+- [x] **들어오는 요청에 Rate Limit을 적용한다.**
+  - `HandlerInterceptor`로 예약/결제 엔드포인트(`/reservations/**`, `/payments/**`)를 제한한다.
+  - 토큰이 없으면 컨트롤러 호출 전 `429 Too Many Requests`와 `Retry-After` 헤더로 거부한다.
+  - 정책은 `rate-limit.*` 설정으로 외부화한다.
+- [x] **Toss 429 응답에 Retry-After 백오프 재시도를 적용한다.**
+  - Toss `RestClient`에 `ClientHttpRequestInterceptor`를 등록한다.
+  - `Retry-After` 헤더가 있으면 해당 초만큼 대기 후 재시도한다.
+  - 헤더가 없으면 기본 폴백 간격으로 재시도한다.
+  - `maxAttempts`를 넘으면 `TossPaymentException.RateLimited`로 실패한다.
+- [x] **나가는 Toss 호출에도 Rate Limit을 적용한다.**
+  - 같은 `TokenBucketRateLimiter`를 재사용해 외부 호출 전 토큰을 소비한다.
+  - 토큰이 없으면 Toss로 요청을 보내지 않고 `OutboundRateLimitException`으로 거부한다.
+  - 정책은 `outbound-rate-limit.*` 설정으로 인바운드 정책과 분리한다.
+
+### 외부 API 연동 설정
+
+```yaml
+toss:
+  base-url: https://api.tosspayments.com
+  client:
+    connect-timeout: 1s
+    read-timeout: 2s
+    max-attempts: 3
+    retry-after-fallback: 1s
+
+rate-limit:
+  capacity: 1000
+  refill-per-second: 1000.0
+
+outbound-rate-limit:
+  capacity: 1000
+  refill-per-second: 1000.0
+```
+
+### 결제 상태 정책
+
+| 상태 | 의미 |
+|------|------|
+| `PENDING` | 결제 대기 주문이 생성되었지만 아직 승인되지 않음 |
+| `CONFIRMED` | Toss 승인과 예약 확정이 완료됨 |
+| `FAILED` | Toss에서 명확한 실패 응답을 받음 |
+| `CONFIRM_UNKNOWN` | 읽기 타임아웃 등으로 승인 결과 확인이 필요함 |
+
+---
+
 ## 4️⃣ API 명세
 
 ### 관리자 API (`/admin`)

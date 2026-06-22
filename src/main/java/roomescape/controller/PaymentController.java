@@ -35,9 +35,7 @@ public class PaymentController {
         } catch (PaymentConnectionException e) {
             return redirectToUser("connection-fail", "토스 결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.", "my");
         }
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("/user.html?payment=success#my"))
-                .build();
+        return redirect(URI.create("/user.html?payment=success#my"));
     }
 
     @GetMapping("/fail")
@@ -47,7 +45,11 @@ public class PaymentController {
             @RequestParam(required = false) String orderId
     ) {
         reservationPaymentService.fail(code, message, orderId);
-        URI location = UriComponentsBuilder.fromPath("/user.html")
+        return redirect(failLocation(code, message));
+    }
+
+    private URI failLocation(String code, String message) {
+        return UriComponentsBuilder.fromPath("/user.html")
                 .queryParam("payment", "fail")
                 .queryParam("code", code)
                 .queryParam("message", message)
@@ -55,19 +57,23 @@ public class PaymentController {
                 .build()
                 .encode()
                 .toUri();
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(location)
-                .build();
     }
 
     private ResponseEntity<Void> redirectToUser(String payment, String message, String fragment) {
-        URI location = UriComponentsBuilder.fromPath("/user.html")
+        return redirect(userLocation(payment, message, fragment));
+    }
+
+    private URI userLocation(String payment, String message, String fragment) {
+        return UriComponentsBuilder.fromPath("/user.html")
                 .queryParam("payment", payment)
                 .queryParam("message", message)
                 .fragment(fragment)
                 .build()
                 .encode()
                 .toUri();
+    }
+
+    private ResponseEntity<Void> redirect(URI location) {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(location)
                 .build();

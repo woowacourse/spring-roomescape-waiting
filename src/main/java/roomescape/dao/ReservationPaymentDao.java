@@ -37,9 +37,8 @@ public class ReservationPaymentDao {
                     rs.getString("name"),
                     rs.getDate("date").toLocalDate(),
                     rs.getTimestamp("created_at").toLocalDateTime(),
-                    new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
-                    new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"),
-                            rs.getString("theme_thumbnail"))
+                    mapReservationTime(rs),
+                    mapTheme(rs)
             )
     );
 
@@ -51,23 +50,40 @@ public class ReservationPaymentDao {
     }
 
     public ReservationPayment save(ReservationPayment payment) {
-        Reservation reservation = payment.getReservation();
         try {
-            long id = jdbcInsert.executeAndReturnKey(Map.of(
-                    "order_id", payment.getOrderId(),
-                    "idempotency_key", payment.getIdempotencyKey(),
-                    "amount", payment.getAmount(),
-                    "payment_status", payment.getPaymentStatus().name(),
-                    "name", reservation.getName(),
-                    "date", reservation.getDate(),
-                    "created_at", payment.getCreatedAt(),
-                    "time_id", reservation.getTime().getId(),
-                    "theme_id", reservation.getTheme().getId()
-            )).longValue();
+            long id = jdbcInsert.executeAndReturnKey(insertParams(payment)).longValue();
             return payment.withId(id);
         } catch (DuplicateKeyException e) {
             throw new DataConflictException(e);
         }
+    }
+
+    private Map<String, Object> insertParams(ReservationPayment payment) {
+        Reservation reservation = payment.getReservation();
+        return Map.of(
+                "order_id", payment.getOrderId(),
+                "idempotency_key", payment.getIdempotencyKey(),
+                "amount", payment.getAmount(),
+                "payment_status", payment.getPaymentStatus().name(),
+                "name", reservation.getName(),
+                "date", reservation.getDate(),
+                "created_at", payment.getCreatedAt(),
+                "time_id", reservation.getTime().getId(),
+                "theme_id", reservation.getTheme().getId()
+        );
+    }
+
+    private ReservationTime mapReservationTime(java.sql.ResultSet rs) throws java.sql.SQLException {
+        return new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime());
+    }
+
+    private Theme mapTheme(java.sql.ResultSet rs) throws java.sql.SQLException {
+        return new Theme(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_description"),
+                rs.getString("theme_thumbnail")
+        );
     }
 
     public Optional<ReservationPayment> findByOrderId(String orderId) {

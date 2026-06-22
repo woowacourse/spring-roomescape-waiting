@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -120,35 +121,57 @@ public class ReservationController {
     @GetMapping("/me")
     public ResponseEntity<MyReservationsResponse> getMyReservations(@RequestParam String username) {
         List<ReservationPayment> payments = reservationPaymentService.findPaymentsByName(username);
-        Map<String, ReservationPayment> paymentsBySlot = payments.stream()
+        List<MyReservation> confirmedAndWaiting = attachPayments(
+                reservationService.getMyReservations(username),
+                paymentsBySlot(payments)
+        );
+        List<MyReservationResponse> responses = combineMyReservations(confirmedAndWaiting, pendingPayments(payments));
+        return ResponseEntity.ok(new MyReservationsResponse(responses));
+    }
+
+    private Map<String, ReservationPayment> paymentsBySlot(List<ReservationPayment> payments) {
+        return payments.stream()
                 .collect(java.util.stream.Collectors.toMap(
                         payment -> slotKey(payment.getReservation()),
                         payment -> payment,
                         (first, second) -> first
                 ));
-        List<MyReservation> myReservations = reservationService.getMyReservations(username).stream()
-                .map(myReservation -> {
-                    if (myReservation.reservationType() != ReservationType.CONFIRMED) {
-                        return myReservation;
-                    }
-                    return myReservation.withPayment(paymentsBySlot.get(slotKey(myReservation.reservation())));
-                })
+    }
+
+    private List<MyReservation> attachPayments(
+            List<MyReservation> myReservations,
+            Map<String, ReservationPayment> paymentsBySlot
+    ) {
+        return myReservations.stream()
+                .map(myReservation -> attachPayment(myReservation, paymentsBySlot))
                 .toList();
-        List<MyReservation> pendingPayments = payments.stream()
+    }
+
+    private MyReservation attachPayment(MyReservation myReservation, Map<String, ReservationPayment> paymentsBySlot) {
+        if (myReservation.reservationType() != ReservationType.CONFIRMED) {
+            return myReservation;
+        }
+        return myReservation.withPayment(paymentsBySlot.get(slotKey(myReservation.reservation())));
+    }
+
+    private List<MyReservation> pendingPayments(List<ReservationPayment> payments) {
+        return payments.stream()
                 .filter(payment -> payment.getPaymentStatus() != PaymentStatus.CONFIRMED)
                 .map(MyReservation::payment)
                 .toList();
-        List<MyReservationResponse> responses = java.util.stream.Stream.concat(
-                        myReservations.stream(),
-                        pendingPayments.stream()
-                )
+    }
+
+    private List<MyReservationResponse> combineMyReservations(
+            List<MyReservation> myReservations,
+            List<MyReservation> pendingPayments
+    ) {
+        return Stream.concat(myReservations.stream(), pendingPayments.stream())
                 .sorted(Comparator
                         .comparing((MyReservation r) -> r.reservation().getDate())
                         .thenComparing(r -> r.reservation().getTime().getStartAt())
                         .thenComparing(MyReservation::reservationType))
                 .map(MyReservationResponse::from)
                 .toList();
-        return ResponseEntity.ok(new MyReservationsResponse(responses));
     }
 
     private String slotKey(Reservation reservation) {
