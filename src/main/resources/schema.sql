@@ -57,6 +57,7 @@ CREATE TABLE payment_order
 (
     id              BIGINT        NOT NULL AUTO_INCREMENT,
     order_id        VARCHAR(64)   NOT NULL,
+    idempotency_key VARCHAR(300)  NOT NULL,
     amount          BIGINT        NOT NULL,
     status          VARCHAR(20)   NOT NULL,
     name            VARCHAR(255)  NOT NULL,
@@ -73,6 +74,7 @@ CREATE TABLE payment_order
 
     PRIMARY KEY (id),
     UNIQUE (order_id),
+    UNIQUE (idempotency_key),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

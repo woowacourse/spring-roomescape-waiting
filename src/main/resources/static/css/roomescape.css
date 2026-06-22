@@ -514,6 +514,8 @@ h2 {
 
 .segmented-tabs {
     display: inline-flex;
+    max-width: 100%;
+    overflow-x: auto;
     gap: 4px;
     margin: 0 0 18px;
     padding: 4px;
@@ -523,6 +525,7 @@ h2 {
 }
 
 .tab-button {
+    min-width: 72px;
     min-height: 38px;
     padding: 0 16px;
     border: 0;
@@ -530,6 +533,13 @@ h2 {
     background: transparent;
     color: var(--muted);
     font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    word-break: keep-all;
+}
+
+.tab-button[data-payment-filter="pending"] {
+    min-width: 96px;
 }
 
 .tab-button.is-active {
@@ -603,6 +613,50 @@ h2 {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: flex-end;
+}
+
+.payment-order-card {
+    grid-template-columns: 1fr;
+}
+
+.payment-order-codes {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.payment-order-codes span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.payment-order-codes strong {
+    margin-right: 6px;
+    color: var(--text);
+    font-weight: 900;
+}
+
+.payment-failure,
+.payment-pending {
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.5;
+}
+
+.payment-failure {
+    border: 1px solid rgba(229, 72, 77, 0.18);
+    background: #fff2f3;
+    color: var(--red);
+}
+
+.payment-pending {
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    background: var(--orange-soft);
+    color: var(--orange);
 }
 
 .payment-page {
@@ -882,6 +936,28 @@ th {
     .lookup-form,
     .summary-row {
         grid-template-columns: 1fr;
+    }
+
+    .segmented-tabs {
+        width: 100%;
+    }
+
+    .tab-button {
+        flex: 0 0 auto;
+    }
+
+    .payment-tabs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+        overflow-x: visible;
+    }
+
+    .payment-tabs .tab-button,
+    .payment-tabs .tab-button[data-payment-filter="pending"] {
+        width: 100%;
+        min-width: 0;
+        padding-right: 10px;
+        padding-left: 10px;
     }
 
     .reservation-card {

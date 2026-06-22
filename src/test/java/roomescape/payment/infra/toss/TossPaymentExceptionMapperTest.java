@@ -3,13 +3,19 @@ package roomescape.payment.infra.toss;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
+import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
 import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentInvalidRequestException;
 import roomescape.payment.domain.exception.PaymentKeyConfigurationException;
 import roomescape.payment.domain.exception.PaymentNotFoundException;
 import roomescape.payment.domain.exception.PaymentRejectedException;
 import roomescape.payment.domain.exception.PaymentRetryableException;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,5 +91,64 @@ class TossPaymentExceptionMapperTest {
         );
 
         assertThat(exception).isInstanceOf(PaymentGatewayException.class);
+    }
+
+    @Test
+    @DisplayName("ResourceAccessException의 connect timeout은 연결 단계 실패로 매핑한다.")
+    void map_resourceAccessConnectTimeout() {
+        RuntimeException exception = TossPaymentExceptionMapper.map(
+                new ResourceAccessException("I/O error", new SocketTimeoutException("Connect timed out"))
+        );
+
+        assertThat(exception)
+                .isInstanceOf(PaymentConfirmationPendingException.class)
+                .hasMessage("결제 승인 서버에 연결하지 못했습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.");
+    }
+
+    @Test
+    @DisplayName("ResourceAccessException의 read timeout은 연결 단계 분기에서 임의로 응답 읽기 실패로 바꾸지 않는다.")
+    void map_resourceAccessReadTimeout() {
+        ResourceAccessException resourceAccessException = new ResourceAccessException(
+                "I/O error",
+                new SocketTimeoutException("Read timed out")
+        );
+
+        RuntimeException exception = TossPaymentExceptionMapper.map(resourceAccessException);
+
+        assertThat(exception).isSameAs(resourceAccessException);
+    }
+
+    @Test
+    @DisplayName("RestClientException의 소켓 타임아웃은 응답 읽기 실패로 매핑한다.")
+    void map_restClientSocketTimeout() {
+        RuntimeException exception = TossPaymentExceptionMapper.map(
+                new RestClientException("Read timed out", new SocketTimeoutException("Read timed out"))
+        );
+
+        assertThat(exception)
+                .isInstanceOf(PaymentConfirmationPendingException.class)
+                .hasMessage("결제 승인 요청에 응답이 없습니다. 승인 여부가 확인되지 않았습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.");
+    }
+
+    @Test
+    @DisplayName("연결 실패는 결제 결과 확인 필요 예외로 매핑한다.")
+    void map_connectException() {
+        RuntimeException exception = TossPaymentExceptionMapper.map(
+                new ResourceAccessException("I/O error", new ConnectException("Connection refused"))
+        );
+
+        assertThat(exception)
+                .isInstanceOf(PaymentConfirmationPendingException.class)
+                .hasMessage("결제 승인 서버에 연결하지 못했습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.");
+    }
+
+    @Test
+    @DisplayName("네트워크 원인이 아닌 RestClient 예외는 그대로 유지한다.")
+    void map_nonNetworkRestClientException() {
+        RestClientException restClientException = new RestClientException("message conversion failed");
+
+        RuntimeException exception = TossPaymentExceptionMapper.map(restClientException);
+
+        assertThat(exception).isSameAs(restClientException);
     }
 }

@@ -2,14 +2,17 @@ package roomescape.payment.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.controller.dto.PaymentConfirmRequest;
 import roomescape.payment.controller.dto.PaymentFailRequest;
 import roomescape.payment.controller.dto.PaymentOrderCreateRequest;
+import roomescape.payment.controller.dto.PaymentOrdersResponse;
 import roomescape.payment.controller.dto.PaymentReadyResponse;
 import roomescape.payment.service.PaymentReadyOrder;
 import roomescape.payment.service.PaymentService;
@@ -42,6 +45,11 @@ public class PaymentController {
 
         return ResponseEntity.status(CREATED)
                 .body(PaymentReadyResponse.from(paymentReadyOrder, paymentProperties));
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<PaymentOrdersResponse> findOrders(@RequestParam String name) {
+        return ResponseEntity.ok(PaymentOrdersResponse.from(paymentService.findOrdersByName(name)));
     }
 
     @PostMapping("/confirm")

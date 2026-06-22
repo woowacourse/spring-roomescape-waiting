@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.controller.dto.PaymentCheckoutRequest;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
 import roomescape.payment.service.PaymentReadyOrder;
 import roomescape.payment.service.PaymentService;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -73,6 +74,14 @@ public class PaymentPageController {
             return "success";
         } catch (PaymentAmountMismatchException exception) {
             return failView(model, "AMOUNT_MISMATCH", exception.getMessage(), orderId);
+        } catch (PaymentConfirmationPendingException exception) {
+            return failView(
+                    model,
+                    PaymentConfirmationPendingException.CODE,
+                    exception.getMessage(),
+                    orderId,
+                    "결제 결과 확인 필요"
+            );
         } catch (RuntimeException exception) {
             return failView(model, "PAYMENT_CONFIRM_FAILED", exception.getMessage(), orderId);
         }
@@ -90,9 +99,14 @@ public class PaymentPageController {
     }
 
     private String failView(Model model, String code, String message, String orderId) {
+        return failView(model, code, message, orderId, "결제를 실패했어요");
+    }
+
+    private String failView(Model model, String code, String message, String orderId, String heading) {
         model.addAttribute("code", fallback(code, "PAYMENT_FAILED"));
         model.addAttribute("message", fallback(message, "결제가 완료되지 않았습니다."));
         model.addAttribute("orderId", orderId);
+        model.addAttribute("heading", fallback(heading, "결제를 실패했어요"));
         return "fail";
     }
 

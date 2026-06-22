@@ -6,6 +6,8 @@ const state = {
     selectedTimeId: null,
     myReservations: [],
     myFilter: "active",
+    paymentOrders: [],
+    paymentFilter: "all",
     activeName: "",
     adminReservations: []
 };
@@ -22,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (page === "my") {
         initMyPage();
+    }
+    if (page === "payments") {
+        initPaymentOrdersPage();
     }
     if (page === "admin") {
         initAdmin();
@@ -94,6 +99,36 @@ async function initMyPage() {
         await loadMyReservations();
     } else {
         renderMyReservations([]);
+    }
+}
+
+async function initPaymentOrdersPage() {
+    const params = new URLSearchParams(window.location.search);
+    const filter = params.get("filter");
+    if (["ready", "pending", "confirmed", "failed"].includes(filter)) {
+        state.paymentFilter = filter;
+    }
+
+    $("#paymentLookupForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        state.activeName = $("#paymentLookupName").value.trim();
+        localStorage.setItem("roomflow.name", state.activeName);
+        loadPaymentOrders();
+    });
+    $$("[data-payment-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+            state.paymentFilter = button.dataset.paymentFilter;
+            renderPaymentOrders(state.paymentOrders);
+        });
+    });
+
+    const savedName = params.get("name") || localStorage.getItem("roomflow.name") || "";
+    $("#paymentLookupName").value = savedName;
+    state.activeName = savedName;
+    if (savedName) {
+        await loadPaymentOrders();
+    } else {
+        renderPaymentOrders([]);
     }
 }
 
@@ -307,7 +342,7 @@ async function initPaymentSuccess() {
         localStorage.setItem("roomflow.name", reservation.name);
         renderPaymentSuccess(reservation);
     } catch (error) {
-        renderPaymentFailure(error.message, "PAYMENT_CONFIRM_FAILED");
+        renderPaymentFailure(error.message, error.code || "PAYMENT_CONFIRM_FAILED");
     }
 }
 
@@ -349,6 +384,7 @@ function renderPaymentSuccess(reservation) {
         </div>
         <div class="hero-actions">
             <a class="button primary" href="/my.html?name=${encodeURIComponent(reservation.name)}">내 예약 보기</a>
+            <a class="button ghost" href="/payments.html?name=${encodeURIComponent(reservation.name)}">결제 내역</a>
             <a class="button ghost" href="/">다른 예약하기</a>
         </div>
     `;
@@ -360,17 +396,24 @@ function renderPaymentFailure(message, code) {
         return;
     }
 
-    root.classList.add("is-failed");
+    const pending = code === "PAYMENT_CONFIRM_PENDING";
+    document.title = pending ? "Roomflow | 결제 확인 필요" : "Roomflow | 결제 실패";
+    root.classList.toggle("is-failed", !pending);
     root.innerHTML = `
         <p class="eyebrow">PAYMENT</p>
-        <h1>결제 실패</h1>
+        <h1>${pending ? "결제 확인 필요" : "결제 실패"}</h1>
         <p>${escapeHtml(message)}</p>
         <div class="payment-summary">
             <span>코드 ${escapeHtml(code)}</span>
         </div>
         <div class="hero-actions">
-            <a class="button primary" href="/">다시 예약하기</a>
-            <a class="button ghost" href="/my.html">내 예약 보기</a>
+            ${pending ? `
+                <a class="button primary" href="/payments.html">결제 내역 확인</a>
+                <a class="button ghost" href="/">다시 예약하기</a>
+            ` : `
+                <a class="button primary" href="/">다시 예약하기</a>
+                <a class="button ghost" href="/payments.html">결제 내역</a>
+            `}
         </div>
     `;
 }
@@ -416,6 +459,110 @@ function renderMyReservations(reservations) {
     }
 
     root.innerHTML = visibleReservations.map((reservation) => reservationCard(reservation)).join("");
+}
+
+async function loadPaymentOrders() {
+    const name = state.activeName || $("#paymentLookupName").value.trim();
+    if (!name) {
+        renderPaymentOrders([]);
+        return;
+    }
+
+    try {
+        const response = await api(`/payments/orders?name=${encodeURIComponent(name)}`);
+        state.paymentOrders = response.orders || [];
+        renderPaymentOrders(state.paymentOrders);
+    } catch (error) {
+        state.paymentOrders = [];
+        renderPaymentOrders([]);
+        showToast(error.message, "error");
+    }
+}
+
+function renderPaymentOrders(orders) {
+    const visibleOrders = orders.filter((order) => {
+        if (state.paymentFilter === "ready") {
+            return order.status === "READY";
+        }
+        if (state.paymentFilter === "pending") {
+            return order.status === "PENDING_CONFIRMATION";
+        }
+        if (state.paymentFilter === "confirmed") {
+            return order.status === "CONFIRMED";
+        }
+        if (state.paymentFilter === "failed") {
+            return order.status === "FAILED";
+        }
+        return true;
+    });
+
+    $("#paymentTotalCount").textContent = orders.length;
+    $("#paymentReadyCount").textContent = orders.filter((order) => order.status === "READY").length;
+    $("#paymentPendingCount").textContent = orders.filter((order) => order.status === "PENDING_CONFIRMATION").length;
+    $("#paymentConfirmedCount").textContent = orders.filter((order) => order.status === "CONFIRMED").length;
+    $("#paymentFailedCount").textContent = orders.filter((order) => order.status === "FAILED").length;
+
+    $$("[data-payment-filter]").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.paymentFilter === state.paymentFilter);
+    });
+
+    const root = $("#paymentOrders");
+    if (visibleOrders.length === 0) {
+        root.innerHTML = emptyState(paymentEmptyMessage());
+        return;
+    }
+
+    root.innerHTML = visibleOrders.map(paymentOrderCard).join("");
+}
+
+function paymentEmptyMessage() {
+    const messages = {
+        ready: "결제 대기 내역이 없습니다.",
+        pending: "확인 필요한 결제 내역이 없습니다.",
+        confirmed: "결제 확정 내역이 없습니다.",
+        failed: "결제 실패 내역이 없습니다."
+    };
+
+    return messages[state.paymentFilter] || "결제 내역이 없습니다.";
+}
+
+function paymentOrderCard(order) {
+    const failure = order.status === "FAILED" && (order.failureMessage || order.failureCode)
+        ? `<div class="payment-failure">${escapeHtml(order.failureMessage || order.failureCode)}</div>`
+        : "";
+    const reservation = order.reservationId == null
+        ? ""
+        : `<span>예약 ID ${order.reservationId}</span>`;
+    const paymentKey = order.paymentKey
+        ? `<span><strong>paymentKey</strong>${escapeHtml(order.paymentKey)}</span>`
+        : "";
+    const pending = order.status === "PENDING_CONFIRMATION"
+        ? `<div class="payment-pending">승인 결과 확인 필요</div>`
+        : "";
+
+    return `
+        <article class="reservation-card payment-order-card">
+            <div class="reservation-main">
+                <div class="reservation-title">
+                    <h3>${escapeHtml(order.theme.name)}</h3>
+                    ${paymentStatusChip(order.status)}
+                </div>
+                <div class="reservation-meta">
+                    <span>${escapeHtml(order.name)}</span>
+                    <span>${escapeHtml(order.date)}</span>
+                    <span>${displayTime(order.time.startAt)}</span>
+                    <span>${formatCurrency(order.amount)}</span>
+                    ${reservation}
+                </div>
+                <div class="payment-order-codes">
+                    <span><strong>orderId</strong>${escapeHtml(order.orderId)}</span>
+                    ${paymentKey}
+                </div>
+                ${pending}
+                ${failure}
+            </div>
+        </article>
+    `;
 }
 
 function reservationCard(reservation) {
@@ -742,7 +889,10 @@ async function api(path, options = {}) {
     const data = text ? JSON.parse(text) : null;
 
     if (!response.ok) {
-        throw new Error(problemMessage(data, response));
+        const error = new Error(problemMessage(data, response));
+        error.status = response.status;
+        error.code = data && data.code ? data.code : null;
+        throw error;
     }
 
     return data;
@@ -768,6 +918,22 @@ function statusChip(reservation) {
     }
     if (reservation.status === "CANCELED") {
         return `<span class="status-chip canceled">취소됨</span>`;
+    }
+    return `<span class="status-chip muted">상태 확인 필요</span>`;
+}
+
+function paymentStatusChip(status) {
+    if (status === "READY") {
+        return `<span class="status-chip waiting">결제 대기</span>`;
+    }
+    if (status === "PENDING_CONFIRMATION") {
+        return `<span class="status-chip waiting">확인 필요</span>`;
+    }
+    if (status === "CONFIRMED") {
+        return `<span class="status-chip reserved">결제 확정</span>`;
+    }
+    if (status === "FAILED") {
+        return `<span class="status-chip canceled">결제 실패</span>`;
     }
     return `<span class="status-chip muted">상태 확인 필요</span>`;
 }
@@ -809,6 +975,10 @@ function displayTime(value) {
         return `${pad(value[0])}:${pad(value[1])}`;
     }
     return String(value).slice(0, 5);
+}
+
+function formatCurrency(value) {
+    return `${Number(value).toLocaleString("ko-KR")}원`;
 }
 
 function toDateInputValue(date) {

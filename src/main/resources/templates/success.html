@@ -83,6 +83,7 @@
     <span class="val" th:text="${paymentKey}">tviva...</span></div>
 
   <a th:href="@{/my.html(name=${reservation.name})}">내 예약 보기</a>
+  <a th:href="@{/payments.html(name=${reservation.name})}" style="margin-left:12px">결제 내역 보기</a>
 </div>
 </body>
 </html>

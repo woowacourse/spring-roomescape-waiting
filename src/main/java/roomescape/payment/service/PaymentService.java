@@ -2,14 +2,17 @@ package roomescape.payment.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.InvalidRequestException;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentOrder;
+import roomescape.payment.domain.PaymentOrderDetails;
 import roomescape.payment.domain.PaymentResult;
-import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
+import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentInvalidRequestException;
 import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.Reservation;
@@ -17,6 +20,7 @@ import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -47,6 +51,7 @@ public class PaymentService {
 
         PaymentOrder paymentOrder = PaymentOrder.ready(
                 generateOrderId(),
+                generateIdempotencyKey(),
                 paymentProperties.reservationAmount(),
                 name,
                 date,
@@ -58,7 +63,7 @@ public class PaymentService {
         return PaymentReadyOrder.from(paymentOrderRepository.save(paymentOrder));
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = PaymentConfirmationPendingException.class)
     public Reservation confirm(String paymentKey, String orderId, long amount) {
         PaymentOrder paymentOrder = findOrder(orderId);
 
@@ -68,8 +73,8 @@ public class PaymentService {
         if (paymentOrder.isConfirmed()) {
             return confirmIdempotently(paymentOrder, paymentKey);
         }
-        if (!paymentOrder.isReady()) {
-            throw new PaymentInvalidRequestException("결제 대기 중인 주문이 아닙니다.");
+        if (!paymentOrder.isConfirmable()) {
+            throw new PaymentInvalidRequestException("승인 확인이 가능한 주문이 아닙니다.");
         }
 
         reservationService.validateCreatable(
@@ -81,7 +86,15 @@ public class PaymentService {
 
         PaymentResult paymentResult;
         try {
-            paymentResult = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+            paymentResult = paymentGateway.confirm(new PaymentConfirmation(
+                    paymentKey,
+                    orderId,
+                    amount,
+                    paymentOrder.getIdempotencyKey()
+            ));
+        } catch (PaymentConfirmationPendingException exception) {
+            paymentOrderRepository.update(paymentOrder.pendingConfirmation(LocalDateTime.now()));
+            throw exception;
         } catch (PaymentAlreadyProcessedException exception) {
             return confirmAlreadyProcessedOrder(orderId, paymentKey, amount, exception);
         }
@@ -152,6 +165,15 @@ public class PaymentService {
                 .ifPresent(paymentOrderRepository::update);
     }
 
+    @Transactional(readOnly = true)
+    public List<PaymentOrderDetails> findOrdersByName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidRequestException("조회할 이름을 입력해 주세요.");
+        }
+
+        return paymentOrderRepository.findDetailsByName(name.trim());
+    }
+
     private PaymentOrder findOrder(String orderId) {
         return paymentOrderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new PaymentInvalidRequestException("결제 주문을 찾을 수 없습니다."));
@@ -159,5 +181,9 @@ public class PaymentService {
 
     private String generateOrderId() {
         return ORDER_ID_PREFIX + UUID.randomUUID();
+    }
+
+    private String generateIdempotencyKey() {
+        return UUID.randomUUID().toString();
     }
 }

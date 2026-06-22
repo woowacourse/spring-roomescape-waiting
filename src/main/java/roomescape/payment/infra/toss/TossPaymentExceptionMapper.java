@@ -1,7 +1,10 @@
 package roomescape.payment.infra.toss;
 
 import org.springframework.http.HttpStatusCode;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
+import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
 import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentInvalidRequestException;
 import roomescape.payment.domain.exception.PaymentKeyConfigurationException;
@@ -9,8 +12,16 @@ import roomescape.payment.domain.exception.PaymentNotFoundException;
 import roomescape.payment.domain.exception.PaymentRejectedException;
 import roomescape.payment.domain.exception.PaymentRetryableException;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.util.Locale;
+
 final class TossPaymentExceptionMapper {
     private static final String DEFAULT_MESSAGE = "결제 승인에 실패했습니다.";
+    private static final String CONNECTION_UNAVAILABLE_MESSAGE =
+            "결제 승인 서버에 연결하지 못했습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.";
+    private static final String TIMEOUT_MESSAGE =
+            "결제 승인 요청에 응답이 없습니다. 승인 여부가 확인되지 않았습니다. 결제 내역에서 결과를 확인한 뒤 다시 시도해주세요.";
 
     private TossPaymentExceptionMapper() {
     }
@@ -34,6 +45,29 @@ final class TossPaymentExceptionMapper {
         };
     }
 
+    static RuntimeException map(RestClientException exception) {
+        if (exception instanceof ResourceAccessException resourceAccessException) {
+            return mapResourceAccessException(resourceAccessException);
+        }
+        if (hasCause(exception, SocketTimeoutException.class)) {
+            return pendingForTimeout(exception);
+        }
+
+        return exception;
+    }
+
+    private static RuntimeException mapResourceAccessException(ResourceAccessException exception) {
+        if (hasCause(exception, ConnectException.class) || hasConnectTimeoutCause(exception)) {
+            return new PaymentConfirmationPendingException(CONNECTION_UNAVAILABLE_MESSAGE, exception);
+        }
+
+        return exception;
+    }
+
+    static PaymentConfirmationPendingException pendingForTimeout(Throwable exception) {
+        return new PaymentConfirmationPendingException(TIMEOUT_MESSAGE, exception);
+    }
+
     private static String code(TossErrorResponse errorResponse) {
         if (errorResponse == null || errorResponse.code() == null || errorResponse.code().isBlank()) {
             return "UNKNOWN";
@@ -46,5 +80,31 @@ final class TossPaymentExceptionMapper {
             return DEFAULT_MESSAGE;
         }
         return errorResponse.message();
+    }
+
+    private static boolean hasCause(Throwable exception, Class<? extends Throwable> causeType) {
+        Throwable current = exception;
+        while (current != null) {
+            if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private static boolean hasConnectTimeoutCause(Throwable exception) {
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof SocketTimeoutException && isConnectTimeoutMessage(current.getMessage())) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private static boolean isConnectTimeoutMessage(String message) {
+        return message != null && message.toLowerCase(Locale.ROOT).contains("connect");
     }
 }
