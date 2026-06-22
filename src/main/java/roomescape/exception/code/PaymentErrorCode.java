@@ -19,6 +19,7 @@ public enum PaymentErrorCode implements ErrorCode {
     PAYMENT_GATEWAY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 오류가 발생했습니다."),
     PAYMENT_CONNECT_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "결제사에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."),
     PAYMENT_READ_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "결제사 응답 대기 중 시간이 초과되었습니다. 결제 결과를 확인할 수 없습니다."),
+    TOSS_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "결제사의 요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요."),
     ;
 
     private final HttpStatus httpStatus;
