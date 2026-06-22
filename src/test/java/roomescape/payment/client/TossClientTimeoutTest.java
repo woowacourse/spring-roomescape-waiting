@@ -114,7 +114,7 @@ class TossClientTimeoutTest {
     @Timeout(value = 3, unit = TimeUnit.SECONDS, threadMode = ThreadMode.SEPARATE_THREAD)
     void 라우팅불가_IP면_connectTimeout만큼_기다렸다가_SocketTimeout으로_실패한다() {
         var gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500));
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500, 1, 100, 100.0));
 
         var start = System.nanoTime();
         assertThatThrownBy(() -> gateway.confirm(confirmation()))
