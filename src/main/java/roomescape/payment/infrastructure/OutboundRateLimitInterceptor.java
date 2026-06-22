@@ -1,0 +1,27 @@
+package roomescape.payment.infrastructure;
+
+import java.io.IOException;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import roomescape.global.ratelimit.TokenBucketRateLimiter;
+import roomescape.payment.exception.OutboundRateLimitExceededException;
+
+public class OutboundRateLimitInterceptor implements ClientHttpRequestInterceptor {
+
+    private final TokenBucketRateLimiter rateLimiter;
+
+    public OutboundRateLimitInterceptor(TokenBucketRateLimiter rateLimiter) {
+        this.rateLimiter = rateLimiter;
+    }
+
+    @Override
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+            throws IOException {
+        if (!rateLimiter.tryConsume()) {
+            throw new OutboundRateLimitExceededException();
+        }
+        return execution.execute(request, body);
+    }
+}

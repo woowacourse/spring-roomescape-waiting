@@ -2,6 +2,7 @@ package roomescape.payment.domain;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Payment {
 
@@ -9,6 +10,7 @@ public class Payment {
     private final Long reservationId;
     private final String orderId;
     private final String paymentKey;
+    private final String idempotencyKey;
     private final Long amount;
     private final PaymentState state;
     private final LocalDateTime createdAt;
@@ -19,6 +21,7 @@ public class Payment {
             Long reservationId,
             String orderId,
             String paymentKey,
+            String idempotencyKey,
             Long amount,
             PaymentState state,
             LocalDateTime createdAt,
@@ -28,6 +31,7 @@ public class Payment {
         this.reservationId = reservationId;
         this.orderId = orderId;
         this.paymentKey = paymentKey;
+        this.idempotencyKey = idempotencyKey;
         this.amount = amount;
         this.state = state;
         this.createdAt = createdAt;
@@ -35,15 +39,20 @@ public class Payment {
     }
 
     public static Payment pending(Long reservationId, String orderId, Long amount, LocalDateTime now) {
-        return new Payment(null, reservationId, orderId, null, amount, PaymentState.PENDING, now, now);
+        String idempotencyKey = UUID.randomUUID().toString();
+        return new Payment(null, reservationId, orderId, null, idempotencyKey, amount, PaymentState.PENDING, now, now);
     }
 
     public Payment confirm(String paymentKey, LocalDateTime now) {
-        return new Payment(id, reservationId, orderId, paymentKey, amount, PaymentState.CONFIRMED, createdAt, now);
+        return new Payment(id, reservationId, orderId, paymentKey, idempotencyKey, amount, PaymentState.CONFIRMED, createdAt, now);
     }
 
     public Payment cancel(LocalDateTime now) {
-        return new Payment(id, reservationId, orderId, paymentKey, amount, PaymentState.CANCELED, createdAt, now);
+        return new Payment(id, reservationId, orderId, paymentKey, idempotencyKey, amount, PaymentState.CANCELED, createdAt, now);
+    }
+
+    public Payment markUncertain(String attemptedPaymentKey, LocalDateTime now) {
+        return new Payment(id, reservationId, orderId, attemptedPaymentKey, idempotencyKey, amount, PaymentState.UNCERTAIN, createdAt, now);
     }
 
     public boolean isConfirmed() {
@@ -64,6 +73,10 @@ public class Payment {
 
     public String getPaymentKey() {
         return paymentKey;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     public Long getAmount() {

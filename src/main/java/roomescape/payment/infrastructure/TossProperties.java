@@ -6,6 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record TossProperties(
         String baseUrl,
         String clientKey,
-        String secretKey
+        String secretKey,
+        int connectTimeoutMs,
+        int readTimeoutMs,
+        int maxAttempts
 ) {
 }

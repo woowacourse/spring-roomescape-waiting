@@ -5,11 +5,16 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
+import roomescape.global.exception.BadRequestException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.payment.domain.Payment;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentResult;
 import roomescape.payment.exception.PaymentAmountMismatchException;
+import roomescape.payment.exception.PaymentConfirmationUncertainException;
+import roomescape.payment.exception.PaymentConnectionFailedException;
 import roomescape.payment.exception.PaymentErrorCode;
 import roomescape.payment.repository.PaymentRepository;
 import roomescape.payment.service.dto.PaymentCheckoutInfo;
@@ -64,7 +69,7 @@ public class PaymentService {
                     roomescape.payment.domain.PaymentStatus.DONE, payment.getAmount());
         }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        PaymentResult result = requestConfirmation(payment, paymentKey, orderId, amount);
         Payment confirmed = payment.confirm(paymentKey, LocalDateTime.now());
         paymentRepository.save(confirmed);
 
@@ -73,6 +78,29 @@ public class PaymentService {
         reservationRepository.save(reservation.confirm());
 
         return result;
+    }
+
+    @Transactional
+    public PaymentResult retryConfirmation(String orderId) {
+        Payment payment = findByOrderId(orderId);
+        if (payment.getPaymentKey() == null) {
+            throw new BadRequestException("재시도할 결제 시도 내역이 없습니다.");
+        }
+        return confirm(payment.getPaymentKey(), orderId, payment.getAmount());
+    }
+
+    private PaymentResult requestConfirmation(Payment payment, String paymentKey, String orderId, Long amount) {
+        PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount, payment.getIdempotencyKey());
+        try {
+            return paymentGateway.confirm(confirmation);
+        } catch (ResourceAccessException e) {
+            // 연결 단계 실패(거부/타임아웃) — 토스가 요청을 받지도 못했으므로 확정 실패로 취급한다.
+            throw new PaymentConnectionFailedException();
+        } catch (RestClientException e) {
+            // 응답 읽기 단계 실패(read timeout) — 토스가 이미 승인했을 수 있어 실패로 단정하지 않는다.
+            paymentRepository.save(payment.markUncertain(paymentKey, LocalDateTime.now()));
+            throw new PaymentConfirmationUncertainException(orderId);
+        }
     }
 
     @Transactional

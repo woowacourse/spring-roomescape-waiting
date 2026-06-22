@@ -2,19 +2,12 @@ package roomescape.payment.infrastructure;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import roomescape.global.exception.BusinessException;
+import roomescape.payment.exception.PaymentFailureException;
 
-public class TossPaymentException extends BusinessException {
-
-    private final String code;
+public class TossPaymentException extends PaymentFailureException {
 
     protected TossPaymentException(HttpStatus status, String code, String message) {
-        super(status, message);
-        this.code = code;
-    }
-
-    public String getCode() {
-        return code;
+        super(status, code, message);
     }
 
     public static TossPaymentException of(HttpStatusCode status, String code, String message) {

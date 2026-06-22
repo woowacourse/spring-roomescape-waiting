@@ -22,6 +22,7 @@ public class PaymentDao {
             resultSet.getLong("reservation_id"),
             resultSet.getString("order_id"),
             resultSet.getString("payment_key"),
+            resultSet.getString("idempotency_key"),
             resultSet.getLong("amount"),
             PaymentState.valueOf(resultSet.getString("status")),
             resultSet.getTimestamp("created_at").toLocalDateTime(),
@@ -36,8 +37,8 @@ public class PaymentDao {
 
     public Payment save(Payment payment) {
         String sql = """
-                INSERT INTO payment (reservation_id, order_id, payment_key, amount, status, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO payment (reservation_id, order_id, payment_key, idempotency_key, amount, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -46,20 +47,21 @@ public class PaymentDao {
             ps.setLong(1, payment.getReservationId());
             ps.setString(2, payment.getOrderId());
             ps.setString(3, payment.getPaymentKey());
-            ps.setLong(4, payment.getAmount());
-            ps.setString(5, payment.getState().name());
-            ps.setTimestamp(6, valueOf(payment.getCreatedAt()));
-            ps.setTimestamp(7, valueOf(payment.getUpdatedAt()));
+            ps.setString(4, payment.getIdempotencyKey());
+            ps.setLong(5, payment.getAmount());
+            ps.setString(6, payment.getState().name());
+            ps.setTimestamp(7, valueOf(payment.getCreatedAt()));
+            ps.setTimestamp(8, valueOf(payment.getUpdatedAt()));
             return ps;
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
-        return new Payment(id, payment.getReservationId(), payment.getOrderId(), payment.getPaymentKey(), payment.getAmount(), payment.getState(), payment.getCreatedAt(), payment.getUpdatedAt());
+        return new Payment(id, payment.getReservationId(), payment.getOrderId(), payment.getPaymentKey(), payment.getIdempotencyKey(), payment.getAmount(), payment.getState(), payment.getCreatedAt(), payment.getUpdatedAt());
     }
 
     public Optional<Payment> findByOrderId(String orderId) {
         String sql = """
-                SELECT id, reservation_id, order_id, payment_key, amount, status, created_at, updated_at
+                SELECT id, reservation_id, order_id, payment_key, idempotency_key, amount, status, created_at, updated_at
                 FROM payment
                 WHERE order_id = ?
                 """;
@@ -69,7 +71,7 @@ public class PaymentDao {
 
     public Optional<Payment> findByReservationId(long reservationId) {
         String sql = """
-                SELECT id, reservation_id, order_id, payment_key, amount, status, created_at, updated_at
+                SELECT id, reservation_id, order_id, payment_key, idempotency_key, amount, status, created_at, updated_at
                 FROM payment
                 WHERE reservation_id = ?
                 """;
@@ -80,7 +82,7 @@ public class PaymentDao {
     public void update(Payment payment) {
         String sql = """
                 UPDATE payment
-                SET reservation_id = ?, order_id = ?, payment_key = ?, amount = ?, status = ?, created_at = ?, updated_at = ?
+                SET reservation_id = ?, order_id = ?, payment_key = ?, idempotency_key = ?, amount = ?, status = ?, created_at = ?, updated_at = ?
                 WHERE id = ?
                 """;
         int affected = jdbcTemplate.update(
@@ -88,6 +90,7 @@ public class PaymentDao {
                 payment.getReservationId(),
                 payment.getOrderId(),
                 payment.getPaymentKey(),
+                payment.getIdempotencyKey(),
                 payment.getAmount(),
                 payment.getState().name(),
                 valueOf(payment.getCreatedAt()),
