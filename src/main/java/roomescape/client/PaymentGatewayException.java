@@ -40,4 +40,14 @@ public class PaymentGatewayException extends RuntimeException {
             );
         }
     }
+
+    public static class RateLimited extends PaymentGatewayException {
+        public RateLimited() {
+            super(
+                    "PAYMENT_GATEWAY_RATE_LIMITED",
+                    "결제 승인 요청이 일시적으로 많아 처리하지 못했습니다. 잠시 후 다시 시도해주세요.",
+                    null
+            );
+        }
+    }
 }

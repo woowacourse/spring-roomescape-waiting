@@ -70,6 +70,65 @@ class TossPaymentGatewayTest {
     }
 
     @Test
+    void 토스가_429와_RetryAfter를_반환하면_대기_후_재시도한다() {
+        int beforeRequestCount = mockWebServer.getRequestCount();
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(429)
+                .setHeader("Retry-After", "0"));
+        enqueue(200, """
+                {
+                  "paymentKey": "payment-key",
+                  "orderId": "order-1",
+                  "status": "DONE",
+                  "totalAmount": 10000
+                }
+                """);
+
+        PaymentResult result = tossPaymentGateway.confirm(
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
+        );
+
+        assertThat(result.approvedAmount()).isEqualTo(10_000L);
+        assertThat(mockWebServer.getRequestCount() - beforeRequestCount).isEqualTo(2);
+    }
+
+    @Test
+    void RetryAfter가_없으면_기본_대기_시간으로_재시도한다() {
+        int beforeRequestCount = mockWebServer.getRequestCount();
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(429));
+        enqueue(200, """
+                {
+                  "paymentKey": "payment-key",
+                  "orderId": "order-1",
+                  "status": "DONE",
+                  "totalAmount": 10000
+                }
+                """);
+
+        PaymentResult result = tossPaymentGateway.confirm(
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
+        );
+
+        assertThat(result.approvedAmount()).isEqualTo(10_000L);
+        assertThat(mockWebServer.getRequestCount() - beforeRequestCount).isEqualTo(2);
+    }
+
+    @Test
+    void 토스가_최대_시도_횟수까지_429를_반환하면_RateLimited_예외가_발생한다() {
+        int beforeRequestCount = mockWebServer.getRequestCount();
+        mockWebServer.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+        mockWebServer.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+        mockWebServer.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(
+                new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")
+        )).isInstanceOf(PaymentGatewayException.RateLimited.class);
+
+        assertThat(mockWebServer.getRequestCount() - beforeRequestCount).isEqualTo(3);
+    }
+
+    @Test
     void 이미_처리된_결제면_AlreadyProcessed_예외가_발생한다() {
         enqueue(400, """
                 {
