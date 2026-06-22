@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.payment;
 
 /**
  * 결제 주문 정보. 결제 전에 (reservation_id, order_id, amount)로 저장해 두고,
@@ -9,6 +9,7 @@ public record Payment(
         Long reservationId,
         String orderId,
         Long amount,
-        String paymentKey
+        String paymentKey,
+        PaymentOrderStatus status
 ) {
 }

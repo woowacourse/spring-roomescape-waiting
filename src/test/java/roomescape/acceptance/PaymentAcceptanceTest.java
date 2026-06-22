@@ -18,10 +18,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.domain.PaymentGateway;
+import roomescape.payment.PaymentGateway;
 import roomescape.client.TossPaymentException;
-import roomescape.domain.PaymentResult;
-import roomescape.domain.PaymentStatus;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

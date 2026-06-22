@@ -21,12 +21,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.retry:spring-retry'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-thymeleaf'
     runtimeOnly 'com.h2database:h2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
     testImplementation 'io.rest-assured:rest-assured:5.3.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {

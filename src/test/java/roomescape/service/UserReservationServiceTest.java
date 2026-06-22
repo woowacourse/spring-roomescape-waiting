@@ -20,6 +20,9 @@ import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.payment.Payment;
+import roomescape.payment.PaymentOrderStatus;
+import roomescape.repository.PaymentRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
@@ -55,6 +58,8 @@ class UserReservationServiceTest {
     private ReservationRepository reservationRepository;
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
+    @Mock
+    private PaymentRepository paymentRepository;
     @InjectMocks
     private UserReservationService userReservationService;
 
@@ -63,7 +68,7 @@ class UserReservationServiceTest {
     void 미래_시점_예약은_정상_생성된다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         ReservationResult expected = new ReservationResult(
-                1L, OWNER, FUTURE_DATE, null, null, 0L);
+                1L, OWNER, FUTURE_DATE, null, null, 0L, null, null, null, null);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationService.create(command, ReservationStatus.PENDING)).willReturn(expected);
 
@@ -113,7 +118,7 @@ class UserReservationServiceTest {
     @DisplayName("빈 슬롯 예약은 PENDING 상태로 생성된다")
     void 빈_슬롯_예약은_PENDING으로_생성된다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
-        ReservationResult expected = new ReservationResult(1L, OWNER, FUTURE_DATE, null, null, 0L);
+        ReservationResult expected = new ReservationResult(1L, OWNER, FUTURE_DATE, null, null, 0L, null, null, null, null);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(FUTURE_DATE, 1L, 1L)).willReturn(false);
         given(reservationService.create(command, ReservationStatus.PENDING)).willReturn(expected);
@@ -127,7 +132,7 @@ class UserReservationServiceTest {
     @DisplayName("이미 예약된 슬롯은 WAITING 상태로 생성된다")
     void 이미_예약된_슬롯은_WAITING으로_생성된다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
-        ReservationResult expected = new ReservationResult(1L, OWNER, FUTURE_DATE, null, null, 1L);
+        ReservationResult expected = new ReservationResult(1L, OWNER, FUTURE_DATE, null, null, 1L, null, null, null, null);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(FUTURE_DATE, 1L, 1L)).willReturn(true);
         given(reservationService.create(command, ReservationStatus.WAITING)).willReturn(expected);
@@ -143,12 +148,32 @@ class UserReservationServiceTest {
         ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
                 1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME), 2L);
         given(reservationRepository.findByName(OWNER)).willReturn(List.of(reservation));
+        given(paymentRepository.findByReservationIds(List.of(1L))).willReturn(List.of());
 
         List<ReservationResult> results = userReservationService.findByName(OWNER);
 
         assertThat(results).hasSize(1);
         assertThat(results.getFirst().name()).isEqualTo(OWNER);
         assertThat(results.getFirst().waitingOrder()).isEqualTo(2L);
+        assertThat(results.getFirst().paymentStatus()).isNull();
+    }
+
+    @Test
+    @DisplayName("예약에 결제 정보가 있으면 함께 조회된다")
+    void 이름으로_예약_목록을_조회하면_결제_정보가_포함된다() {
+        ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
+                1L, OWNER, new ReservationSlot(1L, FUTURE_DATE, VALID_TIME, VALID_THEME), 0L);
+        Payment payment = new Payment(10L, 1L, "order-abc", 30_000L, "payment-key", PaymentOrderStatus.CONFIRMED);
+        given(reservationRepository.findByName(OWNER)).willReturn(List.of(reservation));
+        given(paymentRepository.findByReservationIds(List.of(1L))).willReturn(List.of(payment));
+
+        List<ReservationResult> results = userReservationService.findByName(OWNER);
+
+        ReservationResult result = results.getFirst();
+        assertThat(result.orderId()).isEqualTo("order-abc");
+        assertThat(result.paymentKey()).isEqualTo("payment-key");
+        assertThat(result.amount()).isEqualTo(30_000L);
+        assertThat(result.paymentStatus()).isEqualTo(PaymentOrderStatus.CONFIRMED);
     }
 
     @Test

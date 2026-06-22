@@ -5,10 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import roomescape.domain.Payment;
-import roomescape.domain.PaymentConfirmation;
-import roomescape.domain.PaymentGateway;
-import roomescape.domain.PaymentResult;
+import roomescape.payment.Payment;
+import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentOrderStatus;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentResultUnknownException;
 import roomescape.domain.ReservationStatus;
 import roomescape.repository.PaymentRepository;
 import roomescape.repository.ReservationRepository;
@@ -48,13 +50,15 @@ public class PaymentService {
         return paymentRepository.findByReservationId(reservationId)
                 .filter(existing -> existing.paymentKey() == null)
                 .orElseGet(() -> paymentRepository.save(
-                        new Payment(null, reservationId, generateOrderId(), amount, null)));
+                        new Payment(null, reservationId, generateOrderId(), amount, null, PaymentOrderStatus.PENDING)));
     }
 
     /**
      * 외부 승인 호출은 트랜잭션 밖에서 수행해, 네트워크 대기 동안 DB 커넥션을 점유하지 않는다.
      * 저장 금액으로 먼저 검증해 위변조 amount 를 게이트웨이 호출 전에 차단하고,
      * 승인 성공 뒤의 DB 반영(payment_key 저장 + 예약 확정)만 하나의 짧은 트랜잭션으로 묶어 원자화한다.
+     * read timeout(결과 불명확)은 "확인 필요" 상태로 남겨, 연결 실패(요청이 토스에 도달하지 않음)는
+     * 모호하지 않으므로 PENDING 그대로 둔다.
      */
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         Payment payment = paymentRepository.findByOrderId(orderId)
@@ -63,10 +67,18 @@ public class PaymentService {
             throw new PaymentAmountMismatchException(payment.amount(), amount);
         }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        PaymentResult result;
+        try {
+            result = paymentGateway.confirm(
+                    new PaymentConfirmation(paymentKey, payment.orderId(), payment.amount()));
+        } catch (PaymentResultUnknownException e) {
+            paymentRepository.updateStatus(orderId, PaymentOrderStatus.NEEDS_CONFIRMATION);
+            throw e;
+        }
 
         transactionTemplate.executeWithoutResult(status -> {
             paymentRepository.updatePaymentKey(orderId, result.paymentKey());
+            paymentRepository.updateStatus(orderId, PaymentOrderStatus.CONFIRMED);
             reservationRepository.confirm(payment.reservationId());
         });
         return result;

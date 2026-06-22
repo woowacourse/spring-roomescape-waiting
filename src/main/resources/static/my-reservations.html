@@ -212,10 +212,26 @@
             color: #d97706;
         }
 
+        .status-pending {
+            background: #f0f0f3;
+            color: #6e6e73;
+        }
+
+        .status-needs-confirmation {
+            background: #fdeaea;
+            color: #d70015;
+        }
+
         .res-when {
             margin: 0;
             color: #666;
             font-size: 14px;
+        }
+
+        .res-payment {
+            margin: 6px 0 0;
+            color: #888;
+            font-size: 13px;
         }
 
         .res-actions {
@@ -316,13 +332,45 @@
         return `<span class="status-badge status-waiting">대기 ${r.waitingOrder}번</span>`;
     }
 
+    function paymentBadge(r) {
+        if (!r.paymentStatus) {
+            return '';
+        }
+        if (r.paymentStatus === 'CONFIRMED') {
+            return '<span class="status-badge status-confirmed">결제 완료</span>';
+        }
+        if (r.paymentStatus === 'NEEDS_CONFIRMATION') {
+            return '<span class="status-badge status-needs-confirmation">확인 필요</span>';
+        }
+        return '<span class="status-badge status-pending">결제 대기</span>';
+    }
+
+    function paymentInfo(r) {
+        if (!r.paymentStatus) {
+            return '';
+        }
+        const parts = [`주문번호 ${r.orderId}`];
+        if (r.paymentStatus === 'CONFIRMED') {
+            parts.push(`${r.amount.toLocaleString()}원 결제됨`);
+            if (r.paymentKey) {
+                parts.push(`paymentKey ${r.paymentKey}`);
+            }
+        } else if (r.paymentStatus === 'NEEDS_CONFIRMATION') {
+            parts.push('결제 결과를 확인할 수 없습니다. 다시 시도해도 이중 승인되지 않습니다.');
+        } else {
+            parts.push('결제 대기 중입니다.');
+        }
+        return `<p class="res-payment">${parts.join(' · ')}</p>`;
+    }
+
     function cardHtml(r) {
         return `
             <div class="res-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
                 <div class="res-head">
                     <div>
-                        <p class="res-theme">${r.theme.name} ${statusBadge(r)}</p>
+                        <p class="res-theme">${r.theme.name} ${statusBadge(r)} ${paymentBadge(r)}</p>
                         <p class="res-when">${r.date} · ${r.time.startAt}</p>
+                        ${paymentInfo(r)}
                     </div>
                     <div class="res-actions">
                         <button class="btn btn-light btn-edit">변경</button>

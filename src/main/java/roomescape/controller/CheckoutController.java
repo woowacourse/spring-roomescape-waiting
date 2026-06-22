@@ -6,8 +6,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.client.TossPaymentException;
-import roomescape.domain.Payment;
-import roomescape.domain.PaymentResult;
+import roomescape.payment.Payment;
+import roomescape.payment.PaymentConnectionFailedException;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentResultUnknownException;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -76,6 +78,12 @@ public class CheckoutController {
             // 승인 실패(카드 거절·키 오류 등). 결제 대기 주문/예약을 정리해 고아 데이터가 남지 않게 한다.
             paymentService.cancelOrder(orderId);
             return failView(model, e.getCode(), e.getMessage(), orderId);
+        } catch (PaymentConnectionFailedException e) {
+            // 연결 자체가 안 됐다 — 토스에 요청이 도달하지 않았으니 주문/예약은 그대로 두고 재시도를 안내한다.
+            return retryView(model, "CONNECTION_FAILED", e.getMessage(), paymentKey, orderId, amount);
+        } catch (PaymentResultUnknownException e) {
+            // read timeout — 토스가 이미 승인했을 수 있어 "실패"로 단정하지 않는다. 같은 멱등키로 재확인하게 한다.
+            return retryView(model, "RESULT_UNKNOWN", e.getMessage(), paymentKey, orderId, amount);
         } catch (ResourceNotFoundException e) {
             // 주문을 찾을 수 없는 경우. 정리할 대상이 없으므로 안내만 한다.
             return failView(model, "ORDER_NOT_FOUND", e.getMessage(), orderId);
@@ -101,5 +109,18 @@ public class CheckoutController {
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
         return "fail";
+    }
+
+    /**
+     * 결과가 불명확한 상태(확인 필요)를 보여주는 화면. 실패로 단정하지 않으므로 주문/예약을 정리하지 않고,
+     * 같은 paymentKey/orderId/amount 로 confirm 을 다시 호출할 수 있는 링크를 함께 내려준다.
+     */
+    private String retryView(Model model, String code, String message, String paymentKey, String orderId, Long amount) {
+        model.addAttribute("code", code);
+        model.addAttribute("message", message);
+        model.addAttribute("paymentKey", paymentKey);
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("amount", amount);
+        return "retry";
     }
 }
