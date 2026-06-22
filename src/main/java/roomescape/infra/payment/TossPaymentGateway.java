@@ -18,6 +18,8 @@ import roomescape.exception.server.PaymentUnavailableException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
+import roomescape.ratelimit.OutboundRateLimitInterceptor;
+import roomescape.ratelimit.TokenBucketRateLimiter;
 
 @Component
 public class TossPaymentGateway implements PaymentGateway {
@@ -27,9 +29,13 @@ public class TossPaymentGateway implements PaymentGateway {
 
     public TossPaymentGateway(
             @Value("${toss.base-url}") String baseUrl,
-            @Value("${toss.secret-key:}") String secretKey,
-            @Value("${toss.connect-timeout:3s}") Duration connectTimeout,
-            @Value("${toss.read-timeout:5s}") Duration readTimeout,
+            @Value("${toss.secret-key}") String secretKey,
+            @Value("${toss.connect-timeout}") Duration connectTimeout,
+            @Value("${toss.read-timeout}") Duration readTimeout,
+            @Value("${toss.rate-limit.max-attempts}") int maxAttempts,
+            @Value("${toss.rate-limit.fallback-retry-after}") Duration fallbackRetryAfter,
+            @Value("${outbound-rate-limit.capacity}") long outboundCapacity,
+            @Value("${outbound-rate-limit.refill-per-sec}") double outboundRefillPerSec,
             ObjectMapper objectMapper
     ) {
         String basic = Base64.getEncoder()
@@ -42,6 +48,10 @@ public class TossPaymentGateway implements PaymentGateway {
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .requestFactory(requestFactory)
+                .requestInterceptor(new TossRateLimitRetryInterceptor(maxAttempts, fallbackRetryAfter))
+                .requestInterceptor(new OutboundRateLimitInterceptor(
+                        new TokenBucketRateLimiter(outboundCapacity, outboundRefillPerSec, System::nanoTime)
+                ))
                 .build();
         this.objectMapper = objectMapper;
     }
@@ -56,7 +66,8 @@ public class TossPaymentGateway implements PaymentGateway {
                     .body(TossConfirmRequest.from(confirmation))
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
-                        TossErrorResponse error = objectMapper.readValue(errorResponse.getBody(), TossErrorResponse.class);
+                        TossErrorResponse error = objectMapper.readValue(errorResponse.getBody(),
+                                TossErrorResponse.class);
                         throw TossPaymentException.of(errorResponse.getStatusCode(), error);
                     })
                     .body(TossPaymentResponse.class);
