@@ -99,4 +99,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
                 .body(new ErrorResponse("PAYMENT_UNCERTAIN", e.getMessage()));
     }
+
+    @ExceptionHandler(PaymentRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handle(PaymentRateLimitException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ErrorResponse("PAYMENT_RATE_LIMIT_EXCEEDED", e.getMessage()));
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handle(OutboundRateLimitException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ErrorResponse("OUTBOUND_RATE_LIMIT_EXCEEDED", e.getMessage()));
+    }
 }
