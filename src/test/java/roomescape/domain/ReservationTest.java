@@ -68,7 +68,8 @@ class ReservationTest {
                         new ReservationTime(1L, LocalTime.of(15, 0)),
                         new Theme(1L, "공포의 저택", "무서운 방탈출", "https://image.com")
                 ),
-                "브라운"
+                "브라운",
+                roomescape.domain.ReservationStatus.CONFIRMED
         );
 
         LocalDateTime now = LocalDateTime.parse(nowText);

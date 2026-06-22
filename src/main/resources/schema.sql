@@ -41,11 +41,25 @@ CREATE TABLE reservation
     id      BIGINT      NOT NULL AUTO_INCREMENT,
     name    VARCHAR(50) NOT NULL,
     slot_id BIGINT      NOT NULL,
+    status  VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
     PRIMARY KEY (id),
     CONSTRAINT uq_reservation_slot UNIQUE (slot_id),
     FOREIGN KEY (slot_id) REFERENCES slot (id)
 );
 
--- 1순위 대기자 조회 + 순번 계산 서브쿼리
+CREATE TABLE payment_order
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id       VARCHAR(64)  NOT NULL,
+    amount         BIGINT       NOT NULL,
+    status         VARCHAR(20)  NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    payment_key    VARCHAR(200) NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uq_payment_order_order_id       UNIQUE (order_id),
+    CONSTRAINT uq_payment_order_reservation_id UNIQUE (reservation_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+);
+
 CREATE INDEX idx_waiting_slot_created_id
     ON waiting (slot_id, created_at, id);

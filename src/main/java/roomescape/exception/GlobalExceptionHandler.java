@@ -133,6 +133,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorResponse(errorCode));
     }
 
+    @ExceptionHandler(roomescape.exception.domain.PaymentException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentException(
+            roomescape.exception.domain.PaymentException paymentException) {
+        ErrorCode errorCode = paymentException.getExceptionCode();
+        if (isKeyConfigError(errorCode)) {
+            log.error("결제 키 설정 오류 — 즉시 확인 필요: errorCode={}", errorCode.getCode(), paymentException);
+        } else {
+            log.warn("결제 예외 발생: errorCode={}, message={}", errorCode.getCode(), paymentException.getMessage());
+        }
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(new ErrorResponse(errorCode));
+    }
+
+        private boolean isKeyConfigError(ErrorCode errorCode) {
+        String code = errorCode.getCode();
+        return "UNAUTHORIZED_KEY".equals(code) || "INVALID_API_KEY".equals(code);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception, HttpServletRequest request) {
         log.error("예상하지 못한 서버 오류 발생: method={}, path={}",

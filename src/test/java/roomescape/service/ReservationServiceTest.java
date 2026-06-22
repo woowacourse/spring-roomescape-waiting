@@ -29,6 +29,8 @@ import roomescape.exception.domain.ThemeException;
 
 class ReservationServiceTest extends ServiceTest {
 
+    private static final long DEFAULT_AMOUNT = 10000L;
+
     @Autowired
     private ReservationService reservationService;
 
@@ -42,7 +44,7 @@ class ReservationServiceTest extends ServiceTest {
         Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
 
-        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), theme.getId());
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), theme.getId(), DEFAULT_AMOUNT);
 
         // when
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
@@ -69,7 +71,7 @@ class ReservationServiceTest extends ServiceTest {
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
         long invalidTimeId = 0L;
 
-        ReservationRequest request = new ReservationRequest("예약1", reservationDate, invalidTimeId, theme.getId());
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, invalidTimeId, theme.getId(), DEFAULT_AMOUNT);
 
         // when & then
         assertThatThrownBy(() -> {
@@ -87,7 +89,7 @@ class ReservationServiceTest extends ServiceTest {
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
         long invalidThemeId = 0L;
 
-        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), invalidThemeId);
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), invalidThemeId, DEFAULT_AMOUNT);
 
         // when & then
         assertThatThrownBy(() -> {
@@ -103,7 +105,7 @@ class ReservationServiceTest extends ServiceTest {
         ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(13, 0));
         Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
-        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), theme.getId());
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), theme.getId(), DEFAULT_AMOUNT);
 
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         reservationService.create(request, currentDateTime);
@@ -129,7 +131,8 @@ class ReservationServiceTest extends ServiceTest {
                 "예약1",
                 reservationDate,
                 originalTime.getId(),
-                theme.getId()
+                theme.getId(),
+                DEFAULT_AMOUNT
         );
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
@@ -172,7 +175,8 @@ class ReservationServiceTest extends ServiceTest {
                 "예약1",
                 reservationDate,
                 originalTime.getId(),
-                theme.getId()
+                theme.getId(),
+                DEFAULT_AMOUNT
         );
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
@@ -205,12 +209,12 @@ class ReservationServiceTest extends ServiceTest {
 
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         reservationService.create(
-                new ReservationRequest("로지", alreadyReservedDate, alreadyReservedTime.getId(), theme.getId()),
+                new ReservationRequest("로지", alreadyReservedDate, alreadyReservedTime.getId(), theme.getId(), DEFAULT_AMOUNT),
                 currentDateTime);
 
         ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
         ReservationResponse savedReservation = reservationService.create(
-                new ReservationRequest("러키", LocalDate.of(2026, 5, 10), originalTime.getId(), theme.getId()),
+                new ReservationRequest("러키", LocalDate.of(2026, 5, 10), originalTime.getId(), theme.getId(), DEFAULT_AMOUNT),
                 currentDateTime);
 
         UpdateReservationRequest updateRequest = new UpdateReservationRequest(alreadyReservedDate, alreadyReservedTime.getId());
@@ -230,7 +234,8 @@ class ReservationServiceTest extends ServiceTest {
                 "러키",
                 LocalDate.of(2026, 5, 25),
                 originalTime.getId(),
-                theme.getId()
+                theme.getId(),
+                DEFAULT_AMOUNT
         );
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
@@ -256,7 +261,8 @@ class ReservationServiceTest extends ServiceTest {
                 "러키",
                 LocalDate.of(2026, 5, 25),
                 originalTime.getId(),
-                theme.getId()
+                theme.getId(),
+                DEFAULT_AMOUNT
         );
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
@@ -278,7 +284,7 @@ class ReservationServiceTest extends ServiceTest {
         ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(13, 0));
         Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
-        ReservationRequest request = new ReservationRequest("예약1", LocalDate.of(2026, 5, 8), reservationTime.getId(), theme.getId());
+        ReservationRequest request = new ReservationRequest("예약1", LocalDate.of(2026, 5, 8), reservationTime.getId(), theme.getId(), DEFAULT_AMOUNT);
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse response = reservationService.create(request, currentDateTime);
 
@@ -310,7 +316,8 @@ class ReservationServiceTest extends ServiceTest {
                         "예약1",
                         reservationDate,
                         reservationTime.getId(),
-                        theme.getId()
+                        theme.getId(),
+                        DEFAULT_AMOUNT
                 ),
                 currentDateTime);
 
@@ -353,7 +360,8 @@ class ReservationServiceTest extends ServiceTest {
                 "예약1",
                 reservationDate,
                 reservationTime.getId(),
-                theme.getId()
+                theme.getId(),
+                DEFAULT_AMOUNT
         );
         LocalDateTime currentDateTimeWhenReserve = LocalDateTime.of(2026, 5, 1, 10, 0);
         ReservationResponse response = reservationService.create(request, currentDateTimeWhenReserve);

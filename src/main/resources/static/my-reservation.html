@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Roomescape - 내 예약 조회</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://js.tosspayments.com/v2/standard"></script>
     <style>
         body { background-color: #f8f9fa; }
         .container { max-width: 900px; margin-top: 3rem; }
@@ -75,6 +76,26 @@
         </div>
     </div>
 
+    <!-- 결제 모달 -->
+    <div class="modal fade" id="paymentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">결제 수단 선택</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-payment-method"></div>
+                    <div id="modal-agreement" class="mt-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary px-4" id="modal-pay-button">결제하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 수정 모달 -->
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -117,9 +138,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+
         const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
         let currentReservations = [];
         let editingThemeId = null;
+        let tossWidgets = null;
+        let pendingPayOrderId = null;
+
+        document.getElementById('modal-pay-button').addEventListener('click', onModalPayClick);
+
+        document.getElementById('paymentModal').addEventListener('shown.bs.modal', async () => {
+            if (!tossWidgets) return;
+            document.getElementById('modal-payment-method').innerHTML = '';
+            document.getElementById('modal-agreement').innerHTML = '';
+            await Promise.all([
+                tossWidgets.renderPaymentMethods({ selector: '#modal-payment-method', variantKey: 'DEFAULT' }),
+                tossWidgets.renderAgreement({ selector: '#modal-agreement', variantKey: 'AGREEMENT' }),
+            ]);
+        });
 
         function formatTime(time) {
             if (Array.isArray(time)) {
@@ -138,8 +176,57 @@
             fetchMyWaitings(name);
         }
 
+        function paymentStatusBadge(status, orderId, amount) {
+            if (status === 'CONFIRMED') {
+                return `<span class="badge bg-success">결제 완료</span>`;
+            }
+            if (status === 'PAYMENT_PENDING') {
+                return `<span class="badge bg-warning text-dark">결제 대기</span>
+                        <button class="btn btn-primary btn-sm ms-2 px-2 py-0"
+                                onclick="openPaymentModal('${orderId}', ${amount})">
+                            결제하기
+                        </button>`;
+            }
+            if (status === 'PAYMENT_UNCERTAIN') {
+                return `<span class="badge bg-danger">확인 필요</span>
+                        <button class="btn btn-outline-danger btn-sm ms-2 px-2 py-0"
+                                onclick="openPaymentModal('${orderId}', ${amount})"
+                                title="결제 결과가 불명확합니다. 재시도하면 이중 청구 없이 상태를 확정할 수 있습니다.">
+                            재시도
+                        </button>`;
+            }
+            return `<span class="badge bg-secondary">${status}</span>`;
+        }
+
+        async function openPaymentModal(orderId, amount) {
+            pendingPayOrderId = orderId;
+            try {
+                const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+                tossWidgets = tossPayments.widgets({ customerKey: crypto.randomUUID() });
+                await tossWidgets.setAmount({ currency: 'KRW', value: amount });
+                paymentModal.show();
+            } catch (e) {
+                console.error(e);
+                alert('❌ 결제 초기화에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+            }
+        }
+
+        async function onModalPayClick() {
+            if (!tossWidgets || !pendingPayOrderId) return;
+            try {
+                await tossWidgets.requestPayment({
+                    orderId: pendingPayOrderId,
+                    orderName: '방탈출 예약',
+                    successUrl: `${window.location.origin}/payment-result.html`,
+                    failUrl: `${window.location.origin}/payment-result.html`,
+                });
+            } catch (e) {
+                handleError(e);
+            }
+        }
+
         function fetchMyReservations(name) {
-            fetch(`/reservations?name=${encodeURIComponent(name)}`)
+            fetch(`/reservations/mine?name=${encodeURIComponent(name)}`)
                 .then(response => {
                     if (!response.ok) return response.json().then(error => { throw error; });
                     return response.json();
@@ -154,7 +241,7 @@
 
                     resultsContainer.innerHTML = reservations.map(res => `
                         <div class="col-12">
-                            <div class="card reservation-card shadow-sm h-100 flex-row">
+                            <div class="card reservation-card shadow-sm h-100 flex-row ${res.paymentStatus === 'PAYMENT_UNCERTAIN' ? 'border-danger' : ''}">
                                 <img src="${res.theme.thumbnail}" class="theme-thumb d-none d-md-block" alt="${res.theme.name}" onerror="this.src='https://picsum.photos/seed/${res.theme.id}/200/150'">
                                 <div class="card-body d-flex justify-content-between align-items-center">
                                     <div>
@@ -164,6 +251,10 @@
                                             <span class="badge bg-info text-dark">${formatTime(res.time.startAt)}</span>
                                         </div>
                                         <small class="text-muted d-block">예약자: ${res.name}</small>
+                                        ${res.orderId ? `<small class="text-muted d-block">주문번호: ${res.orderId}</small>` : ''}
+                                        ${res.amount != null ? `<small class="text-muted d-block">결제금액: ${res.amount.toLocaleString()}원</small>` : ''}
+                                        ${res.paymentKey ? `<small class="text-muted d-block">결제키: ${res.paymentKey}</small>` : ''}
+                                        <div class="mt-1">${res.paymentStatus ? paymentStatusBadge(res.paymentStatus, res.orderId, res.amount) : ''}</div>
                                     </div>
                                     <div class="d-flex flex-column flex-sm-row gap-2">
                                         <button class="btn btn-outline-warning btn-sm px-3" onclick="showEditModal(${res.id})">수정</button>

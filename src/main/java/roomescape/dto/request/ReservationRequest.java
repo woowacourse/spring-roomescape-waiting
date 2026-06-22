@@ -25,7 +25,10 @@ public record ReservationRequest(
         Long timeId,
 
         @NotNull(message = "테마를 선택해 주세요.")
-        Long themeId
+        Long themeId,
+
+        @NotNull(message = "결제 금액을 입력해 주세요.")
+        Long amount
 ) {
     public Reservation toReservation(Slot slot, LocalDateTime dateTime) {
         return Reservation.createFutureReservation(name, slot, dateTime);

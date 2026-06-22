@@ -86,7 +86,7 @@ class ReservationConcurrencyTest extends ServiceTest {
             executorService.submit(() -> { // 스레드 작업 시작
                 try {
                     startLatch.await(); // 대기 상태
-                    ReservationRequest request = new ReservationRequest(name, date, time.getId(), theme.getId());
+                    ReservationRequest request = new ReservationRequest(name, date, time.getId(), theme.getId(), 10000L);
                     reservationService.create(request, currentDateTime);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
@@ -133,7 +133,7 @@ class ReservationConcurrencyTest extends ServiceTest {
             executorService.submit(() -> {
                 try {
                     startLatch.await();
-                    ReservationRequest request = new ReservationRequest(name, date, time.getId(), theme.getId());
+                    ReservationRequest request = new ReservationRequest(name, date, time.getId(), theme.getId(), 10000L);
                     reservationService.create(request, currentDateTime);
                 } catch (Exception ignored) {
                     // 중복 예약으로 인한 예외는 무시

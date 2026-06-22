@@ -44,7 +44,8 @@ public class ApiFixtureGenerator {
                         "name", name,
                         "date", date.toString(),
                         "timeId", timeId,
-                        "themeId", themeId
+                        "themeId", themeId,
+                        "amount", 10000
                 ))
                 .when().post("/reservations")
                 .then().log().all()
