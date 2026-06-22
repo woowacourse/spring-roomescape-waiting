@@ -4,7 +4,7 @@ INSERT INTO reservation_time (id, start_at) VALUES (2, '11:00:00'); -- id=2, 오
 INSERT INTO reservation_time (id, start_at) VALUES (3, '10:00:00'); -- id=3, 오늘 이미 지난 시간
 
 -- 테마 데이터
-INSERT INTO theme (id, name, description, thumbnail_url) VALUES (1, '링', '공포 테마', 'http://thumbnail.com');
+INSERT INTO theme (id, name, description, thumbnail_url, price) VALUES (1, '링', '공포 테마', 'http://thumbnail.com', 10000);
 
 -- 예약 슬롯 데이터
 INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id)

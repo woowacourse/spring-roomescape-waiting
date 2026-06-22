@@ -41,6 +41,7 @@ class ThemeControllerTest {
         params.put("name", "링");
         params.put("description", "공포 테마");
         params.put("thumbnailUrl", "https://~");
+        params.put("price", 10000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -70,7 +71,8 @@ class ThemeControllerTest {
                 .body(Map.of(
                         "name", "링",
                         "description", "",
-                        "thumbnailUrl", "https://~"
+                        "thumbnailUrl", "https://~",
+                        "price", 10000
                 ))
                 .when().post("/themes")
                 .then().log().all()
@@ -93,8 +95,8 @@ class ThemeControllerTest {
 
         assertThat(popularThemes.size()).isEqualTo(10);
         assertThat(popularThemes).doesNotContain(
-                new ThemeResponse(11L, "마녀의 숲", "깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마", "https://example.com/images/witch-forest.jpg"),
-                new ThemeResponse(12L, "사라진 열차", "한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마", "https://example.com/images/missing-train.jpg")
+                new ThemeResponse(11L, "마녀의 숲", "깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마", "https://example.com/images/witch-forest.jpg", 10000),
+                new ThemeResponse(12L, "사라진 열차", "한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마", "https://example.com/images/missing-train.jpg", 10000)
         );
     }
 
@@ -113,9 +115,9 @@ class ThemeControllerTest {
     @DisplayName("해당 테마에 예약이 있으면 테마 삭제시 409를 응답한다")
     void respondConflictWhenDeletingThemeInUse() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
         jdbcTemplate.update("INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)", "2026-08-05", "1", "1");
-        jdbcTemplate.update("INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)", "브라운", "brown@example.com", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)", "브라운", "brown@example.com", "1", "CONFIRMED");
 
         RestAssured.given().log().all()
                 .when().delete("/themes/1")

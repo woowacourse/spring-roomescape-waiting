@@ -8,19 +8,19 @@ VALUES (1, '10:00:00'),
        (7, '19:00:00'),
        (8, '20:20:00');
 
-INSERT INTO theme (id, name, description, thumbnail_url)
-VALUES (1, '잃어버린 시간의 방', '멈춰버린 시계탑에서 사라진 시간을 되찾는 미스터리 테마', 'https://example.com/images/time-room.jpg'),
-       (2, '심야 병동', '폐쇄된 병원에서 벌어지는 기묘한 사건을 추적하는 공포 테마', 'https://example.com/images/midnight-hospital.jpg'),
-       (3, '마법사의 서재', '고대 마법서에 숨겨진 주문을 찾아 봉인을 해제하는 판타지 테마', 'https://example.com/images/wizard-library.jpg'),
-       (4, '해적선의 보물', '저주받은 해적선 안에서 전설의 보물을 찾아 탈출하는 어드벤처 테마', 'https://example.com/images/pirate-ship.jpg'),
-       (5, '비밀 연구소', '정체불명의 실험체가 깨어난 연구소에서 탈출하는 SF 테마', 'https://example.com/images/secret-lab.jpg'),
-       (6, '탐정 사무소의 마지막 사건', '명탐정이 남긴 단서를 따라 범인을 찾아내는 추리 테마', 'https://example.com/images/detective-office.jpg'),
-       (7, '고대 유적의 저주', '사라진 탐험대를 찾아 고대 유적 깊숙이 들어가는 모험 테마', 'https://example.com/images/ancient-ruins.jpg'),
-       (8, '지하철 0호선', '존재하지 않는 노선에 갇힌 승객들의 비밀을 파헤치는 스릴러 테마', 'https://example.com/images/subway-zero.jpg'),
-       (9, '달빛 아래의 저택', '오래된 저택에서 반복되는 기묘한 밤의 진실을 밝히는 미스터리 테마', 'https://example.com/images/moonlight-mansion.jpg'),
-       (10, '우주 정거장 알파', '고장 난 우주 정거장에서 산소가 떨어지기 전에 탈출하는 SF 테마', 'https://example.com/images/space-alpha.jpg'),
-       (11, '마녀의 숲', '깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마', 'https://example.com/images/witch-forest.jpg'),
-       (12, '사라진 열차', '한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마', 'https://example.com/images/missing-train.jpg');
+INSERT INTO theme (id, name, description, thumbnail_url, price)
+VALUES (1, '잃어버린 시간의 방', '멈춰버린 시계탑에서 사라진 시간을 되찾는 미스터리 테마', 'https://example.com/images/time-room.jpg', 10000),
+       (2, '심야 병동', '폐쇄된 병원에서 벌어지는 기묘한 사건을 추적하는 공포 테마', 'https://example.com/images/midnight-hospital.jpg', 10000),
+       (3, '마법사의 서재', '고대 마법서에 숨겨진 주문을 찾아 봉인을 해제하는 판타지 테마', 'https://example.com/images/wizard-library.jpg', 10000),
+       (4, '해적선의 보물', '저주받은 해적선 안에서 전설의 보물을 찾아 탈출하는 어드벤처 테마', 'https://example.com/images/pirate-ship.jpg', 10000),
+       (5, '비밀 연구소', '정체불명의 실험체가 깨어난 연구소에서 탈출하는 SF 테마', 'https://example.com/images/secret-lab.jpg', 10000),
+       (6, '탐정 사무소의 마지막 사건', '명탐정이 남긴 단서를 따라 범인을 찾아내는 추리 테마', 'https://example.com/images/detective-office.jpg', 10000),
+       (7, '고대 유적의 저주', '사라진 탐험대를 찾아 고대 유적 깊숙이 들어가는 모험 테마', 'https://example.com/images/ancient-ruins.jpg', 10000),
+       (8, '지하철 0호선', '존재하지 않는 노선에 갇힌 승객들의 비밀을 파헤치는 스릴러 테마', 'https://example.com/images/subway-zero.jpg', 10000),
+       (9, '달빛 아래의 저택', '오래된 저택에서 반복되는 기묘한 밤의 진실을 밝히는 미스터리 테마', 'https://example.com/images/moonlight-mansion.jpg', 10000),
+       (10, '우주 정거장 알파', '고장 난 우주 정거장에서 산소가 떨어지기 전에 탈출하는 SF 테마', 'https://example.com/images/space-alpha.jpg', 10000),
+       (11, '마녀의 숲', '깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마', 'https://example.com/images/witch-forest.jpg', 10000),
+       (12, '사라진 열차', '한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마', 'https://example.com/images/missing-train.jpg', 10000);
 
 DROP TABLE IF EXISTS reservation_seed;
 
@@ -96,8 +96,8 @@ INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id)
 SELECT id, reservation_date, time_id, theme_id
 FROM reservation_seed;
 
-INSERT INTO reservation (id, customer_name, customer_email, slot_id)
-SELECT id, customer_name, CONCAT('customer', id, '@example.com'), id
+INSERT INTO reservation (id, customer_name, customer_email, slot_id, status)
+SELECT id, customer_name, CONCAT('customer', id, '@example.com'), id, 'CONFIRMED'
 FROM reservation_seed;
 
 DROP TABLE reservation_seed;

@@ -48,7 +48,7 @@ class JdbcWaitingRepositoryTest {
     void registerWaitingInSlotWithReservation() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
         Long slotId = insertReservation("브라운", tomorrow, time.getId(), theme.getId());
         Waiting waiting = Waiting.create(
@@ -70,7 +70,7 @@ class JdbcWaitingRepositoryTest {
     void throwExceptionWhenRegisteringWaitingInSlotWithoutReservation() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
         Long slotId = insertReservationSlot(NOW.plusDays(1).toLocalDate(), time.getId(), theme.getId());
         Waiting waiting = Waiting.create(
                 "코로구",
@@ -90,7 +90,7 @@ class JdbcWaitingRepositoryTest {
     void deleteWaitingById() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
         final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
 
         //when
@@ -122,7 +122,7 @@ class JdbcWaitingRepositoryTest {
         void returnWaitingWhenWaitingExists() {
             //given
             ReservationTime time = insertReservationTime("11:00:00");
-            Theme theme = insertTheme("링", "공포 테마", "http:~");
+            Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
             final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
 
             //when
@@ -163,7 +163,7 @@ class JdbcWaitingRepositoryTest {
     void findWaitingWithSmallerIdFirstWhenCreatedAtIsSame() {
         // given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate reservationDate = NOW.plusDays(1).toLocalDate();
         final LocalDateTime sameCreatedAt = NOW.minusMinutes(1);
 
@@ -185,7 +185,7 @@ class JdbcWaitingRepositoryTest {
     void calculateWaitingWithSmallerIdAsEarlierWhenCreatedAtIsSame() {
         // given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate reservationDate = NOW.plusDays(1).toLocalDate();
         final LocalDateTime sameCreatedAt = NOW.minusMinutes(1);
 
@@ -213,15 +213,21 @@ class JdbcWaitingRepositoryTest {
         return ReservationTime.of(1L, Time.valueOf(startAt).toLocalTime());
     }
 
-    private Theme insertTheme(final String name, final String description, final String thumbnailUrl) {
+    private Theme insertTheme(
+            final String name,
+            final String description,
+            final String thumbnailUrl,
+            final int price
+    ) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
                 name,
                 description,
-                thumbnailUrl
+                thumbnailUrl,
+                price
         );
 
-        return Theme.of(1L, name, description, thumbnailUrl);
+        return Theme.of(1L, name, description, thumbnailUrl, price);
     }
 
     private Long insertReservation(
@@ -232,10 +238,11 @@ class JdbcWaitingRepositoryTest {
     ) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation(customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation(customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)",
                 name,
                 emailFromName(name),
-                slotId
+                slotId,
+                "CONFIRMED"
         );
         return slotId;
     }

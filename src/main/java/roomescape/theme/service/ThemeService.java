@@ -18,8 +18,6 @@ import java.util.List;
 public class ThemeService {
 
     private static final int POPULAR_THEME_PERIOD_DAYS = 7;
-    private static final String THEME_NOT_FOUND_MESSAGE = "존재하지 않는 테마입니다.";
-    private static final String THEME_IN_USE_MESSAGE = "해당 테마에 예약이 존재하여 삭제할 수 없습니다.";
 
     private final ThemeRepository themeRepository;
 
@@ -27,7 +25,8 @@ public class ThemeService {
         final Theme themeWithoutId = Theme.create(
                 request.name(),
                 request.description(),
-                request.thumbnailUrl()
+                request.thumbnailUrl(),
+                request.price()
         );
 
         Theme theme = themeRepository.save(themeWithoutId);
@@ -39,7 +38,7 @@ public class ThemeService {
         boolean deleted = deleteTheme(themeId);
 
         if (!deleted) {
-            throw new NotFoundException(THEME_NOT_FOUND_MESSAGE);
+            throw new NotFoundException("존재하지 않는 테마입니다.");
         }
     }
 
@@ -57,7 +56,7 @@ public class ThemeService {
         try {
             return themeRepository.deleteById(themeId);
         } catch (DataIntegrityViolationException exception) {
-            throw new ConflictException(THEME_IN_USE_MESSAGE, exception);
+            throw new ConflictException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.", exception);
         }
     }
 }

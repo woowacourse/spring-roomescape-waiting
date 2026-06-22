@@ -50,7 +50,7 @@ class WaitingControllerTest {
         //given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", futureDate, time.getId(), theme.getId());
         Map<String, String> body = Map.of(
                 "name", "재키",
@@ -78,7 +78,7 @@ class WaitingControllerTest {
         //given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime unSavedTime = ReservationTime.of(999L, LocalTime.of(12, 00));
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
         Map<String, String> body = Map.of(
                 "name", "재키",
                 "email", emailFromName("재키"),
@@ -105,7 +105,7 @@ class WaitingControllerTest {
         //given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme unSavedTheme = Theme.of(999L, "name", "des", "url");
+        Theme unSavedTheme = Theme.of(999L, "name", "des", "url", 10000);
         Map<String, String> body = Map.of(
                 "name", "재키",
                 "email", emailFromName("재키"),
@@ -131,7 +131,7 @@ class WaitingControllerTest {
     void throwExceptionWhenSameCustomerRegistersDuplicateWaitingInSameSlot() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
 
         final String customerName = "재키";
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -163,7 +163,7 @@ class WaitingControllerTest {
     void deleteWaitingByIdAndOwnName() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
 
         final String customerName = "재키";
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -185,7 +185,7 @@ class WaitingControllerTest {
     void respondNotFoundWhenDeletingWaitingNotOwnedByName() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
 
         final String customerName = "코로구";
         final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -228,7 +228,7 @@ class WaitingControllerTest {
     void respondUnprocessableEntityWhenDeletingPastWaiting() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        Theme theme = insertTheme("링", "공포 테마", "http:~", 10000);
 
         final String customerName = "재키";
         final LocalDate yesterday = LocalDate.now().minusDays(1);
@@ -254,15 +254,21 @@ class WaitingControllerTest {
         return ReservationTime.of(1L, Time.valueOf(startAt).toLocalTime());
     }
 
-    private Theme insertTheme(final String name, final String description, final String thumbnailUrl) {
+    private Theme insertTheme(
+            final String name,
+            final String description,
+            final String thumbnailUrl,
+            final int price
+    ) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
                 name,
                 description,
-                thumbnailUrl
+                thumbnailUrl,
+                price
         );
 
-        return Theme.of(1L, name, description, thumbnailUrl);
+        return Theme.of(1L, name, description, thumbnailUrl, price);
     }
 
     private Long insertReservation(
@@ -273,10 +279,11 @@ class WaitingControllerTest {
     ) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation(customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation(customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)",
                 name,
                 emailFromName(name),
-                slotId
+                slotId,
+                "CONFIRMED"
         );
         return slotId;
     }

@@ -31,7 +31,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("테마를 저장하고 조회한다")
     void saveAndFindTheme() {
-        Theme theme = Theme.create("링", "공포 테마", "http:~");
+        Theme theme = Theme.create("링", "공포 테마", "http:~", 10000);
 
         Theme savedTheme = themeRepository.save(theme);
 
@@ -53,7 +53,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("테마를 삭제한다")
     void deleteTheme() {
-        Theme savedTheme = themeRepository.save(Theme.create("링", "공포 테마", "http:~"));
+        Theme savedTheme = themeRepository.save(Theme.create("링", "공포 테마", "http:~", 10000));
 
         boolean deleted = themeRepository.deleteById(savedTheme.getId());
 
@@ -72,7 +72,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("해당 테마에 예약이 있으면 테마를 삭제할 수 없다")
     void cannotDeleteThemeInUse() {
-        Theme savedTheme = themeRepository.save(Theme.create("링", "공포 테마", "http:~"));
+        Theme savedTheme = themeRepository.save(Theme.create("링", "공포 테마", "http:~", 10000));
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update(
                 "INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)",
@@ -81,10 +81,11 @@ class JdbcThemeRepositoryTest {
                 savedTheme.getId()
         );
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)",
                 "브라운",
                 "brown@example.com",
-                1L
+                1L,
+                "CONFIRMED"
         );
 
         assertThatThrownBy(() -> themeRepository.deleteById(savedTheme.getId()))

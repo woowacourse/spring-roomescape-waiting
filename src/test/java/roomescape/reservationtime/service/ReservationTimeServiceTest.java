@@ -73,7 +73,7 @@ class ReservationTimeServiceTest {
     void throwExceptionWhenDeletingReservationTimeInUse() {
         // given
         final ReservationTime time = saveReservationTime("10:00:00");
-        final Theme theme = saveTheme("링", "공포 테마", "http:~");
+        final Theme theme = saveTheme("링", "공포 테마", "http:~", 10000);
         saveReservation("브라운", "customer@example.com", LocalDate.now().plusDays(1), time, theme);
 
         // when & then
@@ -89,9 +89,10 @@ class ReservationTimeServiceTest {
     private Theme saveTheme(
             final String name,
             final String description,
-            final String thumbnailUrl
+            final String thumbnailUrl,
+            final int price
     ) {
-        return themeRepository.save(Theme.create(name, description, thumbnailUrl));
+        return themeRepository.save(Theme.create(name, description, thumbnailUrl, price));
     }
 
     private void saveReservation(

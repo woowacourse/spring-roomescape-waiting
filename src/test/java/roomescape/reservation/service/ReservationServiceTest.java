@@ -7,12 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.payment.controller.dto.response.PaymentReadyResponse;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.repository.ReservationSlotRepository;
@@ -53,23 +55,27 @@ class ReservationServiceTest {
     WaitingRepository waitingRepository;
 
     @Test
-    @DisplayName("예약을 생성한다")
-    void createReservation() {
+    @DisplayName("예약 요청 시 결제 대기 예약이 생성된다")
+    void createPendingReservationOnPaymentPrepare() {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final long timeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
 
         // when
-        ReservationResponse response = reservationService.create(
+        final PaymentReadyResponse response = reservationService.preparePayment(
                 new ReservationCreateRequest("브라운", "customer@example.com", tomorrow, timeId, themeId)
         );
 
         // then
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo("브라운");
-        assertThat(response.date()).isEqualTo(tomorrow);
+        assertThat(response.customerName()).isEqualTo("브라운");
+        assertThat(response.amount()).isEqualTo(10000);
         assertThat(reservationRepository.findAll()).hasSize(1);
+        assertThat(reservationRepository.findById(response.reservationId()))
+                .get()
+                .satisfies(reservation ->
+                        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING)
+                );
     }
 
     @Test
@@ -78,7 +84,7 @@ class ReservationServiceTest {
         // given
         final long pastTimeId = insertReservationTime("09:00:00");
         final long futureTimeId = insertReservationTime("23:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate yesterday = LocalDate.now().minusDays(1);
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
 
@@ -110,10 +116,10 @@ class ReservationServiceTest {
         // given
         final LocalDate yesterday = LocalDate.now().minusDays(1);
         final long timeId = insertReservationTime("10:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest("브라운", "customer@example.com", yesterday, timeId, themeId)
         ))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -124,10 +130,10 @@ class ReservationServiceTest {
     void throwExceptionWhenCreatingReservationWithNonExistingReservationTime() {
         // given
         final long unsavedTimeId = 999L;
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest(
                         "브라운",
                         "customer@example.com",
@@ -147,7 +153,7 @@ class ReservationServiceTest {
         final long unsavedThemeId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest(
                         "브라운",
                         "customer@example.com",
@@ -165,8 +171,8 @@ class ReservationServiceTest {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final long timeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
-        reservationService.create(new ReservationCreateRequest(
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
+        reservationService.preparePayment(new ReservationCreateRequest(
                 "브라운",
                 "brown@example.com",
                 tomorrow,
@@ -175,7 +181,7 @@ class ReservationServiceTest {
         ));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(
+        assertThatThrownBy(() -> reservationService.preparePayment(
                 new ReservationCreateRequest("재키", "jaekkii@example.com", tomorrow, timeId, themeId)
         ))
                 .isInstanceOf(ConflictException.class)
@@ -190,7 +196,7 @@ class ReservationServiceTest {
         final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
         final long originTimeId = insertReservationTime("10:00:00");
         final long changedTimeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, originTimeId, themeId);
 
         // when
@@ -233,7 +239,7 @@ class ReservationServiceTest {
         // given
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final long timeId = insertReservationTime("10:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, timeId, themeId);
 
         // when & then
@@ -252,7 +258,7 @@ class ReservationServiceTest {
         final LocalDate yesterday = LocalDate.now().minusDays(1);
         final long originTimeId = insertReservationTime("11:00:00");
         final long changedTimeId = insertReservationTime("10:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, originTimeId, themeId);
 
         // when & then
@@ -271,7 +277,7 @@ class ReservationServiceTest {
         final LocalDate tomorrow = today.plusDays(1);
         final long originTimeId = insertReservationTime("11:00:00");
         final long changedTimeId = insertReservationTime("12:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "customer@example.com", today, originTimeId, themeId);
 
         // when
@@ -293,7 +299,7 @@ class ReservationServiceTest {
         final LocalDate changedFutureDate = LocalDate.now().plusDays(2);
         final long originTimeId = insertReservationTime("10:00:00");
         final long changedTimeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "brown@example.com", futureDate, originTimeId, themeId);
         insertReservation("재키", "jaekkii@example.com", changedFutureDate, changedTimeId, themeId);
 
@@ -311,7 +317,7 @@ class ReservationServiceTest {
     void findReservableDatesAndThemes() {
         // given
         final LocalDate today = LocalDate.now();
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
 
         // when
         ReservationOptionResponse response = reservationService.getReservationOptions();
@@ -339,7 +345,7 @@ class ReservationServiceTest {
         // given
         final LocalDate tomorrow = LocalDate.now().plusDays(1);
         final long timeId = insertReservationTime("10:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "customer@example.com", tomorrow, timeId, themeId);
 
         // when & then
@@ -354,7 +360,7 @@ class ReservationServiceTest {
         // given
         final LocalDate today = LocalDate.now();
         final long timeId = insertReservationTime("10:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "customer@example.com", today, timeId, themeId);
 
         // when & then
@@ -369,7 +375,7 @@ class ReservationServiceTest {
         // given
         final LocalDate today = LocalDate.now();
         final long timeId = insertReservationTime("10:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final long reservationId = insertReservation("브라운", "customer@example.com", today, timeId, themeId);
 
         // when
@@ -392,7 +398,7 @@ class ReservationServiceTest {
     void calculateWaitingRankByCreatedAtInSameSlot() {
         // given
         final long timeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final long slotId = insertReservationSlot(futureDate, timeId, themeId);
         insertReservation("예약자", "owner@example.com", slotId);
@@ -417,7 +423,7 @@ class ReservationServiceTest {
     void calculateWaitingRankByIdWhenCreatedAtIsSame() {
         // given
         final long timeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final long slotId = insertReservationSlot(futureDate, timeId, themeId);
         insertReservation("예약자", "owner@example.com", slotId);
@@ -443,7 +449,7 @@ class ReservationServiceTest {
     void promoteEarliestWaitingInSlotOnReservationCancel() {
         // given
         final long timeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final long slotId = insertReservationSlot(futureDate, timeId, themeId);
         final long reservationId = insertReservation("브라운", "brown@example.com", slotId);
@@ -475,7 +481,7 @@ class ReservationServiceTest {
     void promoteWaitingWithSmallerIdWhenCreatedAtIsSameOnReservationCancel() {
         // given
         final long timeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final long slotId = insertReservationSlot(futureDate, timeId, themeId);
         final long reservationId = insertReservation("브라운", "brown@example.com", slotId);
@@ -498,7 +504,7 @@ class ReservationServiceTest {
     void deleteOnlyReservationWhenNoWaitingOnReservationCancel() {
         // given
         final long timeId = insertReservationTime("11:00:00");
-        final long themeId = insertTheme("링", "공포 테마", "http:~");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
         final LocalDate futureDate = LocalDate.now().plusDays(1);
         final long reservationId = insertReservation("브라운", "customer@example.com", futureDate, timeId, themeId);
 
@@ -517,9 +523,10 @@ class ReservationServiceTest {
     private long insertTheme(
             final String name,
             final String description,
-            final String thumbnailUrl
+            final String thumbnailUrl,
+            final int price
     ) {
-        return themeRepository.save(Theme.create(name, description, thumbnailUrl))
+        return themeRepository.save(Theme.create(name, description, thumbnailUrl, price))
                 .getId();
     }
 

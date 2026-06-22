@@ -20,7 +20,7 @@ class WaitingTest {
                 "customer@example.com",
 NOW.toLocalDate(),
                 ReservationTime.of(1L, NOW.minusHours(1L).toLocalTime()),
-                Theme.of(1L, "샘플 테마", "테스트용 샘플", "http:~"),
+                Theme.of(1L, "샘플 테마", "테스트용 샘플", "http:~", 10000),
                 NOW
         ));
     }

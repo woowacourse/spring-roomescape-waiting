@@ -4,6 +4,7 @@ public record ThemeEntity(
         Long id,
         String name,
         String description,
-        String thumbnailUrl
+        String thumbnailUrl,
+        int price
 ) {
 }

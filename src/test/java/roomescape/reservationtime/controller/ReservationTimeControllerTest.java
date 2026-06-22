@@ -84,9 +84,9 @@ class ReservationTimeControllerTest {
     @DisplayName("해당 시간에 예약이 있으면 예약 시간 삭제시 409를 응답한다")
     void respondConflictWhenDeletingReservationTimeInUse() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
         jdbcTemplate.update("INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)", "2026-08-05", "1", "1");
-        jdbcTemplate.update("INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)", "브라운", "brown@example.com", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)", "브라운", "brown@example.com", "1", "CONFIRMED");
 
         RestAssured.given().log().all()
                 .when().delete("/times/1")

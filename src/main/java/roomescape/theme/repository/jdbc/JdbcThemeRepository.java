@@ -21,14 +21,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcThemeRepository implements ThemeRepository {
 
-    private static final String GENERATED_ID_NOT_FOUND_MESSAGE = "생성된 id를 가져오지 못했습니다.";
-
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Theme> findAll() {
         final String sql = """
-                SELECT id, name, description, thumbnail_url
+                SELECT id, name, description, thumbnail_url, price
                 FROM theme
                 """;
 
@@ -38,7 +36,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(final Long themeId) {
         final String sql = """
-                SELECT id, name, description, thumbnail_url
+                SELECT id, name, description, thumbnail_url, price
                 FROM theme
                 WHERE id = ?
                 """;
@@ -66,7 +64,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 themeId,
                 themeWithoutId.getName(),
                 themeWithoutId.getDescription(),
-                themeWithoutId.getThumbnailUrl()
+                themeWithoutId.getThumbnailUrl(),
+                themeWithoutId.getPrice()
         );
     }
 
@@ -87,18 +86,20 @@ public class JdbcThemeRepository implements ThemeRepository {
                     t.id,
                     t.name,
                     t.description,
-                    t.thumbnail_url
+                    t.thumbnail_url,
+                    t.price
                 FROM theme t
                 LEFT JOIN reservation_slot s
                     ON s.theme_id = t.id
                     AND s.reservation_date >= ?
                     AND s.reservation_date < ?
-                LEFT JOIN reservation r ON r.slot_id = s.id
+                LEFT JOIN reservation r ON r.slot_id = s.id AND r.status = 'CONFIRMED'
                 GROUP BY
                     t.id,
                     t.name,
                     t.description,
-                    t.thumbnail_url
+                    t.thumbnail_url,
+                    t.price
                 ORDER BY
                     COUNT(r.id) DESC,
                     t.name ASC
@@ -117,8 +118,8 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     private long insertTheme(final ThemeEntity themeEntity) {
         final String sql = """
-                INSERT INTO theme (name, description, thumbnail_url)
-                VALUES (?, ?, ?)
+                INSERT INTO theme (name, description, thumbnail_url, price)
+                VALUES (?, ?, ?, ?)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -132,6 +133,7 @@ public class JdbcThemeRepository implements ThemeRepository {
             preparedStatement.setString(1, themeEntity.name());
             preparedStatement.setString(2, themeEntity.description());
             preparedStatement.setString(3, themeEntity.thumbnailUrl());
+            preparedStatement.setInt(4, themeEntity.price());
 
             return preparedStatement;
         }, keyHolder);
@@ -141,7 +143,7 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     private static long generatedIdFrom(final KeyHolder keyHolder) {
         if (keyHolder.getKey() == null) {
-            throw new IllegalStateException(GENERATED_ID_NOT_FOUND_MESSAGE);
+            throw new IllegalStateException("생성된 id를 가져오지 못했습니다.");
         }
 
         return keyHolder.getKey().longValue();
@@ -152,7 +154,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 resultSet.getString("description"),
-                resultSet.getString("thumbnail_url")
+                resultSet.getString("thumbnail_url"),
+                resultSet.getInt("price")
         );
     }
 
@@ -161,7 +164,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnailUrl()
+                theme.getThumbnailUrl(),
+                theme.getPrice()
         );
     }
 }

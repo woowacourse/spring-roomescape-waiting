@@ -4,6 +4,7 @@ public record ReservationEntity(
         Long id,
         String name,
         String email,
-        Long slotId
+        Long slotId,
+        String status
 ) {
 }

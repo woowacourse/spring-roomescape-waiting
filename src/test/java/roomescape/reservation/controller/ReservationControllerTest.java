@@ -78,7 +78,7 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "14:00");
 
         // 테마 추가
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
 
         // 예약 전
         List<ReservationTimesWithStatus> timeStatusesBeforeReservation = getReservationTimeStatusResponses();
@@ -123,7 +123,7 @@ class ReservationControllerTest {
         final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
         insertReservation("초코칩", futureDate, 1L, 1L);
         insertReservation("재키", futureDate, 2L, 1L);
         insertWaiting("초코칩", futureDate, 2L, 1L);
@@ -149,7 +149,7 @@ class ReservationControllerTest {
     void createAndCancelReservation() {
         final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -184,7 +184,7 @@ class ReservationControllerTest {
     void customerCannotCancelReservationOnReservationDateBeforeStartTime() {
         final String today = LocalDate.now().toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", today, 1L, 1L);
 
         RestAssured.given().log().all()
@@ -201,7 +201,7 @@ class ReservationControllerTest {
     @DisplayName("존재하지 않는 예약 시간으로 예약하면 404를 응답한다")
     void respondNotFoundWhenCreatingReservationWithNonExistingReservationTime() {
         final String futureDate = LocalDate.now().plusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -222,7 +222,7 @@ class ReservationControllerTest {
     @DisplayName("예약 시간을 선택하지 않으면 400을 응답한다")
     void respondBadRequestWhenReservationTimeIsMissing() {
         final String futureDate = LocalDate.now().plusDays(1).toString();
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -278,7 +278,7 @@ class ReservationControllerTest {
     void respondBadRequestWhenCustomerNameIsBlank() {
         final String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)", "링", "공포 테마", "http:~", 10000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -315,10 +315,11 @@ class ReservationControllerTest {
     private void insertReservation(final String name, final String date, final long timeId, final long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)",
                 name,
                 emailFromName(name),
-                slotId
+                slotId,
+                "CONFIRMED"
         );
     }
 

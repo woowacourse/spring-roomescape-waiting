@@ -7,8 +7,6 @@ import java.time.LocalTime;
 @Getter
 public class ReservationTime {
 
-    private static final String START_AT_REQUIRED_MESSAGE = "예약 시작 시간을 입력해야 합니다.";
-
     private final Long id;
     private final LocalTime startAt;
 
@@ -33,7 +31,7 @@ public class ReservationTime {
 
     private void validateStartAt(final LocalTime startAt) {
         if (startAt == null) {
-            throw new IllegalArgumentException(START_AT_REQUIRED_MESSAGE);
+            throw new IllegalArgumentException("예약 시작 시간을 입력해야 합니다.");
         }
     }
 }

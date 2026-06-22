@@ -12,20 +12,18 @@ import java.time.LocalDateTime;
 @Getter
 public class Reservation {
 
-    private static final String RESERVATION_CANCELLATION_MESSAGE = "당일 예약은 취소할 수 없습니다.";
-    private static final String SLOT_REQUIRED_MESSAGE = "예약 슬롯을 입력해야 합니다.";
-    private static final String PAST_RESERVATION_MESSAGE = "과거 시간으로는 예약할 수 없습니다.";
-
     private final Long id;
     private final CustomerName customerName;
     private final CustomerEmail customerEmail;
     private final ReservationSlot slot;
+    private final ReservationStatus status;
 
     private Reservation(
             final Long id,
             final CustomerName customerName,
             final CustomerEmail customerEmail,
-            final ReservationSlot slot
+            final ReservationSlot slot,
+            final ReservationStatus status
     ) {
         validateRequiredValues(slot);
 
@@ -33,6 +31,7 @@ public class Reservation {
         this.customerName = customerName;
         this.customerEmail = customerEmail;
         this.slot = slot;
+        this.status = status;
     }
 
     public static Reservation create(
@@ -52,11 +51,31 @@ public class Reservation {
             final ReservationSlot slot,
             final LocalDateTime now
     ) {
+        return createWithStatus(name, email, slot, now, ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation createPending(
+            final String name,
+            final String email,
+            final ReservationSlot slot,
+            final LocalDateTime now
+    ) {
+        return createWithStatus(name, email, slot, now, ReservationStatus.PENDING);
+    }
+
+    private static Reservation createWithStatus(
+            final String name,
+            final String email,
+            final ReservationSlot slot,
+            final LocalDateTime now,
+            final ReservationStatus status
+    ) {
         final Reservation reservation = new Reservation(
                 null,
                 new CustomerName(name),
                 new CustomerEmail(email),
-                slot
+                slot,
+                status
         );
 
         reservation.validateNotPast(now);
@@ -79,11 +98,22 @@ public class Reservation {
             final String email,
             final ReservationSlot slot
     ) {
+        return of(id, name, email, slot, ReservationStatus.CONFIRMED);
+    }
+
+    public static Reservation of(
+            final Long id,
+            final String name,
+            final String email,
+            final ReservationSlot slot,
+            final ReservationStatus status
+    ) {
         return new Reservation(
                 id,
                 new CustomerName(name),
                 new CustomerEmail(email),
-                slot
+                slot,
+                status
         );
     }
 
@@ -103,11 +133,22 @@ public class Reservation {
                 id,
                 customerName,
                 customerEmail,
-                slot
+                slot,
+                status
         );
 
         changed.validateNotPast(now);
         return changed;
+    }
+
+    public Reservation confirm() {
+        return new Reservation(
+                id,
+                customerName,
+                customerEmail,
+                slot,
+                ReservationStatus.CONFIRMED
+        );
     }
 
     public String getCustomerName() {
@@ -121,6 +162,14 @@ public class Reservation {
     public boolean isOwnedBy(final String customerName, final String customerEmail) {
         return this.customerName.equals(new CustomerName(customerName))
                 && this.customerEmail.equals(new CustomerEmail(customerEmail));
+    }
+
+    public boolean isConfirmed() {
+        return status == ReservationStatus.CONFIRMED;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public Long getSlotId() {
@@ -141,7 +190,7 @@ public class Reservation {
 
     public void validateCancelableByCustomer(final LocalDate today) {
         if (!isBeforeReservationDate(today)) {
-            throw new ConflictException(RESERVATION_CANCELLATION_MESSAGE);
+            throw new ConflictException("당일 예약은 취소할 수 없습니다.");
         }
     }
 
@@ -151,13 +200,13 @@ public class Reservation {
 
     private void validateRequiredValues(final ReservationSlot slot) {
         if (slot == null) {
-            throw new IllegalArgumentException(SLOT_REQUIRED_MESSAGE);
+            throw new IllegalArgumentException("예약 슬롯을 입력해야 합니다.");
         }
     }
 
     private void validateNotPast(final LocalDateTime now) {
         if (isPast(now)) {
-            throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
+            throw new IllegalArgumentException("과거 시간으로는 예약할 수 없습니다.");
         }
     }
 

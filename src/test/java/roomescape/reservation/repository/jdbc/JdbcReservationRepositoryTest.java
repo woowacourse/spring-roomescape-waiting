@@ -41,7 +41,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("예약을 저장하고 조회한다")
     void saveAndFindReservation() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
         Reservation reservation = Reservation.create(
                 "브라운",
@@ -50,7 +50,7 @@ class JdbcReservationRepositoryTest {
                         slotId,
                         LocalDate.of(2026, 8, 5),
                         ReservationTime.of(1L, LocalTime.of(10, 0)),
-                        Theme.of(1L, "링", "공포 테마", "http:~")
+                        Theme.of(1L, "링", "공포 테마", "http:~", 10000)
                 ),
                 LocalDateTime.of(2026, 8, 5, 9, 0)
         );
@@ -69,7 +69,7 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 예약 슬롯으로 예약을 저장하면 예외가 발생한다")
     void throwExceptionWhenSavingReservationWithNonExistingReservationSlot() {
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         Reservation reservation = Reservation.create(
                 "브라운",
                 "customer@example.com",
@@ -77,7 +77,7 @@ class JdbcReservationRepositoryTest {
                         999L,
                         LocalDate.of(2026, 8, 5),
                         ReservationTime.of(999L, LocalTime.of(10, 0)),
-                        Theme.of(1L, "링", "공포 테마", "http:~")
+                        Theme.of(1L, "링", "공포 테마", "http:~", 10000)
                 ),
                 LocalDateTime.of(2026, 8, 5, 9, 0)
         );
@@ -90,7 +90,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("예약을 id로 조회한다")
     void findReservationById() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", "2026-08-05", 1L, 1L);
 
         Optional<Reservation> reservation = reservationRepository.findById(1L);
@@ -104,7 +104,7 @@ class JdbcReservationRepositoryTest {
     void updateReservation() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", "2026-08-05", 1L, 1L);
         Long changedSlotId = insertReservationSlot("2026-08-06", 2L, 1L);
 
@@ -116,7 +116,7 @@ class JdbcReservationRepositoryTest {
                         changedSlotId,
                         LocalDate.of(2026, 8, 6),
                         ReservationTime.of(2L, LocalTime.of(11, 0)),
-                        Theme.of(1L, "링", "공포 테마", "http:~")
+                        Theme.of(1L, "링", "공포 테마", "http:~", 10000)
                 )
         ));
 
@@ -131,7 +131,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("존재하지 않는 예약을 수정하면 false를 반환한다")
     void returnFalseWhenUpdatingNonExistingReservation() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
 
         boolean updated = reservationRepository.update(Reservation.of(
                 1L,
@@ -141,7 +141,7 @@ class JdbcReservationRepositoryTest {
                         999L,
                         LocalDate.of(2026, 8, 5),
                         ReservationTime.of(1L, LocalTime.of(10, 0)),
-                        Theme.of(1L, "링", "공포 테마", "http:~")
+                        Theme.of(1L, "링", "공포 테마", "http:~", 10000)
                 )
         ));
 
@@ -153,7 +153,7 @@ class JdbcReservationRepositoryTest {
     void throwExceptionWhenUpdatingToExistingReservation() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", "2026-08-05", 1L, 1L);
         insertReservation("제임스", "2026-08-05", 2L, 1L);
         Long duplicatedSlotId = insertReservationSlot("2026-08-05", 2L, 1L);
@@ -166,7 +166,7 @@ class JdbcReservationRepositoryTest {
                         duplicatedSlotId,
                         LocalDate.of(2026, 8, 5),
                         ReservationTime.of(2L, LocalTime.of(11, 0)),
-                        Theme.of(1L, "링", "공포 테마", "http:~")
+                        Theme.of(1L, "링", "공포 테마", "http:~", 10000)
                 )
         ))).isInstanceOf(DuplicateKeyException.class);
     }
@@ -175,7 +175,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("존재하지 않는 예약 슬롯으로 수정하면 예외가 발생한다")
     void throwExceptionWhenUpdatingToNonExistingReservationSlot() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", "2026-08-05", 1L, 1L);
 
         assertThatThrownBy(() -> reservationRepository.update(Reservation.of(
@@ -186,7 +186,7 @@ class JdbcReservationRepositoryTest {
                         999L,
                         LocalDate.of(2026, 8, 5),
                         ReservationTime.of(999L, LocalTime.of(11, 0)),
-                        Theme.of(1L, "링", "공포 테마", "http:~")
+                        Theme.of(1L, "링", "공포 테마", "http:~", 10000)
                 )
         ))).isInstanceOf(DataIntegrityViolationException.class);
     }
@@ -195,7 +195,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("예약을 id와 슬롯 id로 삭제한다")
     void deleteReservationByIdAndSlotId() {
         insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         Long slotId = insertReservation("브라운", "2026-08-05", 1L, 1L);
 
         boolean deleted = reservationRepository.deleteByIdAndSlotId(1L, slotId);
@@ -210,7 +210,7 @@ class JdbcReservationRepositoryTest {
     void returnFalseWhenDeletingReservationWithDifferentSlotId() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", "2026-08-05", 1L, 1L);
         Long otherSlotId = insertReservationSlot("2026-08-05", 2L, 1L);
 
@@ -226,7 +226,7 @@ class JdbcReservationRepositoryTest {
     void findReservationsByCustomerName() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("초코칩", "2026-08-05", 1L, 1L);
         insertReservation("재키", "2026-08-05", 2L, 1L);
 
@@ -245,7 +245,7 @@ class JdbcReservationRepositoryTest {
     void findReservationTimeStatusesByDateAndTheme() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
-        insertTheme("링", "공포 테마", "http:~");
+        insertTheme("링", "공포 테마", "http:~", 10000);
         insertReservation("브라운", "2026-08-05", 1L, 1L);
 
         List<ReservationTimesWithStatus> timeStatuses = reservationRepository.findReservationTimeStatusesByDateAndThemeId(
@@ -268,22 +268,29 @@ class JdbcReservationRepositoryTest {
         );
     }
 
-    private void insertTheme(final String name, final String description, final String thumbnailUrl) {
+    private void insertTheme(
+            final String name,
+            final String description,
+            final String thumbnailUrl,
+            final int price
+    ) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
                 name,
                 description,
-                thumbnailUrl
+                thumbnailUrl,
+                price
         );
     }
 
     private Long insertReservation(final String name, final String date, final Long timeId, final Long themeId) {
         Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, customer_email, slot_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation (customer_name, customer_email, slot_id, status) VALUES (?, ?, ?, ?)",
                 name,
                 "customer@example.com",
-                slotId
+                slotId,
+                "CONFIRMED"
         );
         return slotId;
     }
