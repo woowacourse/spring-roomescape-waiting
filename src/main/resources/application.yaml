@@ -20,3 +20,13 @@ payment:
     secret-key: ${TOSS_PAYMENTS_SECRET_KEY:test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6}
     connect-timeout: ${TOSS_PAYMENTS_CONNECT_TIMEOUT:1s}
     read-timeout: ${TOSS_PAYMENTS_READ_TIMEOUT:2s}
+    max-attempts: ${TOSS_PAYMENTS_MAX_ATTEMPTS:3}
+    retry-after-fallback-delay: ${TOSS_PAYMENTS_RETRY_AFTER_FALLBACK_DELAY:1s}
+
+rate-limit:
+  capacity: ${ROOMESCAPE_RATE_LIMIT_CAPACITY:100}
+  refill-per-sec: ${ROOMESCAPE_RATE_LIMIT_REFILL_PER_SEC:100}
+
+outbound-rate-limit:
+  capacity: ${TOSS_OUTBOUND_RATE_LIMIT_CAPACITY:100}
+  refill-per-sec: ${TOSS_OUTBOUND_RATE_LIMIT_REFILL_PER_SEC:100}

@@ -15,3 +15,13 @@ payment:
     base-url: http://localhost
     client-key: test_ck_local
     secret-key: test_sk_local
+    max-attempts: 3
+    retry-after-fallback-delay: 1s
+
+rate-limit:
+  capacity: 100
+  refill-per-sec: 100
+
+outbound-rate-limit:
+  capacity: 100
+  refill-per-sec: 100

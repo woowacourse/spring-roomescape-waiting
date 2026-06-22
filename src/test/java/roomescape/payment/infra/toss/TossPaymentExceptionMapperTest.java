@@ -67,6 +67,19 @@ class TossPaymentExceptionMapperTest {
     }
 
     @Test
+    @DisplayName("429는 토스 Rate Limit 초과로 보고 재시도 가능 예외로 매핑한다.")
+    void map_tooManyRequests() {
+        RuntimeException exception = TossPaymentExceptionMapper.map(
+                HttpStatus.TOO_MANY_REQUESTS,
+                null
+        );
+
+        assertThat(exception)
+                .isInstanceOf(PaymentRetryableException.class)
+                .hasMessage("결제 승인 요청이 결제사 Rate Limit을 초과했습니다. 잠시 후 다시 시도해주세요.");
+    }
+
+    @Test
     @DisplayName("잘못된 요청과 결제 없음 코드를 각각 매핑한다.")
     void map_invalidAndNotFoundCodes() {
         RuntimeException invalidRequest = TossPaymentExceptionMapper.map(

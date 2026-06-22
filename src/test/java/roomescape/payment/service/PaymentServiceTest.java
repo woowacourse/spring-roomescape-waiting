@@ -20,7 +20,7 @@ import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
 import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
 import roomescape.payment.domain.exception.PaymentGatewayException;
-import roomescape.payment.repository.PaymentOrderRepository;
+import roomescape.payment.domain.PaymentOrderRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.service.ReservationService;

@@ -2,12 +2,15 @@ package roomescape.payment.infra.toss;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import roomescape.global.ratelimit.TokenBucketRateLimiter;
+import roomescape.payment.config.OutboundRateLimitProperties;
 import roomescape.payment.config.PaymentProperties;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
@@ -31,11 +34,17 @@ public class TossPaymentGateway implements PaymentGateway {
     public TossPaymentGateway(
             RestClient.Builder restClientBuilder,
             ObjectMapper objectMapper,
-            PaymentProperties paymentProperties
+            PaymentProperties paymentProperties,
+            OutboundRateLimitProperties outboundRateLimitProperties
     ) {
         this.restClient = restClientBuilder
                 .baseUrl(paymentProperties.toss().baseUrl())
                 .requestFactory(tossRequestFactory(paymentProperties.toss()))
+                .requestInterceptor(new OutboundRateLimitInterceptor(outboundRateLimiter(outboundRateLimitProperties)))
+                .requestInterceptor(new RetryAfterInterceptor(
+                        paymentProperties.toss().maxAttempts(),
+                        paymentProperties.toss().retryAfterFallbackDelay()
+                ))
                 .build();
         this.objectMapper = objectMapper;
         this.paymentProperties = paymentProperties;
@@ -57,6 +66,10 @@ public class TossPaymentGateway implements PaymentGateway {
                     ))
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, clientResponse) -> {
+                        if (clientResponse.getStatusCode().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
+                            throw TossPaymentExceptionMapper.map(clientResponse.getStatusCode(), null);
+                        }
+
                         TossErrorResponse errorResponse = readErrorResponse(clientResponse.getBody());
                         throw TossPaymentExceptionMapper.map(clientResponse.getStatusCode(), errorResponse);
                     })
@@ -70,6 +83,10 @@ public class TossPaymentGateway implements PaymentGateway {
         }
 
         return new PaymentResult(response.paymentKey(), response.orderId(), response.totalAmount());
+    }
+
+    private TokenBucketRateLimiter outboundRateLimiter(OutboundRateLimitProperties properties) {
+        return new TokenBucketRateLimiter(properties.capacity(), properties.refillPerSec(), System::nanoTime);
     }
 
     private SimpleClientHttpRequestFactory tossRequestFactory(PaymentProperties.Toss tossProperties) {

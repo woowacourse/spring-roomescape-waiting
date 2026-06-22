@@ -1,4 +1,4 @@
-package roomescape.payment.controller.dto;
+package roomescape.payment.web.dto;
 
 import roomescape.payment.domain.PaymentOrderDetails;
 

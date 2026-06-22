@@ -1,4 +1,4 @@
-package roomescape.payment.controller;
+package roomescape.payment.web;
 
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.payment.config.PaymentProperties;
-import roomescape.payment.controller.dto.PaymentCheckoutRequest;
+import roomescape.payment.web.dto.PaymentCheckoutRequest;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
 import roomescape.payment.domain.exception.PaymentConfirmationPendingException;
 import roomescape.payment.service.PaymentReadyOrder;

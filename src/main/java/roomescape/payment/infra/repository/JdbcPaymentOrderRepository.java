@@ -1,4 +1,4 @@
-package roomescape.payment.repository;
+package roomescape.payment.infra.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.exception.InfrastructureException;
 import roomescape.payment.domain.PaymentOrder;
 import roomescape.payment.domain.PaymentOrderDetails;
+import roomescape.payment.domain.PaymentOrderRepository;
 import roomescape.payment.domain.PaymentOrderStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
