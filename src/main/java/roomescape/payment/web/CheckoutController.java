@@ -12,6 +12,7 @@ import roomescape.payment.PaymentGatewayConnectionException;
 import roomescape.payment.PaymentGatewayNoResponseException;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentService;
+import roomescape.payment.client.OutboundRateLimitException;
 import roomescape.payment.client.TossPaymentException;
 
 /**
@@ -46,6 +47,8 @@ public class CheckoutController {
             return failView(model, "PAYMENT_CONFIRM_UNKNOWN", e.getMessage(), orderId);
         } catch (PaymentGatewayConnectionException e) {
             return failView(model, "PAYMENT_GATEWAY_UNAVAILABLE", e.getMessage(), orderId);
+        } catch (OutboundRateLimitException e) {
+            return failView(model, "OUTBOUND_RATE_LIMITED", e.getMessage(), orderId);
         } catch (TossPaymentException e) {
             return failView(model, e.getCode(), e.getMessage(), orderId);
         }
