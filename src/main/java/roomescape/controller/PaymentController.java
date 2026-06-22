@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.dto.response.PaymentConfirmResponse;
 import roomescape.service.PaymentService;
 
 @RestController
@@ -27,7 +28,11 @@ public class PaymentController {
             @RequestParam String orderId,
             @RequestParam long amount
     ) {
-        paymentService.confirm(paymentKey, orderId, amount);
+        PaymentConfirmResponse response = paymentService.confirm(paymentKey, orderId, amount);
+        if (!response.isConfirmed()) {
+            log.info("결제 결과 불명확 — 202 반환: orderId={}", orderId);
+            return ResponseEntity.accepted().build();
+        }
         return ResponseEntity.ok().build();
     }
 
@@ -39,10 +44,10 @@ public class PaymentController {
     ) {
         if (orderId == null) {
             log.info("결제 취소(orderId 없음): code={}, message={}", code, message);
-        } else {
-            log.info("결제 실패: orderId={}, code={}, message={}", orderId, code, message);
-            paymentService.cancel(orderId);
+            return ResponseEntity.ok().build();
         }
+        log.info("결제 실패: orderId={}, code={}, message={}", orderId, code, message);
+        paymentService.cancel(orderId);
         return ResponseEntity.ok().build();
     }
 }

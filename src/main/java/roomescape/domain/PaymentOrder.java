@@ -30,8 +30,8 @@ public class PaymentOrder {
     }
 
     public PaymentOrder confirm(String paymentKey) {
-        return new PaymentOrder(this.id, this.orderId, this.amount, PaymentStatus.CONFIRMED, this.reservationId,
-                paymentKey);
+        return new PaymentOrder(this.id, this.orderId, this.amount, PaymentStatus.CONFIRMED,
+                this.reservationId, paymentKey);
     }
 
     public Long getId() {
