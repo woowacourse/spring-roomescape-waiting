@@ -9,6 +9,7 @@ import roomescape.domain.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +41,7 @@ public class PaymentOrderDaoTest {
                 "order_123",
                 reservation.getId(),
                 10_000L,
+                "idempotency-key",
                 createdAt
         );
 
@@ -50,6 +52,7 @@ public class PaymentOrderDaoTest {
                 () -> assertThat(saved.getOrderId()).isEqualTo("order_123"),
                 () -> assertThat(saved.getReservationId()).isEqualTo(reservation.getId()),
                 () -> assertThat(saved.getAmount()).isEqualTo(10_000L),
+                () -> assertThat(saved.getIdempotencyKey()).isEqualTo("idempotency-key"),
                 () -> assertThat(saved.getStatus()).isEqualTo(PaymentOrderStatus.PENDING),
                 () -> assertThat(saved.getCreatedAt()).isEqualTo(createdAt)
         );
@@ -65,6 +68,7 @@ public class PaymentOrderDaoTest {
                         "order_123",
                         reservation.getId(),
                         10_000L,
+                        "idempotency-key",
                         LocalDateTime.of(2026, 6, 17, 10, 0)
                 )
         );
@@ -78,6 +82,7 @@ public class PaymentOrderDaoTest {
                         PaymentOrder::getOrderId,
                         PaymentOrder::getReservationId,
                         PaymentOrder::getAmount,
+                        PaymentOrder::getIdempotencyKey,
                         PaymentOrder::getStatus,
                         PaymentOrder::getCreatedAt
                 )
@@ -86,6 +91,7 @@ public class PaymentOrderDaoTest {
                         saved.getOrderId(),
                         saved.getReservationId(),
                         saved.getAmount(),
+                        saved.getIdempotencyKey(),
                         saved.getStatus(),
                         saved.getCreatedAt()
                 );
@@ -96,6 +102,38 @@ public class PaymentOrderDaoTest {
         Optional<PaymentOrder> found = paymentOrderDao.selectByOrderId("not_exist_order");
 
         assertThat(found).isEmpty();
+    }
+
+    @Test
+    void 예약_아이디_목록으로_결제_주문을_조회한다() {
+        Reservation reservation1 = saveReservation();
+        Reservation reservation2 = saveReservation();
+        PaymentOrder paymentOrder1 = paymentOrderDao.insert(
+                PaymentOrder.createPendingWithoutId(
+                        "order_1",
+                        reservation1.getId(),
+                        10_000L,
+                        "idempotency-key-1",
+                        LocalDateTime.of(2026, 6, 17, 10, 0)
+                )
+        );
+        PaymentOrder paymentOrder2 = paymentOrderDao.insert(
+                PaymentOrder.createPendingWithoutId(
+                        "order_2",
+                        reservation2.getId(),
+                        10_000L,
+                        "idempotency-key-2",
+                        LocalDateTime.of(2026, 6, 17, 10, 0)
+                )
+        );
+
+        List<PaymentOrder> found = paymentOrderDao.selectByReservationIds(
+                List.of(reservation1.getId(), reservation2.getId())
+        );
+
+        assertThat(found)
+                .extracting(PaymentOrder::getOrderId)
+                .containsExactlyInAnyOrder(paymentOrder1.getOrderId(), paymentOrder2.getOrderId());
     }
 
     private Reservation saveReservation() {

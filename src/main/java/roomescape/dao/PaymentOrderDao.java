@@ -9,6 +9,8 @@ import roomescape.domain.PaymentOrder;
 import roomescape.domain.PaymentOrderStatus;
 
 import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +25,7 @@ public class PaymentOrderDao {
                     resultSet.getString("order_id"),
                     resultSet.getLong("reservation_id"),
                     resultSet.getLong("amount"),
+                    resultSet.getString("idempotency_key"),
                     PaymentOrderStatus.valueOf(resultSet.getString("status")),
                     resultSet.getTimestamp("created_at").toLocalDateTime()
             );
@@ -39,15 +42,18 @@ public class PaymentOrderDao {
         parameters.put("order_id", paymentOrder.getOrderId());
         parameters.put("reservation_id", paymentOrder.getReservationId());
         parameters.put("amount", paymentOrder.getAmount());
+        parameters.put("idempotency_key", paymentOrder.getIdempotencyKey());
         parameters.put("status", paymentOrder.getStatus().name());
         parameters.put("created_at", paymentOrder.getCreatedAt());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
+
         return new PaymentOrder(
                 generatedId.longValue(),
                 paymentOrder.getOrderId(),
                 paymentOrder.getReservationId(),
                 paymentOrder.getAmount(),
+                paymentOrder.getIdempotencyKey(),
                 paymentOrder.getStatus(),
                 paymentOrder.getCreatedAt()
         );
@@ -56,16 +62,30 @@ public class PaymentOrderDao {
     public Optional<PaymentOrder> selectByOrderId(String orderId) {
         try {
             String sql = """
-                    SELECT id, order_id, reservation_id, amount, status, created_at 
-                    FROM payment_order 
+                    SELECT id, order_id, reservation_id, amount, idempotency_key, status, created_at
+                    FROM payment_order
                     WHERE order_id = ?
                     """;
 
             return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, orderId));
-
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
         }
+    }
+
+    public List<PaymentOrder> selectByReservationIds(List<Long> reservationIds) {
+        if (reservationIds.isEmpty()) {
+            return List.of();
+        }
+
+        String placeholders = String.join(", ", Collections.nCopies(reservationIds.size(), "?"));
+        String sql = """
+                SELECT id, order_id, reservation_id, amount, idempotency_key, status, created_at
+                FROM payment_order
+                WHERE reservation_id IN (%s)
+                """.formatted(placeholders);
+
+        return jdbcTemplate.query(sql, ROW_MAPPER, reservationIds.toArray());
     }
 
     public int deleteByReservationId(Long reservationId) {
@@ -78,9 +98,9 @@ public class PaymentOrderDao {
 
     public PaymentOrder update(PaymentOrder paymentOrder) {
         String sql = """
-                UPDATE payment_order 
-                SET status = ? 
-                WHERE order_id = ? 
+                UPDATE payment_order
+                SET status = ?
+                WHERE order_id = ?
                 """;
 
         jdbcTemplate.update(sql, paymentOrder.getStatus().name(), paymentOrder.getOrderId());

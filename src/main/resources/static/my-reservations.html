@@ -375,6 +375,52 @@
             align-items: center;
         }
 
+        .payment-info {
+            display: grid;
+            gap: 6px;
+            margin-top: 12px;
+            color: var(--gray-700);
+            font-size: 13px;
+        }
+
+        .payment-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            align-items: center;
+        }
+
+        .payment-status {
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            padding: 5px 8px;
+        }
+
+        .payment-status.pending {
+            background: var(--yellow-soft);
+            color: var(--yellow-text);
+        }
+
+        .payment-status.confirmed {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .payment-status.unknown {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .payment-code {
+            overflow-wrap: anywhere;
+            color: var(--gray-500);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
         .badge {
             display: inline-flex;
             width: fit-content;
@@ -781,6 +827,7 @@
                             <span>${item.time.startAt}</span>
                             <span>ID ${item.id}</span>
                         </div>
+                        ${renderPaymentInfo(item)}
                     </div>
                     <div class="actions">
                         ${isWaiting ? '' : `<button class="secondary-button" type="button" onclick="openUpdateModal(${item.id})">변경</button>`}
@@ -789,6 +836,51 @@
                 </article>
             `;
         }).join('');
+    }
+
+    function renderPaymentInfo(item) {
+        if (item.status === 'WAITING' || !item.paymentStatus) {
+            return '';
+        }
+
+        const payment = paymentDisplay(item.paymentStatus);
+        const paymentKeyLine = item.paymentKey
+            ? `<div class="payment-line"><span>paymentKey</span><span class="payment-code">${escapeHtml(item.paymentKey)}</span></div>`
+            : '';
+
+        return `
+            <div class="payment-info">
+                <div class="payment-line">
+                    <span class="payment-status ${payment.className}">${payment.label}</span>
+                    <span>${formatAmount(item.amount)}</span>
+                </div>
+                <div class="payment-line">
+                    <span>orderId</span>
+                    <span class="payment-code">${escapeHtml(item.orderId)}</span>
+                </div>
+                ${paymentKeyLine}
+            </div>
+        `;
+    }
+
+    function paymentDisplay(status) {
+        if (status === 'CONFIRMED') {
+            return { label: '결제 확정', className: 'confirmed' };
+        }
+        if (status === 'UNKNOWN') {
+            return { label: '확인 필요', className: 'unknown' };
+        }
+        if (status === 'FAILED') {
+            return { label: '결제 실패', className: 'unknown' };
+        }
+        return { label: '결제 대기', className: 'pending' };
+    }
+
+    function formatAmount(amount) {
+        if (amount == null) {
+            return '금액 없음';
+        }
+        return `${Number(amount).toLocaleString('ko-KR')}원`;
     }
 
     function openUpdateModal(reservationId) {

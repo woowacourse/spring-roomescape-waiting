@@ -1,6 +1,8 @@
 package roomescape.dto.response;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentOrderStatus;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationWaiting;
 
@@ -13,9 +15,17 @@ public record MyReservationResponse(
         CreateReservationTimeResponse time,
         ThemeResponse theme,
         ReservationStatus status,
-        Integer order
+        Integer order,
+        PaymentOrderStatus paymentStatus,
+        String orderId,
+        String paymentKey,
+        Long amount
 ) {
     public static MyReservationResponse fromReservation(Reservation reservation) {
+        return fromReservation(reservation, null);
+    }
+
+    public static MyReservationResponse fromReservation(Reservation reservation, PaymentOrder paymentOrder) {
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
@@ -31,7 +41,11 @@ public record MyReservationResponse(
                         reservation.getTheme().getThumbnail()
                 ),
                 ReservationStatus.RESERVED,
-                null
+                null,
+                paymentOrder == null ? null : paymentOrder.getStatus(),
+                paymentOrder == null ? null : paymentOrder.getOrderId(),
+                reservation.getPaymentKey(),
+                paymentOrder == null ? null : paymentOrder.getAmount()
         );
     }
 
@@ -51,7 +65,11 @@ public record MyReservationResponse(
                         reservationWaiting.getTheme().getThumbnail()
                 ),
                 ReservationStatus.WAITING,
-                order
+                order,
+                null,
+                null,
+                null,
+                null
         );
     }
 }

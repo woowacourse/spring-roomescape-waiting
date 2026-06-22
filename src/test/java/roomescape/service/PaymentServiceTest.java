@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import roomescape.DatabaseInitializer;
+import roomescape.client.PaymentGatewayException;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
 import roomescape.dao.*;
@@ -71,6 +72,7 @@ public class PaymentServiceTest {
                         "order-1",
                         reservation.getId(),
                         10_000L,
+                        "idempotency-key",
                         LocalDateTime.of(2026, 6, 18, 10, 0)
                 )
         );
@@ -98,11 +100,12 @@ public class PaymentServiceTest {
                         "order-1",
                         reservation.getId(),
                         10_000L,
+                        "idempotency-key",
                         LocalDateTime.of(2026, 6, 18, 10, 0)
                 )
         );
 
-        given(paymentGateway.confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L)))
+        given(paymentGateway.confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")))
                 .willReturn(new PaymentResult("payment-key", "order-1", 10_000L));
 
         PaymentResult result = paymentService.confirm("payment-key", "order-1", 10_000L);
@@ -115,7 +118,7 @@ public class PaymentServiceTest {
                 )
                 .containsExactly("payment-key", "order-1", 10_000L);
 
-        verify(paymentGateway).confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L));
+        verify(paymentGateway).confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key"));
     }
 
     @Test
@@ -126,11 +129,12 @@ public class PaymentServiceTest {
                         "order-1",
                         reservation.getId(),
                         10_000L,
+                        "idempotency-key",
                         LocalDateTime.of(2026, 6, 18, 10, 0)
                 )
         );
 
-        given(paymentGateway.confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L)))
+        given(paymentGateway.confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")))
                 .willReturn(new PaymentResult("payment-key", "order-1", 10_000L));
 
         PaymentResult result = paymentService.confirm("payment-key", "order-1", 10_000L);
@@ -143,7 +147,7 @@ public class PaymentServiceTest {
                 )
                 .containsExactly("payment-key", "order-1", 10_000L);
 
-        verify(paymentGateway).confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L));
+        verify(paymentGateway).confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key"));
 
         Reservation confirmedReservation = reservationDao.selectById(reservation.getId()).get();
         assertThat(confirmedReservation.getState()).isEqualTo(ReservationState.CONFIRMED);
@@ -151,6 +155,33 @@ public class PaymentServiceTest {
 
         PaymentOrder confirmedPaymentOrder = paymentOrderDao.selectByOrderId("order-1").get();
         assertThat(confirmedPaymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.CONFIRMED);
+    }
+
+    @Test
+    void 결제_승인_응답_읽기_타임아웃이면_결제_주문을_확인_필요_상태로_변경하고_예약은_대기로_유지한다() {
+        Reservation reservation = saveReservation();
+        paymentOrderDao.insert(
+                PaymentOrder.createPendingWithoutId(
+                        "order-1",
+                        reservation.getId(),
+                        10_000L,
+                        "idempotency-key",
+                        LocalDateTime.of(2026, 6, 18, 10, 0)
+                )
+        );
+
+        given(paymentGateway.confirm(new PaymentConfirmation("payment-key", "order-1", 10_000L, "idempotency-key")))
+                .willThrow(new PaymentGatewayException.ReadTimeout(new RuntimeException("read timeout")));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 10_000L))
+                .isInstanceOf(PaymentGatewayException.ReadTimeout.class);
+
+        Reservation pendingReservation = reservationDao.selectById(reservation.getId()).get();
+        assertThat(pendingReservation.getState()).isEqualTo(ReservationState.PENDING);
+        assertThat(pendingReservation.getPaymentKey()).isNull();
+
+        PaymentOrder unknownPaymentOrder = paymentOrderDao.selectByOrderId("order-1").get();
+        assertThat(unknownPaymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.UNKNOWN);
     }
 
     private Reservation saveReservation() {
