@@ -5,11 +5,13 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.auth.LoginMemberArgumentResolver;
 import roomescape.auth.filter.AdminFilter;
 import roomescape.auth.filter.AuthFilter;
 import roomescape.auth.filter.ManagerFilter;
+import roomescape.common.ratelimit.RateLimitInterceptor;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -17,17 +19,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final AuthFilter authFilter;
     private final AdminFilter adminFilter;
     private final ManagerFilter managerFilter;
+    private final RateLimitInterceptor rateLimitInterceptor;
 
     public WebMvcConfig(
             LoginMemberArgumentResolver loginMemberArgumentResolver,
             AuthFilter authFilter,
             AdminFilter adminFilter,
-            ManagerFilter managerFilter
+            ManagerFilter managerFilter,
+            RateLimitInterceptor rateLimitInterceptor
     ) {
         this.loginMemberArgumentResolver = loginMemberArgumentResolver;
         this.authFilter = authFilter;
         this.adminFilter = adminFilter;
         this.managerFilter = managerFilter;
+        this.rateLimitInterceptor = rateLimitInterceptor;
     }
 
     @Bean
@@ -55,5 +60,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(loginMemberArgumentResolver);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 결제·예약 엔드포인트에 들어오는 요청 Rate Limit을 건다. 초과분은 컨트롤러 호출 없이 429로 거부된다.
+        registry.addInterceptor(rateLimitInterceptor)
+                .addPathPatterns("/payments", "/payments/**", "/reservations", "/reservations/**");
     }
 }

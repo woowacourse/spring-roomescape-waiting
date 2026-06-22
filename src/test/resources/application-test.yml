@@ -11,3 +11,12 @@ spring:
   sql:
     init:
       data-locations:
+
+# 테스트는 한도를 매우 크게 둬, 기존 E2E·게이트웨이 테스트가 Rate Limit에 걸리지 않게 한다.
+# (한도 동작 자체는 토큰 버킷·인터셉터 단위 테스트가 결정적으로 검증한다.)
+rate-limit:
+  capacity: 1000000
+  refill-per-sec: 1000000
+outbound-rate-limit:
+  capacity: 1000000
+  refill-per-sec: 1000000

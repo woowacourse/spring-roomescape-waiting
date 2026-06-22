@@ -25,6 +25,11 @@ toss:
   # connect: 연결 맺기까지, read: 연결 후 응답 읽기까지 최대 대기. 느린 호출을 일찍 포기해 스레드 보호.
   connect-timeout: ${TOSS_CONNECT_TIMEOUT:2s}
   read-timeout: ${TOSS_READ_TIMEOUT:5s}
+  # 토스 429 응답 백오프 재시도(클라이언트 관점). Retry-After(초)를 존중하고, 없으면 default-backoff-ms로 폴백한다.
+  # max-attempts를 넘어도 429면 어댑터 onStatus가 도메인 예외로 실패시킨다(무한 재시도 금지).
+  retry:
+    max-attempts: ${TOSS_RETRY_MAX_ATTEMPTS:3}
+    default-backoff-ms: ${TOSS_RETRY_DEFAULT_BACKOFF_MS:1000}
 
 # 결제 미완료(abandonment) 정리 스케줄러.
 # ttl-minutes: 이 시간이 지난 PENDING 주문을 정리(결제창 유효시간보다 길게 — 진행 중 결제 보호).
@@ -39,3 +44,15 @@ payment:
   # 결제는 됐는데 예약 확정에 실패한(NEEDS_REFUND) 주문을 토스 취소로 환불(보상)하는 스케줄러.
   refund:
     poll-interval-ms: ${PAYMENT_REFUND_POLL_INTERVAL_MS:60000}
+
+# 들어오는 요청 Rate Limit(서버 관점). 결제·예약 엔드포인트 초과분을 컨트롤러 호출 없이 429+Retry-After로 거부한다.
+# capacity: 허용 버스트, refill-per-sec: 평균 초당 처리 상한. 값만 바꾸면 코드 수정 없이 거부 시점이 달라진다.
+rate-limit:
+  capacity: ${RATE_LIMIT_CAPACITY:100}
+  refill-per-sec: ${RATE_LIMIT_REFILL_PER_SEC:50}
+
+# 나가는 토스 호출 Rate Limit(클라이언트 관점). 한도를 넘는 호출은 외부로 보내지 않고 자체 거부한다.
+# 들어오는 쪽과 같은 토큰 버킷 알고리즘을, 한도만 분리해 적용한다.
+outbound-rate-limit:
+  capacity: ${OUTBOUND_RATE_LIMIT_CAPACITY:50}
+  refill-per-sec: ${OUTBOUND_RATE_LIMIT_REFILL_PER_SEC:20}
