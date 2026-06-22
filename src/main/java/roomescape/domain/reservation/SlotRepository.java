@@ -1,6 +1,8 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.RoomEscapeException;
@@ -17,15 +19,21 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
 
     List<Slot> findByDateAndThemeId(ReservationDate date, Long themeId);
 
-    @Query("SELECT r.slot FROM Reservation r WHERE r.member.id = :memberId")
-    List<Slot> findAllByMemberId(@Param("memberId") Long memberId);
-
-    boolean existsByTimeId(Long timeId);
+boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Slot s WHERE s.id = :id")
+    Optional<Slot> findByIdForUpdate(@Param("id") Long id);
+
     default Slot getById(Long id) {
         return findById(id)
+                .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 예약 슬롯을 찾을 수 없습니다. : " + id));
+    }
+
+    default Slot getByIdForUpdate(Long id) {
+        return findByIdForUpdate(id)
                 .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 예약 슬롯을 찾을 수 없습니다. : " + id));
     }
 

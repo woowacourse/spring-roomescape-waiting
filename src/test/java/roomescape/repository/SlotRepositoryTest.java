@@ -191,21 +191,4 @@ class SlotRepositoryTest {
 
         assertThat(slotRepository.existsByThemeId(theme.getId())).isFalse();
     }
-
-    @Test
-    @DisplayName("회원ID로 슬롯 조회")
-    void findAllByMemberId() {
-        ReservationTime time = givenTime(14);
-        Theme theme = givenTheme("테스트 테마");
-        Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Member member1 = givenMember("유저1");
-        Member member2 = givenMember("유저2");
-        reservationRepository.save(Reservation.create(member1, slot).withStatus(Status.APPROVED));
-        reservationRepository.save(Reservation.create(member2, slot).withStatus(Status.WAITING));
-
-        List<Slot> slots = slotRepository.findAllByMemberId(member1.getId());
-
-        assertThat(slots).hasSize(1);
-        assertThat(slots.get(0).getId()).isEqualTo(slot.getId());
-    }
 }
