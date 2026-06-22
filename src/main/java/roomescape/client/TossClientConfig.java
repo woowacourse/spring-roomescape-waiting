@@ -13,8 +13,8 @@ import roomescape.ratelimit.TokenBucketRateLimiter;
 
 /**
  * Toss 결제 API 호출용 RestClient 빈 설정. 인증은 Basic(시크릿키 + ":" 의 Base64)이다.
- * 나가는 호출 한 곳에 Rate Limit(바깥)과 Retry-After 백오프(안쪽)를 함께 건다 — 한도는 보내기 전에
- * 스스로 조절하고, 그래도 받은 429 는 백오프 재시도한다.
+ * 나가는 호출 한 곳에 Retry-After 백오프(바깥)와 Rate Limit(안쪽)을 함께 건다 — 실제로 나가는
+ * 와이어 요청마다 한도를 소비하고(재시도 호출 포함), 받은 429 는 백오프 재시도한다.
  */
 @Configuration
 public class TossClientConfig {
@@ -40,10 +40,11 @@ public class TossClientConfig {
                 .requestFactory(requestFactory)
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
-                // 바깥: 나가는 호출 한도를 넘으면 보내기 전에 스스로 거부한다(재시도마다 토큰을 또 쓰지 않게 가장 바깥).
-                .requestInterceptor(new OutboundRateLimitInterceptor(outboundLimiter))
-                // 안쪽: 그래도 토스가 429 를 주면 Retry-After 만큼 대기 후 재시도(백오프)한다.
+                // 바깥: 토스가 429 를 주면 Retry-After 만큼 대기 후 재시도(백오프)한다.
                 .requestInterceptor(new RetryAfterInterceptor(maxAttempts))
+                // 안쪽: 실제로 나가는 와이어 요청마다 한도를 소비한다 — 재시도 호출도 한도를 우회하지 못하게
+                // 재시도 루프 안쪽에 둔다. 토큰이 없으면 보내기 전에 스스로 거부한다.
+                .requestInterceptor(new OutboundRateLimitInterceptor(outboundLimiter))
                 .build();
     }
 }
