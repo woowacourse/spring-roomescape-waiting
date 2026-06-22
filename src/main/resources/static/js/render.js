@@ -156,14 +156,15 @@ function renderReservationLookupPage() {
         </div>
         <div class="metric-row" aria-label="내 예약 현황">
           ${renderMetric(state.myReservations.length, "내 예약")}
+          ${renderMetric(state.myPaymentOrders.filter((order) => order.status === "CONFIRMATION_UNKNOWN").length, "확인 필요")}
           ${renderMetric(state.myWaitings.length, "대기 중")}
-          ${renderMetric(editingReservation ? 1 : 0, "변경 중")}
         </div>
       </section>
 
       <section class="lookup-layout">
         <section class="theme-section" aria-labelledby="reservation-lookup-title">
           ${renderReservationLookup()}
+          ${renderPaymentOrders()}
           ${renderMyReservations()}
           ${renderMyWaitings()}
         </section>
@@ -379,6 +380,75 @@ function renderReservationLookup() {
       </form>
     </section>
   `;
+}
+
+function renderPaymentOrders() {
+    const hasName = Boolean(state.guestName.trim());
+
+    return `
+    <section class="my-reservations-section" aria-labelledby="payment-orders-title">
+      <div class="admin-panel-header">
+        <div>
+          <p class="section-kicker">Payment History</p>
+          <h2 id="payment-orders-title">주문 / 결제 내역</h2>
+        </div>
+      </div>
+      ${renderPaymentOrdersContent(hasName)}
+    </section>
+  `;
+}
+
+function renderPaymentOrdersContent(hasName) {
+    if (!hasName) {
+        return renderEmpty("예약자 이름을 입력하면 주문과 결제 상태를 확인할 수 있습니다.");
+    }
+    if (state.myPaymentOrders.length === 0) {
+        return renderEmpty("조회된 결제 주문이 없습니다.");
+    }
+
+    return `
+    <div class="payment-order-list">
+      ${state.myPaymentOrders.map((order) => `
+        <article class="payment-order-card">
+          <div class="payment-order-heading">
+            <div>
+              <strong>${escapeHtml(order.themeName)}</strong>
+              <span>${escapeHtml(order.date)} ${escapeHtml(order.startAt)}</span>
+            </div>
+            <span class="payment-status ${paymentStatusClass(order.status)}">${paymentStatusLabel(order.status)}</span>
+          </div>
+          <dl class="payment-order-detail">
+            <div><dt>orderId</dt><dd>${escapeHtml(order.orderId)}</dd></div>
+            <div><dt>paymentKey</dt><dd>${order.status === "CONFIRMED" ? escapeHtml(order.paymentKey || "-") : "-"}</dd></div>
+            <div><dt>금액</dt><dd>${Number(order.amount).toLocaleString("ko-KR")}원</dd></div>
+          </dl>
+          ${order.retryable ? `
+            <button class="secondary-button" type="button" data-action="retry-payment" data-order-id="${escapeAttr(order.orderId)}" ${state.submitting ? "disabled" : ""}>
+              같은 주문으로 승인 다시 확인
+            </button>
+          ` : ""}
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function paymentStatusLabel(status) {
+    return {
+        PAYMENT_PENDING: "결제 대기",
+        CONFIRMATION_UNKNOWN: "확인 필요",
+        PAYMENT_FAILED: "결제 실패",
+        CONFIRMED: "확정"
+    }[status] || status;
+}
+
+function paymentStatusClass(status) {
+    return {
+        PAYMENT_PENDING: "pending",
+        CONFIRMATION_UNKNOWN: "unknown",
+        PAYMENT_FAILED: "failed",
+        CONFIRMED: "confirmed"
+    }[status] || "";
 }
 
 function renderMyReservations() {

@@ -1131,6 +1131,86 @@ input:focus-visible {
     font-weight: 700;
 }
 
+.payment-order-list {
+    display: grid;
+    gap: 12px;
+}
+
+.payment-order-card {
+    display: grid;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    background: #101010;
+}
+
+.payment-order-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.payment-order-heading strong,
+.payment-order-heading span {
+    display: block;
+}
+
+.payment-order-heading div > span {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
+.payment-status {
+    padding: 6px 9px;
+    border: 1px solid currentColor;
+    font-size: 0.76rem;
+    font-weight: 900;
+}
+
+.payment-status.confirmed {
+    color: #45d483;
+}
+
+.payment-status.pending {
+    color: #e7c65b;
+}
+
+.payment-status.unknown {
+    color: #ff9f43;
+}
+
+.payment-status.failed {
+    color: #ff6b6b;
+}
+
+.payment-order-detail {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.payment-order-detail div {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 12px;
+}
+
+.payment-order-detail dt {
+    color: var(--subtle);
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.payment-order-detail dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    font-size: 0.84rem;
+}
+
 .booking-summary {
     display: grid;
     gap: 10px;

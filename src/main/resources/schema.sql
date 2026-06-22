@@ -25,8 +25,10 @@ CREATE TABLE reservation
     order_id    VARCHAR(64),
     amount      BIGINT,
     payment_key VARCHAR(200),
+    idempotency_key VARCHAR(300),
     PRIMARY KEY (id),
     CONSTRAINT uq_reservation_order_id UNIQUE (order_id),
+    CONSTRAINT uq_reservation_idempotency_key UNIQUE (idempotency_key),
     CONSTRAINT uq_reservation_date_theme_time UNIQUE (date, theme_id, time_id)
 );
 

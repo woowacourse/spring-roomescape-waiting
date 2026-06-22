@@ -2,8 +2,11 @@ package roomescape.payment.infra.toss;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,12 +30,13 @@ public class TossPaymentGateway implements PaymentGateway {
     private final PaymentProperties properties;
 
     @Override
-    public PaymentResult confirm(PaymentConfirmation confirmation) {
+    public PaymentResult confirm(PaymentConfirmation confirmation, String idempotencyKey) {
         try {
             TossConfirmResponse response = tossRestClient.post()
                     .uri("/v1/payments/confirm")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, authorization())
+                    .header("Idempotency-Key", idempotencyKey)
                     .body(TossConfirmRequest.from(confirmation))
                     .retrieve()
                     .onStatus(status -> status.isError(), (request, clientResponse) -> {
@@ -47,8 +51,31 @@ public class TossPaymentGateway implements PaymentGateway {
         } catch (PaymentException exception) {
             throw exception;
         } catch (RestClientException exception) {
-            throw new PaymentException(PaymentErrorCode.UNKNOWN_GATEWAY_ERROR);
+            throw mapTransportError(exception);
         }
+    }
+
+    private PaymentException mapTransportError(RestClientException exception) {
+        Throwable rootCause = rootCause(exception);
+        if (rootCause instanceof ConnectException) {
+            return new PaymentException(PaymentErrorCode.GATEWAY_CONNECTION_FAILED);
+        }
+        if (rootCause instanceof SocketTimeoutException timeoutException) {
+            String message = String.valueOf(timeoutException.getMessage()).toLowerCase(Locale.ROOT);
+            if (message.contains("connect")) {
+                return new PaymentException(PaymentErrorCode.GATEWAY_CONNECTION_FAILED);
+            }
+            return new PaymentException(PaymentErrorCode.CONFIRMATION_UNKNOWN);
+        }
+        return new PaymentException(PaymentErrorCode.UNKNOWN_GATEWAY_ERROR);
+    }
+
+    private Throwable rootCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null && current.getCause() != current) {
+            current = current.getCause();
+        }
+        return current;
     }
 
     private String authorization() {

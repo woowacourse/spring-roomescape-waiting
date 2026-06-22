@@ -9,8 +9,14 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 import roomescape.payment.application.exception.PaymentErrorCode;
@@ -40,6 +47,7 @@ class TossPaymentGatewayTest {
         server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Authorization", authorization))
+                .andExpect(header("Idempotency-Key", "fixed-idempotency-key"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("""
                         {
@@ -58,7 +66,9 @@ class TossPaymentGatewayTest {
                         """, MediaType.APPLICATION_JSON));
 
         PaymentResult result = gateway.confirm(
-                new PaymentConfirmation("payment-key", "ROOM_order123", 10_000L));
+                new PaymentConfirmation("payment-key", "ROOM_order123", 10_000L),
+                "fixed-idempotency-key"
+        );
 
         assertThat(result).isEqualTo(
                 new PaymentResult("payment-key", "ROOM_order123", 10_000L, "DONE"));
@@ -85,19 +95,88 @@ class TossPaymentGatewayTest {
                 .isEqualTo(PaymentErrorCode.UNKNOWN_GATEWAY_ERROR);
     }
 
+    @Test
+    void 응답이_느리면_read_timeout_안에_승인_불명확_예외로_실패한다() throws IOException {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse()
+                    .setBody("""
+                            {
+                              "paymentKey": "payment-key",
+                              "orderId": "ROOM_order123",
+                              "totalAmount": 10000,
+                              "status": "DONE"
+                            }
+                            """)
+                    .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .setBodyDelay(1, TimeUnit.SECONDS));
+            server.start();
+
+            TossPaymentGateway gateway = gateway(
+                    timeoutRestClient(server.url("/").toString(), Duration.ofMillis(150))
+            );
+            long startedAt = System.nanoTime();
+
+            assertThatThrownBy(() -> gateway.confirm(
+                    new PaymentConfirmation("payment-key", "ROOM_order123", 10_000L),
+                    "fixed-idempotency-key"
+            ))
+                    .isInstanceOf(PaymentException.class)
+                    .extracting(exception -> ((PaymentException) exception).errorCode())
+                    .isEqualTo(PaymentErrorCode.CONFIRMATION_UNKNOWN);
+
+            Duration elapsed = Duration.ofNanos(System.nanoTime() - startedAt);
+            assertThat(elapsed).isBetween(Duration.ofMillis(100), Duration.ofMillis(900));
+        }
+    }
+
+    @Test
+    void 연결이_거부되면_연결_실패_예외로_구분한다() throws IOException {
+        int unusedPort;
+        try (ServerSocket socket = new ServerSocket(0)) {
+            unusedPort = socket.getLocalPort();
+        }
+        TossPaymentGateway gateway = gateway(
+                timeoutRestClient("http://127.0.0.1:" + unusedPort, Duration.ofMillis(150))
+        );
+
+        assertThatThrownBy(() -> gateway.confirm(
+                new PaymentConfirmation("payment-key", "ROOM_order123", 10_000L),
+                "fixed-idempotency-key"
+        ))
+                .isInstanceOf(PaymentException.class)
+                .extracting(exception -> ((PaymentException) exception).errorCode())
+                .isEqualTo(PaymentErrorCode.GATEWAY_CONNECTION_FAILED);
+    }
+
     private TossPaymentGateway gateway(RestClient.Builder builder) {
+        return gateway(builder.build());
+    }
+
+    private TossPaymentGateway gateway(RestClient restClient) {
         return new TossPaymentGateway(
-                builder.build(),
+                restClient,
                 new ObjectMapper(),
                 new PaymentProperties(
                         new PaymentProperties.Toss(
                                 "https://api.tosspayments.com",
                                 "test_ck_test",
-                                "test_sk_시크릿"
+                                "test_sk_시크릿",
+                                Duration.ofSeconds(2),
+                                Duration.ofSeconds(3)
                         ),
                         10_000L
                 )
         );
+    }
+
+    private RestClient timeoutRestClient(String baseUrl, Duration readTimeout) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(Duration.ofMillis(150));
+        requestFactory.setReadTimeout(readTimeout);
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .requestFactory(requestFactory)
+                .build();
     }
 
     private static Stream<Arguments> errorMappings() {

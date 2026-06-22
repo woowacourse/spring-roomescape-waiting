@@ -12,6 +12,14 @@ public enum PaymentErrorCode implements ErrorCode {
     CARD_REJECTED(HttpStatus.PAYMENT_REQUIRED, "카드 결제가 거절되었습니다. 다른 결제 수단을 이용해 주세요."),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 건을 찾을 수 없습니다."),
     RETRYABLE_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "결제 서비스의 일시적인 오류입니다. 잠시 후 다시 시도해 주세요."),
+    GATEWAY_CONNECTION_FAILED(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "결제 서비스에 연결하지 못했습니다. 잠시 후 같은 주문으로 다시 시도해 주세요."
+    ),
+    CONFIRMATION_UNKNOWN(
+            HttpStatus.GATEWAY_TIMEOUT,
+            "결제 승인 응답을 받지 못했습니다. 승인 여부를 확인하거나 같은 주문으로 다시 시도해 주세요."
+    ),
     UNKNOWN_GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "결제 승인 중 알 수 없는 오류가 발생했습니다."),
     PAYMENT_CANCELED(HttpStatus.BAD_REQUEST, "사용자가 결제를 취소했습니다.");
 

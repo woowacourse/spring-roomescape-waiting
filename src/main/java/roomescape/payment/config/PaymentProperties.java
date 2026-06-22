@@ -1,5 +1,6 @@
 package roomescape.payment.config;
 
+import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "payments")
@@ -10,7 +11,9 @@ public record PaymentProperties(
     public record Toss(
             String baseUrl,
             String clientKey,
-            String secretKey
+            String secretKey,
+            Duration connectTimeout,
+            Duration readTimeout
     ) {
     }
 }

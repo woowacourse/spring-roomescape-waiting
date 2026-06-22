@@ -128,6 +128,11 @@ async function handleClick(event) {
             return;
         }
 
+        if (action === "retry-payment") {
+            await retryPayment(actionTarget.dataset.orderId);
+            return;
+        }
+
         if (action === "edit-reservation") {
             await startReservationEdit(Number(actionTarget.dataset.reservationId));
             return;
@@ -305,6 +310,7 @@ async function submitReservation(form) {
     let submitted = false;
 
     state.guestName = name;
+    rememberGuestName(name);
 
     if (!canSubmitReservation()) {
         showToast("테마, 날짜, 시간, 예약자를 모두 입력해 주세요.", "error");
@@ -400,6 +406,10 @@ function showPaymentResult() {
 
     if (payment === "success") {
         showToast("결제가 승인되어 예약이 확정되었습니다.", "success");
+    } else if (payment === "unknown") {
+        showToast(params.get("message") || "결제 승인 여부를 확인해야 합니다.", "error");
+    } else if (payment === "retry") {
+        showToast(params.get("message") || "결제 서비스에 연결하지 못했습니다. 다시 시도해 주세요.", "error");
     } else {
         showToast(params.get("message") || "결제가 완료되지 않았습니다.", "error");
     }
@@ -502,6 +512,17 @@ async function deleteReservation(reservationId) {
 
     if (Number(state.editingReservationId) === Number(reservationId)) {
         cancelReservationEditing();
+    }
+}
+
+async function retryPayment(orderId) {
+    state.submitting = true;
+    render();
+
+    try {
+        window.location.assign(`/payments/retry?orderId=${encodeURIComponent(orderId)}`);
+    } finally {
+        state.submitting = false;
     }
 }
 
@@ -609,6 +630,7 @@ async function loadReservations(options = {}) {
 
     if (!name) {
         state.myReservations = [];
+        state.myPaymentOrders = [];
         state.myWaitings = [];
         if (!options.silent) {
             render();
@@ -618,12 +640,14 @@ async function loadReservations(options = {}) {
 
     try {
         const params = new URLSearchParams({name});
-        [state.myReservations, state.myWaitings] = await Promise.all([
+        [state.myReservations, state.myPaymentOrders, state.myWaitings] = await Promise.all([
             api(`/reservations?${params.toString()}`),
+            api(`/payments/orders?${params.toString()}`),
             api(`/waitings?${params.toString()}`)
         ]);
     } catch (error) {
         state.myReservations = [];
+        state.myPaymentOrders = [];
         state.myWaitings = [];
         showToast(error.message, "error");
     } finally {
@@ -636,7 +660,16 @@ async function loadReservations(options = {}) {
 async function submitReservationLookup(form) {
     const formData = new FormData(form);
     state.guestName = String(formData.get("name") || "").trim();
+    rememberGuestName(state.guestName);
     await loadReservations();
+}
+
+function rememberGuestName(name) {
+    if (name) {
+        sessionStorage.setItem("roomescape.guestName", name);
+        return;
+    }
+    sessionStorage.removeItem("roomescape.guestName");
 }
 
 function openConfirm(title, body, onConfirm) {

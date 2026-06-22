@@ -1,6 +1,7 @@
 package roomescape.payment.domain;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface PaymentOrderRepository {
@@ -11,12 +12,19 @@ public interface PaymentOrderRepository {
             Long themeId,
             Long timeId,
             String orderId,
-            long amount
+            long amount,
+            String idempotencyKey
     );
 
     Optional<PaymentOrder> findByOrderId(String orderId);
 
+    List<PaymentOrderDetail> findAllByName(String name);
+
     void confirm(String orderId, String paymentKey);
 
-    void deletePending(String orderId);
+    void markConfirmationUnknown(String orderId, String paymentKey);
+
+    void keepPendingWithPaymentKey(String orderId, String paymentKey);
+
+    void markFailed(String orderId);
 }
