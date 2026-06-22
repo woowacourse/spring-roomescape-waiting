@@ -3,10 +3,12 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentStatus;
 import roomescape.repository.PaymentRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.exception.ErrorCode;
@@ -32,6 +34,10 @@ public class PaymentService {
         Reservation reservation = reservationRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
 
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            return new PaymentResult(paymentKey, orderId, PaymentStatus.DONE, reservation.getAmount());
+        }
+
         if (!reservation.getAmount().equals(amount)) {
             throw new PaymentAmountMismatchException(reservation.getAmount(), amount);
         }
@@ -48,5 +54,11 @@ public class PaymentService {
     public void cancelPendingReservation(String orderId) {
         reservationRepository.findByOrderId(orderId)
                 .ifPresent(r -> reservationRepository.delete(r));
+    }
+
+    @Transactional
+    public void markPaymentUnknown(String orderId) {
+        reservationRepository.findByOrderId(orderId)
+                .ifPresent(r -> reservationRepository.updateStatus(r.getId(), ReservationStatus.PAYMENT_UNKNOWN));
     }
 }

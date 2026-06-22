@@ -53,3 +53,6 @@ INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('캐모', DATEAD
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('티뉴', DATEADD('DAY', 4, CURRENT_DATE), 1, 15);
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('티모', DATEADD('DAY', 4, CURRENT_DATE), 2, 1);
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('티온', DATEADD('DAY', 5, CURRENT_DATE), 1, 2);
+
+-- 시드 예약은 결제까지 끝난 확정 예약으로 취급한다(기본값 PAYMENT_PENDING으로 두면 내역에서 '결제 대기'로 보인다).
+UPDATE reservation SET status = 'CONFIRMED';

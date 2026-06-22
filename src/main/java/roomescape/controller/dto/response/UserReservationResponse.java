@@ -12,7 +12,10 @@ public record UserReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme,
         ReservationStatus status,
-        Long rank
+        Long rank,
+        String orderId,
+        String paymentKey,
+        Long amount
 ) {
 
     public static UserReservationResponse from(UserReservation userReservation) {
@@ -23,7 +26,10 @@ public record UserReservationResponse(
                 ReservationTimeResponse.from(userReservation.time()),
                 ThemeResponse.from(userReservation.theme()),
                 userReservation.status(),
-                userReservation.rank()
+                userReservation.rank(),
+                userReservation.orderId(),
+                userReservation.paymentKey(),
+                userReservation.amount()
         );
     }
 }

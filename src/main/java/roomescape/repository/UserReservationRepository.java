@@ -24,10 +24,12 @@ public class UserReservationRepository {
                 SELECT r.id, r.name, r.date,
                        rt.id AS time_id, rt.start_at AS time_start_at,
                        t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail,
-                       'RESERVED' AS status, NULL AS rank
+                       r.status AS status, NULL AS rank,
+                       r.order_id AS order_id, p.payment_key AS payment_key, r.amount AS amount
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
+                LEFT JOIN payment p ON p.reservation_id = r.id
                 WHERE r.name = ?
                 
                 UNION ALL
@@ -40,7 +42,8 @@ public class UserReservationRepository {
                         WHERE w2.theme_id = w.theme_id
                           AND w2.date = w.date
                           AND w2.time_id = w.time_id
-                          AND w2.id <= w.id) AS rank
+                          AND w2.id <= w.id) AS rank,
+                       NULL AS order_id, NULL AS payment_key, NULL AS amount
                 FROM waiting w
                 JOIN reservation_time rt ON w.time_id = rt.id
                 JOIN theme t ON w.theme_id = t.id
@@ -71,16 +74,17 @@ public class UserReservationRepository {
             ReservationStatus status = ReservationStatus.valueOf(rs.getString("status"));
             Long rank = rs.getObject("rank", Long.class);
 
-            UserReservation userReservation = new UserReservation(
+            return new UserReservation(
                     rs.getLong("id"),
                     rs.getString("name"),
                     LocalDate.parse(rs.getString("date")),
                     time,
                     theme,
                     status,
-                    rank);
-
-            return userReservation;
+                    rank,
+                    rs.getString("order_id"),
+                    rs.getString("payment_key"),
+                    rs.getObject("amount", Long.class));
         };
     }
 }

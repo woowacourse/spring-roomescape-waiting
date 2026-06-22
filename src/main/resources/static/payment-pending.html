@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>결제 확인 필요</title>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #0b1220; color: #f1f5f9; }
+    .box { text-align: center; max-width: 420px; padding: 1rem; }
+    h1 { color: #f59e0b; margin-bottom: 1rem; }
+    p { color: #94a3b8; margin-bottom: 0.6rem; line-height: 1.6; }
+    a { color: #f59e0b; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>결제 결과를 확인 중입니다</h1>
+    <p>결제 서버 응답이 지연되어 승인 여부를 아직 확정하지 못했습니다.</p>
+    <p>결제가 이미 완료됐을 수 있으니 <strong>중복 결제 걱정 없이</strong> '내 예약'에서 상태를 확인하거나 다시 시도해주세요.</p>
+    <p id="msg"></p>
+    <br>
+    <a href="/reservation-cancel.html">내 예약에서 확인하기 →</a>
+    <br><br>
+    <a href="/index.html" style="color:#94a3b8;">홈으로 돌아가기</a>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    document.getElementById('msg').textContent = '주문번호: ' + (params.get('orderId') ?? '');
+  </script>
+</body>
+</html>
