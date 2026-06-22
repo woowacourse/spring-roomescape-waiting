@@ -13,3 +13,7 @@ payment:
     secret-key: ${TOSS_SECRET_KEY:}
     connect-timeout: 3s
     read-timeout: 5s
+
+rate-limit:
+  capacity: 1000
+  refill-per-sec: 1000
