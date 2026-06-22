@@ -17,7 +17,7 @@ public class Order {
 
     private final Long reservationId;
     private final OrderStatus status;
-  
+
     private Order(Long id, String orderId, String idempotencyKey, Long amount, String paymentKey, Long reservationId, OrderStatus status) {
         this.id = id;
         this.orderId = orderId;
