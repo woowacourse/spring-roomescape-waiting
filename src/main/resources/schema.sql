@@ -67,12 +67,14 @@ CREATE TABLE IF NOT EXISTS payment_order
     order_id VARCHAR(64) NOT NULL,
     amount INT NOT NULL,
     payment_key VARCHAR(200),
-    status VARCHAR(20) NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,
+    status VARCHAR(30) NOT NULL,
     reservation_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
     CONSTRAINT unique_payment_order_order_id UNIQUE (order_id),
     CONSTRAINT unique_payment_order_reservation_id UNIQUE (reservation_id),
-    CONSTRAINT unique_payment_order_payment_key UNIQUE (payment_key)
+    CONSTRAINT unique_payment_order_payment_key UNIQUE (payment_key),
+    CONSTRAINT unique_payment_order_idempotency_key UNIQUE (idempotency_key)
 );

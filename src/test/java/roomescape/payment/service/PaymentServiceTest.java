@@ -2,6 +2,7 @@ package roomescape.payment.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
@@ -16,6 +17,7 @@ import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentOrder;
 import roomescape.payment.domain.PaymentOrderStatus;
 import roomescape.payment.domain.PaymentResult;
+import roomescape.payment.exception.PaymentApprovalUnknownException;
 import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.domain.Reservation;
@@ -27,6 +29,7 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
+import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -79,6 +82,7 @@ class PaymentServiceTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING);
         assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.READY);
         assertThat(paymentOrder.getAmount()).isEqualTo(22000);
+        assertThat(paymentOrder.getIdempotencyKey()).isNotBlank();
     }
 
     @Test
@@ -100,6 +104,8 @@ class PaymentServiceTest {
     void confirmPayment() {
         // given
         final PaymentReadyResponse paymentReadyResponse = preparePayment(22000);
+        final PaymentOrder readyPaymentOrder = paymentOrderRepository.findByOrderId(paymentReadyResponse.orderId())
+                .orElseThrow();
         when(paymentGateway.confirm(any(PaymentConfirmation.class)))
                 .thenReturn(new PaymentResult("payment-key", paymentReadyResponse.orderId(), 22000));
 
@@ -115,9 +121,69 @@ class PaymentServiceTest {
                 .orElseThrow();
 
         assertThat(response.reservationStatus()).isEqualTo(ReservationStatus.CONFIRMED.name());
+        assertThat(response.paymentStatus()).isEqualTo(PaymentOrderStatus.COMPLETED.name());
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
         assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.COMPLETED);
         assertThat(paymentOrder.getPaymentKey()).isEqualTo("payment-key");
+
+        final ArgumentCaptor<PaymentConfirmation> captor = ArgumentCaptor.forClass(PaymentConfirmation.class);
+        verify(paymentGateway).confirm(captor.capture());
+        assertThat(captor.getValue().idempotencyKey()).isEqualTo(readyPaymentOrder.getIdempotencyKey());
+    }
+
+    @Test
+    @DisplayName("결제 승인 응답을 받지 못하면 확인 필요 상태로 남긴다")
+    void markRequiresConfirmationWhenPaymentApprovalIsUnknown() {
+        // given
+        final PaymentReadyResponse paymentReadyResponse = preparePayment(22000);
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new PaymentApprovalUnknownException(
+                        "결제 승인 응답을 받지 못했습니다.",
+                        new SocketTimeoutException("Read timed out")
+                ));
+
+        // when
+        final PaymentConfirmResponse response = paymentService.confirm(
+                new PaymentConfirmRequest("payment-key", paymentReadyResponse.orderId(), 22000)
+        );
+
+        // then
+        final Reservation reservation = reservationRepository.findById(paymentReadyResponse.reservationId())
+                .orElseThrow();
+        final PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(paymentReadyResponse.orderId())
+                .orElseThrow();
+
+        assertThat(response.reservationStatus()).isEqualTo(ReservationStatus.PENDING.name());
+        assertThat(response.paymentStatus()).isEqualTo(PaymentOrderStatus.REQUIRES_CONFIRMATION.name());
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING);
+        assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.REQUIRES_CONFIRMATION);
+        assertThat(paymentOrder.getPaymentKey()).isEqualTo("payment-key");
+    }
+
+    @Test
+    @DisplayName("확인 필요 상태의 결제 주문도 같은 멱등키로 다시 승인할 수 있다")
+    void confirmPaymentWhenPaymentOrderRequiresConfirmation() {
+        // given
+        final PaymentReadyResponse paymentReadyResponse = preparePayment(22000);
+        paymentOrderRepository.requireConfirmation(paymentReadyResponse.orderId(), "payment-key");
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenReturn(new PaymentResult("payment-key", paymentReadyResponse.orderId(), 22000));
+
+        // when
+        final PaymentConfirmResponse response = paymentService.confirm(
+                new PaymentConfirmRequest("payment-key", paymentReadyResponse.orderId(), 22000)
+        );
+
+        // then
+        final Reservation reservation = reservationRepository.findById(paymentReadyResponse.reservationId())
+                .orElseThrow();
+        final PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(paymentReadyResponse.orderId())
+                .orElseThrow();
+
+        assertThat(response.reservationStatus()).isEqualTo(ReservationStatus.CONFIRMED.name());
+        assertThat(response.paymentStatus()).isEqualTo(PaymentOrderStatus.COMPLETED.name());
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+        assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.COMPLETED);
     }
 
     @Test

@@ -8,9 +8,12 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.payment.controller.dto.response.PaymentReadyResponse;
+import roomescape.payment.domain.PaymentOrderStatus;
+import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.controller.dto.response.ReservationOptionResponse;
+import roomescape.reservation.controller.dto.response.ReservationPaymentResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservation.domain.Reservation;
@@ -50,6 +53,9 @@ class ReservationServiceTest {
 
     @Autowired
     ReservationRepository reservationRepository;
+
+    @Autowired
+    PaymentOrderRepository paymentOrderRepository;
 
     @Autowired
     WaitingRepository waitingRepository;
@@ -108,6 +114,33 @@ class ReservationServiceTest {
         assertThat(responses.waitings()).hasSize(1);
         assertThat(responses.waitings().getFirst().customerName()).isEqualTo("브라운");
         assertThat(responses.waitings().getFirst().rank()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("예약 조회 시 결제 확인 필요 상태와 결제 정보를 함께 조회한다")
+    void findReservationWithPaymentStatus() {
+        // given
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
+        final long timeId = insertReservationTime("11:00:00");
+        final long themeId = insertTheme("링", "공포 테마", "http:~", 10000);
+        final PaymentReadyResponse payment = reservationService.preparePayment(
+                new ReservationCreateRequest("브라운", "customer@example.com", tomorrow, timeId, themeId)
+        );
+        paymentOrderRepository.requireConfirmation(payment.orderId(), "payment-key");
+
+        // when
+        final ReservationsAndWaitingsResponse responses = reservationService.getReservationsByCustomer(
+                "브라운",
+                "customer@example.com"
+        );
+
+        // then
+        final ReservationPaymentResponse reservation = responses.reservations().getFirst();
+        assertThat(reservation.paymentStatus()).isEqualTo(PaymentOrderStatus.REQUIRES_CONFIRMATION.name());
+        assertThat(reservation.paymentStatusLabel()).isEqualTo("확인 필요");
+        assertThat(reservation.orderId()).isEqualTo(payment.orderId());
+        assertThat(reservation.paymentKey()).isEqualTo("payment-key");
+        assertThat(reservation.amount()).isEqualTo(10000);
     }
 
     @Test

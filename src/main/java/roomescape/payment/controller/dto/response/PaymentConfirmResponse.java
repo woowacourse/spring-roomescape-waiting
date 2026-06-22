@@ -4,6 +4,8 @@ public record PaymentConfirmResponse(
         String orderId,
         int amount,
         String paymentKey,
-        String reservationStatus
+        String reservationStatus,
+        String paymentStatus,
+        String message
 ) {
 }

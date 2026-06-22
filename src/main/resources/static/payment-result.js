@@ -46,8 +46,16 @@ async function confirmPayment(params) {
   }
 
   try {
-    await post('/payments/confirm', { paymentKey, orderId, amount });
-    updateResult('예약이 확정되었습니다', '결제가 승인되어 예약이 완료되었습니다.');
+    const result = await post('/payments/confirm', { paymentKey, orderId, amount });
+    if (result.paymentStatus === 'REQUIRES_CONFIRMATION') {
+      updateResult(
+        '결제 확인이 필요합니다',
+        result.message || '결제 승인 응답을 받지 못했습니다. 내 예약에서 상태를 확인해주세요.'
+      );
+      return;
+    }
+
+    updateResult('예약이 확정되었습니다', result.message || '결제가 승인되어 예약이 완료되었습니다.');
   } catch (e) {
     updateResult('결제 승인 실패', e.message);
   }

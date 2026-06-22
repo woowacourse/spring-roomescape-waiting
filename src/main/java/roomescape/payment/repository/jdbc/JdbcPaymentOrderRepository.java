@@ -32,6 +32,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 paymentOrder.getOrderId(),
                 paymentOrder.getAmount(),
                 paymentOrder.getPaymentKey(),
+                paymentOrder.getIdempotencyKey(),
                 paymentOrder.getStatus(),
                 paymentOrder.getReservationId()
         );
@@ -40,7 +41,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     @Override
     public Optional<PaymentOrder> findByOrderId(final String orderId) {
         final String sql = """
-                SELECT id, order_id, amount, payment_key, status, reservation_id
+                SELECT id, order_id, amount, payment_key, idempotency_key, status, reservation_id
                 FROM payment_order
                 WHERE order_id = ?
                 """;
@@ -53,11 +54,26 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     }
 
     @Override
+    public Optional<PaymentOrder> findByReservationId(final Long reservationId) {
+        final String sql = """
+                SELECT id, order_id, amount, payment_key, idempotency_key, status, reservation_id
+                FROM payment_order
+                WHERE reservation_id = ?
+                """;
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, this::mapToDomain, reservationId));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public boolean complete(final String orderId, final String paymentKey) {
         final String sql = """
                 UPDATE payment_order
                 SET status = ?, payment_key = ?
-                WHERE order_id = ? AND status = ?
+                WHERE order_id = ? AND status IN (?, ?)
                 """;
 
         return jdbcTemplate.update(
@@ -65,7 +81,25 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 PaymentOrderStatus.COMPLETED.name(),
                 paymentKey,
                 orderId,
-                PaymentOrderStatus.READY.name()
+                PaymentOrderStatus.READY.name(),
+                PaymentOrderStatus.REQUIRES_CONFIRMATION.name()
+        ) > 0;
+    }
+
+    @Override
+    public boolean requireConfirmation(final String orderId, final String paymentKey) {
+        final String sql = """
+                UPDATE payment_order
+                SET status = ?, payment_key = ?
+                WHERE order_id = ? AND status <> ?
+                """;
+
+        return jdbcTemplate.update(
+                sql,
+                PaymentOrderStatus.REQUIRES_CONFIRMATION.name(),
+                paymentKey,
+                orderId,
+                PaymentOrderStatus.COMPLETED.name()
         ) > 0;
     }
 
@@ -81,8 +115,8 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
 
     private long insert(final PaymentOrderEntity entity) {
         final String sql = """
-                INSERT INTO payment_order (order_id, amount, payment_key, status, reservation_id)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO payment_order (order_id, amount, payment_key, idempotency_key, status, reservation_id)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -92,8 +126,9 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
             preparedStatement.setString(1, entity.orderId());
             preparedStatement.setInt(2, entity.amount());
             preparedStatement.setString(3, entity.paymentKey());
-            preparedStatement.setString(4, entity.status());
-            preparedStatement.setLong(5, entity.reservationId());
+            preparedStatement.setString(4, entity.idempotencyKey());
+            preparedStatement.setString(5, entity.status());
+            preparedStatement.setLong(6, entity.reservationId());
 
             return preparedStatement;
         }, keyHolder);
@@ -115,6 +150,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 resultSet.getString("order_id"),
                 resultSet.getInt("amount"),
                 resultSet.getString("payment_key"),
+                resultSet.getString("idempotency_key"),
                 PaymentOrderStatus.valueOf(resultSet.getString("status")),
                 resultSet.getLong("reservation_id")
         );
@@ -126,6 +162,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 paymentOrder.getOrderId(),
                 paymentOrder.getAmount(),
                 paymentOrder.getPaymentKey(),
+                paymentOrder.getIdempotencyKey(),
                 paymentOrder.getStatus().name(),
                 paymentOrder.getReservationId()
         );

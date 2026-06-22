@@ -6,12 +6,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentResult;
+import roomescape.payment.exception.PaymentApprovalUnknownException;
+import roomescape.payment.exception.PaymentCommunicationException;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -20,6 +25,7 @@ import java.util.Base64;
 public class TossPaymentGateway implements PaymentGateway {
 
     private static final String TOSS_CONFIRM_URI = "/v1/payments/confirm";
+    private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
 
     private final RestClient tossRestClient;
     private final TossPaymentProperties properties;
@@ -33,6 +39,7 @@ public class TossPaymentGateway implements PaymentGateway {
             final TossPaymentConfirmResponse response = tossRestClient.post()
                     .uri(TOSS_CONFIRM_URI)
                     .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
+                    .header(IDEMPOTENCY_KEY_HEADER, confirmation.idempotencyKey())
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(new TossPaymentConfirmRequest(
                             confirmation.paymentKey(),
@@ -50,11 +57,16 @@ public class TossPaymentGateway implements PaymentGateway {
                     .body(TossPaymentConfirmResponse.class);
 
             return toPaymentResult(response);
+        } catch (ResourceAccessException exception) {
+            throw mapResourceAccessException(exception);
         } catch (RestClientException exception) {
+            if (hasCause(exception, SocketTimeoutException.class)) {
+                throw mapRestClientException(exception);
+            }
             if (exception.getCause() instanceof RuntimeException cause) {
                 throw cause;
             }
-            throw new IllegalStateException("결제 승인 서버와 통신하지 못했습니다.", exception);
+            throw mapRestClientException(exception);
         }
     }
 
@@ -91,5 +103,51 @@ public class TossPaymentGateway implements PaymentGateway {
                 response.orderId(),
                 response.totalAmount()
         );
+    }
+
+    private RuntimeException mapResourceAccessException(final ResourceAccessException exception) {
+        if (hasCause(exception, SocketTimeoutException.class)) {
+            return new PaymentApprovalUnknownException(
+                    "결제 승인 응답을 받지 못했습니다. 결제가 승인되었을 수 있으니 내 예약에서 상태를 확인해주세요.",
+                    exception
+            );
+        }
+        if (hasCause(exception, ConnectException.class)) {
+            return new PaymentCommunicationException(
+                    "결제 승인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.",
+                    exception
+            );
+        }
+
+        return new PaymentCommunicationException(
+                "결제 승인 서버와 통신하지 못했습니다. 잠시 후 다시 시도해주세요.",
+                exception
+        );
+    }
+
+    private RuntimeException mapRestClientException(final RestClientException exception) {
+        if (hasCause(exception, SocketTimeoutException.class)) {
+            return new PaymentApprovalUnknownException(
+                    "결제 승인 응답을 받지 못했습니다. 결제가 승인되었을 수 있으니 내 예약에서 상태를 확인해주세요.",
+                    exception
+            );
+        }
+
+        return new PaymentCommunicationException(
+                "결제 승인 서버와 통신하지 못했습니다. 잠시 후 다시 시도해주세요.",
+                exception
+        );
+    }
+
+    private boolean hasCause(final Throwable exception, final Class<? extends Throwable> causeType) {
+        Throwable current = exception;
+        while (current != null) {
+            if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+
+        return false;
     }
 }

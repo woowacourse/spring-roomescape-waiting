@@ -12,7 +12,9 @@ import roomescape.payment.controller.dto.response.PaymentFailResponse;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentOrder;
+import roomescape.payment.domain.PaymentOrderStatus;
 import roomescape.payment.domain.PaymentResult;
+import roomescape.payment.exception.PaymentApprovalUnknownException;
 import roomescape.payment.repository.PaymentOrderRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
@@ -35,9 +37,20 @@ public class PaymentService {
             return toResponse(paymentOrder);
         }
 
-        final PaymentResult paymentResult = paymentGateway.confirm(
-                new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount())
-        );
+        final PaymentResult paymentResult;
+        try {
+            paymentResult = paymentGateway.confirm(
+                    new PaymentConfirmation(
+                            request.paymentKey(),
+                            request.orderId(),
+                            request.amount(),
+                            paymentOrder.getIdempotencyKey()
+                    )
+            );
+        } catch (PaymentApprovalUnknownException exception) {
+            requireConfirmation(paymentOrder, request.paymentKey());
+            return toRequiresConfirmationResponse(paymentOrder, request.paymentKey(), exception.getMessage());
+        }
 
         completePayment(paymentOrder, paymentResult);
 
@@ -45,7 +58,9 @@ public class PaymentService {
                 paymentResult.orderId(),
                 paymentResult.amount(),
                 paymentResult.paymentKey(),
-                ReservationStatus.CONFIRMED.name()
+                ReservationStatus.CONFIRMED.name(),
+                PaymentOrderStatus.COMPLETED.name(),
+                "결제가 승인되어 예약이 확정되었습니다."
         );
     }
 
@@ -89,12 +104,36 @@ public class PaymentService {
         }
     }
 
+    private void requireConfirmation(final PaymentOrder paymentOrder, final String paymentKey) {
+        final boolean updated = paymentOrderRepository.requireConfirmation(paymentOrder.getOrderId(), paymentKey);
+        if (!updated) {
+            throw new ConflictException("결제 승인 상태가 이미 변경되었습니다.");
+        }
+    }
+
     private PaymentConfirmResponse toResponse(final PaymentOrder paymentOrder) {
         return new PaymentConfirmResponse(
                 paymentOrder.getOrderId(),
                 paymentOrder.getAmount(),
                 paymentOrder.getPaymentKey(),
-                ReservationStatus.CONFIRMED.name()
+                ReservationStatus.CONFIRMED.name(),
+                PaymentOrderStatus.COMPLETED.name(),
+                "이미 승인된 결제입니다."
+        );
+    }
+
+    private PaymentConfirmResponse toRequiresConfirmationResponse(
+            final PaymentOrder paymentOrder,
+            final String paymentKey,
+            final String message
+    ) {
+        return new PaymentConfirmResponse(
+                paymentOrder.getOrderId(),
+                paymentOrder.getAmount(),
+                paymentKey,
+                ReservationStatus.PENDING.name(),
+                PaymentOrderStatus.REQUIRES_CONFIRMATION.name(),
+                message
         );
     }
 }

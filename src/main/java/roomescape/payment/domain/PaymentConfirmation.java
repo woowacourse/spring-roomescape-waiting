@@ -3,6 +3,7 @@ package roomescape.payment.domain;
 public record PaymentConfirmation(
         String paymentKey,
         String orderId,
-        int amount
+        int amount,
+        String idempotencyKey
 ) {
 }

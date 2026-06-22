@@ -37,6 +37,19 @@ const api = {
     }
     return res.json();
   },
+  async post(url, body) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const msg = await extractErrorMessage(res);
+      throw new Error(msg);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
+  },
   async del(url) {
     const res = await fetch(url, { method: 'DELETE' });
     if (!res.ok) {
@@ -56,6 +69,44 @@ function formatTime(t) {
 
 function escStr(str) {
   return (str || '').replace(/'/g, "\\'");
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[ch]));
+}
+
+function formatWon(amount) {
+  if (amount === null || amount === undefined) return '-';
+
+  return `${Number(amount).toLocaleString('ko-KR')}원`;
+}
+
+function optionalText(value) {
+  if (value === null || value === undefined || value === '') return '-';
+
+  return escapeHtml(value);
+}
+
+function shortText(value) {
+  if (!value) return '-';
+
+  const text = String(value);
+  const short = text.length > 14 ? `${text.slice(0, 14)}...` : text;
+  return `<span class="mono-cell" title="${escapeHtml(text)}">${escapeHtml(short)}</span>`;
+}
+
+function paymentStatusClass(status) {
+  if (status === 'COMPLETED') return 'confirmed';
+  if (status === 'REQUIRES_CONFIRMATION') return 'requires-confirmation';
+  if (status === 'READY') return 'ready';
+
+  return 'default';
 }
 
 // ===== 탭 전환 =====
@@ -119,7 +170,7 @@ function renderReservationList(reservations) {
   const tbody = $('my-reservations-tbody');
 
   if (!reservations || reservations.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역이 없습니다.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역이 없습니다.</td></tr>`;
     return;
   }
 
@@ -128,14 +179,56 @@ function renderReservationList(reservations) {
       <td>${r.id}</td>
       <td>${r.date}</td>
       <td>${formatTime(r.time.startAt)}</td>
-      <td>${r.theme.name}</td>
+      <td>${escapeHtml(r.theme.name)}</td>
+      <td>
+        <span class="payment-status-badge ${paymentStatusClass(r.paymentStatus)}">
+          ${optionalText(r.paymentStatusLabel)}
+        </span>
+      </td>
+      <td>${shortText(r.orderId)}</td>
+      <td>${shortText(r.paymentKey)}</td>
+      <td>${formatWon(r.amount)}</td>
       <td>
         <div style="display:flex;gap:8px;justify-content:flex-end">
+          ${renderRetryButton(r)}
           <button class="btn-delete" onclick="cancelReservation(${r.id})">취소</button>
         </div>
       </td>
     </tr>
   `).join('');
+}
+
+function renderRetryButton(reservation) {
+  if (
+    reservation.paymentStatus !== 'REQUIRES_CONFIRMATION'
+    || !reservation.orderId
+    || !reservation.paymentKey
+    || !reservation.amount
+  ) {
+    return '';
+  }
+
+  return `
+    <button
+      class="btn-inline"
+      onclick="retryPaymentConfirmation('${escStr(reservation.orderId)}','${escStr(reservation.paymentKey)}',${reservation.amount})">
+      재확인
+    </button>
+  `;
+}
+
+async function retryPaymentConfirmation(orderId, paymentKey, amount) {
+  try {
+    const result = await api.post('/payments/confirm', { paymentKey, orderId, amount });
+    if (result.paymentStatus === 'REQUIRES_CONFIRMATION') {
+      showToast('아직 결제 승인 응답을 확인하지 못했습니다.', 'default');
+    } else {
+      showToast('결제 상태가 확인되었습니다.', 'success');
+    }
+    searchReservations();
+  } catch (e) {
+    showToast('결제 재확인에 실패했습니다. ' + e.message, 'error');
+  }
 }
 
 // ===== 대기 목록 렌더링 =====
