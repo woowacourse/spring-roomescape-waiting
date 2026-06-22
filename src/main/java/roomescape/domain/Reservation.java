@@ -63,6 +63,14 @@ public class Reservation {
         this.updateAt = now;
     }
 
+    public void moveTo(ReservationSlot reservationSlot, LocalDateTime now, Status status) {
+        validateUpdateAt(now);
+        validateNotCanceledStatus();
+        this.reservationSlot = reservationSlot;
+        this.status = status;
+        this.updateAt = now;
+    }
+
     public void cancel(LocalDateTime now) {
         validateUpdateAt(now);
         validateNotCanceledStatus();

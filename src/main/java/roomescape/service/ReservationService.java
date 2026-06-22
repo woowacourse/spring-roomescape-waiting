@@ -59,7 +59,9 @@ public class ReservationService {
 
     @Transactional
     public void delete(LocalDateTime now, Long reservationId, String name) {
-        ReservationSlot currentSlot = reservationSlotRepository.findByReservationIdForUpdate(reservationId)
+        Long currentSlotId = reservationSlotRepository.findSlotIdByReservationId(reservationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
+        ReservationSlot currentSlot = reservationSlotRepository.findByIdForUpdate(currentSlotId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_EXIST_RESERVATION));
         currentSlot.deleteReservation(reservationId, name, now);
         reservationSlotRepository.flush();

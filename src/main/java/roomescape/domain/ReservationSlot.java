@@ -66,7 +66,7 @@ public class ReservationSlot {
         validateUniqueReservation(name);
         validateNotPastReservation(now, ErrorCode.UNALLOWED_UPDATE_PAST_RESERVATION);
 
-        reservation.update(now, calculateStatus());
+        reservation.moveTo(this, now, calculateStatus());
         reservations.add(reservation);
         return reservation;
     }
