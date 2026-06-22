@@ -2,5 +2,6 @@ package roomescape.domain;
 
 public enum ReservationType {
     CONFIRMED,
-    WAITING
+    WAITING,
+    PAYMENT
 }

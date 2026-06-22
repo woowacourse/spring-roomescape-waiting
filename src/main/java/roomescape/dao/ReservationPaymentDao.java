@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.exception.DataConflictException;
+import roomescape.domain.PaymentStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationPayment;
 import roomescape.domain.ReservationTime;
@@ -24,8 +26,12 @@ public class ReservationPaymentDao {
     private final RowMapper<ReservationPayment> reservationPaymentRowMapper = (rs, rowNum) -> new ReservationPayment(
             rs.getLong("payment_id"),
             rs.getString("order_id"),
+            rs.getString("idempotency_key"),
             rs.getLong("amount"),
             rs.getString("payment_key"),
+            PaymentStatus.valueOf(rs.getString("payment_status")),
+            rs.getString("failure_code"),
+            rs.getString("failure_message"),
             new Reservation(
                     rs.getLong("reservation_id"),
                     rs.getString("name"),
@@ -49,7 +55,9 @@ public class ReservationPaymentDao {
         try {
             long id = jdbcInsert.executeAndReturnKey(Map.of(
                     "order_id", payment.getOrderId(),
+                    "idempotency_key", payment.getIdempotencyKey(),
                     "amount", payment.getAmount(),
+                    "payment_status", payment.getPaymentStatus().name(),
                     "name", reservation.getName(),
                     "date", reservation.getDate(),
                     "created_at", payment.getCreatedAt(),
@@ -64,7 +72,8 @@ public class ReservationPaymentDao {
 
     public Optional<ReservationPayment> findByOrderId(String orderId) {
         String sql = """
-                SELECT rp.id AS payment_id, rp.order_id, rp.amount, rp.payment_key,
+                SELECT rp.id AS payment_id, rp.order_id, rp.idempotency_key, rp.amount, rp.payment_key,
+                       rp.payment_status, rp.failure_code, rp.failure_message,
                        rp.id AS reservation_id, rp.name, rp.date, rp.created_at,
                        t.id AS time_id, t.start_at AS time_value,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
@@ -76,8 +85,47 @@ public class ReservationPaymentDao {
         return jdbcTemplate.query(sql, reservationPaymentRowMapper, orderId).stream().findFirst();
     }
 
+    public List<ReservationPayment> findAllByName(String name) {
+        String sql = """
+                SELECT rp.id AS payment_id, rp.order_id, rp.idempotency_key, rp.amount, rp.payment_key,
+                       rp.payment_status, rp.failure_code, rp.failure_message,
+                       rp.id AS reservation_id, rp.name, rp.date, rp.created_at,
+                       t.id AS time_id, t.start_at AS time_value,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
+                FROM reservation_payment AS rp
+                INNER JOIN reservation_time AS t ON rp.time_id = t.id
+                INNER JOIN theme AS th ON rp.theme_id = th.id
+                WHERE rp.name = ?
+                """;
+        return jdbcTemplate.query(sql, reservationPaymentRowMapper, name);
+    }
+
     public void updatePaymentKey(String orderId, String paymentKey) {
         jdbcTemplate.update("UPDATE reservation_payment SET payment_key = ? WHERE order_id = ?", paymentKey, orderId);
+    }
+
+    public void markConfirmed(String orderId, String paymentKey) {
+        jdbcTemplate.update("""
+                UPDATE reservation_payment
+                SET payment_key = ?, payment_status = ?, failure_code = NULL, failure_message = NULL
+                WHERE order_id = ?
+                """, paymentKey, PaymentStatus.CONFIRMED.name(), orderId);
+    }
+
+    public void markFailed(String orderId, String failureCode, String failureMessage) {
+        jdbcTemplate.update("""
+                UPDATE reservation_payment
+                SET payment_status = ?, failure_code = ?, failure_message = ?
+                WHERE order_id = ?
+                """, PaymentStatus.FAILED.name(), failureCode, failureMessage, orderId);
+    }
+
+    public void markConfirmUnknown(String orderId, String failureCode, String failureMessage) {
+        jdbcTemplate.update("""
+                UPDATE reservation_payment
+                SET payment_status = ?, failure_code = ?, failure_message = ?
+                WHERE order_id = ?
+                """, PaymentStatus.CONFIRM_UNKNOWN.name(), failureCode, failureMessage, orderId);
     }
 
     public int deleteByOrderId(String orderId) {

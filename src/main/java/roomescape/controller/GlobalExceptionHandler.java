@@ -15,6 +15,8 @@ import roomescape.domain.exception.InvalidInputException;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.exception.PastReservationException;
 import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentConfirmUnknownException;
+import roomescape.payment.PaymentConnectionException;
 import roomescape.payment.toss.TossPaymentException;
 import roomescape.service.exception.ReservationConflictException;
 
@@ -50,6 +52,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PaymentAmountMismatchException.class)
     public ResponseEntity<ErrorResponse> handlePaymentAmountMismatch(PaymentAmountMismatchException e) {
         return ResponseEntity.badRequest()
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentConfirmUnknownException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentConfirmUnknown(PaymentConfirmUnknownException e) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentConnectionException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentConnection(PaymentConnectionException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(new ErrorResponse(e.getMessage()));
     }
 

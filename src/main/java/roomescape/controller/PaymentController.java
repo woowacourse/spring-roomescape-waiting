@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
+import roomescape.payment.PaymentConfirmUnknownException;
+import roomescape.payment.PaymentConnectionException;
 import roomescape.service.ReservationPaymentService;
 
 @RequestMapping("/payments")
@@ -26,7 +28,13 @@ public class PaymentController {
             @RequestParam String orderId,
             @RequestParam long amount
     ) {
-        reservationPaymentService.confirm(paymentKey, orderId, amount);
+        try {
+            reservationPaymentService.confirm(paymentKey, orderId, amount);
+        } catch (PaymentConfirmUnknownException e) {
+            return redirectToUser("unknown", "결제 승인 결과를 확인하고 있습니다. 내 예약에서 결제 상태를 확인해 주세요.", "my");
+        } catch (PaymentConnectionException e) {
+            return redirectToUser("connection-fail", "토스 결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.", "my");
+        }
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create("/user.html?payment=success#my"))
                 .build();
@@ -44,6 +52,19 @@ public class PaymentController {
                 .queryParam("code", code)
                 .queryParam("message", message)
                 .fragment("booking")
+                .build()
+                .encode()
+                .toUri();
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(location)
+                .build();
+    }
+
+    private ResponseEntity<Void> redirectToUser(String payment, String message, String fragment) {
+        URI location = UriComponentsBuilder.fromPath("/user.html")
+                .queryParam("payment", payment)
+                .queryParam("message", message)
+                .fragment(fragment)
                 .build()
                 .encode()
                 .toUri();

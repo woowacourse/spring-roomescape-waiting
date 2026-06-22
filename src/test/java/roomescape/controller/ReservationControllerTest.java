@@ -559,6 +559,30 @@ class ReservationControllerTest extends ControllerTest {
                 .body("message", equalTo(message));
     }
 
+    @DisplayName("내 예약 목록에서 결제 대기 주문의 결제 정보를 확인할 수 있다")
+    @Test
+    void 내_예약_목록_결제_정보_조회() {
+        String date = LocalDate.now().plusDays(30).toString();
+        String orderId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservationParams("브라운", date, 1, 1))
+                .when().post("/reservations/payment")
+                .then().log().all()
+                .statusCode(201)
+                .extract().path("orderId");
+
+        RestAssured.given().log().all()
+                .queryParam("username", "브라운")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", equalTo(1))
+                .body("reservations[0].reservationStatus", equalTo("PAYMENT_PENDING"))
+                .body("reservations[0].paymentStatus", equalTo("PENDING"))
+                .body("reservations[0].orderId", equalTo(orderId))
+                .body("reservations[0].amount", equalTo(10000));
+    }
+
     private void assertBadRequestWhenCreateReservationWaiting(Map<String, Object> params, String message) {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

@@ -50,18 +50,23 @@ CREATE TABLE IF NOT EXISTS reservation_waiting
 
 CREATE TABLE IF NOT EXISTS reservation_payment
 (
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
-    order_id    VARCHAR(64)  NOT NULL,
-    amount      BIGINT       NOT NULL,
-    payment_key VARCHAR(255),
-    name        VARCHAR(255) NOT NULL,
-    date        DATE         NOT NULL,
-    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    time_id     BIGINT       NOT NULL,
-    theme_id    BIGINT       NOT NULL,
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id        VARCHAR(64)  NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,
+    amount          BIGINT       NOT NULL,
+    payment_key     VARCHAR(255),
+    payment_status  VARCHAR(30)  NOT NULL,
+    failure_code    VARCHAR(255),
+    failure_message VARCHAR(1024),
+    name            VARCHAR(255) NOT NULL,
+    date            DATE         NOT NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    time_id         BIGINT       NOT NULL,
+    theme_id        BIGINT       NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     UNIQUE (order_id),
+    UNIQUE (idempotency_key),
     UNIQUE (date, time_id, theme_id)
 );
