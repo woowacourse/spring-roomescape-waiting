@@ -347,29 +347,32 @@ class ReservationServiceTest {
                 reservation.getTheme().getId()))
                 .thenReturn(false);
         when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
-                reservation.getDate(),
-                reservation.getTime().getId(),
+                date,
+                originalTime.getId(),
                 reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
         when(reservationRepository.save(any(Reservation.class)))
                 .thenReturn(promotedReservation);
-        when(reservationRepository.findById(promotedReservation.getId()))
-                .thenReturn(Optional.of(promotedReservation));
 
         // when
         Reservation result = service.update(id, name, updateDate, timeId);
 
         // then
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-        assertThat(result).isEqualTo(updatedReservation);
-        verify(reservationRepository, times(2)).save(captor.capture());
-        verify(reservationWaitingRepository, times(1)).delete(waiting);
-        Reservation captured = captor.getAllValues().getFirst();
         assertAll(
-                () -> assertThat(captured.getId()).isEqualTo(id),
-                () -> assertThat(captured.getName()).isEqualTo(name),
-                () -> assertThat(captured.getDate()).isEqualTo(updateDate),
-                () -> assertThat(captured.getTime()).isEqualTo(updateTime),
+                () -> assertThat(result.getId()).isEqualTo(id),
+                () -> assertThat(result.getName()).isEqualTo(name),
+                () -> assertThat(result.getDate()).isEqualTo(updateDate),
+                () -> assertThat(result.getTime()).isEqualTo(updateTime),
+                () -> assertThat(result.getTheme()).isEqualTo(reservation.getTheme()));
+        verify(reservationRepository, times(1)).flush();
+        verify(reservationRepository, times(1)).save(captor.capture());
+        verify(reservationWaitingRepository, times(1)).delete(waiting);
+        Reservation captured = captor.getValue();
+        assertAll(
+                () -> assertThat(captured.getName()).isEqualTo(waiting.getName()),
+                () -> assertThat(captured.getDate()).isEqualTo(date),
+                () -> assertThat(captured.getTime()).isEqualTo(originalTime),
                 () -> assertThat(captured.getTheme()).isEqualTo(reservation.getTheme()));
     }
 
@@ -392,8 +395,8 @@ class ReservationServiceTest {
                 reservation.getTheme().getId()))
                 .thenReturn(false);
         when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
-                reservation.getDate(),
-                reservation.getTime().getId(),
+                date,
+                originalTime.getId(),
                 reservation.getTheme().getId()))
                 .thenReturn(Optional.empty());
 
@@ -401,8 +404,11 @@ class ReservationServiceTest {
         Reservation result = service.update(id, name, updateDate, timeId);
 
         // then
-        assertThat(result).isEqualTo(updatedReservation);
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        assertAll(
+                () -> assertThat(result.getDate()).isEqualTo(updateDate),
+                () -> assertThat(result.getTime()).isEqualTo(updateTime));
+        verify(reservationRepository, times(1)).flush();
+        verify(reservationRepository, never()).save(any(Reservation.class));
         verify(reservationWaitingRepository, never()).delete(any());
     }
 
@@ -425,12 +431,11 @@ class ReservationServiceTest {
                 reservation.getTheme().getId()))
                 .thenReturn(false);
         when(reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
-                reservation.getDate(),
-                reservation.getTime().getId(),
+                date,
+                originalTime.getId(),
                 reservation.getTheme().getId()))
                 .thenReturn(Optional.of(waiting));
         when(reservationRepository.save(any(Reservation.class)))
-                .thenReturn(new Reservation(id, name, updateDate, updateTime, reservation.getTheme()))
                 .thenThrow(new DuplicateKeyException("duplicate reservation"));
 
         // when & then
@@ -464,7 +469,8 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.getDate()).isEqualTo(updateDate),
                 () -> assertThat(result.getTime()).isEqualTo(time));
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        verify(reservationRepository, times(1)).flush();
+        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     @Test

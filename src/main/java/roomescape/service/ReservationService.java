@@ -2,7 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -64,52 +64,62 @@ public class ReservationService {
     public void delete(Long id, String name) {
         Reservation reservation = findReservation(id);
         reservationValidator.validateUpdatableReservation(reservation, name);
+        ReservationSlot deletedSlot = ReservationSlot.from(reservation);
+
         reservationRepository.deleteById(id);
-        promoteFirstWaiting(reservation);
+        reservationRepository.flush();
+        promoteFirstWaiting(deletedSlot);
     }
 
     @Transactional
     public void deleteByAdmin(Long id) {
         Reservation reservation = findReservation(id);
+        ReservationSlot deletedSlot = ReservationSlot.from(reservation);
+
         reservationRepository.deleteById(id);
         if (!reservation.isPast()) {
-            promoteFirstWaiting(reservation);
+            reservationRepository.flush();
+            promoteFirstWaiting(deletedSlot);
         }
     }
 
     @Transactional
     public Reservation update(Long id, String name, LocalDate date, Long timeId) {
         Reservation reservation = findReservation(id);
+        ReservationSlot previousSlot = ReservationSlot.from(reservation);
+
         reservationValidator.validateUpdatableReservation(reservation, name);
 
         Reservation updatedReservation = createUpdatedReservation(reservation, date, timeId);
         reservationValidator.validateUpdatePolicy(reservation, updatedReservation);
 
+        reservation.changeSchedule(updatedReservation.getTime(), updatedReservation.getDate());
+
         try {
-            reservationRepository.save(updatedReservation);
-        } catch (DuplicateKeyException e) {
+            reservationRepository.flush();
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
-        promoteFirstWaiting(reservation);
-        return findUpdatedReservation(id);
+        promoteFirstWaiting(previousSlot);
+        return reservation;
     }
 
     private Reservation save(Reservation reservation) {
         try {
             return reservationRepository.save(reservation);
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
     }
 
-    private void promoteFirstWaiting(Reservation canceledReservation) {
+    private void promoteFirstWaiting(ReservationSlot slot) {
         try {
             reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
-                            canceledReservation.getDate(),
-                            canceledReservation.getTime().getId(),
-                            canceledReservation.getTheme().getId())
+                            slot.date(),
+                            slot.timeId(),
+                            slot.themeId())
                     .ifPresent(this::promote);
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
         }
     }
@@ -129,11 +139,6 @@ public class ReservationService {
     private Reservation findReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
-    }
-
-    private Reservation findUpdatedReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("수정된 예약을 찾을 수 없습니다."));
     }
 
     private ReservationTime findReservationTime(Long timeId) {

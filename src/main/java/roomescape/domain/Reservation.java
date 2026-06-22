@@ -84,6 +84,14 @@ public class Reservation {
         return this.time.equals(time);
     }
 
+    public void changeSchedule(ReservationTime time, LocalDate date) {
+        validateTime(time);
+        validateDate(date);
+
+        this.time = time;
+        this.date = date;
+    }
+
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name은 비어 있을 수 없습니다.");
