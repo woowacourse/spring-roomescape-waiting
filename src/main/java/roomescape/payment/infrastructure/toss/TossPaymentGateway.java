@@ -20,6 +20,7 @@ import java.util.Base64;
 public class TossPaymentGateway implements PaymentGateway {
 
     private static final String TOSS_CONFIRM_URI = "/v1/payments/confirm";
+    private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
 
     private final RestClient tossRestClient;
     private final TossPaymentProperties properties;
@@ -33,6 +34,7 @@ public class TossPaymentGateway implements PaymentGateway {
             final TossPaymentConfirmResponse response = tossRestClient.post()
                     .uri(TOSS_CONFIRM_URI)
                     .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
+                    .header(IDEMPOTENCY_KEY_HEADER, confirmation.idempotencyKey())
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(new TossPaymentConfirmRequest(
                             confirmation.paymentKey(),

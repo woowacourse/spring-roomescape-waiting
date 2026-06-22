@@ -2,6 +2,7 @@ package roomescape.payment.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
@@ -79,6 +80,7 @@ class PaymentServiceTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING);
         assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.READY);
         assertThat(paymentOrder.getAmount()).isEqualTo(22000);
+        assertThat(paymentOrder.getIdempotencyKey()).isNotBlank();
     }
 
     @Test
@@ -100,6 +102,8 @@ class PaymentServiceTest {
     void confirmPayment() {
         // given
         final PaymentReadyResponse paymentReadyResponse = preparePayment(22000);
+        final PaymentOrder readyPaymentOrder = paymentOrderRepository.findByOrderId(paymentReadyResponse.orderId())
+                .orElseThrow();
         when(paymentGateway.confirm(any(PaymentConfirmation.class)))
                 .thenReturn(new PaymentResult("payment-key", paymentReadyResponse.orderId(), 22000));
 
@@ -118,6 +122,10 @@ class PaymentServiceTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
         assertThat(paymentOrder.getStatus()).isEqualTo(PaymentOrderStatus.COMPLETED);
         assertThat(paymentOrder.getPaymentKey()).isEqualTo("payment-key");
+
+        final ArgumentCaptor<PaymentConfirmation> captor = ArgumentCaptor.forClass(PaymentConfirmation.class);
+        verify(paymentGateway).confirm(captor.capture());
+        assertThat(captor.getValue().idempotencyKey()).isEqualTo(readyPaymentOrder.getIdempotencyKey());
     }
 
     @Test

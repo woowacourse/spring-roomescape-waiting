@@ -5,6 +5,7 @@ public record PaymentOrderEntity(
         String orderId,
         int amount,
         String paymentKey,
+        String idempotencyKey,
         String status,
         Long reservationId
 ) {

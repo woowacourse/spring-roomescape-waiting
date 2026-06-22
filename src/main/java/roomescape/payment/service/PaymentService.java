@@ -36,7 +36,12 @@ public class PaymentService {
         }
 
         final PaymentResult paymentResult = paymentGateway.confirm(
-                new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount())
+                new PaymentConfirmation(
+                        request.paymentKey(),
+                        request.orderId(),
+                        request.amount(),
+                        paymentOrder.getIdempotencyKey()
+                )
         );
 
         completePayment(paymentOrder, paymentResult);
