@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.config.TestTimeConfig;
 import roomescape.common.exception.RoomEscapeException;
+import roomescape.reservation.dto.ReservationCreateResponse;
 import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationResponse;
 import roomescape.reservation.dto.UserReservationsResponse;
 import roomescape.reservation.exception.ReservationErrorCode;
@@ -54,42 +54,45 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 비어있는_슬롯에_예약하면_확정된다() {
+    void 비어있는_슬롯에_예약하면_결제_대기_상태가_된다() {
         // given
         Long timeId = saveTimeId();
         Long themeId = saveThemeId();
 
         // when
-        ReservationResponse response = reservationService.reserve(request("브라운", timeId, themeId));
+        ReservationCreateResponse response = reservationService.reserve(request("브라운", timeId, themeId));
 
         // then
-        assertThat(response.status()).isEqualTo("CONFIRMED");
+        assertThat(response.status()).isEqualTo("PENDING");
+        assertThat(response.payment()).isNotNull();
+        assertThat(response.payment().orderId()).isNotBlank();
     }
 
     @Test
-    void 이미_확정된_슬롯에_예약하면_대기로_등록된다() {
+    void 이미_점유된_슬롯에_예약하면_대기로_등록된다() {
         // given
         Long timeId = saveTimeId();
         Long themeId = saveThemeId();
         reservationService.reserve(request("브라운", timeId, themeId));
 
         // when
-        ReservationResponse response = reservationService.reserve(request("어공", timeId, themeId));
+        ReservationCreateResponse response = reservationService.reserve(request("어공", timeId, themeId));
 
         // then
         assertThat(response.status()).isEqualTo("WAITING");
+        assertThat(response.payment()).isNull();
     }
 
     @Test
-    void 확정_예약을_취소하면_첫_대기자가_확정으로_승급된다() {
+    void 점유_예약을_취소하면_첫_대기자가_확정으로_승급된다() {
         // given
         Long timeId = saveTimeId();
         Long themeId = saveThemeId();
-        ReservationResponse confirmed = reservationService.reserve(request("브라운", timeId, themeId));
-        ReservationResponse waiting = reservationService.reserve(request("어공", timeId, themeId));
+        ReservationCreateResponse occupying = reservationService.reserve(request("브라운", timeId, themeId));
+        ReservationCreateResponse waiting = reservationService.reserve(request("어공", timeId, themeId));
 
         // when
-        reservationService.cancel(confirmed.id());
+        reservationService.cancel(occupying.id());
 
         // then
         assertThat(reservationService.readById(waiting.id()).status()).isEqualTo("CONFIRMED");
@@ -100,7 +103,7 @@ class ReservationServiceTest {
         // given
         Long timeId = saveTimeId();
         Long themeId = saveThemeId();
-        reservationService.reserve(request("브라운", timeId, themeId));   // 확정
+        reservationService.reserve(request("브라운", timeId, themeId));   // 점유(결제 대기)
         reservationService.reserve(request("어공", timeId, themeId));     // 대기 1번
         reservationService.reserve(request("고구마", timeId, themeId));   // 대기 2번
 
@@ -111,6 +114,21 @@ class ReservationServiceTest {
         List<UserReservationResponse> waitings = response.waitings();
         assertThat(waitings).hasSize(1);
         assertThat(waitings.get(0).waitingNumber()).isEqualTo(2L);
+    }
+
+    @Test
+    void 이미_취소된_예약을_다시_취소하면_예외가_발생한다() {
+        // given
+        Long timeId = saveTimeId();
+        Long themeId = saveThemeId();
+        ReservationCreateResponse reservation = reservationService.reserve(request("브라운", timeId, themeId));
+        reservationService.cancel(reservation.id());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.cancel(reservation.id()))
+                .isInstanceOf(RoomEscapeException.class)
+                .extracting("errorCode")
+                .isEqualTo(ReservationErrorCode.RESERVATION_NOT_FOUND);
     }
 
     @Test

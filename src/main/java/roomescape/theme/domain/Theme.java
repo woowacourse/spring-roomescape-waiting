@@ -15,24 +15,25 @@ public class Theme {
     private final String imageUrl;
     private final Long runningTime;
 
-    private Theme(Long id, String name, String description, String imageUrl) {
+    private Theme(Long id, String name, String description, String imageUrl, Long runningTime) {
         validateName(name);
         validateDescription(description);
         validateImageUrl(imageUrl);
+        validateRunningTime(runningTime);
         this.id = id;
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.runningTime = DEFAULT_RUNNING_TIME;
+        this.runningTime = runningTime;
     }
 
     public static Theme create(String name, String description, String imageUrl) {
-        return new Theme(null, name, description, imageUrl);
+        return new Theme(null, name, description, imageUrl, DEFAULT_RUNNING_TIME);
     }
 
-    public static Theme of(Long id, String name, String description, String imageUrl) {
+    public static Theme of(Long id, String name, String description, String imageUrl, Long runningTime) {
         validateId(id);
-        return new Theme(id, name, description, imageUrl);
+        return new Theme(id, name, description, imageUrl, runningTime);
     }
 
     private static void validateId(Long id) {
@@ -60,6 +61,12 @@ public class Theme {
     private static void validateImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.isBlank() || !imageUrl.contains(".")) {
             throw new RoomEscapeException(ThemeErrorCode.THEME_INVALID_URL);
+        }
+    }
+
+    private static void validateRunningTime(Long runningTime) {
+        if (runningTime == null || runningTime < 1) {
+            throw new IllegalStateException("소요 시간은 1분 이상이어야 합니다. (입력값: " + runningTime + ")");
         }
     }
 

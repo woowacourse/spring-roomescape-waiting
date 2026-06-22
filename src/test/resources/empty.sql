@@ -1,4 +1,6 @@
 DELETE
+FROM orders;
+DELETE
 FROM reservation;
 DELETE
 FROM slot;
@@ -7,6 +9,8 @@ FROM reservation_time;
 DELETE
 FROM theme;
 
+ALTER TABLE orders
+    ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE reservation
     ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE slot

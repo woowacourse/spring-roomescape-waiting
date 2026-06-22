@@ -1,10 +1,13 @@
 package roomescape.reservationtime.service;
 
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.SlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
@@ -16,11 +19,14 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final SlotRepository slotRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+                                  ReservationRepository reservationRepository,
+                                  SlotRepository slotRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.slotRepository = slotRepository;
     }
 
     @Transactional
@@ -29,9 +35,12 @@ public class ReservationTimeService {
         ReservationTime reservationTime = ReservationTime.create(reservationTimeRequest.startAt());
 
         validateDuplicateReservationTime(reservationTime);
-        ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
-
-        return ReservationTimeResponse.from(savedTime);
+        try {
+            ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
+            return ReservationTimeResponse.from(savedTime);
+        } catch (DuplicateKeyException duplicate) {
+            throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_DUPLICATE);
+        }
     }
 
     private void validateDuplicateReservationTime(ReservationTime reservationTime) {
@@ -50,7 +59,13 @@ public class ReservationTimeService {
     public void deleteReservationTime(Long id) {
         validateReservationTimeExists(id);
         validateRemovableReservationTime(id);
-        reservationTimeRepository.delete(id);
+        try {
+            // 예약이 없는 시간의 슬롯은 전부 고아이므로 함께 정리해야 FK에 막히지 않는다
+            slotRepository.deleteByTimeId(id);
+            reservationTimeRepository.delete(id);
+        } catch (DataIntegrityViolationException concurrentReservation) {
+            throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_EXIST_ON_TIME);
+        }
     }
 
     private void validateReservationTimeExists(Long id) {

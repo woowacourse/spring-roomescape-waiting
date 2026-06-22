@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>결제 실패</title>
+    <style>
+        :root {
+            --ink: #202124;
+            --muted: #666f7a;
+            --line: #d9dee7;
+            --surface: #ffffff;
+            --bg: #f6f7f9;
+            --accent: #1f6feb;
+            --danger: #c9362c;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+        }
+
+        .panel {
+            width: min(100%, 420px);
+            margin: 24px;
+            padding: 32px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 22px;
+            color: var(--danger);
+        }
+
+        p {
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .reason {
+            margin-top: 12px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--accent);
+            font-weight: 700;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<main class="panel">
+    <h1>결제에 실패했습니다</h1>
+    <p>결제가 정상적으로 완료되지 않았습니다. 결제 대기 중이던 예약은 자동으로 정리됩니다.</p>
+    <p class="reason" id="reason"></p>
+    <a href="/">홈으로 이동</a>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const messageParam = params.get('message');
+        const orderId = params.get('orderId');
+
+        const reason = document.getElementById('reason');
+        reason.textContent = messageParam ? `사유: ${messageParam}` : '사유: 결제가 취소되었거나 실패했습니다.';
+
+        // 사용자가 결제를 취소하면 orderId가 없을 수 있으므로 null 가드를 둔다.
+        fetch('/api/payments/fail', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({code, message: messageParam, orderId})
+        }).catch(() => {
+        });
+    });
+</script>
+</body>
+</html>

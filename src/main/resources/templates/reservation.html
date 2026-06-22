@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>예약하기</title>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <script th:inline="javascript">
+        window.TOSS_CLIENT_KEY = /*[[${clientKey}]]*/ '';
+    </script>
     <style>
         :root {
             --ink: #202124;
@@ -269,12 +273,32 @@
             })
                 .then(handleResponse)
                 .then(reservation => {
-                    const waiting = reservation.status === 'WAITING';
-                    showMessage(waiting ? '대기 신청이 완료되었습니다.' : '예약이 완료되었습니다.', true);
+                    if (reservation.payment) {
+                        requestTossPayment(reservation.payment);
+                        return;
+                    }
+                    showMessage('대기 신청이 완료되었습니다.', true);
                     setTimeout(() => window.location.href = '/', 1500);
                 })
                 .catch(error => showMessage(toErrorMessage(error, '요청에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
         });
+
+        function requestTossPayment(payment) {
+            const orderName = document.getElementById('theme-name').textContent;
+            const tossPayments = TossPayments(window.TOSS_CLIENT_KEY);
+            const widget = tossPayments.payment({customerKey: TossPayments.ANONYMOUS});
+
+            showMessage('결제창으로 이동합니다...', true);
+            widget.requestPayment({
+                method: 'CARD',
+                amount: {currency: 'KRW', value: payment.amount},
+                orderId: payment.orderId,
+                orderName: orderName,
+                successUrl: window.location.origin + '/payments/success',
+                failUrl: window.location.origin + '/payments/fail',
+                card: {flowMode: 'DEFAULT', useEscrow: false, useCardPoint: false, useAppCardOnly: false}
+            }).catch(error => showMessage(error.message || '결제 요청을 시작하지 못했습니다.'));
+        }
 
         function loadBookedTimes() {
             const selectedDate = datePicker.value;

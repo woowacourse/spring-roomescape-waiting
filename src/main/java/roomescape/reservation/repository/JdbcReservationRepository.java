@@ -70,7 +70,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
                 rs.getString("theme_description"),
-                rs.getString("theme_image_url")
+                rs.getString("theme_image_url"),
+                rs.getLong("theme_running_time")
         );
 
         return Slot.of(
@@ -113,7 +114,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                        th.id          AS theme_id,
                        th.name        AS theme_name,
                        th.description AS theme_description,
-                       th.image_url   AS theme_image_url
+                       th.image_url   AS theme_image_url,
+                       th.running_time AS theme_running_time
                 FROM reservation AS r
                 INNER JOIN slot AS s ON r.slot_id = s.id
                 INNER JOIN reservation_time AS t ON s.time_id = t.id
@@ -145,7 +147,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                        th.id          AS theme_id,
                        th.name        AS theme_name,
                        th.description AS theme_description,
-                       th.image_url   AS theme_image_url
+                       th.image_url   AS theme_image_url,
+                       th.running_time AS theme_running_time
                 FROM reservation AS r
                 INNER JOIN slot AS s ON r.slot_id = s.id
                 INNER JOIN reservation_time AS t ON s.time_id = t.id
@@ -159,24 +162,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void delete(Long id) {
+    public int delete(Long id) {
         String sql = """
                 DELETE FROM reservation
                 WHERE id = :id
                 """;
 
-        jdbcTemplate.update(
+        return jdbcTemplate.update(
                 sql,
                 new MapSqlParameterSource("id", id)
         );
     }
 
     @Override
-    public boolean existsConfirmedBySlotId(Long slotId) {
+    public boolean existsOccupiedBySlotId(Long slotId) {
         String sql = """
                 SELECT EXISTS (
                   SELECT 1 FROM reservation
-                  WHERE slot_id = :slot_id AND status = 'CONFIRMED'
+                  WHERE slot_id = :slot_id AND status IN ('CONFIRMED', 'PENDING')
                 )
                 """;
         return Boolean.TRUE.equals(
@@ -202,7 +205,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                        th.id          AS theme_id,
                        th.name        AS theme_name,
                        th.description AS theme_description,
-                       th.image_url   AS theme_image_url
+                       th.image_url   AS theme_image_url,
+                       th.running_time AS theme_running_time
                 FROM reservation AS r
                 INNER JOIN slot AS s ON r.slot_id = s.id
                 INNER JOIN reservation_time AS t ON s.time_id = t.id
@@ -240,7 +244,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findConfirmedByName(String name) {
+    public List<Reservation> findReservedByName(String name) {
         String sql = """
                 SELECT r.id           AS reservation_id,
                        r.name         AS reservation_name,
@@ -253,12 +257,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                        th.id          AS theme_id,
                        th.name        AS theme_name,
                        th.description AS theme_description,
-                       th.image_url   AS theme_image_url
+                       th.image_url   AS theme_image_url,
+                       th.running_time AS theme_running_time
                 FROM reservation AS r
                 INNER JOIN slot AS s ON r.slot_id = s.id
                 INNER JOIN reservation_time AS t ON s.time_id = t.id
                 INNER JOIN theme AS th ON s.theme_id = th.id
-                WHERE r.name = :name AND r.status = 'CONFIRMED'
+                WHERE r.name = :name AND r.status IN ('CONFIRMED', 'PENDING')
                 """;
 
         return jdbcTemplate.query(
@@ -282,7 +287,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                        th.id          AS theme_id,
                        th.name        AS theme_name,
                        th.description AS theme_description,
-                       th.image_url   AS theme_image_url
+                       th.image_url   AS theme_image_url,
+                       th.running_time AS theme_running_time
                 FROM (
                     SELECT r.id         AS reservation_id,
                            r.name       AS reservation_name,

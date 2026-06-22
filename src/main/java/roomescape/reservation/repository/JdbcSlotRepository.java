@@ -39,7 +39,8 @@ public class JdbcSlotRepository implements SlotRepository {
                     resultSet.getLong("theme_id"),
                     resultSet.getString("theme_name"),
                     resultSet.getString("theme_description"),
-                    resultSet.getString("theme_image_url")
+                    resultSet.getString("theme_image_url"),
+                    resultSet.getLong("theme_running_time")
             );
             return Slot.of(
                     resultSet.getLong("slot_id"),
@@ -98,7 +99,8 @@ public class JdbcSlotRepository implements SlotRepository {
                        th.id         AS theme_id,
                        th.name       AS theme_name,
                        th.description AS theme_description,
-                       th.image_url  AS theme_image_url
+                       th.image_url  AS theme_image_url,
+                       th.running_time AS theme_running_time
                 FROM slot AS s
                 INNER JOIN reservation_time AS t ON s.time_id = t.id
                 INNER JOIN theme AS th ON s.theme_id = th.id
@@ -113,5 +115,25 @@ public class JdbcSlotRepository implements SlotRepository {
 
         return results.stream()
                 .findFirst();
+    }
+
+    @Override
+    public void deleteByThemeId(Long themeId) {
+        String sql = """
+                DELETE FROM slot
+                WHERE theme_id = :theme_id
+                """;
+
+        jdbcTemplate.update(sql, new MapSqlParameterSource("theme_id", themeId));
+    }
+
+    @Override
+    public void deleteByTimeId(Long timeId) {
+        String sql = """
+                DELETE FROM slot
+                WHERE time_id = :time_id
+                """;
+
+        jdbcTemplate.update(sql, new MapSqlParameterSource("time_id", timeId));
     }
 }

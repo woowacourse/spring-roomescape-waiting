@@ -13,7 +13,8 @@ CREATE TABLE theme
     description  VARCHAR(255) NOT NULL,
     image_url    VARCHAR(255) NOT NULL,
     running_time BIGINT       NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT uq_theme_name UNIQUE (name)
 );
 
 
@@ -31,14 +32,27 @@ CREATE TABLE slot
 
 CREATE TABLE reservation
 (
-    id                BIGINT      NOT NULL AUTO_INCREMENT,
-    slot_id           BIGINT      NOT NULL,
-    name              VARCHAR(20) NOT NULL,
-    status            VARCHAR(20) NOT NULL,
-    created_at        DATETIME    NOT NULL,
-    confirmed_slot_id BIGINT GENERATED ALWAYS AS (CASE WHEN status = 'CONFIRMED' THEN slot_id END),
+    id               BIGINT      NOT NULL AUTO_INCREMENT,
+    slot_id          BIGINT      NOT NULL,
+    name             VARCHAR(20) NOT NULL,
+    status           VARCHAR(20) NOT NULL,
+    created_at       DATETIME    NOT NULL,
+    occupied_slot_id BIGINT GENERATED ALWAYS AS (CASE WHEN status IN ('CONFIRMED', 'PENDING') THEN slot_id END),
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id),
     CONSTRAINT uq_applicant UNIQUE (slot_id, name),
-    CONSTRAINT uq_confirmed UNIQUE (confirmed_slot_id)
+    CONSTRAINT uq_occupied UNIQUE (occupied_slot_id)
+);
+
+CREATE TABLE orders
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT       NOT NULL,
+    order_id       VARCHAR(64)  NOT NULL,
+    amount         BIGINT       NOT NULL,
+    payment_key    VARCHAR(210),
+    status         VARCHAR(20)  NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
+    CONSTRAINT uq_order_id UNIQUE (order_id)
 );
