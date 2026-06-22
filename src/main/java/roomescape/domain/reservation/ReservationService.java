@@ -18,7 +18,6 @@ import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
 import roomescape.support.exception.RoomescapeException;
-import roomescape.support.exception.RoomescapeErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -108,19 +107,12 @@ public class ReservationService {
                 waitingReservation.getTime(),
                 waitingReservation.getTheme()
         ));
-        deleteWaitingReservationOrThrow(waitingReservation.getId());
+        waitingReservationRepository.delete(waitingReservation);
     }
 
     private void deleteReservationOrThrow(Long id) {
         Reservation reservation = getReservation(id);
         reservationRepository.delete(reservation);
-    }
-
-    private void deleteWaitingReservationOrThrow(Long id) {
-        int deletedCount = waitingReservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new RoomescapeException(RoomescapeErrorCode.DATA_CONSISTENCY_VIOLATION);
-        }
     }
 
     private Reservation getReservation(Long id) {

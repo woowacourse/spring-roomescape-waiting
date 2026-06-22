@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,9 +25,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
-import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
 import roomescape.support.exception.RoomescapeException;
@@ -42,7 +39,7 @@ class ReservationServiceTest {
     private ReservationDateRepository reservationDateRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
-    private FakeWaitingReservationRepository waitingReservationRepository;
+    private WaitingReservationRepository waitingReservationRepository;
 
     @BeforeEach
     void setUp() {
@@ -54,7 +51,7 @@ class ReservationServiceTest {
         configureReservationDateRepository(reservationDateRepository);
         configureReservationTimeRepository(reservationTimeRepository);
         configureThemeRepository(themeRepository);
-        waitingReservationRepository = new FakeWaitingReservationRepository();
+        waitingReservationRepository = mock(WaitingReservationRepository.class);
 
         reservationService = new ReservationService(
                 reservationRepository,
@@ -454,48 +451,6 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), updateRequest))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
-    }
-
-    private static class FakeWaitingReservationRepository implements WaitingReservationRepository {
-
-        @Override
-        public WaitingReservation save(WaitingReservation waitingReservation) {
-            return waitingReservation;
-        }
-
-        @Override
-        public boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, long dateId, long timeId, long themeId) {
-            return false;
-        }
-
-        @Override
-        public Optional<WaitingReservation> findOldestBySlot(long dateId, long timeId, long themeId) {
-            return Optional.empty();
-        }
-
-        @Override
-        public List<WaitingReservationWithRank> findAllByNameWithRank(String name) {
-            return List.of();
-        }
-
-        @Override
-        public List<WaitingReservationWithRank> findUpcomingByNameWithRank(
-                String name,
-                LocalDate currentDate,
-                LocalTime currentTime
-        ) {
-            return List.of();
-        }
-
-        @Override
-        public int deleteById(Long id) {
-            return 0;
-        }
-
-        @Override
-        public Optional<WaitingReservation> findById(Long id) {
-            return Optional.empty();
-        }
     }
 
 }

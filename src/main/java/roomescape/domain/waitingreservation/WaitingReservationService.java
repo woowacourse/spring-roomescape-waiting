@@ -70,10 +70,8 @@ public class WaitingReservationService {
     }
 
     public void cancelWaitingReservation(Long id) {
-        int deletedCount = waitingReservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new RoomescapeException(WaitingReservationErrorCode.WAITING_RESERVATION_NOT_FOUND);
-        }
+        WaitingReservation waitingReservation = getWaitingReservation(id);
+        waitingReservationRepository.delete(waitingReservation);
     }
 
     public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByName(String name) {
@@ -81,5 +79,10 @@ public class WaitingReservationService {
             .stream()
             .map(WaitingReservationWithRankResponse::from)
             .toList();
+    }
+
+    private WaitingReservation getWaitingReservation(Long id) {
+        return waitingReservationRepository.findById(id)
+            .orElseThrow(() -> new RoomescapeException(WaitingReservationErrorCode.WAITING_RESERVATION_NOT_FOUND));
     }
 }

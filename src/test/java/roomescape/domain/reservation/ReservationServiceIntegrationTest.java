@@ -200,7 +200,7 @@ class ReservationServiceIntegrationTest {
         );
         doThrow(new IllegalStateException("예약 대기 삭제 실패"))
             .when(waitingReservationRepository)
-            .deleteById(firstWaiting.getId());
+            .delete(argThat(waiting -> waiting.getId().equals(firstWaiting.getId())));
 
         assertThatThrownBy(() -> reservationService.cancelReservation(cancelledReservation.getId()))
             .isInstanceOf(RuntimeException.class)
@@ -232,7 +232,7 @@ class ReservationServiceIntegrationTest {
         );
         doThrow(new IllegalStateException("예약 대기 삭제 실패"))
             .when(waitingReservationRepository)
-            .deleteById(firstWaiting.getId());
+            .delete(argThat(waiting -> waiting.getId().equals(firstWaiting.getId())));
 
         assertThatThrownBy(() -> reservationService.updateReservation(
             updatedReservation.getId(),
