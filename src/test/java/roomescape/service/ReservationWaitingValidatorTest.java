@@ -7,8 +7,8 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,8 +17,8 @@ import static org.mockito.Mockito.when;
 
 class ReservationWaitingValidatorTest {
 
-    private final ReservationRepository reservationRepository = mock();
-    private final ReservationWaitingRepository reservationWaitingRepository = mock();
+    private final JpaReservationRepository reservationRepository = mock();
+    private final JpaReservationWaitingRepository reservationWaitingRepository = mock();
     private final ReservationWaitingValidator validator = new ReservationWaitingValidator(
             reservationRepository,
             reservationWaitingRepository);
@@ -31,11 +31,13 @@ class ReservationWaitingValidatorTest {
     void 예약된_시간이고_본인_예약과_중복_대기가_아니면_대기_신청이_가능하다() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, time.getId(), theme.getId()))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByNameAndDateAndTime_IdAndTheme_Id(
+                "브라운", date, time.getId(), theme.getId()))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationWaitingRepository.existsByNameAndDateAndTime_IdAndTheme_Id(
+                "브라운", date, time.getId(), theme.getId()))
                 .thenReturn(false);
 
         // when & then
@@ -47,7 +49,7 @@ class ReservationWaitingValidatorTest {
     void 예약_가능한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, time.getId(), theme.getId()))
                 .thenReturn(false);
 
         // when & then
@@ -60,9 +62,10 @@ class ReservationWaitingValidatorTest {
     void 본인이_예약한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, time.getId(), theme.getId()))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByNameAndDateAndTime_IdAndTheme_Id(
+                "브라운", date, time.getId(), theme.getId()))
                 .thenReturn(true);
 
         // when & then
@@ -75,11 +78,13 @@ class ReservationWaitingValidatorTest {
     void 이미_대기한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByDateAndTime_IdAndTheme_Id(date, time.getId(), theme.getId()))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByNameAndDateAndTime_IdAndTheme_Id(
+                "브라운", date, time.getId(), theme.getId()))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationWaitingRepository.existsByNameAndDateAndTime_IdAndTheme_Id(
+                "브라운", date, time.getId(), theme.getId()))
                 .thenReturn(true);
 
         // when & then

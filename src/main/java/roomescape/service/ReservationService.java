@@ -2,7 +2,8 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -11,26 +12,26 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.jpa.JpaReservationRepository;
+import roomescape.repository.jpa.JpaReservationTimeRepository;
+import roomescape.repository.jpa.JpaReservationWaitingRepository;
+import roomescape.repository.jpa.JpaThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ThemeRepository themeRepository;
+    private final JpaReservationRepository reservationRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationWaitingRepository reservationWaitingRepository;
+    private final JpaThemeRepository themeRepository;
     private final ReservationValidator reservationValidator;
 
     public ReservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ReservationWaitingRepository reservationWaitingRepository,
-            ThemeRepository themeRepository,
+            JpaReservationRepository reservationRepository,
+            JpaReservationTimeRepository reservationTimeRepository,
+            JpaReservationWaitingRepository reservationWaitingRepository,
+            JpaThemeRepository themeRepository,
             ReservationValidator reservationValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -64,54 +65,71 @@ public class ReservationService {
     public void delete(Long id, String name) {
         Reservation reservation = findReservation(id);
         reservationValidator.validateUpdatableReservation(reservation, name);
-        reservationRepository.delete(id);
-        promoteFirstWaiting(reservation);
+        ReservationSlot deletedSlot = ReservationSlot.from(reservation);
+
+        deleteAndFlush(id);
+        promoteFirstWaiting(deletedSlot);
     }
 
     @Transactional
     public void deleteByAdmin(Long id) {
         Reservation reservation = findReservation(id);
-        reservationRepository.delete(id);
+        ReservationSlot deletedSlot = ReservationSlot.from(reservation);
+
+        deleteAndFlush(id);
         if (!reservation.isPast()) {
-            promoteFirstWaiting(reservation);
+            promoteFirstWaiting(deletedSlot);
         }
     }
 
     @Transactional
     public Reservation update(Long id, String name, LocalDate date, Long timeId) {
         Reservation reservation = findReservation(id);
+        ReservationSlot previousSlot = ReservationSlot.from(reservation);
+
         reservationValidator.validateUpdatableReservation(reservation, name);
 
         Reservation updatedReservation = createUpdatedReservation(reservation, date, timeId);
         reservationValidator.validateUpdatePolicy(reservation, updatedReservation);
 
+        reservation.changeSchedule(updatedReservation.getTime(), updatedReservation.getDate());
+
         try {
-            reservationRepository.update(updatedReservation);
-        } catch (DuplicateKeyException e) {
+            reservationRepository.flush();
+        } catch (OptimisticLockingFailureException e) {
+            throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
-        promoteFirstWaiting(reservation);
-        return findUpdatedReservation(id);
+        promoteFirstWaiting(previousSlot);
+        return reservation;
     }
 
     private Reservation save(Reservation reservation) {
         try {
-            Long id = reservationRepository.insert(reservation);
-            return reservationRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("생성된 예약을 찾을 수 없습니다."));
-        } catch (DuplicateKeyException e) {
+            return reservationRepository.save(reservation);
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
     }
 
-    private void promoteFirstWaiting(Reservation canceledReservation) {
+    private void deleteAndFlush(Long id) {
         try {
-            reservationWaitingRepository.findFirstWaiting(
-                            canceledReservation.getDate(),
-                            canceledReservation.getTime().getId(),
-                            canceledReservation.getTheme().getId())
+            reservationRepository.deleteById(id);
+            reservationRepository.flush();
+        } catch (OptimisticLockingFailureException e) {
+            throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
+        }
+    }
+
+    private void promoteFirstWaiting(ReservationSlot slot) {
+        try {
+            reservationWaitingRepository.findFirstByDateAndTime_IdAndTheme_IdOrderByCreatedAtAscIdAsc(
+                            slot.date(),
+                            slot.timeId(),
+                            slot.themeId())
                     .ifPresent(this::promote);
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.RESERVATION_OPERATION_CONFLICT);
         }
     }
@@ -124,8 +142,8 @@ public class ReservationService {
                 waiting.getTime(),
                 waiting.getTheme());
 
-        reservationRepository.insert(reservation);
-        reservationWaitingRepository.delete(waiting.getId());
+        reservationRepository.save(reservation);
+        reservationWaitingRepository.delete(waiting);
     }
 
     private Reservation findReservation(Long id) {
@@ -133,13 +151,8 @@ public class ReservationService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
     }
 
-    private Reservation findUpdatedReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("수정된 예약을 찾을 수 없습니다."));
-    }
-
     private ReservationTime findReservationTime(Long timeId) {
-        return reservationTimeRepository.findBy(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 시간입니다."));
     }
 
@@ -153,7 +166,7 @@ public class ReservationService {
     }
 
     private Theme findTheme(Long themeId) {
-        return themeRepository.findBy(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
