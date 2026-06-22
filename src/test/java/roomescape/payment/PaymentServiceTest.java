@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
@@ -25,6 +26,7 @@ import roomescape.payment.application.dto.request.PaymentConfirmRequest;
 import roomescape.payment.application.dto.request.PaymentFailRequest;
 import roomescape.payment.application.dto.response.PaymentConfirmResponse;
 import roomescape.payment.application.port.out.PaymentGateway;
+import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentResult;
 import roomescape.reservation.application.port.out.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
@@ -37,6 +39,7 @@ import roomescape.theme.domain.Theme;
 class PaymentServiceTest {
 
     private static final String ORDER_ID = "order_123456";
+    private static final String IDEMPOTENCY_KEY = "idempotency-key";
     private static final String PAYMENT_KEY = "payment-key";
     private static final int AMOUNT = 15_000;
 
@@ -78,7 +81,42 @@ class PaymentServiceTest {
 
         assertThat(response.status()).isEqualTo(ReservationStatus.CONFIRMED);
         assertThat(response.paymentKey()).isEqualTo(PAYMENT_KEY);
+        ArgumentCaptor<PaymentConfirmation> captor = ArgumentCaptor.forClass(PaymentConfirmation.class);
+        verify(paymentGateway).confirm(captor.capture());
+        assertThat(captor.getValue().idempotencyKey()).isEqualTo(IDEMPOTENCY_KEY);
         verify(reservationRepository).confirmPayment(reservation.getId(), ORDER_ID, PAYMENT_KEY);
+    }
+
+    @Test
+    @DisplayName("read timeout처럼 결과가 불명확한 실패는 확인 필요 상태로 표시한다.")
+    void timeout_unknown_marks_payment_check_required() {
+        Reservation reservation = pendingReservation();
+        when(reservationRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.of(reservation));
+        when(paymentGateway.confirm(any()))
+                .thenThrow(new EscapeRoomException(ErrorCode.PAYMENT_GATEWAY_TIMEOUT_UNKNOWN));
+
+        assertThatThrownBy(() -> paymentService.confirm(new PaymentConfirmRequest(PAYMENT_KEY, ORDER_ID, AMOUNT), 1L))
+                .isInstanceOf(EscapeRoomException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_GATEWAY_TIMEOUT_UNKNOWN);
+        verify(reservationRepository).markPaymentCheckRequired(reservation.getId(), ORDER_ID, PAYMENT_KEY);
+        verify(reservationRepository, never()).confirmPayment(anyLong(), any(), any());
+    }
+
+    @Test
+    @DisplayName("명확한 카드 거절은 결제 실패 상태로 표시한다.")
+    void card_rejected_marks_payment_failed() {
+        Reservation reservation = pendingReservation();
+        when(reservationRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.of(reservation));
+        when(paymentGateway.confirm(any()))
+                .thenThrow(new EscapeRoomException(ErrorCode.PAYMENT_CARD_REJECTED));
+
+        assertThatThrownBy(() -> paymentService.confirm(new PaymentConfirmRequest(PAYMENT_KEY, ORDER_ID, AMOUNT), 1L))
+                .isInstanceOf(EscapeRoomException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.PAYMENT_CARD_REJECTED);
+        verify(reservationRepository).markPaymentFailed(reservation.getId(), ORDER_ID, PAYMENT_KEY);
+        verify(reservationRepository, never()).confirmPayment(anyLong(), any(), any());
     }
 
     @Test
@@ -115,7 +153,15 @@ class PaymentServiceTest {
     void payment_failure_without_order_id_is_ignored() {
         paymentService.handleFailure(new PaymentFailRequest("PAY_PROCESS_CANCELED", "사용자 취소", null), 1L);
 
-        verify(reservationRepository, never()).deletePendingByOrderIdAndMemberId(any(), anyLong());
+        verify(reservationRepository, never()).markPendingPaymentFailedByOrderIdAndMemberId(any(), anyLong());
+    }
+
+    @Test
+    @DisplayName("failUrl의 orderId가 있으면 결제 대기 주문을 실패 상태로 표시한다.")
+    void payment_failure_with_order_id_marks_payment_failed() {
+        paymentService.handleFailure(new PaymentFailRequest("PAY_PROCESS_ABORTED", "결제 실패", ORDER_ID), 1L);
+
+        verify(reservationRepository).markPendingPaymentFailedByOrderIdAndMemberId(ORDER_ID, 1L);
     }
 
     private Reservation pendingReservation() {
@@ -127,6 +173,6 @@ class PaymentServiceTest {
                 theme,
                 AMOUNT
         );
-        return Reservation.of(1L, 1L, slot, ReservationStatus.PENDING, ORDER_ID, AMOUNT, null);
+        return Reservation.of(1L, 1L, slot, ReservationStatus.PENDING, ORDER_ID, IDEMPOTENCY_KEY, AMOUNT, null);
     }
 }

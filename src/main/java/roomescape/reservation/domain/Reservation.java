@@ -14,6 +14,7 @@ public class Reservation {
     private final Slot slot;
     private final ReservationStatus status;
     private final String orderId;
+    private final String idempotencyKey;
     private final int amount;
     private final String paymentKey;
 
@@ -23,6 +24,7 @@ public class Reservation {
             Slot slot,
             ReservationStatus status,
             String orderId,
+            String idempotencyKey,
             int amount,
             String paymentKey
     ) {
@@ -31,6 +33,7 @@ public class Reservation {
         this.slot = Objects.requireNonNull(slot, "slot은 null일 수 없습니다.");
         this.status = Objects.requireNonNull(status, "status는 null일 수 없습니다.");
         this.orderId = orderId;
+        this.idempotencyKey = idempotencyKey;
         this.amount = amount;
         this.paymentKey = paymentKey;
     }
@@ -39,16 +42,25 @@ public class Reservation {
         return createConfirmed(memberId, slot);
     }
 
-    public static Reservation createPending(long memberId, Slot slot, String orderId) {
-        return new Reservation(null, memberId, slot, ReservationStatus.PENDING, orderId, slot.getPrice(), null);
+    public static Reservation createPending(long memberId, Slot slot, String orderId, String idempotencyKey) {
+        return new Reservation(
+                null,
+                memberId,
+                slot,
+                ReservationStatus.PENDING,
+                orderId,
+                idempotencyKey,
+                slot.getPrice(),
+                null
+        );
     }
 
     public static Reservation createConfirmed(long memberId, Slot slot) {
-        return new Reservation(null, memberId, slot, ReservationStatus.CONFIRMED, null, slot.getPrice(), null);
+        return new Reservation(null, memberId, slot, ReservationStatus.CONFIRMED, null, null, slot.getPrice(), null);
     }
 
     public static Reservation of(Long id, Long memberId, Slot slot) {
-        return new Reservation(id, memberId, slot, ReservationStatus.CONFIRMED, null, slot.getPrice(), null);
+        return new Reservation(id, memberId, slot, ReservationStatus.CONFIRMED, null, null, slot.getPrice(), null);
     }
 
     public static Reservation of(
@@ -57,14 +69,15 @@ public class Reservation {
             Slot slot,
             ReservationStatus status,
             String orderId,
+            String idempotencyKey,
             int amount,
             String paymentKey
     ) {
-        return new Reservation(id, memberId, slot, status, orderId, amount, paymentKey);
+        return new Reservation(id, memberId, slot, status, orderId, idempotencyKey, amount, paymentKey);
     }
 
     public boolean isPending() {
-        return status == ReservationStatus.PENDING;
+        return status == ReservationStatus.PENDING || status == ReservationStatus.PAYMENT_CHECK_REQUIRED;
     }
 
     public boolean isConfirmedWith(String paymentKey) {

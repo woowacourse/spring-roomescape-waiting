@@ -27,6 +27,14 @@ public enum ErrorCode {
     PAYMENT_CARD_REJECTED(HttpStatus.FORBIDDEN, "PAYMENT_403_CARD_REJECTED", "카드 결제가 거절되었습니다."),
     PAYMENT_GATEWAY_RETRYABLE(HttpStatus.BAD_GATEWAY, "PAYMENT_502_RETRYABLE",
             "결제 승인 중 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
+    PAYMENT_GATEWAY_TIMEOUT_UNKNOWN(HttpStatus.BAD_GATEWAY, "PAYMENT_502_TIMEOUT_UNKNOWN",
+            "결제 승인 응답을 확인하지 못했습니다. 내 예약에서 결제 상태를 확인하거나 다시 시도해주세요."),
+    PAYMENT_GATEWAY_UNAVAILABLE(HttpStatus.BAD_GATEWAY, "PAYMENT_502_GATEWAY_UNAVAILABLE",
+            "결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요."),
+    PAYMENT_INVALID_IDEMPOTENCY_KEY(HttpStatus.BAD_REQUEST, "PAYMENT_400_INVALID_IDEMPOTENCY_KEY",
+            "결제 멱등키가 올바르지 않습니다."),
+    PAYMENT_IDEMPOTENT_REQUEST_PROCESSING(HttpStatus.CONFLICT, "PAYMENT_409_IDEMPOTENT_PROCESSING",
+            "같은 결제 승인 요청이 처리 중입니다. 잠시 후 다시 확인해주세요."),
     PAYMENT_GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "PAYMENT_502_GATEWAY", "결제 승인 중 오류가 발생했습니다."),
 
     // Waiting

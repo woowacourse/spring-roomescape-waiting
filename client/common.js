@@ -323,11 +323,15 @@ function renderPopular(themes) {
 function summarizeReservations(reservations) {
   const reservedCount = reservations.filter((reservation) => reservation.status === "CONFIRMED").length;
   const waitingCount = reservations.filter((reservation) => reservation.status === "WAITING").length;
+  const pendingCount = reservations.filter((reservation) => reservation.status === "PENDING").length;
+  const checkRequiredCount = reservations.filter((reservation) => reservation.status === "PAYMENT_CHECK_REQUIRED").length;
 
   reservationSummaryEl.classList.remove("hidden");
   reservationSummaryEl.innerHTML = `
     <span><strong>${reservedCount}</strong> 예약</span>
     <span><strong>${waitingCount}</strong> 대기</span>
+    <span><strong>${pendingCount}</strong> 결제 대기</span>
+    <span><strong>${checkRequiredCount}</strong> 확인 필요</span>
     <span>대기 순번은 취소/승격 후 자동 재계산됩니다.</span>
   `;
 }
@@ -376,6 +380,28 @@ function buildWaitingDeleteMessage(afterReservations, waitingId) {
   return lines.join("\n");
 }
 
+function paymentStatusLabel(status) {
+  if (status === "CONFIRMED") return "예약 확정";
+  if (status === "PENDING") return "결제 대기";
+  if (status === "PAYMENT_CHECK_REQUIRED") return "확인 필요";
+  if (status === "PAYMENT_FAILED") return "결제 실패";
+  if (status === "WAITING") return "대기";
+  return status;
+}
+
+function paymentMetaHtml(reservation) {
+  if (reservation.status === "WAITING") return "";
+  const amount = reservation.amount ? `${reservation.amount.toLocaleString()}원` : "-";
+  const paymentKey = reservation.paymentKey || "-";
+  const orderId = reservation.orderId || "-";
+  return `
+        <p><span>결제 상태</span><strong>${paymentStatusLabel(reservation.status)}</strong></p>
+        <p><span>주문번호</span><strong>${orderId}</strong></p>
+        <p><span>결제 금액</span><strong>${amount}</strong></p>
+        <p><span>결제키</span><strong>${paymentKey}</strong></p>
+  `;
+}
+
 function renderMyReservationCards(reservations) {
   myReservationCardsEl.innerHTML = "";
   if (!reservations.length) {
@@ -391,12 +417,14 @@ function renderMyReservationCards(reservations) {
     const card = document.createElement("article");
     const isWaiting = reservation.status === "WAITING";
     const isPending = reservation.status === "PENDING";
+    const isCheckRequired = reservation.status === "PAYMENT_CHECK_REQUIRED";
+    const isFailed = reservation.status === "PAYMENT_FAILED";
     const menuId = `${reservation.status}-${reservation.id}`;
-    const statusLabel = isWaiting ? "대기" : (isPending ? "결제 대기" : "예약");
+    const statusLabel = paymentStatusLabel(reservation.status);
     const menuItems = isWaiting
       ? `<button type="button" class="menu-item delete" data-waiting-delete-id="${reservation.id}">대기 취소</button>`
-      : `<button type="button" class="menu-item delete" data-delete-id="${reservation.id}">예약 취소</button>`;
-    const rankLabel = isWaiting ? `대기 ${reservation.waitingOrder}번째` : (isPending ? "결제 대기" : "확정 예약");
+      : (isCheckRequired || isFailed ? "" : `<button type="button" class="menu-item delete" data-delete-id="${reservation.id}">예약 취소</button>`);
+    const rankLabel = isWaiting ? `대기 ${reservation.waitingOrder}번째` : statusLabel;
 
     card.className = `reservation-card${isWaiting ? " waiting-card" : ""}`;
     card.innerHTML = `
@@ -411,7 +439,7 @@ function renderMyReservationCards(reservations) {
         <div class="menu-wrapper">
           <button type="button" class="menu-button" data-menu-id="${menuId}" aria-label="${statusLabel} 메뉴">☰</button>
           <div class="menu-panel hidden" id="menu-${menuId}">
-            ${menuItems}
+            ${menuItems || `<span class="menu-item">처리할 수 있는 작업이 없습니다.</span>`}
           </div>
         </div>
       </div>
@@ -419,7 +447,8 @@ function renderMyReservationCards(reservations) {
         <p><span>날짜</span><strong>${reservation.date}</strong></p>
         <p><span>테마</span><strong>${reservation.theme.name}</strong></p>
         <p><span>시간</span><strong>${reservation.time.time}</strong></p>
-        <p><span>상태</span><strong>${isWaiting ? `${reservation.waitingOrder}번째 대기` : (isPending ? "결제 대기" : "예약 확정")}</strong></p>
+        <p><span>상태</span><strong>${isWaiting ? `${reservation.waitingOrder}번째 대기` : statusLabel}</strong></p>
+        ${paymentMetaHtml(reservation)}
       </div>
     `;
     myReservationCardsEl.appendChild(card);

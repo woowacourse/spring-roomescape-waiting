@@ -103,7 +103,10 @@ class ReservationControllerTest {
                 new ThemeFindResponse(1L, "theme", "description", "thumbnail"),
                 new TimeInformation(1L, java.time.LocalTime.of(10, 0)),
                 ReservationStatus.CONFIRMED,
-                null
+                null,
+                "order-id",
+                10_000,
+                "payment-key"
         );
     }
 }

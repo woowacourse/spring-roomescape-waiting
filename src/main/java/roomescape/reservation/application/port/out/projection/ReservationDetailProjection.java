@@ -16,7 +16,10 @@ public record ReservationDetailProjection(
         int themePrice,
         Long timeId,
         LocalTime startAt,
-        ReservationStatus status
+        ReservationStatus status,
+        String orderId,
+        int amount,
+        String paymentKey
 ) {
     public long getTimeId() {
         return timeId();

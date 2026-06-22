@@ -53,13 +53,14 @@ CREATE TABLE reservation
     id        BIGINT NOT NULL AUTO_INCREMENT,
     member_id BIGINT NOT NULL,
     slot_id   BIGINT NOT NULL,
-    status    VARCHAR(20) NOT NULL DEFAULT 'CONFIRMED',
+    status    VARCHAR(30) NOT NULL DEFAULT 'CONFIRMED',
     order_id  VARCHAR(64),
+    idempotency_key VARCHAR(300),
     amount    INT NOT NULL DEFAULT 10000,
     payment_key VARCHAR(200),
     PRIMARY KEY (id),
-    CONSTRAINT uk_reservation_slot UNIQUE (slot_id),
     CONSTRAINT uk_reservation_order UNIQUE (order_id),
+    CONSTRAINT uk_reservation_idempotency_key UNIQUE (idempotency_key),
     FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
     FOREIGN KEY (slot_id) REFERENCES slot (id) ON DELETE RESTRICT
 );

@@ -12,6 +12,12 @@ public interface ReservationRepository {
 
     boolean confirmPayment(long reservationId, String orderId, String paymentKey);
 
+    boolean markPaymentCheckRequired(long reservationId, String orderId, String paymentKey);
+
+    void markPaymentFailed(long reservationId, String orderId, String paymentKey);
+
+    void markPendingPaymentFailedByOrderIdAndMemberId(String orderId, long memberId);
+
     List<ReservationDetailProjection> findAll();
 
     Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
@@ -28,5 +34,4 @@ public interface ReservationRepository {
 
     boolean existsByMemberIdAndSlotId(long memberId, long slotId);
 
-    void deletePendingByOrderIdAndMemberId(String orderId, long memberId);
 }
