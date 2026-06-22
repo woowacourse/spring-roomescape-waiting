@@ -25,6 +25,7 @@ public class TossPaymentException extends RuntimeException {
             case "REJECT_CARD_PAYMENT" -> new CardRejected(error.message());
             case "NOT_FOUND_PAYMENT" -> new PaymentNotFound(error.message());
             case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> new Retryable(error.message());
+            case "TOO_MANY_REQUESTS" -> new RateLimited(error.message());
             default -> new TossPaymentException(status, error.code(), error.message());
         };
     }
@@ -90,6 +91,13 @@ public class TossPaymentException extends RuntimeException {
 
         public Retryable(String message) {
             super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
+        }
+    }
+
+    public static class RateLimited extends TossPaymentException {
+
+        public RateLimited(String message) {
+            super(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", message);
         }
     }
 }
