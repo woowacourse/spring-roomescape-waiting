@@ -24,6 +24,7 @@ public class JdbcAvailableReservationTimeRepository implements AvailableReservat
                         WHERE r.time_id = rt.id
                             AND r.theme_id = ?
                             AND r.date = ?
+                            AND r.status IN ('PAYMENT_PENDING', 'CONFIRMED')
                     ) AS available
                 FROM reservation_time rt
                 ORDER BY rt.start_at ASC

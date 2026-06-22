@@ -25,6 +25,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingColumns("name", "date", "theme_id", "time_id")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -36,6 +37,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
+                        WHERE r.status = 'CONFIRMED'
                         ORDER BY r.date ASC
                         """,
                 (rs, rowNum) ->
@@ -54,7 +56,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByName(String name) {
         return jdbcTemplate.query(
-                "SELECT id, name, date, theme_id, time_id FROM reservation WHERE name = ? ORDER BY date ASC",
+                """
+                        SELECT id, name, date, theme_id, time_id
+                        FROM reservation
+                        WHERE name = ? AND status = 'CONFIRMED'
+                        ORDER BY date ASC
+                        """,
                 (rs, rowNum) -> mapReservation(rs.getLong("id"),
                         rs.getString("name"),
                         rs.getDate("date").toLocalDate(),
@@ -67,7 +74,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return jdbcTemplate.query(
-                "SELECT id, name, date, theme_id, time_id FROM reservation WHERE id = ?",
+                """
+                        SELECT id, name, date, theme_id, time_id
+                        FROM reservation
+                        WHERE id = ? AND status = 'CONFIRMED'
+                        """,
                 (rs, rowNum) -> mapReservation(rs.getLong("id"),
                         rs.getString("name"),
                         rs.getDate("date").toLocalDate(),
@@ -85,7 +96,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                         FROM reservation r
                         JOIN theme t ON r.theme_id = t.id
                         JOIN reservation_time rt ON r.time_id = rt.id
-                        WHERE r.id = ?
+                        WHERE r.id = ? AND r.status = 'CONFIRMED'
                         """,
                 (rs, rowNum) ->
                         new ReservationDetail(rs.getLong("id"),
@@ -141,7 +152,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Boolean existsByDateAndThemeAndTime(LocalDate date, Long themeId, Long timeId) {
         return jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?)",
+                """
+                        SELECT EXISTS(
+                            SELECT 1 FROM reservation
+                            WHERE date = ? AND theme_id = ? AND time_id = ? AND status = 'CONFIRMED'
+                        )
+                        """,
                 Boolean.class,
                 date,
                 themeId,
@@ -161,6 +177,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                             SELECT 1
                             FROM reservation
                             WHERE name = ? AND date = ? AND theme_id = ? AND time_id = ?
+                                AND status = 'CONFIRMED'
                         )
                         """,
                 Boolean.class,
@@ -179,6 +196,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                             SELECT 1
                             FROM reservation
                             WHERE date = ? AND theme_id = ? AND time_id = ? AND id <> ?
+                                AND status = 'CONFIRMED'
                         )
                         """,
                 Boolean.class,

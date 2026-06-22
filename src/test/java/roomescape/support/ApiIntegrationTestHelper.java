@@ -24,6 +24,7 @@ public class ApiIntegrationTestHelper {
                 .usingGeneratedKeyColumns("id");
         this.reservationInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingColumns("name", "date", "theme_id", "time_id")
                 .usingGeneratedKeyColumns("id");
         this.waitingInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")

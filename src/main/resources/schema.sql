@@ -16,12 +16,17 @@ CREATE TABLE theme
 
 CREATE TABLE reservation
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(255) NOT NULL,
-    date     DATE         NOT NULL,
-    theme_id BIGINT       NOT NULL,
-    time_id  BIGINT       NOT NULL,
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(255) NOT NULL,
+    date        DATE         NOT NULL,
+    theme_id    BIGINT       NOT NULL,
+    time_id     BIGINT       NOT NULL,
+    status      VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
+    order_id    VARCHAR(64),
+    amount      BIGINT,
+    payment_key VARCHAR(200),
     PRIMARY KEY (id),
+    CONSTRAINT uq_reservation_order_id UNIQUE (order_id),
     CONSTRAINT uq_reservation_date_theme_time UNIQUE (date, theme_id, time_id)
 );
 
