@@ -50,4 +50,14 @@ public class PaymentGatewayException extends RuntimeException {
             );
         }
     }
+
+    public static class OutboundRateLimited extends PaymentGatewayException {
+        public OutboundRateLimited() {
+            super(
+                    "PAYMENT_GATEWAY_OUTBOUND_RATE_LIMITED",
+                    "결제 승인 요청이 자체 호출 한도를 초과해 외부로 전송되지 않았습니다. 잠시 후 다시 시도해주세요.",
+                    null
+            );
+        }
+    }
 }
