@@ -20,6 +20,7 @@ public class TossClientConfig {
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.connect-timeout-ms}") int connectTimeoutMs,
             @Value("${toss.read-timeout-ms}") int readTimeoutMs
+
     ) {
         final String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
