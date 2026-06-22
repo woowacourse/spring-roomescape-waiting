@@ -1,27 +1,27 @@
 package roomescape.domain.theme;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.RoomEscapeException;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
 
-public interface ThemeRepository {
-    Theme save(Theme theme);
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    List<Theme> findAll();
+    @Query("SELECT t FROM Theme t " +
+            "JOIN Slot s ON s.theme = t " +
+            "JOIN Reservation r ON r.slot = s " +
+            "WHERE s.date.date > :fromDate AND s.date.date <= :date " +
+            "GROUP BY t " +
+            "ORDER BY COUNT(r) DESC")
+    List<Theme> findFamous(@Param("fromDate") LocalDate fromDate, @Param("date") LocalDate date, Pageable pageable);
 
-    Optional<Theme> findById(long themeId);
-
-    List<Theme> findFamous(long days, LocalDate date, long limit);
-
-    void deleteById(long themeId);
-
-    boolean existsById(long themeId);
-
-    default Theme getById(long id) {
+    default Theme getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 테마를 찾을 수 없습니다. : " + id));
     }

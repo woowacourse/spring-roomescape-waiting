@@ -1,27 +1,18 @@
 package roomescape.domain.reservation;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.RoomEscapeException;
 
-import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import static roomescape.domain.DomainErrorCode.RESOURCE_NOT_FOUND;
 
-public interface ReservationTimeRepository {
-    ReservationTime save(ReservationTime time);
+public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    List<ReservationTime> findAll();
+    List<ReservationTime> findByIdNotIn(Collection<Long> ids);
 
-    Optional<ReservationTime> findById(long id);
-
-    List<ReservationTime> findByDateAndTheme(LocalDate date, long themeId);
-
-    void delete(long id);
-
-    boolean existsById(long id);
-
-    default ReservationTime getById(long id) {
+    default ReservationTime getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new RoomEscapeException(RESOURCE_NOT_FOUND, "해당 시간을 찾을 수 없습니다. : " + id));
     }

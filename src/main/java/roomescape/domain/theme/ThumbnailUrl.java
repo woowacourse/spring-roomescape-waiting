@@ -1,5 +1,8 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -7,9 +10,15 @@ import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.require;
 import static roomescape.domain.DomainPreconditions.requireNonBlank;
 
+@Embeddable
 public class ThumbnailUrl {
     private static final Pattern URL_PATTERN = Pattern.compile("^https?://.+");
-    private final String value;
+
+    @Column(name = "thumbnail_url", nullable = false)
+    private String value;
+
+    protected ThumbnailUrl() {
+    }
 
     public ThumbnailUrl(String value) {
         requireNonBlank(value, INVALID_INPUT, "이미지 주소는 비어있을 수 없습니다.");

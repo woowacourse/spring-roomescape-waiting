@@ -25,6 +25,7 @@ public class MissionStepTest {
         jdbcTemplate.update("insert into reservation_time(start_at) values ('10:00')");
         jdbcTemplate.update(
                 "insert into theme(name, description, thumbnail_url) values ('공포', '무서워요', 'https://zeze.com')");
+        jdbcTemplate.update("insert into member(name) values ('브라운')");  // id=1
     }
 
     @Test
@@ -33,14 +34,14 @@ public class MissionStepTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservations.size()", is(0)); // 아직 생성 요청이 없으니 0개
+                .body("reservations.size()", is(0));
     }
 
 
     @Test
     void 예약_추가_및_삭제() {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
+        params.put("memberId", 1L);
         params.put("date", "2099-08-05");
         params.put("timeId", 1);
         params.put("themeId", 1);
@@ -60,7 +61,7 @@ public class MissionStepTest {
                 .body("reservations.size()", is(1));
 
         RestAssured.given().log().all()
-                .param("name", "브라운")
+                .param("memberId", 1)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);

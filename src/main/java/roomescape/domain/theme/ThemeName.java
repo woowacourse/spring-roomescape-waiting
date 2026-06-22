@@ -1,14 +1,23 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.require;
 import static roomescape.domain.DomainPreconditions.requireNonBlank;
 
+@Embeddable
 public class ThemeName {
     private static final int MAX_NAME_LENGTH = 30;
-    private final String value;
+
+    @Column(name = "name", nullable = false, length = MAX_NAME_LENGTH)
+    private String value;
+
+    protected ThemeName() {
+    }
 
     public ThemeName(String value) {
         requireNonBlank(value, INVALID_INPUT, "테마 이름은 비어있을 수 없습니다.");

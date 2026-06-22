@@ -1,13 +1,28 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalTime;
 
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.requireNonNull;
 
+@Entity
 public class ReservationTime {
-    private final Long id;
-    private final LocalTime startAt;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private LocalTime startAt;
+
+    protected ReservationTime() {
+    }
 
     private ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
@@ -20,10 +35,6 @@ public class ReservationTime {
 
     public static ReservationTime create(LocalTime startAt) {
         return new ReservationTime(null, startAt);
-    }
-
-    public ReservationTime withId(Long id) {
-        return new ReservationTime(id, this.getStartAt());
     }
 
     public Long getId() {

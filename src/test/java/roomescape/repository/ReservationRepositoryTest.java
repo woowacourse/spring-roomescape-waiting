@@ -4,15 +4,15 @@ package roomescape.repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataAccessException;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.reservation.Status;
@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,13 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 
-@JdbcTest
-@Import(value = {
-        JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class,
-        JdbcSlotRepository.class,
-        JdbcReservationRepository.class
-})
+@DataJpaTest
 class ReservationRepositoryTest {
     private final static Clock FIXED_CLOCK = Clock.fixed(
             Instant.parse("2026-05-10T03:00:00Z"),
@@ -61,6 +56,9 @@ class ReservationRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     private ReservationTime givenTime(int hour) {
         return reservationTimeRepository.save(ReservationTime.create(LocalTime.of(hour, 0)));
     }
@@ -73,35 +71,41 @@ class ReservationRepositoryTest {
         return slotRepository.save(Slot.create(date, time, theme, LocalDateTime.now(FIXED_CLOCK)));
     }
 
+    private Member givenMember(String name) {
+        return memberRepository.save(Member.create(name));
+    }
+
     @Test
     @DisplayName("ID 부여하며 저장")
     void save() {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation persisted = Reservation.create("유저", slot).withStatus(Status.APPROVED);
+        Member member = givenMember("유저");
+        Reservation persisted = Reservation.create(member, slot).withStatus(Status.APPROVED);
 
         Reservation saved = reservationRepository.save(persisted);
 
         assertSoftly(softly -> {
             softly.assertThat(saved.getId()).isNotNull();
-            softly.assertThat(saved.getName().getValue()).isEqualTo("유저");
+            softly.assertThat(saved.getMember().getName()).isEqualTo("유저");
         });
     }
 
     @Test
-    @DisplayName("같은 이름 저장 시 유니크 처리")
-    void save_throwsException_whenSameSlotAndName() {
+    @DisplayName("같은 회원 저장 시 유니크 처리")
+    void save_throwsException_whenSameSlotAndMember() {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation persisted = Reservation.create("유저", slot).withStatus(Status.APPROVED);
+        Member member = givenMember("유저");
+        Reservation persisted = Reservation.create(member, slot).withStatus(Status.APPROVED);
 
         reservationRepository.save(persisted);
 
         assertThatThrownBy(() -> {
-            Reservation conflict = Reservation.create("유저", slot).withStatus(Status.WAITING);
-            reservationRepository.save(conflict);
+            Reservation conflict = Reservation.create(member, slot).withStatus(Status.WAITING);
+            reservationRepository.saveAndFlush(conflict);
         }).isInstanceOf(DataAccessException.class);
     }
 
@@ -111,14 +115,16 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given1 = Reservation.create("유저1", slot).withStatus(Status.APPROVED);
-        Reservation given2 = Reservation.create("유저2", slot).withStatus(Status.WAITING);
+        Member member1 = givenMember("유저1");
+        Member member2 = givenMember("유저2");
+        Reservation given1 = Reservation.create(member1, slot).withStatus(Status.APPROVED);
+        Reservation given2 = Reservation.create(member2, slot).withStatus(Status.WAITING);
         reservationRepository.save(given1);
         reservationRepository.save(given2);
 
-        Reservations all = reservationRepository.findAll();
+        List<Reservation> all = reservationRepository.findAll();
 
-        assertThat(all.getValues().size()).isEqualTo(2);
+        assertThat(all).hasSize(2);
     }
 
     @Test
@@ -127,7 +133,8 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
+        Member member = givenMember("유저");
+        Reservation given = Reservation.create(member, slot).withStatus(Status.APPROVED);
 
         Reservation saved = reservationRepository.save(given);
         Optional<Reservation> found = reservationRepository.findById(saved.getId());
@@ -135,7 +142,7 @@ class ReservationRepositoryTest {
         assertSoftly(softly -> {
             softly.assertThat(found).isPresent();
             softly.assertThat(found.get().getId()).isEqualTo(saved.getId());
-            softly.assertThat(found.get().getName()).isEqualTo(saved.getName());
+            softly.assertThat(found.get().getMember().getId()).isEqualTo(saved.getMember().getId());
             softly.assertThat(found.get().getStatus()).isEqualTo(saved.getStatus());
         });
     }
@@ -146,7 +153,8 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
+        Member member = givenMember("유저");
+        Reservation given = Reservation.create(member, slot).withStatus(Status.APPROVED);
         Reservation saved = reservationRepository.save(given);
 
         reservationRepository.deleteById(saved.getId());
@@ -156,31 +164,34 @@ class ReservationRepositoryTest {
 
     @Test
     @DisplayName("slot_id의 모든 예약 조회")
-    void findBySlotId() {
+    void findBySlot_Id() {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given1 = Reservation.create("유저1", slot).withStatus(Status.APPROVED);
-        Reservation given2 = Reservation.create("유저2", slot).withStatus(Status.WAITING);
+        Member member1 = givenMember("유저1");
+        Member member2 = givenMember("유저2");
+        Reservation given1 = Reservation.create(member1, slot).withStatus(Status.APPROVED);
+        Reservation given2 = Reservation.create(member2, slot).withStatus(Status.WAITING);
         reservationRepository.save(given1);
         reservationRepository.save(given2);
 
-        Reservations bySlotId = reservationRepository.findBySlotId(slot.getId());
+        List<Reservation> bySlotId = reservationRepository.findBySlot_Id(slot.getId());
 
-        assertThat(bySlotId.getValues().size()).isEqualTo(2);
+        assertThat(bySlotId).hasSize(2);
     }
 
     @Test
-    @DisplayName("같은 slot_id와 name의 예약 존재 확인")
-    void existsBySlotIdAndName() {
+    @DisplayName("같은 slot_id와 member의 예약 존재 확인")
+    void existsBySlotIdAndMember() {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
+        Member member = givenMember("유저");
+        Reservation given = Reservation.create(member, slot).withStatus(Status.APPROVED);
         Reservation saved = reservationRepository.save(given);
 
-        Reservations reservations = reservationRepository.findBySlotId(slot.getId());
-        boolean exists = reservations.hasByName(saved);
+        List<Reservation> reservations = reservationRepository.findBySlot_Id(slot.getId());
+        boolean exists = reservations.stream().anyMatch(r -> r.isSameMember(saved));
 
         assertThat(exists).isTrue();
     }
@@ -191,70 +202,51 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
+        Member member = givenMember("유저");
+        Reservation given = Reservation.create(member, slot).withStatus(Status.APPROVED);
         reservationRepository.save(given);
 
-        Reservations reservations = reservationRepository.findBySlotId(slot.getId());
-        boolean hasApproved = reservations.getValues().stream().anyMatch(Reservation::isApproved);
+        List<Reservation> reservations = reservationRepository.findBySlot_Id(slot.getId());
+        boolean hasApproved = reservations.stream().anyMatch(Reservation::isApproved);
 
         assertThat(hasApproved).isTrue();
     }
 
     @Test
-    @DisplayName("id에 따른 status 업데이트 후 조회")
-    void updateStatusById() {
+    @DisplayName("id에 따른 status 더티 체킹 후 조회")
+    void changeStatus() {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", slot).withStatus(Status.WAITING);
+        Member member = givenMember("유저");
+        Reservation given = Reservation.create(member, slot).withStatus(Status.WAITING);
         Reservation saved = reservationRepository.save(given);
 
-        reservationRepository.updateStatusById(saved.getId(), Status.APPROVED);
+        reservationRepository.getById(saved.getId()).changeStatus(Status.APPROVED);
 
         Optional<Reservation> found = reservationRepository.findById(saved.getId());
 
         assertSoftly(softly -> {
             softly.assertThat(found).isPresent();
-            softly.assertThat(found.get().getId()).isEqualTo(saved.getId());
-            softly.assertThat(found.get().getName()).isEqualTo(saved.getName());
             softly.assertThat(found.get().getStatus()).isEqualTo(Status.APPROVED);
         });
     }
 
     @Test
-    @DisplayName("이름으로 예약 조회")
-    void findByName() {
+    @DisplayName("회원으로 예약 조회")
+    void findByMember() {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given1 = Reservation.create("유저1", slot).withStatus(Status.APPROVED);
-        Reservation given2 = Reservation.create("유저2", slot).withStatus(Status.WAITING);
-        reservationRepository.save(given1);
-        reservationRepository.save(given2);
+        Member member1 = givenMember("유저1");
+        Member member2 = givenMember("유저2");
+        reservationRepository.save(Reservation.create(member1, slot).withStatus(Status.APPROVED));
+        reservationRepository.save(Reservation.create(member2, slot).withStatus(Status.WAITING));
 
-        Reservations byName = reservationRepository.findByName("유저1");
+        List<Reservation> byMember = reservationRepository.findAllByMember(member1);
 
-        assertThat(byName.getValues()).hasSize(1);
-        assertThat(byName.getValues().get(0).getName().getValue()).isEqualTo("유저1");
-    }
-
-    @Test
-    @DisplayName("예약 수정 후 조회")
-    void update() {
-        ReservationTime time = givenTime(14);
-        Theme theme = givenTheme("테스트 테마");
-        Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", slot).withStatus(Status.WAITING);
-        Reservation saved = reservationRepository.save(given);
-
-        Reservation updated = Reservation.create("수정유저", slot).withStatus(Status.APPROVED);
-        Reservation result = reservationRepository.update(saved.getId(), updated);
-
-        assertSoftly(softly -> {
-            softly.assertThat(result.getId()).isEqualTo(saved.getId());
-            softly.assertThat(result.getName().getValue()).isEqualTo("수정유저");
-            softly.assertThat(result.getStatus()).isEqualTo(Status.APPROVED);
-        });
+        assertThat(byMember).hasSize(1);
+        assertThat(byMember.get(0).getMember().getName()).isEqualTo("유저1");
     }
 
     @Test
@@ -263,7 +255,8 @@ class ReservationRepositoryTest {
         ReservationTime time = givenTime(14);
         Theme theme = givenTheme("테스트 테마");
         Slot slot = givenSlot(new ReservationDate(TODAY), time, theme);
-        Reservation given = Reservation.create("유저", slot).withStatus(Status.APPROVED);
+        Member member = givenMember("유저");
+        Reservation given = Reservation.create(member, slot).withStatus(Status.APPROVED);
         Reservation saved = reservationRepository.save(given);
 
         assertThat(reservationRepository.existsById(saved.getId())).isTrue();

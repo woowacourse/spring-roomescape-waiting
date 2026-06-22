@@ -1,20 +1,60 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.requireNonNull;
 
+@Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(name = "uq_slot",
+        columnNames = {"date", "time_id", "theme_id"}
+        ))
 public class Slot {
-    private final Long id;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private ReservationDate date;
+
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    /**
+     * 미션 1 이후 양방향 삭제 고려
+     *
+     * - 테스트를 위한 양방향
+     */
+    @OneToMany(mappedBy = "slot")
+    private List<Reservation> reservations = new ArrayList<>();
+
+    protected Slot() {
+    }
 
     public Slot(Long id, ReservationDate date, ReservationTime time, Theme theme) {
         this.id = id;
@@ -39,16 +79,16 @@ public class Slot {
         }
     }
 
-    public Slot withId(Long generatedKey) {
-        return new Slot(generatedKey, date, time, theme);
-    }
-
     public boolean isPast(LocalDateTime now) {
         return LocalDateTime.of(date.getDate(), time.getStartAt()).isBefore(now);
     }
 
     public Long getId() {
         return id;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 
     public ReservationDate getDate() {

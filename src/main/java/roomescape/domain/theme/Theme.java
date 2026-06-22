@@ -1,16 +1,36 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.util.Objects;
 
 import static roomescape.domain.DomainErrorCode.INVALID_INPUT;
 import static roomescape.domain.DomainPreconditions.requireNonBlank;
 import static roomescape.domain.DomainPreconditions.requireNonNull;
 
+@Entity
 public class Theme {
-    private final Long id;
-    private final ThemeName name;
-    private final String description;
-    private final ThumbnailUrl thumbnailUrl;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private ThemeName name;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Embedded
+    private ThumbnailUrl thumbnailUrl;
+
+    protected Theme() {
+    }
 
     private Theme(Long id, ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
         this.id = id;
@@ -25,10 +45,6 @@ public class Theme {
 
     public static Theme create(ThemeName name, String description, ThumbnailUrl thumbnailUrl) {
         return new Theme(null, name, description, thumbnailUrl);
-    }
-
-    public Theme withId(Long generatedKey) {
-        return new Theme(generatedKey, name, description, thumbnailUrl);
     }
 
     public Long getId() {
@@ -59,5 +75,9 @@ public class Theme {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public void changeDescription(String description) {
+        this.description = description;
     }
 }

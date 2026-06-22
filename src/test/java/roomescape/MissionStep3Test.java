@@ -49,9 +49,10 @@ public class MissionStep3Test {
         jdbcTemplate.update("insert into reservation_time(start_at) values ('10:00')");
         jdbcTemplate.update(
                 "insert into theme(name, description, thumbnail_url) values ('공포', '무서워요', 'https://zeze.com')");
+        jdbcTemplate.update("insert into member(name) values ('브라운')");  // id=1
 
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
+        reservation.put("memberId", 1L);
         reservation.put("date", "2099-08-05");
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
@@ -67,6 +68,6 @@ public class MissionStep3Test {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("reservations.size()", is(1));
     }
 }

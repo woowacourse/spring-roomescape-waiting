@@ -4,6 +4,7 @@ import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class Reservations {
@@ -14,24 +15,23 @@ public class Reservations {
     }
 
     public Reservation join(Reservation assembled) {
-        conflictByName(assembled);
-        Reservation withStatus = assembled.withStatus(nextStatus());
-        return withStatus.withRank(rankOf(withStatus));
+        conflictByMember(assembled);
+        return assembled.withStatus(nextStatus());
     }
 
     private Status nextStatus() {
         return values.stream().anyMatch(Reservation::isApproved) ? Status.WAITING : Status.APPROVED;
     }
 
-    public void conflictByName(Reservation reservation) {
-        if (hasByName(reservation)) {
-            throw new RoomEscapeException(DomainErrorCode.ALREADY_EXISTS, "이미 같은 슬롯에 예약이 존재합니다: " + reservation.getName().getValue());
+    public void conflictByMember(Reservation reservation) {
+        if (hasByMember(reservation)) {
+            throw new RoomEscapeException(DomainErrorCode.ALREADY_EXISTS, "이미 같은 슬롯에 예약이 존재합니다: " + reservation.getMember().getName());
         }
     }
 
-    public boolean hasByName(Reservation other) {
+    public boolean hasByMember(Reservation other) {
         return values.stream()
-                .anyMatch(r -> r.isSameName(other));
+                .anyMatch(r -> r.isSameMember(other));
     }
 
     public Reservations excluding(Long id) {
@@ -44,13 +44,10 @@ public class Reservations {
                 .findFirst();
     }
 
-    public Rank rankOf(Reservation reservation) {
-        if (reservation.isApproved()) {
-            return new Rank(0);
-        }
-        List<Reservation> waitings = values.stream().filter(Reservation::isWaiting).toList();
-        int position = waitings.indexOf(reservation);
-        return position == -1 ? new Rank(waitings.size() + 1) : new Rank(position + 1);
+    public List<ReservationWithRank> withRanks(Map<Long, Long> rankMap) {
+        return values.stream()
+                .map(r -> new ReservationWithRank(r, rankMap.getOrDefault(r.getId(), 0L)))
+                .toList();
     }
 
     public List<Reservation> getValues() {

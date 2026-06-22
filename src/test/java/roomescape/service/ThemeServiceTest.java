@@ -11,6 +11,8 @@ import roomescape.domain.RoomEscapeException;
 import roomescape.domain.reservation.SlotRepository;
 import roomescape.domain.theme.ThemeRepository;
 
+import org.springframework.data.domain.PageRequest;
+
 import java.time.LocalDate;
 
 import static org.mockito.BDDMockito.given;
@@ -57,7 +59,7 @@ public class ThemeServiceTest {
         themeService.findFamous(limit, days, date);
 
         // then
-        verify(themeRepository).findFamous(days, date, limit);
+        verify(themeRepository).findFamous(date.minusDays(days), date, PageRequest.of(0, limit));
     }
 
     @Test

@@ -1,47 +1,76 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import roomescape.domain.DomainErrorCode;
 import roomescape.domain.RoomEscapeException;
+import roomescape.domain.member.Member;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(name = "uq_reservation",
+                columnNames = {"slot_id", "member_id"}
+        ))
 public class Reservation {
-    private final Long id;
-    private final ReservationName name;
-    private final Status status;
-    private final Slot slot;
-    private final Rank rank;
 
-    public Reservation(Long id, ReservationName name, Status status, Slot slot) {
-        this(id, name, status, slot, null);
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "slot_id")
+    private Slot slot;
+
+    @Column(name = "created_at", insertable = false, updatable = false,
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime createdAt;
+
+    protected Reservation() {
     }
 
-    public Reservation(Long id, ReservationName name, Status status, Slot slot, Rank rank) {
+    public Reservation(Long id, Member member, Status status, Slot slot) {
         this.id = id;
-        this.name = name;
+        this.member = member;
         this.status = status;
         this.slot = slot;
-        this.rank = rank;
     }
 
-    public static Reservation load(Long id, String name, String status, Slot slot) {
-        return new Reservation(id, new ReservationName(name), Status.from(status), slot);
-    }
-
-    public static Reservation create(String name, Slot slot) {
-        return new Reservation(null, new ReservationName(name), Status.WAITING, slot);
-    }
-
-    public Reservation withId(Long id) {
-        return new Reservation(id, name, status, slot, rank);
+    public static Reservation create(Member member, Slot slot) {
+        if (member == null) {
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT, "회원은 null일 수 없습니다.");
+        }
+        return new Reservation(null, member, Status.WAITING, slot);
     }
 
     public Reservation withStatus(Status status) {
-        return new Reservation(id, name, status, slot, rank);
+        return new Reservation(id, member, status, slot);
     }
 
-    public Reservation withRank(Rank rank) {
-        return new Reservation(id, name, status, slot, rank);
+    public void changeStatus(Status status) {
+        this.status = status;
+    }
+
+    public void changeSlot(Slot slot) {
+        this.slot = slot;
     }
 
     public boolean isApproved() {
@@ -52,16 +81,16 @@ public class Reservation {
         return status == Status.WAITING;
     }
 
-    public boolean isSameName(Reservation other) {
-        return name.isSame(other.name);
+    public boolean isSameMember(Reservation other) {
+        return member.getId().equals(other.member.getId());
     }
 
     public void validateCancellable(LocalDateTime now) {
         slot.validateNotPast(now);
     }
 
-    public void validateOwner(String ownerName) {
-        if (!name.isSame(new ReservationName(ownerName))) {
+    public void validateOwner(Long memberId) {
+        if (!member.getId().equals(memberId)) {
             throw new RoomEscapeException(DomainErrorCode.FORBIDDEN, "본인의 예약만 취소할 수 있습니다.");
         }
     }
@@ -70,16 +99,12 @@ public class Reservation {
         return id;
     }
 
-    public ReservationName getName() {
-        return name;
+    public Member getMember() {
+        return member;
     }
 
     public Status getStatus() {
         return status;
-    }
-
-    public Rank getRank() {
-        return rank;
     }
 
     public Slot getSlot() {
