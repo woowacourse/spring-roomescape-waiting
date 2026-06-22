@@ -295,6 +295,59 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        .payment-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: -8px 0 16px;
+        }
+
+        .pay-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .pay-badge.done {
+            background: #d1f5d3;
+            color: #1d6b1f;
+        }
+
+        .pay-badge.pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .pay-badge.indoubt {
+            background: #fff3cd;
+            color: #8a6100;
+        }
+
+        .pay-badge.fail {
+            background: #fff5f5;
+            color: #ff3b30;
+        }
+
+        .pay-meta {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .pay-note {
+            width: 100%;
+            margin: 4px 0 0;
+            padding: 8px 12px;
+            background: #fffbe6;
+            border-radius: 6px;
+            color: #8a6100;
+            font-size: 13px;
+        }
+
     </style>
 </head>
 <body>
@@ -359,6 +412,7 @@
         const isWaiting = r.status === 'WAITING';
         const statusText = isWaiting ? '대기' : '예약';
         const cancelText = isWaiting ? '대기 취소' : '취소';
+        const paymentInfo = (!isWaiting && r.paymentStatus) ? renderPayment(r) : '';
 
         return `
             <div class="reservation-card" data-id="${r.id}" data-theme-id="${r.theme.id}" data-status="${r.status}">
@@ -379,6 +433,7 @@
                         <button class="cancel-btn">${cancelText}</button>
                     </div>
                 </div>
+                ${paymentInfo}
 
                 <div class="update-form ${isWaiting ? 'hidden' : ''}">
                     <div class="update-form-row">
@@ -553,6 +608,30 @@
         } catch {
             return '알 수 없는 오류가 발생했습니다.';
         }
+    }
+
+    function renderPayment(r) {
+        const map = {
+            PENDING: ['결제 대기', 'pending'],
+            DONE: ['결제 완료', 'done'],
+            IN_DOUBT: ['확인 필요', 'indoubt'],
+            UNKNOWN: ['확인 필요', 'indoubt'],
+            CANCELED: ['결제 취소', 'fail'],
+            ABORTED: ['결제 실패', 'fail'],
+        };
+        const [label, cls] = map[r.paymentStatus] || ['확인 필요', 'indoubt'];
+        const amount = (r.amount != null) ? ` · ${r.amount.toLocaleString()}원` : '';
+        const key = (r.paymentStatus === 'DONE' && r.paymentKey)
+            ? ` · 결제키 ${escapeHtml(r.paymentKey)}` : '';
+        const note = (r.paymentStatus === 'IN_DOUBT')
+            ? `<p class="pay-note">결제 결과가 확인되지 않았어요. 잠시 후 다시 조회하거나, 같은 주문으로 재시도해도 이중 결제되지 않습니다.</p>`
+            : '';
+        return `
+            <div class="payment-info">
+                <span class="pay-badge ${cls}">${label}</span>
+                <span class="pay-meta">주문 ${escapeHtml(r.orderId || '-')}${amount}${key}</span>
+                ${note}
+            </div>`;
     }
 
     function showToast(message) {

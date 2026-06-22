@@ -8,13 +8,22 @@
 <main style="max-width:480px;margin:80px auto;text-align:center;font-family:sans-serif">
     <h1 id="title"></h1>
     <p id="message" style="color:#666"></p>
-    <a href="index.html">메인으로</a>
+    <a href="my-reservations.html">내 예약 보기</a>
 </main>
 <script>
     const p = new URLSearchParams(location.search);
-    document.getElementById('title').textContent =
-        p.get('status') === 'success' ? '✅ 결제가 완료되었습니다' : '❌ 결제에 실패했습니다';
-    document.getElementById('message').textContent = p.get('message') || '';
+    const status = p.get('status');
+    let title;
+    if (status === 'success') {
+        title = '✅ 결제가 완료되었습니다';
+    } else if (status === 'pending') {
+        title = '⏳ 결제 결과를 확인 중입니다';
+    } else {
+        title = '❌ 결제에 실패했습니다';
+    }
+    document.getElementById('title').textContent = title;
+    document.getElementById('message').textContent = p.get('message')
+        || (status === 'pending' ? "잠시 후 '내 예약'에서 결제 상태를 확인해 주세요." : '');
 </script>
 </body>
 </html>

@@ -70,4 +70,10 @@ public class JdbcPaymentRepository implements PaymentRepository {
     public void deleteByReservationId(Long reservationId) {
         jdbcTemplate.update("DELETE FROM payment WHERE reservation_id = ?", reservationId);
     }
+
+    @Override
+    public void updateStatus(String orderId, PaymentStatus status) {
+        jdbcTemplate.update("UPDATE payment SET status = ? WHERE order_id = ?", status.name(), orderId);
+    }
+
 }

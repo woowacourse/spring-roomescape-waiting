@@ -7,7 +7,8 @@ public enum PaymentStatus {
     DONE,
     CANCELED,
     ABORTED,
-    UNKNOWN;
+    UNKNOWN,
+    IN_DOUBT;   // read timeout 등 결과 미확정 — 사용자에겐 '확인 필요'. 토스가 주는 값이 아니라 우리가 직접 세팅한다.
 
     /**
      * 외부 PG사가 준 상태 문자열을 도메인 상태로 번역한다. 모르는 값이 와도 깨지지 않고 UNKNOWN으로 떨어뜨린다(외부 스키마 변화 방어).
@@ -22,9 +23,5 @@ public enum PaymentStatus {
             }
         }
         return UNKNOWN;
-    }
-
-    public boolean isSuccess() {
-        return this == DONE;
     }
 }

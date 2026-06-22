@@ -2,6 +2,7 @@ package roomescape.application;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -59,4 +60,25 @@ class PaymentServiceTest {
         verify(paymentRepository).updateConfirmed("order_1", "test_pk_1", PaymentStatus.DONE);
         verify(reservationRepository).updateStatus(1L, ReservationStatus.CONFIRMED);
     }
+
+    @Test
+    void markInDoubt는_대기중_결제를_확인필요로_바꾼다() {
+        given(paymentRepository.findByOrderId("order_1"))
+                .willReturn(Optional.of(Payment.pending(1L, "order_1", 1000L)));
+
+        paymentService.markInDoubt("order_1");
+
+        verify(paymentRepository).updateStatus("order_1", PaymentStatus.IN_DOUBT);
+    }
+
+    @Test
+    void markInDoubt는_이미_확정된_결제는_건드리지_않는다() {
+        Payment done = Payment.withId(1L, 1L, "order_1", 1000L, "pk", PaymentStatus.DONE);
+        given(paymentRepository.findByOrderId("order_1")).willReturn(Optional.of(done));
+
+        paymentService.markInDoubt("order_1");
+
+        verify(paymentRepository, never()).updateStatus(anyString(), any());
+    }
+
 }
