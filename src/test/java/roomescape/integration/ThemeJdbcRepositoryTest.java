@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
-import roomescape.repository.ThemeJdbcRepository;
+import roomescape.infrastructure.repository.ThemeJdbcRepository;
 
 @JdbcTest
 @Import(ThemeJdbcRepository.class)

@@ -15,8 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.Theme;
+import roomescape.domain.ThemeRepository;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeUseCaseMockTest {

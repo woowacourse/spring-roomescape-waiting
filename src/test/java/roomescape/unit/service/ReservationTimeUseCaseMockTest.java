@@ -20,10 +20,10 @@ import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.projection.ReservationTimeAvailability;
-import roomescape.repository.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeUseCaseMockTest {

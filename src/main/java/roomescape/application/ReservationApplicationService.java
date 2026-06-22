@@ -2,8 +2,6 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.api.dto.ReservationRequest;
-import roomescape.api.dto.ReservationResponses;
 import roomescape.application.command.ReservationCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
@@ -13,10 +11,12 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+import roomescape.presentation.dto.ReservationRequest;
+import roomescape.presentation.dto.ReservationResponses;
 
 @Service
 public class ReservationApplicationService {
-    
+
     private final ReservationCommandService reservationCommandService;
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;

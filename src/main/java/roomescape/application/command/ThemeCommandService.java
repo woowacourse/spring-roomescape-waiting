@@ -3,7 +3,7 @@ package roomescape.application.command;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.repository.ThemeRepository;
+import roomescape.domain.ThemeRepository;
 
 @Service
 @Transactional

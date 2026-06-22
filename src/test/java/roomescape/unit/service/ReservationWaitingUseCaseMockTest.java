@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.api.dto.ReservationWaitingRequest;
 import roomescape.application.ReservationWaitingApplicationService;
 import roomescape.application.command.ReservationWaitingCommandService;
 import roomescape.application.query.ReservationQueryService;
@@ -32,14 +31,15 @@ import roomescape.config.FixedClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.ReservationWaitingQueryRepository;
+import roomescape.domain.ReservationWaitingRepository;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
-import roomescape.repository.ReservationWaitingQueryRepository;
-import roomescape.repository.ReservationWaitingRepository;
+import roomescape.presentation.dto.ReservationWaitingRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingUseCaseMockTest {

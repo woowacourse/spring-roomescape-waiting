@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.api.dto.ReservationRequest;
 import roomescape.application.ReservationApplicationService;
 import roomescape.application.command.ReservationCommandService;
 import roomescape.application.query.ReservationQueryService;
@@ -25,11 +24,12 @@ import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ThemeQueryService;
 import roomescape.config.FixedClockConfig;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.repository.ReservationRepository;
+import roomescape.presentation.dto.ReservationRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationUseCaseMockTest {

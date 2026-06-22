@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.api.dto.ReservationTimeRequest;
 import roomescape.application.command.ReservationTimeCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
@@ -13,6 +12,7 @@ import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.projection.ReservationTimeAvailability;
+import roomescape.presentation.dto.ReservationTimeRequest;
 
 @Service
 public class ReservationTimeApplicationService {

@@ -6,11 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.ReservationWaitingQueryRepository;
+import roomescape.domain.ReservationWaitingRepository;
 import roomescape.domain.Slot;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
-import roomescape.repository.ReservationWaitingQueryRepository;
-import roomescape.repository.ReservationWaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
