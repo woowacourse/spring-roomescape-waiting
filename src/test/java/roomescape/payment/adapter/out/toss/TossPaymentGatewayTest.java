@@ -9,6 +9,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withForbiddenRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -31,6 +33,7 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentResult;
+import roomescape.ratelimit.RetryAfterInterceptor;
 
 class TossPaymentGatewayTest {
 
@@ -82,6 +85,42 @@ class TossPaymentGatewayTest {
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.totalAmount()).isEqualTo(15_000);
         server.verify();
+    }
+
+    @Test
+    @DisplayName("토스 429 재시도에서도 같은 멱등키로 결제 승인 요청을 다시 보낸다.")
+    void retries_with_same_idempotency_key_when_toss_returns_rate_limit() {
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl(BASE_URL)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + BASIC_TOKEN)
+                .requestInterceptor(new RetryAfterInterceptor(2, Duration.ZERO, duration -> {
+                }));
+        MockRestServiceServer retryServer = MockRestServiceServer.bindTo(builder).build();
+        TossPaymentGateway retryGateway = new TossPaymentGateway(builder.build(), new ObjectMapper());
+
+        retryServer.expect(requestTo(BASE_URL + "/v1/payments/confirm"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", IDEMPOTENCY_KEY))
+                .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS)
+                        .header(HttpHeaders.RETRY_AFTER, "0"));
+        retryServer.expect(requestTo(BASE_URL + "/v1/payments/confirm"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", IDEMPOTENCY_KEY))
+                .andRespond(withSuccess("""
+                        {
+                          "paymentKey": "payment-key",
+                          "orderId": "order_123456",
+                          "status": "DONE",
+                          "totalAmount": 15000
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        PaymentResult result = retryGateway.confirm(
+                new PaymentConfirmation("payment-key", "order_123456", IDEMPOTENCY_KEY, 15_000)
+        );
+
+        assertThat(result.status()).isEqualTo("DONE");
+        retryServer.verify();
     }
 
     @Test

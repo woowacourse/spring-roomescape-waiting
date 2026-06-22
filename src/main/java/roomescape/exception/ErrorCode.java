@@ -35,7 +35,14 @@ public enum ErrorCode {
             "결제 멱등키가 올바르지 않습니다."),
     PAYMENT_IDEMPOTENT_REQUEST_PROCESSING(HttpStatus.CONFLICT, "PAYMENT_409_IDEMPOTENT_PROCESSING",
             "같은 결제 승인 요청이 처리 중입니다. 잠시 후 다시 확인해주세요."),
+    PAYMENT_GATEWAY_RATE_LIMITED(HttpStatus.BAD_GATEWAY, "PAYMENT_502_GATEWAY_RATE_LIMITED",
+            "결제 서버 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요."),
+    PAYMENT_OUTBOUND_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "PAYMENT_429_OUTBOUND_RATE_LIMITED",
+            "결제 승인 요청이 일시적으로 많습니다. 잠시 후 다시 시도해주세요."),
     PAYMENT_GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "PAYMENT_502_GATEWAY", "결제 승인 중 오류가 발생했습니다."),
+
+    // Rate limit
+    RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_429", "요청이 일시적으로 많습니다. 잠시 후 다시 시도해주세요."),
 
     // Waiting
     WAITING_ALREADY_EXIST(HttpStatus.CONFLICT, "WAITING_409", "이미 신청한 대기가 존재합니다."),
