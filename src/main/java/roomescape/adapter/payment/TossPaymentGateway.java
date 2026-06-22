@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.NestedExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -33,8 +31,6 @@ import roomescape.exception.server.PaymentTimeoutException;
  */
 @Component
 public class TossPaymentGateway implements PaymentGateway {
-    private static final Logger log = LoggerFactory.getLogger(TossPaymentGateway.class);
-
     private static final Logger log = LoggerFactory.getLogger(TossPaymentGateway.class);
 
     private final RestClient tossRestClient;
