@@ -13,7 +13,6 @@ public record ReservationResult(
 
         String paymentKey,
         String orderStatus,
-
         LocalDate date,
         ReservationTimeResult time,
         ThemeResult theme,
