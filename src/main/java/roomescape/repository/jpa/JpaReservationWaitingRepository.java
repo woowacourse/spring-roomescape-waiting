@@ -3,6 +3,7 @@ package roomescape.repository.jpa;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,7 @@ public interface JpaReservationWaitingRepository extends JpaRepository<Reservati
             Long themeId
     );
 
+    @EntityGraph(attributePaths = {"theme", "time"})
     List<ReservationWaiting> findByName(String name);
 
     boolean existsByTheme_Id(Long themeId);
