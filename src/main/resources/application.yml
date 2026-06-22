@@ -13,6 +13,9 @@ payment:
     secret-key: ${TOSS_SECRET_KEY:}
     connect-timeout: 3s
     read-timeout: 5s
+    rate-limit-retry:
+      max-attempts: 3
+      fallback-backoff: 1s
 
 rate-limit:
   capacity: 1000

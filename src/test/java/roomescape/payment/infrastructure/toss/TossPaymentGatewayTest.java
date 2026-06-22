@@ -71,7 +71,8 @@ class TossPaymentGatewayTest {
                         "client-key",
                         "secret-key",
                         Duration.ofSeconds(3),
-                        Duration.ofSeconds(5)
+                        Duration.ofSeconds(5),
+                        null
                 ),
                 new ObjectMapper()
         );

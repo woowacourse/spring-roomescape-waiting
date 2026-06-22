@@ -10,7 +10,8 @@ public record TossPaymentProperties(
         String clientKey,
         String secretKey,
         Duration connectTimeout,
-        Duration readTimeout
+        Duration readTimeout,
+        RateLimitRetry rateLimitRetry
 ) {
 
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(3);
@@ -22,6 +23,31 @@ public record TossPaymentProperties(
         }
         if (readTimeout == null) {
             readTimeout = DEFAULT_READ_TIMEOUT;
+        }
+        if (rateLimitRetry == null) {
+            rateLimitRetry = RateLimitRetry.defaults();
+        }
+    }
+
+    public record RateLimitRetry(
+            Integer maxAttempts,
+            Duration fallbackBackoff
+    ) {
+
+        private static final int DEFAULT_MAX_ATTEMPTS = 3;
+        private static final Duration DEFAULT_FALLBACK_BACKOFF = Duration.ofSeconds(1);
+
+        public RateLimitRetry {
+            if (maxAttempts == null) {
+                maxAttempts = DEFAULT_MAX_ATTEMPTS;
+            }
+            if (fallbackBackoff == null) {
+                fallbackBackoff = DEFAULT_FALLBACK_BACKOFF;
+            }
+        }
+
+        private static RateLimitRetry defaults() {
+            return new RateLimitRetry(null, null);
         }
     }
 }
