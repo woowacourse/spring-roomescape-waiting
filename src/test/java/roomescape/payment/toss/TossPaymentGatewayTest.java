@@ -12,6 +12,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,6 +67,43 @@ class TossPaymentGatewayTest {
         assertThat(result.orderId()).isEqualTo("order-1");
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.approvedAmount()).isEqualTo(10000L);
+        server.verify();
+    }
+
+    @Test
+    void confirm_429를_받으면_같은_멱등키로_재시도한다() {
+        String credential = Base64.getEncoder()
+                .encodeToString("test_sk_dummy:".getBytes(StandardCharsets.UTF_8));
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl("https://api.tosspayments.com")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + credential)
+                .requestInterceptor(new RetryAfterInterceptor(2, Duration.ZERO, delay -> {
+                }));
+        server = MockRestServiceServer.bindTo(builder).build();
+        tossPaymentGateway = new TossPaymentGateway(builder.build(), new ObjectMapper());
+        server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "idempotency-key-1"))
+                .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS)
+                        .header(HttpHeaders.RETRY_AFTER, "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"code\":\"TOO_MANY_REQUESTS\",\"message\":\"잠시 후 다시 시도해 주세요.\"}"));
+        server.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "idempotency-key-1"))
+                .andRespond(withSuccess("""
+                        {
+                          "paymentKey": "test_payment_key",
+                          "orderId": "order-1",
+                          "status": "DONE",
+                          "totalAmount": 10000
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        var result = tossPaymentGateway.confirm(
+                new PaymentConfirmation("test_payment_key", "order-1", 10000L, "idempotency-key-1"));
+
+        assertThat(result.status()).isEqualTo("DONE");
         server.verify();
     }
 
