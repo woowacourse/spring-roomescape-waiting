@@ -556,7 +556,14 @@
             } catch (e) {
                 if (e.status === 401) R.auth.clearMemberToken();
                 updateAuthUi();
-                R.toast(`결제 승인 실패: ${e.message}`, 'error');
+                // read timeout 등 결과가 불명확한 경우(502)는 "결제 실패"로 단정하지 않는다.
+                // 주문은 서버에서 UNCONFIRMED로 저장되므로 내역의 "확인 필요" 행에서 다시 시도할 수 있다.
+                if (e.status === 502) {
+                    R.toast('결제 결과가 확인되지 않았습니다. 내역에서 상태를 확인하고 필요하면 다시 시도해주세요.', 'info');
+                } else {
+                    R.toast(`결제 승인 실패: ${e.message}`, 'error');
+                }
+                await loadMyReservations();
             }
         } else if (payment === 'fail') {
             const orderId = params.get('orderId');
@@ -1021,7 +1028,7 @@
         section.appendChild(R.h('div', {className: 'table-wrap'}, [
             R.h('table', {}, [
                 R.h('thead', {}, [
-                    R.h('tr', {}, ['ID', '테마', '날짜', '시간', '상태', '액션'].map(text => R.h('th', {text}))),
+                    R.h('tr', {}, ['ID', '테마', '날짜', '시간', '상태', '결제', '액션'].map(text => R.h('th', {text}))),
                 ]),
                 tbody,
             ]),
@@ -1029,16 +1036,25 @@
     }
 
     function renderReservedRow(reservation) {
+        const paymentCell = R.h('td', {}, [R.badge('조회 중…', 'gray')]);
+        loadPaymentCell(reservation.id, paymentCell);
+        const isReserved = reservation.status === 'RESERVED';
+        const statusBadge = isReserved
+            ? R.badge('예약 완료', 'green')
+            : R.badge('결제 대기', 'gray');
+        
+        const actions = [R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(reservation.id))];
+        if (isReserved) {
+            actions.unshift(R.button('btn btn-ghost btn-sm', '✏️ 수정', () => openEditModal(reservation)));
+        }
         return R.h('tr', {}, [
             R.h('td', {}, [R.badge(`#${reservation.id}`)]),
             R.h('td', {text: reservation.themeName || '–'}),
             R.h('td', {text: reservation.date}),
             R.h('td', {text: reservation.time || '–'}),
-            R.h('td', {}, [R.badge('예약 완료', 'green')]),
-            R.h('td', {style: {display: 'flex', gap: '6px'}}, [
-                R.button('btn btn-ghost btn-sm', '✏️ 수정', () => openEditModal(reservation)),
-                R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(reservation.id)),
-            ]),
+            R.h('td', {}, [statusBadge]),
+            paymentCell,
+            R.h('td', {style: {display: 'flex', gap: '6px'}}, actions),
         ]);
     }
 
@@ -1049,10 +1065,60 @@
             R.h('td', {text: waiting.date}),
             R.h('td', {text: waiting.time || '–'}),
             R.h('td', {}, [R.badge(`대기 ${waiting.waitingOrder}번`, 'yellow')]),
+            R.h('td', {text: '–'}),
             R.h('td', {style: {display: 'flex', gap: '6px'}}, [
                 R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(waiting.id)),
             ]),
         ]);
+    }
+
+    // 예약 행마다 주문/결제 정보를 조회해 결제 상태 배지를 채운다.
+    async function loadPaymentCell(reservationId, cell) {
+        try {
+            const order = await R.api('GET', `/order?reservationId=${reservationId}`, {token: R.auth.getMemberToken()});
+            R.clear(cell);
+            cell.appendChild(renderPaymentBadge(order));
+        } catch (e) {
+            R.clear(cell);
+            cell.appendChild(R.h('span', {text: '–', style: {color: 'var(--text-muted)'}}));
+        }
+    }
+
+    function renderPaymentBadge(order) {
+        const status = order.status;
+        if (status === 'DONE') {
+            const badge = R.badge('확정', 'green');
+            badge.title = `주문번호: ${order.orderId}\n결제키: ${order.paymentKey || '-'}\n금액: ${order.amount.toLocaleString()}원`;
+            return badge;
+        }
+        if (status === 'UNCONFIRMED') {
+            return R.h('span', {style: {display: 'flex', gap: '6px', alignItems: 'center'}}, [
+                R.badge('확인 필요', 'yellow'),
+                R.button('btn btn-ghost btn-sm', '↻ 다시 시도', () => retryPayment(order)),
+            ]);
+        }
+        if (status === 'CANCELED' || status === 'ABORTED' || status === 'EXPIRED') {
+            return R.badge('실패', 'red');
+        }
+        return R.badge('결제 대기', 'gray');
+    }
+
+    // "확인 필요"(read timeout 등) 주문을 같은 orderId(멱등키)로 재승인 시도한다. 이중 승인되지 않는다.
+    async function retryPayment(order) {
+        if (!order.paymentKey) {
+            R.toast('결제키가 없어 다시 시도할 수 없습니다. 새로 결제해주세요.', 'error');
+            return;
+        }
+        try {
+            const query = `paymentKey=${encodeURIComponent(order.paymentKey)}`
+                + `&orderId=${encodeURIComponent(order.orderId)}`
+                + `&amount=${encodeURIComponent(order.amount)}`;
+            await R.api('POST', `/payments/success?${query}`, {token: R.auth.getMemberToken()});
+            R.toast('결제가 확정되었습니다.', 'success');
+            await loadMyReservations();
+        } catch (e) {
+            R.toast(`다시 시도 실패: ${e.message}`, 'error');
+        }
     }
 
     async function cancelReservation(id) {

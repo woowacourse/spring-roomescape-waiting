@@ -8,7 +8,8 @@ public record OrderResponse(
         String orderId,
         Long reservationId,
         Long amount,
-        PaymentStatus status
+        PaymentStatus status,
+        String paymentKey
 ) {
     public static OrderResponse from(Order order) {
         return new OrderResponse(
@@ -16,6 +17,7 @@ public record OrderResponse(
                 order.getOrderId().getValue(),
                 order.getReservationId(),
                 order.getAmount(),
-                order.getStatus());
+                order.getStatus(),
+                order.getPaymentKey());
     }
 }
