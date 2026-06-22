@@ -7,21 +7,27 @@ public class Payment {
     private final String paymentKey;
     private final String orderId;
     private final Long amount;
+    private final PaymentStatus status;
 
     public Payment(Long reservationId, String paymentKey, String orderId, Long amount) {
-        this.id = null;
-        this.reservationId = reservationId;
-        this.paymentKey = paymentKey;
-        this.orderId = orderId;
-        this.amount = amount;
+        this(null, reservationId, paymentKey, orderId, amount, PaymentStatus.CONFIRMED);
+    }
+
+    public Payment(Long reservationId, String paymentKey, String orderId, Long amount, PaymentStatus status) {
+        this(null, reservationId, paymentKey, orderId, amount, status);
     }
 
     public Payment(Long id, Long reservationId, String paymentKey, String orderId, Long amount) {
+        this(id, reservationId, paymentKey, orderId, amount, PaymentStatus.CONFIRMED);
+    }
+
+    public Payment(Long id, Long reservationId, String paymentKey, String orderId, Long amount, PaymentStatus status) {
         this.id = id;
         this.reservationId = reservationId;
         this.paymentKey = paymentKey;
         this.orderId = orderId;
         this.amount = amount;
+        this.status = status;
     }
 
     public Long getId() {
@@ -42,5 +48,9 @@ public class Payment {
 
     public Long getAmount() {
         return amount;
+    }
+
+    public PaymentStatus getStatus() {
+        return status;
     }
 }

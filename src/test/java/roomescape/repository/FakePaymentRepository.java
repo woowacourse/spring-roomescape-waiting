@@ -16,7 +16,7 @@ public class FakePaymentRepository implements PaymentRepository {
     @Override
     public Payment save(Payment payment) {
         long id = sequence.getAndIncrement();
-        Payment saved = new Payment(id, payment.getReservationId(), payment.getPaymentKey(), payment.getOrderId(), payment.getAmount());
+        Payment saved = new Payment(id, payment.getReservationId(), payment.getPaymentKey(), payment.getOrderId(), payment.getAmount(), payment.getStatus());
         storage.put(id, saved);
         return saved;
     }
@@ -25,6 +25,13 @@ public class FakePaymentRepository implements PaymentRepository {
     public Optional<Payment> findByOrderId(String orderId) {
         return storage.values().stream()
                 .filter(p -> Objects.equals(p.getOrderId(), orderId))
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Payment> findByReservationId(Long reservationId) {
+        return storage.values().stream()
+                .filter(p -> Objects.equals(p.getReservationId(), reservationId))
                 .findFirst();
     }
 }

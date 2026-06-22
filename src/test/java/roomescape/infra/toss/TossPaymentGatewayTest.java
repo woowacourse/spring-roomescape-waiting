@@ -21,6 +21,9 @@ import roomescape.domain.payment.PaymentResult;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+
 class TossPaymentGatewayTest {
 
     private static final String BASE_URL = "https://api.tosspayments.com";
@@ -131,5 +134,33 @@ class TossPaymentGatewayTest {
                 .isInstanceOf(CustomException.class)
                 .extracting(e -> ((CustomException) e).getErrorCode())
                 .isEqualTo(ErrorCode.PAYMENT_UNKNOWN_ERROR);
+    }
+
+    @Test
+    @DisplayName("read timeout 발생 시 PAYMENT_READ_TIMEOUT ErrorCode를 가진 RetryablePaymentException이 던져진다.")
+    void confirm_readTimeout_throwsRetryableWithReadTimeoutCode() {
+        mockServer.expect(requestTo(CONFIRM_URL))
+                .andRespond(request -> {
+                    throw new SocketTimeoutException("Read timed out");
+                });
+
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("pay-key", "order-123", 10000L)))
+                .isInstanceOf(RetryablePaymentException.class)
+                .extracting(e -> ((RetryablePaymentException) e).getErrorCode())
+                .isEqualTo(ErrorCode.PAYMENT_READ_TIMEOUT);
+    }
+
+    @Test
+    @DisplayName("connect 실패 발생 시 PAYMENT_CONNECTION_TIMEOUT ErrorCode를 가진 RetryablePaymentException이 던져진다.")
+    void confirm_connectFailure_throwsRetryableWithConnectionTimeoutCode() {
+        mockServer.expect(requestTo(CONFIRM_URL))
+                .andRespond(request -> {
+                    throw new ConnectException("Connection refused");
+                });
+
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("pay-key", "order-123", 10000L)))
+                .isInstanceOf(RetryablePaymentException.class)
+                .extracting(e -> ((RetryablePaymentException) e).getErrorCode())
+                .isEqualTo(ErrorCode.PAYMENT_CONNECTION_TIMEOUT);
     }
 }
