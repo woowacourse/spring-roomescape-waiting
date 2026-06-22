@@ -21,7 +21,8 @@ public class TossClientConfig {
             @Value("${toss.base-url}") String baseUrl,
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.connect-timeout-ms}") Long timeoutMs,
-            @Value("${toss.read-timeout-ms}") Long readTimeoutMs
+            @Value("${toss.read-timeout-ms}") Long readTimeoutMs,
+            @Value("${toss.max-attempts}") int maxAttempts
     ) {
         String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
@@ -32,6 +33,8 @@ public class TossClientConfig {
                 .requestFactory(requestFactory)
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
+                // 토스가 429 를 주면 Retry-After 만큼 대기 후 재시도(백오프)한다.
+                .requestInterceptor(new RetryAfterInterceptor(maxAttempts))
                 .build();
     }
 }

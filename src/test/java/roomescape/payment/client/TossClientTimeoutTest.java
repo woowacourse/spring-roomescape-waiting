@@ -123,7 +123,7 @@ class TossClientTimeoutTest {
         // 학생이 채운 tossRestClient 의 connect timeout 을 그대로 검증한다.
         // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(3초)이 끊어 실패시킨다.
         var gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500L, 500L),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500L, 500L, 1),
                 null
         );
 
