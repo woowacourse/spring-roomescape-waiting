@@ -48,7 +48,7 @@ class WaitingE2ETest {
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "브라운", "date", futureDate, "timeId", 1, "themeId", 1))
+                .body(Map.of("name", "브라운", "date", futureDate, "timeId", 1, "themeId", 1, "amount", 50000))
                 .when().post("/reservations");
 
         RestAssured.given().log().all()

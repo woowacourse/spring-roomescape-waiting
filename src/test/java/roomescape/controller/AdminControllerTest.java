@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
@@ -44,10 +45,12 @@ class AdminControllerTest {
         List<Reservation> reservations = List.of(
                 new Reservation(1L, "레서", LocalDate.of(2026, 5, 6),
                         new ReservationTime(1L, LocalTime.of(18, 0)),
-                        new Theme(1L, "공포방", "무서운방입니다.", "image-url")),
+                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"),
+                        ReservationStatus.CONFIRMED, null, null),
                 new Reservation(2L, "어셔", LocalDate.of(2026, 5, 7),
                         new ReservationTime(2L, LocalTime.of(20, 0)),
-                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"))
+                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"),
+                        ReservationStatus.CONFIRMED, null, null)
         );
         when(reservationService.findReservations(1, 5)).thenReturn(reservations);
 

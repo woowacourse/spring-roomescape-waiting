@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>결제 실패</title>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #0b1220; color: #f1f5f9; }
+    .box { text-align: center; }
+    h1 { color: #e74c3c; margin-bottom: 1rem; }
+    p { color: #94a3b8; margin-bottom: 0.5rem; }
+    a { color: #f59e0b; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>결제에 실패했습니다</h1>
+    <p id="msg"></p>
+    <p id="code"></p>
+    <br>
+    <a href="/index.html">홈으로 돌아가기</a>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    document.getElementById('msg').textContent = params.get('message') ?? '';
+    document.getElementById('code').textContent = params.get('code') ? '코드: ' + params.get('code') : '';
+  </script>
+</body>
+</html>

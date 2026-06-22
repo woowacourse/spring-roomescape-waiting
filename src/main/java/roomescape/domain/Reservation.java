@@ -13,8 +13,12 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final ReservationStatus status;
+    private final String orderId;
+    private final Long amount;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
+                       ReservationStatus status, String orderId, Long amount) {
         if (name == null || name.isBlank()) {
             throw new DomainRuleViolationException("예약자 이름은 비어 있을 수 없습니다.");
         }
@@ -32,17 +36,29 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
+        this.orderId = orderId;
+        this.amount = amount;
     }
 
-    private Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, name, date, time, theme);
-    }
-
-    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime now) {
+    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme,
+                                     LocalDateTime now, String orderId, Long amount) {
         if (time.isPast(date, now)) {
             throw new DomainConflictException("지난 시간으로는 예약할 수 없습니다.");
         }
-        return new Reservation(name, date, time, theme);
+        return new Reservation(null, name, date, time, theme, ReservationStatus.PAYMENT_PENDING, orderId, amount);
+    }
+
+    public static Reservation promote(String name, LocalDate date, ReservationTime time, Theme theme,
+                                      LocalDateTime now) {
+        if (time.isPast(date, now)) {
+            throw new DomainConflictException("지난 시간으로는 예약할 수 없습니다.");
+        }
+        return new Reservation(null, name, date, time, theme, ReservationStatus.CONFIRMED, null, null);
+    }
+
+    public Reservation confirm() {
+        return new Reservation(id, name, date, time, theme, ReservationStatus.CONFIRMED, orderId, amount);
     }
 
     public Reservation changeSchedule(LocalDate newDate, ReservationTime newTime, String requester, LocalDateTime now) {
@@ -53,7 +69,7 @@ public class Reservation {
         if (newTime.isPast(newDate, now)) {
             throw new DomainConflictException("과거로는 변경할 수 없습니다.");
         }
-        return new Reservation(id, name, newDate, newTime, theme);
+        return new Reservation(id, name, newDate, newTime, theme, status, orderId, amount);
     }
 
     public void checkCancellable(String requester, LocalDateTime now) {
@@ -96,5 +112,17 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public Long getAmount() {
+        return amount;
     }
 }

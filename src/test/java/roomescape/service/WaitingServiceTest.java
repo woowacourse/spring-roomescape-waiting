@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -65,7 +66,8 @@ class WaitingServiceTest {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(waitingRepository.existsByScheduleAndName(any(), anyLong(), anyLong(), any())).thenReturn(false);
-        Reservation reservation = new Reservation(1L, "브라운", futureDate, time, theme);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, time, theme,
+                ReservationStatus.CONFIRMED, null, null);
         when(reservationRepository.findBySchedule(futureDate, 1L, 1L)).thenReturn(Optional.of(reservation));
         Waiting saved = new Waiting(1L, "레서", futureDate, time, theme);
         when(waitingRepository.save(any())).thenReturn(saved);
@@ -106,7 +108,8 @@ class WaitingServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
         when(reservationRepository.findBySchedule(pastDate, 1L, 1L))
-                .thenReturn(Optional.of(new Reservation(1L, "브라운", pastDate, time, theme)));
+                .thenReturn(Optional.of(new Reservation(1L, "브라운", pastDate, time, theme,
+                        ReservationStatus.CONFIRMED, null, null)));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", pastDate, 1L, 1L))
                 .isInstanceOf(DomainConflictException.class);
@@ -115,7 +118,8 @@ class WaitingServiceTest {
 
     @Test
     void 동일한_일정에_이미_대기_중이면_예외가_발생한다() {
-        Reservation reservation = new Reservation(1L, "브라운", futureDate, time, theme);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, time, theme,
+                ReservationStatus.CONFIRMED, null, null);
         when(reservationRepository.findBySchedule(any(), anyLong(), anyLong()))
                 .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
@@ -133,7 +137,8 @@ class WaitingServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(waitingRepository.existsByScheduleAndName(any(), anyLong(), anyLong(), any())).thenReturn(false);
         when(reservationRepository.findBySchedule(futureDate, 1L, 1L))
-                .thenReturn(Optional.of(new Reservation(1L, "레서", futureDate, time, theme)));
+                .thenReturn(Optional.of(new Reservation(1L, "레서", futureDate, time, theme,
+                        ReservationStatus.CONFIRMED, null, null)));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
                 .isInstanceOf(BusinessConflictException.class);

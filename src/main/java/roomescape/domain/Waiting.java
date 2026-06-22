@@ -52,7 +52,7 @@ public class Waiting {
     }
 
     public Reservation promote(LocalDateTime now) {
-        return Reservation.create(this.name, this.date, this.time, this.theme, now);
+        return Reservation.promote(this.name, this.date, this.time, this.theme, now);
     }
 
     public boolean isSameName(String name) {

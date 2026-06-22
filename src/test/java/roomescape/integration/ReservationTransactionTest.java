@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -73,7 +74,8 @@ public class ReservationTransactionTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 reservationTime,
-                theme
+                theme,
+                ReservationStatus.CONFIRMED, null, null
         ));
 
         Waiting waiting = waitingRepository.save(new Waiting(
@@ -109,7 +111,8 @@ public class ReservationTransactionTest {
                 "브라운",
                 LocalDate.of(2026, 5, 10),
                 reservationTime,
-                theme
+                theme,
+                ReservationStatus.CONFIRMED, null, null
         ));
 
         Waiting waiting = waitingRepository.save(new Waiting(

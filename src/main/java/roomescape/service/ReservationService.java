@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -61,7 +62,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createReservation(String name, LocalDate date, long timeId, long themeId) {
+    public Reservation createReservation(String name, LocalDate date, long timeId, long themeId, long amount) {
         checkWaitingExists(date, timeId, themeId);
 
         ReservationTime time = reservationTimeRepository.findById(timeId)
@@ -70,7 +71,9 @@ public class ReservationService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND));
 
-        Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now(clock));
+        String orderId = "order-" + UUID.randomUUID().toString().replace("-", "");
+        Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now(clock), orderId,
+                amount);
         checkDuplicated(reservation);
         return reservationRepository.save(reservation);
     }

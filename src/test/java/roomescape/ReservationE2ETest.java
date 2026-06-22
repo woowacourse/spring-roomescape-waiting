@@ -69,6 +69,7 @@ class ReservationE2ETest {
         body.put("date", futureDate);
         body.put("timeId", 1);
         body.put("themeId", 1);
+        body.put("amount", 50000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -153,6 +154,7 @@ class ReservationE2ETest {
         body.put("date", "2025-12-25");
         body.put("timeId", 999);
         body.put("themeId", 1);
+        body.put("amount", 50000);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
