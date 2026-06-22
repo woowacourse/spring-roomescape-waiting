@@ -18,6 +18,7 @@ public class PaymentDao {
                     rs.getLong("reservation_id"),
                     rs.getString("payment_key"),
                     rs.getString("order_id"),
+                    rs.getString("idempotency_key"),
                     PaymentStatus.from(rs.getString("status")),
                     rs.getLong("amount")
             );
@@ -37,12 +38,13 @@ public class PaymentDao {
                 .addValue("reservation_id", payment.getReservationId())
                 .addValue("payment_key", payment.getPaymentKey())
                 .addValue("order_id", payment.getOrderId())
+                .addValue("idempotency_key", payment.getIdempotencyKey())
                 .addValue("status", payment.getStatus().name())
                 .addValue("amount", payment.getAmount());
 
         Long id = (long) simpleJdbcInsert.executeAndReturnKey(parameters);
         return new Payment(id, payment.getReservationId(), payment.getPaymentKey(), payment.getOrderId(),
-                payment.getStatus(), payment.getAmount());
+                payment.getIdempotencyKey(), payment.getStatus(), payment.getAmount());
     }
 
     public Optional<Payment> selectByOrderId(String orderId) {
@@ -66,6 +68,15 @@ public class PaymentDao {
                 where order_id = ?
                 """;
         jdbcTemplate.update(sql, paymentKey, status.name(), orderId);
+    }
+
+    public void updateStatus(String orderId, PaymentStatus status) {
+        String sql = """
+                update payment
+                set status = ?
+                where order_id = ?
+                """;
+        jdbcTemplate.update(sql, status.name(), orderId);
     }
 
 }

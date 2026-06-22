@@ -5,18 +5,21 @@ public class Payment {
     private final Long reservationId;
     private final String paymentKey;
     private final String orderId;
+    private final String idempotencyKey;
     private final PaymentStatus status;
     private final Long amount;
 
-    public Payment(Long reservationId, String orderId, Long amount) {
-        this(null, reservationId, null, orderId, PaymentStatus.READY, amount);
+    public Payment(Long reservationId, String orderId, String idempotencyKey, Long amount) {
+        this(null, reservationId, null, orderId, idempotencyKey, PaymentStatus.READY, amount);
     }
 
-    public Payment(Long id, Long reservationId, String paymentKey, String orderId, PaymentStatus status, Long amount) {
+    public Payment(Long id, Long reservationId, String paymentKey, String orderId, String idempotencyKey,
+                   PaymentStatus status, Long amount) {
         this.id = id;
         this.reservationId = reservationId;
         this.paymentKey = paymentKey;
         this.orderId = orderId;
+        this.idempotencyKey = idempotencyKey;
         this.status = status;
         this.amount = amount;
     }
@@ -35,6 +38,10 @@ public class Payment {
 
     public String getOrderId() {
         return orderId;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     public PaymentStatus getStatus() {

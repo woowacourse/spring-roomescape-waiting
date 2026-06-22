@@ -34,6 +34,9 @@ public enum ErrorCode {
     DUPLICATED_RESERVATION(CONFLICT, "본인 예약에 대기를 신청할 수 없습니다."),
     DUPLICATED_RESERVATION_WAITING(CONFLICT, "이미 해당 예약의 대기가 존재합니다."),
     PAYMENT_CONFIRM_FAILED(CONFLICT, "결제 승인이 완료되지 않았습니다."),
+    PAYMENT_CONFIRM_UNKNOWN(CONFLICT, "결제 승인 결과를 확인할 수 없습니다. 내 예약에서 상태를 확인하거나 다시 시도해 주세요."),
+
+    PAYMENT_GATEWAY_UNAVAILABLE(SERVICE_UNAVAILABLE, "결제 승인 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."),
     ;
 
     private final HttpStatus status;

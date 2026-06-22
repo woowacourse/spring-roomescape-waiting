@@ -11,3 +11,10 @@ toss:
   base-url: https://api.tosspayments.com
   client-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
   secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+  # TossClientConfig 가 RestClient 에 적용하는 타임아웃(밀리초).
+  connect-timeout-ms: 1000
+  read-timeout-ms: 2000
+
+demo:
+  # 느린 게이트웨이 스텁의 응답 지연(밀리초). read-timeout 보다 길어야 타임아웃이 재현된다.
+  slow-gateway-delay-ms: 4000

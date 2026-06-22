@@ -5,24 +5,35 @@ package roomescape.payment;
  */
 public enum PaymentStatus {
 
-  READY,
-  IN_PROGRESS,
-  WAITING_FOR_DEPOSIT,
-  DONE,
-  CANCELED,
-  PARTIAL_CANCELED,
-  ABORTED,
-  EXPIRED,
-  UNKNOWN;
+    READY("결제 대기"),
+    IN_PROGRESS("결제 대기"),
+    WAITING_FOR_DEPOSIT("결제 대기"),
+    DONE("확정"),
+    FAILED("실패"),
+    CANCELED("실패"),
+    PARTIAL_CANCELED("실패"),
+    ABORTED("실패"),
+    EXPIRED("실패"),
+    UNKNOWN("확인 필요");
 
-  public static PaymentStatus from(String raw) {
-    if (raw == null) {
-      return UNKNOWN;
+    private final String description;
+
+    PaymentStatus(String description) {
+        this.description = description;
     }
-    try {
-      return valueOf(raw);
-    } catch (IllegalArgumentException e) {
-      return UNKNOWN;
+
+    public static PaymentStatus from(String raw) {
+        if (raw == null) {
+            return UNKNOWN;
+        }
+        try {
+            return valueOf(raw);
+        } catch (IllegalArgumentException e) {
+            return UNKNOWN;
+        }
     }
-  }
+
+    public String getDescription() {
+        return description;
+    }
 }

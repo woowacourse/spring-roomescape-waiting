@@ -488,14 +488,36 @@ th:last-child {
     font-weight: 900;
 }
 
-.status-badge.reserved {
+.status-badge.reserved,
+.status-badge.confirmed {
     background: #eef8f5;
     color: #247567;
 }
 
-.status-badge.waiting {
+.status-badge.waiting,
+.status-badge.pending,
+.status-badge.unknown {
     background: #fff2d9;
     color: #8a5c10;
+}
+
+.status-badge.failed {
+    background: #fff1f1;
+    color: var(--danger);
+}
+
+.identifier-cell {
+    min-width: 180px;
+    max-width: 260px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.amount-cell {
+    font-variant-numeric: tabular-nums;
 }
 
 .waiting-number-badge {

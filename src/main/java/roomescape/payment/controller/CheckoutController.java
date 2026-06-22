@@ -5,6 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.payment.Payment;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.infrastructure.payment.toss.toss.TossPaymentException;
@@ -53,9 +55,11 @@ public class CheckoutController {
             model.addAttribute("paymentKey", paymentKey);
             return "success";
         } catch (PaymentAmountMismatchException e) {
-            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId);
+            return failView(model, "결제 요청을 처리하지 못했어요", "AMOUNT_MISMATCH", e.getMessage(), orderId);
+        } catch (RoomescapeException e) {
+            return failView(model, resultTitle(e.getErrorCode()), e.getErrorCode().name(), e.getMessage(), orderId);
         } catch (TossPaymentException e) {
-            return failView(model, e.getCode(), e.getMessage(), orderId);
+            return failView(model, "결제가 거절됐어요", e.getCode(), e.getMessage(), orderId);
         }
     }
 
@@ -67,10 +71,18 @@ public class CheckoutController {
             Model model
     ) {
         // 사용자 취소 시 orderId 가 없을 수 있다.
-        return failView(model, code, message, orderId);
+        return failView(model, "결제를 완료하지 못했어요", code, message, orderId);
     }
 
-    private String failView(Model model, String code, String message, String orderId) {
+    private String resultTitle(ErrorCode errorCode) {
+        if (errorCode == ErrorCode.PAYMENT_CONFIRM_UNKNOWN) {
+            return "결제 확인이 필요해요";
+        }
+        return "결제를 완료하지 못했어요";
+    }
+
+    private String failView(Model model, String title, String code, String message, String orderId) {
+        model.addAttribute("title", title);
         model.addAttribute("code", code);
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
