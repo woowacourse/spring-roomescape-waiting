@@ -18,7 +18,8 @@ public class TossClientConfig {
             @Value("${toss.base-url}") String baseUrl,
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.connect-timeout}") Duration connectTimeout,
-            @Value("${toss.read-timeout}") Duration readTimeout
+            @Value("${toss.read-timeout}") Duration readTimeout,
+            @Value("${toss.max-attempts}") int maxAttempts
     ) {
         var basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
@@ -26,6 +27,7 @@ public class TossClientConfig {
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
                 .requestFactory(requestFactory(connectTimeout, readTimeout))
+                .requestInterceptor(new RetryAfterInterceptor(maxAttempts))
                 .build();
     }
     
