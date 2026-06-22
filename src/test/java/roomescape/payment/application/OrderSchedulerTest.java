@@ -28,8 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.payment.application.dto.OrderInfo;
 import roomescape.payment.application.dto.PaymentResult;
 import roomescape.payment.domain.Order;
-import roomescape.payment.domain.OrderStatus;
-import roomescape.payment.infra.client.PaymentStatus;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.infra.client.exception.TossBusinessException.PaymentNotFound;
 import roomescape.reservation.application.PendingReservationService;
 import roomescape.reservation.application.ReservationManager;
@@ -86,7 +85,7 @@ class OrderSchedulerTest {
                 .orderId("order-1")
                 .amount(50000L)
                 .reservation(reservationInfo)
-                .status(OrderStatus.COMPLETED)
+                .status(PaymentStatus.COMPLETED)
                 .createdAt(today.atStartOfDay())
                 .build();
         given(orderService.getOrder(1L)).willReturn(completedOrder);
@@ -110,7 +109,7 @@ class OrderSchedulerTest {
                 .orderId("order-2")
                 .amount(50000L)
                 .reservation(reservationInfo)
-                .status(OrderStatus.PENDING)
+                .status(PaymentStatus.PENDING)
                 .createdAt(today.atStartOfDay())
                 .build();
         given(orderService.getOrder(2L)).willReturn(unpaidOrder);
@@ -136,7 +135,7 @@ class OrderSchedulerTest {
                 .orderId("order-1")
                 .amount(50000L)
                 .reservation(errorResInfo)
-                .status(OrderStatus.COMPLETED)
+                .status(PaymentStatus.COMPLETED)
                 .createdAt(today.atStartOfDay())
                 .build();
         ReservationIntegrationInfo successResInfo = new ReservationIntegrationInfo(2L, "정상인사람", "테마1", "PENDING");
@@ -144,7 +143,7 @@ class OrderSchedulerTest {
                 .orderId("order-2")
                 .amount(50000L)
                 .reservation(successResInfo)
-                .status(OrderStatus.COMPLETED)
+                .status(PaymentStatus.COMPLETED)
                 .createdAt(today.atStartOfDay())
                 .build();
         given(orderService.getOrder(1L)).willReturn(errorOrder);
@@ -240,7 +239,7 @@ class OrderSchedulerTest {
 
         PaymentResult tossResult = PaymentResult.builder()
                 .paymentKey("test-payment-key")
-                .status(PaymentStatus.DONE)
+                .status(PaymentStatus.COMPLETED)
                 .approvedAmount(50000L)
                 .build();
         given(paymentGateway.getStatus("order-1")).willReturn(tossResult);

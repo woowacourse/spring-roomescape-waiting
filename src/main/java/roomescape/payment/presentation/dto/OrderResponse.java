@@ -3,7 +3,7 @@ package roomescape.payment.presentation.dto;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import roomescape.payment.application.dto.OrderInfo;
-import roomescape.payment.domain.OrderStatus;
+import roomescape.payment.domain.PaymentStatus;
 
 @Builder
 public record OrderResponse(
@@ -11,7 +11,7 @@ public record OrderResponse(
         Long amount,
         Long reservationId,
         String themeName,
-        OrderStatus status,
+        PaymentStatus status,
         LocalDateTime createdAt
 ) {
     public static OrderResponse from(OrderInfo order) {
