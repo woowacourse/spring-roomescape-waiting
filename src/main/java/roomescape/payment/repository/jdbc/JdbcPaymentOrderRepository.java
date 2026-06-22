@@ -58,7 +58,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         final String sql = """
                 UPDATE payment_order
                 SET status = ?, payment_key = ?
-                WHERE order_id = ? AND status = ?
+                WHERE order_id = ? AND status IN (?, ?)
                 """;
 
         return jdbcTemplate.update(
@@ -66,7 +66,25 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 PaymentOrderStatus.COMPLETED.name(),
                 paymentKey,
                 orderId,
-                PaymentOrderStatus.READY.name()
+                PaymentOrderStatus.READY.name(),
+                PaymentOrderStatus.REQUIRES_CONFIRMATION.name()
+        ) > 0;
+    }
+
+    @Override
+    public boolean requireConfirmation(final String orderId, final String paymentKey) {
+        final String sql = """
+                UPDATE payment_order
+                SET status = ?, payment_key = ?
+                WHERE order_id = ? AND status <> ?
+                """;
+
+        return jdbcTemplate.update(
+                sql,
+                PaymentOrderStatus.REQUIRES_CONFIRMATION.name(),
+                paymentKey,
+                orderId,
+                PaymentOrderStatus.COMPLETED.name()
         ) > 0;
     }
 

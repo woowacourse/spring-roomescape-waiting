@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import roomescape.payment.exception.PaymentCommunicationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -76,6 +77,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(IllegalStateException.class)
     public ErrorResponse handleIllegalStateException(final IllegalStateException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    @ExceptionHandler(PaymentCommunicationException.class)
+    public ErrorResponse handlePaymentCommunicationException(final PaymentCommunicationException exception) {
         return new ErrorResponse(exception.getMessage());
     }
 

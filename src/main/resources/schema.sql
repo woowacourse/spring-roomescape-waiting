@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS payment_order
     amount INT NOT NULL,
     payment_key VARCHAR(200),
     idempotency_key VARCHAR(300) NOT NULL,
-    status VARCHAR(20) NOT NULL,
+    status VARCHAR(30) NOT NULL,
     reservation_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),

@@ -12,5 +12,7 @@ public interface PaymentOrderRepository {
 
     boolean complete(String orderId, String paymentKey);
 
+    boolean requireConfirmation(String orderId, String paymentKey);
+
     boolean deleteByOrderId(String orderId);
 }
