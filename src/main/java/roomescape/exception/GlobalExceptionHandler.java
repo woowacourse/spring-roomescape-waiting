@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import roomescape.infrastructure.payment.OutboundRateLimitException;
 import roomescape.infrastructure.payment.PaymentConnectionException;
 import roomescape.infrastructure.payment.PaymentUnknownException;
 import roomescape.infrastructure.payment.TossPaymentException;
@@ -48,6 +49,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(new ErrorResponse("PAYMENT_RESULT_UNKNOWN",
                         "결제 결과를 확인 중입니다. 내 예약에서 상태를 확인하거나 다시 시도해주세요."));
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handleOutboundRateLimit(OutboundRateLimitException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse("OUTBOUND_RATE_LIMITED",
+                        "결제 요청이 일시적으로 많아 잠시 후 다시 시도해주세요."));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
