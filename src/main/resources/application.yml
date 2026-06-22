@@ -20,3 +20,7 @@ payment:
 rate-limit:
   capacity: 1000
   refill-per-sec: 1000
+
+outbound-rate-limit:
+  capacity: 1000
+  refill-per-sec: 1000

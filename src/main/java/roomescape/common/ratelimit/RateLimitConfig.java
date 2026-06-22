@@ -6,7 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(RateLimitProperties.class)
+@EnableConfigurationProperties({
+        RateLimitProperties.class,
+        OutboundRateLimitProperties.class
+})
 public class RateLimitConfig {
 
     @Bean
@@ -18,6 +21,15 @@ public class RateLimitConfig {
 
     @Bean(name = "inboundRateLimiter")
     public TokenBucketRateLimiter inboundRateLimiter(final RateLimitProperties properties) {
+        return new TokenBucketRateLimiter(
+                properties.capacity(),
+                properties.refillPerSec(),
+                System::nanoTime
+        );
+    }
+
+    @Bean(name = "outboundRateLimiter")
+    public TokenBucketRateLimiter outboundRateLimiter(final OutboundRateLimitProperties properties) {
         return new TokenBucketRateLimiter(
                 properties.capacity(),
                 properties.refillPerSec(),
