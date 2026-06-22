@@ -12,4 +12,6 @@ public interface PaymentOrderPort {
 
     Optional<OrderTicket> findTicket(long reservationId);
 
+    Optional<PaymentDetails> findDetails(long reservationId);
+
 }

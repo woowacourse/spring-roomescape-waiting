@@ -89,7 +89,10 @@ class UserReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("결제대기"));
+                .body("[0].status", is("결제대기"))
+                .body("[0].payment.status", is("결제대기"))
+                .body("[0].payment.orderId", notNullValue())
+                .body("[0].payment.amount", is(5_000));
     }
 
     @Test

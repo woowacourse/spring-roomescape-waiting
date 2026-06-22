@@ -8,7 +8,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.time.LocalDate;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +19,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.web.client.ResourceAccessException;
 import roomescape.payment.order.Order;
 import roomescape.payment.order.OrderRepository;
 import roomescape.RoomescapeApplication;
 import roomescape.controller.FixedClockConfig;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.Waiting;
 import roomescape.repository.ReservationDao;
+import roomescape.repository.WaitingDao;
 import roomescape.service.PendingReservation;
 import roomescape.service.ReservationCommandService;
+import roomescape.service.WaitingCommandService;
 
 @SpringBootTest(classes = RoomescapeApplication.class)
 @Import(FixedClockConfig.class)
@@ -39,6 +47,10 @@ class PaymentServiceTest {
     private OrderRepository orderRepository;
     @Autowired
     private ReservationDao reservationDao;
+    @Autowired
+    private WaitingCommandService waitingCommandService;
+    @Autowired
+    private WaitingDao waitingDao;
     @MockitoBean
     private PaymentGateway paymentGateway;
 
@@ -62,7 +74,9 @@ class PaymentServiceTest {
     void confirmSuccess() {
         PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
                 "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
-        when(paymentGateway.confirm(new PaymentConfirmation("payment-key", pending.orderId(), 5_000L)))
+        Order placedOrder = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        when(paymentGateway.confirm(new PaymentConfirmation(
+                "payment-key", pending.orderId(), 5_000L, placedOrder.idempotencyKey())))
                 .thenReturn(new PaymentResult("payment-key", pending.orderId(), 5_000L, PaymentStatus.DONE));
 
         PaymentResult result = paymentService.confirm("payment-key", pending.orderId(), 5_000L);
@@ -80,7 +94,9 @@ class PaymentServiceTest {
     void confirmIsIdempotentForAlreadyDoneOrder() {
         PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
                 "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
-        when(paymentGateway.confirm(new PaymentConfirmation("payment-key", pending.orderId(), 5_000L)))
+        Order placedOrder = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        when(paymentGateway.confirm(new PaymentConfirmation(
+                "payment-key", pending.orderId(), 5_000L, placedOrder.idempotencyKey())))
                 .thenReturn(new PaymentResult("payment-key", pending.orderId(), 5_000L, PaymentStatus.DONE));
         paymentService.confirm("payment-key", pending.orderId(), 5_000L);
 
@@ -89,6 +105,61 @@ class PaymentServiceTest {
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.paymentKey()).isEqualTo("payment-key");
         verify(paymentGateway, times(1)).confirm(any(PaymentConfirmation.class));
+    }
+
+    @Test
+    @DisplayName("read timeout이면 주문을 확인 필요 상태로 남기고 예약을 결제대기로 유지한다.")
+    void readTimeoutLeavesOrderUnknown() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new ResourceAccessException("Read timed out", new SocketTimeoutException("Read timed out")));
+
+        ThrowingCallable confirm = () -> paymentService.confirm("payment-key", pending.orderId(), 5_000L);
+
+        assertThatThrownBy(confirm).isInstanceOf(RuntimeException.class);
+        Order order = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        assertThat(order.status()).isEqualTo(PaymentStatus.UNKNOWN);
+        assertThat(reservationDao.findById(pending.reservation().id()).orElseThrow().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
+    }
+
+    @Test
+    @DisplayName("연결 실패면 주문을 확인 필요로 바꾸지 않고 연결 실패로 안내한다.")
+    void connectionFailureKeepsOrderReady() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new ResourceAccessException("Connection refused", new ConnectException("Connection refused")));
+
+        ThrowingCallable confirm = () -> paymentService.confirm("payment-key", pending.orderId(), 5_000L);
+
+        assertThatThrownBy(confirm)
+                .isInstanceOf(PaymentGatewayConnectionException.class)
+                .hasMessage("결제 승인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.");
+        Order order = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        assertThat(order.status()).isEqualTo(PaymentStatus.READY);
+        assertThat(reservationDao.findById(pending.reservation().id()).orElseThrow().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
+    }
+
+    @Test
+    @DisplayName("connect timeout이면 주문을 확인 필요로 바꾸지 않고 연결 실패로 안내한다.")
+    void connectTimeoutKeepsOrderReady() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "new-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        when(paymentGateway.confirm(any(PaymentConfirmation.class)))
+                .thenThrow(new ResourceAccessException("connect timed out", new SocketTimeoutException("connect timed out")));
+
+        ThrowingCallable confirm = () -> paymentService.confirm("payment-key", pending.orderId(), 5_000L);
+
+        assertThatThrownBy(confirm)
+                .isInstanceOf(PaymentGatewayConnectionException.class)
+                .hasMessage("결제 승인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.");
+        Order order = orderRepository.findByOrderId(pending.orderId()).orElseThrow();
+        assertThat(order.status()).isEqualTo(PaymentStatus.READY);
+        assertThat(reservationDao.findById(pending.reservation().id()).orElseThrow().status())
+                .isEqualTo(ReservationStatus.PENDING_PAYMENT);
     }
 
     @Test
@@ -106,5 +177,23 @@ class PaymentServiceTest {
         paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", pending.orderId());
 
         assertThat(reservationDao.findById(pending.reservation().id())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("실패 콜백에서 같은 슬롯의 대기 1번을 결제대기 예약으로 전환한다.")
+    void failWithOrderIdPromotesNextWaiting() {
+        PendingReservation pending = reservationCommandService.createPendingPaymentReservation(
+                "pending-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+        Waiting waiting = waitingCommandService.create(
+                "waiting-user", LocalDate.of(2026, 6, 5), 1L, 2L);
+
+        paymentService.fail("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.", pending.orderId());
+
+        assertThat(reservationDao.findById(pending.reservation().id())).isEmpty();
+        assertThat(waitingDao.findById(waiting.id())).isEmpty();
+        Reservation promoted = reservationDao.findAllByName(new Member("waiting-user")).getFirst();
+        assertThat(promoted.status()).isEqualTo(ReservationStatus.PENDING_PAYMENT);
+        assertThat(orderRepository.findAll())
+                .anySatisfy(order -> assertThat(order.reservationId()).isEqualTo(promoted.id()));
     }
 }

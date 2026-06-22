@@ -2,7 +2,9 @@ package roomescape.payment.client;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +23,7 @@ import roomescape.payment.PaymentConfirmation;
 class TossPaymentGatewayTest {
 
     private static final PaymentConfirmation CONFIRMATION =
-            new PaymentConfirmation("payment-key", "order_id", 5_000L);
+            new PaymentConfirmation("payment-key", "order_id", 5_000L, "idempotency-key");
 
     @ParameterizedTest(name = "{1} → {2}")
     @MethodSource
@@ -54,6 +56,28 @@ class TossPaymentGatewayTest {
 
         assertThatThrownBy(() -> gateway.confirm(CONFIRMATION))
                 .isExactlyInstanceOf(TossPaymentException.class);
+    }
+
+    @Test
+    @DisplayName("confirm 요청에 주문의 고정 멱등키를 Idempotency-Key 헤더로 보낸다.")
+    void sendsIdempotencyKeyHeader() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo("/v1/payments/confirm"))
+                .andExpect(header("Idempotency-Key", "idempotency-key"))
+                .andRespond(withSuccess("""
+                        {
+                          "paymentKey": "payment-key",
+                          "orderId": "order_id",
+                          "status": "DONE",
+                          "totalAmount": 5000
+                        }
+                        """, MediaType.APPLICATION_JSON));
+        TossPaymentGateway gateway = new TossPaymentGateway(builder.build(), new ObjectMapper());
+
+        gateway.confirm(CONFIRMATION);
+
+        server.verify();
     }
 
     private TossPaymentGateway gatewayReturning(HttpStatus status, String body) {

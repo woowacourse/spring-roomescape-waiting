@@ -42,7 +42,7 @@ public class WaitingCommandService {
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
 
         slot.validateNotPast(now);
-        Reservation reservation = findConfirmedReservationBySlot(slot);
+        Reservation reservation = findReservationBySlot(slot);
         validateNotOwnReservation(reservation, member);
         validateNoDuplicateWaiting(slot, member);
 
@@ -63,9 +63,9 @@ public class WaitingCommandService {
         waitingDao.deleteById(waitingId);
     }
 
-    private Reservation findConfirmedReservationBySlot(Slot slot) {
-        return reservationDao.findConfirmedBySlotForUpdate(slot)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 확정된 예약이 존재하지 않습니다."));
+    private Reservation findReservationBySlot(Slot slot) {
+        return reservationDao.findBySlotForUpdate(slot)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다."));
     }
 
     private void validateNotOwnReservation(Reservation reservation, Member member) {

@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import java.time.Clock;
 
-@SpringBootApplication(scanBasePackages = {"roomescape"})
+@SpringBootApplication
 public class RoomescapeApplication {
 
     public static void main(String[] args) {

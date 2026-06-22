@@ -43,6 +43,7 @@ CREATE TABLE payment_order
     amount         BIGINT      NOT NULL,
     payment_key    VARCHAR(255),
     status         VARCHAR(30) NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,
     created_at     DATETIME    NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT uk_payment_order_order_id UNIQUE (order_id),

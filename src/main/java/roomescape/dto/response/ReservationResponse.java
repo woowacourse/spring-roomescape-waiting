@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Reservation;
 import roomescape.domain.Slot;
 import roomescape.domain.WaitingWithRank;
+import roomescape.payment.PaymentDetails;
 
 import java.time.LocalDate;
 
@@ -18,9 +19,14 @@ public record ReservationResponse(
         ThemeInfo theme,
 
         ReservationStatus status,
-        Integer rank
+        Integer rank,
+        PaymentInfoResponse payment
 ) {
     public static ReservationResponse from(Reservation reservation) {
+        return from(reservation, null);
+    }
+
+    public static ReservationResponse from(Reservation reservation, PaymentDetails payment) {
         Slot slot = reservation.slot();
         return new ReservationResponse(
                 reservation.id(),
@@ -29,7 +35,8 @@ public record ReservationResponse(
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme()),
                 statusFrom(reservation),
-                null
+                null,
+                payment == null ? null : PaymentInfoResponse.from(payment)
         );
     }
 
@@ -42,7 +49,8 @@ public record ReservationResponse(
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme()),
                 ReservationStatus.WAITING,
-                waitingWithRank.rank()
+                waitingWithRank.rank(),
+                null
         );
     }
 
