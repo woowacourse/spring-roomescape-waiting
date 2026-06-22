@@ -22,3 +22,7 @@ toss:
 rate-limit:
   capacity: 5
   refill-per-second: 1.0
+
+outbound-rate-limit:
+  capacity: 5
+  refill-per-second: 1.0
