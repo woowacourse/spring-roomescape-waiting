@@ -17,9 +17,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import roomescape.common.domain.ReservationSlot;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.exception.ErrorCode;
+import roomescape.payment.repository.PaymentRepository;
+import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationRequest;
@@ -47,7 +50,11 @@ class ReservationServiceTest {
     @Mock
     private ReservationFactory reservationFactory;
     @Mock
+    private PaymentRepository paymentRepository;
+    @Mock
     private Clock clock;
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -67,11 +74,11 @@ class ReservationServiceTest {
         timeWithin12Hours = ReservationTime.restore(3L, LocalTime.of(20, 0), LocalTime.of(21, 0));
         theme = Theme.restore(1L, "테마A", "설명A", "https://a.com", 20000);
         futureReservation = Reservation.restore(1L, "user1",
-                new ReservationSlot(LocalDate.of(2099, 12, 1), time1, theme));
+                new ReservationSlot(LocalDate.of(2099, 12, 1), time1, theme), PaymentStatus.CONFIRMED);
         pastReservation = Reservation.restore(1L, "user1",
-                new ReservationSlot(LocalDate.now().minusDays(1), time1, theme));
+                new ReservationSlot(LocalDate.now().minusDays(1), time1, theme), PaymentStatus.CONFIRMED);
         within12HoursReservation = Reservation.restore(1L, "user1",
-                new ReservationSlot(LocalDate.now(), timeWithin12Hours, theme));
+                new ReservationSlot(LocalDate.now(), timeWithin12Hours, theme), PaymentStatus.CONFIRMED);
     }
 
     @Test
@@ -195,7 +202,7 @@ class ReservationServiceTest {
     @DisplayName("변경하려는 시간이 이미 예약된 경우 수정 불가")
     void 중복_예약_수정_불가() {
         Reservation reservation = Reservation.restore(2L, "user2",
-                new ReservationSlot(LocalDate.of(2099, 12, 1), time2, theme));
+                new ReservationSlot(LocalDate.of(2099, 12, 1), time2, theme), PaymentStatus.CONFIRMED);
         when(reservationRepository.findById(2L)).thenReturn(Optional.of(reservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());

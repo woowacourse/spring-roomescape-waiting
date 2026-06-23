@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.domain.ReservationSlot;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.exception.ErrorCode;
+import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -57,7 +58,7 @@ class ReservationWaitingServiceTest {
         time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
         theme = Theme.restore(1L, "테마A", "설명", "https://a.com", 20000);
         futureReservation = Reservation.restore(1L, "user1",
-                new ReservationSlot(LocalDate.of(2099, 12, 1), time, theme));
+                new ReservationSlot(LocalDate.of(2099, 12, 1), time, theme), PaymentStatus.CONFIRMED);
     }
 
     @Test

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.domain.ReservationSlot;
 import roomescape.common.exception.BusinessException;
+import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -77,7 +78,7 @@ class ReservationTest {
     @DisplayName("과거 예약이면 isPast가 true를 반환한다")
     void isPast_과거면_true() {
         Reservation past = Reservation.restore(1L, "현미밥",
-                new ReservationSlot(LocalDate.now().minusDays(1), time, theme));
+                new ReservationSlot(LocalDate.now().minusDays(1), time, theme), PaymentStatus.CONFIRMED);
         assertThat(past.isPast(clock)).isTrue();
     }
 
@@ -85,7 +86,7 @@ class ReservationTest {
     @DisplayName("미래 예약이면 isPast가 false를 반환한다")
     void isPast_미래면_false() {
         Reservation future = Reservation.restore(1L, "현미밥",
-                new ReservationSlot(LocalDate.now().plusDays(1), time, theme));
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme), PaymentStatus.CONFIRMED);
         assertThat(future.isPast(clock)).isFalse();
     }
 

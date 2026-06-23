@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS reservation_waiting;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS theme;
@@ -57,5 +58,5 @@ CREATE TABLE payment (
     payment_key VARCHAR(200),
     reservation_id BIGINT   NOT NULL,
     PRIMARY KEY (order_id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation(id)
+    FOREIGN KEY (reservation_id) REFERENCES reservation(id) ON DELETE CASCADE
 )
