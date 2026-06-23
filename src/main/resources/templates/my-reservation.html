@@ -6,6 +6,11 @@
     <title>내 예약·대기 조회</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/app.css">
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <script th:inline="javascript">
+        window.paymentClientKey = /*[[${clientKey}]]*/ "test_gck_xxx";
+    </script>
+    <script src="/js/payment-window.js"></script>
 </head>
 <body class="my-page">
 <header>
@@ -395,7 +400,7 @@
         }
         if (pendingPayment) {
             return `
-                <button type="button" class="btn-text" onclick="retryPayment(${reservation.id})">결제 다시 시도</button>
+                <button type="button" class="btn-text" onclick="retryPayment(${reservation.id})">결제하기</button>
                 <button type="button" class="btn-text danger" onclick="cancelReservation(${reservation.id}, 'RESERVATION')">취소</button>
             `;
         }
@@ -409,8 +414,12 @@
         const name = nameInput.value.trim();
         fetch(`/reservations/${id}/payments?name=${encodeURIComponent(name)}`, {method: 'POST'})
             .then(handleResponse)
-            .then(result => window.location.href = result.checkoutUrl)
+            .then(result => openPaymentWindow(result, name))
             .catch(error => showToast(error.message, 'error'));
+    }
+
+    function showPaymentError(message) {
+        showToast(message || '결제창을 열지 못했습니다', 'error');
     }
 
     function renderStatusBadge(reservation) {

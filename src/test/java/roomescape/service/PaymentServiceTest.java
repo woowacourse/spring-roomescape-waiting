@@ -20,8 +20,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentFailureCategory;
@@ -67,7 +65,7 @@ class PaymentServiceTest {
         when(paymentRepository.insert(any(Payment.class)))
                 .thenAnswer(invocation -> invocation.<Payment>getArgument(0).withId(2L));
 
-        Payment payment = paymentService.retryForReservation(1L, "브라운", now);
+        Payment payment = paymentService.resumeOrRetryForReservation(1L, "브라운", now);
 
         assertThat(payment.getId()).isEqualTo(2L);
         assertThat(payment.getReservationId()).isEqualTo(1L);
@@ -78,7 +76,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    void 진행_중인_결제가_있으면_재결제를_막는다() {
+    void 준비된_결제가_있으면_기존_결제를_반환한다() {
         LocalDateTime now = LocalDateTime.of(2026, 6, 24, 12, 0);
         Reservation reservation = pendingReservation(1L, LocalDate.of(2099, 1, 1));
         Payment readyPayment = new Payment(1L, 1L, "payment_ready_123456789012345678901", 20_000L, null,
@@ -86,36 +84,10 @@ class PaymentServiceTest {
         when(reservationService.findPendingByUser(1L, "브라운", now)).thenReturn(reservation);
         when(paymentRepository.findLatestByReservationId(1L)).thenReturn(Optional.of(readyPayment));
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> paymentService.retryForReservation(1L, "브라운", now))
-                .isInstanceOf(RoomescapeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_RETRY_NOT_ALLOWED);
-    }
+        Payment result = paymentService.resumeOrRetryForReservation(1L, "브라운", now);
 
-    @Test
-    void 결제_대기_예약의_준비된_결제만_checkout에_사용한다() {
-        Payment payment = new Payment(1L, 1L, "payment_ready_123456789012345678901", 20_000L, null,
-                PaymentStatus.READY, null, null);
-        Reservation reservation = pendingReservation(1L, LocalDate.of(2099, 1, 1));
-        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
-        when(reservationService.findById(1L)).thenReturn(reservation);
-
-        Payment result = paymentService.getReadyPayment(1L);
-
-        assertThat(result).isSameAs(payment);
-    }
-
-    @Test
-    void 확정된_예약의_결제는_checkout에_사용할_수_없다() {
-        Payment payment = new Payment(1L, 1L, "payment_ready_123456789012345678901", 20_000L, null,
-                PaymentStatus.READY, null, null);
-        Reservation reservation = new Reservation(1L, new Reserver("브라운"),
-                pendingReservation(1L, LocalDate.of(2099, 1, 1)).getSlot(), ReservationStatus.CONFIRMED);
-        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
-        when(reservationService.findById(1L)).thenReturn(reservation);
-
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> paymentService.getReadyPayment(1L))
-                .isInstanceOf(RoomescapeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_CHECKOUT_NOT_ALLOWED);
+        assertThat(result).isSameAs(readyPayment);
+        verify(paymentRepository, never()).insert(any());
     }
 
     @Test

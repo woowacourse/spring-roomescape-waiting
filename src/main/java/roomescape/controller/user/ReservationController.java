@@ -8,14 +8,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
-import roomescape.controller.dto.response.PaymentCheckoutResponse;
+import roomescape.controller.dto.response.PaymentReadyResponse;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.domain.Payment;
 import roomescape.domain.Reservation;
 import roomescape.service.PaymentService;
 import roomescape.service.ReservationService;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,25 +32,23 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<PaymentCheckoutResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<PaymentReadyResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
         Payment payment = paymentService.createForReservation(
                 request.name(),
                 request.date(),
                 request.timeId(),
                 request.themeId(),
                 LocalDateTime.now());
-        PaymentCheckoutResponse response = PaymentCheckoutResponse.from(payment);
-        return ResponseEntity.created(URI.create(response.checkoutUrl())).body(response);
+        return ResponseEntity.status(201).body(PaymentReadyResponse.from(payment));
     }
 
     @PostMapping("/{id}/payments")
-    public ResponseEntity<PaymentCheckoutResponse> retryPayment(
+    public ResponseEntity<PaymentReadyResponse> retryPayment(
             @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
             @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name
     ) {
-        Payment payment = paymentService.retryForReservation(id, name, LocalDateTime.now());
-        PaymentCheckoutResponse response = PaymentCheckoutResponse.from(payment);
-        return ResponseEntity.created(URI.create(response.checkoutUrl())).body(response);
+        Payment payment = paymentService.resumeOrRetryForReservation(id, name, LocalDateTime.now());
+        return ResponseEntity.ok(PaymentReadyResponse.from(payment));
     }
 
     @GetMapping

@@ -361,7 +361,7 @@ public class MissionStepTest {
                 .queryParam("name", "브라운")
                 .when().post("/reservations/1/payments")
                 .then().log().all()
-                .statusCode(201)
+                .statusCode(200)
                 .body("reservationId", is(1))
                 .body("paymentId", is(2));
 

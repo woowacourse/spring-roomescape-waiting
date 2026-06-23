@@ -38,23 +38,11 @@ public class PaymentService {
         return paymentRepository.insert(Payment.ready(reservation.getId(), RESERVATION_AMOUNT));
     }
 
-    public Payment retryForReservation(Long reservationId, String name, LocalDateTime now) {
+    public Payment resumeOrRetryForReservation(Long reservationId, String name, LocalDateTime now) {
         Reservation reservation = reservationService.findPendingByUser(reservationId, name, now);
-        paymentRepository.findLatestByReservationId(reservation.getId())
-                .ifPresent(this::validateRetryablePayment);
-        return paymentRepository.insert(Payment.ready(reservation.getId(), RESERVATION_AMOUNT));
-    }
-
-    @Transactional(readOnly = true)
-    public Payment getReadyPayment(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 결제입니다."));
-        Reservation reservation = reservationService.findById(payment.getReservationId());
-        if (payment.getStatus() != PaymentStatus.READY || !reservation.isPending()) {
-            throw new RoomescapeException(ErrorCode.PAYMENT_CHECKOUT_NOT_ALLOWED,
-                    "결제를 진행할 수 없는 상태입니다.");
-        }
-        return payment;
+        return paymentRepository.findLatestByReservationId(reservation.getId())
+                .map(payment -> reuseOrCreatePayment(payment, reservation.getId()))
+                .orElseGet(() -> paymentRepository.insert(Payment.ready(reservation.getId(), RESERVATION_AMOUNT)));
     }
 
     @Transactional(noRollbackFor = PaymentGatewayException.class)
@@ -96,10 +84,14 @@ public class PaymentService {
         paymentRepository.update(payment.fail(failureCode, failureMessage));
     }
 
-    private void validateRetryablePayment(Payment payment) {
-        if (payment.getStatus() != PaymentStatus.FAILED && payment.getStatus() != PaymentStatus.CANCELED) {
-            throw new RoomescapeException(ErrorCode.PAYMENT_RETRY_NOT_ALLOWED,
-                    "진행 중인 결제가 있어 재결제할 수 없습니다.");
+    private Payment reuseOrCreatePayment(Payment payment, Long reservationId) {
+        if (payment.getStatus() == PaymentStatus.READY) {
+            return payment;
         }
+        if (payment.getStatus() == PaymentStatus.FAILED || payment.getStatus() == PaymentStatus.CANCELED) {
+            return paymentRepository.insert(Payment.ready(reservationId, RESERVATION_AMOUNT));
+        }
+        throw new RoomescapeException(ErrorCode.PAYMENT_RETRY_NOT_ALLOWED,
+                "결제를 다시 시도할 수 없는 상태입니다.");
     }
 }

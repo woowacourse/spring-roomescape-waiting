@@ -56,10 +56,10 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validRequest()))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/payments/1/checkout"))
                 .andExpect(jsonPath("$.reservationId").value(1))
                 .andExpect(jsonPath("$.paymentId").value(1))
-                .andExpect(jsonPath("$.checkoutUrl").value("/payments/1/checkout"));
+                .andExpect(jsonPath("$.orderId").value("payment_12345678901234567890123456789012"))
+                .andExpect(jsonPath("$.amount").value(20000));
 
         verify(paymentService, times(1)).createForReservation(
                 eq("브라운"),
@@ -71,18 +71,18 @@ class ReservationControllerTest {
     }
 
     @Test
-    void 결제_대기_예약의_결제를_다시_시도한다() throws Exception {
-        given(paymentService.retryForReservation(eq(1L), eq("브라운"), any(LocalDateTime.class)))
+    void 결제_대기_예약의_결제를_재개하거나_다시_시도한다() throws Exception {
+        given(paymentService.resumeOrRetryForReservation(eq(1L), eq("브라운"), any(LocalDateTime.class)))
                 .willReturn(payment());
 
         mockMvc.perform(post("/reservations/{id}/payments", 1L).param("name", "브라운"))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/payments/1/checkout"))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservationId").value(1))
                 .andExpect(jsonPath("$.paymentId").value(1))
-                .andExpect(jsonPath("$.checkoutUrl").value("/payments/1/checkout"));
+                .andExpect(jsonPath("$.orderId").value("payment_12345678901234567890123456789012"))
+                .andExpect(jsonPath("$.amount").value(20000));
 
-        verify(paymentService).retryForReservation(eq(1L), eq("브라운"), any(LocalDateTime.class));
+        verify(paymentService).resumeOrRetryForReservation(eq(1L), eq("브라운"), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationService, paymentService);
     }
 

@@ -13,6 +13,8 @@
         <dt>사유</dt><dd th:text="${message}">결제 금액이 일치하지 않습니다.</dd>
         <dt>주문번호</dt><dd th:text="${orderId}">payment-xxxx</dd>
     </dl>
+    <a th:if="${name != null}" th:href="@{/reservation/me(name=${name})}">내 예약으로 이동</a>
+    <a th:unless="${name != null}" href="/reservation/me">내 예약으로 이동</a>
 </main>
 </body>
 </html>

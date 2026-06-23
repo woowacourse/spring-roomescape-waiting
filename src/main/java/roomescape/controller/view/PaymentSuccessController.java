@@ -23,16 +23,18 @@ public class PaymentSuccessController {
             @RequestParam String paymentKey,
             @RequestParam String orderId,
             @RequestParam Long amount,
+            @RequestParam(required = false) String name,
             Model model
     ) {
         try {
             PaymentResult result = paymentService.confirm(paymentKey, orderId, amount);
             model.addAttribute("result", result);
+            model.addAttribute("name", name);
             return "payment-success";
         } catch (PaymentAmountMismatchException e) {
-            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId);
+            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId, name);
         } catch (PaymentGatewayException e) {
-            return failView(model, e.getCode(), e.getMessage(), orderId);
+            return failView(model, e.getCode(), e.getMessage(), orderId, name);
         }
     }
 
@@ -42,18 +44,20 @@ public class PaymentSuccessController {
             @RequestParam(required = false) String message,
             @RequestParam(required = false) String orderId,
             @RequestParam(required = false) Long paymentId,
+            @RequestParam(required = false) String name,
             Model model
     ) {
         if (paymentId != null) {
             paymentService.fail(paymentId, code, message);
         }
-        return failView(model, code, message, orderId);
+        return failView(model, code, message, orderId, name);
     }
 
-    private String failView(Model model, String code, String message, String orderId) {
+    private String failView(Model model, String code, String message, String orderId, String name) {
         model.addAttribute("code", code);
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
+        model.addAttribute("name", name);
         return "payment-fail";
     }
 }
