@@ -21,4 +21,10 @@ public class OrderService {
   public OrderRow findByOrderId(String orderId) {
     return orderDao.findByOrderId(orderId);
   }
+
+  public Long cancelByOrderId(String orderId) {
+    OrderRow order = findByOrderId(orderId);
+    orderDao.deleteByOrderId(orderId);
+    return order.reservationId();
+  }
 }

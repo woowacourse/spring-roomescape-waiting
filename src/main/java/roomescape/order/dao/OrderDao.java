@@ -48,4 +48,7 @@ public class OrderDao {
     }
   }
 
+  public void deleteByOrderId(String orderId) {
+    jdbcTemplate.update("DELETE FROM orders WHERE order_id = ?", orderId);
+  }
 }

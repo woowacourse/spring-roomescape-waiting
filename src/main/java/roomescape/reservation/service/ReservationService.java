@@ -162,7 +162,7 @@ public class ReservationService {
     }
 
     public void confirm(Long reservationId) {
-        reservationDao.updateStatus(reservationId, ReservationStatus.CONFIRMED);
+        reservationDao.updateStatus(reservationId, ReservationStatus.RESERVED);
     }
 
     private void isReservationExists(LocalDate date, Long timeId, Long themeId) {

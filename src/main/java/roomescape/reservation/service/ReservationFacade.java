@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ResourceInUseException;
 import roomescape.order.dao.dto.OrderRow;
 import roomescape.order.service.OrderService;
+import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.dto.request.ConfirmRequest;
 import roomescape.payment.exception.PaymentAmountMismatchException;
 import roomescape.payment.service.PaymentService;
@@ -147,8 +148,15 @@ public class ReservationFacade {
         if (!order.amount().equals(request.amount())) {
             throw new PaymentAmountMismatchException("요청 금액과 인증 금액이 일치하지 않습니다.");
         }
-        paymentService.approve(order.reservationId(), request);
+        paymentService.approve(order.reservationId(), new PaymentConfirmation(request.paymentKey(),
+            request.orderId(), request.amount()));
         reservationService.confirm(order.reservationId());
+    }
+
+    @Transactional
+    public void cancelPendingByOrderId(String orderId) {
+        Long reservationId = orderService.cancelByOrderId(orderId);
+        reservationService.delete(reservationId);
     }
 
     @NonNull

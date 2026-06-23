@@ -1,25 +1,24 @@
 package roomescape.payment.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.payment.client.TossPaymentClient;
 import roomescape.payment.dao.PaymentDao;
-import roomescape.payment.dto.request.ConfirmRequest;
+import roomescape.payment.domain.PaymentConfirmation;
+import roomescape.payment.port.PaymentGateway;
 
 @Service
 public class PaymentService {
 
-  private final TossPaymentClient tossPaymentClient;
+  private final PaymentGateway paymentGateway;
   private final PaymentDao paymentDao;
 
-  public PaymentService(TossPaymentClient tossPaymentClient, PaymentDao paymentDao) {
-    this.tossPaymentClient = tossPaymentClient;
+  public PaymentService(PaymentGateway paymentGateway, PaymentDao paymentDao) {
+    this.paymentGateway = paymentGateway;
     this.paymentDao = paymentDao;
   }
 
-  public void approve(Long reservationId, ConfirmRequest confirmRequest) {
-    tossPaymentClient.confirm(confirmRequest.paymentKey(), confirmRequest.orderId(),
-        confirmRequest.amount());
-    paymentDao.insert(reservationId, confirmRequest.paymentKey(), confirmRequest.orderId(),
-        confirmRequest.amount());
+  public void approve(Long reservationId, PaymentConfirmation paymentConfirmation) {
+    paymentGateway.confirm(paymentConfirmation);
+    paymentDao.insert(reservationId, paymentConfirmation.paymentKey(),
+        paymentConfirmation.orderId(), paymentConfirmation.amount());
   }
 }
