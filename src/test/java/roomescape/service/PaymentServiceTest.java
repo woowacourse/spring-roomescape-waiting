@@ -24,7 +24,9 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentFailureCategory;
 import roomescape.payment.PaymentGateway;
+import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.PaymentResult;
 import roomescape.repository.PaymentRepository;
 
@@ -145,6 +147,41 @@ class PaymentServiceTest {
         assertThat(paymentCaptor.getValue().getPaymentKey()).isEqualTo("test_payment_key");
         assertThat(paymentCaptor.getValue().getStatus()).isEqualTo(PaymentStatus.CONFIRMED);
         verify(reservationService).confirmPayment(1L);
+    }
+
+    @Test
+    void 확정적인_승인_실패는_결제를_실패_상태로_저장한다() {
+        Payment payment = readyPayment();
+        PaymentConfirmation confirmation = new PaymentConfirmation("test_payment_key", payment.getOrderId(), 20_000L);
+        PaymentGatewayException exception = new PaymentGatewayException(
+                PaymentFailureCategory.DEFINITIVE, "REJECT_CARD_PAYMENT", "카드가 거절되었습니다.");
+        when(paymentRepository.findByOrderId(payment.getOrderId())).thenReturn(Optional.of(payment));
+        when(paymentGateway.confirm(confirmation)).thenThrow(exception);
+
+        assertThatThrownBy(() -> paymentService.confirm("test_payment_key", payment.getOrderId(), 20_000L))
+                .isSameAs(exception);
+
+        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository).update(paymentCaptor.capture());
+        assertThat(paymentCaptor.getValue().getStatus()).isEqualTo(PaymentStatus.FAILED);
+        assertThat(paymentCaptor.getValue().getFailureCode()).isEqualTo("REJECT_CARD_PAYMENT");
+        verify(reservationService, never()).confirmPayment(any());
+    }
+
+    @Test
+    void 결과가_불명확한_승인_실패는_결제_상태를_바꾸지_않는다() {
+        Payment payment = readyPayment();
+        PaymentConfirmation confirmation = new PaymentConfirmation("test_payment_key", payment.getOrderId(), 20_000L);
+        PaymentGatewayException exception = new PaymentGatewayException(
+                PaymentFailureCategory.UNKNOWN, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", "토스 내부 오류입니다.");
+        when(paymentRepository.findByOrderId(payment.getOrderId())).thenReturn(Optional.of(payment));
+        when(paymentGateway.confirm(confirmation)).thenThrow(exception);
+
+        assertThatThrownBy(() -> paymentService.confirm("test_payment_key", payment.getOrderId(), 20_000L))
+                .isSameAs(exception);
+
+        verify(paymentRepository, never()).update(any());
+        verify(reservationService, never()).confirmPayment(any());
     }
 
     @Test

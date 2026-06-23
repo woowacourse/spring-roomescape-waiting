@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClient;
 import roomescape.domain.PaymentStatus;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentFailureCategory;
 import roomescape.payment.PaymentResult;
 
 import java.util.stream.Stream;
@@ -68,6 +69,7 @@ class TossPaymentGatewayTest {
     @ParameterizedTest
     @MethodSource("errorResponses")
     void 토스_오류를_코드에_맞는_예외로_변환한다(String code, int status,
+                                           PaymentFailureCategory failureCategory,
                                            Class<? extends TossPaymentException> exceptionType)
             throws Exception {
         server.enqueue(new MockResponse()
@@ -81,16 +83,21 @@ class TossPaymentGatewayTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation(
                         "test_payment_key", "payment_123456789012345678901", 20_000L)))
                 .isInstanceOf(exceptionType)
-                .hasFieldOrPropertyWithValue("code", code);
+                .hasFieldOrPropertyWithValue("code", code)
+                .hasFieldOrPropertyWithValue("failureCategory", failureCategory);
     }
 
     private static Stream<Arguments> errorResponses() {
         return Stream.of(
-                Arguments.of("ALREADY_PROCESSED_PAYMENT", 400, TossPaymentException.AlreadyProcessed.class),
-                Arguments.of("REJECT_CARD_PAYMENT", 403, TossPaymentException.CardRejected.class),
-                Arguments.of("INVALID_API_KEY", 401, TossPaymentException.GatewayConfig.class),
-                Arguments.of("FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", 500, TossPaymentException.Retryable.class),
-                Arguments.of("UNKNOWN_ERROR", 400, TossPaymentException.class)
+                Arguments.of("ALREADY_PROCESSED_PAYMENT", 400, PaymentFailureCategory.UNKNOWN,
+                        TossPaymentException.AlreadyProcessed.class),
+                Arguments.of("REJECT_CARD_PAYMENT", 403, PaymentFailureCategory.DEFINITIVE,
+                        TossPaymentException.CardRejected.class),
+                Arguments.of("INVALID_API_KEY", 401, PaymentFailureCategory.CONFIGURATION,
+                        TossPaymentException.GatewayConfig.class),
+                Arguments.of("FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", 500, PaymentFailureCategory.UNKNOWN,
+                        TossPaymentException.Retryable.class),
+                Arguments.of("UNKNOWN_ERROR", 400, PaymentFailureCategory.UNKNOWN, TossPaymentException.class)
         );
     }
 }

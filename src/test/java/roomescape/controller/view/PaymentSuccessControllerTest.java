@@ -14,6 +14,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.PaymentStatus;
 import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentFailureCategory;
+import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.PaymentResult;
 import roomescape.service.PaymentService;
 
@@ -54,6 +56,23 @@ class PaymentSuccessControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("payment-fail"))
                 .andExpect(model().attribute("code", "AMOUNT_MISMATCH"))
+                .andExpect(model().attribute("orderId", orderId));
+    }
+
+    @Test
+    void 결제_승인_오류를_실패_화면으로_렌더링한다() throws Exception {
+        String orderId = "payment_123456789012345678901";
+        given(paymentService.confirm("test_payment_key", orderId, 20_000L))
+                .willThrow(new PaymentGatewayException(
+                        PaymentFailureCategory.DEFINITIVE, "REJECT_CARD_PAYMENT", "카드가 거절되었습니다."));
+
+        mockMvc.perform(get("/payments/success")
+                        .param("paymentKey", "test_payment_key")
+                        .param("orderId", orderId)
+                        .param("amount", "20000"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("payment-fail"))
+                .andExpect(model().attribute("code", "REJECT_CARD_PAYMENT"))
                 .andExpect(model().attribute("orderId", orderId));
     }
 

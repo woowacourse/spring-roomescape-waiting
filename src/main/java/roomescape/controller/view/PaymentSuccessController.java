@@ -5,8 +5,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.PaymentResult;
-import roomescape.payment.client.TossPaymentException;
 import roomescape.service.PaymentService;
 
 @Controller
@@ -31,7 +31,7 @@ public class PaymentSuccessController {
             return "payment-success";
         } catch (PaymentAmountMismatchException e) {
             return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId);
-        } catch (TossPaymentException e) {
+        } catch (PaymentGatewayException e) {
             return failView(model, e.getCode(), e.getMessage(), orderId);
         }
     }

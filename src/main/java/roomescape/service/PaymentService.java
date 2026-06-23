@@ -12,6 +12,7 @@ import roomescape.exception.RoomescapeException;
 import roomescape.repository.PaymentRepository;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentGatewayException;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
 
@@ -56,6 +57,7 @@ public class PaymentService {
         return payment;
     }
 
+    @Transactional(noRollbackFor = PaymentGatewayException.class)
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 결제입니다."));
@@ -67,7 +69,15 @@ public class PaymentService {
                     "결제 대기 상태의 결제만 승인할 수 있습니다.");
         }
 
-        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        PaymentResult result;
+        try {
+            result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        } catch (PaymentGatewayException e) {
+            if (e.isDefinitiveFailure()) {
+                paymentRepository.update(payment.fail(e.getCode(), e.getMessage()));
+            }
+            throw e;
+        }
         if (result.status() != PaymentStatus.CONFIRMED) {
             throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRMATION_NOT_ALLOWED,
                     "결제 승인 결과가 확정 상태가 아닙니다.");
