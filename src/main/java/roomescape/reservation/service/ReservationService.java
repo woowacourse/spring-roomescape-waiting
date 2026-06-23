@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
@@ -13,8 +14,11 @@ import roomescape.common.domain.ReservationSlot;
 import roomescape.common.event.ReservationEvent;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.exception.ErrorCode;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.repository.PaymentRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
+import roomescape.reservation.dto.ReservationCreateResponse;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -32,6 +36,7 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final ReservationFactory reservationFactory;
+    private final PaymentRepository paymentRepository;
     private final Clock clock;
     private final ApplicationEventPublisher publisher;
 
@@ -40,17 +45,20 @@ public class ReservationService {
             ReservationTimeService reservationTimeService,
             ThemeService themeService,
             ReservationFactory reservationFactory,
-            Clock clock, ApplicationEventPublisher publisher) {
+            PaymentRepository paymentRepository,
+            Clock clock,
+            ApplicationEventPublisher publisher) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationFactory = reservationFactory;
+        this.paymentRepository = paymentRepository;
         this.clock = clock;
         this.publisher = publisher;
     }
 
     @Transactional
-    public ReservationResponse createReservation(ReservationRequest request) {
+    public ReservationCreateResponse createReservation(ReservationRequest request) {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
         ReservationSlot slot = new ReservationSlot(request.date(), time, theme);
@@ -60,7 +68,9 @@ public class ReservationService {
         }
         try {
             Reservation saved = reservationRepository.save(reservationFactory.create(request.name(), slot));
-            return ReservationResponse.from(saved);
+            String orderId = UUID.randomUUID().toString();
+            Payment payment = paymentRepository.save(Payment.pending(orderId, (long) theme.getPrice(), saved.getId()));
+            return ReservationCreateResponse.of(saved, payment);
         } catch (DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }

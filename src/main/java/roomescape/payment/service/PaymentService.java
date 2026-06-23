@@ -1,0 +1,43 @@
+package roomescape.payment.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.payment.domain.Payment;
+import roomescape.payment.domain.PaymentConfirmation;
+import roomescape.payment.domain.PaymentResult;
+import roomescape.payment.port.PaymentGateway;
+import roomescape.payment.repository.PaymentRepository;
+import roomescape.reservation.domain.PaymentStatus;
+import roomescape.reservation.repository.ReservationRepository;
+
+@Service
+public class PaymentService {
+
+    private final PaymentRepository paymentRepository;
+    private final PaymentGateway paymentGateway;
+    private final ReservationRepository reservationRepository;
+
+    public PaymentService(PaymentGateway paymentGateway, PaymentRepository paymentRepository,
+                          ReservationRepository reservationRepository) {
+        this.paymentGateway = paymentGateway;
+        this.paymentRepository = paymentRepository;
+        this.reservationRepository = reservationRepository;
+    }
+
+    @Transactional
+    public void confirm(String paymentKey, String orderId, Long amount) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        if (!amount.equals(payment.getAmount())) {
+            throw new BusinessException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+
+        PaymentResult result = paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+
+        paymentRepository.updatePaymentKey(orderId, result.paymentKey());
+        reservationRepository.updateStatus(payment.getReservationId(), PaymentStatus.CONFIRMED);
+    }
+}

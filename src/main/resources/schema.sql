@@ -50,3 +50,12 @@ CREATE TABLE reservation_waiting
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
+
+CREATE TABLE payment (
+    order_id VARCHAR(64) NOT NULL,
+    amount      INT          NOT NULL,
+    payment_key VARCHAR(200),
+    reservation_id BIGINT   NOT NULL,
+    PRIMARY KEY (order_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation(id)
+)

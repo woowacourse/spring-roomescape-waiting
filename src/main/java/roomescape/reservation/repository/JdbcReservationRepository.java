@@ -155,4 +155,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = "select id from reservation where date = ? and theme_id = ? and time_id = ?";
         return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
     }
+
+    @Override
+    public void updateStatus(Long reservationId, PaymentStatus status) {
+        String query = "UPDATE reservation SET status = ? WHERE id = ?";
+        jdbcTemplate.update(query, status.name(), reservationId);
+    }
 }
