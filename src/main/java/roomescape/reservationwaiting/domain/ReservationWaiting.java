@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import roomescape.common.domain.ReservationSlot;
 import roomescape.common.exception.BusinessException;
 import roomescape.common.exception.ErrorCode;
+import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -26,7 +27,7 @@ public class ReservationWaiting {
     }
 
     public Reservation toReservation() {
-        return Reservation.restore(null, name, slot);
+        return Reservation.restore(null, name, slot, PaymentStatus.CONFIRMED);
     }
 
     public void validateCancelable(Clock clock, ErrorCode code) {

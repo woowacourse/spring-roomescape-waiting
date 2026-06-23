@@ -21,7 +21,7 @@ public class ReservationFactory {
 
     public Reservation create(String name, ReservationSlot slot) {
         validate(name, slot.date(), slot.time(), slot.theme());
-        return Reservation.restore(null, name, slot);
+        return Reservation.restore(null, name, slot, PaymentStatus.PAYMENT_PENDING);
     }
 
     private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {

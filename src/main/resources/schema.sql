@@ -30,6 +30,7 @@ CREATE TABLE reservation
     date     DATE         NOT NULL,
     time_id  BIGINT,
     theme_id BIGINT,
+    status   VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
     UNIQUE(date, time_id, theme_id),
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

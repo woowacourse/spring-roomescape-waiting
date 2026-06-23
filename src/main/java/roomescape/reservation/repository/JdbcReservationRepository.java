@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.common.domain.ReservationSlot;
+import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -38,7 +39,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                             resultSet.getString("theme_image_url"),
                             resultSet.getInt("theme_price")
                     )
-            )
+            ),
+            PaymentStatus.valueOf(resultSet.getString("status"))
     );
 
     private final RowMapper<Long> idMapper = (resultSet, rowNum) -> (
@@ -58,11 +60,12 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("name", reservation.getName())
                 .addValue("date", reservation.getDate())
                 .addValue("time_id", reservation.getTime().getId())
-                .addValue("theme_id", reservation.getTheme().getId());
+                .addValue("theme_id", reservation.getTheme().getId())
+                .addValue("status", reservation.getStatus().name());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Reservation.restore(id, reservation.getName(),
                 new ReservationSlot(reservation.getDate(), reservation.getTime(),
-                        reservation.getTheme()));
+                        reservation.getTheme()), reservation.getStatus());
     }
 
     @Override
@@ -70,7 +73,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price,
+                       r.status
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -84,7 +88,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price,
+                       r.status
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -98,7 +103,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price,
+                       r.status
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id

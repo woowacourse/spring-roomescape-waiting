@@ -15,19 +15,22 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
+    private final PaymentStatus status;
 
     @Builder(access = lombok.AccessLevel.PRIVATE)
-    private Reservation(Long id, String name, ReservationSlot slot) {
+    private Reservation(Long id, String name, ReservationSlot slot, PaymentStatus status) {
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.status = status;
     }
 
-    public static Reservation restore(Long id, String name, ReservationSlot slot) {
+    public static Reservation restore(Long id, String name, ReservationSlot slot, PaymentStatus status) {
         return Reservation.builder()
                 .id(id)
                 .name(name)
                 .slot(slot)
+                .status(status)
                 .build();
     }
 
@@ -36,6 +39,7 @@ public class Reservation {
                 .id(this.id)
                 .name(this.name)
                 .slot(new ReservationSlot(date, time, getTheme()))
+                .status(this.status)
                 .build();
         if (changed.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_TIME_RESERVATION);
@@ -75,5 +79,9 @@ public class Reservation {
 
     public ReservationSlot getSlot() {
         return this.slot;
+    }
+
+    public PaymentStatus getStatus() {
+        return status;
     }
 }
