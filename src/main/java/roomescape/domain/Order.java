@@ -6,19 +6,36 @@ package roomescape.domain;
 public class Order {
 
     private final String orderId;
+    private final String orderName;
     private final Long amount;
+    private final Reservation reservation;
 
-    public Order(String orderId, Long amount) {
+    public Order(
+            String orderId,
+            String orderName,
+            Long amount,
+            Reservation reservation
+    ) {
         this.orderId = orderId;
+        this.orderName = orderName;
         this.amount = amount;
+        this.reservation = reservation;
     }
 
     public String getOrderId() {
         return orderId;
     }
 
+    public String getOrderName() {
+        return orderName;
+    }
+
     public Long getAmount() {
         return amount;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
     }
 
 }
