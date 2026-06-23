@@ -25,6 +25,7 @@ public class MissionStepTest {
     @BeforeEach
     void setup() {
         jdbcTemplate.update("DELETE FROM reservation_waiting;");
+        jdbcTemplate.update("DELETE FROM payment;");
         jdbcTemplate.update("DELETE FROM reservation;");
         jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1;");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
@@ -118,7 +119,8 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("id", is(1));
+                .body("reservationId", is(1))
+                .body("paymentId", is(1));
 
         Map<String, String> firstWaitingParams = waitingRequest(reservationParams, "구구");
         Map<String, String> secondWaitingParams = waitingRequest(reservationParams, "포비");
@@ -176,7 +178,7 @@ public class MissionStepTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationParams)
-                .when().post("/reservations")
+                .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201)
                 .body("id", is(1));

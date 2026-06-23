@@ -8,8 +8,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
+import roomescape.controller.dto.response.PaymentCheckoutResponse;
 import roomescape.controller.dto.response.ReservationResponse;
+import roomescape.domain.Payment;
 import roomescape.domain.Reservation;
+import roomescape.service.PaymentService;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
@@ -22,21 +25,23 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService service;
+    private final PaymentService paymentService;
 
-    public ReservationController(ReservationService service) {
+    public ReservationController(ReservationService service, PaymentService paymentService) {
         this.service = service;
+        this.paymentService = paymentService;
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
-        Reservation reservation = service.createByUser(
+    public ResponseEntity<PaymentCheckoutResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
+        Payment payment = paymentService.createForReservation(
                 request.name(),
                 request.date(),
                 request.timeId(),
                 request.themeId(),
                 LocalDateTime.now());
-        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
-                .body(ReservationResponse.from(reservation));
+        PaymentCheckoutResponse response = PaymentCheckoutResponse.from(payment);
+        return ResponseEntity.created(URI.create(response.checkoutUrl())).body(response);
     }
 
     @GetMapping

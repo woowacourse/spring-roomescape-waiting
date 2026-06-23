@@ -47,3 +47,21 @@ CREATE TABLE IF NOT EXISTS reservation_waiting (
     CONSTRAINT uq_reservation_waiting_name_slot
         UNIQUE (name, date, time_id, theme_id)
 );
+
+CREATE TABLE IF NOT EXISTS payment (
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id  BIGINT       NOT NULL,
+    order_id        VARCHAR(64)  NOT NULL,
+    amount          BIGINT       NOT NULL,
+    payment_key     VARCHAR(255),
+    status          VARCHAR(20)  NOT NULL,
+    failure_code    VARCHAR(100),
+    failure_message VARCHAR(255),
+
+    PRIMARY KEY (id),
+
+    CONSTRAINT fk_payment_reservation
+        FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
+    CONSTRAINT uq_payment_order_id
+        UNIQUE (order_id)
+);

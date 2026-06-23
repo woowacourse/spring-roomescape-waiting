@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reserver;
@@ -58,8 +59,18 @@ public class ReservationService {
 
     @Transactional
     public Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
+        return createByUser(name, date, timeId, themeId, now, ReservationStatus.CONFIRMED);
+    }
+
+    @Transactional
+    public Reservation createPendingByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
+        return createByUser(name, date, timeId, themeId, now, ReservationStatus.PENDING);
+    }
+
+    private Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now,
+                                     ReservationStatus status) {
         ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));
-        Reservation reservation = new Reservation(null, new Reserver(name), slot);
+        Reservation reservation = new Reservation(null, new Reserver(name), slot, status);
         reservationValidator.validateCreatableByUser(reservation, now);
 
         return insertReservation(reservation);
