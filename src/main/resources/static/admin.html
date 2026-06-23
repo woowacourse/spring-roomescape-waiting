@@ -447,6 +447,10 @@
       <label>썸네일 URL</label>
       <input type="text" id="theme-thumb" placeholder="https://example.com/image.jpg">
     </div>
+    <div class="form-group">
+      <label>금액</label>
+      <input type="number" id="theme-amount" placeholder="10000" min="1" step="1000">
+    </div>
     <button class="btn btn-accent" onclick="createTheme()">테마 추가</button>
   </div>
 
@@ -597,6 +601,7 @@
           <div class="admin-theme-card-body">
             <div class="admin-theme-card-name">${t.name}</div>
             <div class="admin-theme-card-desc">${t.description}</div>
+            <div class="admin-theme-card-desc">${formatCurrency(t.amount)}</div>
             <button class="btn btn-danger-outline" onclick="deleteTheme(${t.id})">삭제</button>
           </div>
         </div>
@@ -612,17 +617,19 @@
     const name = document.getElementById('theme-name').value.trim();
     const desc = document.getElementById('theme-desc').value.trim();
     const thumb = document.getElementById('theme-thumb').value.trim();
+    const amount = Number(document.getElementById('theme-amount').value);
 
     try {
       await fetchEmpty(`${API}/admin/themes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description: desc, thumbnailUrl: thumb })
+        body: JSON.stringify({ name, description: desc, thumbnailUrl: thumb, amount })
       }, '테마 추가에 실패했습니다.');
 
       document.getElementById('theme-name').value = '';
       document.getElementById('theme-desc').value = '';
       document.getElementById('theme-thumb').value = '';
+      document.getElementById('theme-amount').value = '';
 
       showToast(`"${name}" 테마가 추가되었습니다.`);
       await ensureStandardTimes();
@@ -733,6 +740,12 @@
         })
       ));
     } catch (_) {}
+  }
+
+  function formatCurrency(amount) {
+    const value = Number(amount);
+    if (!Number.isFinite(value)) return '-';
+    return `${value.toLocaleString('ko-KR')}원`;
   }
 
   // Init: load reservations by default

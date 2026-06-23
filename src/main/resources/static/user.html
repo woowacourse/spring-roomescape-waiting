@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RoomEscape</title>
+  <script src="https://js.tosspayments.com/v1/payment"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -211,6 +212,13 @@
       line-height: 1.5;
     }
 
+    .theme-card-price {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
     /* Popular theme rank badge */
     .rank-badge {
       display: inline-flex;
@@ -294,6 +302,7 @@
 
     .selected-theme-info h3 { font-size: 15px; font-weight: 700; }
     .selected-theme-info p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .selected-theme-info .price { color: var(--accent); font-weight: 700; }
 
     label {
       display: block;
@@ -762,8 +771,11 @@
           <div class="confirm-row">
             <span>예약자</span><span id="confirm-name">-</span>
           </div>
+          <div class="confirm-row" id="confirm-amount-row">
+            <span>결제 금액</span><span id="confirm-amount">-</span>
+          </div>
           <div class="btn-row" id="confirm-actions" style="margin-top:20px">
-            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlotInfo-btn">예약 확정</button>
+            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlotInfo-btn">결제하기</button>
             <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
           </div>
         </div>
@@ -796,6 +808,7 @@
 
 <script>
   const API = '';
+  const TOSS_CLIENT_KEY = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
   let username = '';
   let selectedTheme = null;
   let selectedDate = null;
@@ -812,7 +825,24 @@
       return;
     }
     document.getElementById('headerName').textContent = username;
+    handlePaymentRedirect();
     switchSection('popular');
+  }
+
+  function handlePaymentRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const paymentResult = params.get('payment');
+    if (paymentResult === 'success') {
+      showMessageModal('결제 인증 완료', '결제 인증이 완료되었습니다. 서버 승인 API 연동이 완료되면 이 단계에서 예약이 확정됩니다.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    if (paymentResult === 'fail') {
+      const message = params.get('message') || '결제가 취소되었거나 실패했습니다.';
+      showMessageModal('결제 실패', message);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 
   function logout() {
@@ -907,6 +937,7 @@
             <div class="${rankClass(i+1)} rank-badge">${i+1}</div>
             <div class="theme-card-name">${t.name}</div>
             <div class="theme-card-desc">${t.description}</div>
+            <div class="theme-card-price">${formatCurrency(t.amount)}</div>
           </div>
         </div>
       `).join('');
@@ -957,6 +988,7 @@
           <div class="theme-card-body">
             <div class="theme-card-name">${t.name}</div>
             <div class="theme-card-desc">${t.description}</div>
+            <div class="theme-card-price">${formatCurrency(t.amount)}</div>
           </div>
         </div>
       `).join('');
@@ -975,8 +1007,9 @@
       : '테마를 선택하고 원하는 날짜와 시간을 예약하세요.';
     document.getElementById('confirm-box-title').textContent = editing ? '수정 확인' : '예약 확인';
     document.getElementById('confirm-id-row').style.display = 'none';
+    document.getElementById('confirm-amount-row').style.display = editing ? 'none' : 'flex';
     document.getElementById('confirm-actions').innerHTML = `
-      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlotInfo-btn">${editing ? '수정 완료' : '예약 확정'}</button>
+      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlotInfo-btn">${editing ? '수정 완료' : '결제하기'}</button>
       <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
     `;
   }
@@ -1005,6 +1038,7 @@
       <div>
         <h3>${theme.name}</h3>
         <p>${theme.description}</p>
+        <p class="price">${formatCurrency(theme.amount)}</p>
       </div>
     `;
     document.getElementById('selected-theme-info').innerHTML = themeInfoHtml;
@@ -1107,7 +1141,8 @@
       themeName: selectedTheme.name,
       date: selectedDate,
       time: selectedTime?.startAt || '-',
-      name: username
+      name: username,
+      amount: selectedTheme?.amount
     });
     document.getElementById('confirm-id-row').style.display = 'none';
     goToStep(4);
@@ -1118,6 +1153,7 @@
     document.getElementById('confirm-date').textContent = formatDate(reservationSlotInfo.date);
     document.getElementById('confirm-time').textContent = reservationSlotInfo.time;
     document.getElementById('confirm-name').textContent = reservationSlotInfo.name || username;
+    document.getElementById('confirm-amount').textContent = formatCurrency(reservationSlotInfo.amount ?? selectedTheme?.amount);
   }
 
   function showReservationComplete(reservationSlotInfo) {
@@ -1125,6 +1161,7 @@
     document.getElementById('booking-desc').textContent = '예약이 정상적으로 등록되었습니다.';
     document.getElementById('confirm-box-title').textContent = '예약 완료';
     document.getElementById('confirm-id-row').style.display = 'none';
+    document.getElementById('confirm-amount-row').style.display = 'flex';
     renderReservationSummary(reservationSlotInfo);
     document.getElementById('confirm-actions').innerHTML = `
       <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
@@ -1158,15 +1195,49 @@
         if (response.order !== 0) {
           showWaitingComplete(response);
         } else {
-          showMessageModal('예약 완료', '예약이 완료되었습니다!');
-          showReservationComplete(response);
-          resetBookingState();
+          await requestTossPayment(response);
         }
       }
     } catch (e) {
       showToast(e.message, 'error');
       recoverReservationFlow(e);
     }
+  }
+
+  async function requestTossPayment(reservation) {
+    const payment = extractPaymentInfo(reservation);
+    if (!payment.orderId || !payment.amount) {
+      showMessageModal(
+        '결제 정보가 필요합니다',
+        '예약은 생성되었지만 결제창을 열기 위한 orderId와 amount가 응답에 없습니다.\n서버 응답에 결제 주문 정보를 포함한 뒤 다시 시도해주세요.'
+      );
+      showReservationComplete(reservation);
+      resetBookingState();
+      return;
+    }
+
+    if (!window.TossPayments) {
+      showToast('Toss Payments SDK를 불러오지 못했습니다.', 'error');
+      return;
+    }
+
+    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+    await tossPayments.requestPayment('카드', {
+      amount: payment.amount,
+      orderId: payment.orderId,
+      orderName: `${reservation.themeName || selectedTheme.name} 예약`,
+      customerName: reservation.name || username,
+      successUrl: `${window.location.origin}/user.html?payment=success`,
+      failUrl: `${window.location.origin}/user.html?payment=fail`
+    });
+  }
+
+  function extractPaymentInfo(reservation) {
+    const paymentOrder = reservation.paymentOrder || reservation.orderInfo || reservation.payment || {};
+    return {
+      orderId: reservation.orderId || paymentOrder.orderId,
+      amount: Number(reservation.amount ?? paymentOrder.amount ?? selectedTheme?.amount)
+    };
   }
 
   async function recoverReservationFlow(error) {
@@ -1242,6 +1313,7 @@
     document.querySelector('#confirm-id-row span:first-child').textContent = '대기 번호';
     document.getElementById('confirm-id').textContent = `${waitingOrder}번째`;
     document.getElementById('confirm-id-row').style.display = 'flex';
+    document.getElementById('confirm-amount-row').style.display = 'none';
     renderReservationSummary({
       themeName: reservation.themeName,
       date: reservation.date,
@@ -1387,6 +1459,12 @@
     const d = new Date(dateStr + 'T00:00:00');
     const days = ['일','월','화','수','목','금','토'];
     return `${dateStr} (${days[d.getDay()]})`;
+  }
+
+  function formatCurrency(amount) {
+    const value = Number(amount);
+    if (!Number.isFinite(value)) return '-';
+    return `${value.toLocaleString('ko-KR')}원`;
   }
 
   init();
