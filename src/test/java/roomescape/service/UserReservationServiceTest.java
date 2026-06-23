@@ -26,10 +26,17 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentService;
+import roomescape.payment.PaymentStatus;
+import roomescape.payment.order.PaymentOrder;
+import roomescape.payment.order.PaymentOrderRepository;
 import roomescape.repository.LockedReservationWriter;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeLockedAction;
+import roomescape.service.dto.PaymentConfirmCommand;
+import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -65,6 +72,10 @@ class UserReservationServiceTest {
     private LockedReservationWriter reservationWriter;
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
+    @Mock
+    private PaymentService paymentService;
+    @Mock
+    private PaymentOrderRepository paymentOrderRepository;
     @InjectMocks
     private UserReservationService userReservationService;
 
@@ -77,46 +88,73 @@ class UserReservationServiceTest {
     }
 
     @Test
-    @DisplayName("미래 시점에 예약하면 정상적으로 생성된다")
-    void 미래_시점_예약은_정상_생성된다() {
+    @DisplayName("미래 시점에 주문하면 결제 대기 주문이 저장되고 예약은 아직 생성되지 않는다")
+    void 미래_시점_주문은_결제대기로_저장된다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
 
-        assertDoesNotThrow(() -> userReservationService.create(command));
+        PaymentOrderResult result = userReservationService.createOrder(command);
 
+        assertThat(result.orderId()).isNotBlank();
+        assertThat(result.amount()).isPositive();
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(reservationService, times(1)).create(command);
-        verifyNoInteractions(reservationRepository);
+        verify(paymentOrderRepository, times(1)).save(any(PaymentOrder.class));
+        verifyNoInteractions(reservationService, reservationRepository, paymentService);
     }
 
     @Test
-    @DisplayName("과거 날짜로 예약하면 PastReservationException이 발생한다")
-    void 과거_날짜_예약시_예외가_발생한다() {
+    @DisplayName("과거 날짜로 주문하면 PastReservationException이 발생하고 주문이 저장되지 않는다")
+    void 과거_날짜_주문시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, PAST_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
 
         assertThrows(
                 PastReservationException.class,
-                () -> userReservationService.create(command)
+                () -> userReservationService.createOrder(command)
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationRepository);
+        verifyNoInteractions(reservationService, reservationRepository, paymentService, paymentOrderRepository);
     }
 
     @Test
-    @DisplayName("존재하지 않는 timeId로 예약하면 ReservationTimeNotFoundException이 발생한다")
-    void 존재하지_않는_timeId로_예약시_예외가_발생한다() {
+    @DisplayName("존재하지 않는 timeId로 주문하면 ReservationTimeNotFoundException이 발생한다")
+    void 존재하지_않는_timeId로_주문시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationTimeNotFoundException.class,
-                () -> userReservationService.create(command)
+                () -> userReservationService.createOrder(command)
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationRepository);
+        verifyNoInteractions(reservationService, reservationRepository, paymentService, paymentOrderRepository);
+    }
+
+    @Test
+    @DisplayName("결제가 승인되면 예약을 생성하고 주문을 확정 처리한다")
+    void 결제_승인시_예약을_생성하고_주문을_확정한다() {
+        PaymentConfirmCommand command = new PaymentConfirmCommand("test_pk_1", "order-1", 1000L);
+        ReservationCreateCommand reservationCommand = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
+        PaymentOrder order = PaymentOrder.pending("order-1", reservationCommand, 1000L);
+        ReservationResult created = new ReservationResult(
+                10L, OWNER, FUTURE_DATE,
+                new roomescape.service.dto.ReservationTimeResult(1L, LocalTime.of(10, 0)),
+                new roomescape.service.dto.ThemeResult(1L, "무인도 탈출", "설명", "https://example.com/thumb.jpg"),
+                0L, ReservationStatus.CONFIRMED);
+        given(paymentService.confirm("test_pk_1", "order-1", 1000L))
+                .willReturn(new PaymentResult("test_pk_1", "order-1", PaymentStatus.DONE, 1000L));
+        given(paymentOrderRepository.getByOrderId("order-1")).willReturn(order);
+        given(reservationService.create(any(ReservationCreateCommand.class))).willReturn(created);
+
+        ReservationResult result = userReservationService.confirm(command);
+
+        assertThat(result.id()).isEqualTo(10L);
+        assertThat(result.status()).isEqualTo(ReservationStatus.CONFIRMED);
+        verify(paymentService, times(1)).confirm("test_pk_1", "order-1", 1000L);
+        verify(reservationService, times(1)).create(any(ReservationCreateCommand.class));
+        verify(paymentOrderRepository, times(1)).markConfirmed("order-1", "test_pk_1", 10L);
     }
 
     @Test

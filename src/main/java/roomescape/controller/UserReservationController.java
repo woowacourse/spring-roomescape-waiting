@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.PaymentCancelRequest;
+import roomescape.controller.dto.PaymentConfirmRequest;
+import roomescape.controller.dto.PaymentOrderResponse;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.ReservationUpdateRequest;
 import roomescape.service.UserReservationService;
+import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationResult;
 
 @RestController
@@ -28,9 +33,14 @@ import roomescape.service.dto.ReservationResult;
 public class UserReservationController {
 
     private final UserReservationService userReservationService;
+    private final String clientKey;
 
-    public UserReservationController(UserReservationService userReservationService) {
+    public UserReservationController(
+            UserReservationService userReservationService,
+            @Value("${toss.client-key}") String clientKey
+    ) {
         this.userReservationService = userReservationService;
+        this.clientKey = clientKey;
     }
 
     @GetMapping
@@ -43,9 +53,24 @@ public class UserReservationController {
     }
 
     @PostMapping
-    public ReservationResponse create(@RequestBody @Valid ReservationRequest request) {
-        ReservationResult saved = userReservationService.create(request.toCommand());
+    public PaymentOrderResponse createOrder(@RequestBody @Valid ReservationRequest request) {
+        PaymentOrderResult order = userReservationService.createOrder(request.toCommand());
+        return PaymentOrderResponse.from(order, clientKey);
+    }
+
+    @PostMapping("/confirm")
+    public ReservationResponse confirm(@RequestBody @Valid PaymentConfirmRequest request) {
+        ReservationResult saved = userReservationService.confirm(request.toCommand());
         return ReservationResponse.from(saved);
+    }
+
+    @PostMapping("/payment/cancel")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelPayment(@RequestBody PaymentCancelRequest request) {
+        if (request.orderId() == null || request.orderId().isBlank()) {
+            return;
+        }
+        userReservationService.cancelOrder(request.orderId());
     }
 
     @PatchMapping("/{id}")

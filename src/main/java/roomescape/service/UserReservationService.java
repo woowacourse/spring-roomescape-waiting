@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithWaitingOrder;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentService;
+import roomescape.payment.order.PaymentOrder;
+import roomescape.payment.order.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.service.dto.PaymentConfirmCommand;
+import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -28,29 +35,64 @@ public class UserReservationService {
 
     private static final Logger log = LoggerFactory.getLogger(UserReservationService.class);
 
+    private static final long RESERVATION_AMOUNT = 1000L;
+    private static final String ORDER_NAME = "방탈출 예약";
+
     private final AdminReservationService reservationService;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final PaymentService paymentService;
+    private final PaymentOrderRepository paymentOrderRepository;
 
     public UserReservationService(
             AdminReservationService reservationService,
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository
+            ReservationTimeRepository reservationTimeRepository,
+            PaymentService paymentService,
+            PaymentOrderRepository paymentOrderRepository
     ) {
         this.reservationService = reservationService;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.paymentService = paymentService;
+        this.paymentOrderRepository = paymentOrderRepository;
     }
 
-    public ReservationResult create(ReservationCreateCommand command) {
+    public PaymentOrderResult createOrder(ReservationCreateCommand command) {
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
-                    log.warn("존재하지 않는 시간으로 예약 생성 시도: timeId={}", command.timeId());
+                    log.warn("존재하지 않는 시간으로 주문 생성 시도: timeId={}", command.timeId());
                     return new ReservationTimeNotFoundException(
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), time.getStartAt(), "과거 시점에는 예약할 수 없습니다");
-        return reservationService.create(command);
+
+        String orderId = generateOrderId();
+        paymentOrderRepository.save(PaymentOrder.pending(orderId, command, RESERVATION_AMOUNT));
+        log.info("주문 생성 완료: orderId={}, reserverName={}, date={}, timeId={}, themeId={}, amount={}",
+                orderId, command.reserverName(), command.date(), command.timeId(), command.themeId(),
+                RESERVATION_AMOUNT);
+        return new PaymentOrderResult(orderId, RESERVATION_AMOUNT, ORDER_NAME);
+    }
+
+    public ReservationResult confirm(PaymentConfirmCommand command) {
+        PaymentResult payment = paymentService.confirm(
+                command.paymentKey(), command.orderId(), command.amount());
+        PaymentOrder order = paymentOrderRepository.getByOrderId(command.orderId());
+        ReservationResult reservation = reservationService.create(order.toCommand());
+        paymentOrderRepository.markConfirmed(command.orderId(), payment.paymentKey(), reservation.id());
+        log.info("결제 승인 후 예약 생성 완료: orderId={}, reservationId={}, status={}",
+                command.orderId(), reservation.id(), reservation.status());
+        return reservation;
+    }
+
+    public void cancelOrder(String orderId) {
+        paymentOrderRepository.markCanceled(orderId);
+        log.info("결제 대기 주문 취소: orderId={}", orderId);
+    }
+
+    private String generateOrderId() {
+        return "order-" + UUID.randomUUID().toString().replace("-", "");
     }
 
     public List<ReservationResult> findByReserverName(String reserverName) {

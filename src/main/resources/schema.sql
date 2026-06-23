@@ -1,3 +1,4 @@
+drop table if exists payment_order;
 drop table if exists reservation;
 drop table if exists reservation_time;
 drop table if exists theme;
@@ -30,4 +31,20 @@ CREATE TABLE reservation (
                              PRIMARY KEY (id),
                              FOREIGN KEY (time_id) REFERENCES reservation_time (id),
                              FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
+CREATE TABLE payment_order (
+                             id BIGINT NOT NULL AUTO_INCREMENT,
+                             order_id VARCHAR(64) NOT NULL UNIQUE,
+                             reserver_name VARCHAR(30) NOT NULL,
+                             date DATE NOT NULL,
+                             time_id BIGINT NOT NULL,
+                             theme_id BIGINT NOT NULL,
+                             amount BIGINT NOT NULL,
+                             payment_key VARCHAR(200),
+                             status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+                             reservation_id BIGINT,
+                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                             PRIMARY KEY (id)
 );
