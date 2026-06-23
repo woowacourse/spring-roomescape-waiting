@@ -94,7 +94,7 @@ public class SessionService {
     @Transactional
     public Reservation makeReservation(ReservationRequest request) {
         Session session = findSessionOrThrow(request.date(), request.timeId(), request.themeId());
-        return reservationService.save(request.name(), session);
+        return reservationService.save(request.name(), session, request.amount());
     }
 
     @Transactional
@@ -166,7 +166,7 @@ public class SessionService {
         if (waitingService.isExistsBySessionId(session.getId())) {
             Waiting first = waitingService.findFirstBySessionId(session.getId());
             waitingService.deleteById(first.getId());
-            reservationService.save(first.getName(), session);
+            reservationService.save(first.getName(), session, 0L);
         }
     }
 }

@@ -11,7 +11,8 @@ public record BookingResponse(
         TimeResponse timeResponse,
         ThemeResponse themeResponse,
         boolean isReserved,
-        Integer waitingNumber
+        Integer waitingNumber,
+        Long amount
 ) {
 
     public static BookingResponse from(Booking booking) {
@@ -22,7 +23,8 @@ public record BookingResponse(
                 TimeResponse.from(booking.timeSlot()),
                 ThemeResponse.from(booking.theme()),
                 booking.isReserved(),
-                booking.waitingNumber()
+                booking.waitingNumber(),
+                booking.amount()
         );
     }
 }

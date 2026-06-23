@@ -14,7 +14,8 @@ public record Booking(
         TimeSlot timeSlot,
         Theme theme,
         boolean isReserved,
-        Integer waitingNumber
+        Integer waitingNumber,
+        Long amount
 ) {
 
     public static Booking fromReservation(Reservation reservation) {
@@ -25,7 +26,8 @@ public record Booking(
                 reservation.getSession().getTimeSlot(),
                 reservation.getSession().getTheme(),
                 true,
-                null
+                null,
+                reservation.getAmount()
         );
     }
 
@@ -37,7 +39,8 @@ public record Booking(
                 waiting.getSession().getTimeSlot(),
                 waiting.getSession().getTheme(),
                 false,
-                waiting.getWaitingNumber()
+                waiting.getWaitingNumber(),
+                null
         );
     }
 }

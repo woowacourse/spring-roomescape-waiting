@@ -12,6 +12,8 @@ public record ReservationRequest(
         @NotNull(message = "유효한 시간대 번호가 필요합니다.")
         Long timeId,
         @NotNull(message = "유효한 테마 번호가 필요합니다.")
-        Long themeId
+        Long themeId,
+        @NotNull(message = "금액은 필수입니다.")
+        Long amount
 ) {
 }

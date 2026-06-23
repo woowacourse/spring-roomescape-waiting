@@ -20,6 +20,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT
                 r.id AS r_id,
                 r.name,
+                r.amount,
                 s.id AS session_id,
                 s.date,
                 t.id AS t_id,
@@ -38,7 +39,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String FIND_BY_NAME_SQL = BASE_SQL + " WHERE r.name = ?";
     private static final String FIND_BY_CONDITIONS_SQL = BASE_SQL + " WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ?";
     private static final String DELETE_SQL = "DELETE FROM reservation WHERE id = ?";
-    private static final String UPDATE_SQL = "UPDATE reservation SET name = ?, session_id = ? WHERE id = ?";
+    private static final String UPDATE_SQL = "UPDATE reservation SET name = ?, session_id = ?, amount = ? WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
@@ -52,7 +53,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         this.rowMapper = (rs, rowNum) -> new Reservation(
                 rs.getLong("r_id"),
                 rs.getString("name"),
-                mapperFactory.mapSession(rs)
+                mapperFactory.mapSession(rs),
+                rs.getLong("amount")
         );
     }
 
@@ -80,10 +82,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         Map<String, Object> params = Map.of(
                 "name", reservation.getName(),
-                "session_id", reservation.getSession().getId()
+                "session_id", reservation.getSession().getId(),
+                "amount", reservation.getAmount() != null ? reservation.getAmount() : 0L
         );
         long id = jdbcInsert.executeAndReturnKey(params).longValue();
-        return new Reservation(id, reservation.getName(), reservation.getSession());
+        return new Reservation(id, reservation.getName(), reservation.getSession(), reservation.getAmount());
     }
 
     @Override
@@ -93,7 +96,10 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation update(Reservation reservation) {
-        int columns = jdbcTemplate.update(UPDATE_SQL, reservation.getName(), reservation.getSession().getId(), reservation.getId());
+        int columns = jdbcTemplate.update(UPDATE_SQL,
+                reservation.getName(), reservation.getSession().getId(),
+                reservation.getAmount() != null ? reservation.getAmount() : 0L,
+                reservation.getId());
         checkUpdateResult(columns, reservation.getId());
         return reservation;
     }

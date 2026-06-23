@@ -4,7 +4,7 @@ import roomescape.domain.Reservation;
 
 import java.time.LocalDate;
 
-public record ReservationResponse(long id, String name, LocalDate date, TimeResponse time, ThemeResponse theme) {
+public record ReservationResponse(long id, String name, LocalDate date, TimeResponse time, ThemeResponse theme, Long amount) {
 
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
@@ -12,7 +12,8 @@ public record ReservationResponse(long id, String name, LocalDate date, TimeResp
                 reservation.getName(),
                 reservation.getSession().getDate(),
                 TimeResponse.from(reservation.getSession().getTimeSlot()),
-                ThemeResponse.from(reservation.getSession().getTheme())
+                ThemeResponse.from(reservation.getSession().getTheme()),
+                reservation.getAmount()
         );
     }
 }
