@@ -9,7 +9,9 @@ public record ReservationCreateResponse(
         String name,
         LocalDate date,
         TimeResponse time,
-        ReservationStatus status
+        ReservationStatus status,
+        String orderId,
+        Long amount
 ) {
     public static ReservationCreateResponse from(Reservation reservation) {
         return new ReservationCreateResponse(
@@ -17,7 +19,13 @@ public record ReservationCreateResponse(
                 reservation.getName(),
                 reservation.getDate(),
                 TimeResponse.from(reservation.getTime()),
-                reservation.getStatus()
+                reservation.getStatus(),
+                null,
+                null
         );
+    }
+
+    public ReservationCreateResponse withOrder(String orderId, Long amount) {
+        return new ReservationCreateResponse(id, name, date, time, status, orderId, amount);
     }
 }

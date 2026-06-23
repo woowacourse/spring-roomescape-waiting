@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>결제 완료</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <style>
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+        .result-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .result-sub {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-table {
+            width: 100%;
+            font-size: 0.88rem;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        .info-table td {
+            padding: 0.5rem 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-table td:first-child {
+            color: var(--muted);
+            width: 6rem;
+        }
+        .info-table td:last-child {
+            font-weight: 500;
+            word-break: break-all;
+        }
+        .confirm-status {
+            margin-top: 0.75rem;
+        }
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <div class="panel" style="text-align:center; padding: 2rem 1.5rem;">
+        <div class="result-icon">&#10003;</div>
+        <div class="result-title">결제 인증 완료</div>
+        <div class="result-sub">카드사 인증이 완료되었습니다. 서버에서 최종 승인을 처리합니다.</div>
+    </div>
+
+    <div class="panel">
+        <h2>결제 정보</h2>
+        <table class="info-table" id="infoTable">
+            <tbody>
+            <tr><td>주문 ID</td><td id="tdOrderId">—</td></tr>
+            <tr><td>결제 금액</td><td id="tdAmount">—</td></tr>
+            <tr><td>결제 키</td><td id="tdPaymentKey">—</td></tr>
+            </tbody>
+        </table>
+        <p id="confirmStatus" class="status-msg confirm-status" style="display:none;"></p>
+        <div class="actions" style="margin-top:1rem;">
+            <a th:href="@{/user/my-reservations}" class="btn btn-primary">내 예약 확인</a>
+            <a th:href="@{/user/reserve}" class="btn">다른 예약 추가</a>
+        </div>
+    </div>
+</main>
+<script>
+    const params     = new URLSearchParams(location.search);
+    const paymentKey = params.get('paymentKey') ?? '';
+    const orderId    = params.get('orderId') ?? '';
+    const amount     = params.get('amount') ?? '0';
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    document.getElementById('tdOrderId').textContent    = orderId;
+    document.getElementById('tdAmount').textContent     = Number(amount).toLocaleString() + '원';
+    document.getElementById('tdPaymentKey').textContent = paymentKey;
+
+    const confirmStatus = document.getElementById('confirmStatus');
+
+    function showConfirm(text, ok) {
+        confirmStatus.textContent  = text;
+        confirmStatus.className    = 'status-msg confirm-status ' + (ok ? 'ok' : 'err');
+        confirmStatus.style.display = 'block';
+    }
+
+    // 서버에 최종 결제 승인 요청 (Step 3에서 구현될 엔드포인트)
+    (async function confirmPayment() {
+        try {
+            const res = await fetch('/payments/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) })
+            });
+            if (res.ok) {
+                showConfirm('결제 승인이 완료되었습니다.', true);
+            } else {
+                const body = await res.json().catch(() => ({}));
+                showConfirm('승인 중 오류: ' + (body.message || res.status), false);
+            }
+        } catch (e) {
+            showConfirm('서버 연결 오류 — 고객센터에 문의하세요.', false);
+        }
+    })();
+</script>
+</body>
+</html>

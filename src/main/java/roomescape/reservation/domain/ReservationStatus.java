@@ -4,11 +4,13 @@ import java.util.Map;
 import java.util.Set;
 
 public enum ReservationStatus {
+  PENDING,
   RESERVED,
   WAITING,
   CANCELED;
 
   private static final Map<ReservationStatus, Set<ReservationStatus>> TRANSITIONS = Map.of(
+      PENDING, Set.of(RESERVED),
       RESERVED, Set.of(CANCELED),
       WAITING, Set.of(RESERVED, CANCELED)
   );

@@ -1,10 +1,23 @@
 package roomescape.web.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.reservation.service.ReservationFacade;
 
 @Controller
 public class WebViewController {
+
+    @Value("${toss.client-key}")
+    private String tossClientKey;
+
+    private final ReservationFacade reservationFacade;
+
+    public WebViewController(ReservationFacade reservationFacade) {
+        this.reservationFacade = reservationFacade;
+    }
 
     @GetMapping("/")
     public String welcome() {
@@ -37,8 +50,27 @@ public class WebViewController {
     }
 
     @GetMapping("/user/reserve")
-    public String userReserve() {
+    public String userReserve(Model model) {
+        model.addAttribute("tossClientKey", tossClientKey);
         return "user/reserve";
+    }
+
+    @GetMapping("/user/payment/success")
+    public String paymentSuccess() {
+        return "user/payment-success";
+    }
+
+    @GetMapping("/user/payment/fail")
+    public String paymentFail(@RequestParam String code,
+        @RequestParam(required = false) String orderId) {
+        if (orderId != null) {
+            try {
+                reservationFacade.cancelPendingByOrderId(orderId);
+            } catch (Exception ignored) {
+
+            }
+        }
+        return "user/payment-fail";
     }
 
     @GetMapping("/user/popular")

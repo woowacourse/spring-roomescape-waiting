@@ -20,6 +20,7 @@ import roomescape.exception.InvalidReservationStateException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ResourceInUseException;
 import roomescape.exception.UnauthorizedReservationException;
+import roomescape.payment.exception.PaymentAmountMismatchException;
 
 @Component
 public class CustomExceptionResolver implements HandlerExceptionResolver, Ordered {
@@ -36,6 +37,11 @@ public class CustomExceptionResolver implements HandlerExceptionResolver, Ordere
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
                                          @Nullable Object handler, Exception ex) {
         try {
+            if (ex instanceof PaymentAmountMismatchException) {
+                writeJsonResponse(response, HttpStatus.BAD_REQUEST, ex.getMessage());
+                return new ModelAndView();
+            }
+
             if (ex instanceof DuplicateReservationException) {
                 writeJsonResponse(response, HttpStatus.CONFLICT, ex.getMessage());
                 return new ModelAndView();

@@ -2,12 +2,22 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ResourceInUseException;
+import roomescape.order.dao.dto.OrderRow;
+import roomescape.order.service.OrderService;
+import roomescape.payment.domain.PaymentConfirmation;
+import roomescape.payment.dto.request.ConfirmRequest;
+import roomescape.payment.exception.PaymentAmountMismatchException;
+import roomescape.payment.service.PaymentService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
@@ -20,14 +30,22 @@ import roomescape.reservation.dto.response.ReservationTimeFindAllResponse;
 @Service
 public class ReservationFacade {
 
+    public static final long DEFAULT_RESERVATION_PRICE = 50000L;
+
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
+    private final OrderService orderService;
+    private final PaymentService paymentService;
 
     private final ConcurrentHashMap<String, ReentrantLock> slotLocks = new ConcurrentHashMap<>();
 
-    public ReservationFacade(ReservationService reservationService, ReservationTimeService reservationTimeService) {
+    public ReservationFacade(ReservationService reservationService,
+        ReservationTimeService reservationTimeService, OrderService orderService,
+        PaymentService paymentService) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
+        this.orderService = orderService;
+        this.paymentService = paymentService;
     }
 
     public ReservationCreateResponse createReservation(ReservationRequest request) {
@@ -35,7 +53,15 @@ public class ReservationFacade {
             request.themeId());
         lock.lock();
         try {
-            return reservationService.create(request);
+            ReservationCreateResponse reservationCreateResponse = reservationService.create(
+                request);
+
+            if (reservationCreateResponse.status() == ReservationStatus.PENDING) {
+                String orderId = generateOrderId();
+                orderService.save(reservationCreateResponse.id(), orderId, DEFAULT_RESERVATION_PRICE);
+                return reservationCreateResponse.withOrder(orderId, DEFAULT_RESERVATION_PRICE);
+            }
+            return reservationCreateResponse;
         } finally {
             lock.unlock();
         }
@@ -114,6 +140,28 @@ public class ReservationFacade {
 
     public List<MyReservationResponse> findReservationsByName(String name) {
         return reservationService.findAllByName(name);
+    }
+
+    @Transactional
+    public void confirmPayment(ConfirmRequest request) {
+        OrderRow order = orderService.findByOrderId(request.orderId());
+        if (!order.amount().equals(request.amount())) {
+            throw new PaymentAmountMismatchException("요청 금액과 인증 금액이 일치하지 않습니다.");
+        }
+        paymentService.approve(order.reservationId(), new PaymentConfirmation(request.paymentKey(),
+            request.orderId(), request.amount()));
+        reservationService.confirm(order.reservationId());
+    }
+
+    @Transactional
+    public void cancelPendingByOrderId(String orderId) {
+        Long reservationId = orderService.cancelByOrderId(orderId);
+        reservationService.delete(reservationId);
+    }
+
+    @NonNull
+    private static String generateOrderId() {
+        return "order-" + UUID.randomUUID().toString().replace("-", "");
     }
 
     private Lock getSlotLock(LocalDate date, Long timeId, Long themeId) {
