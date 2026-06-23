@@ -34,7 +34,9 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                     rs.getString("theme_description"),
                     rs.getString("theme_thumbnail"),
                     rs.getTime("time_value").toLocalTime(),
-                    rs.getInt("waiting_order")
+                    rs.getInt("waiting_order"),
+                    null,
+                    null
             );
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {

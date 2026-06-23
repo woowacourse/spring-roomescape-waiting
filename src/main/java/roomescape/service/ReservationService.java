@@ -46,10 +46,11 @@ public class ReservationService {
 
         int order = reservationSlot.calculateOrder(newReservation);
         newReservation = reservationSlotRepository.saveReservation(newReservation);
+        Order paymentOrder = null;
         if (newReservation.isReserved()) {
-            saveOrderWithRetry(newReservation.getId(), calculateAmount(reservationSlot));
+            paymentOrder = saveOrderWithRetry(newReservation.getId(), calculateAmount(reservationSlot));
         }
-        return ReservationResponse.from(newReservation, reservationSlot.getSlot(), order);
+        return ReservationResponse.from(newReservation, reservationSlot.getSlot(), order, paymentOrder);
     }
 
     @Transactional
@@ -104,17 +105,19 @@ public class ReservationService {
         return reservationSlot.getSlot().theme().getAmount();
     }
 
-    private void saveOrderWithRetry(Long reservationId, Long amount) {
+    private Order saveOrderWithRetry(Long reservationId, Long amount) {
         for (int attempt = 0; attempt < MAX_ORDER_SAVE_ATTEMPTS; attempt++) {
             try {
-                orderRepository.save(Order.create(reservationId, amount));
-                return;
+                Order order = Order.create(reservationId, amount);
+                orderRepository.save(order);
+                return order;
             } catch (DuplicateKeyException e) {
                 if (attempt == MAX_ORDER_SAVE_ATTEMPTS - 1) {
                     throw e;
                 }
             }
         }
+        throw new IllegalStateException("결제 주문 정보를 저장할 수 없습니다.");
     }
 
     private LockedReservationSlots findBothSlotsForUpdate(Long currentSlotId, Long newSlotId) {
