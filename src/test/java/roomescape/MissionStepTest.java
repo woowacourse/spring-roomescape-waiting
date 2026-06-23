@@ -147,22 +147,22 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .queryParam("name", "구구")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("RESERVED"))
+                .body("[0].bookingType", is("RESERVATION"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", nullValue());
 
         RestAssured.given().log().all()
                 .queryParam("name", "포비")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("WAITING"))
+                .body("[0].bookingType", is("WAITING"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", is(1));
@@ -212,33 +212,33 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("RESERVED"))
+                .body("[0].bookingType", is("RESERVATION"))
                 .body("[0].date", is(updateParams.get("date")))
                 .body("[0].time.id", is(2))
                 .body("[0].turn", nullValue());
 
         RestAssured.given().log().all()
                 .queryParam("name", "구구")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("RESERVED"))
+                .body("[0].bookingType", is("RESERVATION"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", nullValue());
 
         RestAssured.given().log().all()
                 .queryParam("name", "포비")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("WAITING"))
+                .body("[0].bookingType", is("WAITING"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", is(1));
@@ -328,14 +328,14 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
                 .body("name", everyItem(is("브라운")))
-                .body("status", containsInAnyOrder("RESERVED", "WAITING"))
-                .body("find { it.status == 'RESERVED' }.turn", nullValue())
-                .body("find { it.status == 'WAITING' }.turn", is(1));
+                .body("bookingType", containsInAnyOrder("RESERVATION", "WAITING"))
+                .body("find { it.bookingType == 'RESERVATION' }.turn", nullValue())
+                .body("find { it.bookingType == 'WAITING' }.turn", is(1));
     }
 
     private Map<String, String> reservationRequest(String name, LocalDate date, String timeId, String themeId) {

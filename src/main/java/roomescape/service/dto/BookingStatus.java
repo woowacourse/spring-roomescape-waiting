@@ -1,41 +1,45 @@
 package roomescape.service.dto;
 
-import roomescape.domain.*;
-
 import java.time.LocalDate;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithTurn;
 
-public record ReservationStatus(
+public record BookingStatus(
         Long id,
         String name,
         LocalDate date,
         ReservationTime time,
         Theme theme,
-        Status status,
+        BookingType bookingType,
         Long turn
 ) {
-    public static ReservationStatus reserved(Reservation reservation) {
+    public static BookingStatus reservation(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
-        return new ReservationStatus(
+        return new BookingStatus(
                 reservation.getId(),
                 reservation.getName(),
                 slot.getDate(),
                 slot.getTime(),
                 slot.getTheme(),
-                Status.RESERVED,
+                BookingType.RESERVATION,
                 null
         );
     }
 
-    public static ReservationStatus waiting(WaitingWithTurn waitingWithTurn) {
+    public static BookingStatus waiting(WaitingWithTurn waitingWithTurn) {
         ReservationWaiting waiting = waitingWithTurn.waiting();
         ReservationSlot slot = waiting.getSlot();
-        return new ReservationStatus(
+        return new BookingStatus(
                 waiting.getId(),
                 waiting.getName(),
                 slot.getDate(),
                 slot.getTime(),
                 slot.getTheme(),
-                Status.WAITING,
+                BookingType.WAITING,
                 waitingWithTurn.turn()
         );
     }

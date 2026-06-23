@@ -1,6 +1,6 @@
 package roomescape.service.dto;
 
-public enum Status {
-    RESERVED,
+public enum BookingType {
+    RESERVATION,
     WAITING
 }
