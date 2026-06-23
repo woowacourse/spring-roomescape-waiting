@@ -145,7 +145,8 @@ class ReservationSlotTest {
                 1L,
                 "공포의 저택",
                 "버려진 저택에서 탈출하라",
-                "https://example.com/image.png"
+                "https://example.com/image.png",
+                10000L
         );
     }
 }

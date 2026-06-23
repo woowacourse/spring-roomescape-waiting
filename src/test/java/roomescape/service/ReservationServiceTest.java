@@ -91,6 +91,35 @@ class ReservationServiceTest {
         assertThat(secondResponse.order()).isEqualTo(1);
     }
 
+    @DisplayName("예약이 확정되면 결제 주문 정보가 응답에 포함된다.")
+    @Test
+    void 예약_확정시_결제_주문_정보_응답_테스트() {
+        LocalDateTime now = LocalDateTime.now();
+        ReservationRequest request = new ReservationRequest("김철수", now.toLocalDate().plusDays(70), 2L, 1L);
+
+        ReservationResponse response = reservationService.save(now, request);
+
+        assertThat(response.order()).isZero();
+        assertThat(response.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(response.amount()).isEqualTo(10000L);
+    }
+
+    @DisplayName("예약 대기이면 결제 주문 정보가 응답에 포함되지 않는다.")
+    @Test
+    void 예약_대기시_결제_주문_정보_응답_제외_테스트() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate reservationDate = now.toLocalDate().plusDays(71);
+        ReservationRequest firstRequest = new ReservationRequest("김철수", reservationDate, 2L, 1L);
+        ReservationRequest secondRequest = new ReservationRequest("이영희", reservationDate, 2L, 1L);
+
+        reservationService.save(now, firstRequest);
+        ReservationResponse waitingResponse = reservationService.save(now.plusSeconds(1), secondRequest);
+
+        assertThat(waitingResponse.order()).isEqualTo(1);
+        assertThat(waitingResponse.orderId()).isNull();
+        assertThat(waitingResponse.amount()).isNull();
+    }
+
     @DisplayName("같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
     @Test
     void 같은_사용자_중복_대기_예외_테스트() {

@@ -29,7 +29,7 @@ class AdminThemeServiceTest {
     @DisplayName("존재하는 테마를 추가하면 에러를 던진다.")
     @Test
     void 테마_추가_예외_테스트() {
-        ThemeRequest themeRequest = new ThemeRequest("공포의 저택", "무서워요", "url");
+        ThemeRequest themeRequest = new ThemeRequest("공포의 저택", "무서워요", "url", 10000L);
         assertThatThrownBy(() -> adminThemeService.save(themeRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_EXISTS_THEME.getMessage());
