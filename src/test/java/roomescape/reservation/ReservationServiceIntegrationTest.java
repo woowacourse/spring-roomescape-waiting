@@ -22,12 +22,12 @@ import roomescape.reservationhistory.ReservationHistoryService;
 import roomescape.reservationtime.ReservationTimeDao;
 import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
 import roomescape.reservationwait.ReservationWaitDao;
-import roomescape.payment.PaymentOrderDao;
+import roomescape.payment.infrastructure.JdbcPaymentOrderRepository;
 
 @JdbcTest
 @ActiveProfiles("test")
 @Import({ReservationService.class, ReservationDao.class, ReservationTimeDao.class,
-        ReservationWaitDao.class, ReservationHistoryDao.class, ReservationHistoryService.class, PaymentOrderDao.class})
+        ReservationWaitDao.class, ReservationHistoryDao.class, ReservationHistoryService.class, JdbcPaymentOrderRepository.class})
 public class ReservationServiceIntegrationTest {
 
     private static final long BROWN_ID = 1L;
