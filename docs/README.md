@@ -283,3 +283,43 @@ https://github.com/woowacourse/spring-roomescape-waiting/pull/510#discussion_r33
 - [x] Time과 Theme의 영속성 관리를 JPA로 전환
 - [x] ReservationSlot과 Reservation의 영속성 관리를 JPA로 전환
 - [x] Reservation과 ReservationSlot을 양방향 매핑으로 수정
+
+### 2단계: 내 예약 목록 조회 기능
+- [x] 사용자 이름으로 예약 조회 기능 추가
+
+### 3단계: 예약 대기 기능
+이미 구현되어있는 대기 기능이라, 이전 미션과 이번 미션의 SQL문 로그 비교에 중점을 두었습니다.
+
+### 4단계 - 예약 대기 관리
+- [x] 동시성 처리에 대한 오류 수정
+
+### 발행 SQL 발췌
+JDBC에서는 제가 직접 SQL을 작성했던 반면, JPA에서는 hibernate가 엔티티 메타 데이터를 분석해서 Insert SQL 쿼리를 생성합니다. 그래서 JDBC는 실행과정(SQL 생성, 파라미터 바인딩, Generated Key 조회 과정 등)이 로그로 잘 드러나는 반면, JPA에서는 hibernate 내부에서 수행되기 때문에 상대적으로 단순한 SQL 로그만 확인할 수 있습니다.
+또한, JDBC에서는 DB에서 생성한 primary key도 개발자가 SimpleJdbcInsert를 사용해서 조회하고 객체에 반영해야했습니다. 반면 JPA에서는 Hibernate가 Insert 후에 생성된 primary key를 조회해서 자동으로 주입해주기 때문에 개발자가 직접 처리할 필요 없습니다.
+
+```
+[JDBC]
+2026-06-22T14:21:43.181+09:00 DEBUG 9599 --- [    Test worker] o.s.jdbc.core.simple.SimpleJdbcInsert    : Compiled insert object: insert string is [INSERT INTO reservation (NAME, RESERVATION_SLOT_ID, STATUS, UPDATED_AT) VALUES(?, ?, ?, ?)]
+2026-06-22T14:21:43.182+09:00 DEBUG 9599 --- [    Test worker] o.s.jdbc.core.simple.SimpleJdbcInsert    : JdbcInsert for table [reservation] compiled
+2026-06-22T14:21:43.182+09:00 DEBUG 9599 --- [    Test worker] o.s.jdbc.core.simple.SimpleJdbcInsert    : The following parameters are used for call INSERT INTO reservation (NAME, RESERVATION_SLOT_ID, STATUS, UPDATED_AT) VALUES(?, ?, ?, ?) with: [김철수, 23, RESERVED, 2026-06-22T14:21:43.136685]
+2026-06-22T14:21:43.182+09:00 DEBUG 9599 --- [    Test worker] o.s.jdbc.core.JdbcTemplate               : Executing SQL update and returning generated keys
+2026-06-22T14:21:43.182+09:00 DEBUG 9599 --- [    Test worker] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement
+2026-06-22T14:21:43.182+09:00 DEBUG 9599 --- [    Test worker] o.s.jdbc.core.simple.SimpleJdbcInsert    : Using generated keys support with array of column names.
+
+[JPA]
+Hibernate:
+insert
+into
+reservation
+(name, reservation_slot_id, status, updated_at, id)
+values
+(?, ?, ?, ?, default)
+```
+
+### 변경사항
+JDBC에서 JPA로 넘어오며 생긴 변경사항입니다.
+1)`@Entity` , `@id`, `@GeneratedValue` 추가
+2)도메인 필드에서 final제거 (JPA에서는 EntityManger가 객체 필드값을 채워주고 수정하기 때문에 final 불가능)
+3)protected 생성자 추가(jpa전용), 기존 사용자 지정에서는 생성자 파라미터에서 id 삭제(이것 역시 JPA가 관리하기 때문에 id는 직접 지정 안함)
+4)JdbcTemplate와 RowMapper 삭제
+5)JpaRepository<T, ID>를 extends하여 제공된 CRUD 기능 사용
