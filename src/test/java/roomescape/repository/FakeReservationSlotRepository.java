@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import roomescape.domain.ReservationSlot;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationSlotRepository;
 
 public class FakeReservationSlotRepository implements ReservationSlotRepository {
 

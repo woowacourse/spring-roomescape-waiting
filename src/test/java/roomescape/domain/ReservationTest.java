@@ -9,6 +9,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.PastTimeException;
 
 class ReservationTest {

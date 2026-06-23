@@ -8,21 +8,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationAndWaiting;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-import roomescape.domain.UserReservations;
-import roomescape.domain.ReservationLine;
-import roomescape.domain.WaitingWithNumber;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAndWaiting;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.reservation.UserReservations;
+import roomescape.domain.reservation.ReservationLine;
+import roomescape.domain.reservation.WaitingWithNumber;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationSlotRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlotRepository;
+import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.timeslot.TimeSlotRepository;
 
 @Service
 @Transactional(readOnly = true)

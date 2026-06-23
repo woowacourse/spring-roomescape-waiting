@@ -1,17 +1,18 @@
-package roomescape.repository;
+package roomescape.infra.persistence;
 
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import roomescape.domain.theme.ThemeRepository;
 
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {

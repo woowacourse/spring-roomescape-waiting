@@ -1,12 +1,13 @@
-package roomescape.repository;
+package roomescape.infra.persistence;
 
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.service.dto.AvailableTimeSlot;
 
 import java.time.LocalDate;

@@ -1,7 +1,9 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.PastTimeException;
 
 public class Reservation {

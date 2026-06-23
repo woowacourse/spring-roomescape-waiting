@@ -1,7 +1,7 @@
 package roomescape.controller.dto;
 
 import java.time.LocalTime;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.service.dto.AvailableTimeSlot;
 
 public record TimeResponse(

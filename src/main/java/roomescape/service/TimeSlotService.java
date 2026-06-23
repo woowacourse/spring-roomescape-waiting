@@ -5,13 +5,13 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ResourceInUseException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.service.dto.AvailableTimeSlot;
 
 @Service

@@ -9,6 +9,14 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAndWaiting;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.UserReservations;
+import roomescape.domain.reservation.WaitingWithNumber;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 
 class UserReservationsTest {
 

@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.infra.persistence;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,10 +11,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.DuplicateException;
+import roomescape.domain.reservation.ReservationSlotRepository;
 
 @Repository
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {

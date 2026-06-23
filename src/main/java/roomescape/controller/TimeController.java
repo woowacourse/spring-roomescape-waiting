@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.TimeRequest;
 import roomescape.controller.dto.TimeResponse;
 import roomescape.controller.dto.TimeResponses;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.service.TimeSlotService;
 
 @RestController
