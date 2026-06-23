@@ -9,5 +9,5 @@ public record AvailableTimeResponse(
         @JsonFormat(pattern = "HH:mm")
         LocalTime startAt,
         boolean isAvailable,
-        int waitNumber) {
+        long waitNumber) {
 }

@@ -163,8 +163,9 @@ class ReservationServiceTest {
 
         reservationService.save(now, firstRequest);
         ReservationResponse secondResponse = reservationService.save(now.plusSeconds(1), secondRequest);
+        Long secondReservationId = secondResponse.reservationId();
 
-        assertThatThrownBy(() -> reservationService.update(secondResponse.reservationId(), now, updateRequest))
+        assertThatThrownBy(() -> reservationService.update(secondReservationId, now, updateRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_EXISTS_RESERVATION.getMessage());
     }

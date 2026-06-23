@@ -17,31 +17,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
 
 @SpringBootTest
 class ReservationConcurrencyTest {
+    private static final LocalDate TEST_BASE_DATE = LocalDate.now().plusYears(5);
 
     @Autowired
     private ReservationService reservationService;
-
-    @Autowired
-    private ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Test
     void 같은_슬롯에_동시에_예약하면_확정_예약은_하나만_생긴다() throws Exception {
-        LocalDate date = LocalDate.now().plusDays(30);
+        LocalDate date = TEST_BASE_DATE.plusDays(1);
         Long timeId = 2L;
         Long themeId = 1L;
 
         // getOrCreate 동시성 이슈와 분리하기 위해 슬롯은 미리 만들어둔다.
-        reservationSlotRepository.save(date, timeId, themeId);
+        saveReservationSlot(date, timeId, themeId);
 
         int threadCount = 10;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -76,44 +73,21 @@ class ReservationConcurrencyTest {
             });
         }
 
-        readyLatch.await();
+        assertThat(readyLatch.await(5, TimeUnit.SECONDS)).isTrue();
         startLatch.countDown();
-        doneLatch.await();
+        assertThat(doneLatch.await(5, TimeUnit.SECONDS)).isTrue();
 
         executor.shutdown();
 
         assertThat(exceptions).isEmpty();
 
-        Integer reservedCount = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM reservation r
-                INNER JOIN reservation_slot rs
-                    ON r.reservation_slot_id = rs.id
-                WHERE rs.date = ?
-                  AND rs.time_id = ?
-                  AND rs.theme_id = ?
-                  AND r.status = 'RESERVED'
-                """, Integer.class, date, timeId, themeId);
-
-        Integer waitingCount = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM reservation r
-                INNER JOIN reservation_slot rs
-                    ON r.reservation_slot_id = rs.id
-                WHERE rs.date = ?
-                  AND rs.time_id = ?
-                  AND rs.theme_id = ?
-                  AND r.status = 'WAITING'
-                """, Integer.class, date, timeId, themeId);
-        assertThat(reservedCount).isEqualTo(1);
-        assertThat(waitingCount).isEqualTo(threadCount - 1);
-//        System.out.println("reserved인 행 수 : " + reservedCount);
-//        System.out.println("waiting인 행 수 : " + waitingCount);
+        assertThat(countReservations(date, timeId, themeId, "RESERVED")).isEqualTo(1);
+        assertThat(countReservations(date, timeId, themeId, "WAITING")).isEqualTo(threadCount - 1);
     }
 
     @Test
     void 같은_슬롯에서_확정_예약과_첫번째_대기를_동시에_취소해도_확정_예약은_하나만_남는다() throws Exception {
-        LocalDate date = LocalDate.now().plusDays(31);
+        LocalDate date = TEST_BASE_DATE.plusDays(2);
         Long timeId = 3L;
         Long themeId = 1L;
         LocalDateTime baseNow = LocalDateTime.now().minusMinutes(1);
@@ -136,10 +110,6 @@ class ReservationConcurrencyTest {
                 () -> reservationService.delete(LocalDateTime.now(), firstWaiting.reservationId(), "취소대기1")
         ));
 
-
-        System.out.println("reserved인 행 수 : " + countReservations(date, timeId, themeId, "RESERVED"));
-        System.out.println("waiting인 행 수 : " + countReservations(date, timeId, themeId, "WAITING"));
-
         assertThat(countReservations(date, timeId, themeId, "RESERVED")).isEqualTo(1);
         assertThat(countReservations(date, timeId, themeId, "WAITING")).isZero();
         assertThat(findStatusByName("취소대기2")).isEqualTo("RESERVED");
@@ -147,7 +117,7 @@ class ReservationConcurrencyTest {
 
     @Test
     void 같은_슬롯에서_확정_예약과_첫번째_대기를_동시에_수정해도_기존_슬롯에는_확정_예약이_하나만_남는다() throws Exception {
-        LocalDate date = LocalDate.now().plusDays(32);
+        LocalDate date = TEST_BASE_DATE.plusDays(3);
         Long currentTimeId = 4L;
         Long firstTargetTimeId = 5L;
         Long secondTargetTimeId = 6L;
@@ -167,8 +137,8 @@ class ReservationConcurrencyTest {
                 new ReservationRequest("수정대기2", date, currentTimeId, themeId)
         );
 
-        reservationSlotRepository.save(date, firstTargetTimeId, themeId);
-        reservationSlotRepository.save(date, secondTargetTimeId, themeId);
+        saveReservationSlot(date, firstTargetTimeId, themeId);
+        saveReservationSlot(date, secondTargetTimeId, themeId);
 
         runConcurrently(List.of(
                 () -> reservationService.update(
@@ -229,6 +199,13 @@ class ReservationConcurrencyTest {
                   AND r.status = ?
                 """, Integer.class, date, timeId, themeId, status);
         return count;
+    }
+
+    private void saveReservationSlot(LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update("""
+                INSERT INTO reservation_slot (date, time_id, theme_id)
+                VALUES (?, ?, ?)
+                """, date, timeId, themeId);
     }
 
     private String findStatusByName(String name) {

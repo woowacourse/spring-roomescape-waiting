@@ -1,12 +1,7 @@
 package roomescape.domain.repository;
 
-import java.time.LocalTime;
-import java.util.List;
-
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Time;
 
-public interface TimeRepository {
-    List<Time> findAll();
-    Long save(LocalTime startAt);
-    void delete(long id);
+public interface TimeRepository extends JpaRepository<Time,Long> {
 }

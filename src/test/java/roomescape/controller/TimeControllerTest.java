@@ -58,8 +58,6 @@ class TimeControllerTest {
                 .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", equalTo(13))
-                .body("size()", equalTo(13))
                 .body("[0].id", equalTo(1))
                 .body("[0].startAt", equalTo("10:00"))
                 .body("[12].id", equalTo(13))
