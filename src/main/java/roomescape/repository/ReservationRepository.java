@@ -181,6 +181,11 @@ public class ReservationRepository {
                 reservation.getId());
     }
 
+    public int updateStatus(Long id, ReservationStatus status) {
+        String sql = "UPDATE reservation SET status = ? WHERE id = ?;";
+        return jdbcTemplate.update(sql, status.name(), id);
+    }
+
     public boolean existsBySlot(ReservationSlot slot) {
         String sql = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(

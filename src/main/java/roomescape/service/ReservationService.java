@@ -70,6 +70,16 @@ public class ReservationService {
     }
 
     @Transactional
+    public void confirmPayment(Long id) {
+        Reservation reservation = findReservation(id);
+        if (!reservation.isPending()) {
+            throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRMATION_NOT_ALLOWED,
+                    "결제 대기 중인 예약만 확정할 수 있습니다.");
+        }
+        reservationRepository.updateStatus(id, ReservationStatus.CONFIRMED);
+    }
+
+    @Transactional
     public Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
         return createByUser(name, date, timeId, themeId, now, ReservationStatus.CONFIRMED);
     }

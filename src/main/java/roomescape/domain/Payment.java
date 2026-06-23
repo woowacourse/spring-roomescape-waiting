@@ -38,6 +38,17 @@ public class Payment {
         return new Payment(id, reservationId, orderId, amount, paymentKey, status, failureCode, failureMessage);
     }
 
+    public Payment confirm(String paymentKey) {
+        if (status != PaymentStatus.READY) {
+            throw new IllegalStateException("결제 대기 상태에서만 승인할 수 있습니다.");
+        }
+        if (paymentKey == null || paymentKey.isBlank()) {
+            throw new IllegalArgumentException("paymentKey는 비어 있을 수 없습니다.");
+        }
+        return new Payment(id, reservationId, orderId, amount, paymentKey, PaymentStatus.CONFIRMED,
+                failureCode, failureMessage);
+    }
+
     public Long getId() {
         return id;
     }

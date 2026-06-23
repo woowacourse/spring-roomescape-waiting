@@ -64,4 +64,18 @@ public class PaymentRepository {
         String sql = "SELECT * FROM payment WHERE reservation_id = ? ORDER BY id DESC LIMIT 1;";
         return jdbcTemplate.query(sql, paymentRowMapper, reservationId).stream().findFirst();
     }
+
+    public int update(Payment payment) {
+        String sql = """
+                UPDATE payment
+                SET payment_key = ?, status = ?, failure_code = ?, failure_message = ?
+                WHERE id = ?;
+                """;
+        return jdbcTemplate.update(sql,
+                payment.getPaymentKey(),
+                payment.getStatus().name(),
+                payment.getFailureCode(),
+                payment.getFailureMessage(),
+                payment.getId());
+    }
 }

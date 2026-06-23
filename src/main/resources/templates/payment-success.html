@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>결제 완료</title>
+</head>
+<body>
+<main>
+    <h1>결제를 완료했어요</h1>
+    <p>예약이 확정되었습니다.</p>
+    <dl>
+        <dt>주문번호</dt><dd th:text="${result.orderId}">payment-xxxx</dd>
+        <dt>승인 금액</dt><dd th:text="${result.approvedAmount}">20000</dd>
+        <dt>paymentKey</dt><dd th:text="${result.paymentKey}">payment-key</dd>
+    </dl>
+    <a href="/reservation/me">내 예약 보기</a>
+</main>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>결제 실패</title>
+</head>
+<body>
+<main>
+    <h1>결제를 완료하지 못했어요</h1>
+    <dl>
+        <dt>에러 코드</dt><dd th:text="${code}">AMOUNT_MISMATCH</dd>
+        <dt>사유</dt><dd th:text="${message}">결제 금액이 일치하지 않습니다.</dd>
+        <dt>주문번호</dt><dd th:text="${orderId}">payment-xxxx</dd>
+    </dl>
+</main>
+</body>
+</html>
