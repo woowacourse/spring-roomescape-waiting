@@ -35,7 +35,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                             resultSet.getLong("theme_id"),
                             resultSet.getString("theme_name"),
                             resultSet.getString("theme_description"),
-                            resultSet.getString("theme_image_url")
+                            resultSet.getString("theme_image_url"),
+                            resultSet.getInt("theme_price")
                     )
             )
     );
@@ -69,7 +70,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -83,7 +84,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -97,7 +98,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id

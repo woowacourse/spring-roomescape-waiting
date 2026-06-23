@@ -30,7 +30,7 @@ class ReservationCancelPromotionE2ETest {
         RestAssured.port = port;
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')"); // id=1
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')"); // id=1
+                "INSERT INTO theme (name, description, image_url, price) VALUES ('테마A', '설명A', 'https://a.com', 10000)"); // id=1
     }
 
     @Test

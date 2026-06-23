@@ -6,7 +6,8 @@ public record ThemeResponse(
         Long id,
         String name,
         String description,
-        String imageUrl
+        String imageUrl,
+        int price
 ) {
 
     public static ThemeResponse from(Theme theme) {
@@ -14,7 +15,8 @@ public record ThemeResponse(
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getImageUrl()
+                theme.getImageUrl(),
+                theme.getPrice()
         );
     }
 }

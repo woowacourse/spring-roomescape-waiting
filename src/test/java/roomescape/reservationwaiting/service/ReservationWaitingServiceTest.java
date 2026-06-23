@@ -55,7 +55,7 @@ class ReservationWaitingServiceTest {
     @BeforeEach
     void setUp() {
         time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+        theme = Theme.restore(1L, "테마A", "설명", "https://a.com", 20000);
         futureReservation = Reservation.restore(1L, "user1",
                 new ReservationSlot(LocalDate.of(2099, 12, 1), time, theme));
     }
