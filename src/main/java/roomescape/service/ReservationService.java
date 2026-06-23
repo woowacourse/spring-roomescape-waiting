@@ -8,9 +8,11 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import roomescape.domain.Order;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
+import roomescape.domain.repository.OrderRepository;
 import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.domain.vo.LockedReservationSlots;
@@ -23,12 +25,17 @@ import roomescape.exception.ErrorCode;
 
 @Service
 public class ReservationService {
+    private static final long RESERVATION_AMOUNT = 1_000L;
+    private static final int MAX_ORDER_SAVE_ATTEMPTS = 3;
+
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationQueryRepository reservationQueryRepository;
+    private final OrderRepository orderRepository;
 
-    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationQueryRepository reservationQueryRepository) {
+    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationQueryRepository reservationQueryRepository, OrderRepository orderRepository) {
         this.reservationSlotRepository = reservationSlotRepository;
         this.reservationQueryRepository = reservationQueryRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Transactional
@@ -37,8 +44,12 @@ public class ReservationService {
 
         ReservationSlot reservationSlot = reservationSlotRepository.findByIdForUpdate(reservationSlotId);
         Reservation newReservation = reservationSlot.reserve(request.name(), now);
+
         int order = reservationSlot.calculateOrder(newReservation);
         newReservation = reservationSlotRepository.saveReservation(newReservation);
+        if (newReservation.isReserved()) {
+            saveOrderWithRetry(newReservation.getId(), calculateAmount(request));
+        }
         return ReservationResponse.from(newReservation, reservationSlot.getSlot(), order);
     }
 
@@ -90,6 +101,23 @@ public class ReservationService {
         }
     }
 
+    private Long calculateAmount(ReservationRequest request) {
+        return RESERVATION_AMOUNT;
+    }
+
+    private void saveOrderWithRetry(Long reservationId, Long amount) {
+        for (int attempt = 0; attempt < MAX_ORDER_SAVE_ATTEMPTS; attempt++) {
+            try {
+                orderRepository.save(Order.create(reservationId, amount));
+                return;
+            } catch (DuplicateKeyException e) {
+                if (attempt == MAX_ORDER_SAVE_ATTEMPTS - 1) {
+                    throw e;
+                }
+            }
+        }
+    }
+
     private LockedReservationSlots findBothSlotsForUpdate(Long currentSlotId, Long newSlotId) {
         Long firstLockId = Math.min(currentSlotId, newSlotId);
         Long secondLockId = Math.max(currentSlotId, newSlotId);
@@ -103,4 +131,5 @@ public class ReservationService {
 
         return new LockedReservationSlots(second, first);
     }
+
 }
