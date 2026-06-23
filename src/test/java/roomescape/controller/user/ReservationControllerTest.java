@@ -71,6 +71,22 @@ class ReservationControllerTest {
     }
 
     @Test
+    void 결제_대기_예약의_결제를_다시_시도한다() throws Exception {
+        given(paymentService.retryForReservation(eq(1L), eq("브라운"), any(LocalDateTime.class)))
+                .willReturn(payment());
+
+        mockMvc.perform(post("/reservations/{id}/payments", 1L).param("name", "브라운"))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/payments/1/checkout"))
+                .andExpect(jsonPath("$.reservationId").value(1))
+                .andExpect(jsonPath("$.paymentId").value(1))
+                .andExpect(jsonPath("$.checkoutUrl").value("/payments/1/checkout"));
+
+        verify(paymentService).retryForReservation(eq(1L), eq("브라운"), any(LocalDateTime.class));
+        verifyNoMoreInteractions(reservationService, paymentService);
+    }
+
+    @Test
     void 사용자_본인_예약을_조회한다() throws Exception {
         given(reservationService.findByName(eq("브라운")))
                 .willReturn(List.of(reservation()));

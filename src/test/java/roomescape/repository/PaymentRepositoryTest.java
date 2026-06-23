@@ -44,6 +44,17 @@ class PaymentRepositoryTest {
                 .isEqualTo(foundPayment.getId());
     }
 
+    @Test
+    void 예약의_가장_최근_결제를_조회한다() {
+        Long reservationId = createPendingReservation();
+        paymentRepository.insert(new Payment(null, reservationId, "payment_failed_12345678901234567890", 20_000L,
+                null, PaymentStatus.FAILED, "REJECT_CARD_PAYMENT", "카드 거절"));
+        Payment latestPayment = paymentRepository.insert(Payment.ready(reservationId, 20_000L));
+
+        assertThat(paymentRepository.findLatestByReservationId(reservationId).orElseThrow().getId())
+                .isEqualTo(latestPayment.getId());
+    }
+
     private Long createPendingReservation() {
         jdbcTemplate.update("""
                 INSERT INTO reservation(name, date, time_id, theme_id, status)

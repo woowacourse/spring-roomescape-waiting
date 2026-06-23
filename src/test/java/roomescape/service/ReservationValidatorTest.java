@@ -145,6 +145,17 @@ class ReservationValidatorTest {
     }
 
     @Test
+    void 결제_확정_예약은_재결제할_수_없다() {
+        Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time);
+
+        assertThatThrownBy(() -> validator.validatePaymentRetryByUser(reservation, "브라운", now))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_RETRY_NOT_ALLOWED)
+                .hasMessage("결제 대기 중인 예약만 재결제할 수 있습니다.");
+        verifyNoMoreInteractions(reservationRepository);
+    }
+
+    @Test
     void 변경하려는_예약이_유효하면_통과한다() {
         // given
         Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time);

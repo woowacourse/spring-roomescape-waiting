@@ -58,6 +58,13 @@ public class ReservationService {
     }
 
     @Transactional
+    public Reservation findPendingByUser(Long id, String name, LocalDateTime now) {
+        Reservation reservation = findReservation(id);
+        reservationValidator.validatePaymentRetryByUser(reservation, name, now);
+        return reservation;
+    }
+
+    @Transactional
     public Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
         return createByUser(name, date, timeId, themeId, now, ReservationStatus.CONFIRMED);
     }

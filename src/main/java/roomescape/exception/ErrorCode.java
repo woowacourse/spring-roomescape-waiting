@@ -15,6 +15,7 @@ public enum ErrorCode {
     RESOURCE_IN_USE(HttpStatus.CONFLICT, "예약이 존재하는 리소스는 삭제할 수 없습니다."),
     PAYMENT_CANCELLATION_REQUIRED(HttpStatus.CONFLICT, "결제가 완료된 예약은 결제 취소 후 삭제할 수 있습니다."),
     PENDING_RESERVATION_LOCKED(HttpStatus.CONFLICT, "결제 대기 중인 예약은 변경할 수 없습니다."),
+    PAYMENT_RETRY_NOT_ALLOWED(HttpStatus.CONFLICT, "결제를 다시 시도할 수 없는 예약입니다."),
     TEMPORARY_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 발생했습니다.");
 

@@ -44,6 +44,16 @@ public class ReservationController {
         return ResponseEntity.created(URI.create(response.checkoutUrl())).body(response);
     }
 
+    @PostMapping("/{id}/payments")
+    public ResponseEntity<PaymentCheckoutResponse> retryPayment(
+            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
+            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name
+    ) {
+        Payment payment = paymentService.retryForReservation(id, name, LocalDateTime.now());
+        PaymentCheckoutResponse response = PaymentCheckoutResponse.from(payment);
+        return ResponseEntity.created(URI.create(response.checkoutUrl())).body(response);
+    }
+
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getReservationsByName(
             @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name

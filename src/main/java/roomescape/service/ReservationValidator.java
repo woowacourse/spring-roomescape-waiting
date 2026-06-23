@@ -39,6 +39,15 @@ public class ReservationValidator {
         validateConfirmed(reservation);
     }
 
+    public void validatePaymentRetryByUser(Reservation reservation, String name, LocalDateTime now) {
+        validateOwner(reservation, name);
+        validateNotPastForModification(reservation, now);
+        if (reservation.isConfirmed()) {
+            throw new RoomescapeException(ErrorCode.PAYMENT_RETRY_NOT_ALLOWED,
+                    "결제 대기 중인 예약만 재결제할 수 있습니다.");
+        }
+    }
+
     public void validateUpdatedReservation(Reservation reservation, Reservation updatedReservation, LocalDateTime now) {
         validateScheduleChanged(reservation, updatedReservation);
         validateNotPast(updatedReservation, now);

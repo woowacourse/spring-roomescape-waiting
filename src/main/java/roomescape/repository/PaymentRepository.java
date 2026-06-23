@@ -59,4 +59,9 @@ public class PaymentRepository {
         String sql = "SELECT * FROM payment WHERE order_id = ?;";
         return jdbcTemplate.query(sql, paymentRowMapper, orderId).stream().findFirst();
     }
+
+    public Optional<Payment> findLatestByReservationId(Long reservationId) {
+        String sql = "SELECT * FROM payment WHERE reservation_id = ? ORDER BY id DESC LIMIT 1;";
+        return jdbcTemplate.query(sql, paymentRowMapper, reservationId).stream().findFirst();
+    }
 }
