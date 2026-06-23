@@ -1,4 +1,4 @@
-package roomescape.application.payment;
+package roomescape.application;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ import roomescape.domain.exception.ConflictException;
 import roomescape.presentation.dto.ReservationOrderRequest;
 
 @Service
-public class ReservationOrderApplicationService {
+public class OrderCreateUseCase {
 
     private static final long DEFAULT_AMOUNT = 50_000L;
     private static final String ORDER_NAME_SUFFIX = " 예약";
@@ -32,7 +32,7 @@ public class ReservationOrderApplicationService {
     private final OrderRepository orderRepository;
     private final Clock clock;
 
-    public ReservationOrderApplicationService(
+    public OrderCreateUseCase(
             ReservationTimeQueryService reservationTimeQueryService,
             ThemeQueryService themeQueryService,
             ReservationQueryService reservationQueryService,

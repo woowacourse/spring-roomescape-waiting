@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.payment.ReservationOrderApplicationService;
+import roomescape.application.OrderCreateUseCase;
 import roomescape.application.payment.model.ReservationOrderResult;
 import roomescape.presentation.dto.ReservationOrderRequest;
 import roomescape.presentation.dto.ReservationOrderResponse;
@@ -16,19 +16,19 @@ import roomescape.presentation.dto.ReservationOrderResponse;
 @RequestMapping("/reservation-orders")
 public class ReservationOrderController {
 
-    private final ReservationOrderApplicationService reservationOrderApplicationService;
+    private final OrderCreateUseCase orderCreateUseCase;
 
     public ReservationOrderController(
-            ReservationOrderApplicationService reservationOrderApplicationService
+            OrderCreateUseCase orderCreateUseCase
     ) {
-        this.reservationOrderApplicationService = reservationOrderApplicationService;
+        this.orderCreateUseCase = orderCreateUseCase;
     }
 
     @PostMapping
     public ResponseEntity<ReservationOrderResponse> create(
             @RequestBody @Valid ReservationOrderRequest request
     ) {
-        ReservationOrderResult result = reservationOrderApplicationService.create(request);
+        ReservationOrderResult result = orderCreateUseCase.create(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationOrderResponse.from(result));

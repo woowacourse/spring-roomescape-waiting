@@ -26,13 +26,7 @@ public class ReservationCommandService {
         this.clock = clock;
     }
 
-    public Reservation save(Member reserver, Slot slot) {
-        Reservation reservation = Reservation.createWith(
-                reserver,
-                slot,
-                now()
-        );
-
+    public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
 

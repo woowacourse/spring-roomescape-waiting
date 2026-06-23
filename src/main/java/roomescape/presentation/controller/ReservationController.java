@@ -1,12 +1,10 @@
 package roomescape.presentation.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationApplicationService;
 import roomescape.application.ReservationModificationUseCase;
 import roomescape.domain.Reservation;
-import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
 import roomescape.presentation.dto.ReservationResponses;
 import roomescape.presentation.dto.ReservationUpdateRequest;
@@ -33,17 +30,6 @@ public class ReservationController {
     ) {
         this.reservationApplicationService = reservationApplicationService;
         this.reservationModificationUseCase = reservationModificationUseCase;
-    }
-
-    @PostMapping
-    public ResponseEntity<ReservationResponse> add(
-            @RequestBody @Valid ReservationRequest request
-    ) {
-        Reservation reservation = reservationApplicationService.save(request);
-        ReservationResponse response = ReservationResponse.from(reservation);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(response);
     }
 
     @PutMapping("/me/{id}")

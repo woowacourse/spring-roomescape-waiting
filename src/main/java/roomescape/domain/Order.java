@@ -31,12 +31,14 @@ public class Order {
         this.status = OrderStatus.PENDING_PAYMENT;
     }
 
-    public void confirm(String paymentKey) {
+    public Order confirm(String paymentKey) {
         validatePending();
         validatePaymentKey(paymentKey);
 
         this.paymentKey = paymentKey;
         this.status = OrderStatus.CONFIRMED;
+
+        return this;
     }
 
     private void validatePending() {

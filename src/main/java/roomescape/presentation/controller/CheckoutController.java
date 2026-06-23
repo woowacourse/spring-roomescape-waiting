@@ -5,8 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import roomescape.application.payment.PaymentService;
-import roomescape.application.payment.ReservationOrderApplicationService;
+import roomescape.application.OrderCreateUseCase;
+import roomescape.application.ReservationPaymentUseCase;
 import roomescape.application.payment.exception.PaymentAmountMismatchException;
 import roomescape.application.payment.model.ReservationOrderResult;
 import roomescape.infrastructure.payment.toss.TossPaymentException;
@@ -17,17 +17,17 @@ import roomescape.infrastructure.payment.toss.TossPaymentException;
 @Controller
 public class CheckoutController {
 
-    private final ReservationOrderApplicationService reservationOrderApplicationService;
-    private final PaymentService paymentService;
+    private final OrderCreateUseCase orderCreateUseCase;
+    private final ReservationPaymentUseCase reservationPaymentUseCase;
     private final String clientKey;
 
     public CheckoutController(
-            ReservationOrderApplicationService reservationOrderApplicationService,
-            PaymentService paymentService,
+            OrderCreateUseCase orderCreateUseCase,
+            ReservationPaymentUseCase reservationPaymentUseCase,
             @Value("${toss.client-key:}") String clientKey
     ) {
-        this.reservationOrderApplicationService = reservationOrderApplicationService;
-        this.paymentService = paymentService;
+        this.orderCreateUseCase = orderCreateUseCase;
+        this.reservationPaymentUseCase = reservationPaymentUseCase;
         this.clientKey = clientKey;
     }
 
@@ -36,7 +36,7 @@ public class CheckoutController {
             @RequestParam String orderId,
             Model model
     ) {
-        ReservationOrderResult order = reservationOrderApplicationService.getByOrderId(orderId);
+        ReservationOrderResult order = orderCreateUseCase.getByOrderId(orderId);
 
         model.addAttribute("clientKey", clientKey);
         model.addAttribute("orderId", order.orderId());
@@ -53,7 +53,7 @@ public class CheckoutController {
             Model model
     ) {
         try {
-            var result = paymentService.confirm(paymentKey, orderId, amount);
+            var result = reservationPaymentUseCase.confirm(paymentKey, orderId, amount);
             model.addAttribute("result", result);
             model.addAttribute("paymentKey", paymentKey);
             return "payment/success";
