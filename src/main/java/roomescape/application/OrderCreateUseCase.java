@@ -5,13 +5,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.command.OrderCommandService;
 import roomescape.application.payment.model.ReservationOrderResult;
+import roomescape.application.query.OrderQueryService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.Member;
 import roomescape.domain.Order;
-import roomescape.domain.OrderRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -29,20 +30,23 @@ public class OrderCreateUseCase {
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
     private final ReservationQueryService reservationQueryService;
-    private final OrderRepository orderRepository;
+    private final OrderCommandService orderCommandService;
+    private final OrderQueryService orderQueryService;
     private final Clock clock;
 
     public OrderCreateUseCase(
             ReservationTimeQueryService reservationTimeQueryService,
             ThemeQueryService themeQueryService,
             ReservationQueryService reservationQueryService,
-            OrderRepository orderRepository,
+            OrderCommandService orderCommandService,
+            OrderQueryService orderQueryService,
             Clock clock
     ) {
         this.reservationTimeQueryService = reservationTimeQueryService;
         this.themeQueryService = themeQueryService;
         this.reservationQueryService = reservationQueryService;
-        this.orderRepository = orderRepository;
+        this.orderCommandService = orderCommandService;
+        this.orderQueryService = orderQueryService;
         this.clock = clock;
     }
 
@@ -69,7 +73,7 @@ public class OrderCreateUseCase {
                 DEFAULT_AMOUNT,
                 reservation
         );
-        orderRepository.save(order);
+        orderCommandService.save(order);
 
         return new ReservationOrderResult(
                 order.getOrderId(),
@@ -80,7 +84,7 @@ public class OrderCreateUseCase {
 
     @Transactional(readOnly = true)
     public ReservationOrderResult getByOrderId(String orderId) {
-        Order order = orderRepository.getByOrderId(orderId);
+        Order order = orderQueryService.getById(orderId);
         return new ReservationOrderResult(
                 order.getOrderId(),
                 order.getOrderName(),

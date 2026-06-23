@@ -36,10 +36,10 @@ class OrderTest {
     void 결제를_확정하면_paymentKey를_저장하고_CONFIRMED로_변경한다() {
         Order order = order();
 
-        order.confirm("payment-key");
+        Order confirmed = order.confirm("payment-key");
 
-        assertThat(order.getPaymentKey()).isEqualTo("payment-key");
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(confirmed.getPaymentKey()).isEqualTo("payment-key");
+        assertThat(confirmed.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
     }
 
     @Test
@@ -53,9 +53,9 @@ class OrderTest {
     @Test
     void 이미_확정된_주문을_다시_확정할_수_없다() {
         Order order = order();
-        order.confirm("payment-key");
+        Order confirmed = order.confirm("payment-key");
 
-        assertThatThrownBy(() -> order.confirm("another-payment-key"))
+        assertThatThrownBy(() -> confirmed.confirm("another-payment-key"))
                 .isInstanceOf(ConflictException.class);
     }
 

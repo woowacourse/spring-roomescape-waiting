@@ -15,8 +15,24 @@ public class Order {
     private final String orderName;
     private final Long amount;
     private final Reservation reservation;
-    private String paymentKey;
-    private OrderStatus status;
+    private final String paymentKey;
+    private final OrderStatus status;
+
+    public Order(
+            String orderId,
+            String orderName,
+            Long amount,
+            Reservation reservation,
+            String paymentKey,
+            OrderStatus status
+    ) {
+        this.orderId = orderId;
+        this.orderName = orderName;
+        this.amount = amount;
+        this.reservation = reservation;
+        this.paymentKey = paymentKey;
+        this.status = status;
+    }
 
     public Order(
             String orderId,
@@ -24,21 +40,21 @@ public class Order {
             Long amount,
             Reservation reservation
     ) {
-        this.orderId = orderId;
-        this.orderName = orderName;
-        this.amount = amount;
-        this.reservation = reservation;
-        this.status = OrderStatus.PENDING_PAYMENT;
+        this(orderId, orderName, amount, reservation, null, OrderStatus.PENDING_PAYMENT);
     }
 
     public Order confirm(String paymentKey) {
         validatePending();
         validatePaymentKey(paymentKey);
 
-        this.paymentKey = paymentKey;
-        this.status = OrderStatus.CONFIRMED;
-
-        return this;
+        return new Order(
+                orderId,
+                orderName,
+                amount,
+                reservation,
+                paymentKey,
+                OrderStatus.CONFIRMED
+        );
     }
 
     private void validatePending() {
