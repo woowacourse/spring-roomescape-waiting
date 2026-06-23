@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.service.BookingLookupService;
 import roomescape.service.dto.BookingStatus;
@@ -52,9 +53,11 @@ class AdminBookingControllerTest {
                 .andExpect(jsonPath("$[0].theme.id").value(1))
                 .andExpect(jsonPath("$[0].theme.name").value("테마"))
                 .andExpect(jsonPath("$[0].bookingType").value("RESERVATION"))
+                .andExpect(jsonPath("$[0].reservationStatus").value("CONFIRMED"))
                 .andExpect(jsonPath("$[0].turn").value(nullValue()))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].bookingType").value("WAITING"))
+                .andExpect(jsonPath("$[1].reservationStatus").value(nullValue()))
                 .andExpect(jsonPath("$[1].turn").value(1));
 
         verify(bookingLookupService, times(1)).findByDateRange(startDate, endDate);
@@ -87,13 +90,13 @@ class AdminBookingControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
         return new BookingStatus(1L, "브라운", LocalDate.of(2099, 1, 1), time, theme,
-                BookingType.RESERVATION, null);
+                BookingType.RESERVATION, ReservationStatus.CONFIRMED, null);
     }
 
     private BookingStatus waitingBooking() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
         return new BookingStatus(2L, "구구", LocalDate.of(2099, 1, 1), time, theme,
-                BookingType.WAITING, 1L);
+                BookingType.WAITING, null, 1L);
     }
 }

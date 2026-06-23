@@ -77,7 +77,7 @@ public class ReservationService {
     @Transactional
     public void deleteByUser(Long id, String name, LocalDateTime now) {
         Reservation reservation = findReservation(id);
-        reservationValidator.validateModifiableByUser(reservation, name, now);
+        reservationValidator.validateDeletableByUser(reservation, name, now);
         deleteAndPromoteWaiting(reservation);
     }
 
@@ -100,7 +100,7 @@ public class ReservationService {
     @Transactional
     public Reservation updateByUser(Long id, String name, LocalDate updateDate, Long updateTimeId, LocalDateTime now) {
         Reservation reservation = findReservation(id);
-        reservationValidator.validateModifiableByUser(reservation, name, now);
+        reservationValidator.validateUpdatableByUser(reservation, name, now);
 
         Reservation updatedReservation = createUpdatedReservation(reservation, updateDate, updateTimeId);
         reservationValidator.validateUpdatedReservation(reservation, updatedReservation, now);
@@ -143,7 +143,8 @@ public class ReservationService {
                         resolveUpdateDate(originalSlot.getDate(), updateDate),
                         resolveUpdateTime(originalSlot.getTime(), updateTimeId),
                         originalSlot.getTheme()
-                ));
+                ),
+                reservation.getStatus());
     }
 
     private LocalDate resolveUpdateDate(LocalDate originalDate, LocalDate updateDate) {

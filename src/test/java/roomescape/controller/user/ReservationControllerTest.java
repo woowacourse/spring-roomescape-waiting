@@ -57,7 +57,8 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.time.id").value(1))
                 .andExpect(jsonPath("$.time.startAt").value("10:00:00"))
                 .andExpect(jsonPath("$.theme.id").value(1))
-                .andExpect(jsonPath("$.theme.name").value("테마"));
+                .andExpect(jsonPath("$.theme.name").value("테마"))
+                .andExpect(jsonPath("$.status").value("CONFIRMED"));
 
         verify(reservationService, times(1)).createByUser(
                 eq("브라운"),
@@ -82,7 +83,8 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$[0].time.id").value(1))
                 .andExpect(jsonPath("$[0].time.startAt").value("10:00:00"))
                 .andExpect(jsonPath("$[0].theme.id").value(1))
-                .andExpect(jsonPath("$[0].theme.name").value("테마"));
+                .andExpect(jsonPath("$[0].theme.name").value("테마"))
+                .andExpect(jsonPath("$[0].status").value("CONFIRMED"));
 
         verify(reservationService, times(1)).findByName("브라운");
         verifyNoMoreInteractions(reservationService);
@@ -144,7 +146,8 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.time.id").value(2))
                 .andExpect(jsonPath("$.time.startAt").value("12:00:00"))
                 .andExpect(jsonPath("$.theme.id").value(1))
-                .andExpect(jsonPath("$.theme.name").value("테마"));
+                .andExpect(jsonPath("$.theme.name").value("테마"))
+                .andExpect(jsonPath("$.status").value("CONFIRMED"));
 
         verify(reservationService, times(1)).updateByUser(
                 eq(id),

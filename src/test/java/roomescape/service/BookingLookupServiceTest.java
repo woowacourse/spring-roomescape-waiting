@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reserver;
@@ -52,6 +53,8 @@ class BookingLookupServiceTest {
                 () -> assertThat(result).extracting(BookingStatus::id).containsExactly(2L, 1L),
                 () -> assertThat(result).extracting(BookingStatus::bookingType)
                         .containsExactly(BookingType.WAITING, BookingType.RESERVATION),
+                () -> assertThat(result).extracting(BookingStatus::reservationStatus)
+                        .containsExactly(null, ReservationStatus.CONFIRMED),
                 () -> assertThat(result).extracting(BookingStatus::turn).containsExactly(1L, null));
     }
 
@@ -107,6 +110,9 @@ class BookingLookupServiceTest {
                 () -> assertThat(result).extracting(BookingStatus::bookingType)
                         .containsExactly(BookingType.RESERVATION, BookingType.RESERVATION, BookingType.WAITING,
                                 BookingType.WAITING, BookingType.RESERVATION),
+                () -> assertThat(result).extracting(BookingStatus::reservationStatus)
+                        .containsExactly(ReservationStatus.CONFIRMED, ReservationStatus.CONFIRMED, null, null,
+                                ReservationStatus.CONFIRMED),
                 () -> assertThat(result).extracting(status -> status.theme().getName())
                         .containsExactly("테마1", "테마1", "테마1", "테마3", "테마1"));
     }

@@ -141,7 +141,7 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")
-                .when().delete("/reservations/1")
+                .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
@@ -152,6 +152,7 @@ public class MissionStepTest {
                 .statusCode(200)
                 .body("size()", is(1))
                 .body("[0].bookingType", is("RESERVATION"))
+                .body("[0].reservationStatus", is("PENDING"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", nullValue());

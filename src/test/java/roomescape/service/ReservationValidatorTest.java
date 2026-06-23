@@ -3,6 +3,7 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
@@ -91,7 +92,7 @@ class ReservationValidatorTest {
 
         // when & then
         assertThatNoException()
-                .isThrownBy(() -> validator.validateModifiableByUser(reservation, "브라운", now));
+                .isThrownBy(() -> validator.validateUpdatableByUser(reservation, "브라운", now));
         verifyNoMoreInteractions(reservationRepository);
     }
 
@@ -101,7 +102,7 @@ class ReservationValidatorTest {
         Reservation reservation = reservation("구구", now.toLocalDate().plusDays(1), time);
 
         // when & then
-        assertThatThrownBy(() -> validator.validateModifiableByUser(reservation, "브라운", now))
+        assertThatThrownBy(() -> validator.validateUpdatableByUser(reservation, "브라운", now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_RESOURCE)
                 .hasMessage("본인의 예약만 변경하거나 취소할 수 있습니다.");
@@ -114,10 +115,32 @@ class ReservationValidatorTest {
         Reservation reservation = reservation("브라운", now.toLocalDate().minusDays(1), time);
 
         // when & then
-        assertThatThrownBy(() -> validator.validateModifiableByUser(reservation, "브라운", now))
+        assertThatThrownBy(() -> validator.validateUpdatableByUser(reservation, "브라운", now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAST_RESOURCE_LOCKED)
                 .hasMessage("이미 지난 예약은 변경하거나 취소할 수 없습니다.");
+        verifyNoMoreInteractions(reservationRepository);
+    }
+
+    @Test
+    void 결제_대기_예약은_변경할_수_없다() {
+        Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time, ReservationStatus.PENDING);
+
+        assertThatThrownBy(() -> validator.validateUpdatableByUser(reservation, "브라운", now))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PENDING_RESERVATION_LOCKED)
+                .hasMessage("결제 대기 중인 예약은 변경할 수 없습니다.");
+        verifyNoMoreInteractions(reservationRepository);
+    }
+
+    @Test
+    void 결제_확정_예약은_삭제할_수_없다() {
+        Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time);
+
+        assertThatThrownBy(() -> validator.validateDeletableByUser(reservation, "브라운", now))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_CANCELLATION_REQUIRED)
+                .hasMessage("결제가 완료된 예약은 결제 취소 후 삭제할 수 있습니다.");
         verifyNoMoreInteractions(reservationRepository);
     }
 
@@ -184,6 +207,10 @@ class ReservationValidatorTest {
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time) {
-        return new Reservation(1L, new Reserver(name), new ReservationSlot(date, time, theme));
+        return reservation(name, date, time, ReservationStatus.CONFIRMED);
+    }
+
+    private Reservation reservation(String name, LocalDate date, ReservationTime time, ReservationStatus status) {
+        return new Reservation(1L, new Reserver(name), new ReservationSlot(date, time, theme), status);
     }
 }

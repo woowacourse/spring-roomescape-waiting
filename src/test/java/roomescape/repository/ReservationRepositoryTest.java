@@ -9,6 +9,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reserver;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 
 import java.time.LocalDate;
@@ -50,8 +51,24 @@ class ReservationRepositoryTest {
                 () -> assertThat(savedReservation.getId()).isNotNull(),
                 () -> assertThat(reservations).hasSize(1),
                 () -> assertThat(savedReservation.getName()).isEqualTo(reservation.getName()),
+                () -> assertThat(savedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED),
+                () -> assertThat(reservations.getFirst().getStatus()).isEqualTo(ReservationStatus.CONFIRMED),
                 () -> assertThat(savedReservation.getSlot().getDate()).isEqualTo(reservation.getSlot().getDate()),
                 () -> assertThat(savedReservation.getSlot().getTime().getStartAt()).isEqualTo(reservation.getSlot().getTime().getStartAt()));
+    }
+
+    @Test
+    void 결제_대기_상태를_저장하고_조회한다() {
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름", "테마 설명", "썸네일");
+        Reservation reservation = new Reservation(null, new Reserver("브라운"),
+                new ReservationSlot(date, time, theme), ReservationStatus.PENDING);
+
+        Reservation savedReservation = reservationRepository.insert(reservation);
+
+        assertThat(reservationRepository.findById(savedReservation.getId()).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.PENDING);
+        assertThat(reservationRepository.existsBySlot(reservation.getSlot())).isTrue();
     }
 
     @Test

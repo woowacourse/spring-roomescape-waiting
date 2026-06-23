@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS reservation (
     date     DATE         NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
+    status   VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
 
     PRIMARY KEY (id),
 

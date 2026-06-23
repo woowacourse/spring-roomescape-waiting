@@ -48,6 +48,16 @@ class ReservationTest {
 
         // then
         assertThat(result.getName()).isEqualTo(name);
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+    }
+
+    @Test
+    void 결제_대기_예약인지_확인한다() {
+        Reservation reservation = new Reservation(null, new Reserver("브라운"),
+                slot(date, new ReservationTime(1L, startAt)), ReservationStatus.PENDING);
+
+        assertThat(reservation.isPending()).isTrue();
+        assertThat(reservation.isConfirmed()).isFalse();
     }
 
     @Test

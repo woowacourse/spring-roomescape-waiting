@@ -3,6 +3,7 @@ package roomescape.controller.dto.response;
 import java.time.LocalDate;
 import roomescape.service.dto.BookingStatus;
 import roomescape.service.dto.BookingType;
+import roomescape.domain.ReservationStatus;
 
 public record BookingStatusResponse(
         Long id,
@@ -11,6 +12,7 @@ public record BookingStatusResponse(
         ReservationTimeResponse time,
         ReservationThemeResponse theme,
         BookingType bookingType,
+        ReservationStatus reservationStatus,
         Long turn
 ) {
 
@@ -22,6 +24,7 @@ public record BookingStatusResponse(
                 ReservationTimeResponse.from(bookingStatus.time()),
                 ReservationThemeResponse.from(bookingStatus.theme()),
                 bookingStatus.bookingType(),
+                bookingStatus.reservationStatus(),
                 bookingStatus.turn()
         );
     }

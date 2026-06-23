@@ -3,6 +3,7 @@ package roomescape.service.dto;
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -15,6 +16,7 @@ public record BookingStatus(
         ReservationTime time,
         Theme theme,
         BookingType bookingType,
+        ReservationStatus reservationStatus,
         Long turn
 ) {
     public static BookingStatus reservation(Reservation reservation) {
@@ -26,6 +28,7 @@ public record BookingStatus(
                 slot.getTime(),
                 slot.getTheme(),
                 BookingType.RESERVATION,
+                reservation.getStatus(),
                 null
         );
     }
@@ -40,6 +43,7 @@ public record BookingStatus(
                 slot.getTime(),
                 slot.getTheme(),
                 BookingType.WAITING,
+                null,
                 waitingWithTurn.turn()
         );
     }
