@@ -41,7 +41,12 @@ class ReservationApplicationServiceMockTest {
     private static final Long TIME_ID = 1L;
     private static final Long THEME_ID = 1L;
     private static final ReservationTime TIME = new ReservationTime(TIME_ID, LocalTime.of(10, 0));
-    private static final Theme THEME = new Theme(THEME_ID, "공포", "무서운 테마", "https://example.com/horror.jpg");
+    private static final Theme THEME = new Theme(
+            THEME_ID,
+            "공포",
+            "무서운 테마",
+            "https://example.com/horror.jpg"
+    );
 
     @Mock
     private ReservationService reservationService;
@@ -60,13 +65,24 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void 본인이_예약한_슬롯에는_대기를_신청할_수_없다() {
-        Reservation owned = new Reservation(99L, "민욱", DATE, TIME, THEME);
+        Reservation owned = new Reservation(
+                99L,
+                "민욱",
+                DATE,
+                TIME,
+                THEME
+        );
         given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
         given(themeService.findById(THEME_ID)).willReturn(THEME);
         given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
                 .willReturn(new Reservations(List.of(owned)));
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest(
+                "민욱",
+                DATE,
+                TIME_ID,
+                THEME_ID
+        );
 
         assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -80,7 +96,12 @@ class ReservationApplicationServiceMockTest {
         given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
                 .willReturn(new Reservations(List.of()));
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest(
+                "민욱",
+                DATE,
+                TIME_ID,
+                THEME_ID
+        );
 
         assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -89,13 +110,24 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void 지난_예약에는_대기를_신청할_수_없다() {
-        Reservation past = new Reservation(99L, "티뉴", PAST_DATE, TIME, THEME);
+        Reservation past = new Reservation(
+                99L,
+                "티뉴",
+                PAST_DATE,
+                TIME,
+                THEME
+        );
         given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
         given(themeService.findById(THEME_ID)).willReturn(THEME);
         given(reservationService.findByDateAndThemeId(PAST_DATE, THEME_ID))
                 .willReturn(new Reservations(List.of(past)));
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", PAST_DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest(
+                "민욱",
+                PAST_DATE,
+                TIME_ID,
+                THEME_ID
+        );
 
         assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -105,13 +137,24 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void 다른_사람이_예약한_슬롯에는_대기_신청이_저장소까지_도달한다() {
-        Reservation other = new Reservation(99L, "티뉴", DATE, TIME, THEME);
+        Reservation other = new Reservation(
+                99L,
+                "티뉴",
+                DATE,
+                TIME,
+                THEME
+        );
         given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
         given(themeService.findById(THEME_ID)).willReturn(THEME);
         given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
                 .willReturn(new Reservations(List.of(other)));
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest(
+                "민욱",
+                DATE,
+                TIME_ID,
+                THEME_ID
+        );
 
         applicationService.addWaiting(request);
 
@@ -120,14 +163,25 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void 이미_대기를_신청한_예약에는_다시_신청할_수_없다() {
-        Reservation other = new Reservation(99L, "티뉴", DATE, TIME, THEME);
+        Reservation other = new Reservation(
+                99L,
+                "티뉴",
+                DATE,
+                TIME,
+                THEME
+        );
         given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
         given(themeService.findById(THEME_ID)).willReturn(THEME);
         given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
                 .willReturn(new Reservations(List.of(other)));
         given(reservationWaitingService.existBy("민욱", 99L)).willReturn(true);
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest(
+                "민욱",
+                DATE,
+                TIME_ID,
+                THEME_ID
+        );
 
         assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -138,7 +192,13 @@ class ReservationApplicationServiceMockTest {
     void 이미_지난_예약은_변경할_수_없다() {
         Long reservationId = 1L;
         String name = "민욱";
-        Reservation past = new Reservation(reservationId, name, PAST_DATE, TIME, THEME);
+        Reservation past = new Reservation(
+                reservationId,
+                name,
+                PAST_DATE,
+                TIME,
+                THEME
+        );
         given(reservationService.findMyReservation(reservationId, name)).willReturn(past);
 
         ReservationUpdateRequest request = new ReservationUpdateRequest(DATE, TIME_ID);
@@ -150,7 +210,13 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void cancelMyReservation은_지난_예약이면_BusinessRuleViolationException을_던진다() {
-        Reservation past = new Reservation(1L, "민욱", PAST_DATE, TIME, THEME);
+        Reservation past = new Reservation(
+                1L,
+                "민욱",
+                PAST_DATE,
+                TIME,
+                THEME
+        );
         given(reservationService.findMyReservation(1L, "민욱")).willReturn(past);
 
         assertThatThrownBy(() -> applicationService.cancelMyReservation(1L, "민욱"))
@@ -161,7 +227,13 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void cancelMyReservation은_대기가_없으면_예약을_삭제한다() {
-        Reservation reservation = new Reservation(1L, "민욱", DATE, TIME, THEME);
+        Reservation reservation = new Reservation(
+                1L,
+                "민욱",
+                DATE,
+                TIME,
+                THEME
+        );
         given(reservationService.findMyReservation(1L, "민욱")).willReturn(reservation);
         given(reservationWaitingService.findEarliestByReservationId(1L)).willReturn(Optional.empty());
 
@@ -173,8 +245,19 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void cancelMyReservation은_대기가_있으면_대기_1번을_예약으로_전환한다() {
-        Reservation reservation = new Reservation(1L, "민욱", DATE, TIME, THEME);
-        ReservationWaiting first = new ReservationWaiting(10L, "브라운", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
+        Reservation reservation = new Reservation(
+                1L,
+                "민욱",
+                DATE,
+                TIME,
+                THEME
+        );
+        ReservationWaiting first = new ReservationWaiting(
+                10L,
+                "브라운",
+                LocalDateTime.of(2026, 8, 1, 10, 0),
+                reservation
+        );
         given(reservationService.findMyReservation(1L, "민욱")).willReturn(reservation);
         given(reservationWaitingService.findEarliestByReservationId(1L)).willReturn(Optional.of(first));
 
@@ -187,8 +270,19 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void deleteReservation은_미래_슬롯에_대기가_있으면_대기_1번을_예약으로_전환한다() {
-        Reservation reservation = new Reservation(1L, "민욱", DATE, TIME, THEME);
-        ReservationWaiting first = new ReservationWaiting(10L, "브라운", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
+        Reservation reservation = new Reservation(
+                1L,
+                "민욱",
+                DATE,
+                TIME,
+                THEME
+        );
+        ReservationWaiting first = new ReservationWaiting(
+                10L,
+                "브라운",
+                LocalDateTime.of(2026, 8, 1, 10, 0),
+                reservation
+        );
         given(reservationService.findReservation(1L)).willReturn(Optional.of(reservation));
         given(reservationWaitingService.findEarliestByReservationId(1L)).willReturn(Optional.of(first));
 
@@ -200,7 +294,13 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void deleteReservation은_대기가_없으면_예약을_삭제한다() {
-        Reservation reservation = new Reservation(1L, "민욱", DATE, TIME, THEME);
+        Reservation reservation = new Reservation(
+                1L,
+                "민욱",
+                DATE,
+                TIME,
+                THEME
+        );
         given(reservationService.findReservation(1L)).willReturn(Optional.of(reservation));
         given(reservationWaitingService.findEarliestByReservationId(1L)).willReturn(Optional.empty());
 
@@ -211,7 +311,13 @@ class ReservationApplicationServiceMockTest {
 
     @Test
     void deleteReservation은_지난_예약이면_BusinessRuleViolationException을_던진다() {
-        Reservation past = new Reservation(1L, "티뉴", PAST_DATE, TIME, THEME);
+        Reservation past = new Reservation(
+                1L,
+                "티뉴",
+                PAST_DATE,
+                TIME,
+                THEME
+        );
         given(reservationService.findReservation(1L)).willReturn(Optional.of(past));
 
         assertThatThrownBy(() -> applicationService.deleteReservation(1L))
