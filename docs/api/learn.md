@@ -230,3 +230,5 @@ curl --request POST \
 "message": "잘못된 시크릿키 연동 정보 입니다."
 }
 ```
+
+샌드박스에 표시된 시크릿 키 / orderId / paymentKey 로 재시도 - successUrl 응답 확인 
