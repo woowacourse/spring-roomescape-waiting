@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>방탈출 예약 결제</title>
+    <!-- Toss Payments v2 결제창 SDK -->
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <style>
+        body {
+            font-family: -apple-system, "Segoe UI", sans-serif;
+            background: #f4f5f7;
+            margin: 0;
+            padding: 40px 16px;
+        }
+
+        .card {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0 0 24px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .row .label {
+            color: #888;
+        }
+
+        .row code {
+            font-size: 12px;
+            color: #555;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 12px;
+            padding: 16px;
+            border: 0;
+            border-radius: 10px;
+            background: #3182f6;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b64da;
+        }
+
+        button:disabled {
+            background: #c3d7f5;
+            cursor: not-allowed;
+        }
+
+        .hint {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #999;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🔐 방탈출 예약 결제</h1>
+    <div class="row"><span class="label">주문명</span><b th:text="${orderName}">방탈출 예약</b></div>
+    <div class="row"><span class="label">주문번호</span><code th:text="${orderId}">order-xxxx</code></div>
+    <div class="row"><span class="label">결제금액</span>
+        <b><span th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}">50,000</span>원</b></div>
+
+    <button id="payButton">카드로 결제하기</button>
+
+    <p class="hint">
+        샌드박스 테스트 결제입니다. 카드 정보 입력과 본인 인증은 토스 결제창과 카드사가 처리합니다.<br/>
+        인증 성공 후 서버가 전달받는 값은 paymentKey, orderId, amount뿐입니다.
+    </p>
+</div>
+
+<!-- Thymeleaf 가 주석 안 표현식(/*[[...]]*/)을 서버 값으로 치환한다. 뒤의 리터럴은 정적 미리보기용. -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const clientKey = /*[[${clientKey}]]*/ "test_ck_xxx";
+    const orderId = /*[[${orderId}]]*/ "order-1";
+    const orderName = /*[[${orderName}]]*/ "방탈출 예약";
+    const amountValue = /*[[${amount}]]*/ 50000;
+
+    const payButton = document.getElementById("payButton");
+    const hint = document.querySelector(".hint");
+    const validClientKey = clientKey.startsWith("test_ck_") || clientKey.startsWith("live_ck_");
+
+    if (!validClientKey) {
+        payButton.disabled = true;
+        hint.textContent = "TOSS_CLIENT_KEY에 test_ck_로 시작하는 클라이언트 키를 설정해주세요.";
+    }
+
+    payButton.addEventListener("click", async function () {
+        payButton.disabled = true;
+        try {
+            const tossPayments = TossPayments(clientKey);
+            const payment = tossPayments.payment({customerKey: orderId});
+
+            await payment.requestPayment({
+                method: "CARD",
+                amount: {
+                    currency: "KRW",
+                    value: amountValue
+                },
+                orderId: orderId,
+                orderName: orderName,
+                successUrl: window.location.origin + "/payments/success",
+                failUrl: window.location.origin + "/payments/fail",
+                card: {
+                    flowMode: "DEFAULT"
+                }
+            });
+        } catch (error) {
+            if (error.code !== "USER_CANCEL") {
+                hint.textContent = "결제 요청 실패: " + error.message;
+            }
+            payButton.disabled = false;
+        }
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 const API = '/reservations';
+const RESERVATION_ORDERS_API = '/reservation-orders';
 const WAITINGS_API = '/waitings';
 const TIMES_API = '/times';
 const THEMES_API = '/themes';
@@ -191,10 +192,10 @@ async function saveRow(name, date, themeId, timeId, timeSelect) {
 
     const selectedOption = timeSelect.options[timeSelect.selectedIndex];
     const isWaiting = selectedOption && selectedOption.dataset.reserved === 'true';
-    const endpoint = isWaiting ? WAITINGS_API : API;
+    const endpoint = isWaiting ? WAITINGS_API : RESERVATION_ORDERS_API;
 
     try {
-        await fetchJson(endpoint, {
+        const result = await fetchJson(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -208,11 +209,13 @@ async function saveRow(name, date, themeId, timeId, timeSelect) {
         isEditing = false;
         if (isWaiting) {
             alert('대기 신청이 완료되었습니다. 내 예약에서 대기 순번을 확인할 수 있습니다.');
+            refresh();
+            return;
         }
-        refresh();
+        window.location.href = `/payments/checkout?orderId=${encodeURIComponent(result.orderId)}`;
     } catch (error) {
-        console.error(isWaiting ? '대기 신청 실패:' : '예약 추가 실패:', error);
-        alert(getErrorMessage(error, isWaiting ? '대기 신청에 실패했습니다.' : '예약 추가에 실패했습니다.'));
+        console.error(isWaiting ? '대기 신청 실패:' : '예약 주문 생성 실패:', error);
+        alert(getErrorMessage(error, isWaiting ? '대기 신청에 실패했습니다.' : '예약 주문 생성에 실패했습니다.'));
     }
 }
 
