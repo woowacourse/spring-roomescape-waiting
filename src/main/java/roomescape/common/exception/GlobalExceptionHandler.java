@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import roomescape.common.dto.ErrorResponse;
-import roomescape.payment.exception.PaymentGatewayConfigurationException;
-import roomescape.payment.exception.RetryablePaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,91 +21,48 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        ErrorType errorType = e.getErrorType();
-
-        if (e instanceof PaymentGatewayConfigurationException) {
-            log.error("[결제 설정 오류] Toss Payments API 키 설정을 확인해야 합니다.", e);
-        } else if (e instanceof RetryablePaymentException) {
-            log.warn("[결제 일시 오류] Toss Payments 승인 요청을 재시도할 수 있습니다.", e);
-        }
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(e.getErrorType());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgument(MethodArgumentNotValidException e) {
-        ErrorType errorType = ErrorType.METHOD_ARGUMENT_NOT_VALID;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.METHOD_ARGUMENT_NOT_VALID);
     }
 
     @ExceptionHandler(MissingPathVariableException.class)
     public ResponseEntity<ErrorResponse> handleMissingPathVariable(MissingPathVariableException e) {
-        ErrorType errorType = ErrorType.MISSING_PATH_VARIABLE;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.MISSING_PATH_VARIABLE);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
             MissingServletRequestParameterException e) {
-        ErrorType errorType = ErrorType.MISSING_REQUEST_PARAMETER;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.MISSING_REQUEST_PARAMETER);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        ErrorType errorType = ErrorType.HTTP_MESSAGE_NOT_READABLE;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.HTTP_MESSAGE_NOT_READABLE);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
-        ErrorType errorType = ErrorType.METHOD_ARGUMENT_TYPE_MISMATCH;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.METHOD_ARGUMENT_TYPE_MISMATCH);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException e) {
-        ErrorType errorType = ErrorType.CONSTRAINT_VIOLATION;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.CONSTRAINT_VIOLATION);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpectedException(
-            Exception e,
-            HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e, HttpServletRequest request) {
         log.error("[예기치 못한 오류] {} {}", request.getMethod(), request.getRequestURI(), e);
+        return toResponse(CommonErrorType.UNEXPECTED_EXCEPTION);
+    }
 
-        ErrorType errorType = ErrorType.UNEXPECTED_EXCEPTION;
+    private ResponseEntity<ErrorResponse> toResponse(ErrorType errorType) {
         return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+                .body(new ErrorResponse(errorType.getErrorMessage(), errorType.getErrorCode()));
     }
 }
