@@ -10,6 +10,7 @@ import roomescape.reservation.Reservation;
 import roomescape.reservationwait.dto.WaitingResult;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservationwait.exception.ReservationWaitAlreadyExistsException;
+import roomescape.reservationwait.exception.PendingReservationWaitNotAllowedException;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,6 +33,9 @@ public class ReservationWaitService {
     @Transactional
     public ReservationWait createReservationWait(Long memberId, Long reservationId) {
         Reservation reservation = findReservation(reservationId);
+        if (!reservation.isConfirmed()) {
+            throw new PendingReservationWaitNotAllowedException();
+        }
         ReservationWait candidate = ReservationWait.create(reservation, memberId);
         try {
             return reservationWaitDao.insert(candidate);

@@ -35,6 +35,12 @@ public class ReservationTimeService {
         return AvailableTimeResponse.fromAll(reservationTimeReservationIdMap);
     }
 
+    public List<AvailableTimeResponse> getAvailableTimes(LocalDate date, Long themeId, Long storeId) {
+        return reservationTimeDao.findAvailableTimes(date, themeId, storeId).stream()
+                .map(AvailableTimeResponse::from)
+                .toList();
+    }
+
     @Transactional
     public void deleteReservationTime(Long id) {
         try {

@@ -3,6 +3,7 @@ package roomescape.reservation.dto;
 import java.util.List;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.ReservationTime;
 
 public record ReservationResponse(
@@ -11,7 +12,8 @@ public record ReservationResponse(
         String date,
         ReservationTimeResponse time,
         Long themeId,
-        Long storeId
+        Long storeId,
+        ReservationStatus status
 ) {
     public static ReservationResponse from(Reservation reservation) {
         ReservationTime reservationTime = reservation.getTime();
@@ -21,7 +23,8 @@ public record ReservationResponse(
                 reservation.getDate().toString(),
                 ReservationTimeResponse.from(reservationTime),
                 reservation.getThemeId(),
-                reservation.getStoreId()
+                reservation.getStoreId(),
+                reservation.getStatus()
         );
     }
 

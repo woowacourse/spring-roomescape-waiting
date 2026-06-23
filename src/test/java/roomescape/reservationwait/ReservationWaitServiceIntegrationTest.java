@@ -15,6 +15,7 @@ import roomescape.reservation.ReservationDao;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservationwait.dto.WaitingResult;
 import roomescape.reservationwait.exception.ReservationWaitAlreadyExistsException;
+import roomescape.reservationwait.exception.PendingReservationWaitNotAllowedException;
 
 @JdbcTest
 @ActiveProfiles("test")
@@ -154,5 +155,19 @@ public class ReservationWaitServiceIntegrationTest {
         // when & then: 없는 reservation(999) 으로 대기 신청 시도
         assertThatThrownBy(() -> reservationWaitService.createReservationWait(BROWN_ID, 999L))
                 .isInstanceOf(ReservationNotFoundException.class);
+    }
+
+    @Test
+    @Sql(statements = {
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_DEFAULT_THEME_SQL,
+            INSERT_DEFAULT_TIME_SQL,
+            "INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id, status) "
+                    + "VALUES (1, 2, '2026-12-01', 1, 1, 1, 'PENDING')"
+    })
+    void 결제가_완료되지_않은_예약에는_대기를_걸_수_없다() {
+        assertThatThrownBy(() -> reservationWaitService.createReservationWait(BROWN_ID, RESERVATION_ID))
+                .isInstanceOf(PendingReservationWaitNotAllowedException.class);
     }
 }

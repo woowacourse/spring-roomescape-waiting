@@ -107,6 +107,24 @@
 
 ---
 
+## 8. 결제 (PAYMENT)
+
+| 에러 코드 | HTTP | 메시지 | 발생 상황 |
+| --- | --- | --- | --- |
+| `PAYMENT400_001` | `400` | 결제 금액이 주문 금액과 일치하지 않습니다. | 승인 전 금액 위변조 검증 실패 |
+| `PAYMENT400_002` | `400` | 올바르지 않은 결제 승인 요청입니다. | Toss `INVALID_REQUEST` |
+| `PAYMENT403_001` | `403` | 본인의 결제 주문만 처리할 수 있습니다. | 다른 회원의 주문 승인·실패 처리 |
+| `PAYMENT404_001` | `404` | 결제 주문을 찾을 수 없습니다. | 로컬 주문 또는 Toss 결제 없음 |
+| `PAYMENT409_001` | `409` | 이미 처리된 결제입니다. | 다른 결제키로 중복 승인 시도 |
+| `PAYMENT409_002` | `409` | 이미 사용된 주문 번호입니다. | Toss `DUPLICATED_ORDER_ID` |
+| `PAYMENT410_001` | `410` | 결제 세션이 만료되었습니다. | Toss `NOT_FOUND_PAYMENT_SESSION` |
+| `PAYMENT422_001` | `422` | 카드 결제가 거절되었습니다. | Toss `REJECT_CARD_PAYMENT` |
+| `PAYMENT500_001` | `500` | 결제 설정 오류가 발생했습니다. | Toss API 키 설정 오류, 운영 알람 대상 |
+| `PAYMENT502_001` | `502` | 결제 승인 중 오류가 발생했습니다. | 미정의 Toss 오류 또는 응답 불일치 |
+| `PAYMENT503_001` | `503` | 결제 서비스가 일시적으로 불안정합니다. | Toss 내부 오류, 재시도 가능 |
+
+---
+
 ## 401 vs 403 구분
 
 - `401 Unauthorized` = **인증 실패** (당신이 누구인지 모름)
@@ -120,10 +138,13 @@
 
 | HTTP | 코드 |
 | --- | --- |
-| `400` | `COMMON400_001` ~ `COMMON400_006`, `RESERVATION400_001` ~ `RESERVATION400_003` |
+| `400` | `COMMON400_001` ~ `COMMON400_006`, `RESERVATION400_001` ~ `RESERVATION400_003`, `PAYMENT400_001` ~ `PAYMENT400_002` |
 | `401` | `AUTH401_001` ~ `AUTH401_004` |
-| `403` | `AUTH403_001`, `AUTH403_002` |
-| `404` | `RESERVATION404_001`, `RESERVATION_TIME404_001`, `RESERVATION_WAIT404_001`, `THEME404_001` |
-| `409` | `RESERVATION409_001`, `RESERVATION_TIME409_001`, `RESERVATION_WAIT409_001`, `THEME409_001` |
-| `422` | `RESERVATION_WAIT422_001`, `RESERVATION_WAIT422_002` |
-| `500` | `COMMON500_001` |
+| `403` | `AUTH403_001`, `AUTH403_002`, `PAYMENT403_001` |
+| `404` | `RESERVATION404_001`, `RESERVATION_TIME404_001`, `RESERVATION_WAIT404_001`, `THEME404_001`, `PAYMENT404_001` |
+| `409` | `RESERVATION409_001`, `RESERVATION_TIME409_001`, `RESERVATION_WAIT409_001`, `THEME409_001`, `PAYMENT409_001` ~ `PAYMENT409_002` |
+| `410` | `PAYMENT410_001` |
+| `422` | `RESERVATION_WAIT422_001` ~ `RESERVATION_WAIT422_003`, `PAYMENT422_001` |
+| `500` | `COMMON500_001`, `PAYMENT500_001` |
+| `502` | `PAYMENT502_001` |
+| `503` | `PAYMENT503_001` |

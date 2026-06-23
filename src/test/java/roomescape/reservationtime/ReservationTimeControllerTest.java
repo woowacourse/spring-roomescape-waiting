@@ -69,7 +69,8 @@ public class ReservationTimeControllerTest {
                     .body("id", is(1));
 
             RestAssured.given().log().all()
-                    .when().get("/api/v1/reservation-times/availability?date=" + AVAILABLE_TIME_TEST_DATE + "&themeId=1")
+                    .when().get("/api/v1/reservation-times/availability?date=" + AVAILABLE_TIME_TEST_DATE
+                            + "&themeId=1&storeId=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(3))

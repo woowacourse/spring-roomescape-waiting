@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import roomescape.common.dto.ErrorResponse;
+import roomescape.payment.exception.PaymentGatewayConfigurationException;
+import roomescape.payment.exception.RetryablePaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -22,6 +24,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
         ErrorType errorType = e.getErrorType();
+
+        if (e instanceof PaymentGatewayConfigurationException) {
+            log.error("[결제 설정 오류] Toss Payments API 키 설정을 확인해야 합니다.", e);
+        } else if (e instanceof RetryablePaymentException) {
+            log.warn("[결제 일시 오류] Toss Payments 승인 요청을 재시도할 수 있습니다.", e);
+        }
 
         return ResponseEntity.status(errorType.getHttpStatus())
                 .body(new ErrorResponse(

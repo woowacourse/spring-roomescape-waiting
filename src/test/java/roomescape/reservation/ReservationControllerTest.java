@@ -198,7 +198,7 @@ public class ReservationControllerTest {
                     .when().get("/api/v1/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("reservations.size()", is(1));
+                    .body("reservations.size()", is(0));
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -370,7 +370,7 @@ public class ReservationControllerTest {
 
         @Test
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-        void 토큰_로그인_후_Authorization_헤더로_본인_예약을_조회할_수_있다() {
+        void 결제_전_대기_예약은_본인_예약_목록에_노출되지_않는다() {
             String cookie = authenticate();
             createDefaultTimesAsManager();
             createDefaultThemesAsManager();
@@ -389,8 +389,7 @@ public class ReservationControllerTest {
                     .when().get("/api/v1/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("reservations.size()", is(1))
-                    .body("reservations[0].memberId", is(1));
+                    .body("reservations.size()", is(0));
         }
     }
 

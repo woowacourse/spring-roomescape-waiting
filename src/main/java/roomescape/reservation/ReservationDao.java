@@ -29,7 +29,8 @@ public class ReservationDao {
                     t.id as time_id,
                     t.start_at,
                     r.theme_id,
-                    r.store_id
+                    r.store_id,
+                    r.status
                 FROM reservation as r
                 INNER JOIN reservation_time as t
                   ON r.time_id = t.id
@@ -49,11 +50,13 @@ public class ReservationDao {
                     t.id as time_id,
                     t.start_at,
                     r.theme_id,
-                    r.store_id
+                    r.store_id,
+                    r.status
                 FROM reservation as r
                 INNER JOIN reservation_time as t
                   ON r.time_id = t.id
                 WHERE r.member_id = ?
+                  AND r.status = 'CONFIRMED'
                 """;
         List<Reservation> reservations = jdbcTemplate.query(
                 sql,
@@ -72,11 +75,13 @@ public class ReservationDao {
                     t.id as time_id,
                     t.start_at,
                     r.theme_id,
-                    r.store_id
+                    r.store_id,
+                    r.status
                 FROM reservation as r
                 INNER JOIN reservation_time as t
                   ON r.time_id = t.id
                 WHERE r.store_id = ?
+                  AND r.status = 'CONFIRMED'
                 """;
         List<Reservation> reservations = jdbcTemplate.query(
                 sql,
@@ -95,7 +100,8 @@ public class ReservationDao {
                     t.id as time_id,
                     t.start_at,
                     r.theme_id,
-                    r.store_id
+                    r.store_id,
+                    r.status
                 FROM reservation as r
                 INNER JOIN reservation_time as t
                   ON r.time_id = t.id
@@ -109,7 +115,7 @@ public class ReservationDao {
     }
 
     public Reservation insert(Reservation reservation) {
-        String sql = "insert into reservation (member_id, date, time_id, theme_id, store_id) values (?, ?, ?, ?, ?)";
+        String sql = "insert into reservation (member_id, date, time_id, theme_id, store_id, status) values (?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -122,6 +128,7 @@ public class ReservationDao {
             ps.setLong(3, reservation.getTime().getId());
             ps.setLong(4, reservation.getThemeId());
             ps.setLong(5, reservation.getStoreId());
+            ps.setString(6, reservation.getStatus().name());
             return ps;
         }, keyHolder);
 
@@ -132,12 +139,13 @@ public class ReservationDao {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getThemeId(),
-                reservation.getStoreId()
+                reservation.getStoreId(),
+                reservation.getStatus()
         );
     }
 
     public Reservation update(Reservation reservation) {
-        String sql = "update reservation set member_id = ?, date = ?, time_id = ?, theme_id = ?, store_id = ? where id = ?";
+        String sql = "update reservation set member_id = ?, date = ?, time_id = ?, theme_id = ?, store_id = ?, status = ? where id = ?";
         jdbcTemplate.update(
                 sql,
                 reservation.getMemberId(),
@@ -145,6 +153,7 @@ public class ReservationDao {
                 reservation.getTime().getId(),
                 reservation.getThemeId(),
                 reservation.getStoreId(),
+                reservation.getStatus().name(),
                 reservation.getId()
         );
         return reservation;
@@ -165,7 +174,8 @@ public class ReservationDao {
                             LocalTime.parse(resultSet.getString("start_at"))
                     ),
                     resultSet.getLong("theme_id"),
-                    resultSet.getLong("store_id")
+                    resultSet.getLong("store_id"),
+                    ReservationStatus.valueOf(resultSet.getString("status"))
             );
             return newReservation;
         };

@@ -73,6 +73,7 @@ public class ThemeDao {
                     FROM theme t
                     JOIN reservation r ON t.id = r.theme_id
                     WHERE r.date BETWEEN ? AND ?
+                      AND r.status = 'CONFIRMED'
                     GROUP BY t.id, t.name, t.description, t.img_url
                 ) ranked
                 WHERE ranked.theme_rank <= 10

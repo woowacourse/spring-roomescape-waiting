@@ -211,4 +211,26 @@ public class ReservationTimeDaoTest {
                         tuple(3L, null)
                 );
     }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_SINGLE_MEMBER_SQL,
+            "INSERT INTO store (id, name) VALUES (1, '강남점'), (2, '홍대점')",
+            "INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id, status) "
+                    + "VALUES (1, 1, '2026-05-01', 1, 1, 1, 'PENDING')"
+    })
+    void 매장별로_가용시간을_구분하고_PENDING_예약은_대기대상이_아니다() {
+        List<ReservationTimeAvailability> gangnam = reservationTimeDao.findAvailableTimes(
+                LocalDate.of(2026, 5, 1), 1L, 1L);
+        List<ReservationTimeAvailability> hongdae = reservationTimeDao.findAvailableTimes(
+                LocalDate.of(2026, 5, 1), 1L, 2L);
+
+        ReservationTimeAvailability gangnamTen = gangnam.get(0);
+        ReservationTimeAvailability hongdaeTen = hongdae.get(0);
+        assertThat(gangnamTen.isAvailable()).isFalse();
+        assertThat(gangnamTen.isWaitable()).isFalse();
+        assertThat(hongdaeTen.isAvailable()).isTrue();
+    }
 }

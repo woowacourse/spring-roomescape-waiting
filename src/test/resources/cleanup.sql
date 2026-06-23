@@ -2,6 +2,7 @@ SET
 REFERENTIAL_INTEGRITY FALSE;
 
 TRUNCATE TABLE reservation;
+TRUNCATE TABLE payment_order;
 TRUNCATE TABLE member;
 TRUNCATE TABLE theme;
 TRUNCATE TABLE reservation_time;
@@ -10,6 +11,8 @@ TRUNCATE TABLE reservation_wait;
 TRUNCATE TABLE reservation_history;
 
 ALTER TABLE reservation
+    ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE payment_order
     ALTER COLUMN id RESTART WITH 1;
 ALTER TABLE member
     ALTER COLUMN id RESTART WITH 1;
