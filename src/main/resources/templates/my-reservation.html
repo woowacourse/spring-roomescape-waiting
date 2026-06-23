@@ -91,7 +91,7 @@
         resultMeta.textContent = '예약·대기 목록을 불러오는 중입니다.';
         reservationBody.innerHTML = `<tr><td colspan="7" class="empty">조회 중입니다</td></tr>`;
 
-        fetch(`/reservation-statuses?name=${encodeURIComponent(name)}`)
+        fetch(`/bookings?name=${encodeURIComponent(name)}`)
             .then(handleResponse)
             .then(rows => {
                 reservations = rows;
@@ -113,20 +113,22 @@
         }
 
         reservationBody.innerHTML = sortedRows.map(reservation => {
-            const waiting = reservation.status === 'WAITING';
-            const editing = editingReservationId === reservation.id && reservation.status === 'RESERVED';
+            const waiting = reservation.bookingType === 'WAITING';
+            const pendingPayment = reservation.reservationStatus === 'PENDING';
+            const editing = editingReservationId === reservation.id
+                && reservation.bookingType === 'RESERVATION'
+                && reservation.reservationStatus === 'CONFIRMED';
             let row = `
             <tr class="${editing ? 'editing' : ''}">
                 <td class="muted">${reservation.id}</td>
                 <td>${reservation.date}</td>
                 <td class="accent">${formatTime(reservation.time?.startAt)}</td>
                 <td class="theme-name">${escapeHtml(reservation.theme?.name || '')}</td>
-                <td>${renderStatusBadge(reservation.status)}</td>
+                <td>${renderStatusBadge(reservation)}</td>
                 <td>${waiting ? `${reservation.turn}번째` : '-'}</td>
                 <td class="right">
                     <div class="action-buttons">
-                        ${waiting ? '' : `<button type="button" class="btn-text" onclick="openEditForm(${reservation.id}, '${reservation.status}')">변경</button>`}
-                        <button type="button" class="btn-text danger" onclick="cancelReservation(${reservation.id}, '${reservation.status}')">취소</button>
+                        ${renderActions(reservation, waiting, pendingPayment)}
                     </div>
                 </td>
             </tr>`;
@@ -196,8 +198,12 @@
 
     function openEditForm(id, status) {
         const reservation = findReservation(id, status);
-        if (!reservation || reservation.status === 'WAITING') {
+        if (!reservation || reservation.bookingType === 'WAITING') {
             showToast('대기는 변경할 수 없습니다', 'error');
+            return;
+        }
+        if (reservation.reservationStatus !== 'CONFIRMED') {
+            showToast('결제 대기 중인 예약은 변경할 수 없습니다', 'error');
             return;
         }
         editingReservationId = id;
@@ -215,7 +221,7 @@
     }
 
     function loadEditTimes(id) {
-        const reservation = findReservation(id, 'RESERVED');
+        const reservation = findReservation(id, 'RESERVATION');
         if (!reservation) {
             showToast('예약 정보를 찾을 수 없습니다', 'error');
             return;
@@ -250,7 +256,7 @@
 
     function updateReservation(id) {
         const name = nameInput.value.trim();
-        const reservation = findReservation(id, 'RESERVED');
+        const reservation = findReservation(id, 'RESERVATION');
         if (!reservation) {
             showToast('예약 정보를 찾을 수 없습니다', 'error');
             return;
@@ -294,7 +300,7 @@
             showToast('예약 정보를 찾을 수 없습니다', 'error');
             return;
         }
-        const waiting = reservation.status === 'WAITING';
+        const waiting = reservation.bookingType === 'WAITING';
         if (!confirm(waiting ? '예약 대기를 취소하시겠습니까?' : '예약을 취소하시겠습니까?')) {
             return;
         }
@@ -313,7 +319,7 @@
     }
 
     function findReservation(id, status) {
-        return reservations.find(reservation => reservation.id === id && reservation.status === status);
+        return reservations.find(reservation => reservation.id === id && reservation.bookingType === status);
     }
 
     function compareReservation(a, b) {
@@ -348,7 +354,7 @@
             date: reservation.date,
             time: reservation.time?.startAt,
             theme: reservation.theme?.name,
-            status: reservation.status,
+            status: getStatusLabel(reservation),
             turn: reservation.turn ?? 0
         }[key] || '';
     }
@@ -383,11 +389,45 @@
         return value ? value.slice(0, 5) : '';
     }
 
-    function renderStatusBadge(status) {
-        if (status === 'WAITING') {
+    function renderActions(reservation, waiting, pendingPayment) {
+        if (waiting) {
+            return `<button type="button" class="btn-text danger" onclick="cancelReservation(${reservation.id}, 'WAITING')">취소</button>`;
+        }
+        if (pendingPayment) {
+            return `
+                <button type="button" class="btn-text" onclick="retryPayment(${reservation.id})">결제 다시 시도</button>
+                <button type="button" class="btn-text danger" onclick="cancelReservation(${reservation.id}, 'RESERVATION')">취소</button>
+            `;
+        }
+        return `
+            <button type="button" class="btn-text" onclick="openEditForm(${reservation.id}, 'RESERVATION')">변경</button>
+            <span class="muted">결제 취소 기능 준비 중</span>
+        `;
+    }
+
+    function retryPayment(id) {
+        const name = nameInput.value.trim();
+        fetch(`/reservations/${id}/payments?name=${encodeURIComponent(name)}`, {method: 'POST'})
+            .then(handleResponse)
+            .then(result => window.location.href = result.checkoutUrl)
+            .catch(error => showToast(error.message, 'error'));
+    }
+
+    function renderStatusBadge(reservation) {
+        if (reservation.bookingType === 'WAITING') {
             return '<span class="status-badge waiting">대기</span>';
         }
-        return '<span class="status-badge reserved">예약</span>';
+        if (reservation.reservationStatus === 'PENDING') {
+            return '<span class="status-badge waiting">결제 대기</span>';
+        }
+        return '<span class="status-badge reserved">예약 확정</span>';
+    }
+
+    function getStatusLabel(reservation) {
+        if (reservation.bookingType === 'WAITING') {
+            return '대기';
+        }
+        return reservation.reservationStatus === 'PENDING' ? '결제 대기' : '예약 확정';
     }
 
     function escapeHtml(value) {

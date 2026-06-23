@@ -249,10 +249,15 @@
             </div>
             <div class="summary-row">
                 <span class="summary-label">신청 구분</span>
-                <span class="summary-value">${selectedSlotAvailable ? '예약' : '대기'}</span>
+                <span class="summary-value">${selectedSlotAvailable ? '예약 · 결제 필요' : '대기'}</span>
             </div>
+            ${selectedSlotAvailable ? `
+            <div class="summary-row">
+                <span class="summary-label">결제 금액</span>
+                <span class="summary-value accent">20,000원</span>
+            </div>` : ''}
         `;
-        document.getElementById('btn-reserve').textContent = selectedSlotAvailable ? '예약하기' : '대기 신청하기';
+        document.getElementById('btn-reserve').textContent = selectedSlotAvailable ? '결제하기' : '대기 신청하기';
         bookingSection.style.display = 'block';
         bookingSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         setTimeout(() => document.getElementById('user-name').focus(), 300);
@@ -272,7 +277,7 @@
 
         const btn = document.getElementById('btn-reserve');
         btn.disabled = true;
-        btn.textContent = selectedSlotAvailable ? '예약 중...' : '대기 신청 중...';
+        btn.textContent = selectedSlotAvailable ? '결제 정보 생성 중...' : '대기 신청 중...';
 
         const body = {
             themeId: parseInt(selectedThemeId),
@@ -289,20 +294,26 @@
             body: JSON.stringify(body)
         })
             .then(res => {
-                if (res.ok) {
-                    showToast(selectedSlotAvailable ? '예약이 완료되었습니다' : '대기 신청이 완료되었습니다', 'success');
-                    setTimeout(() => window.location.href = `/reservation/me?name=${encodeURIComponent(name)}`, 1500);
+                if (!res.ok) {
+                    return res.json()
+                        .then(error => {
+                            throw new Error(error.detail || '신청 중 오류가 발생했습니다');
+                        });
+                }
+                return res.json();
+            })
+            .then(result => {
+                if (selectedSlotAvailable) {
+                    window.location.href = result.checkoutUrl;
                     return;
                 }
-                return res.json()
-                    .then(error => {
-                        throw new Error(error.detail || '신청 중 오류가 발생했습니다');
-                    });
+                showToast('대기 신청이 완료되었습니다', 'success');
+                setTimeout(() => window.location.href = `/reservation/me?name=${encodeURIComponent(name)}`, 1500);
             })
             .catch(error => {
                 showToast(error.message || '신청 중 오류가 발생했습니다', 'error');
                 btn.disabled = false;
-                btn.textContent = selectedSlotAvailable ? '예약하기' : '대기 신청하기';
+                btn.textContent = selectedSlotAvailable ? '결제하기' : '대기 신청하기';
             });
     }
 
