@@ -6,23 +6,32 @@ public class Theme {
     private final String name;
     private final String description;
     private final String thumbnailUrl;
+    private final Long price;
 
-    public Theme(Long id, String name, String description, String thumbnailUrl) {
+    public Theme(Long id, String name, String description, String thumbnailUrl, Long price) {
         validateNullOrBlank(name, description, thumbnailUrl);
+        validatePrice(price);
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
+        this.price = price;
     }
 
-    public Theme(String name, String description, String thumbnailUrl) {
-        this(null, name, description, thumbnailUrl);
+    public Theme(String name, String description, String thumbnailUrl, Long price) {
+        this(null, name, description, thumbnailUrl, price);
     }
 
     private void validateNullOrBlank(String name, String description, String thumbnailUrl) {
         validateName(name);
         validateDescription(description);
         validateThumbnailUrl(thumbnailUrl);
+    }
+
+    private void validatePrice(Long price) {
+        if (price == null || price < 0) {
+            throw new IllegalArgumentException("가격은 0 이상이어야 합니다.");
+        }
     }
 
     private void validateName(String name) {
@@ -57,5 +66,9 @@ public class Theme {
 
     public String getThumbnailUrl() {
         return thumbnailUrl;
+    }
+
+    public Long getPrice() {
+        return price;
     }
 }
