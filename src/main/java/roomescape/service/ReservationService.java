@@ -57,6 +57,11 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    public Reservation findById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
+    }
+
     @Transactional
     public Reservation findPendingByUser(Long id, String name, LocalDateTime now) {
         Reservation reservation = findReservation(id);

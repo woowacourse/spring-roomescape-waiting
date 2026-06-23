@@ -81,6 +81,33 @@ class PaymentServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_RETRY_NOT_ALLOWED);
     }
 
+    @Test
+    void 결제_대기_예약의_준비된_결제만_checkout에_사용한다() {
+        Payment payment = new Payment(1L, 1L, "payment_ready_123456789012345678901", 20_000L, null,
+                PaymentStatus.READY, null, null);
+        Reservation reservation = pendingReservation(1L, LocalDate.of(2099, 1, 1));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(reservationService.findById(1L)).thenReturn(reservation);
+
+        Payment result = paymentService.getReadyPayment(1L);
+
+        assertThat(result).isSameAs(payment);
+    }
+
+    @Test
+    void 확정된_예약의_결제는_checkout에_사용할_수_없다() {
+        Payment payment = new Payment(1L, 1L, "payment_ready_123456789012345678901", 20_000L, null,
+                PaymentStatus.READY, null, null);
+        Reservation reservation = new Reservation(1L, new Reserver("브라운"),
+                pendingReservation(1L, LocalDate.of(2099, 1, 1)).getSlot(), ReservationStatus.CONFIRMED);
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(reservationService.findById(1L)).thenReturn(reservation);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> paymentService.getReadyPayment(1L))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_CHECKOUT_NOT_ALLOWED);
+    }
+
     private Reservation pendingReservation(Long id, LocalDate date) {
         ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");

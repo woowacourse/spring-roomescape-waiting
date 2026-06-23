@@ -37,6 +37,18 @@ public class PaymentService {
         return paymentRepository.insert(Payment.ready(reservation.getId(), RESERVATION_AMOUNT));
     }
 
+    @Transactional(readOnly = true)
+    public Payment getReadyPayment(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 결제입니다."));
+        Reservation reservation = reservationService.findById(payment.getReservationId());
+        if (payment.getStatus() != PaymentStatus.READY || !reservation.isPending()) {
+            throw new RoomescapeException(ErrorCode.PAYMENT_CHECKOUT_NOT_ALLOWED,
+                    "결제를 진행할 수 없는 상태입니다.");
+        }
+        return payment;
+    }
+
     private void validateRetryablePayment(Payment payment) {
         if (payment.getStatus() != PaymentStatus.FAILED && payment.getStatus() != PaymentStatus.CANCELED) {
             throw new RoomescapeException(ErrorCode.PAYMENT_RETRY_NOT_ALLOWED,
