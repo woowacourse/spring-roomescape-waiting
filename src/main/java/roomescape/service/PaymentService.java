@@ -77,6 +77,15 @@ public class PaymentService {
         return result;
     }
 
+    public void fail(Long paymentId, String failureCode, String failureMessage) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 결제입니다."));
+        if (payment.getStatus() != PaymentStatus.READY) {
+            return;
+        }
+        paymentRepository.update(payment.fail(failureCode, failureMessage));
+    }
+
     private void validateRetryablePayment(Payment payment) {
         if (payment.getStatus() != PaymentStatus.FAILED && payment.getStatus() != PaymentStatus.CANCELED) {
             throw new RoomescapeException(ErrorCode.PAYMENT_RETRY_NOT_ALLOWED,

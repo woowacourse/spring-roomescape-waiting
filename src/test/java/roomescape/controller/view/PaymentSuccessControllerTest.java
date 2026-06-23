@@ -1,6 +1,7 @@
 package roomescape.controller.view;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,5 +55,30 @@ class PaymentSuccessControllerTest {
                 .andExpect(view().name("payment-fail"))
                 .andExpect(model().attribute("code", "AMOUNT_MISMATCH"))
                 .andExpect(model().attribute("orderId", orderId));
+    }
+
+    @Test
+    void 결제_실패_콜백은_실패_정보를_저장하고_실패_화면을_렌더링한다() throws Exception {
+        mockMvc.perform(get("/payments/fail")
+                        .param("paymentId", "1")
+                        .param("code", "REJECT_CARD_PAYMENT")
+                        .param("message", "카드가 거절되었습니다.")
+                        .param("orderId", "payment_123456789012345678901"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("payment-fail"))
+                .andExpect(model().attribute("code", "REJECT_CARD_PAYMENT"));
+
+        verify(paymentService).fail(1L, "REJECT_CARD_PAYMENT", "카드가 거절되었습니다.");
+    }
+
+    @Test
+    void 결제_취소는_orderId가_없어도_실패_화면을_렌더링한다() throws Exception {
+        mockMvc.perform(get("/payments/fail")
+                        .param("code", "PAY_PROCESS_CANCELED")
+                        .param("message", "사용자가 결제를 취소했습니다."))
+                .andExpect(status().isOk())
+                .andExpect(view().name("payment-fail"))
+                .andExpect(model().attribute("code", "PAY_PROCESS_CANCELED"))
+                .andExpect(model().attribute("orderId", (Object) null));
     }
 }

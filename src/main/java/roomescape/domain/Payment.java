@@ -49,6 +49,17 @@ public class Payment {
                 failureCode, failureMessage);
     }
 
+    public Payment fail(String failureCode, String failureMessage) {
+        if (status != PaymentStatus.READY) {
+            throw new IllegalStateException("결제 대기 상태에서만 실패 처리할 수 있습니다.");
+        }
+        PaymentStatus failedStatus = "PAY_PROCESS_CANCELED".equals(failureCode)
+                ? PaymentStatus.CANCELED
+                : PaymentStatus.FAILED;
+        return new Payment(id, reservationId, orderId, amount, paymentKey, failedStatus,
+                failureCode, failureMessage);
+    }
+
     public Long getId() {
         return id;
     }

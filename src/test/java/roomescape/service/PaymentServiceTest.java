@@ -147,6 +147,32 @@ class PaymentServiceTest {
         verify(reservationService).confirmPayment(1L);
     }
 
+    @Test
+    void 결제_실패를_저장하고_결제_대기_예약은_유지한다() {
+        Payment payment = readyPayment();
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+
+        paymentService.fail(1L, "REJECT_CARD_PAYMENT", "카드가 거절되었습니다.");
+
+        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository).update(paymentCaptor.capture());
+        assertThat(paymentCaptor.getValue().getStatus()).isEqualTo(PaymentStatus.FAILED);
+        assertThat(paymentCaptor.getValue().getFailureCode()).isEqualTo("REJECT_CARD_PAYMENT");
+        verify(reservationService, never()).confirmPayment(any());
+    }
+
+    @Test
+    void 사용자_취소는_취소된_결제_상태로_저장한다() {
+        Payment payment = readyPayment();
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+
+        paymentService.fail(1L, "PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.");
+
+        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository).update(paymentCaptor.capture());
+        assertThat(paymentCaptor.getValue().getStatus()).isEqualTo(PaymentStatus.CANCELED);
+    }
+
     private Reservation pendingReservation(Long id, LocalDate date) {
         ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
