@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS payment_order;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_slot;
 DROP TABLE IF EXISTS theme;
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS theme
     name          VARCHAR(255) NOT NULL UNIQUE,
     description   VARCHAR(255) NOT NULL,
     thumbnail_url TEXT NOT NULL,
+    amount        BIGINT       NOT NULL,
     PRIMARY KEY (id)
 );
 

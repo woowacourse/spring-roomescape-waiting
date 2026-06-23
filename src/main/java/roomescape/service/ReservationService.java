@@ -25,7 +25,6 @@ import roomescape.exception.ErrorCode;
 
 @Service
 public class ReservationService {
-    private static final long RESERVATION_AMOUNT = 1_000L;
     private static final int MAX_ORDER_SAVE_ATTEMPTS = 3;
 
     private final ReservationSlotRepository reservationSlotRepository;
@@ -48,7 +47,7 @@ public class ReservationService {
         int order = reservationSlot.calculateOrder(newReservation);
         newReservation = reservationSlotRepository.saveReservation(newReservation);
         if (newReservation.isReserved()) {
-            saveOrderWithRetry(newReservation.getId(), calculateAmount(request));
+            saveOrderWithRetry(newReservation.getId(), calculateAmount(reservationSlot));
         }
         return ReservationResponse.from(newReservation, reservationSlot.getSlot(), order);
     }
@@ -101,8 +100,8 @@ public class ReservationService {
         }
     }
 
-    private Long calculateAmount(ReservationRequest request) {
-        return RESERVATION_AMOUNT;
+    private Long calculateAmount(ReservationSlot reservationSlot) {
+        return reservationSlot.getSlot().theme().getAmount();
     }
 
     private void saveOrderWithRetry(Long reservationId, Long amount) {
