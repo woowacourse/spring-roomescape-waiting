@@ -46,5 +46,8 @@ CREATE TABLE payment_order (
                              reservation_id BIGINT,
                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                             PRIMARY KEY (id)
+                             PRIMARY KEY (id),
+                             FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+                             FOREIGN KEY (theme_id) REFERENCES theme (id),
+                             FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
