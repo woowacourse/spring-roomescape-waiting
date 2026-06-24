@@ -1,38 +1,26 @@
-package roomescape.controller.controller;
+package roomescape.controller;
 
 import static org.hamcrest.Matchers.notNullValue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import roomescape.DatabaseInitializer;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class AdminThemeControllerTest {
-
-    @Autowired
-    private DatabaseInitializer databaseInitializer;
-
-    @BeforeEach
-    void setUp() {
-        databaseInitializer.clear();
-    }
+public class AdminThemeControllerTest extends ControllerTestSupport {
 
     @Test
     void 테마를_추가한다() {
-        createTheme("방탈출1", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs")
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", "방탈출1", "description", "다함께 탈출해요 방탈출", "thumbnail", "https://asdfsdf.sdfs"))
+                .when().post("/admin/themes")
+                .then().log().all()
                 .statusCode(201)
                 .body("id", notNullValue())
                 .header("Location", "/admin/themes/1");
@@ -41,7 +29,12 @@ public class AdminThemeControllerTest {
     @ParameterizedTest
     @MethodSource("invalidThemeRequests")
     void 테마_추가_요청_값이_잘못되면_400을_반환한다(String name, String description, String thumbnail) {
-        createTheme(name, description, thumbnail).statusCode(400);
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", name, "description", description, "thumbnail", thumbnail))
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(400);
     }
 
     private static Stream<Arguments> invalidThemeRequests() {
@@ -60,15 +53,19 @@ public class AdminThemeControllerTest {
 
     @Test
     void 이미_존재하는_테마를_추가하면_409를_반환한다() {
-        createTheme("방탈출1", "설명", "https://asdfsdf.sdfs").statusCode(201);
-        createTheme("방탈출1", "설명2", "https://asdfsdf2.sdfs").statusCode(409);
+        createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", "방탈출1", "description", "설명2", "thumbnail", "https://asdfsdf2.sdfs"))
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(409);
     }
 
     @Test
     void 테마를_삭제한다() {
-        int themeId = createTheme("방탈출11", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs")
-                .statusCode(201)
-                .extract().path("id");
+        int themeId = createTheme("방탈출11", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
 
         RestAssured.given().log().all()
                 .when().delete("/admin/themes/" + themeId)
@@ -86,41 +83,13 @@ public class AdminThemeControllerTest {
 
     @Test
     void 예약에_존재하는_테마를_삭제하면_409를_반환한다() {
-        int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs")
-                .statusCode(201)
-                .extract().path("id");
-
+        int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
         int timeId = createTime("10:00");
-        createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId, themeId);
+        createReservation(createMember("브라운"), LocalDate.now().plusDays(1).toString(), timeId, themeId).statusCode(201);
 
         RestAssured.given().log().all()
                 .when().delete("/admin/themes/" + themeId)
                 .then().log().all()
                 .statusCode(409);
-    }
-
-    private int createTime(String startAt) {
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of("startAt", startAt))
-                .when().post("/admin/times")
-                .then().statusCode(201)
-                .extract().jsonPath().getInt("id");
-    }
-
-    private void createReservation(String name, String date, int timeId, int themeId) {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of("name", name, "date", date, "timeId", timeId, "themeId", themeId))
-                .when().post("/reservations")
-                .then().statusCode(201);
-    }
-
-    private ValidatableResponse createTheme(String name, String description, String thumbnail) {
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of("name", name, "description", description, "thumbnail", thumbnail))
-                .when().post("/admin/themes")
-                .then().log().all();
     }
 }

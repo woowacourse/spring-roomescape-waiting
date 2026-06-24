@@ -56,8 +56,8 @@
                 </select>
             </div>
             <div class="field">
-                <label for="name">예약자</label>
-                <input id="name" maxlength="10" required type="text" placeholder="예약자 이름">
+                <label for="name">회원 ID</label>
+                <input id="name" min="1" required type="number" placeholder="회원 ID">
             </div>
             <button class="primary-button" type="submit">추가하기</button>
         </form>
@@ -178,7 +178,7 @@
     function addReservation(event) {
         event.preventDefault();
         const payload = {
-            name: $('#name').value.trim(),
+            memberId: Number($('#name').value),
             date: $('#date').value,
             timeId: Number($('#time').value),
             themeId: Number($('#theme').value)

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roomescape - 예약하기</title>
+
     <style>
         :root {
             --blue: #3182f6;
@@ -600,8 +601,9 @@
                 <div class="section-header">
                     <div>
                         <span class="eyebrow">STEP 2</span>
-                        <h2>날짜와 이름</h2>
+                        <h2>날짜와 회원</h2>
                     </div>
+                    <p class="hint">이름 입력 후 회원 등록을 눌러주세요.</p>
                 </div>
                 <div class="date-name-grid">
                     <div class="field">
@@ -610,8 +612,16 @@
                     </div>
                     <div class="field">
                         <label for="reservation-name">예약자 이름</label>
-                        <input id="reservation-name" maxlength="10" placeholder="이름을 입력하세요" type="text">
+                        <div style="display:flex;gap:8px;">
+                            <input id="reservation-name" maxlength="10" placeholder="이름을 입력하세요" type="text" style="flex:1;">
+                            <button id="register-member-btn" type="button" style="height:52px;padding:0 16px;border-radius:8px;background:var(--blue);color:var(--white);font-weight:800;white-space:nowrap;">회원 등록</button>
+                        </div>
+                        <p id="member-info" style="display:none;margin:6px 0 0;font-size:13px;color:var(--green);font-weight:700;"></p>
                     </div>
+                </div>
+                <div class="field" style="margin-top:14px;">
+                    <label for="reservation-amount">결제 금액 (원)</label>
+                    <input id="reservation-amount" type="number" min="100" value="10000" placeholder="결제 금액을 입력하세요">
                 </div>
             </section>
 
@@ -665,7 +675,8 @@
         themes: [],
         selectedTheme: null,
         selectedTime: null,
-        actionType: null
+        actionType: null,
+        memberId: null
     };
 
     const $ = (selector) => document.querySelector(selector);
@@ -676,13 +687,21 @@
         dateInput.min = today;
         dateInput.value = today;
 
+        const errorParam = new URLSearchParams(location.search).get('error');
+        if (errorParam) showToast(decodeURIComponent(errorParam));
+
         $('#summary-date').textContent = today;
         $('#reservation-date').addEventListener('change', () => {
             resetTimeSelection();
             $('#summary-date').textContent = dateInput.value || '-';
             fetchTimes();
         });
-        $('#reservation-name').addEventListener('input', updateSubmitState);
+        $('#reservation-name').addEventListener('input', () => {
+            state.memberId = null;
+            $('#member-info').style.display = 'none';
+            updateSubmitState();
+        });
+        $('#register-member-btn').addEventListener('click', registerMember);
         $('#submit-button').addEventListener('click', submitSelectedAction);
         $('#modal-close').addEventListener('click', closeModal);
         $('#modal-my-page').addEventListener('click', () => location.href = '/my-reservations.html');
@@ -803,38 +822,67 @@
         $('#submit-button').textContent = isWaiting ? '대기 신청하기' : '예약 확정하기';
     }
 
-    function updateSubmitState() {
-        const hasName = $('#reservation-name').value.trim().length > 0;
-        $('#submit-button').disabled = !(state.selectedTheme && state.selectedTime && hasName);
+    function registerMember() {
+        const name = $('#reservation-name').value.trim();
+        if (!name) { showToast('이름을 입력해주세요.'); return; }
+        const btn = $('#register-member-btn');
+        btn.disabled = true;
+        btn.textContent = '등록 중...';
+        fetch('/members', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        })
+            .then(toJson)
+            .then(member => {
+                state.memberId = member.id;
+                $('#member-info').textContent = `✓ 회원 ID ${member.id} (${member.name})`;
+                $('#member-info').style.display = 'block';
+                updateSubmitState();
+                showToast(`회원 등록 완료 (ID: ${member.id})`);
+            })
+            .catch(error => showToast(error.message || '회원 등록에 실패했습니다.'))
+            .finally(() => { btn.disabled = false; btn.textContent = '회원 등록'; });
     }
 
-    function submitSelectedAction() {
-        const name = $('#reservation-name').value.trim();
+    function updateSubmitState() {
+        $('#submit-button').disabled = !(state.selectedTheme && state.selectedTime && state.memberId);
+    }
+
+    async function submitSelectedAction() {
         const date = $('#reservation-date').value;
         const isWaiting = state.actionType === 'waiting';
-        const url = isWaiting ? '/waitings' : '/reservations';
-        const payload = isWaiting
-            ? { name, reservationDate: date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id }
-            : { name, date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id };
 
         $('#submit-button').disabled = true;
         $('#submit-button').textContent = isWaiting ? '대기 신청 중...' : '예약 중...';
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-            .then(toJson)
-            .then(data => {
-                openResultModal(data, isWaiting);
+        try {
+            if (isWaiting) {
+                const payload = { memberId: state.memberId, reservationDate: date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id };
+                const data = await fetch('/waitings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(toJson);
+                openResultModal(data, true);
                 fetchTimes();
-            })
-            .catch(error => showToast(error.message || '신청에 실패했습니다.'))
-            .finally(() => {
-                renderActionSummary();
-                updateSubmitState();
-            });
+            } else {
+                const amount = Number($('#reservation-amount').value);
+                const payload = { memberId: state.memberId, date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id, amount };
+                const data = await fetch('/reservations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(toJson);
+
+                location.href = '/payment?orderId=' + data.orderId;
+            }
+        } catch (error) {
+            showToast(error.message || '신청에 실패했습니다.');
+        } finally {
+            renderActionSummary();
+            updateSubmitState();
+        }
     }
 
     function openResultModal(data, isWaiting) {

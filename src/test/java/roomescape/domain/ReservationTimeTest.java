@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Member;
 
 class ReservationTimeTest {
 
@@ -56,7 +57,7 @@ class ReservationTimeTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "방탈출1", "설명", "https://thumb.com");
         ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 6, 1), time, theme);
-        Reservation reservation = new Reservation(1L, "브라운", slot);
+        Reservation reservation = new Reservation(1L, new Member(1L, "브라운"), slot);
 
         assertThat(time.isNotReserved(List.of(reservation))).isFalse();
     }
@@ -67,7 +68,7 @@ class ReservationTimeTest {
         ReservationTime time2 = new ReservationTime(2L, LocalTime.of(11, 0));
         Theme theme = new Theme(1L, "방탈출1", "설명", "https://thumb.com");
         ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 6, 1), time2, theme);
-        Reservation reservation = new Reservation(1L, "브라운", slot);
+        Reservation reservation = new Reservation(1L, new Member(1L, "브라운"), slot);
 
         assertThat(time1.isNotReserved(List.of(reservation))).isTrue();
     }

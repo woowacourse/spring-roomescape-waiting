@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>방탈출 예약 결제</title>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    h1 { font-size: 20px; margin: 0 0 24px; }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .row .label { color: #888; }
+    .row code { font-size: 12px; color: #555; }
+
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 16px;
+      border: 0;
+      border-radius: 10px;
+      background: #3182f6;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { background: #1b64da; }
+    button:disabled { background: #c3d7f5; cursor: not-allowed; }
+
+    .hint {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #999;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>방탈출 예약 결제</h1>
+  <div class="row"><span class="label">주문명</span><b th:text="${orderName}">방탈출 예약</b></div>
+  <div class="row"><span class="label">주문번호</span><code th:text="${orderId}">order-xxxx</code></div>
+  <div class="row"><span class="label">결제금액</span>
+    <b><span th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}">10,000</span>원</b>
+  </div>
+
+  <div id="payment-method"></div>
+  <div id="agreement"></div>
+
+  <button id="payButton" disabled>결제하기</button>
+
+  <p class="hint">
+    샌드박스 테스트 결제입니다. 실제 출금은 없습니다.<br/>
+    승인은 successUrl로 리다이렉트된 뒤 서버가 직접 호출합니다.
+  </p>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const clientKey  = /*[[${clientKey}]]*/  "test_gck_xxx";
+  const orderId    = /*[[${orderId}]]*/    "order-1";
+  const orderName  = /*[[${orderName}]]*/ "방탈출 예약";
+  const amountValue = /*[[${amount}]]*/   10000;
+
+  const tossPayments = TossPayments(clientKey);
+  const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+  const payButton = document.getElementById("payButton");
+
+  (async () => {
+    try {
+      await widgets.setAmount({ currency: "KRW", value: amountValue });
+      await Promise.all([
+        widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" }),
+        widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" })
+      ]);
+      payButton.disabled = false;
+    } catch (error) {
+      document.querySelector(".hint").textContent = "결제위젯 렌더링 실패: " + error.message;
+    }
+  })();
+
+  payButton.addEventListener("click", async function () {
+    try {
+      await widgets.requestPayment({
+        orderId: orderId,
+        orderName: orderName,
+        successUrl: window.location.origin + "/payment/success",
+        failUrl: window.location.origin + "/payment/fail"
+      });
+    } catch (error) {
+      if (error.code !== "USER_CANCEL") {
+        document.querySelector(".hint").textContent = "결제 요청 실패: " + error.message;
+      }
+    }
+  });
+  /*]]>*/
+</script>
+</body>
+</html>

@@ -1,13 +1,11 @@
 package roomescape.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDate;
 
 public record ReservationWaitingRequest(
-        @NotBlank(message = "예약 대기자명은 필수값 입니다.")
-        String name,
+        @NotNull(message = "회원 ID는 필수값 입니다.")
+        Long memberId,
 
         @NotNull(message = "예약 날짜는 필수값 입니다.")
         LocalDate reservationDate,

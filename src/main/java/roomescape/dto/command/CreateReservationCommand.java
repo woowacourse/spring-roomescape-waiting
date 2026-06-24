@@ -3,9 +3,10 @@ package roomescape.dto.command;
 import java.time.LocalDate;
 
 public record CreateReservationCommand(
-        String name,
+        long memberId,
         LocalDate date,
         long timeId,
-        long themeId
+        long themeId,
+        long amount
 ) {
 }

@@ -14,12 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
-import roomescape.dao.ReservationDao;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.dao.ThemeDao;
+import roomescape.repository.ThemeRepository;
 import roomescape.domain.Theme;
 import roomescape.dto.command.CreateThemeCommand;
 import roomescape.dto.response.ThemeResponse;
@@ -34,13 +36,16 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Autowired
-    private ReservationTimeDao timeDao;
+    private ReservationTimeRepository timeDao;
 
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -92,12 +97,13 @@ class ThemeServiceTest {
         Theme normalTheme = saveTheme("사라진 연구소", "설명", "https://thumb2.com");
 
         LocalDate today = LocalDate.now();
-        ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 
-        reservationDao.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, popularTheme)));
-        reservationDao.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(2), time, popularTheme)));
-        reservationDao.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(3), time, popularTheme)));
-        reservationDao.insert(Reservation.createWithoutId("예약자", new ReservationSlot(today.minusDays(1), time, normalTheme)));
+        Member member = saveMember("예약자");
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(1), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(2), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(3), time, popularTheme)));
+        reservationRepository.save(Reservation.createWithoutId(member, new ReservationSlot(today.minusDays(1), time, normalTheme)));
 
         List<ThemeResponse> responses = themeService.getPopularThemes(today);
 
@@ -125,8 +131,8 @@ class ThemeServiceTest {
     void 예약에_존재하는_테마를_삭제하면_409를_반환한다() {
         // given
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        reservationDao.insert(Reservation.createWithoutId("브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
+        ReservationTime time = timeDao.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        reservationRepository.save(Reservation.createWithoutId(saveMember("브라운"), new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme)));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
@@ -135,7 +141,11 @@ class ThemeServiceTest {
                         .isEqualTo(HttpStatus.CONFLICT));
     }
 
+    private Member saveMember(String name) {
+        return memberRepository.save(Member.createWithoutId(name));
+    }
+
     private Theme saveTheme(String name, String description, String thumbnail) {
-        return themeDao.insert(Theme.createWithoutId(name, description, thumbnail));
+        return themeRepository.save(Theme.createWithoutId(name, description, thumbnail));
     }
 }
