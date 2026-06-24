@@ -21,6 +21,8 @@ import roomescape.exception.NotFoundException;
 import roomescape.exception.ResourceInUseException;
 import roomescape.exception.UnauthorizedReservationException;
 import roomescape.payment.exception.PaymentAmountMismatchException;
+import roomescape.payment.exception.PaymentGatewayConnectionException;
+import roomescape.payment.exception.PaymentResultUnknownException;
 
 @Component
 public class CustomExceptionResolver implements HandlerExceptionResolver, Ordered {
@@ -39,6 +41,16 @@ public class CustomExceptionResolver implements HandlerExceptionResolver, Ordere
         try {
             if (ex instanceof PaymentAmountMismatchException) {
                 writeJsonResponse(response, HttpStatus.BAD_REQUEST, ex.getMessage());
+                return new ModelAndView();
+            }
+
+            if (ex instanceof PaymentGatewayConnectionException) {
+                writeJsonResponse(response, HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+                return new ModelAndView();
+            }
+
+            if (ex instanceof PaymentResultUnknownException) {
+                writeJsonResponse(response, HttpStatus.GATEWAY_TIMEOUT, ex.getMessage());
                 return new ModelAndView();
             }
 
