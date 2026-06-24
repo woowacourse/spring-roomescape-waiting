@@ -48,6 +48,12 @@ public class PaymentService {
     }
 
     @Transactional
+    public void markAsUncertain(String orderId) {
+        paymentRepository.findByOrderId(orderId).ifPresent(payment ->
+                reservationRepository.updateStatus(payment.getReservationId(), PaymentStatus.PAYMENT_UNCERTAIN));
+    }
+
+    @Transactional
     public void cancelPending(String orderId) {
         paymentRepository.findByOrderId(orderId).ifPresent(payment ->
                 reservationRepository.findById(payment.getReservationId()).ifPresent(reservation -> {
