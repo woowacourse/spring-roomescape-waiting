@@ -4,6 +4,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.controller.view.dto.PaymentReservationView;
+import roomescape.domain.Reservation;
 import roomescape.service.payment.PaymentAmountMismatchException;
 import roomescape.service.payment.PaymentGatewayException;
 import roomescape.service.payment.PaymentResult;
@@ -29,12 +31,15 @@ public class PaymentSuccessController {
         try {
             PaymentResult result = paymentService.confirm(paymentKey, orderId, amount);
             model.addAttribute("result", result);
+            addReservationViewByOrderId(model, orderId);
             model.addAttribute("name", name);
             return "payment-success";
         } catch (PaymentAmountMismatchException e) {
-            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId, name);
+            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId, name,
+                    paymentService.findReservationByOrderId(orderId));
         } catch (PaymentGatewayException e) {
-            return failView(model, e.getCode(), e.getMessage(), orderId, name);
+            return failView(model, e.getCode(), e.getMessage(), orderId, name,
+                    paymentService.findReservationByOrderId(orderId));
         }
     }
 
@@ -47,17 +52,30 @@ public class PaymentSuccessController {
             @RequestParam(required = false) String name,
             Model model
     ) {
+        Reservation reservation = null;
         if (paymentId != null) {
             paymentService.fail(paymentId, code, message);
+            reservation = paymentService.findReservationByPaymentId(paymentId);
+        } else if (orderId != null) {
+            reservation = paymentService.findReservationByOrderId(orderId);
         }
-        return failView(model, code, message, orderId, name);
+        return failView(model, code, message, orderId, name, reservation);
     }
 
-    private String failView(Model model, String code, String message, String orderId, String name) {
+    private void addReservationViewByOrderId(Model model, String orderId) {
+        Reservation reservation = paymentService.findReservationByOrderId(orderId);
+        model.addAttribute("reservation", PaymentReservationView.from(reservation));
+    }
+
+    private String failView(Model model, String code, String message, String orderId, String name,
+                            Reservation reservation) {
         model.addAttribute("code", code);
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
         model.addAttribute("name", name);
+        if (reservation != null) {
+            model.addAttribute("reservation", PaymentReservationView.from(reservation));
+        }
         return "payment-fail";
     }
 }

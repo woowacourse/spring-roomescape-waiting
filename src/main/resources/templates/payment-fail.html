@@ -20,6 +20,25 @@
         <h1 id="payment-result-title">결제를 완료하지 못했어요</h1>
         <p class="payment-result-description">예약은 결제 대기 상태로 유지됩니다. 내 예약에서 다시 결제하거나 취소할 수 있어요.</p>
 
+        <div th:if="${reservation != null}">
+            <h2 class="payment-result-detail-title">예약 정보</h2>
+            <dl class="payment-result-details">
+                <div>
+                    <dt>예약자</dt>
+                    <dd th:text="${reservation.reserverName}">브라운</dd>
+                </div>
+                <div>
+                    <dt>테마</dt>
+                    <dd th:text="${reservation.themeName}">미스터리 룸</dd>
+                </div>
+                <div>
+                    <dt>예약 일시</dt>
+                    <dd><span th:text="${reservation.date}">2026. 06. 30.</span> <span th:text="${reservation.time}">14:00</span></dd>
+                </div>
+            </dl>
+        </div>
+
+        <h2 class="payment-result-detail-title payment-result-failure-title">결제 실패 정보</h2>
         <dl class="payment-result-details">
             <div>
                 <dt>에러 코드</dt>

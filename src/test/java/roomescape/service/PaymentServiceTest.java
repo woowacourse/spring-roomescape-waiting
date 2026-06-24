@@ -91,6 +91,30 @@ class PaymentServiceTest {
     }
 
     @Test
+    void 주문번호로_결제에_연결된_예약을_조회한다() {
+        Payment payment = readyPayment();
+        Reservation reservation = pendingReservation(1L, LocalDate.of(2099, 1, 1));
+        when(paymentRepository.findByOrderId(payment.getOrderId())).thenReturn(Optional.of(payment));
+        when(reservationService.findById(1L)).thenReturn(reservation);
+
+        Reservation result = paymentService.findReservationByOrderId(payment.getOrderId());
+
+        assertThat(result).isSameAs(reservation);
+    }
+
+    @Test
+    void 결제번호로_결제에_연결된_예약을_조회한다() {
+        Payment payment = readyPayment();
+        Reservation reservation = pendingReservation(1L, LocalDate.of(2099, 1, 1));
+        when(paymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(reservationService.findById(1L)).thenReturn(reservation);
+
+        Reservation result = paymentService.findReservationByPaymentId(1L);
+
+        assertThat(result).isSameAs(reservation);
+    }
+
+    @Test
     void 저장된_금액과_다르면_결제_승인을_요청하지_않는다() {
         Payment payment = readyPayment();
         when(paymentRepository.findByOrderId(payment.getOrderId())).thenReturn(Optional.of(payment));

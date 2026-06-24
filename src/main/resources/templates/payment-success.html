@@ -20,6 +20,23 @@
         <h1 id="payment-result-title">결제를 완료했어요</h1>
         <p class="payment-result-description">예약이 확정되었습니다. 즐거운 방탈출 되세요.</p>
 
+        <h2 class="payment-result-detail-title">예약 정보</h2>
+        <dl class="payment-result-details">
+            <div>
+                <dt>예약자</dt>
+                <dd th:text="${reservation.reserverName}">브라운</dd>
+            </div>
+            <div>
+                <dt>테마</dt>
+                <dd th:text="${reservation.themeName}">미스터리 룸</dd>
+            </div>
+            <div>
+                <dt>예약 일시</dt>
+                <dd><span th:text="${reservation.date}">2026. 06. 30.</span> <span th:text="${reservation.time}">14:00</span></dd>
+            </div>
+        </dl>
+
+        <h2 class="payment-result-detail-title">결제 정보</h2>
         <dl class="payment-result-details">
             <div>
                 <dt>주문번호</dt>

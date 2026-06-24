@@ -45,6 +45,20 @@ public class PaymentService {
                 .orElseGet(() -> paymentRepository.insert(Payment.ready(reservation.getId(), RESERVATION_AMOUNT)));
     }
 
+    @Transactional(readOnly = true)
+    public Reservation findReservationByOrderId(String orderId) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 결제입니다."));
+        return reservationService.findById(payment.getReservationId());
+    }
+
+    @Transactional(readOnly = true)
+    public Reservation findReservationByPaymentId(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 결제입니다."));
+        return reservationService.findById(payment.getReservationId());
+    }
+
     @Transactional(noRollbackFor = PaymentGatewayException.class)
     public PaymentResult confirm(String paymentKey, String orderId, Long amount) {
         Payment payment = paymentRepository.findByOrderId(orderId)
