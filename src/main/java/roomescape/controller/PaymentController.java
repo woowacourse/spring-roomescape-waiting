@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentResult;
+import roomescape.domain.PaymentStatus;
 import roomescape.repository.PaymentOrderRepository;
 import roomescape.service.PaymentService;
 import roomescape.service.ReservationService;
@@ -53,7 +55,10 @@ public class PaymentController {
             @RequestParam String paymentKey,
             @RequestParam String orderId,
             @RequestParam Long amount) {
-        paymentService.confirm(paymentKey, orderId, amount);
+        PaymentResult paymentResult = paymentService.confirm(paymentKey, orderId, amount);
+        if (paymentResult.status() == PaymentStatus.NO_RESPONSE) {
+            return "redirect:/my-reservations.html?payment=pending";
+        }
         return "redirect:/my-reservations.html?payment=success";
     }
 

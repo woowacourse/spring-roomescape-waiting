@@ -9,6 +9,7 @@ import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentOrder;
 import roomescape.domain.PaymentResult;
+import roomescape.domain.PaymentStatus;
 import roomescape.repository.PaymentOrderRepository;
 
 @Service
@@ -31,7 +32,9 @@ public class PaymentService {
         }
         PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
         PaymentResult paymentResult = paymentGateway.confirm(confirmation);
-        order.getReservation().updateStatus();
+        if (paymentResult.status() == PaymentStatus.DONE) {
+            order.getReservation().updateStatus();
+        }
 
         return paymentResult;
     }

@@ -1,12 +1,10 @@
 package roomescape.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -18,9 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.PaymentStatus;
 
 @SpringBootTest
 class TossClientTimeoutTest {
@@ -62,7 +59,7 @@ class TossClientTimeoutTest {
     }
 
     @Test
-    void 읽기타임아웃이면_readTimeout만큼만_기다렸다가_RestClient예외로_실패한다() {
+    void 읽기타임아웃이면_readTimeout만큼만_기다렸다가_NO_RESPONSE를_반환한다() {
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
@@ -70,12 +67,11 @@ class TossClientTimeoutTest {
                 .setHeadersDelay(2, TimeUnit.SECONDS));
 
         var start = System.nanoTime();
-        assertThatThrownBy(() -> tossPaymentGateway.confirm(confirmation()))
-                .isInstanceOf(RestClientException.class)
-                .hasRootCauseInstanceOf(SocketTimeoutException.class);
+        var result = tossPaymentGateway.confirm(confirmation());
         var elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
-        // 서버는 2초를 끌지만 read timeout(500ms)이 먼저 끊는다.
+        // 서버는 2초를 끌지만 read timeout(500ms)이 먼저 끊고 NO_RESPONSE를 반환한다.
+        assertThat(result.status()).isEqualTo(PaymentStatus.NO_RESPONSE);
         assertThat(elapsedMs).isLessThan(1500);
     }
 
@@ -97,12 +93,11 @@ class TossClientTimeoutTest {
         var succeeded = 0;
         var start = System.nanoTime();
         for (var i = 0; i < 6; i++) {
-            try {
-                tossPaymentGateway.confirm(confirmation());
+            var result = tossPaymentGateway.confirm(confirmation());
+            if (result.status() == PaymentStatus.DONE) {
                 succeeded++;
-            } catch (RestClientException e) {
-                // 타임아웃으로 일찍 포기한 호출 — 성공 TPS 에 세지 않는다.
             }
+            // NO_RESPONSE는 타임아웃으로 일찍 포기한 호출 — 성공 TPS 에 세지 않는다.
         }
         var elapsedSeconds = (System.nanoTime() - start) / 1_000_000_000.0;
         var tps = succeeded / elapsedSeconds;
@@ -115,7 +110,7 @@ class TossClientTimeoutTest {
 
     @Test
     @Timeout(value = 3, unit = TimeUnit.SECONDS, threadMode = ThreadMode.SEPARATE_THREAD)
-    void 라우팅불가_IP면_connectTimeout만큼_기다렸다가_SocketTimeout으로_실패한다() {
+    void 라우팅불가_IP면_connectTimeout만큼_기다렸다가_NO_RESPONSE를_반환한다() {
         // 학생이 채운 tossRestClient 의 connect timeout 을 그대로 검증한다.
         // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(3초)이 끊어 실패시킨다.
         var gateway = new TossPaymentGateway(
@@ -124,12 +119,11 @@ class TossClientTimeoutTest {
         );
 
         var start = System.nanoTime();
-        assertThatThrownBy(() -> gateway.confirm(confirmation()))
-                .isInstanceOf(ResourceAccessException.class)
-                .hasCauseInstanceOf(SocketTimeoutException.class);
+        var result = gateway.confirm(confirmation());
         var elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
-        // connect timeout(500ms)만큼 기다렸다가 끊긴다.
+        // connect timeout(500ms)만큼 기다렸다가 끊기고 NO_RESPONSE를 반환한다.
+        assertThat(result.status()).isEqualTo(PaymentStatus.NO_RESPONSE);
         assertThat(elapsedMs).isBetween(300L, 2500L);
     }
 

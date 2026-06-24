@@ -11,6 +11,7 @@ public enum PaymentStatus {
     ABORTED,
     EXPIRED,
     UNKNOWN,
+    NO_RESPONSE,
     ;
 
     public static PaymentStatus from(String raw) {

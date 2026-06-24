@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.client.dto.ConfirmRequest;
 import roomescape.client.dto.TossErrorResponse;
 import roomescape.client.dto.TossPaymentResponse;
@@ -50,6 +52,8 @@ public class TossPaymentGateway implements PaymentGateway {
                     response.totalAmount());
         } catch (AlreadyProcessedPaymentException exception) {
             return new PaymentResult(request.paymentKey(), request.orderId(), PaymentStatus.DONE, request.amount());
+        } catch (RestClientException exception) {
+            return new PaymentResult(request.paymentKey(), request.orderId(), PaymentStatus.NO_RESPONSE, request.amount());
         }
     }
 
