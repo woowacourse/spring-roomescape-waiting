@@ -20,6 +20,7 @@ import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
+import roomescape.reservation.dto.ReservationWithPaymentResponse;
 import roomescape.reservation.service.ReservationService;
 
 @Tag(name = "예약", description = "예약 생성·조회·수정·삭제 API")
@@ -37,6 +38,11 @@ public class ReservationController {
     public ResponseEntity<List<ReservationResponse>> getReservationsByName(
             @RequestParam(required = false) String name) {
         return ResponseEntity.ok(reservationService.getReservationsByName(name));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<ReservationWithPaymentResponse>> getMyReservations(@RequestParam String name) {
+        return ResponseEntity.ok(reservationService.getMyReservations(name));
     }
 
     @GetMapping("/id")

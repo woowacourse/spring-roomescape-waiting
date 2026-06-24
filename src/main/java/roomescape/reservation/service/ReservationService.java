@@ -23,6 +23,7 @@ import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
+import roomescape.reservation.dto.ReservationWithPaymentResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
@@ -119,6 +120,10 @@ public class ReservationService {
     private Reservation getById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    public List<ReservationWithPaymentResponse> getMyReservations(String name) {
+        return reservationRepository.findWithPaymentByName(name);
     }
 
     public ReservationIdResponse getReservationId(LocalDate date, Long themeId, Long timeId) {
