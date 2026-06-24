@@ -29,31 +29,28 @@ class JdbcPaymentRepositoryTest {
     }
 
     @Test
-    @DisplayName("결제 정보를 저장하고 영속화된 객체를 반환한다.")
+    @DisplayName("승인된 결제 정보를 저장하고 영속화된 객체를 반환한다.")
     void 결제_저장() {
-        Long reservationId = insertReservation();
-        Payment payment = new Payment("order-1", 50000L, reservationId);
+        insertOrder();
+        Payment payment = new Payment("payment-key", "order-1");
 
         Payment savedPayment = jdbcPaymentRepository.save(payment);
 
         assertThat(savedPayment.getId()).isPositive();
+        assertThat(savedPayment.getPaymentKey()).isEqualTo("payment-key");
         assertThat(savedPayment.getOrderId()).isEqualTo("order-1");
-        assertThat(savedPayment.getPaymentKey()).isNull();
-        assertThat(savedPayment.getAmount()).isEqualTo(50000L);
-        assertThat(savedPayment.getReservationId()).isEqualTo(reservationId);
     }
 
     @Test
-    @DisplayName("주문 번호로 결제 정보를 조회한다.")
+    @DisplayName("주문 번호로 승인된 결제 정보를 조회한다.")
     void 주문_번호로_결제_조회() {
-        Long reservationId = insertReservation();
-        jdbcPaymentRepository.save(new Payment("order-1", 50000L, reservationId));
+        insertOrder();
+        jdbcPaymentRepository.save(new Payment("payment-key", "order-1"));
 
         Optional<Payment> foundPayment = jdbcPaymentRepository.findByOrderId("order-1");
 
         assertThat(foundPayment).isPresent();
-        assertThat(foundPayment.get().getAmount()).isEqualTo(50000L);
-        assertThat(foundPayment.get().getReservationId()).isEqualTo(reservationId);
+        assertThat(foundPayment.get().getPaymentKey()).isEqualTo("payment-key");
     }
 
     @Test
@@ -64,16 +61,12 @@ class JdbcPaymentRepositoryTest {
         assertThat(foundPayment).isEmpty();
     }
 
-    @Test
-    @DisplayName("주문 번호로 결제 키를 업데이트한다.")
-    void 결제_키_업데이트() {
+    private void insertOrder() {
         Long reservationId = insertReservation();
-        jdbcPaymentRepository.save(new Payment("order-1", 50000L, reservationId));
-
-        Payment updatedPayment = jdbcPaymentRepository.updatePaymentKey("order-1", "payment-key");
-
-        assertThat(updatedPayment.getPaymentKey()).isEqualTo("payment-key");
-        assertThat(updatedPayment.getOrderId()).isEqualTo("order-1");
+        jdbcTemplate.update(
+                "INSERT INTO orders (order_id, amount, reservation_id, status) VALUES (?, ?, ?, ?)",
+                "order-1", 50000L, reservationId, "PENDING"
+        );
     }
 
     private Long insertReservation() {
@@ -88,7 +81,7 @@ class JdbcPaymentRepositoryTest {
         );
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, slot_id, created_at, status) VALUES (?, ?, ?, ?)",
-                "브라운", 1L, LocalDate.now().atStartOfDay(), "PAYMENT_PENDING"
+                "브라운", 1L, LocalDate.now().atStartOfDay(), "RESERVED"
         );
 
         return jdbcTemplate.queryForObject("SELECT id FROM reservation WHERE name = ?", Long.class, "브라운");

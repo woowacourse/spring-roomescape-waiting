@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS payment CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS reservation CASCADE;
 DROP TABLE IF EXISTS reservation_slot CASCADE;
 DROP TABLE IF EXISTS theme CASCADE;
@@ -52,14 +53,25 @@ CREATE INDEX IF NOT EXISTS idx_reservation_name
 CREATE INDEX IF NOT EXISTS idx_reservation_slot_id
     ON reservation (slot_id);
 
-CREATE TABLE payment
+CREATE TABLE orders
 (
-    id            BIGINT       NOT NULL AUTO_INCREMENT,
-    order_id      VARCHAR(64)  NOT NULL,
-    payment_key   VARCHAR(200),
-    amount        BIGINT       NOT NULL,
+    id             BIGINT      NOT NULL AUTO_INCREMENT,
+    order_id       VARCHAR(64) NOT NULL,
+    amount         BIGINT      NOT NULL,
     reservation_id BIGINT      NOT NULL,
+    status         VARCHAR(50) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    CONSTRAINT uk_orders_order_id UNIQUE (order_id)
+);
+
+CREATE TABLE payment
+(
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    payment_key VARCHAR(200) NOT NULL,
+    order_id    VARCHAR(64)  NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (order_id) REFERENCES orders (order_id),
+    CONSTRAINT uk_payment_payment_key UNIQUE (payment_key),
     CONSTRAINT uk_payment_order_id UNIQUE (order_id)
 );
