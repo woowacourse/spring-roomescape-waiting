@@ -9,6 +9,7 @@ import roomescape.payment.PaymentConfirmation;
 import roomescape.payment.PaymentGateway;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.PaymentStatus;
+import roomescape.payment.client.dto.CancelRequest;
 import roomescape.payment.client.dto.ConfirmRequest;
 import roomescape.payment.client.dto.TossErrorResponse;
 import roomescape.payment.client.dto.TossPaymentResponse;
@@ -39,6 +40,20 @@ public class TossPaymentGateway implements PaymentGateway {
                 })
                 .body(TossPaymentResponse.class);
         return toResult(response);
+    }
+
+    @Override
+    public void cancel(String paymentKey, String reason) {
+        tossRestClient.post()
+                .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new CancelRequest(reason))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (req, res) -> {
+                    TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
+                    throw TossPaymentException.of(res.getStatusCode(), error);
+                })
+                .toBodilessEntity();
     }
 
     private PaymentResult toResult(TossPaymentResponse response) {

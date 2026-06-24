@@ -1,6 +1,7 @@
 package roomescape.payment.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -67,6 +68,37 @@ class TossPaymentGatewayTest {
 
         assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
                 .isInstanceOf(TossPaymentException.AlreadyProcessed.class);
+    }
+
+    private TossPaymentGateway cancelGatewayResponding(String paymentKey, HttpStatus status, String body) {
+        RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(BASE_URL + "/v1/payments/" + paymentKey + "/cancel"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(status)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(body));
+        return new TossPaymentGateway(builder.build(), new ObjectMapper());
+    }
+
+    @Test
+    void cancel이_성공하면_예외없이_완료된다() {
+        TossPaymentGateway gateway = cancelGatewayResponding("test_pk_1", HttpStatus.OK, """
+                {"paymentKey": "test_pk_1", "status": "CANCELED"}
+                """);
+
+        assertThatCode(() -> gateway.cancel("test_pk_1", "예약 생성 실패"))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void cancel이_실패하면_매핑된_예외가_던져진다() {
+        TossPaymentGateway gateway = cancelGatewayResponding("test_pk_1", HttpStatus.NOT_FOUND, """
+                {"code": "NOT_FOUND_PAYMENT", "message": "결제 건을 찾을 수 없습니다."}
+                """);
+
+        assertThatThrownBy(() -> gateway.cancel("test_pk_1", "예약 생성 실패"))
+                .isInstanceOf(TossPaymentException.PaymentNotFound.class);
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")

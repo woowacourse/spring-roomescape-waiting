@@ -41,6 +41,7 @@ public class UserReservationService {
     private static final String ORDER_NAME = "방탈출 예약";
 
     private final AdminReservationService reservationService;
+    private final ReservationConfirmer reservationConfirmer;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -49,6 +50,7 @@ public class UserReservationService {
 
     public UserReservationService(
             AdminReservationService reservationService,
+            ReservationConfirmer reservationConfirmer,
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
@@ -56,6 +58,7 @@ public class UserReservationService {
             PaymentOrderRepository paymentOrderRepository
     ) {
         this.reservationService = reservationService;
+        this.reservationConfirmer = reservationConfirmer;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -90,14 +93,28 @@ public class UserReservationService {
     public ReservationResult confirm(PaymentConfirmCommand command) {
         PaymentResult payment = paymentService.confirm(
                 command.paymentKey(), command.orderId(), command.amount());
-        PaymentOrder order = paymentOrderRepository.getByOrderId(command.orderId());
-        ReservationCreateCommand createCommand = new ReservationCreateCommand(
-                order.getReserverName(), order.getDate(), order.getTimeId(), order.getThemeId());
-        ReservationResult reservation = reservationService.create(createCommand);
-        paymentOrderRepository.markConfirmed(command.orderId(), payment.paymentKey(), reservation.id());
-        log.info("결제 승인 후 예약 생성 완료: orderId={}, reservationId={}, status={}",
-                command.orderId(), reservation.id(), reservation.status());
-        return reservation;
+        try {
+            ReservationResult reservation = reservationConfirmer.confirmReservation(
+                    command.orderId(), payment.paymentKey());
+            log.info("결제 승인 후 예약 생성 완료: orderId={}, reservationId={}, status={}",
+                    command.orderId(), reservation.id(), reservation.status());
+            return reservation;
+        } catch (Exception e) {
+            log.error("결제 승인 후 예약 생성 실패, 보상(결제 취소)을 시도합니다: orderId={}", command.orderId(), e);
+            compensate(command.orderId(), payment.paymentKey());
+            throw e;
+        }
+    }
+
+    private void compensate(String orderId, String paymentKey) {
+        try {
+            paymentService.cancel(paymentKey, "예약 생성 실패로 인한 자동 결제 취소");
+            paymentOrderRepository.markCanceled(orderId);
+            log.info("보상 결제 취소 완료: orderId={}", orderId);
+        } catch (Exception cancelError) {
+            log.error("보상 결제 취소 실패 - 수동 정산이 필요합니다: orderId={}, paymentKey={}",
+                    orderId, paymentKey, cancelError);
+        }
     }
 
     public void cancelOrder(String orderId) {

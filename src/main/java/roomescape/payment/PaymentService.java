@@ -22,4 +22,8 @@ public class PaymentService {
         }
         return paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
     }
+
+    public void cancel(String paymentKey, String reason) {
+        paymentGateway.cancel(paymentKey, reason);
+    }
 }

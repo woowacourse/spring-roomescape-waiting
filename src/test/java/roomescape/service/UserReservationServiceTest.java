@@ -69,6 +69,8 @@ class UserReservationServiceTest {
     @Mock
     private AdminReservationService reservationService;
     @Mock
+    private ReservationConfirmer reservationConfirmer;
+    @Mock
     private ReservationRepository reservationRepository;
     @Mock
     private LockedReservationWriter reservationWriter;
@@ -154,10 +156,9 @@ class UserReservationServiceTest {
     }
 
     @Test
-    @DisplayName("결제가 승인되면 예약을 생성하고 주문을 확정 처리한다")
+    @DisplayName("결제가 승인되면 예약 확정 단위에 위임하고 결과를 반환한다")
     void 결제_승인시_예약을_생성하고_주문을_확정한다() {
         PaymentConfirmCommand command = new PaymentConfirmCommand("test_pk_1", "order-1", 1000L);
-        PaymentOrder order = PaymentOrder.pending("order-1", OWNER, FUTURE_DATE, 1L, 1L, 1000L);
         ReservationResult created = new ReservationResult(
                 10L, OWNER, FUTURE_DATE,
                 new roomescape.service.dto.ReservationTimeResult(1L, LocalTime.of(10, 0)),
@@ -165,16 +166,33 @@ class UserReservationServiceTest {
                 0L, ReservationStatus.CONFIRMED);
         given(paymentService.confirm("test_pk_1", "order-1", 1000L))
                 .willReturn(new PaymentResult("test_pk_1", "order-1", PaymentStatus.DONE, 1000L));
-        given(paymentOrderRepository.getByOrderId("order-1")).willReturn(order);
-        given(reservationService.create(any(ReservationCreateCommand.class))).willReturn(created);
+        given(reservationConfirmer.confirmReservation("order-1", "test_pk_1")).willReturn(created);
 
         ReservationResult result = userReservationService.confirm(command);
 
         assertThat(result.id()).isEqualTo(10L);
         assertThat(result.status()).isEqualTo(ReservationStatus.CONFIRMED);
         verify(paymentService, times(1)).confirm("test_pk_1", "order-1", 1000L);
-        verify(reservationService, times(1)).create(any(ReservationCreateCommand.class));
-        verify(paymentOrderRepository, times(1)).markConfirmed("order-1", "test_pk_1", 10L);
+        verify(reservationConfirmer, times(1)).confirmReservation("order-1", "test_pk_1");
+        verify(paymentService, never()).cancel(any(), any());
+    }
+
+    @Test
+    @DisplayName("결제 승인 후 예약 생성이 실패하면 결제를 취소(보상)하고 주문을 취소 처리한 뒤 예외를 전파한다")
+    void 예약_생성_실패시_결제를_취소하고_예외를_전파한다() {
+        PaymentConfirmCommand command = new PaymentConfirmCommand("test_pk_1", "order-1", 1000L);
+        given(paymentService.confirm("test_pk_1", "order-1", 1000L))
+                .willReturn(new PaymentResult("test_pk_1", "order-1", PaymentStatus.DONE, 1000L));
+        given(reservationConfirmer.confirmReservation("order-1", "test_pk_1"))
+                .willThrow(new ReservationConflictException("이미 확정된 슬롯"));
+
+        assertThrows(
+                ReservationConflictException.class,
+                () -> userReservationService.confirm(command)
+        );
+
+        verify(paymentService, times(1)).cancel(eq("test_pk_1"), any());
+        verify(paymentOrderRepository, times(1)).markCanceled("order-1");
     }
 
     @Test
