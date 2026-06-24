@@ -11,6 +11,7 @@ import roomescape.service.ReservationService;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import roomescape.service.dto.ReservationCreateResult;
 
 @Validated
 @RestController
@@ -43,11 +44,12 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationRequest request) {
         LocalDateTime requestTime = LocalDateTime.now();
-        Reservation reservation = reservationService.saveReservation(
+        ReservationCreateResult result = reservationService.saveReservationWithOrder(
                 request.name(), request.date(), request.timeId(), request.themeId(), requestTime
         );
+        Reservation reservation = result.reservation();
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
-                .body(ReservationResponse.from(reservation));
+                .body(ReservationResponse.from(result));
     }
 
     @DeleteMapping("/{id}")
