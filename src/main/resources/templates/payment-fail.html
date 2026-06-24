@@ -3,18 +3,44 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>결제 실패</title>
+    <title>결제 실패 | ESCAPE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css?v=payment-result-20260625-2">
 </head>
-<body>
-<main>
-    <h1>결제를 완료하지 못했어요</h1>
-    <dl>
-        <dt>에러 코드</dt><dd th:text="${code}">AMOUNT_MISMATCH</dd>
-        <dt>사유</dt><dd th:text="${message}">결제 금액이 일치하지 않습니다.</dd>
-        <dt>주문번호</dt><dd th:text="${orderId}">payment-xxxx</dd>
-    </dl>
-    <a th:if="${name != null}" th:href="@{/reservation/me(name=${name})}">내 예약으로 이동</a>
-    <a th:unless="${name != null}" href="/reservation/me">내 예약으로 이동</a>
+<body class="payment-result-page payment-result-fail">
+<header>
+    <a href="/" class="escape-logo">ESC<span>A</span>PE</a>
+    <a href="/reservation" class="header-link">새 예약</a>
+</header>
+
+<main class="payment-result-main">
+    <section class="payment-result-card" aria-labelledby="payment-result-title">
+        <p class="payment-result-eyebrow">PAYMENT NOT COMPLETED</p>
+        <div class="payment-result-symbol" aria-hidden="true">!</div>
+        <h1 id="payment-result-title">결제를 완료하지 못했어요</h1>
+        <p class="payment-result-description">예약은 결제 대기 상태로 유지됩니다. 내 예약에서 다시 결제하거나 취소할 수 있어요.</p>
+
+        <dl class="payment-result-details">
+            <div>
+                <dt>에러 코드</dt>
+                <dd th:text="${code}">AMOUNT_MISMATCH</dd>
+            </div>
+            <div>
+                <dt>사유</dt>
+                <dd th:text="${message}">결제 금액이 일치하지 않습니다.</dd>
+            </div>
+            <div th:if="${orderId != null}">
+                <dt>주문번호</dt>
+                <dd th:text="${orderId}">payment-xxxx</dd>
+            </div>
+        </dl>
+
+        <div class="payment-result-actions">
+            <a class="payment-result-primary" th:if="${name != null}" th:href="@{/reservation/me(name=${name})}">내 예약으로 이동</a>
+            <a class="payment-result-primary" th:unless="${name != null}" href="/reservation/me">내 예약으로 이동</a>
+            <a class="payment-result-secondary" href="/reservation">새 예약하기</a>
+        </div>
+    </section>
 </main>
 </body>
 </html>

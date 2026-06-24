@@ -1067,6 +1067,173 @@ body.error-page {
     font-weight: 500;
 }
 
+/* 결제 결과 */
+body.payment-result-page {
+    background:
+            radial-gradient(ellipse 55% 45% at 50% 45%, rgba(200,169,110,0.08), transparent 72%),
+            var(--bg);
+}
+
+body.payment-result-fail {
+    background:
+            radial-gradient(ellipse 55% 45% at 50% 45%, rgba(224,82,82,0.08), transparent 72%),
+            var(--bg);
+}
+
+.payment-result-main {
+    min-height: calc(100vh - 104px);
+    max-width: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 4rem;
+}
+
+.payment-result-card {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(30,30,36,0.98), rgba(22,22,26,0.98));
+    padding: clamp(2rem, 6vw, 3.5rem);
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.24);
+}
+
+.payment-result-eyebrow {
+    color: var(--accent);
+    font-size: 0.67rem;
+    letter-spacing: 0.2em;
+    font-weight: 500;
+}
+
+.payment-result-symbol {
+    width: 56px;
+    height: 56px;
+    margin: 1.4rem auto;
+    border: 1px solid rgba(76,175,125,0.5);
+    border-radius: 50%;
+    background: rgba(76,175,125,0.1);
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.3rem;
+    line-height: 1;
+}
+
+.payment-result-fail .payment-result-eyebrow { color: var(--danger); }
+
+.payment-result-fail .payment-result-symbol {
+    border-color: rgba(224,82,82,0.5);
+    background: rgba(224,82,82,0.1);
+    color: var(--danger);
+}
+
+.payment-result-card h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+}
+
+.payment-result-description {
+    max-width: 430px;
+    margin: 1rem auto 2.4rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+
+.payment-result-detail-title {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 2rem 0 0.85rem;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.payment-result-detail-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(200,169,110,0.3);
+}
+
+.payment-result-failure-title {
+    color: var(--danger);
+}
+
+.payment-result-failure-title::after {
+    background: rgba(224,82,82,0.3);
+}
+
+.payment-result-details {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+.payment-result-details > div {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.payment-result-details > div:last-child { border-bottom: 0; }
+
+.payment-result-details dt {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+}
+
+.payment-result-details dd {
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+.payment-result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.payment-result-primary,
+.payment-result-secondary {
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.78rem 1.1rem;
+    color: #1a1400;
+    background: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.payment-result-secondary {
+    border-color: var(--border-hover);
+    color: var(--text-secondary);
+    background: transparent;
+}
+
+.payment-result-primary:hover,
+.payment-result-secondary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
 @media (max-width: 600px) {
     header { padding: 1.5rem; }
     main { padding: 2rem 1rem 4rem; }
@@ -1106,5 +1273,20 @@ body.error-page {
     }
     .error-actions {
         flex-direction: column;
+    }
+    .payment-result-main {
+        min-height: calc(100vh - 93px);
+        padding-top: 2rem;
+    }
+    .payment-result-details > div {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+    .payment-result-actions {
+        flex-direction: column;
+    }
+    .payment-result-primary,
+    .payment-result-secondary {
+        width: 100%;
     }
 }
