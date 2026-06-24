@@ -6,6 +6,7 @@ public enum ErrorCode {
     //400 - BAD_REQUEST
     INVALID_RESERVATION_REQUEST(HttpStatus.BAD_REQUEST, "유효하지 않은 입력값 입니다."),
     MISSING_NAME(HttpStatus.BAD_REQUEST, "이름은 필수 입력 값입니다."),
+    PAYMENT_SECRET_KEY_NOT_CONFIGURED(HttpStatus.BAD_REQUEST, "결제 시크릿 키가 설정되어있지 않습니다."),
 
     //401 - UNAUTHORIZED
     UNAUTHORIZED_NAME(HttpStatus.UNAUTHORIZED, "해당 예약을 삭제할 권한이 없습니다."),
