@@ -30,7 +30,7 @@ public class PaymentService {
         if (!Objects.equals(order.getAmount(), amount)) {
             throw new RoomEscapeException(PaymentErrorCode.AMOUNT_MISMATCH);
         }
-        PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
+        PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount, order.getIdempotencyKey());
         PaymentResult paymentResult = paymentGateway.confirm(confirmation);
         if (paymentResult.status() == PaymentStatus.DONE) {
             order.getReservation().updateStatus();

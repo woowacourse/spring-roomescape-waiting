@@ -60,7 +60,7 @@ class TossClientIdempotencyTest {
   }
 
   private PaymentConfirmation confirmation() {
-    return new PaymentConfirmation("test_pk_1", "order-1", 10000L);
+    return new PaymentConfirmation("test_pk_1", "order-1", 10000L, "test-idempotency-key");
   }
 
   @Test

@@ -76,7 +76,7 @@ class TossPaymentGatewayTest {
                 }
                 """);
 
-        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L));
+        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "test-idempotency-key"));
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.approvedAmount()).isEqualTo(10000L);
@@ -88,7 +88,7 @@ class TossPaymentGatewayTest {
                 {"code": "ALREADY_PROCESSED_PAYMENT", "message": "이미 처리된 결제 입니다."}
                 """);
 
-        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L));
+        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "test-idempotency-key"));
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.approvedAmount()).isEqualTo(10000L);
@@ -101,7 +101,7 @@ class TossPaymentGatewayTest {
         enqueue(httpStatus, "{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+                new PaymentConfirmation("test_pk_1", "order-1", 10000L, "test-idempotency-key")))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(e -> assertThat(((RoomEscapeException) e).getErrorCode())
                         .isEqualTo(expectedErrorCode));

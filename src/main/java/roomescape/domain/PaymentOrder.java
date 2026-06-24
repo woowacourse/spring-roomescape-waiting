@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 public class PaymentOrder {
@@ -23,6 +24,8 @@ public class PaymentOrder {
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
+    private String idempotencyKey;
+
     protected PaymentOrder() {
     }
 
@@ -34,6 +37,7 @@ public class PaymentOrder {
         this.orderId = orderId;
         this.amount = amount;
         this.reservation = reservation;
+        this.idempotencyKey = UUID.randomUUID().toString();
     }
 
     public static PaymentOrder createWithoutId(String orderId, Long amount, Reservation reservation) {
@@ -54,6 +58,10 @@ public class PaymentOrder {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     @Override
