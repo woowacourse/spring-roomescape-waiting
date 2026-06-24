@@ -14,14 +14,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationSlotRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlotRepository;
+import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.service.ReservationService;
 
 @SpringBootTest
@@ -58,7 +58,7 @@ public class ReservationConcurrencyTest {
         savedTimeSlot = timeSlotRepository.findByStartAt(LocalTime.of(10, 0))
                 .orElseGet(() -> timeSlotRepository.save(new TimeSlot(LocalTime.of(10, 0))));
 
-        savedTheme = themeRepository.save(new Theme("공포", "귀신의 집 탈출", "https://test.com"));
+        savedTheme = themeRepository.save(new Theme("공포", "귀신의 집 탈출", "https://test.com", 50000L));
     }
 
     @Test

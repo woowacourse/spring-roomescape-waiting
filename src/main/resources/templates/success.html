@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 완료</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+      color: #1f2933;
+    }
+
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #e8f7ef;
+      color: #16834a;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 0 0 8px;
+    }
+
+    p.desc {
+      color: #667085;
+      margin: 0 0 24px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .summary {
+      border-top: 1px solid #eef1f4;
+      border-bottom: 1px solid #eef1f4;
+      padding: 12px 0;
+      margin-bottom: 24px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      gap: 16px;
+    }
+
+    .label {
+      color: #7b8794;
+      white-space: nowrap;
+    }
+
+    .value {
+      text-align: right;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .button.primary {
+      background: #3182f6;
+      color: #fff;
+    }
+
+    .button.secondary {
+      background: #eef2f7;
+      color: #344054;
+    }
+
+    .redirect-notice {
+      margin: 18px 0 0;
+      color: #8a94a6;
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">✓</div>
+  <h1>결제가 완료되었습니다</h1>
+  <p class="desc">예약 결제가 정상적으로 승인되었습니다. 잠시 후 내 예약 화면으로 이동합니다.</p>
+
+  <div class="summary">
+    <div class="row">
+      <span class="label">결제 상태</span>
+      <span class="value" th:text="${result != null ? result.status() : '-'}">DONE</span>
+    </div>
+    <div class="row">
+      <span class="label">결제 금액</span>
+      <span class="value"
+            th:text="${result != null ? #numbers.formatInteger(result.approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a class="button secondary" href="/reservation">예약 계속하기</a>
+    <a class="button primary" href="/my-reservation">내 예약 보기</a>
+  </div>
+
+  <p class="redirect-notice"><span id="countdown">3</span>초 후 내 예약 화면으로 이동합니다.</p>
+</div>
+
+<script>
+  const redirectUrl = "/my-reservation";
+  const countdown = document.getElementById("countdown");
+  let remainingSeconds = 3;
+
+  const timer = setInterval(() => {
+    remainingSeconds -= 1;
+    countdown.textContent = String(remainingSeconds);
+
+    if (remainingSeconds <= 0) {
+      clearInterval(timer);
+      window.location.replace(redirectUrl);
+    }
+  }, 1000);
+</script>
+</body>
+</html>

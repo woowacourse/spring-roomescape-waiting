@@ -1,6 +1,6 @@
 package roomescape.service.dto;
 
-import roomescape.domain.TimeSlot;
+import roomescape.domain.timeslot.TimeSlot;
 
 public record AvailableTimeSlot(
         TimeSlot timeSlot,

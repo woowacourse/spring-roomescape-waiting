@@ -3,7 +3,7 @@ package roomescape.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;

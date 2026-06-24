@@ -9,10 +9,18 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAndWaiting;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.UserReservations;
+import roomescape.domain.reservation.WaitingWithNumber;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 
 class UserReservationsTest {
 
-    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com");
+    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com", 50000L);
 
     @Test
     @DisplayName("예약과 대기를 날짜와 시간이 가까운 순서로 반환한다.")

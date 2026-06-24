@@ -16,11 +16,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.infra.persistence.JdbcReservationRepository;
+import roomescape.infra.persistence.JdbcReservationSlotRepository;
+import roomescape.infra.persistence.JdbcThemeRepository;
+import roomescape.infra.persistence.JdbcTimeSlotRepository;
 
 @JdbcTest
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -79,7 +83,7 @@ class JdbcTimeSlotRepositoryTest {
     @DisplayName("예약이 존재하는 시간을 삭제할 수 없다.")
     void 예약이_존재하는_시간_삭제_예외_발생() {
         TimeSlot savedTimeSlot = timeRepository.save(new TimeSlot(LocalTime.of(10, 0)));
-        Theme savedTheme = themeRepository.save(new Theme("공포", "설명", "url"));
+        Theme savedTheme = themeRepository.save(new Theme("공포", "설명", "url", 50000L));
         ReservationSlot slot = reservationSlotRepository.save(
                 new ReservationSlot(LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
         reservationRepository.save(

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.ThemeRequest;
 import roomescape.controller.dto.ThemeResponse;
 import roomescape.controller.dto.ThemeResponses;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.service.ThemeService;
 
 @Validated
@@ -53,7 +53,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> createTheme(@RequestBody @Valid ThemeRequest request) {
-        Theme theme = themeService.saveTheme(request.name(), request.description(), request.thumbnailUrl());
+        Theme theme = themeService.saveTheme(request.name(), request.description(), request.thumbnailUrl(), request.price());
         return ResponseEntity.created(URI.create("/themes/" + theme.getId()))
                 .body(ThemeResponse.from(theme));
     }

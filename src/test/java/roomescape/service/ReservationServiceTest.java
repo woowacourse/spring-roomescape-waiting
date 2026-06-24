@@ -11,19 +11,21 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationAndWaiting;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAndWaiting;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.PastTimeException;
+import roomescape.repository.FakeOrderRepository;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeReservationSlotRepository;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;
+import roomescape.service.dto.ReservationCreateResult;
 
 class ReservationServiceTest {
 
@@ -34,6 +36,7 @@ class ReservationServiceTest {
     private FakeReservationSlotRepository reservationSlotRepository;
     private FakeTimeSlotRepository timeSlotRepository;
     private FakeThemeRepository themeRepository;
+    private FakeOrderRepository orderRepository;
 
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
@@ -44,12 +47,13 @@ class ReservationServiceTest {
         reservationRepository = new FakeReservationRepository();
         reservationSlotRepository = new FakeReservationSlotRepository();
         themeRepository = new FakeThemeRepository();
+        orderRepository = new FakeOrderRepository();
 
         reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository,
-                reservationSlotRepository);
+                reservationSlotRepository, orderRepository);
 
         savedTimeSlot = timeSlotRepository.save(new TimeSlot(LocalTime.of(10, 0)));
-        savedTheme = themeRepository.save(new Theme("이름", "설명", "test.com"));
+        savedTheme = themeRepository.save(new Theme("이름", "설명", "test.com", 50000L));
     }
 
     @Test
@@ -59,6 +63,38 @@ class ReservationServiceTest {
         Reservation reservation = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
                 savedTheme.getId(), REQUEST_TIME);
         assertThat(reservation.getTimeSlot().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+    }
+
+    @Test
+    @DisplayName("확정 예약을 생성하면 주문 정보를 함께 생성한다.")
+    void 확정_예약_주문_생성() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+
+        ReservationCreateResult result = reservationService.saveReservationWithOrder(
+                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
+        );
+
+        assertThat(result.reservation().getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(result.orderId()).isNotBlank();
+        assertThat(result.amount()).isEqualTo(50000L);
+        assertThat(orderRepository.findByOrderId(result.orderId())).isPresent();
+    }
+
+    @Test
+    @DisplayName("대기 예약을 생성하면 주문 정보를 생성하지 않는다.")
+    void 대기_예약_주문_미생성() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        reservationService.saveReservationWithOrder(
+                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
+        );
+
+        ReservationCreateResult result = reservationService.saveReservationWithOrder(
+                "네오", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
+        );
+
+        assertThat(result.reservation().getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(result.orderId()).isNull();
+        assertThat(result.amount()).isNull();
     }
 
     @Test

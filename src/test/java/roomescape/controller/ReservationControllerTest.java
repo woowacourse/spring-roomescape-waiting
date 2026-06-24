@@ -27,15 +27,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.UpdateReservationRequest;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.GlobalExceptionHandler;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationCreateResult;
 
 @WebMvcTest(ReservationController.class)
 @Import(GlobalExceptionHandler.class)
@@ -89,9 +90,13 @@ class ReservationControllerTest {
     @DisplayName("유효한 데이터로 예약을 생성하고 201 상태 코드와 Location 헤더를 반환한다.")
     void 예약_생성() throws Exception {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now(), 1L, 1L);
-        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong(), any()))
-                .willReturn(createMockReservation());
-        performPost("/reservations", request).andExpect(status().isCreated()).andExpect(header().exists("Location"));
+        given(reservationService.saveReservationWithOrder(any(), any(), anyLong(), anyLong(), any()))
+                .willReturn(new ReservationCreateResult(createMockReservation(), "order-1", 50000L));
+        performPost("/reservations", request)
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.orderId").value("order-1"))
+                .andExpect(jsonPath("$.amount").value(50000));
     }
 
     @Test
@@ -142,7 +147,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("도메인 검증 실패(IllegalArgument) 시 400 상태 코드를 반환한다.")
     void 예약_생성_도메인_검증_예외_발생() throws Exception {
-        given(reservationService.saveReservation(any(), any(), anyLong(), anyLong(), any()))
+        given(reservationService.saveReservationWithOrder(any(), any(), anyLong(), anyLong(), any()))
                 .willThrow(new IllegalArgumentException("테스트용 에러 메시지"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
                 .andExpect(status().isBadRequest())
@@ -170,7 +175,7 @@ class ReservationControllerTest {
 
     private Reservation createMockReservation() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "테마", "설명", "url");
+        Theme theme = new Theme(1L, "테마", "설명", "url", 50000L);
         ReservationSlot slot = new ReservationSlot(1L, LocalDate.now(), timeSlot, theme);
         return new Reservation(1L, "브라운", slot, LocalDate.now().atStartOfDay(), ReservationStatus.RESERVED);
     }

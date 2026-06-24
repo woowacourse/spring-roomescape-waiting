@@ -5,24 +5,28 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationAndWaiting;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-import roomescape.domain.UserReservations;
-import roomescape.domain.ReservationLine;
-import roomescape.domain.WaitingWithNumber;
+import roomescape.domain.payment.Order;
+import roomescape.domain.payment.OrderRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAndWaiting;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.reservation.UserReservations;
+import roomescape.domain.reservation.ReservationLine;
+import roomescape.domain.reservation.WaitingWithNumber;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationSlotRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlotRepository;
+import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.timeslot.TimeSlotRepository;
+import roomescape.service.dto.ReservationCreateResult;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,18 +36,21 @@ public class ReservationService {
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
+    private final OrderRepository orderRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             TimeSlotRepository timeSlotRepository,
             ThemeRepository themeRepository,
-            ReservationSlotRepository reservationSlotRepository
+            ReservationSlotRepository reservationSlotRepository,
+            OrderRepository orderRepository
     ) {
 
         this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.reservationSlotRepository = reservationSlotRepository;
+        this.orderRepository = orderRepository;
     }
 
     public List<Reservation> findAllReservations() {
@@ -69,6 +76,19 @@ public class ReservationService {
                                        LocalDateTime requestTime) {
         Reservation reservation = createReservation(name, date, timeId, themeId, requestTime);
         return reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public ReservationCreateResult saveReservationWithOrder(String name, LocalDate date, long timeId, long themeId,
+                                                           LocalDateTime requestTime) {
+        Reservation reservation = saveReservation(name, date, timeId, themeId, requestTime);
+
+        if (reservation.isWaiting()) {
+            return ReservationCreateResult.withoutOrder(reservation);
+        }
+
+        Order order = orderRepository.save(new Order(createOrderId(), reservation.getTheme().getPrice(), reservation.getId()));
+        return ReservationCreateResult.withOrder(reservation, order);
     }
 
     @Transactional
@@ -102,6 +122,10 @@ public class ReservationService {
         ReservationLine reservationLine = createReservationLine(lockedSlot);
 
         return reservationLine.add(name, requestTime);
+    }
+
+    private String createOrderId() {
+        return UUID.randomUUID().toString();
     }
 
     private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName,

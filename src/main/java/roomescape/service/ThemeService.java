@@ -2,11 +2,11 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ResourceInUseException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.theme.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,8 +33,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme saveTheme(String name, String description, String thumbnailUrl) {
-        Theme theme = new Theme(name, description, thumbnailUrl);
+    public Theme saveTheme(String name, String description, String thumbnailUrl, Long price) {
+        Theme theme = new Theme(name, description, thumbnailUrl, price);
         return themeRepository.save(theme);
     }
 

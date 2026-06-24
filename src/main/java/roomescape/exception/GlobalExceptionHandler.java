@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
         exceptionHttpStatusMap.put(ResourceInUseException.class, HttpStatus.CONFLICT);
         exceptionHttpStatusMap.put(NotFoundException.class, HttpStatus.NOT_FOUND);
         exceptionHttpStatusMap.put(UnauthorizedException.class, HttpStatus.UNAUTHORIZED);
+        exceptionHttpStatusMap.put(PaymentAmountMismatchException.class, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RoomescapeException.class)

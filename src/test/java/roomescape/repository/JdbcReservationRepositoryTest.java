@@ -17,11 +17,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.infra.persistence.JdbcReservationRepository;
+import roomescape.infra.persistence.JdbcReservationSlotRepository;
+import roomescape.infra.persistence.JdbcThemeRepository;
+import roomescape.infra.persistence.JdbcTimeSlotRepository;
 
 @JdbcTest
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -46,7 +50,7 @@ class JdbcReservationRepositoryTest {
         JdbcTimeSlotRepository timeRepository = new JdbcTimeSlotRepository(jdbcTemplate);
         JdbcThemeRepository themeRepository = new JdbcThemeRepository(jdbcTemplate);
         savedTimeSlot = timeRepository.save(new TimeSlot(1L, LocalTime.of(10, 0)));
-        savedTheme = themeRepository.save(new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com"));
+        savedTheme = themeRepository.save(new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com", 50000L));
     }
 
     @Test

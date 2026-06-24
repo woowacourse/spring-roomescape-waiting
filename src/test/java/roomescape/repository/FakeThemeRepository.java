@@ -1,12 +1,13 @@
 package roomescape.repository;
 
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import roomescape.domain.theme.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
 
@@ -26,7 +27,13 @@ public class FakeThemeRepository implements ThemeRepository {
     @Override
     public Theme save(Theme theme) {
         long id = sequence++;
-        Theme savedTheme = new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
+        Theme savedTheme = new Theme(
+                id,
+                theme.getName(),
+                theme.getDescription(),
+                theme.getThumbnailUrl(),
+                theme.getPrice()
+        );
         storage.put(id, savedTheme);
         return savedTheme;
     }

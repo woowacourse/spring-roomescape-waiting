@@ -1,6 +1,7 @@
 package roomescape.repository;
 
-import roomescape.domain.TimeSlot;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.service.dto.AvailableTimeSlot;
 
 import java.time.LocalDate;

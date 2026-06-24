@@ -8,11 +8,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 
 class ReservationSlotTest {
 
     private static final TimeSlot TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));
-    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com");
+    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com", 50000L);
 
     @Test
     @DisplayName("예약 슬롯은 날짜, 시간, 테마로 생성된다.")

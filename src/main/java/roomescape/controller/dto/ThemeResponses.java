@@ -1,7 +1,7 @@
 package roomescape.controller.dto;
 
 import java.util.List;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 
 public record ThemeResponses(
         List<ThemeResponse> themeResponses

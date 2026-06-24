@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:database
+
+toss:
+  base-url: http://localhost:8089
+  client-key: test_client_key
+  secret-key: test_secret_key

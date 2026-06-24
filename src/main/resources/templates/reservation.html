@@ -232,6 +232,16 @@
             overflow: hidden;
         }
 
+        .theme-card-price {
+            margin-top: 0.7rem;
+            padding-top: 0.65rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.78rem;
+            color: var(--accent);
+            font-weight: 500;
+            letter-spacing: 0.03em;
+        }
+
         /* 날짜 선택 */
         input[type="date"] {
             appearance: none;
@@ -364,6 +374,10 @@
         }
 
         .summary-value.accent { color: var(--accent); }
+        .summary-value.price {
+            color: var(--accent);
+            font-weight: 500;
+        }
 
         input[type="text"] {
             width: 100%;
@@ -738,10 +752,10 @@
             })
             .catch(() => {
                 const dummy = [
-                    { id: 1, name: '저주받은 저택', description: '오래된 저택에 숨겨진 비밀을 밝혀라', thumbnailUrl: '' },
-                    { id: 2, name: '우주 정거장', description: '고장난 우주선에서 지구로 귀환하라', thumbnailUrl: '' },
-                    { id: 3, name: '마법사의 서재', description: '잃어버린 마법서를 찾아라', thumbnailUrl: '' },
-                    { id: 4, name: '탐정 사무소', description: '24시간 안에 범인을 잡아라', thumbnailUrl: '' },
+                    { id: 1, name: '저주받은 저택', description: '오래된 저택에 숨겨진 비밀을 밝혀라', thumbnailUrl: '', price: 50000 },
+                    { id: 2, name: '우주 정거장', description: '고장난 우주선에서 지구로 귀환하라', thumbnailUrl: '', price: 50000 },
+                    { id: 3, name: '마법사의 서재', description: '잃어버린 마법서를 찾아라', thumbnailUrl: '', price: 50000 },
+                    { id: 4, name: '탐정 사무소', description: '24시간 안에 범인을 잡아라', thumbnailUrl: '', price: 50000 },
                 ];
                 allThemes = dummy;
                 renderThemes(dummy);
@@ -757,6 +771,14 @@
             .replaceAll("'", '&#039;');
     }
 
+    function formatPrice(value) {
+        const amount = Number(value);
+        if (!Number.isFinite(amount)) {
+            return '-';
+        }
+        return `${amount.toLocaleString('ko-KR')}원`;
+    }
+
     function renderThemes(themes) {
         themeGrid.innerHTML = '';
         const emojis = ['👻', '🚀', '🧙', '🔍', '🏴‍☠️', '🎭'];
@@ -767,6 +789,7 @@
             const themeName = escapeHtml(t.name);
             const themeDescription = escapeHtml(t.description || '');
             const thumbnailUrl = escapeHtml(t.thumbnailUrl);
+            const themePrice = escapeHtml(formatPrice(t.price));
             card.innerHTML = `
                 ${thumbnailUrl
                 ? `<img class="theme-card-img" src="${thumbnailUrl}" alt="${themeName}" onerror="this.parentElement.querySelector('.theme-card-img-placeholder').style.display='flex'; this.style.display='none';">`
@@ -775,6 +798,7 @@
                 <div class="theme-card-body">
                     <div class="theme-card-name">${themeName}</div>
                     <div class="theme-card-desc">${themeDescription}</div>
+                    <div class="theme-card-price">${themePrice}</div>
                 </div>
             `;
             card.onclick = () => selectTheme(t.id);
@@ -895,9 +919,13 @@
                 <span class="summary-label">신청 유형</span>
                 <span class="summary-value">${selectedTimeMode === 'waiting' ? '예약 대기' : '예약'}</span>
             </div>
+            <div class="summary-row">
+                <span class="summary-label">결제 금액</span>
+                <span class="summary-value price">${theme ? escapeHtml(formatPrice(theme.price)) : '-'}</span>
+            </div>
         `;
         const button = document.getElementById('btn-reserve');
-        button.textContent = selectedTimeMode === 'waiting' ? '대기 신청하기' : '예약하기';
+        button.textContent = selectedTimeMode === 'waiting' ? '대기 신청하기' : '예약 후 결제하기';
         bookingSection.style.display = 'block';
         bookingSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -911,7 +939,7 @@
 
         const btn = document.getElementById('btn-reserve');
         btn.disabled = true;
-        btn.textContent = selectedTimeMode === 'waiting' ? '대기 신청 중...' : '예약 중...';
+        btn.textContent = selectedTimeMode === 'waiting' ? '대기 신청 중...' : '결제 준비 중...';
 
         const body = {
             themeId: parseInt(selectedThemeId),
@@ -936,6 +964,17 @@
                 return res.json();
             })
             .then((reservation) => {
+                if (reservation.orderId && reservation.amount) {
+                    const theme = allThemes.find(t => t.id == selectedThemeId);
+                    const orderName = theme ? `${theme.name} 예약` : '방탈출 예약';
+                    const checkoutUrl = new URL('/checkout', window.location.origin);
+                    checkoutUrl.searchParams.set('orderId', reservation.orderId);
+                    checkoutUrl.searchParams.set('amount', reservation.amount);
+                    checkoutUrl.searchParams.set('orderName', orderName);
+                    window.location.href = checkoutUrl.toString();
+                    return;
+                }
+
                 const successMessage = reservation.status === 'WAITING'
                     ? '예약 대기 신청이 완료되었습니다.'
                     : '예약이 성공적으로 완료되었습니다.';
@@ -947,7 +986,7 @@
             .catch((error) => {
                 showErrorAlert(error);
                 btn.disabled = false;
-                btn.textContent = selectedTimeMode === 'waiting' ? '대기 신청하기' : '예약하기';
+                btn.textContent = selectedTimeMode === 'waiting' ? '대기 신청하기' : '예약 후 결제하기';
             });
     }
 
