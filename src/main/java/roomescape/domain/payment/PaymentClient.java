@@ -5,5 +5,5 @@ import roomescape.domain.payment.dto.PaymentConfirmResponse;
 
 public interface PaymentClient {
 
-    PaymentConfirmResponse confirm(PaymentConfirmRequest request);
+    PaymentConfirmResponse confirm(PaymentConfirmRequest request, String idempotencyKey);
 }

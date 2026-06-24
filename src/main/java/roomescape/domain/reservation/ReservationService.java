@@ -1,7 +1,10 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +12,8 @@ import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.domain.payment.PaymentRepository;
+import roomescape.domain.payment.ReservationPayment;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
@@ -22,21 +27,26 @@ import roomescape.exception.RoomescapeException;
 @Service
 public class ReservationService {
 
+    private static final long RESERVATION_PRICE = 10_000L;
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
+    private final PaymentRepository paymentRepository;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         ReservationTimeRepository reservationTimeRepository,
         ThemeRepository themeRepository,
-        WaitingRepository waitingRepository
+        WaitingRepository waitingRepository,
+        PaymentRepository paymentRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
@@ -58,7 +68,8 @@ public class ReservationService {
 
         try {
             Reservation saved = reservationRepository.save(reservation);
-            return ReservationResponse.from(saved);
+            ReservationPayment payment = createPendingPayment(saved.getId());
+            return ReservationResponse.from(saved, payment);
         } catch (DuplicateKeyException exception) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
@@ -88,7 +99,13 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public MyReservationsResponse getMyReservations(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
-        return MyReservationsResponse.from(reservations);
+        List<Long> reservationIds = reservations.stream()
+            .map(Reservation::getId)
+            .toList();
+        Map<Long, ReservationPayment> paymentsByReservationId =
+            paymentRepository.findByReservationIds(reservationIds).stream()
+                .collect(Collectors.toMap(ReservationPayment::reservationId, Function.identity()));
+        return MyReservationsResponse.from(reservations, paymentsByReservationId);
     }
 
     @Transactional
@@ -125,14 +142,18 @@ public class ReservationService {
 
         waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)
             .ifPresent(waiting -> {
-                reservationRepository.save(Reservation.of(
+                Reservation promotedReservation = reservationRepository.save(Reservation.of(
                     waiting.getName(),
                     waiting.getDate(),
                     waiting.getTime(),
                     waiting.getTheme()
                 ));
+                createPendingPayment(promotedReservation.getId());
                 waitingRepository.deleteById(waiting.getId());
             });
     }
 
+    private ReservationPayment createPendingPayment(Long reservationId) {
+        return paymentRepository.save(ReservationPayment.pending(reservationId, RESERVATION_PRICE));
+    }
 }

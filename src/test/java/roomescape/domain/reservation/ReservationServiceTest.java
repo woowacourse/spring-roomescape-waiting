@@ -27,6 +27,9 @@ import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.ReservationRequest;
+import roomescape.domain.payment.PaymentRepository;
+import roomescape.domain.payment.PaymentStatus;
+import roomescape.domain.payment.ReservationPayment;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
@@ -53,6 +56,9 @@ class ReservationServiceTest {
     @Mock
     private WaitingRepository waitingRepository;
 
+    @Mock
+    private PaymentRepository paymentRepository;
+
     @InjectMocks
     private ReservationService reservationService;
 
@@ -77,6 +83,7 @@ class ReservationServiceTest {
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
+            when(paymentRepository.save(any(ReservationPayment.class))).thenReturn(paymentFor(saved.getId()));
 
             reservationService.createReservation(request);
 
@@ -198,6 +205,9 @@ class ReservationServiceTest {
             TimeSlot canceledReservationSlot = TimeSlot.from(reservation);
             when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
             when(waitingRepository.findFirstByTimeSlotForUpdate(canceledReservationSlot)).thenReturn(Optional.of(waiting));
+            Reservation promoted = Reservation.of(3L, "대기자1", LocalDate.of(2099, 12, 31), time, theme);
+            when(reservationRepository.save(any(Reservation.class))).thenReturn(promoted);
+            when(paymentRepository.save(any(ReservationPayment.class))).thenReturn(paymentFor(promoted.getId()));
 
             reservationService.deleteReservation(1L, "예약자");
 
@@ -227,6 +237,8 @@ class ReservationServiceTest {
         void 이름으로_조회() {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
             when(reservationRepository.findByName("유저1")).thenReturn(List.of(reservation));
+            when(paymentRepository.findByReservationIds(List.of(1L)))
+                .thenReturn(List.of(paymentFor(1L)));
 
             MyReservationsResponse response = reservationService.getMyReservations("유저1");
 
@@ -240,6 +252,7 @@ class ReservationServiceTest {
         @Test
         void 결과가_없으면_빈_리스트() {
             when(reservationRepository.findByName("없는유저")).thenReturn(List.of());
+            when(paymentRepository.findByReservationIds(List.of())).thenReturn(List.of());
 
             MyReservationsResponse response = reservationService.getMyReservations("없는유저");
 
@@ -348,5 +361,17 @@ class ReservationServiceTest {
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
         }
+    }
+
+    private ReservationPayment paymentFor(Long reservationId) {
+        return new ReservationPayment(
+            reservationId,
+            reservationId,
+            "order-" + reservationId,
+            null,
+            10_000L,
+            "idempotency-" + reservationId,
+            PaymentStatus.PENDING
+        );
     }
 }

@@ -26,15 +26,15 @@ class TossPaymentsClientTest {
 
     private static final String BASE_URL = "https://api.tosspayments.com";
     private static final String SECRET_KEY = "test_sk_dummy";
+    private static final String IDEMPOTENCY_KEY = "fixed-idempotency-key";
 
     @Test
     void 토스_결제_승인_API를_호출한다() {
         RestClient.Builder restClientBuilder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(restClientBuilder).build();
         TossPaymentsClient client = new TossPaymentsClient(
-            restClientBuilder,
+            restClientBuilder.baseUrl(BASE_URL).build(),
             new ObjectMapper(),
-            BASE_URL,
             SECRET_KEY
         );
         PaymentConfirmRequest request = new PaymentConfirmRequest("paymentKey", "orderId", 1000L);
@@ -42,6 +42,7 @@ class TossPaymentsClientTest {
         server.expect(once(), requestTo(BASE_URL + "/v1/payments/confirm"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.AUTHORIZATION, authorizationHeader()))
+            .andExpect(header("Idempotency-Key", IDEMPOTENCY_KEY))
             .andExpect(content().json("""
                 {
                   "paymentKey": "paymentKey",
@@ -58,7 +59,7 @@ class TossPaymentsClientTest {
                 }
                 """, MediaType.APPLICATION_JSON));
 
-        PaymentConfirmResponse response = client.confirm(request);
+        PaymentConfirmResponse response = client.confirm(request, IDEMPOTENCY_KEY);
 
         assertThat(response.status()).isEqualTo("DONE");
         assertThat(response.totalAmount()).isEqualTo(1000L);
@@ -70,9 +71,8 @@ class TossPaymentsClientTest {
         RestClient.Builder restClientBuilder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(restClientBuilder).build();
         TossPaymentsClient client = new TossPaymentsClient(
-            restClientBuilder,
+            restClientBuilder.baseUrl(BASE_URL).build(),
             new ObjectMapper(),
-            BASE_URL,
             SECRET_KEY
         );
         PaymentConfirmRequest request = new PaymentConfirmRequest("paymentKey", "orderId", 1000L);
@@ -85,7 +85,7 @@ class TossPaymentsClientTest {
                 }
                 """).contentType(MediaType.APPLICATION_JSON));
 
-        assertThatThrownBy(() -> client.confirm(request))
+        assertThatThrownBy(() -> client.confirm(request, IDEMPOTENCY_KEY))
             .isInstanceOf(PaymentException.class)
             .extracting("code")
             .isEqualTo("ALREADY_PROCESSED_PAYMENT");

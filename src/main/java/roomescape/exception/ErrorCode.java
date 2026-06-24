@@ -7,6 +7,7 @@ public enum ErrorCode {
     INVALID_RESERVATION_REQUEST(HttpStatus.BAD_REQUEST, "유효하지 않은 입력값 입니다."),
     MISSING_NAME(HttpStatus.BAD_REQUEST, "이름은 필수 입력 값입니다."),
     PAYMENT_SECRET_KEY_NOT_CONFIGURED(HttpStatus.BAD_REQUEST, "결제 시크릿 키가 설정되어있지 않습니다."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "주문 금액과 결제 금액이 일치하지 않습니다."),
 
     //401 - UNAUTHORIZED
     UNAUTHORIZED_NAME(HttpStatus.UNAUTHORIZED, "해당 예약을 삭제할 권한이 없습니다."),
@@ -16,6 +17,7 @@ public enum ErrorCode {
     THEME_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 theme id를 찾을 수 없습니다."),
     RESERVATION_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 reservation id를 찾을 수 없습니다."),
     WAITING_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 waiting id를 찾을 수 없습니다."),
+    PAYMENT_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "결제할 주문을 찾을 수 없습니다."),
 
     //409 - CONFLICT
     DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 선택된 예약입니다."),
