@@ -38,7 +38,7 @@ public class ReservationController {
     public ReservationController(ReservationService reservationService,
                                  ReservationWaitService reservationWaitService,
                                  PaymentService paymentService,
-                                 @Value("${payment.toss.client-key:}") String paymentClientKey) {
+                                 @Value("${payment.toss.client-key}") String paymentClientKey) {
         this.reservationService = reservationService;
         this.reservationWaitService = reservationWaitService;
         this.paymentService = paymentService;

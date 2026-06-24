@@ -14,7 +14,7 @@ public class TossClientConfig {
     @Bean("tossRestClient")
     public RestClient tossRestClient(
             @Value("${payment.toss.base-url}") String baseUrl,
-            @Value("${payment.toss.secret-key:}") String secretKey
+            @Value("${payment.toss.secret-key}") String secretKey
     ) {
         String credential = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
