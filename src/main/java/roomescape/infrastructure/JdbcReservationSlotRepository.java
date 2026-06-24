@@ -206,4 +206,16 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 reservation.getId()
         );
     }
+
+    @Override
+    public void confirmPayment(long reservationId) {
+        jdbcTemplate.update("""
+                        UPDATE reservation
+                        SET status = 'RESERVED'
+                        WHERE id = ?
+                          AND status = 'PAYMENT_PENDING'
+                        """,
+                reservationId
+        );
+    }
 }

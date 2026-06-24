@@ -17,4 +17,5 @@ public interface ReservationSlotRepository {
     Long save(LocalDate date, long timeId, long themeId);
     Reservation saveReservation(Reservation reservation);
     void updateReservation(Reservation reservation);
+    void confirmPayment(long reservationId);
 }

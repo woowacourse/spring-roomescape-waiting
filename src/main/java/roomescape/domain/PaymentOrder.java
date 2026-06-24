@@ -2,17 +2,17 @@ package roomescape.domain;
 
 import java.util.UUID;
 
-public class Order {
+public class PaymentOrder {
     private final Long id;
     private final String orderId;
     private final Long reservationId;
     private final Long amount;
 
-    public static Order create(Long reservationId, Long amount) {
-        return new Order(null, reservationId, generateOrderId(), amount);
+    public static PaymentOrder create(Long reservationId, Long amount) {
+        return new PaymentOrder(null, reservationId, generateOrderId(), amount);
     }
 
-    public Order(Long id, Long reservationId, String orderId, Long amount) {
+    public PaymentOrder(Long id, Long reservationId, String orderId, Long amount) {
         this.id = id;
         this.reservationId = reservationId;
         this.orderId = orderId;

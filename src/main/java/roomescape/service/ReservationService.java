@@ -8,11 +8,11 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import roomescape.domain.Order;
+import roomescape.domain.PaymentOrder;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.OrderRepository;
+import roomescape.domain.repository.PaymentOrderRepository;
 import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.domain.vo.LockedReservationSlots;
@@ -29,12 +29,12 @@ public class ReservationService {
 
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationQueryRepository reservationQueryRepository;
-    private final OrderRepository orderRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
 
-    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationQueryRepository reservationQueryRepository, OrderRepository orderRepository) {
+    public ReservationService(ReservationSlotRepository reservationSlotRepository, ReservationQueryRepository reservationQueryRepository, PaymentOrderRepository paymentOrderRepository) {
         this.reservationSlotRepository = reservationSlotRepository;
         this.reservationQueryRepository = reservationQueryRepository;
-        this.orderRepository = orderRepository;
+        this.paymentOrderRepository = paymentOrderRepository;
     }
 
     @Transactional
@@ -46,7 +46,7 @@ public class ReservationService {
 
         int order = reservationSlot.calculateOrder(newReservation);
         newReservation = reservationSlotRepository.saveReservation(newReservation);
-        Order paymentOrder = null;
+        PaymentOrder paymentOrder = null;
         if (newReservation.isPaymentPending()) {
             paymentOrder = saveOrderWithRetry(newReservation.getId(), calculateAmount(reservationSlot));
         }
@@ -105,12 +105,12 @@ public class ReservationService {
         return reservationSlot.getSlot().theme().getAmount();
     }
 
-    private Order saveOrderWithRetry(Long reservationId, Long amount) {
+    private PaymentOrder saveOrderWithRetry(Long reservationId, Long amount) {
         for (int attempt = 0; attempt < MAX_ORDER_SAVE_ATTEMPTS; attempt++) {
             try {
-                Order order = Order.create(reservationId, amount);
-                orderRepository.save(order);
-                return order;
+                PaymentOrder paymentOrder = PaymentOrder.create(reservationId, amount);
+                paymentOrderRepository.save(paymentOrder);
+                return paymentOrder;
             } catch (DuplicateKeyException e) {
                 if (attempt == MAX_ORDER_SAVE_ATTEMPTS - 1) {
                     throw e;

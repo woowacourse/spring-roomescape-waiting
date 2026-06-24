@@ -6,27 +6,23 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import roomescape.domain.Order;
-import roomescape.domain.repository.OrderRepository;
+import roomescape.domain.PaymentOrder;
+import roomescape.domain.repository.PaymentOrderRepository;
 
 @Repository
-public class JdbcOrderRepository implements OrderRepository {
+public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     private final JdbcTemplate jdbcTemplate;
-    private final SimpleJdbcInsert orderInsert;
+    private final SimpleJdbcInsert paymentOrderInsert;
 
-    public JdbcOrderRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcPaymentOrderRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.orderInsert = new SimpleJdbcInsert(jdbcTemplate)
+        this.paymentOrderInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("payment_order")
                 .usingGeneratedKeyColumns("id");
     }
 
     @Override
-    public void findById(Long id) {
-    }
-
-    @Override
-    public Order getById(String orderId) {
+    public PaymentOrder getByOrderId(String orderId) {
         String sql = """
                 SELECT id,
                        reservation_id,
@@ -35,7 +31,7 @@ public class JdbcOrderRepository implements OrderRepository {
                 FROM payment_order
                 WHERE order_id = ?
                 """;
-        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Order(
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new PaymentOrder(
                 rs.getLong("id"),
                 rs.getLong("reservation_id"),
                 rs.getString("order_id"),
@@ -44,11 +40,11 @@ public class JdbcOrderRepository implements OrderRepository {
     }
 
     @Override
-    public void save(Order order) {
-        orderInsert.execute(Map.of(
-                "reservation_id", order.getReservationId(),
-                "order_id", order.getOrderId(),
-                "amount", order.getAmount()
+    public void save(PaymentOrder paymentOrder) {
+        paymentOrderInsert.execute(Map.of(
+                "reservation_id", paymentOrder.getReservationId(),
+                "order_id", paymentOrder.getOrderId(),
+                "amount", paymentOrder.getAmount()
         ));
     }
 }
