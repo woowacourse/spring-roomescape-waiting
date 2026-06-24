@@ -9,6 +9,7 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingWithOrder;
+import roomescape.dto.PaymentConfirmRequest;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservationWaitingRequest;
@@ -102,6 +103,14 @@ public class ReservationApplicationService {
         Reservation saved = reservationService.addReservation(reservation);
         Payment payment = paymentService.createOrder(saved.getId(), PAYMENT_AMOUNT);
         return new ReservationPayment(saved, payment);
+    }
+
+    @Transactional
+    public Reservation confirmReservation(String orderId, PaymentConfirmRequest request) {
+        Payment payment = paymentService.confirm(request.paymentKey(), orderId, request.amount());
+        reservationService.confirm(payment.getReservationId());
+        return reservationService.findReservation(payment.getReservationId())
+                .orElseThrow(() -> NotFoundException.reservation(payment.getReservationId()));
     }
 
     @Transactional

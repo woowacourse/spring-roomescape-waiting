@@ -56,4 +56,9 @@ public class PaymentJdbcRepository implements PaymentRepository {
         String sql = "SELECT id, order_id, amount, payment_key, reservation_id FROM payment WHERE order_id = ?";
         return jdbcTemplate.query(sql, paymentRowMapper, orderId).stream().findFirst();
     }
+
+    @Override
+    public void updatePaymentKey(String orderId, String paymentKey) {
+        jdbcTemplate.update("UPDATE payment SET payment_key = ? WHERE order_id = ?", paymentKey, orderId);
+    }
 }

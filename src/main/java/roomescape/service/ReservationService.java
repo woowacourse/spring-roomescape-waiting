@@ -74,6 +74,11 @@ public class ReservationService {
         reservationRepository.transferWithPendingStatus(id, name);
     }
 
+    @Transactional
+    public void confirm(Long id) {
+        reservationRepository.confirm(id);
+    }
+
     public boolean hasReservationsByThemeId(Long themeId) {
         return reservationRepository.existsByThemeId(themeId);
     }

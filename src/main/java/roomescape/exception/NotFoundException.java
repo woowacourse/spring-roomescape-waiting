@@ -23,4 +23,8 @@ public class NotFoundException extends RoomescapeException {
     public static NotFoundException theme(Long id) {
         return new NotFoundException(NOT_FOUND_FORMAT.formatted(id, "테마"));
     }
+
+    public static NotFoundException payment(String orderId) {
+        return new NotFoundException("주문 %s에 대한 결제 정보를 찾을 수 없습니다.".formatted(orderId));
+    }
 }
