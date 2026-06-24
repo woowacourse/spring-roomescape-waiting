@@ -6,3 +6,5 @@ toss:
   base-url: http://localhost:8089
   client-key: test_client_key
   secret-key: test_secret_key
+  connect-timeout-ms: 1000
+  read-timeout-ms: 2000
