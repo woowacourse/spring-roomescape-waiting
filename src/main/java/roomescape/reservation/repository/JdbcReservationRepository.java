@@ -99,7 +99,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
+    public List<Reservation> findConfirmedByName(String name) {
+        // 내 예약 조회는 결제 완료(CONFIRMED)된 예약만 보여준다. 결제 대기(PENDING)는 아직 확정이 아니므로 제외.
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
@@ -108,10 +109,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
-                WHERE r.name = ?
+                WHERE r.name = ? AND r.status = ?
                 ORDER BY r.date DESC, rt.start_at DESC
                 """;
-        return jdbcTemplate.query(query, rowMapper, name);
+        return jdbcTemplate.query(query, rowMapper, name, PaymentStatus.CONFIRMED.name());
     }
 
     @Override

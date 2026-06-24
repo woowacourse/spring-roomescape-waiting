@@ -46,4 +46,16 @@ public class PaymentService {
         paymentRepository.updatePaymentKey(orderId, result.paymentKey());
         reservationRepository.updateStatus(payment.getReservationId(), PaymentStatus.CONFIRMED);
     }
+
+    @Transactional
+    public void cancelPending(String orderId) {
+        paymentRepository.findByOrderId(orderId).ifPresent(payment ->
+                reservationRepository.findById(payment.getReservationId()).ifPresent(reservation -> {
+                    // 결제 대기 상태일 때만 정리한다. 이미 CONFIRMED 된 예약은 건드리지 않는다(방어).
+                    if (reservation.getStatus() == PaymentStatus.PAYMENT_PENDING) {
+                        // payment 는 reservation FK 의 ON DELETE CASCADE 로 함께 삭제된다.
+                        reservationRepository.deleteById(reservation.getId());
+                    }
+                }));
+    }
 }

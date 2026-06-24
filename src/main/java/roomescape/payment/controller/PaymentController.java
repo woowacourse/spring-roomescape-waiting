@@ -5,7 +5,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import roomescape.common.exception.BusinessException;
 import roomescape.config.TossPaymentProperties;
+import roomescape.payment.TossPaymentException;
 import roomescape.payment.service.PaymentService;
 
 @Controller
@@ -30,17 +33,35 @@ public class PaymentController {
     }
 
     @GetMapping("/success")
-    public String success(@RequestParam String paymentKey, @RequestParam String orderId, @RequestParam Long amount) {
-        paymentService.confirm(paymentKey, orderId, amount);
-        return "success";
+    public String success(@RequestParam String paymentKey, @RequestParam String orderId, @RequestParam Long amount,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            paymentService.confirm(paymentKey, orderId, amount);
+            return "success";
+        } catch (TossPaymentException e) {
+            // 승인 실패도 JSON(@RestControllerAdvice)이 아니라 사용자용 fail 페이지로 보낸다.
+            return redirectToFail(redirectAttributes, e.getCode(), e.getMessage(), orderId);
+        } catch (BusinessException e) {
+            return redirectToFail(redirectAttributes, e.getErrorCode().name(), e.getMessage(), orderId);
+        }
     }
 
     @GetMapping("/fail")
     public String fail(@RequestParam(required = false) String code, @RequestParam(required = false) String message,
                        @RequestParam(required = false) String orderId, Model model) {
+        // 사용자가 결제창에서 취소(PAY_PROCESS_CANCELED)하면 orderId 가 없을 수 있다 → null 가드.
+        if (orderId != null) {
+            paymentService.cancelPending(orderId);
+        }
         model.addAttribute("code", code);
         model.addAttribute("message", message);
-        model.addAttribute("orderId", orderId);
-        return "fail";  // fail.html 필요
+        return "fail";
+    }
+
+    private String redirectToFail(RedirectAttributes redirectAttributes, String code, String message, String orderId) {
+        redirectAttributes.addAttribute("code", code);
+        redirectAttributes.addAttribute("message", message);
+        redirectAttributes.addAttribute("orderId", orderId);
+        return "redirect:/payments/fail";
     }
 }

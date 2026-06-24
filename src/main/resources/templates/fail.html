@@ -48,9 +48,16 @@
     a {
       display: inline-block;
       margin-top: 24px;
-      color: #3182f6;
+      padding: 14px 22px;
+      background: #3182f6;
+      color: #fff;
+      border-radius: 10px;
       text-decoration: none;
       font-weight: 600;
+    }
+
+    a:hover {
+      background: #1b64da;
     }
   </style>
 </head>
@@ -62,10 +69,8 @@
     <span class="val" th:text="${code}">REJECT_CARD_PAYMENT</span></div>
   <div class="row"><span class="label">에러메시지</span>
     <span class="val" th:text="${message}">에러 메시지</span></div>
-  <div class="row"><span class="label">주문번호</span>
-    <span class="val" style="color:#555" th:text="${orderId} ?: '(취소되어 전달되지 않음)'">order-xxxx</span></div>
 
-  <a href="/">← 다시 시도하기</a>
+  <a href="/reservation">예약 페이지로 돌아가기</a>
 </div>
 </body>
 </html>

@@ -15,7 +15,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findConfirmedByName(String name);
 
     void update(Long id, ReservationSlot slot);
 

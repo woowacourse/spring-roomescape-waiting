@@ -78,7 +78,7 @@ public class ReservationService {
 
     public List<ReservationResponse> getReservationsByName(String name) {
         List<Reservation> reservations = (name != null)
-                ? reservationRepository.findByName(name)
+                ? reservationRepository.findConfirmedByName(name)
                 : reservationRepository.findAll();
         return reservations.stream()
                 .map(ReservationResponse::from)
