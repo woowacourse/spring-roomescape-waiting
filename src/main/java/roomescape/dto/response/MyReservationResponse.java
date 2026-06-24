@@ -14,6 +14,9 @@ public record MyReservationResponse(
         Integer order
 ) {
     public static MyReservationResponse fromReservation(Reservation reservation) {
+        ReservationStatus status = reservation.getReservationStatus() == roomescape.domain.ReservationStatus.CONFIRMED
+                ? ReservationStatus.RESERVED
+                : ReservationStatus.PENDING_PAYMENT;
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
@@ -28,7 +31,7 @@ public record MyReservationResponse(
                         reservation.getTheme().getDescription(),
                         reservation.getTheme().getThumbnail()
                 ),
-                ReservationStatus.RESERVED,
+                status,
                 null
         );
     }

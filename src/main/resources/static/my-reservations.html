@@ -332,6 +332,11 @@
             color: var(--green);
         }
 
+        .badge.pending {
+            background: var(--blue-soft);
+            color: var(--blue);
+        }
+
         .badge.waiting {
             background: var(--yellow-soft);
             color: var(--yellow-text);
@@ -549,6 +554,16 @@
     </section>
 </main>
 
+<div class="modal-backdrop" id="payment-success-modal" role="dialog" aria-modal="true" aria-labelledby="payment-success-title">
+    <div class="modal">
+        <h2 id="payment-success-title">결제 완료</h2>
+        <p>결제가 완료되었습니다.<br>예약이 확정되었으니 아래에서 내역을 확인하세요.</p>
+        <div class="modal-actions" style="grid-template-columns: 1fr;">
+            <button class="primary-button" id="close-payment-success" type="button">확인</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal-backdrop" id="update-modal" role="dialog" aria-modal="true" aria-labelledby="update-title">
     <div class="modal">
         <h2 id="update-title">예약 변경</h2>
@@ -604,6 +619,15 @@
         $('#update-modal').addEventListener('click', event => {
             if (event.target.id === 'update-modal') closeUpdateModal();
         });
+        $('#close-payment-success').addEventListener('click', closePaymentSuccessModal);
+        $('#payment-success-modal').addEventListener('click', event => {
+            if (event.target.id === 'payment-success-modal') closePaymentSuccessModal();
+        });
+
+        if (new URLSearchParams(location.search).get('payment') === 'success') {
+            history.replaceState(null, '', location.pathname);
+            $('#payment-success-modal').classList.add('show');
+        }
     });
 
     function searchMyReservations() {
@@ -638,17 +662,26 @@
 
     function renderStats() {
         const reservedCount = state.items.filter(item => item.status === 'RESERVED').length;
+        const pendingCount = state.items.filter(item => item.status === 'PENDING_PAYMENT').length;
         const waitingCount = state.items.filter(item => item.status === 'WAITING').length;
         $('#total-count').textContent = state.items.length;
-        $('#reserved-count').textContent = reservedCount;
+        $('#reserved-count').textContent = reservedCount + pendingCount;
         $('#waiting-count').textContent = waitingCount;
+    }
+
+    function badgeHtml(item) {
+        if (item.status === 'WAITING') return `<span class="badge waiting">대기 ${item.order}번째</span>`;
+        if (item.status === 'PENDING_PAYMENT') return `<span class="badge pending">결제 대기</span>`;
+        return `<span class="badge reserved">예약 확정</span>`;
     }
 
     function renderReservations() {
         const list = $('#reservation-list');
         const items = state.filter === 'ALL'
             ? state.items
-            : state.items.filter(item => item.status === state.filter);
+            : state.filter === 'RESERVED'
+                ? state.items.filter(item => item.status === 'RESERVED' || item.status === 'PENDING_PAYMENT')
+                : state.items.filter(item => item.status === state.filter);
 
         if (items.length === 0) {
             list.innerHTML = '<div class="empty">조건에 맞는 내역이 없습니다.</div>';
@@ -657,11 +690,12 @@
 
         list.innerHTML = items.map(item => {
             const isWaiting = item.status === 'WAITING';
+            const isConfirmed = item.status === 'RESERVED';
             return `
                 <article class="reservation-card">
                     <img class="thumb" src="${item.theme.thumbnail}" alt="${escapeHtml(item.theme.name)}" onerror="this.src='https://placehold.co/160x160/f2f4f6/8b95a1?text=Theme'">
                     <div class="card-main">
-                        <span class="badge ${isWaiting ? 'waiting' : 'reserved'}">${isWaiting ? `대기 ${item.order}번째` : '예약 확정'}</span>
+                        ${badgeHtml(item)}
                         <h3>${escapeHtml(item.theme.name)}</h3>
                         <div class="meta">
                             <span>${item.date}</span>
@@ -670,7 +704,7 @@
                         </div>
                     </div>
                     <div class="actions">
-                        ${isWaiting ? '' : `<button class="secondary-button" type="button" onclick="openUpdateModal(${item.id})">변경</button>`}
+                        ${isConfirmed ? `<button class="secondary-button" type="button" onclick="openUpdateModal(${item.id})">변경</button>` : ''}
                         <button class="danger-button" type="button" onclick="cancelItem(${item.id}, '${item.status}')">${isWaiting ? '대기 취소' : '예약 취소'}</button>
                     </div>
                 </article>
@@ -749,6 +783,10 @@
     function closeUpdateModal() {
         $('#update-modal').classList.remove('show');
         state.editing = null;
+    }
+
+    function closePaymentSuccessModal() {
+        $('#payment-success-modal').classList.remove('show');
     }
 
     function cancelItem(id, status) {

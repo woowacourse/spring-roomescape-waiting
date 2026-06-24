@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
@@ -12,6 +13,7 @@ import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.domain.Member;
+import roomescape.domain.PaymentOrder;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -22,6 +24,7 @@ import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationWaitingOrderResponse;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
@@ -35,6 +38,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
     private final ReservationWaitingService waitingService;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -42,12 +46,14 @@ public class ReservationService {
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
                               MemberRepository memberRepository,
+                              PaymentOrderRepository paymentOrderRepository,
                               ReservationWaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.paymentOrderRepository = paymentOrderRepository;
         this.waitingService = waitingService;
     }
 
@@ -63,7 +69,11 @@ public class ReservationService {
 
         Reservation reservation = Reservation.createWithoutId(member, slot);
         Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponse.from(savedReservation);
+
+        String orderId = generateOrderId();
+        paymentOrderRepository.save(PaymentOrder.createWithoutId(orderId, command.amount(), savedReservation));
+
+        return ReservationResponse.from(savedReservation, orderId);
     }
 
     public List<ReservationResponse> getAllReservations() {
@@ -104,9 +114,28 @@ public class ReservationService {
     @Transactional
     public void delete(Long reservationId) {
         Reservation reservation = getReservation(reservationId);
+        paymentOrderRepository.findByReservation_Id(reservationId)
+                .ifPresent(paymentOrderRepository::delete);
         reservationRepository.deleteById(reservationId);
         reservationRepository.flush();
         waitingService.promoteFirstWaiting(reservation.getSlot());
+    }
+
+    @Transactional
+    public void cancelPendingByOrderId(String orderId) {
+        if (orderId == null) {
+            return;
+        }
+        paymentOrderRepository.findByOrderId(orderId).ifPresent(order -> {
+            Reservation reservation = order.getReservation();
+            paymentOrderRepository.delete(order);
+            paymentOrderRepository.flush();
+            reservationRepository.delete(reservation);
+        });
+    }
+
+    private String generateOrderId() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     }
 
     private Member getMember(long memberId) {

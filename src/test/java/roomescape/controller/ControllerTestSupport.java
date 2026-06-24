@@ -52,7 +52,7 @@ public abstract class ControllerTestSupport {
     protected ValidatableResponse createReservation(int memberId, String date, int timeId, int themeId) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of("memberId", memberId, "date", date, "timeId", timeId, "themeId", themeId))
+                .body(Map.of("memberId", memberId, "date", date, "timeId", timeId, "themeId", themeId, "amount", 10000))
                 .when().post("/reservations")
                 .then().log().all();
     }

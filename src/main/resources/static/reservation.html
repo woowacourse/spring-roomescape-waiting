@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roomescape - 예약하기</title>
+
     <style>
         :root {
             --blue: #3182f6;
@@ -618,6 +619,10 @@
                         <p id="member-info" style="display:none;margin:6px 0 0;font-size:13px;color:var(--green);font-weight:700;"></p>
                     </div>
                 </div>
+                <div class="field" style="margin-top:14px;">
+                    <label for="reservation-amount">결제 금액 (원)</label>
+                    <input id="reservation-amount" type="number" min="100" value="10000" placeholder="결제 금액을 입력하세요">
+                </div>
             </section>
 
             <section class="section">
@@ -681,6 +686,9 @@
         const today = new Date().toISOString().split('T')[0];
         dateInput.min = today;
         dateInput.value = today;
+
+        const errorParam = new URLSearchParams(location.search).get('error');
+        if (errorParam) showToast(decodeURIComponent(errorParam));
 
         $('#summary-date').textContent = today;
         $('#reservation-date').addEventListener('change', () => {
@@ -841,32 +849,40 @@
         $('#submit-button').disabled = !(state.selectedTheme && state.selectedTime && state.memberId);
     }
 
-    function submitSelectedAction() {
+    async function submitSelectedAction() {
         const date = $('#reservation-date').value;
         const isWaiting = state.actionType === 'waiting';
-        const url = isWaiting ? '/waitings' : '/reservations';
-        const payload = isWaiting
-            ? { memberId: state.memberId, reservationDate: date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id }
-            : { memberId: state.memberId, date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id };
 
         $('#submit-button').disabled = true;
         $('#submit-button').textContent = isWaiting ? '대기 신청 중...' : '예약 중...';
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-            .then(toJson)
-            .then(data => {
-                openResultModal(data, isWaiting);
+        try {
+            if (isWaiting) {
+                const payload = { memberId: state.memberId, reservationDate: date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id };
+                const data = await fetch('/waitings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(toJson);
+                openResultModal(data, true);
                 fetchTimes();
-            })
-            .catch(error => showToast(error.message || '신청에 실패했습니다.'))
-            .finally(() => {
-                renderActionSummary();
-                updateSubmitState();
-            });
+            } else {
+                const amount = Number($('#reservation-amount').value);
+                const payload = { memberId: state.memberId, date, timeId: state.selectedTime.id, themeId: state.selectedTheme.id, amount };
+                const data = await fetch('/reservations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(toJson);
+
+                location.href = '/payment?orderId=' + data.orderId;
+            }
+        } catch (error) {
+            showToast(error.message || '신청에 실패했습니다.');
+        } finally {
+            renderActionSummary();
+            updateSubmitState();
+        }
     }
 
     function openResultModal(data, isWaiting) {

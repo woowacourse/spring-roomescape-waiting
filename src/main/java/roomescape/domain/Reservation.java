@@ -31,6 +31,8 @@ public class Reservation {
     @Embedded
     private ReservationSlot slot;
 
+    private ReservationStatus reservationStatus;
+
     protected Reservation() {
     }
 
@@ -40,6 +42,7 @@ public class Reservation {
         this.id = id;
         this.member = member;
         this.slot = slot;
+        this.reservationStatus = ReservationStatus.PENDING_PAYMENT;
     }
 
     public static Reservation createWithoutId(Member member, ReservationSlot slot) {
@@ -78,6 +81,14 @@ public class Reservation {
         return slot.getTheme();
     }
 
+    public ReservationStatus getReservationStatus() {
+        return reservationStatus;
+    }
+
+    public void updateStatus() {
+        this.reservationStatus = ReservationStatus.CONFIRMED;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass()) {
@@ -89,7 +100,8 @@ public class Reservation {
             return Objects.equals(id, reservation.id);
         }
         return Objects.equals(member, reservation.member)
-                && Objects.equals(slot, reservation.slot);
+                && Objects.equals(slot, reservation.slot)
+                && Objects.equals(reservationStatus, reservation.reservationStatus);
     }
 
     @Override
@@ -97,6 +109,6 @@ public class Reservation {
         if (id != null) {
             return Objects.hash(id);
         }
-        return Objects.hash(member, slot);
+        return Objects.hash(member, slot, reservationStatus);
     }
 }

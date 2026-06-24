@@ -8,9 +8,14 @@ public record ReservationResponse(
         String name,
         LocalDate date,
         CreateReservationTimeResponse time,
-        ThemeResponse theme
+        ThemeResponse theme,
+        String orderId
 ) {
     public static ReservationResponse from(Reservation reservation) {
+        return from(reservation, null);
+    }
+
+    public static ReservationResponse from(Reservation reservation, String orderId) {
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
@@ -24,7 +29,8 @@ public record ReservationResponse(
                         reservation.getTheme().getName(),
                         reservation.getTheme().getDescription(),
                         reservation.getTheme().getThumbnail()
-                )
+                ),
+                orderId
         );
     }
 }

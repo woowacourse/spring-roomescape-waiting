@@ -6,6 +6,7 @@ public record CreateReservationCommand(
         long memberId,
         LocalDate date,
         long timeId,
-        long themeId
+        long themeId,
+        long amount
 ) {
 }

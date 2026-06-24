@@ -69,7 +69,7 @@ class ReservationServiceTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         CreateReservationCommand command = new CreateReservationCommand(
-                member.getId(), LocalDate.now().plusDays(1), time.getId(), theme.getId()
+                member.getId(), LocalDate.now().plusDays(1), time.getId(), theme.getId(), 10000L
         );
 
         ReservationResponse response = reservationService.createReservation(command, LocalDateTime.now());
@@ -84,7 +84,7 @@ class ReservationServiceTest {
         Member member = saveMember("브라운");
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         CreateReservationCommand command = new CreateReservationCommand(
-                member.getId(), LocalDate.now().plusDays(1), 999L, theme.getId()
+                member.getId(), LocalDate.now().plusDays(1), 999L, theme.getId(), 10000L
         );
 
         assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
@@ -98,7 +98,7 @@ class ReservationServiceTest {
         Member member = saveMember("브라운");
         ReservationTime time = saveTime(10, 0);
         CreateReservationCommand command = new CreateReservationCommand(
-                member.getId(), LocalDate.now().plusDays(1), time.getId(), 999L
+                member.getId(), LocalDate.now().plusDays(1), time.getId(), 999L, 10000L
         );
 
         assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
@@ -117,7 +117,7 @@ class ReservationServiceTest {
         saveReservation(member1, date, time, theme);
 
         CreateReservationCommand command = new CreateReservationCommand(
-                member2.getId(), date, time.getId(), theme.getId()
+                member2.getId(), date, time.getId(), theme.getId(), 10000L
         );
 
         assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
@@ -132,7 +132,7 @@ class ReservationServiceTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         CreateReservationCommand command = new CreateReservationCommand(
-                member.getId(), LocalDate.now().minusDays(1), time.getId(), theme.getId()
+                member.getId(), LocalDate.now().minusDays(1), time.getId(), theme.getId(), 10000L
         );
 
         assertThatThrownBy(() -> reservationService.createReservation(command, LocalDateTime.now()))
@@ -169,7 +169,7 @@ class ReservationServiceTest {
 
         assertThat(responses).hasSize(2);
         assertThat(responses).extracting(MyReservationResponse::status)
-                .containsExactly(ReservationStatus.RESERVED, ReservationStatus.WAITING);
+                .containsExactly(ReservationStatus.PENDING_PAYMENT, ReservationStatus.WAITING);
     }
 
     @Test

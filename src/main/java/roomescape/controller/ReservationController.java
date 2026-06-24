@@ -35,7 +35,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationRequest request) {
         CreateReservationCommand command = new CreateReservationCommand(
-                request.memberId(), request.date(), request.timeId(), request.themeId()
+                request.memberId(), request.date(), request.timeId(), request.themeId(), request.amount()
         );
         ReservationResponse response = reservationService.createReservation(command, LocalDateTime.now());
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))

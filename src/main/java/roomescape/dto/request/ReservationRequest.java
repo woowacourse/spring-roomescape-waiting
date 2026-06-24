@@ -14,6 +14,9 @@ public record ReservationRequest(
         Long timeId,
 
         @NotNull(message = "예약 테마는 필수값 입니다.")
-        Long themeId
+        Long themeId,
+
+        @NotNull(message = "결제 금액은 필수값 입니다.")
+        Long amount
 ) {
 }
