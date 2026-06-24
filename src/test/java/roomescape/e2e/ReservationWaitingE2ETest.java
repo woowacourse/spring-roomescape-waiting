@@ -32,7 +32,7 @@ public class ReservationWaitingE2ETest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('14:00', '15:00')");
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
+                "INSERT INTO theme (name, description, image_url, price) VALUES ('테마A', '설명A', 'https://a.com', 10000)");
     }
 
     @Test

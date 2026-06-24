@@ -22,7 +22,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     private static final String BASE_QUERY = """
             SELECT rw.id as reservation_waiting_id, rw.name, rw.date as reservation_date, rw.created_at as created_at,
                    rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                   t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                   t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price
             FROM reservation_waiting rw
             JOIN reservation_time rt ON rw.time_id = rt.id
             JOIN theme t ON rw.theme_id = t.id
@@ -45,7 +45,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                             resultSet.getLong("theme_id"),
                             resultSet.getString("theme_name"),
                             resultSet.getString("theme_description"),
-                            resultSet.getString("theme_image_url")
+                            resultSet.getString("theme_image_url"),
+                            resultSet.getInt("theme_price")
                     )
             );
 

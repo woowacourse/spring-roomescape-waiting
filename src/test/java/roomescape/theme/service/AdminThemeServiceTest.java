@@ -10,8 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.theme.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)

@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import roomescape.common.domain.ReservationSlot;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -15,19 +15,22 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
+    private final PaymentStatus status;
 
     @Builder(access = lombok.AccessLevel.PRIVATE)
-    private Reservation(Long id, String name, ReservationSlot slot) {
+    private Reservation(Long id, String name, ReservationSlot slot, PaymentStatus status) {
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.status = status;
     }
 
-    public static Reservation restore(Long id, String name, ReservationSlot slot) {
+    public static Reservation restore(Long id, String name, ReservationSlot slot, PaymentStatus status) {
         return Reservation.builder()
                 .id(id)
                 .name(name)
                 .slot(slot)
+                .status(status)
                 .build();
     }
 
@@ -36,6 +39,7 @@ public class Reservation {
                 .id(this.id)
                 .name(this.name)
                 .slot(new ReservationSlot(date, time, getTheme()))
+                .status(this.status)
                 .build();
         if (changed.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_TIME_RESERVATION);
@@ -47,8 +51,10 @@ public class Reservation {
         return LocalDateTime.of(getDate(), getTime().getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
-    public boolean isCancelable(Clock clock) {
-        return LocalDateTime.now(clock).isBefore(LocalDateTime.of(getDate(), getTime().getStartAt()).minusHours(12));
+    public void validateModifiable(Clock clock, ErrorCode code) {
+        if (!LocalDateTime.now(clock).isBefore(LocalDateTime.of(getDate(), getTime().getStartAt()).minusHours(12))) {
+            throw new BusinessException(code);
+        }
     }
 
     public Long getId() {
@@ -73,5 +79,9 @@ public class Reservation {
 
     public ReservationSlot getSlot() {
         return this.slot;
+    }
+
+    public PaymentStatus getStatus() {
+        return status;
     }
 }

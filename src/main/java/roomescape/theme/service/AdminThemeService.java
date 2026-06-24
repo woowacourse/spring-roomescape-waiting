@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.AdminThemeRequest;
 import roomescape.theme.dto.AdminThemeResponse;
@@ -22,7 +22,7 @@ public class AdminThemeService {
 
     @Transactional
     public AdminThemeResponse createTheme(AdminThemeRequest request) {
-        Theme theme = Theme.of(request.name(), request.description(), request.imageUrl());
+        Theme theme = Theme.of(request.name(), request.description(), request.imageUrl(), request.price());
         Theme saved = themeRepository.save(theme);
         return AdminThemeResponse.from(saved);
     }

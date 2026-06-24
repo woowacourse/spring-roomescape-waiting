@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS reservation_waiting;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS theme;
@@ -18,6 +19,7 @@ CREATE TABLE theme
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(500) NOT NULL,
     image_url   VARCHAR(255) NOT NULL,
+    price       INT          NOT NULL,
     UNIQUE(name),
     PRIMARY KEY (id)
 );
@@ -29,6 +31,7 @@ CREATE TABLE reservation
     date     DATE         NOT NULL,
     time_id  BIGINT,
     theme_id BIGINT,
+    status   VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED',
     UNIQUE(date, time_id, theme_id),
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
@@ -48,3 +51,12 @@ CREATE TABLE reservation_waiting
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
+
+CREATE TABLE payment (
+    order_id VARCHAR(64) NOT NULL,
+    amount      INT          NOT NULL,
+    payment_key VARCHAR(200),
+    reservation_id BIGINT   NOT NULL,
+    PRIMARY KEY (order_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation(id) ON DELETE CASCADE
+)

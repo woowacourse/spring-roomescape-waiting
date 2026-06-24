@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>결제 완료</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 40px 16px;
+    }
+
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    p.desc {
+      color: #888;
+      margin: 0 0 24px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 14px 22px;
+      background: #3182f6;
+      color: #fff;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      background: #1b64da;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>✅ 결제가 완료되었어요</h1>
+  <p class="desc">예약이 정상적으로 확정되었습니다.<br/>즐거운 방탈출 되세요!</p>
+
+  <a href="/reservation">예약 페이지로 돌아가기</a>
+</div>
+</body>
+</html>

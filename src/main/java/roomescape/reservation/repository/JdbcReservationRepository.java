@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.common.domain.ReservationSlot;
+import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -35,9 +36,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                             resultSet.getLong("theme_id"),
                             resultSet.getString("theme_name"),
                             resultSet.getString("theme_description"),
-                            resultSet.getString("theme_image_url")
+                            resultSet.getString("theme_image_url"),
+                            resultSet.getInt("theme_price")
                     )
-            )
+            ),
+            PaymentStatus.valueOf(resultSet.getString("status"))
     );
 
     private final RowMapper<Long> idMapper = (resultSet, rowNum) -> (
@@ -57,11 +60,12 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("name", reservation.getName())
                 .addValue("date", reservation.getDate())
                 .addValue("time_id", reservation.getTime().getId())
-                .addValue("theme_id", reservation.getTheme().getId());
+                .addValue("theme_id", reservation.getTheme().getId())
+                .addValue("status", reservation.getStatus().name());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Reservation.restore(id, reservation.getName(),
                 new ReservationSlot(reservation.getDate(), reservation.getTime(),
-                        reservation.getTheme()));
+                        reservation.getTheme()), reservation.getStatus());
     }
 
     @Override
@@ -69,7 +73,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price,
+                       r.status
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -83,7 +88,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price,
+                       r.status
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -93,18 +99,20 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
+    public List<Reservation> findConfirmedByName(String name) {
+        // 내 예약 조회는 결제 완료(CONFIRMED)된 예약만 보여준다. 결제 대기(PENDING)는 아직 확정이 아니므로 제외.
         String query = """
                 SELECT r.id as reservation_id, r.name, r.date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url, t.price as theme_price,
+                       r.status
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
-                WHERE r.name = ?
+                WHERE r.name = ? AND r.status = ?
                 ORDER BY r.date DESC, rt.start_at DESC
                 """;
-        return jdbcTemplate.query(query, rowMapper, name);
+        return jdbcTemplate.query(query, rowMapper, name, PaymentStatus.CONFIRMED.name());
     }
 
     @Override
@@ -147,5 +155,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     public ReservationIdResponse findIdBySlot(LocalDate date, Long themeId, Long timeId) {
         String query = "select id from reservation where date = ? and theme_id = ? and time_id = ?";
         return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
+    }
+
+    @Override
+    public void updateStatus(Long reservationId, PaymentStatus status) {
+        String query = "UPDATE reservation SET status = ? WHERE id = ?";
+        jdbcTemplate.update(query, status.name(), reservationId);
     }
 }

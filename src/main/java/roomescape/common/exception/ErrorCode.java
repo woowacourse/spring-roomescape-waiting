@@ -1,4 +1,4 @@
-package roomescape.exception;
+package roomescape.common.exception;
 
 import org.springframework.http.HttpStatus;
 
@@ -11,12 +11,14 @@ public enum ErrorCode {
     PAST_TIME_CREATE(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 예약할 수 없습니다."),
     PAST_TIME_WAITING(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기 신청할 수 없습니다."),
     PAST_WAITING_CANCEL(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기를 취소할 수 없습니다."),
+    PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
 
     // 404 - NOT_FOUND
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
     WAITING_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 대기입니다."),
     TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 시간대입니다."),
     THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 테마입니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 결제 내역입니다."),
 
     // 409 - CONFLICT
     DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 예약된 시간입니다."),

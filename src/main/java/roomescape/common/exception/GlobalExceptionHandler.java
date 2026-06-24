@@ -1,4 +1,4 @@
-package roomescape.exception;
+package roomescape.common.exception;
 
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.payment.TossPaymentException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -97,6 +98,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException e) {
         log.warn("비즈니스 규칙 위반 [{}]: {}", e.getStatus(), e.getMessage());
         return ResponseEntity.status(e.getStatus()).body(ErrorResponse.from(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleTossPayment(TossPaymentException e) {
+        if (e instanceof TossPaymentException.GatewayConfig) {
+            log.error("Toss 결제 키 설정 오류 [{}]: {}", e.getCode(), e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("PAYMENT_CONFIG_ERROR", "결제 시스템 설정 오류가 발생했습니다."));
+        }
+        log.warn("Toss 결제 오류 [{}]: {}", e.getCode(), e.getMessage());
+        return ResponseEntity.status(e.getStatus())
+                .body(new ErrorResponse(e.getCode(), e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

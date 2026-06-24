@@ -2,8 +2,8 @@ package roomescape.reservationwaiting.domain;
 
 import java.time.Clock;
 import org.springframework.stereotype.Component;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
 
 @Component

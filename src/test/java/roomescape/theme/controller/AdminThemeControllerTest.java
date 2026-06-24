@@ -29,14 +29,14 @@ class AdminThemeControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마B', '설명B', 'https://b.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마C', '설명C', 'https://c.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마D', '설명D', 'https://d.com')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url, price) VALUES ('테마A', '설명A', 'https://a.com', 10000)");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url, price) VALUES ('테마B', '설명B', 'https://b.com', 20000)");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url, price) VALUES ('테마C', '설명C', 'https://c.com', 30000)");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url, price) VALUES ('테마D', '설명D', 'https://d.com', 40000)");
     }
 
-    private Map<String, String> themeBody() {
-        return Map.of("name", "테마5", "description", "설명", "imageUrl", "https://image.com");
+    private Map<String, Object> themeBody() {
+        return Map.of("name", "테마5", "description", "설명", "imageUrl", "https://image.com", "price", 15000);
     }
 
     @Test
@@ -48,7 +48,8 @@ class AdminThemeControllerTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201)
-                .body("name", equalTo("테마5"));
+                .body("name", equalTo("테마5"))
+                .body("price", equalTo(15000));
     }
 
     @Test

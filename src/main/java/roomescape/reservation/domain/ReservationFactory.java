@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.common.domain.ReservationSlot;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -21,7 +21,7 @@ public class ReservationFactory {
 
     public Reservation create(String name, ReservationSlot slot) {
         validate(name, slot.date(), slot.time(), slot.theme());
-        return Reservation.restore(null, name, slot);
+        return Reservation.restore(null, name, slot, PaymentStatus.PAYMENT_PENDING);
     }
 
     private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {

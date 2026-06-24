@@ -15,8 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorCode;
+import roomescape.common.exception.BusinessException;
+import roomescape.common.exception.ErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
@@ -44,9 +44,9 @@ class ThemeServiceTest {
         LocalDate endDate = LocalDate.now(fixedClock);
         LocalDate startDate = endDate.minusDays(7);
         List<Long> themeIds = List.of(1L, 2L, 3L);
-        Theme theme1 = Theme.restore(1L, "테마A", "설명A", "https://a.com");
-        Theme theme2 = Theme.restore(2L, "테마B", "설명B", "https://b.com");
-        Theme theme3 = Theme.restore(3L, "테마C", "설명C", "https://c.com");
+        Theme theme1 = Theme.restore(1L, "테마A", "설명A", "https://a.com", 10000);
+        Theme theme2 = Theme.restore(2L, "테마B", "설명B", "https://b.com", 20000);
+        Theme theme3 = Theme.restore(3L, "테마C", "설명C", "https://c.com", 30000);
 
         when(themeRepository.findTopThemeIds(startDate, endDate, 10)).thenReturn(themeIds);
         when(themeRepository.findAllByIds(themeIds)).thenReturn(List.of(theme1, theme2, theme3));
@@ -68,8 +68,8 @@ class ThemeServiceTest {
         LocalDate endDate = LocalDate.now(fixedClock);
         LocalDate startDate = endDate.minusDays(7);
         List<Long> themeIds = List.of(1L, 2L);
-        Theme theme1 = Theme.restore(1L, "테마A", "설명A", "https://a.com");
-        Theme theme2 = Theme.restore(2L, "테마B", "설명B", "https://b.com");
+        Theme theme1 = Theme.restore(1L, "테마A", "설명A", "https://a.com", 10000);
+        Theme theme2 = Theme.restore(2L, "테마B", "설명B", "https://b.com", 20000);
 
         when(themeRepository.findTopThemeIds(startDate, endDate, 2)).thenReturn(themeIds);
         when(themeRepository.findAllByIds(themeIds)).thenReturn(List.of(theme1, theme2));
