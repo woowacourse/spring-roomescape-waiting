@@ -2,8 +2,8 @@ package roomescape.payment.client;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import roomescape.payment.PaymentFailureCategory;
-import roomescape.payment.PaymentGatewayException;
+import roomescape.service.payment.PaymentFailureCategory;
+import roomescape.service.payment.PaymentGatewayException;
 import roomescape.payment.client.dto.TossErrorResponse;
 
 public class TossPaymentException extends PaymentGatewayException {

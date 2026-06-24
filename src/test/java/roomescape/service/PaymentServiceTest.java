@@ -20,12 +20,12 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
-import roomescape.payment.PaymentAmountMismatchException;
-import roomescape.payment.PaymentConfirmation;
-import roomescape.payment.PaymentFailureCategory;
-import roomescape.payment.PaymentGateway;
-import roomescape.payment.PaymentGatewayException;
-import roomescape.payment.PaymentResult;
+import roomescape.service.payment.PaymentAmountMismatchException;
+import roomescape.service.payment.PaymentConfirmation;
+import roomescape.service.payment.PaymentFailureCategory;
+import roomescape.service.payment.PaymentGateway;
+import roomescape.service.payment.PaymentGatewayException;
+import roomescape.service.payment.PaymentResult;
 import roomescape.repository.PaymentRepository;
 
 class PaymentServiceTest {

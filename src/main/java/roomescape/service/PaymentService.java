@@ -10,11 +10,11 @@ import roomescape.domain.Reservation;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.PaymentRepository;
-import roomescape.payment.PaymentAmountMismatchException;
-import roomescape.payment.PaymentConfirmation;
-import roomescape.payment.PaymentGatewayException;
-import roomescape.payment.PaymentGateway;
-import roomescape.payment.PaymentResult;
+import roomescape.service.payment.PaymentAmountMismatchException;
+import roomescape.service.payment.PaymentConfirmation;
+import roomescape.service.payment.PaymentGatewayException;
+import roomescape.service.payment.PaymentGateway;
+import roomescape.service.payment.PaymentResult;
 
 @Service
 @Transactional

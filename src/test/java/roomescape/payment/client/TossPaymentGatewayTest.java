@@ -14,9 +14,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClient;
 import roomescape.domain.PaymentStatus;
-import roomescape.payment.PaymentConfirmation;
-import roomescape.payment.PaymentFailureCategory;
-import roomescape.payment.PaymentResult;
+import roomescape.service.payment.PaymentConfirmation;
+import roomescape.service.payment.PaymentFailureCategory;
+import roomescape.service.payment.PaymentResult;
 
 import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.ObjectMapper;

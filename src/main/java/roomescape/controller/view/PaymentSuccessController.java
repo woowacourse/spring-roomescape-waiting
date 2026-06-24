@@ -4,9 +4,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import roomescape.payment.PaymentAmountMismatchException;
-import roomescape.payment.PaymentGatewayException;
-import roomescape.payment.PaymentResult;
+import roomescape.service.payment.PaymentAmountMismatchException;
+import roomescape.service.payment.PaymentGatewayException;
+import roomescape.service.payment.PaymentResult;
 import roomescape.service.PaymentService;
 
 @Controller

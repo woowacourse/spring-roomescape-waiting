@@ -13,10 +13,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.PaymentStatus;
-import roomescape.payment.PaymentAmountMismatchException;
-import roomescape.payment.PaymentFailureCategory;
-import roomescape.payment.PaymentGatewayException;
-import roomescape.payment.PaymentResult;
+import roomescape.service.payment.PaymentAmountMismatchException;
+import roomescape.service.payment.PaymentFailureCategory;
+import roomescape.service.payment.PaymentGatewayException;
+import roomescape.service.payment.PaymentResult;
 import roomescape.service.PaymentService;
 
 @WebMvcTest(PaymentSuccessController.class)
