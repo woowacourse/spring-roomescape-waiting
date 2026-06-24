@@ -2,6 +2,7 @@ package roomescape.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import roomescape.client.dto.ConfirmRequest;
@@ -32,6 +33,8 @@ public class TossPaymentGateway implements PaymentGateway {
         try {
             TossPaymentResponse response = tossRestClient.post()
                     .uri("/v1/payments/confirm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.orderId())
                     .body(request)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (req, res) -> {
