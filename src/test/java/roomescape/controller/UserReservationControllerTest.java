@@ -21,7 +21,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.controller.dto.PaymentConfirmRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationUpdateRequest;
 import roomescape.payment.client.TossProperties;
@@ -73,20 +72,6 @@ class UserReservationControllerTest {
                 .andExpect(jsonPath("$.orderId").value("order-1"))
                 .andExpect(jsonPath("$.amount").value(1000))
                 .andExpect(jsonPath("$.clientKey").isNotEmpty());
-    }
-
-    @Test
-    @DisplayName("POST /user/reservations/confirm - 결제가 승인되면 예약을 반환한다")
-    void confirm() throws Exception {
-        given(userReservationService.confirm(any())).willReturn(sampleResult());
-        PaymentConfirmRequest request = new PaymentConfirmRequest("test_pk_1", "order-1", 1000L);
-
-        mockMvc.perform(post("/user/reservations/confirm")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reserverName").value("브라운"))
-                .andExpect(jsonPath("$.status").value("CONFIRMED"));
     }
 
     @Test

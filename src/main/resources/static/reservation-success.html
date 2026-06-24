@@ -130,7 +130,7 @@
     async function confirmPayment() {
         const content = document.getElementById('content');
         try {
-            const res = await fetch('/user/reservations/confirm', {
+            const res = await fetch('/user/payments/confirm', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

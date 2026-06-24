@@ -117,7 +117,7 @@
             return;
         }
         try {
-            await fetch('/user/reservations/payment/cancel', {
+            await fetch('/user/payments/cancel', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({code: code, message: message, orderId: orderId})

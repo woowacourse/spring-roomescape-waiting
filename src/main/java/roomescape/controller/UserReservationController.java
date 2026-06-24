@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.PaymentCancelRequest;
-import roomescape.controller.dto.PaymentConfirmRequest;
 import roomescape.controller.dto.PaymentOrderResponse;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
@@ -56,21 +54,6 @@ public class UserReservationController {
     public PaymentOrderResponse createOrder(@RequestBody @Valid ReservationRequest request) {
         PaymentOrderResult order = userReservationService.createOrder(request.toCommand());
         return PaymentOrderResponse.from(order, tossProperties.clientKey());
-    }
-
-    @PostMapping("/confirm")
-    public ReservationResponse confirm(@RequestBody @Valid PaymentConfirmRequest request) {
-        ReservationResult saved = userReservationService.confirm(request.toCommand());
-        return ReservationResponse.from(saved);
-    }
-
-    @PostMapping("/payment/cancel")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelPayment(@RequestBody PaymentCancelRequest request) {
-        if (request.orderId() == null || request.orderId().isBlank()) {
-            return;
-        }
-        userReservationService.cancelOrder(request.orderId());
     }
 
     @PatchMapping("/{id}")
