@@ -2,7 +2,6 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.application.command.ReservationCommandService;
 import roomescape.application.command.ReservationWaitingCommandService;
 import roomescape.application.query.ReservationQueryService;
@@ -13,6 +12,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.exception.ConflictException;
+import roomescape.presentation.dto.ReservationUpdateRequest;
 
 @Service
 public class ReservationModificationUseCase {

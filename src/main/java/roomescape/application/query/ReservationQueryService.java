@@ -7,13 +7,13 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.api.dto.ReservationResponses;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.repository.ReservationRepository;
+import roomescape.presentation.dto.ReservationResponses;
 
 @Service
 @Transactional(readOnly = true)

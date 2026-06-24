@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.api.dto.ThemeRequest;
 import roomescape.application.command.ThemeCommandService;
 import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.Theme;
+import roomescape.presentation.dto.ThemeRequest;
 
 @Service
 public class ThemeApplicationService {

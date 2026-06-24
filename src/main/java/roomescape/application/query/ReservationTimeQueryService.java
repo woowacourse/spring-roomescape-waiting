@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.repository.ReservationTimeRepository;
 
 @Service
 @Transactional(readOnly = true)

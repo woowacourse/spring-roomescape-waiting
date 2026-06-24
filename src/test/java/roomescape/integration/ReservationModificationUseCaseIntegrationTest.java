@@ -22,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.application.ReservationModificationUseCase;
 import roomescape.application.command.ReservationCommandService;
 import roomescape.application.command.ReservationWaitingCommandService;
@@ -34,10 +33,11 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.ForbiddenException;
-import roomescape.repository.ReservationJdbcRepository;
-import roomescape.repository.ReservationTimeJdbcRepository;
-import roomescape.repository.ReservationWaitingJdbcRepository;
-import roomescape.repository.ReservationWaitingQueryJdbcRepository;
+import roomescape.infrastructure.repository.ReservationJdbcRepository;
+import roomescape.infrastructure.repository.ReservationTimeJdbcRepository;
+import roomescape.infrastructure.repository.ReservationWaitingJdbcRepository;
+import roomescape.infrastructure.repository.ReservationWaitingQueryJdbcRepository;
+import roomescape.presentation.dto.ReservationUpdateRequest;
 
 @JdbcTest
 @Import({

@@ -7,7 +7,18 @@ let isEditing = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('search-form').addEventListener('submit', handleSubmit);
+    loadFromQuery();
 });
+
+async function loadFromQuery() {
+    const name = new URLSearchParams(window.location.search).get('name');
+    if (!name || !name.trim()) return;
+
+    const trimmedName = name.trim();
+    document.getElementById('name-input').value = trimmedName;
+    currentName = trimmedName;
+    await refresh();
+}
 
 async function handleSubmit(event) {
     event.preventDefault();

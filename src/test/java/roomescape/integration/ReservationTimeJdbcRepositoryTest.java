@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.exception.ConflictException;
-import roomescape.repository.ReservationTimeJdbcRepository;
+import roomescape.infrastructure.repository.ReservationTimeJdbcRepository;
 
 @JdbcTest
 @Import(ReservationTimeJdbcRepository.class)

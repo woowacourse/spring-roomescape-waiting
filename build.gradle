@@ -24,8 +24,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     runtimeOnly 'com.h2database:h2'
 
+    // Toss API를 흉내내는 스텁 서버 (에러코드/지연/상태코드 주입용)
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.rest-assured:rest-assured:5.3.1'
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 test {

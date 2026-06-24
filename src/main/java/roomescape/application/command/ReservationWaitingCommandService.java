@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
-import roomescape.repository.ReservationWaitingRepository;
+import roomescape.domain.ReservationWaitingRepository;
 
 @Service
 @Transactional

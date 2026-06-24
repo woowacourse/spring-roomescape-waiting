@@ -31,6 +31,23 @@ CREATE TABLE reservation
         UNIQUE (date, theme_id, time_id)
 );
 
+CREATE TABLE reservation_order
+(
+    order_id         VARCHAR(64)  NOT NULL,
+    order_name       VARCHAR(255) NOT NULL,
+    amount           BIGINT       NOT NULL,
+    payment_key      VARCHAR(255),
+    status           VARCHAR(30)  NOT NULL,
+    reserver_name    VARCHAR(255) NOT NULL,
+    reservation_date DATE         NOT NULL,
+    time_id          BIGINT       NOT NULL,
+    theme_id         BIGINT       NOT NULL,
+
+    PRIMARY KEY (order_id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
 CREATE TABLE reservation_waiting
 (
     id         BIGINT       NOT NULL AUTO_INCREMENT,

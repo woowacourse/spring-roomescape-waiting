@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>결제 완료</title>
+    <style>
+        body {
+            font-family: -apple-system, "Segoe UI", sans-serif;
+            background: #f4f5f7;
+            margin: 0;
+            padding: 40px 16px;
+        }
+
+        .card {
+            position: relative;
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0 0 8px;
+        }
+
+        p.desc {
+            color: #888;
+            margin: 0 0 24px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 16px;
+        }
+
+        .row .label {
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .row .val {
+            text-align: right;
+            word-break: break-all;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 24px;
+            color: #3182f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .redirect {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 18px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .countdown-ring {
+            flex: 0 0 auto;
+            width: 34px;
+            height: 34px;
+            transform: rotate(-90deg);
+        }
+
+        .countdown-ring .track {
+            fill: none;
+            stroke: #e8edf5;
+            stroke-width: 4;
+        }
+
+        .countdown-ring .progress {
+            fill: none;
+            stroke: #3182f6;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 88;
+            stroke-dashoffset: 0;
+            animation: countdown 3s linear forwards;
+        }
+
+        @keyframes countdown {
+            to {
+                stroke-dashoffset: 88;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>✅ 결제를 완료했어요</h1>
+    <p class="desc">브라우저 인증 후, <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 결제를 확정했습니다.</p>
+
+    <div class="row"><span class="label">결제 상태</span>
+        <span class="val" th:text="${result != null ? result.status() : '미구현 — confirm() 을 구현하세요'}">DONE</span></div>
+    <div class="row"><span class="label">주문번호</span>
+        <span class="val" th:text="${result?.orderId()}">order-xxxx</span></div>
+    <div class="row"><span class="label">승인 금액</span>
+        <span class="val"
+              th:text="${result != null ? #numbers.formatInteger(result.approvedAmount(), 0, 'COMMA') + '원' : '-'}">50,000원</span>
+    </div>
+    <div class="row"><span class="label">paymentKey</span>
+        <span class="val" th:text="${paymentKey}">tviva...</span></div>
+
+    <div class="redirect">
+        <span>잠시뒤 내 예약 화면으로 이동합니다.</span>
+        <svg class="countdown-ring" viewBox="0 0 32 32" aria-hidden="true">
+            <circle class="track" cx="16" cy="16" r="14"></circle>
+            <circle class="progress" cx="16" cy="16" r="14"></circle>
+        </svg>
+    </div>
+    <a id="myReservationLink" href="/my">내 예약 바로가기</a>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const orderId = /*[[${result.orderId()}]]*/ "order-xxxx";
+    const myReservationLink = document.getElementById("myReservationLink");
+
+    function getMyReservationUrl() {
+        try {
+            const reserverName = sessionStorage.getItem(`reservationName:${orderId}`);
+            if (reserverName) {
+                sessionStorage.removeItem(`reservationName:${orderId}`);
+                return `/my?name=${encodeURIComponent(reserverName)}`;
+            }
+        } catch (_) {
+            // 세션 저장소를 사용할 수 없으면 이름 없이 내 예약 화면으로 이동한다.
+        }
+        return "/my";
+    }
+
+    const myReservationUrl = getMyReservationUrl();
+    myReservationLink.href = myReservationUrl;
+
+    setTimeout(() => {
+        window.location.href = myReservationUrl;
+    }, 3000);
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -3,7 +3,6 @@ package roomescape.application;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.api.dto.ReservationWaitingRequest;
 import roomescape.application.command.ReservationWaitingCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
@@ -17,6 +16,7 @@ import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
+import roomescape.presentation.dto.ReservationWaitingRequest;
 
 @Service
 public class ReservationWaitingApplicationService {

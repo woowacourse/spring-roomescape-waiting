@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
+import roomescape.domain.ThemeRepository;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)

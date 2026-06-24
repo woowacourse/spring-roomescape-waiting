@@ -21,12 +21,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.ReservationWaitingQueryRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
-import roomescape.repository.ReservationWaitingJdbcRepository;
-import roomescape.repository.ReservationWaitingQueryJdbcRepository;
-import roomescape.repository.ReservationWaitingQueryRepository;
+import roomescape.infrastructure.repository.ReservationWaitingJdbcRepository;
+import roomescape.infrastructure.repository.ReservationWaitingQueryJdbcRepository;
 
 @JdbcTest
 @Import({

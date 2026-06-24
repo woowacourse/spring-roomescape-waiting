@@ -23,7 +23,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
-import roomescape.repository.ReservationJdbcRepository;
+import roomescape.infrastructure.repository.ReservationJdbcRepository;
 
 @JdbcTest
 @Import(ReservationJdbcRepository.class)

@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Slot;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.repository.ReservationRepository;
 
 @Service
 @Transactional
@@ -26,13 +26,7 @@ public class ReservationCommandService {
         this.clock = clock;
     }
 
-    public Reservation save(Member reserver, Slot slot) {
-        Reservation reservation = Reservation.createWith(
-                reserver,
-                slot,
-                now()
-        );
-
+    public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
 

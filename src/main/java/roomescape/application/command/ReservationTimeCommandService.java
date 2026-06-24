@@ -3,7 +3,7 @@ package roomescape.application.command;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.domain.ReservationTimeRepository;
 
 @Service
 @Transactional
