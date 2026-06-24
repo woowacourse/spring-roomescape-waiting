@@ -152,6 +152,47 @@ class ReservationServiceTest {
                 });
     }
 
+    @DisplayName("결제 대기 예약을 취소하면 다음 대기자가 결제 대기로 승격되고 결제 주문 정보가 조회된다.")
+    @Test
+    void 결제_대기_취소시_다음_대기자_결제_대기_승격() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate reservationDate = now.toLocalDate().plusDays(80);
+        ReservationRequest firstRequest = new ReservationRequest("취소승격1", reservationDate, 2L, 1L);
+        ReservationRequest waitingRequest = new ReservationRequest("취소승격2", reservationDate, 2L, 1L);
+
+        ReservationResponse firstResponse = reservationService.save(now, firstRequest);
+        reservationService.save(now.plusSeconds(1), waitingRequest);
+
+        reservationService.delete(now.plusSeconds(2), firstResponse.reservationId(), "취소승격1");
+
+        ReservationResponse promoted = reservationService.findAllByName("취소승격2").get(0);
+        assertThat(promoted.status()).isEqualTo("PAYMENT_PENDING");
+        assertThat(promoted.order()).isZero();
+        assertThat(promoted.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(promoted.amount()).isEqualTo(10000L);
+    }
+
+    @DisplayName("결제 대기 예약을 수정하면 기존 슬롯의 다음 대기자가 결제 대기로 승격되고 결제 주문 정보가 조회된다.")
+    @Test
+    void 결제_대기_수정시_다음_대기자_결제_대기_승격() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate reservationDate = now.toLocalDate().plusDays(81);
+        ReservationRequest firstRequest = new ReservationRequest("수정승격1", reservationDate, 2L, 1L);
+        ReservationRequest waitingRequest = new ReservationRequest("수정승격2", reservationDate, 2L, 1L);
+        ReservationRequest updateRequest = new ReservationRequest("수정승격1", reservationDate, 3L, 1L);
+
+        ReservationResponse firstResponse = reservationService.save(now, firstRequest);
+        reservationService.save(now.plusSeconds(1), waitingRequest);
+
+        reservationService.update(firstResponse.reservationId(), now.plusSeconds(2), updateRequest);
+
+        ReservationResponse promoted = reservationService.findAllByName("수정승격2").get(0);
+        assertThat(promoted.status()).isEqualTo("PAYMENT_PENDING");
+        assertThat(promoted.order()).isZero();
+        assertThat(promoted.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(promoted.amount()).isEqualTo(10000L);
+    }
+
     @DisplayName("본인 예약이 아니면 예약 대기를 취소할 수 없다.")
     @Test
     void 본인_예약이_아니면_예약_대기_취소_예외_테스트() {

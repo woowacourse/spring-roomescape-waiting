@@ -112,7 +112,7 @@ class ReservationSlotTest {
     }
 
     @Test
-    @DisplayName("확정 예약을 삭제하면 첫 번째 대기 예약이 확정으로 승격된다")
+    @DisplayName("확정 예약을 삭제하면 첫 번째 대기 예약이 결제 대기로 승격된다")
     void 확정_삭제시_대기_승격() {
         LocalDateTime now = LocalDateTime.now();
         Reservation firstWaiting = createReservation(2L, "도니", Status.WAITING, now.plusMinutes(1));
@@ -125,7 +125,25 @@ class ReservationSlotTest {
 
         reservationSlot.deleteReservation(1L, "브라운", now.plusMinutes(3));
 
-        assertThat(firstWaiting.getStatus()).isEqualTo(Status.RESERVED);
+        assertThat(firstWaiting.getStatus()).isEqualTo(Status.PAYMENT_PENDING);
+        assertThat(secondWaiting.getStatus()).isEqualTo(Status.WAITING);
+    }
+
+    @Test
+    @DisplayName("결제 대기 예약을 삭제하면 첫 번째 대기 예약이 결제 대기로 승격된다")
+    void 결제_대기_삭제시_대기_승격() {
+        LocalDateTime now = LocalDateTime.now();
+        Reservation firstWaiting = createReservation(2L, "도니", Status.WAITING, now.plusMinutes(1));
+        Reservation secondWaiting = createReservation(3L, "모디", Status.WAITING, now.plusMinutes(2));
+        ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
+                createReservation(1L, "브라운", Status.PAYMENT_PENDING, now),
+                firstWaiting,
+                secondWaiting
+        )));
+
+        reservationSlot.deleteReservation(1L, "브라운", now.plusMinutes(3));
+
+        assertThat(firstWaiting.getStatus()).isEqualTo(Status.PAYMENT_PENDING);
         assertThat(secondWaiting.getStatus()).isEqualTo(Status.WAITING);
     }
 
