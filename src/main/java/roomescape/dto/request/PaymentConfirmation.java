@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.dto.request;
 
 public record PaymentConfirmation(
         String paymentKey,

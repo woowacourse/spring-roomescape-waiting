@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
-import roomescape.domain.PaymentOrder;
-import roomescape.domain.PaymentResult;
+import roomescape.domain.Order;
 import roomescape.domain.PaymentStatus;
-import roomescape.repository.PaymentOrderRepository;
+import roomescape.dto.response.PaymentResult;
+import roomescape.repository.OrderRepository;
 import roomescape.service.PaymentService;
 import roomescape.service.ReservationService;
 
@@ -23,23 +23,23 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final ReservationService reservationService;
-    private final PaymentOrderRepository paymentOrderRepository;
+    private final OrderRepository orderRepository;
     private final String clientKey;
 
     public PaymentController(
             PaymentService paymentService,
             ReservationService reservationService,
-            PaymentOrderRepository paymentOrderRepository,
+            OrderRepository orderRepository,
             @Value("${toss.client-key}") String clientKey) {
         this.paymentService = paymentService;
         this.reservationService = reservationService;
-        this.paymentOrderRepository = paymentOrderRepository;
+        this.orderRepository = orderRepository;
         this.clientKey = clientKey;
     }
 
     @GetMapping
     public String paymentPage(@RequestParam String orderId, Model model) {
-        PaymentOrder order = paymentOrderRepository.findByOrderId(orderId)
+        Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RoomEscapeException(PaymentErrorCode.NOT_FOUND));
         String orderName = order.getReservation().getTheme().getName() + " 방탈출 예약";
 

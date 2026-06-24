@@ -20,7 +20,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
-import roomescape.domain.PaymentConfirmation;
+import roomescape.dto.request.PaymentConfirmation;
 import roomescape.domain.PaymentStatus;
 
 @SpringBootTest

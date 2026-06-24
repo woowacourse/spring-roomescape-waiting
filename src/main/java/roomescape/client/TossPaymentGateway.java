@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import roomescape.client.dto.ConfirmRequest;
@@ -12,9 +11,9 @@ import roomescape.client.dto.TossErrorResponse;
 import roomescape.client.dto.TossPaymentResponse;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
-import roomescape.domain.PaymentConfirmation;
+import roomescape.dto.request.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
-import roomescape.domain.PaymentResult;
+import roomescape.dto.response.PaymentResult;
 import roomescape.domain.PaymentStatus;
 
 @Component

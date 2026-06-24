@@ -1,7 +1,7 @@
 package roomescape.dto.response;
 
 import java.time.LocalDate;
-import roomescape.domain.PaymentOrder;
+import roomescape.domain.Order;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
 
@@ -17,7 +17,7 @@ public record MyReservationResponse(
         String paymentKey,
         Long amount
 ) {
-    public static MyReservationResponse fromReservation(Reservation reservation, PaymentOrder paymentOrder) {
+    public static MyReservationResponse fromReservation(Reservation reservation, Order paymentOrder) {
         ReservationStatus status = resolveStatus(reservation, paymentOrder);
         String paymentKey = (paymentOrder != null) ? paymentOrder.getPaymentKey() : null;
         return new MyReservationResponse(
@@ -42,7 +42,7 @@ public record MyReservationResponse(
         );
     }
 
-    private static ReservationStatus resolveStatus(Reservation reservation, PaymentOrder paymentOrder) {
+    private static ReservationStatus resolveStatus(Reservation reservation, Order paymentOrder) {
         if (reservation.getReservationStatus() == roomescape.domain.ReservationStatus.CONFIRMED) {
             return ReservationStatus.RESERVED;
         }
