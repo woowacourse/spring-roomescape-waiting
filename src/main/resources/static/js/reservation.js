@@ -307,15 +307,7 @@ async function closePaymentModal() {
     if (order) {
         // 결제를 마치지 않고 모달을 닫으면 결제 대기(PENDING) 주문을 정리한다.
         try {
-            await fetchJson('/payments/fail', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    code: 'USER_CANCEL',
-                    message: '사용자가 결제를 취소했습니다.',
-                    orderId: order.orderId
-                })
-            });
+            await fetchJson(`/payments/${encodeURIComponent(order.orderId)}`, { method: 'DELETE' });
         } catch (error) {
             console.error('결제 대기 주문 정리 실패:', error);
         }

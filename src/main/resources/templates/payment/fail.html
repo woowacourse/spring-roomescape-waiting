@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 실패 · 방탈출</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/}">방탈출 예약</a>
+    <nav class="nav">
+        <a th:href="@{/}">홈</a>
+        <a th:href="@{/reservation}">예약</a>
+        <a th:href="@{/my}">내 예약</a>
+        <a th:href="@{/popular}">인기 테마</a>
+        <a th:href="@{/admin}">어드민</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="card">
+        <h1 id="status">결제 대기 주문을 정리하는 중입니다...</h1>
+        <p id="detail" class="subtitle"></p>
+        <div class="actions">
+            <a class="btn btn-primary" th:href="@{/reservation}">다시 예약하기</a>
+            <a class="btn btn-ghost" th:href="@{/my}">내 예약 보기</a>
+        </div>
+    </section>
+</main>
+
+<script th:src="@{/js/common.js(v=2)}"></script>
+<script th:src="@{/js/payment-fail.js(v=1)}"></script>
+</body>
+</html>

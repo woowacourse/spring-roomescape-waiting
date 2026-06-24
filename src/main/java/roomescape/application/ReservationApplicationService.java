@@ -41,6 +41,7 @@ public class ReservationApplicationService {
     private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String PAST_RESERVATION_DELETE_REJECTED = "지난 예약은 삭제할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
+    private static final String ONLY_PENDING_PAYMENT_CAN_BE_DELETED = "결제 대기 중인 예약만 정리할 수 있습니다.";
     private static final long PAYMENT_AMOUNT = 50_000L;
 
     private final ReservationService reservationService;
@@ -111,6 +112,20 @@ public class ReservationApplicationService {
         reservationService.confirm(payment.getReservationId());
         return reservationService.findReservation(payment.getReservationId())
                 .orElseThrow(() -> NotFoundException.reservation(payment.getReservationId()));
+    }
+
+    @Transactional
+    public void deletePendingPayment(String orderId) {
+        Payment payment = paymentService.findByOrderId(orderId)
+                .orElseThrow(() -> NotFoundException.payment(orderId));
+        Reservation reservation = reservationService.findReservation(payment.getReservationId())
+                .orElseThrow(() -> NotFoundException.reservation(payment.getReservationId()));
+
+        if (!reservation.isPending()) {
+            throw new BusinessRuleViolationException(ONLY_PENDING_PAYMENT_CAN_BE_DELETED);
+        }
+
+        reservationService.deleteReservation(reservation.getId());
     }
 
     @Transactional
