@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
@@ -9,6 +10,7 @@ import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.domain.Member;
+import roomescape.domain.Order;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -17,6 +19,7 @@ import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.OrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
@@ -30,17 +33,20 @@ public class ReservationWaitingService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
+    private final OrderRepository orderRepository;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
                                      ReservationTimeRepository reservationTimeRepository,
                                      ThemeRepository themeRepository,
                                      ReservationRepository reservationRepository,
-                                     MemberRepository memberRepository) {
+                                     MemberRepository memberRepository,
+                                     OrderRepository orderRepository) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Transactional
@@ -63,11 +69,18 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void promoteFirstWaiting(ReservationSlot slot) {
+    public void promoteFirstWaiting(ReservationSlot slot, Long amount) {
         reservationWaitingRepository.findFirstBySlotOrderByCreatedAt(slot).ifPresent(waiting -> {
-            reservationRepository.save(Reservation.createWithoutId(waiting.getMember(), slot));
+            Reservation promoted = reservationRepository.save(Reservation.createWithoutId(waiting.getMember(), slot));
+            if (amount != null) {
+                orderRepository.save(Order.createWithoutId(generateOrderId(), amount, promoted));
+            }
             reservationWaitingRepository.deleteById(waiting.getId());
         });
+    }
+
+    private String generateOrderId() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 20);
     }
 
     @Transactional

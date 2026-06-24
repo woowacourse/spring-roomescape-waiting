@@ -714,6 +714,8 @@
         list.innerHTML = items.map(item => {
             const isWaiting = item.status === 'WAITING';
             const isConfirmed = item.status === 'RESERVED';
+            const needsPayment = item.status === 'PENDING_PAYMENT' && item.orderId;
+            const needsRetry = item.status === 'NEED_CHECK' && item.orderId;
             return `
                 <article class="reservation-card">
                     <img class="thumb" src="${item.theme.thumbnail}" alt="${escapeHtml(item.theme.name)}" onerror="this.src='https://placehold.co/160x160/f2f4f6/8b95a1?text=Theme'">
@@ -728,6 +730,8 @@
                         ${paymentInfoHtml(item)}
                     </div>
                     <div class="actions">
+                        ${needsPayment ? `<a class="primary-button" href="/payment?orderId=${encodeURIComponent(item.orderId)}" style="display:inline-flex;align-items:center;text-decoration:none;">결제하기</a>` : ''}
+                        ${needsRetry ? `<a class="secondary-button" href="/payment?orderId=${encodeURIComponent(item.orderId)}" style="display:inline-flex;align-items:center;text-decoration:none;">결제 재시도</a>` : ''}
                         ${isConfirmed ? `<button class="secondary-button" type="button" onclick="openUpdateModal(${item.id})">변경</button>` : ''}
                         <button class="danger-button" type="button" onclick="cancelItem(${item.id}, '${item.status}')">${isWaiting ? '대기 취소' : '예약 취소'}</button>
                     </div>

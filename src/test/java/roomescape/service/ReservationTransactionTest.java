@@ -74,7 +74,7 @@ public class ReservationTransactionTest {
                         new ReservationSlot(date, time, theme)));
 
         doThrow(new RuntimeException("승격 실패 강제 주입"))
-                .when(waitingService).promoteFirstWaiting(any());
+                .when(waitingService).promoteFirstWaiting(any(), any());
 
         // when
         assertThatThrownBy(() ->

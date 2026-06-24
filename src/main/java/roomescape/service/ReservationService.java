@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,11 +118,12 @@ public class ReservationService {
     @Transactional
     public void delete(Long reservationId) {
         Reservation reservation = getReservation(reservationId);
-        orderRepository.findByReservation_Id(reservationId)
-                .ifPresent(orderRepository::delete);
+        Optional<Order> orderOpt = orderRepository.findByReservation_Id(reservationId);
+        Long amount = orderOpt.map(Order::getAmount).orElse(null);
+        orderOpt.ifPresent(orderRepository::delete);
         reservationRepository.deleteById(reservationId);
         reservationRepository.flush();
-        waitingService.promoteFirstWaiting(reservation.getSlot());
+        waitingService.promoteFirstWaiting(reservation.getSlot(), amount);
     }
 
     @Transactional
