@@ -64,7 +64,7 @@ public class TossPaymentException extends RuntimeException {
     /** 인증 실패 — 키 설정 오류, 운영 알림 대상 */
     public static class GatewayConfig extends TossPaymentException {
         public GatewayConfig(String message) {
-            super(HttpStatus.INTERNAL_SERVER_ERROR, "UNAUTHORIZED_KEY", message);
+            super(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED_KEY", message);
         }
     }
 
@@ -83,7 +83,7 @@ public class TossPaymentException extends RuntimeException {
     /** Toss 내부 오류 — 재시도 대상 */
     public static class Retryable extends TossPaymentException {
         public Retryable(String message) {
-            super(HttpStatus.BAD_GATEWAY, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
+            super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
         }
     }
 }

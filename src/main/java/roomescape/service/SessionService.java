@@ -7,16 +7,19 @@ import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.*;
+import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.gateway.PaymentGateway;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateSessionException;
 import roomescape.exception.InvalidWaitingPrerequisiteException;
 import roomescape.exception.SessionNotFoundException;
+import roomescape.repository.PendingPaymentRepository;
 import roomescape.repository.SessionRepository;
 import roomescape.service.dto.AvailableTimeSlot;
 
 import java.util.Objects;
+import java.util.UUID;
 import roomescape.service.dto.Booking;
 
 import java.time.LocalDate;
@@ -34,16 +37,19 @@ public class SessionService {
     private final ReservationService reservationService;
     private final WaitingService waitingService;
     private final PaymentGateway paymentGateway;
+    private final PendingPaymentRepository pendingPaymentRepository;
 
     public SessionService(SessionRepository sessionRepository, TimeSlotService timeSlotService,
                           ThemeService themeService, ReservationService reservationService,
-                          WaitingService waitingService, PaymentGateway paymentGateway) {
+                          WaitingService waitingService, PaymentGateway paymentGateway,
+                          PendingPaymentRepository pendingPaymentRepository) {
         this.sessionRepository = sessionRepository;
         this.timeSlotService = timeSlotService;
         this.themeService = themeService;
         this.reservationService = reservationService;
         this.waitingService = waitingService;
         this.paymentGateway = paymentGateway;
+        this.pendingPaymentRepository = pendingPaymentRepository;
     }
 
     public List<Session> allSessions() {
@@ -97,9 +103,27 @@ public class SessionService {
     }
 
     @Transactional
+    public String preparePayment(Long amount) {
+        String orderId = UUID.randomUUID().toString();
+        pendingPaymentRepository.save(new PendingPayment(orderId, amount));
+        return orderId;
+    }
+
+    @Transactional
+    public void cancelPreparedPayment(String orderId) {
+        pendingPaymentRepository.deleteByOrderId(orderId);
+    }
+
+    @Transactional
     public Reservation makeReservation(PaymentReservationRequest request) {
         Session session = findSessionOrThrow(request.date(), request.timeId(), request.themeId());
+        PendingPayment pending = pendingPaymentRepository.findByOrderId(request.orderId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다: " + request.orderId()));
+        if (!pending.amount().equals(request.amount())) {
+            throw new PaymentAmountMismatchException(pending.amount(), request.amount());
+        }
         paymentGateway.confirm(new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount()));
+        pendingPaymentRepository.deleteByOrderId(request.orderId());
         return reservationService.save(request.name(), session, request.amount(), request.paymentKey());
     }
 

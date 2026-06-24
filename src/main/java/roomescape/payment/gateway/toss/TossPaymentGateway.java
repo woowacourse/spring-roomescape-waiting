@@ -33,8 +33,20 @@ public class TossPaymentGateway implements PaymentGateway {
                 .body(new ConfirmRequest(confirmation.paymentKey(), confirmation.orderId(), confirmation.amount()))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
-                    throw TossPaymentException.of(res.getStatusCode(), error);
+                    HttpStatusCode statusCode = res.getStatusCode();
+                    try {
+                        TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
+                        throw TossPaymentException.of(statusCode, error);
+                    } catch (java.io.IOException e) {
+                        // ponytail: HttpURLConnection consumes 401 body on auth-retry — fall back to status-code mapping
+                        throw switch (statusCode.value()) {
+                            case 401 -> new TossPaymentException.GatewayConfig("인증 실패");
+                            case 403 -> new TossPaymentException.CardRejected("카드 거절");
+                            case 404 -> new TossPaymentException.PaymentNotFound("결제 정보 없음");
+                            case 500 -> new TossPaymentException.Retryable("Toss 내부 오류");
+                            default  -> new TossPaymentException(statusCode, "UNKNOWN_ERROR", e.getMessage());
+                        };
+                    }
                 })
                 .body(TossPaymentResponse.class);
 

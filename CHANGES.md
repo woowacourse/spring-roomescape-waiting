@@ -111,7 +111,102 @@ ALTER TABLE reservation
 
 ---
 
+---
+
+# [2차] 결제 무결성 강화
+
+> 요구사항: orderId 서버에서 생성, 금액 위변조 방어, 결제 취소 시 대기 레코드 정리
+
+---
+
+## 8. pending_payment 테이블
+
+**요구사항**: 클라이언트가 제출한 금액을 그대로 Toss에 전달하면 위변조 가능. 결제 시작 전에 서버가 금액을 DB에 저장하고, 승인 시점에 비교해야 한다.
+
+**파일**: `src/main/resources/schema.sql`, `src/test/resources/test-setup.sql`
+
+```sql
+CREATE TABLE pending_payment
+(
+    order_id   VARCHAR(64) NOT NULL,
+    amount     BIGINT      NOT NULL,
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (order_id)
+);
+```
+
+---
+
+## 9. PendingPayment 도메인 및 레포지토리
+
+**요구사항**: orderId → 저장 금액 조회, 결제 완료/취소 시 삭제.
+
+| 파일                                             | 설명                                                   |
+|------------------------------------------------|------------------------------------------------------|
+| `domain/PendingPayment.java`                   | `record PendingPayment(String orderId, Long amount)` |
+| `repository/PendingPaymentRepository.java`     | `save` / `findByOrderId` / `deleteByOrderId` 인터페이스   |
+| `repository/JdbcPendingPaymentRepository.java` | `SimpleJdbcInsert` + `JdbcTemplate` 구현               |
+
+---
+
+## 10. PaymentAmountMismatchException
+
+**요구사항**: Toss 승인 API 호출 전에 저장 금액 ≠ 요청 금액이면 차단 (승인 후 불일치 검증은 의미 없음).
+
+**파일**: `payment/PaymentAmountMismatchException.java`
+
+- `RuntimeException` 상속, 생성자에서 "저장된 금액 vs 요청 금액" 메시지 포함
+- `ProblemDetailsAdvice`에 핸들러 추가 → HTTP 400 + code `PAYMENT_AMOUNT_MISMATCH`
+
+---
+
+## 11. POST /payments/prepare — orderId 서버 발급
+
+**요구사항**: 클라이언트가 orderId를 생성하면 임의 값 삽입 가능. 서버가 UUID로 생성하고 금액과 함께 `pending_payment`에 저장해야 한다.
+
+**파일**: `controller/PaymentController.java`, `controller/dto/PreparePaymentRequest.java`
+
+```
+POST /payments/prepare          { "amount": 50000 }
+→ 200 { "orderId": "uuid" }   (pending_payment 행 삽입)
+
+DELETE /payments/prepare/{orderId}
+→ 204                          (pending_payment 행 삭제, 존재하지 않으면 no-op)
+```
+
+`SessionService.preparePayment(Long)` / `cancelPreparedPayment(String)` 위임.
+
+---
+
+## 12. SessionService.makeReservation — 금액 검증 추가
+
+**요구사항**: Toss 승인 전에 DB 저장 금액과 요청 금액을 비교해 위변조를 차단한다.
+
+**파일**: `service/SessionService.java`
+
+변경 후 실행 순서:
+
+1. `findSessionOrThrow` — 세션 존재 확인
+2. `pendingPaymentRepository.findByOrderId` — 없으면 `IllegalArgumentException` (400)
+3. **금액 비교** — 불일치 시 `PaymentAmountMismatchException` (400), Toss 호출 없음
+4. `paymentGateway.confirm` — Toss 승인
+5. `pendingPaymentRepository.deleteByOrderId` — 대기 레코드 정리
+6. `reservationService.save` — 예약 저장 (과거 날짜 검증은 여기서 발생)
+
+---
+
+## 13. 테스트 변경
+
+**요구사항**: 기존 단위/통합 테스트가 새 흐름(pending_payment 선행 필요)을 통과해야 한다.
+
+| 파일                                                       | 변경 내용                                                                                                     |
+|----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `test/repository/FakePendingPaymentRepository.java` (신규) | 단위 테스트용 인메모리 구현. `deleteByOrderId` no-op (클린업은 통합 테스트 관심사)                                                |
+| `test/service/SessionServiceTest.java`                   | 생성자 7번째 인자 추가, `@BeforeEach`에 `("order_test", 0L)` 사전 저장, `PaymentAmountMismatchException` 테스트 추가         |
+| `test/integration/RoomescapeIntegrationTest.java`        | `insertTestData()`에 `pending_payment ('order_test', 0)` 삽입 추가 (POST /reservations 테스트가 pending 조회를 통과하도록) |
+
+---
+
 ### **TODO**
 
-- 예외 종류 / 매핑 추가
 - 자동 승격 예약 결제 처리

@@ -1,6 +1,7 @@
 package roomescape.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.gateway.toss.TossPaymentException;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,13 @@ public class ProblemDetailsAdvice {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, exception.getMessage());
         problemDetail.setProperty("code", exception.getErrorCode());
         return ResponseEntity.status(status).body(problemDetail);
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    public ResponseEntity<ProblemDetail> handlePaymentAmountMismatchException(PaymentAmountMismatchException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problemDetail.setProperty("code", "PAYMENT_AMOUNT_MISMATCH");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
 
     @ExceptionHandler(TossPaymentException.class)

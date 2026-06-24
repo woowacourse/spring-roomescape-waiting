@@ -40,6 +40,7 @@ import roomescape.domain.TimeSlot;
 import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.ProblemDetailsAdvice;
 import roomescape.exception.ReservationNotFoundException;
+import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.service.SessionService;
 
 @WebMvcTest(ReservationController.class)
@@ -167,6 +168,16 @@ class ReservationControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("DUPLICATE_KEY_VIOLATION"))
                 .andExpect(jsonPath("$.detail").value("이미 존재하는 데이터입니다."));
+    }
+
+    @Test
+    @DisplayName("결제 금액 불일치 시 400 상태 코드와 PAYMENT_AMOUNT_MISMATCH 코드를 반환한다.")
+    void createReservationWithAmountMismatch() throws Exception {
+        given(sessionService.makeReservation(any()))
+                .willThrow(new PaymentAmountMismatchException(50000L, 30000L));
+        performPost("/reservations", new PaymentReservationRequest("브라운", LocalDate.now(), 1L, 1L, 30000L, "pk_test", "order_test"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PAYMENT_AMOUNT_MISMATCH"));
     }
 
     @Test

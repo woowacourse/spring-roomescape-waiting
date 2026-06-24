@@ -142,5 +142,6 @@ class RoomescapeIntegrationTest {
 
         jdbcTemplate.update("INSERT INTO session (date, time_id, theme_id) VALUES (?, 1, 1)", date);
         jdbcTemplate.update("INSERT INTO reservation (name, session_id) VALUES ('브라운', 1)");
+        jdbcTemplate.update("INSERT INTO pending_payment (order_id, amount) VALUES ('order_test', 0)");
     }
 }
