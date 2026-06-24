@@ -2,8 +2,8 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Payment;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reservations;
@@ -16,6 +16,7 @@ import roomescape.dto.TimeWithStatusResponse;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
+import roomescape.service.PaymentService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
@@ -39,22 +40,26 @@ public class ReservationApplicationService {
     private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String PAST_RESERVATION_DELETE_REJECTED = "지난 예약은 삭제할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
+    private static final long PAYMENT_AMOUNT = 50_000L;
 
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
     private final ReservationWaitingService reservationWaitingService;
     private final ThemeService themeService;
+    private final PaymentService paymentService;
 
     public ReservationApplicationService(
             ReservationService reservationService,
             ReservationTimeService reservationTimeService,
             ReservationWaitingService reservationWaitingService,
-            ThemeService themeService
+            ThemeService themeService,
+            PaymentService paymentService
     ) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.reservationWaitingService = reservationWaitingService;
         this.themeService = themeService;
+        this.paymentService = paymentService;
     }
 
     @Transactional
@@ -74,7 +79,7 @@ public class ReservationApplicationService {
     }
 
     @Transactional
-    public Reservation addReservation(ReservationRequest request) {
+    public ReservationPayment addReservation(ReservationRequest request) {
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
 
@@ -94,7 +99,9 @@ public class ReservationApplicationService {
             throw new ConflictException(ALREADY_EXISTS_ADD_RESERVATION);
         }
 
-        return reservationService.addReservation(reservation);
+        Reservation saved = reservationService.addReservation(reservation);
+        Payment payment = paymentService.createOrder(saved.getId(), PAYMENT_AMOUNT);
+        return new ReservationPayment(saved, payment);
     }
 
     @Transactional
