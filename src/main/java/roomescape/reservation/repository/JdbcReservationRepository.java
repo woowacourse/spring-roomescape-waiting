@@ -177,7 +177,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
                 LEFT JOIN payment p ON p.reservation_id = r.id
-                WHERE r.name = ? AND r.status IN ('CONFIRMED', 'PAYMENT_UNCERTAIN')
+                WHERE r.name = ? AND r.status IN ('CONFIRMED', 'PAYMENT_UNCERTAIN', 'PAYMENT_PENDING')
                 ORDER BY r.date DESC, rt.start_at DESC
                 """;
         return jdbcTemplate.query(query, (rs, rowNum) -> new ReservationWithPaymentResponse(
