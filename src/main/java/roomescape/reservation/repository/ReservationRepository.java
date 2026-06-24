@@ -7,6 +7,7 @@ import roomescape.common.domain.ReservationSlot;
 import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
+import roomescape.reservation.dto.ReservationWithPaymentResponse;
 
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
@@ -30,4 +31,6 @@ public interface ReservationRepository {
     ReservationIdResponse findIdBySlot(LocalDate date, Long themeId, Long timeId);
 
     void updateStatus(Long reservationId, PaymentStatus status);
+
+    List<ReservationWithPaymentResponse> findWithPaymentByName(String name);
 }

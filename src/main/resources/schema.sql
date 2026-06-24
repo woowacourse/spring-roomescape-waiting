@@ -53,10 +53,10 @@ CREATE TABLE reservation_waiting
 );
 
 CREATE TABLE payment (
-    order_id VARCHAR(64) NOT NULL,
-    amount      INT          NOT NULL,
-    payment_key VARCHAR(200),
-    reservation_id BIGINT   NOT NULL,
+    order_id       VARCHAR(64)  NOT NULL,
+    amount         INT          NOT NULL,
+    payment_key    VARCHAR(200),
+    reservation_id BIGINT       NOT NULL,
     PRIMARY KEY (order_id),
     FOREIGN KEY (reservation_id) REFERENCES reservation(id) ON DELETE CASCADE
 )

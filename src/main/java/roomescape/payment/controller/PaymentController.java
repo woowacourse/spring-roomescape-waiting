@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import roomescape.common.exception.BusinessException;
 import roomescape.config.TossPaymentProperties;
+import roomescape.payment.PaymentConnectionException;
+import roomescape.payment.PaymentUncertainException;
 import roomescape.payment.TossPaymentException;
 import roomescape.payment.service.PaymentService;
 
@@ -43,6 +45,13 @@ public class PaymentController {
             return redirectToFail(redirectAttributes, e.getCode(), e.getMessage(), orderId);
         } catch (BusinessException e) {
             return redirectToFail(redirectAttributes, e.getErrorCode().name(), e.getMessage(), orderId);
+        } catch (PaymentConnectionException e) {
+            // Toss에 요청이 도달하지 않아 결제 안 됨 → fail 엔드포인트에서 예약 정리.
+            return redirectToFail(redirectAttributes, "CONNECTION_FAILED", e.getMessage(), orderId);
+        } catch (PaymentUncertainException e) {
+            // read timeout: 결제 처리 여부 불명 → 예약을 PAYMENT_UNCERTAIN으로 보존, 삭제하지 않음.
+            paymentService.markAsUncertain(orderId);
+            return redirectToFail(redirectAttributes, "PAYMENT_UNCERTAIN", e.getMessage(), orderId);
         }
     }
 

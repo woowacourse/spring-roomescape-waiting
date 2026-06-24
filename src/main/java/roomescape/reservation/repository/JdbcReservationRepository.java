@@ -13,7 +13,9 @@ import roomescape.common.domain.ReservationSlot;
 import roomescape.reservation.domain.PaymentStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
+import roomescape.reservation.dto.ReservationWithPaymentResponse;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.dto.TimeResponse;
 import roomescape.theme.domain.Theme;
 
 @Repository
@@ -161,5 +163,36 @@ public class JdbcReservationRepository implements ReservationRepository {
     public void updateStatus(Long reservationId, PaymentStatus status) {
         String query = "UPDATE reservation SET status = ? WHERE id = ?";
         jdbcTemplate.update(query, status.name(), reservationId);
+    }
+
+    @Override
+    public List<ReservationWithPaymentResponse> findWithPaymentByName(String name) {
+        String query = """
+                SELECT r.id as reservation_id, r.name, r.date,
+                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
+                       t.name as theme_name,
+                       r.status,
+                       p.order_id, p.payment_key, p.amount as payment_amount
+                FROM reservation r
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                LEFT JOIN payment p ON p.reservation_id = r.id
+                WHERE r.name = ? AND r.status IN ('CONFIRMED', 'PAYMENT_UNCERTAIN', 'PAYMENT_PENDING')
+                ORDER BY r.date DESC, rt.start_at DESC
+                """;
+        return jdbcTemplate.query(query, (rs, rowNum) -> new ReservationWithPaymentResponse(
+                rs.getLong("reservation_id"),
+                rs.getString("name"),
+                rs.getDate("date").toLocalDate(),
+                new TimeResponse(
+                        rs.getLong("time_id"),
+                        rs.getTime("time_start_at").toLocalTime()
+                ),
+                rs.getString("theme_name"),
+                PaymentStatus.valueOf(rs.getString("status")),
+                rs.getString("order_id"),
+                rs.getString("payment_key"),
+                rs.getLong("payment_amount")
+        ), name);
     }
 }
