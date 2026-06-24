@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.payment.order.PaymentOrder;
 import roomescape.payment.order.PaymentOrderRepository;
-import roomescape.service.dto.ReservationCreateCommand;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -34,8 +33,7 @@ class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationCreateCommand command = new ReservationCreateCommand("브라운", LocalDate.of(2099, 12, 31), 1L, 1L);
-        order = PaymentOrder.pending("order-1", command, 10000L);
+        order = PaymentOrder.pending("order-1", "브라운", LocalDate.of(2099, 12, 31), 1L, 1L, 10000L);
     }
 
     @Test

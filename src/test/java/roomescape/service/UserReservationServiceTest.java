@@ -157,8 +157,7 @@ class UserReservationServiceTest {
     @DisplayName("결제가 승인되면 예약을 생성하고 주문을 확정 처리한다")
     void 결제_승인시_예약을_생성하고_주문을_확정한다() {
         PaymentConfirmCommand command = new PaymentConfirmCommand("test_pk_1", "order-1", 1000L);
-        ReservationCreateCommand reservationCommand = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
-        PaymentOrder order = PaymentOrder.pending("order-1", reservationCommand, 1000L);
+        PaymentOrder order = PaymentOrder.pending("order-1", OWNER, FUTURE_DATE, 1L, 1L, 1000L);
         ReservationResult created = new ReservationResult(
                 10L, OWNER, FUTURE_DATE,
                 new roomescape.service.dto.ReservationTimeResult(1L, LocalTime.of(10, 0)),

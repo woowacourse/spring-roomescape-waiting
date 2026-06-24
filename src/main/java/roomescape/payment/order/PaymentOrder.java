@@ -1,7 +1,6 @@
 package roomescape.payment.order;
 
 import java.time.LocalDate;
-import roomescape.service.dto.ReservationCreateCommand;
 
 public class PaymentOrder {
 
@@ -28,22 +27,19 @@ public class PaymentOrder {
         this.reservationId = reservationId;
     }
 
-    public static PaymentOrder pending(String orderId, ReservationCreateCommand command, Long amount) {
+    public static PaymentOrder pending(String orderId, String reserverName, LocalDate date,
+                                       Long timeId, Long themeId, Long amount) {
         return new PaymentOrder(
                 orderId,
-                command.reserverName(),
-                command.date(),
-                command.timeId(),
-                command.themeId(),
+                reserverName,
+                date,
+                timeId,
+                themeId,
                 amount,
                 null,
                 PaymentOrderStatus.PENDING,
                 null
         );
-    }
-
-    public ReservationCreateCommand toCommand() {
-        return new ReservationCreateCommand(reserverName, date, timeId, themeId);
     }
 
     public String getOrderId() {

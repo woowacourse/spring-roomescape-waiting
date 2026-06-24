@@ -78,7 +78,9 @@ public class UserReservationService {
         }
 
         String orderId = generateOrderId();
-        paymentOrderRepository.save(PaymentOrder.pending(orderId, command, RESERVATION_AMOUNT));
+        paymentOrderRepository.save(PaymentOrder.pending(
+                orderId, command.reserverName(), command.date(),
+                command.timeId(), command.themeId(), RESERVATION_AMOUNT));
         log.info("주문 생성 완료: orderId={}, reserverName={}, date={}, timeId={}, themeId={}, amount={}",
                 orderId, command.reserverName(), command.date(), command.timeId(), command.themeId(),
                 RESERVATION_AMOUNT);
@@ -89,7 +91,9 @@ public class UserReservationService {
         PaymentResult payment = paymentService.confirm(
                 command.paymentKey(), command.orderId(), command.amount());
         PaymentOrder order = paymentOrderRepository.getByOrderId(command.orderId());
-        ReservationResult reservation = reservationService.create(order.toCommand());
+        ReservationCreateCommand createCommand = new ReservationCreateCommand(
+                order.getReserverName(), order.getDate(), order.getTimeId(), order.getThemeId());
+        ReservationResult reservation = reservationService.create(createCommand);
         paymentOrderRepository.markConfirmed(command.orderId(), payment.paymentKey(), reservation.id());
         log.info("결제 승인 후 예약 생성 완료: orderId={}, reservationId={}, status={}",
                 command.orderId(), reservation.id(), reservation.status());
