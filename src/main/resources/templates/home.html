@@ -446,6 +446,11 @@
             color: var(--text-secondary);
         }
 
+        .theme-meta-value.price {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
         .card-arrow {
             font-size: 0.8rem;
             color: var(--accent);
@@ -537,6 +542,12 @@
         .popular-sub {
             font-size: 0.72rem;
             color: var(--text-muted);
+        }
+
+        .popular-price {
+            font-size: 0.72rem;
+            color: var(--accent);
+            white-space: nowrap;
         }
 
         .popular-meta {
@@ -844,6 +855,14 @@
     const difficulties = ['입문', '보통', '어려움', '매우 어려움'];
     const genres = [['공포', '미스터리'], ['SF', '탈출'], ['판타지', '모험'], ['추리', '스릴러'], ['해적', '탐험'], ['드라마', '심리'], ['추리', '범죄'], ['공포', '실험']];
 
+    function formatPrice(value) {
+        const amount = Number(value);
+        if (!Number.isFinite(amount)) {
+            return '-';
+        }
+        return `${amount.toLocaleString('ko-KR')}원`;
+    }
+
     function renderThemeIntroGrid(themes) {
         const grid = document.getElementById('theme-intro-grid');
         grid.innerHTML = '';
@@ -875,6 +894,10 @@
                                 <span class="theme-meta-label">제한시간</span>
                                 <span class="theme-meta-value">60분</span>
                             </div>
+                            <div class="theme-meta-item">
+                                <span class="theme-meta-label">가격</span>
+                                <span class="theme-meta-value price">${formatPrice(t.price)}</span>
+                            </div>
                         </div>
                         <span class="card-arrow">→</span>
                     </div>
@@ -901,6 +924,7 @@
                     <div class="popular-sub">${t.description ? t.description.slice(0, 40) : '자세한 설명 없음'}</div>
                 </div>
                 <div class="popular-meta">
+                    <span class="popular-price">${formatPrice(t.price)}</span>
                     <span class="popular-arrow">→</span>
                 </div>
             `;
@@ -910,11 +934,11 @@
     }
 
     const dummyThemes = [
-        { id: 1, name: '저주받은 저택', description: '오래된 저택에 숨겨진 100년의 비밀을 밝혀라. 공포와 미스터리가 교차하는 극한의 체험.', thumbnailUrl: '' },
-        { id: 2, name: '우주 정거장 X9', description: '고장난 우주선에서 산소가 떨어지기 전에 지구로 귀환하라. SF 어드벤처의 정수.', thumbnailUrl: '' },
-        { id: 3, name: '마법사의 비밀 서재', description: '실종된 마법사의 서재에서 금지된 마법서를 찾아라. 판타지와 퍼즐이 어우러진 명작.', thumbnailUrl: '' },
-        { id: 4, name: '탐정 사무소 1987', description: '냉전 시대 베를린, 24시간 안에 스파이를 잡아라. 역사와 추리가 만나는 스릴러.', thumbnailUrl: '' },
-        { id: 5, name: '심해 탐사선', description: '수심 3000m, 통신이 끊긴 탐사선에서 살아 돌아올 수 있을까? 최고 난이도의 도전.', thumbnailUrl: '' },
+        { id: 1, name: '저주받은 저택', description: '오래된 저택에 숨겨진 100년의 비밀을 밝혀라. 공포와 미스터리가 교차하는 극한의 체험.', thumbnailUrl: '', price: 50000 },
+        { id: 2, name: '우주 정거장 X9', description: '고장난 우주선에서 산소가 떨어지기 전에 지구로 귀환하라. SF 어드벤처의 정수.', thumbnailUrl: '', price: 50000 },
+        { id: 3, name: '마법사의 비밀 서재', description: '실종된 마법사의 서재에서 금지된 마법서를 찾아라. 판타지와 퍼즐이 어우러진 명작.', thumbnailUrl: '', price: 50000 },
+        { id: 4, name: '탐정 사무소 1987', description: '냉전 시대 베를린, 24시간 안에 스파이를 잡아라. 역사와 추리가 만나는 스릴러.', thumbnailUrl: '', price: 50000 },
+        { id: 5, name: '심해 탐사선', description: '수심 3000m, 통신이 끊긴 탐사선에서 살아 돌아올 수 있을까? 최고 난이도의 도전.', thumbnailUrl: '', price: 50000 },
     ];
 
     fetch('/themes')
