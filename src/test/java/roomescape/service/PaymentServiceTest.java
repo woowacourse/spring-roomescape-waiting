@@ -22,12 +22,14 @@ class PaymentServiceTest {
     private PaymentService paymentService;
     private FakeOrderRepository orderRepository;
     private FakePaymentRepository paymentRepository;
+    private FakePaymentGateway paymentGateway;
 
     @BeforeEach
     void setUp() {
         orderRepository = new FakeOrderRepository();
         paymentRepository = new FakePaymentRepository();
-        paymentService = new PaymentService(orderRepository, new FakePaymentGateway(), paymentRepository);
+        paymentGateway = new FakePaymentGateway();
+        paymentService = new PaymentService(orderRepository, paymentGateway, paymentRepository);
     }
 
     @Test
@@ -62,16 +64,37 @@ class PaymentServiceTest {
                 .hasMessageContaining("결제 금액과 저장된 금액이 일치하지 않습니다.");
     }
 
+    @Test
+    @DisplayName("주문 금액과 결제 요청 금액이 다르면 승인 요청을 보내지 않는다.")
+    void 결제_금액_불일치_승인_요청_차단() {
+        orderRepository.save(new Order("order-1", 50000L, 1L));
+
+        assertThatThrownBy(() -> paymentService.confirm("payment-key", "order-1", 10000L))
+                .isInstanceOf(PaymentAmountMismatchException.class);
+
+        assertThat(paymentGateway.isConfirmed()).isFalse();
+        assertThat(paymentRepository.findByOrderId("order-1")).isEmpty();
+        assertThat(orderRepository.findByOrderId("order-1").orElseThrow().getStatus())
+                .isEqualTo(OrderStatus.PENDING);
+    }
+
     private static class FakePaymentGateway implements PaymentGateway {
+
+        private boolean confirmed;
 
         @Override
         public PaymentResult confirm(PaymentConfirmation confirmation) {
+            confirmed = true;
             return new PaymentResult(
                     confirmation.paymentKey(),
                     confirmation.orderId(),
                     PaymentStatus.DONE,
                     confirmation.amount()
             );
+        }
+
+        public boolean isConfirmed() {
+            return confirmed;
         }
     }
 }
