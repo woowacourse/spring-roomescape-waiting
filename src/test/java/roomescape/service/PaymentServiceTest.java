@@ -18,18 +18,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import roomescape.domain.Payment;
-import roomescape.domain.PaymentConfirmation;
-import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentOrder;
-import roomescape.domain.PaymentResult;
-import roomescape.domain.PaymentStatus;
 import roomescape.domain.repository.PaymentOrderRepository;
 import roomescape.domain.repository.PaymentRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
+import roomescape.domain.vo.PaymentConfirmation;
+import roomescape.domain.vo.PaymentResult;
 import roomescape.dto.PaymentConfirmRequest;
 import roomescape.dto.PaymentFailRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
+import roomescape.service.port.PaymentGateway;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -75,7 +74,7 @@ class PaymentServiceTest {
         PaymentOrder paymentOrder = new PaymentOrder(1L, 10L, ORDER_ID, 10_000L);
         when(paymentOrderRepository.getByOrderId(ORDER_ID)).thenReturn(paymentOrder);
         when(paymentGateway.confirm(new PaymentConfirmation(PAYMENT_KEY, ORDER_ID, 10_000L)))
-                .thenReturn(new PaymentResult(PAYMENT_KEY, ORDER_ID, PaymentStatus.DONE, 10_000L));
+                .thenReturn(new PaymentResult(PAYMENT_KEY, ORDER_ID, 10_000L));
 
         paymentService.confirm(new PaymentConfirmRequest(PAYMENT_KEY, ORDER_ID, 10_000L));
 

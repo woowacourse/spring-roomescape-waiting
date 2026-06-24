@@ -1,9 +1,8 @@
-package roomescape.domain;
+package roomescape.domain.vo;
 
 public record PaymentResult(
         String paymentKey,
         String orderId,
-        PaymentStatus status,
         Long amount
 ) {
 }

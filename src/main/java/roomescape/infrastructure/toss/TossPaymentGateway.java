@@ -12,13 +12,12 @@ import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import roomescape.domain.PaymentConfirmation;
-import roomescape.domain.PaymentGateway;
-import roomescape.domain.PaymentResult;
-import roomescape.domain.PaymentStatus;
+import roomescape.domain.vo.PaymentConfirmation;
+import roomescape.domain.vo.PaymentResult;
 import roomescape.infrastructure.toss.dto.ConfirmRequest;
 import roomescape.infrastructure.toss.dto.TossErrorResponse;
 import roomescape.infrastructure.toss.dto.TossPaymentResponse;
+import roomescape.service.port.PaymentGateway;
 
 @Component
 public class TossPaymentGateway implements PaymentGateway {
@@ -56,7 +55,6 @@ public class TossPaymentGateway implements PaymentGateway {
         return new PaymentResult(
                 response.paymentKey(),
                 response.orderId(),
-                PaymentStatus.from(response.status()),
                 response.totalAmount()
         );
     }

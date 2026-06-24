@@ -5,17 +5,17 @@ import org.springframework.util.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Payment;
-import roomescape.domain.PaymentConfirmation;
-import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentOrder;
-import roomescape.domain.PaymentResult;
 import roomescape.domain.repository.PaymentOrderRepository;
 import roomescape.domain.repository.PaymentRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
+import roomescape.domain.vo.PaymentConfirmation;
+import roomescape.domain.vo.PaymentResult;
 import roomescape.dto.PaymentConfirmRequest;
 import roomescape.dto.PaymentFailRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
+import roomescape.service.port.PaymentGateway;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
