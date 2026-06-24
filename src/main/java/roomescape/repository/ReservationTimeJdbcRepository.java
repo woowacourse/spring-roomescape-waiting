@@ -26,7 +26,14 @@ public class ReservationTimeJdbcRepository implements ReservationTimeRepository 
     );
 
     public List<ReservationTime> findAll() {
-        return jdbcTemplate.query("SELECT id, start_at FROM reservation_time ORDER BY start_at;", timeRowMapper);
+        String sql = """
+                SELECT
+                    id,
+                    start_at
+                FROM reservation_time
+                ORDER BY start_at
+                """;
+        return jdbcTemplate.query(sql, timeRowMapper);
     }
 
     public ReservationTime save(ReservationTime time) {
