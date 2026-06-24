@@ -1,8 +1,13 @@
 package roomescape.service;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 
 import roomescape.domain.Payment;
 import roomescape.domain.PaymentOrder;
@@ -51,11 +56,38 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
-        PaymentResult result = paymentGateway.confirm(
-                new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount())
-        );
+        PaymentResult result = confirmPayment(request);
         paymentRepository.save(Payment.create(paymentOrder.getId(), result.paymentKey(), result.amount()));
         reservationSlotRepository.confirmPayment(paymentOrder.getReservationId());
+    }
+
+    private PaymentResult confirmPayment(PaymentConfirmRequest request) {
+        try {
+            return paymentGateway.confirm(
+                    new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount())
+            );
+        } catch (ResourceAccessException e) {
+            if (hasCause(e, ConnectException.class) || hasCause(e, SocketTimeoutException.class)) {
+                throw new CustomException(ErrorCode.PAYMENT_GATEWAY_CONNECTION_FAILED);
+            }
+            throw e;
+        } catch (RestClientException e) {
+            if (hasCause(e, SocketTimeoutException.class)) {
+                throw new CustomException(ErrorCode.PAYMENT_CONFIRM_RESULT_UNKNOWN);
+            }
+            throw e;
+        }
+    }
+
+    private boolean hasCause(Throwable throwable, Class<? extends Throwable> causeType) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     @Transactional

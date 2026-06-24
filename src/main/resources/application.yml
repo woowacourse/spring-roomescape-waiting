@@ -11,6 +11,7 @@ spring:
 
 payment:
   toss:
+    # 토스 공식 문서에 공객된 시크릿 키
     secret-key: ${TOSS_SECRET_KEY:test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6}
     connect-timeout: 2s
     read-timeout: 3s
