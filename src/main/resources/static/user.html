@@ -829,8 +829,26 @@
     switchSection('popular');
   }
 
-  function handlePaymentRedirect() {
+  async function handlePaymentRedirect() {
     const params = new URLSearchParams(window.location.search);
+    const paymentKey = params.get('paymentKey');
+    const orderId = params.get('orderId');
+    const amount = params.get('amount');
+    if (paymentKey && orderId && amount) {
+      try {
+        await fetchEmpty(`${API}/payments/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) })
+        }, '결제 승인에 실패했습니다.');
+        showMessageModal('결제 완료', '결제가 승인되었습니다.');
+      } catch (e) {
+        showMessageModal('결제 승인 실패', e.message);
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
     const paymentResult = params.get('payment');
     if (paymentResult === 'success') {
       showMessageModal('결제 인증 완료', '결제 인증이 완료되었습니다. 서버 승인 API 연동이 완료되면 이 단계에서 예약이 확정됩니다.');
@@ -1227,7 +1245,7 @@
       orderId: payment.orderId,
       orderName: `${reservation.themeName || selectedTheme.name} 예약`,
       customerName: reservation.name || username,
-      successUrl: `${window.location.origin}/user.html?payment=success`,
+      successUrl: `${window.location.origin}/user.html`,
       failUrl: `${window.location.origin}/user.html?payment=fail`
     });
   }

@@ -11,6 +11,7 @@ import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.dto.PaymentConfirmRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
+import roomescape.infrastructure.toss.TossPaymentGateway;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,18 @@ public class PaymentService {
     private final PaymentOrderRepository paymentOrderRepository;
     private final PaymentRepository paymentRepository;
     private final ReservationSlotRepository reservationSlotRepository;
+    private final TossPaymentGateway tossPaymentGateway;
 
-    public PaymentService(PaymentOrderRepository paymentOrderRepository, PaymentRepository paymentRepository, ReservationSlotRepository reservationSlotRepository) {
+    public PaymentService(
+            PaymentOrderRepository paymentOrderRepository,
+            PaymentRepository paymentRepository,
+            ReservationSlotRepository reservationSlotRepository,
+            TossPaymentGateway tossPaymentGateway
+    ) {
         this.paymentOrderRepository = paymentOrderRepository;
         this.paymentRepository = paymentRepository;
         this.reservationSlotRepository = reservationSlotRepository;
+        this.tossPaymentGateway = tossPaymentGateway;
     }
 
     @Transactional
@@ -39,7 +47,7 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
-        // TODO: Toss Payments 결제 승인 API를 호출한다.
+        tossPaymentGateway.confirm(request.paymentKey(), request.orderId(), request.amount());
         paymentRepository.save(Payment.create(paymentOrder.getId(), request.paymentKey(), request.amount()));
         reservationSlotRepository.confirmPayment(paymentOrder.getReservationId());
     }
