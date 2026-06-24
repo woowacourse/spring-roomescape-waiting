@@ -30,6 +30,7 @@ public class TossPaymentGateway implements PaymentGateway {
 
         TossPaymentResponse tossResponse = tossRestClient.post()
                 .uri("/v1/payments/confirm")
+                .header("Idempotency-Key", confirmation.orderId())
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (req, res) -> {
