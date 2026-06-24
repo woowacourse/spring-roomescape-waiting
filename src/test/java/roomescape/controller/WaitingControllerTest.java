@@ -48,7 +48,7 @@ class WaitingControllerTest {
         mockMvc.perform(post("/waitings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new WaitingRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L))))
+                                new WaitingRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L, 0L))))
                 .andExpect(status().isOk());
     }
 

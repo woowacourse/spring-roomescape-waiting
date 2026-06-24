@@ -1,6 +1,7 @@
 package roomescape.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import roomescape.payment.gateway.toss.TossPaymentException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,6 +48,13 @@ public class ProblemDetailsAdvice {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, exception.getMessage());
         problemDetail.setProperty("code", exception.getErrorCode());
         return ResponseEntity.status(status).body(problemDetail);
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ProblemDetail> handleTossPaymentException(TossPaymentException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());
+        problemDetail.setProperty("code", exception.getCode());
+        return ResponseEntity.status(exception.getStatus()).body(problemDetail);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

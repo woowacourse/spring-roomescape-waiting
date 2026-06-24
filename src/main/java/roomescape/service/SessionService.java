@@ -2,10 +2,13 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.PaymentReservationRequest;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.*;
+import roomescape.payment.domain.PaymentConfirmation;
+import roomescape.payment.gateway.PaymentGateway;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateSessionException;
 import roomescape.exception.InvalidWaitingPrerequisiteException;
@@ -30,15 +33,17 @@ public class SessionService {
     private final ThemeService themeService;
     private final ReservationService reservationService;
     private final WaitingService waitingService;
+    private final PaymentGateway paymentGateway;
 
     public SessionService(SessionRepository sessionRepository, TimeSlotService timeSlotService,
                           ThemeService themeService, ReservationService reservationService,
-                          WaitingService waitingService) {
+                          WaitingService waitingService, PaymentGateway paymentGateway) {
         this.sessionRepository = sessionRepository;
         this.timeSlotService = timeSlotService;
         this.themeService = themeService;
         this.reservationService = reservationService;
         this.waitingService = waitingService;
+        this.paymentGateway = paymentGateway;
     }
 
     public List<Session> allSessions() {
@@ -92,9 +97,10 @@ public class SessionService {
     }
 
     @Transactional
-    public Reservation makeReservation(ReservationRequest request) {
+    public Reservation makeReservation(PaymentReservationRequest request) {
         Session session = findSessionOrThrow(request.date(), request.timeId(), request.themeId());
-        return reservationService.save(request.name(), session, request.amount());
+        paymentGateway.confirm(new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount()));
+        return reservationService.save(request.name(), session, request.amount(), request.paymentKey());
     }
 
     @Transactional
@@ -166,7 +172,7 @@ public class SessionService {
         if (waitingService.isExistsBySessionId(session.getId())) {
             Waiting first = waitingService.findFirstBySessionId(session.getId());
             waitingService.deleteById(first.getId());
-            reservationService.save(first.getName(), session, 0L);
+            reservationService.save(first.getName(), session, 0L, null);
         }
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import roomescape.controller.dto.PaymentReservationRequest;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.domain.Reservation;
@@ -88,14 +89,14 @@ class ReservationControllerTest {
     @DisplayName("유효한 데이터로 예약을 생성하고 201 상태 코드와 Location 헤더를 반환한다.")
     void createReservation() throws Exception {
         given(sessionService.makeReservation(any())).willReturn(createMockReservation());
-        performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
+        performPost("/reservations", new PaymentReservationRequest("브라운", LocalDate.now(), 1L, 1L, 0L, "pk_test", "order_test"))
                 .andExpect(status().isCreated()).andExpect(header().exists("Location"));
     }
 
     @Test
     @DisplayName("DTO 검증 실패 시 400 예외와 ProblemDetail 포맷을 반환한다.")
     void createReservationWithInvalidData() throws Exception {
-        performPost("/reservations", new ReservationRequest("", LocalDate.now(), 1L, 1L))
+        performPost("/reservations", new PaymentReservationRequest("", LocalDate.now(), 1L, 1L, 0L, "pk_test", "order_test"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST_BODY"))
                 .andExpect(jsonPath("$.detail").value("요청 값이 유효하지 않습니다."))
@@ -107,7 +108,7 @@ class ReservationControllerTest {
     void rescheduleAll() throws Exception {
         given(sessionService.rescheduleReservation(anyLong(), anyString(), any(ReservationRequest.class)))
                 .willReturn(createMockReservation());
-        performPut("/reservations/1", "브라운", new ReservationRequest("네오", LocalDate.now(), 1L, 1L))
+        performPut("/reservations/1", "브라운", new ReservationRequest("네오", LocalDate.now(), 1L, 1L, 0L))
                 .andExpect(status().isOk());
     }
 
@@ -116,7 +117,7 @@ class ReservationControllerTest {
     void findNonExistentReservation() throws Exception {
         given(sessionService.rescheduleReservation(anyLong(), anyString(), any(ReservationRequest.class)))
                 .willThrow(new ReservationNotFoundException(999L));
-        performPut("/reservations/999", "브라운", new ReservationRequest("네오", LocalDate.now(), 1L, 1L))
+        performPut("/reservations/999", "브라운", new ReservationRequest("네오", LocalDate.now(), 1L, 1L, 0L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND"));
     }
@@ -151,7 +152,7 @@ class ReservationControllerTest {
     void createReservationIllegalArgument() throws Exception {
         given(sessionService.makeReservation(any()))
                 .willThrow(new IllegalArgumentException("테스트용 에러 메시지"));
-        performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
+        performPost("/reservations", new PaymentReservationRequest("브라운", LocalDate.now(), 1L, 1L, 0L, "pk_test", "order_test"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_DOMAIN_STATE"))
                 .andExpect(jsonPath("$.detail").value("테스트용 에러 메시지"));
@@ -162,7 +163,7 @@ class ReservationControllerTest {
     void createReservationDuplicateKey() throws Exception {
         given(sessionService.makeReservation(any()))
                 .willThrow(new DuplicateKeyException("중복 데이터 발생"));
-        performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
+        performPost("/reservations", new PaymentReservationRequest("브라운", LocalDate.now(), 1L, 1L, 0L, "pk_test", "order_test"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("DUPLICATE_KEY_VIOLATION"))
                 .andExpect(jsonPath("$.detail").value("이미 존재하는 데이터입니다."));
@@ -173,7 +174,7 @@ class ReservationControllerTest {
     void createReservationDataIntegrity() throws Exception {
         given(sessionService.makeReservation(any()))
                 .willThrow(new DataIntegrityViolationException("외래키 위반"));
-        performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
+        performPost("/reservations", new PaymentReservationRequest("브라운", LocalDate.now(), 1L, 1L, 0L, "pk_test", "order_test"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("DATA_INTEGRITY_VIOLATION"))
                 .andExpect(jsonPath("$.detail").value("데이터 무결성 제약조건이 위반되었습니다."));
@@ -206,6 +207,6 @@ class ReservationControllerTest {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Session session = new Session(1L, LocalDate.now(), timeSlot, theme);
-        return new Reservation(1L, "브라운", session);
+        return new Reservation(1L, "브라운", session, 0L, null);
     }
 }

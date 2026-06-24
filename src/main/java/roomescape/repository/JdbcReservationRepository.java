@@ -21,6 +21,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 r.id AS r_id,
                 r.name,
                 r.amount,
+                r.payment_key,
                 s.id AS session_id,
                 s.date,
                 t.id AS t_id,
@@ -39,7 +40,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String FIND_BY_NAME_SQL = BASE_SQL + " WHERE r.name = ?";
     private static final String FIND_BY_CONDITIONS_SQL = BASE_SQL + " WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ?";
     private static final String DELETE_SQL = "DELETE FROM reservation WHERE id = ?";
-    private static final String UPDATE_SQL = "UPDATE reservation SET name = ?, session_id = ?, amount = ? WHERE id = ?";
+    private static final String UPDATE_SQL = "UPDATE reservation SET name = ?, session_id = ?, amount = ?, payment_key = ? WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
@@ -54,7 +55,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getLong("r_id"),
                 rs.getString("name"),
                 mapperFactory.mapSession(rs),
-                rs.getLong("amount")
+                rs.getLong("amount"),
+                rs.getString("payment_key")
         );
     }
 
@@ -80,13 +82,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        Map<String, Object> params = Map.of(
-                "name", reservation.getName(),
-                "session_id", reservation.getSession().getId(),
-                "amount", reservation.getAmount() != null ? reservation.getAmount() : 0L
-        );
+        var params = new java.util.HashMap<String, Object>();
+        params.put("name", reservation.getName());
+        params.put("session_id", reservation.getSession().getId());
+        params.put("amount", reservation.getAmount() != null ? reservation.getAmount() : 0L);
+        params.put("payment_key", reservation.getPaymentKey());
         long id = jdbcInsert.executeAndReturnKey(params).longValue();
-        return new Reservation(id, reservation.getName(), reservation.getSession(), reservation.getAmount());
+        return new Reservation(id, reservation.getName(), reservation.getSession(), reservation.getAmount(), reservation.getPaymentKey());
     }
 
     @Override
@@ -99,6 +101,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         int columns = jdbcTemplate.update(UPDATE_SQL,
                 reservation.getName(), reservation.getSession().getId(),
                 reservation.getAmount() != null ? reservation.getAmount() : 0L,
+                reservation.getPaymentKey(),
                 reservation.getId());
         checkUpdateResult(columns, reservation.getId());
         return reservation;

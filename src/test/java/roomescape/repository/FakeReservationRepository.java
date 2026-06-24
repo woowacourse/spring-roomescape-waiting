@@ -34,7 +34,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         long id = sequence++;
-        Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getSession());
+        Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getSession(), reservation.getAmount(), reservation.getPaymentKey());
         storage.put(id, savedReservation);
         return savedReservation;
     }

@@ -35,10 +35,11 @@ CREATE TABLE session
 
 CREATE TABLE reservation
 (
-    id         BIGINT       NOT NULL AUTO_INCREMENT,
-    name       VARCHAR(255) NOT NULL,
-    session_id BIGINT       NOT NULL,
-    amount     BIGINT       NOT NULL DEFAULT 0,
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(255) NOT NULL,
+    session_id  BIGINT       NOT NULL,
+    amount      BIGINT       NOT NULL DEFAULT 0,
+    payment_key VARCHAR(255) NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (session_id) REFERENCES session (id),
     CONSTRAINT uk_reservation_session UNIQUE (session_id)

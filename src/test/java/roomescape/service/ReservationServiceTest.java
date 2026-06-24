@@ -35,14 +35,14 @@ class ReservationServiceTest {
     @Test
     @DisplayName("원시값을 받아 예약을 생성하고 저장한다.")
     void save() {
-        Reservation reservation = reservationService.save("브라운", session);
+        Reservation reservation = reservationService.save("브라운", session, 0L, null);
         assertThat(reservation.getSession().getTimeSlot().getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
     @Test
     @DisplayName("모든 예약 목록을 조회하여 반환한다.")
     void findAll() {
-        reservationService.save("브라운", session);
+        reservationService.save("브라운", session, 0L, null);
         List<Reservation> reservations = reservationService.findAll();
         assertThat(reservations).hasSize(1);
     }
@@ -50,7 +50,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("식별자를 통해 특정 예약 객체를 조회한다.")
     void findById() {
-        Reservation saved = reservationService.save("브라운", session);
+        Reservation saved = reservationService.save("브라운", session, 0L, null);
         Reservation found = reservationService.findById(saved.getId());
         assertThat(found.getName()).isEqualTo("브라운");
     }
@@ -58,7 +58,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("이름으로 해당 사용자의 예약 목록을 조회한다.")
     void findByName() {
-        reservationService.save("브라운", session);
+        reservationService.save("브라운", session, 0L, null);
         List<Reservation> reservations = reservationService.findByName("브라운");
         assertThat(reservations).hasSize(1);
     }
@@ -66,7 +66,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("세션으로 해당 예약을 조회한다.")
     void findBySession() {
-        reservationService.save("브라운", session);
+        reservationService.save("브라운", session, 0L, null);
         Optional<Reservation> found = reservationService.findBySession(session);
         assertThat(found).isPresent();
     }
@@ -74,7 +74,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 삭제하면 목록에서 사라진다.")
     void delete() {
-        Reservation saved = reservationService.save("브라운", session);
+        Reservation saved = reservationService.save("브라운", session, 0L, null);
         reservationService.delete(saved.getId());
         assertThat(reservationService.findAll()).isEmpty();
     }

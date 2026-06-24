@@ -45,8 +45,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation save(String name, Session session, Long amount) {
-        Reservation reservation = Reservation.transientOf(name, session, amount);
+    public Reservation save(String name, Session session, Long amount, String paymentKey) {
+        Reservation reservation = Reservation.transientOf(name, session, amount, paymentKey);
         reservation.validateNotPast(LocalDateTime.now());
         checkDuplicateForSave(session);
         return reservationRepository.save(reservation);

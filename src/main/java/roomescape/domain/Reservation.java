@@ -12,23 +12,25 @@ public class Reservation {
     private final String name;
     private final Session session;
     private final Long amount;
+    private final String paymentKey;
 
-    public Reservation(Long id, String name, Session session, Long amount) {
+    public Reservation(Long id, String name, Session session, Long amount, String paymentKey) {
         validate(name, session);
         this.id = id;
         this.name = name;
         this.session = session;
         this.amount = amount;
+        this.paymentKey = paymentKey;
     }
 
-    public static Reservation transientOf(String name, Session session, Long amount) {
-        return new Reservation(null, name, session, amount);
+    public static Reservation transientOf(String name, Session session, Long amount, String paymentKey) {
+        return new Reservation(null, name, session, amount, paymentKey);
     }
 
     public Reservation reschedule(Session session, LocalDateTime currentDateTime) {
         Session patchedSession = Objects.requireNonNullElse(session, this.session);
         validateNotPast(currentDateTime);
-        return new Reservation(this.id, this.name, patchedSession, this.amount);
+        return new Reservation(this.id, this.name, patchedSession, this.amount, this.paymentKey);
     }
 
     public boolean isReservedBy(String name) {
@@ -70,5 +72,9 @@ public class Reservation {
 
     public Long getAmount() {
         return amount;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
     }
 }

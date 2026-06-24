@@ -3,11 +3,15 @@ package roomescape.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.controller.dto.PaymentReservationRequest;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.*;
 import roomescape.exception.*;
+import roomescape.payment.domain.PaymentResult;
+import roomescape.payment.domain.PaymentStatus;
+import roomescape.payment.gateway.PaymentGateway;
 import roomescape.repository.*;
 import roomescape.service.dto.Booking;
 
@@ -44,8 +48,11 @@ class SessionServiceTest {
         WaitingService waitingService = new WaitingService(waitingRepository);
         TimeSlotService timeSlotService = new TimeSlotService(timeSlotRepository);
         ThemeService themeService = new ThemeService(themeRepository);
+        // ponytail: no-op stub — tests cover domain logic, not payment gateway
+        PaymentGateway paymentGateway = confirmation -> new PaymentResult(
+                confirmation.paymentKey(), confirmation.orderId(), PaymentStatus.DONE, confirmation.amount());
         sessionService = new SessionService(sessionRepository, timeSlotService, themeService,
-                reservationService, waitingService);
+                reservationService, waitingService, paymentGateway);
 
         savedTimeSlot = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         savedTheme = themeRepository.save(Theme.transientOf("이름", "설명", "test.com"));
@@ -86,7 +93,7 @@ class SessionServiceTest {
     @DisplayName("존재하지 않는 세션에 예약을 시도하면 예외가 발생한다.")
     void makeReservation_SessionNotFound() {
         assertThatThrownBy(() -> sessionService.makeReservation(
-                new ReservationRequest("브라운", futureDate, 999L, savedTheme.getId())))
+                new PaymentReservationRequest("브라운", futureDate, 999L, savedTheme.getId(), 0L, "pk_test", "order_test")))
                 .isInstanceOf(SessionNotFoundException.class);
     }
 
@@ -104,7 +111,7 @@ class SessionServiceTest {
         Session pastSession = sessionRepository.save(
                 Session.transientOf(LocalDate.now().minusDays(1), savedTimeSlot, savedTheme));
         assertThatThrownBy(() -> sessionService.makeReservation(
-                new ReservationRequest("브라운", pastSession.getDate(), savedTimeSlot.getId(), savedTheme.getId())))
+                new PaymentReservationRequest("브라운", pastSession.getDate(), savedTimeSlot.getId(), savedTheme.getId(), 0L, "pk_test", "order_test")))
                 .isInstanceOf(PastTimeException.class);
     }
 
@@ -159,7 +166,7 @@ class SessionServiceTest {
         Session newSession = sessionRepository.save(Session.transientOf(futureDate, newTime, savedTheme));
         Reservation updated = sessionService.rescheduleReservation(
                 reservation.getId(), "브라운",
-                new ReservationRequest("브라운", futureDate, newTime.getId(), savedTheme.getId()));
+                new ReservationRequest("브라운", futureDate, newTime.getId(), savedTheme.getId(), 0L));
         assertThat(updated.getSession().getId()).isEqualTo(newSession.getId());
     }
 
@@ -171,7 +178,7 @@ class SessionServiceTest {
         TimeSlot newTime = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(15, 0)));
         sessionRepository.save(Session.transientOf(futureDate, newTime, savedTheme));
         sessionService.rescheduleReservation(reservation.getId(), "브라운",
-                new ReservationRequest("브라운", futureDate, newTime.getId(), savedTheme.getId()));
+                new ReservationRequest("브라운", futureDate, newTime.getId(), savedTheme.getId(), 0L));
         assertThat(sessionService.allReservations()).extracting(Reservation::getName)
                 .containsExactlyInAnyOrder("브라운", "네오");
     }
@@ -200,7 +207,7 @@ class SessionServiceTest {
     void addWaiting() {
         sessionService.makeReservation(basicRequest("브라운"));
         Waiting waiting = sessionService.addWaiting(
-                new WaitingRequest("네오", futureDate, savedTimeSlot.getId(), savedTheme.getId()));
+                new WaitingRequest("네오", futureDate, savedTimeSlot.getId(), savedTheme.getId(), 0L));
         assertThat(waiting.getName()).isEqualTo("네오");
     }
 
@@ -209,7 +216,7 @@ class SessionServiceTest {
     void cancelWaiting() {
         sessionService.makeReservation(basicRequest("브라운"));
         Waiting waiting = sessionService.addWaiting(
-                new WaitingRequest("네오", futureDate, savedTimeSlot.getId(), savedTheme.getId()));
+                new WaitingRequest("네오", futureDate, savedTimeSlot.getId(), savedTheme.getId(), 0L));
         sessionService.cancelWaiting(waiting.getId(), "네오");
         assertThat(waitingRepository.isExistsBySessionId(savedSession.getId())).isFalse();
     }
@@ -222,13 +229,13 @@ class SessionServiceTest {
         assertThat(availableTimes).isNotNull();
     }
 
-    private ReservationRequest basicRequest(String name) {
-        return new ReservationRequest(name, futureDate, savedTimeSlot.getId(), savedTheme.getId());
+    private PaymentReservationRequest basicRequest(String name) {
+        return new PaymentReservationRequest(name, futureDate, savedTimeSlot.getId(), savedTheme.getId(), 0L, "pk_test", "order_test");
     }
 
     private Reservation savePastReservation() {
         Session pastSession = sessionRepository.save(
                 Session.transientOf(LocalDate.now().minusDays(1), savedTimeSlot, savedTheme));
-        return reservationRepository.save(Reservation.transientOf("브라운", pastSession));
+        return reservationRepository.save(Reservation.transientOf("브라운", pastSession, 0L, null));
     }
 }

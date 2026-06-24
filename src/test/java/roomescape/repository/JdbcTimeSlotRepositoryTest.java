@@ -96,7 +96,7 @@ class JdbcTimeSlotRepositoryTest {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         Theme savedTheme = themeRepository.save(Theme.transientOf("공포", "설명", "url"));
         Session savedSlot = jdbcSessionRepository.save(Session.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
-        reservationRepository.save(Reservation.transientOf("브라운", savedSlot));
+        reservationRepository.save(Reservation.transientOf("브라운", savedSlot, 0L, null));
         assertThatThrownBy(() -> timeRepository.deleteById(savedTimeSlot.getId())).isInstanceOf(DataIntegrityViolationException.class);
     }
 }

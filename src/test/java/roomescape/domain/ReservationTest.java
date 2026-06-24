@@ -16,7 +16,7 @@ class ReservationTest {
     @DisplayName("정상적인 값을 입력하면 예약 객체가 생성된다.")
     void createValidReservation() {
         Session session = createMockSlot();
-        Reservation reservation = new Reservation(1L, "브라운", session);
+        Reservation reservation = new Reservation(1L, "브라운", session, 0L, null);
         assertThat(reservation.getName()).isEqualTo("브라운");
     }
 
@@ -24,14 +24,14 @@ class ReservationTest {
     @DisplayName("예약자 이름이 null이거나 비어있으면 예외가 발생한다.")
     void createInvalidNameThrowsException() {
         Session session = createMockSlot();
-        assertThatThrownBy(() -> new Reservation(1L, " ", session))
+        assertThatThrownBy(() -> new Reservation(1L, " ", session, 0L, null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("슬롯 객체가 null이면 예외가 발생한다.")
     void createNullSlotThrowsException() {
-        assertThatThrownBy(() -> new Reservation(1L, "브라운", null))
+        assertThatThrownBy(() -> new Reservation(1L, "브라운", null, 0L, null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -39,14 +39,14 @@ class ReservationTest {
     @DisplayName("transientOf를 통해 비영속 상태의 예약 객체를 생성할 수 있다.")
     void transientOfCreatesTransientReservation() {
         Session session = createMockSlot();
-        Reservation reservation = Reservation.transientOf("브라운", session);
+        Reservation reservation = Reservation.transientOf("브라운", session, 0L, null);
         assertThat(reservation.getId()).isNull();
     }
 
     @Test
     @DisplayName("예약 소유자가 일치하지 않으면 예외가 발생한다.")
     void validateModifiableThrowsException() {
-        Reservation reservation = new Reservation(1L, "브라운", createMockSlot());
+        Reservation reservation = new Reservation(1L, "브라운", createMockSlot(), 0L, null);
         assertThatThrownBy(() -> reservation.validateModifiable("포비", LocalDateTime.now()))
                 .isInstanceOf(InvalidOwnershipException.class);
     }
