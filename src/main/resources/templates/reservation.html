@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>예약하기 · 방탈출</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=2)}">
 </head>
 <body>
 <header class="topbar">
@@ -44,7 +44,28 @@
     </section>
 </main>
 
+<div id="payment-modal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+        <div class="modal-header">
+            <h2 id="payment-modal-title">결제하기</h2>
+            <button id="payment-modal-close" class="modal-close" type="button" aria-label="닫기">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="order-summary">
+                <span id="order-name" class="order-name"></span>
+                <span id="order-amount" class="order-amount"></span>
+            </div>
+            <div id="payment-method"></div>
+            <div id="agreement"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="payment-button" class="btn btn-primary" type="button">결제하기</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.tosspayments.com/v2/standard"></script>
 <script th:src="@{/js/common.js(v=2)}"></script>
-<script th:src="@{/js/reservation.js(v=3)}"></script>
+<script th:src="@{/js/reservation.js(v=6)}"></script>
 </body>
 </html>
