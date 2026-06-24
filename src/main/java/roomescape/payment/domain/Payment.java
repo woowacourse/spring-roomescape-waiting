@@ -17,22 +17,20 @@ public class Payment {
         return new Payment(orderId, amount, paymentKey, reservationId);
     }
 
-    // 결제 정보 생성(이후 토스 결제창 뜸)
     public static Payment pending(String orderId, Long amount, Long reservationId) {
         return new Payment(orderId, amount, null, reservationId);
     }
 
-    // 결제 완료해서 새로운 paymentKey 발급 받음
     public Payment confirm(String paymentKey) {
         return new Payment(orderId, amount, paymentKey, reservationId);
     }
 
-    public Long getAmount() {
-        return amount;
-    }
-
     public String getOrderId() {
         return orderId;
+    }
+
+    public Long getAmount() {
+        return amount;
     }
 
     public String getPaymentKey() {
