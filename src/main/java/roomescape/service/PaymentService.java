@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.payment.Order;
 import roomescape.domain.payment.OrderRepository;
+import roomescape.domain.payment.OrderStatus;
+import roomescape.domain.payment.Payment;
 import roomescape.domain.payment.PaymentConfirmation;
 import roomescape.domain.payment.PaymentGateway;
+import roomescape.domain.payment.PaymentRepository;
 import roomescape.domain.payment.PaymentResult;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.PaymentAmountMismatchException;
@@ -15,10 +18,13 @@ public class PaymentService {
 
     private final OrderRepository orderRepository;
     private final PaymentGateway paymentGateway;
+    private final PaymentRepository paymentRepository;
 
-    public PaymentService(OrderRepository orderRepository, PaymentGateway paymentGateway) {
+    public PaymentService(OrderRepository orderRepository, PaymentGateway paymentGateway,
+                          PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
         this.paymentGateway = paymentGateway;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
@@ -29,7 +35,12 @@ public class PaymentService {
         }
 
         PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
-        return paymentGateway.confirm(confirmation);
+        PaymentResult result = paymentGateway.confirm(confirmation);
+
+        paymentRepository.save(new Payment(result.paymentKey(), result.orderId()));
+        orderRepository.updateStatus(orderId, OrderStatus.CONFIRMED);
+
+        return result;
     }
 
     private Order getOrder(String orderId) {
