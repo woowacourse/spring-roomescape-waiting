@@ -39,7 +39,7 @@ class JdbcReservationSlotRepositoryTest {
         JdbcThemeRepository themeRepository = new JdbcThemeRepository(jdbcTemplate);
 
         savedTimeSlot = timeSlotRepository.save(new TimeSlot(LocalTime.of(10, 0)));
-        savedTheme = themeRepository.save(new Theme("공포", "귀신의 집 탈출", "https://test.com"));
+        savedTheme = themeRepository.save(new Theme("공포", "귀신의 집 탈출", "https://test.com", 50000L));
     }
 
     @Test

@@ -33,24 +33,26 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("테마를 저장하고 영속화된 객체를 반환한다.")
     void 테마_저장() {
-        Theme theme = new Theme("공포", "귀신의 집", "https://url");
+        Theme theme = new Theme("공포", "귀신의 집", "https://url", 50000L);
         Theme savedTheme = jdbcThemeRepository.save(theme);
         assertThat(savedTheme.getId()).isPositive();
+        assertThat(savedTheme.getPrice()).isEqualTo(50000L);
     }
 
     @Test
     @DisplayName("식별자로 테마를 조회한다.")
     void 식별자로_테마_조회() {
-        Theme savedTheme = jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url"));
+        Theme savedTheme = jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url", 50000L));
         Optional<Theme> foundTheme = jdbcThemeRepository.findById(savedTheme.getId());
         assertThat(foundTheme).isPresent();
         assertThat(foundTheme.get().getName()).isEqualTo("공포");
+        assertThat(foundTheme.get().getPrice()).isEqualTo(50000L);
     }
 
     @Test
     @DisplayName("모든 테마 목록을 조회한다.")
     void 전체_테마_조회() {
-        jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url"));
+        jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url", 50000L));
         List<Theme> themes = jdbcThemeRepository.findAll();
         assertThat(themes).hasSize(1);
     }
@@ -58,7 +60,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("기간 내 인기 테마를 예약 건수 기반으로 조회한다.")
     void 인기_테마_조회() {
-        Theme savedTheme = jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url"));
+        Theme savedTheme = jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url", 50000L));
         insertReservation(savedTheme.getId());
         LocalDate startDate = LocalDate.now().minusDays(1);
         LocalDate endDate = startDate.plusDays(2);
@@ -69,7 +71,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("존재하는 테마를 삭제한다.")
     void 존재하는_테마_삭제() {
-        Theme savedTheme = jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url"));
+        Theme savedTheme = jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url", 50000L));
         int totalCount = jdbcThemeRepository.findAll().size();
         jdbcThemeRepository.deleteById(savedTheme.getId());
         assertThat(jdbcThemeRepository.findAll().size() != totalCount).isTrue();

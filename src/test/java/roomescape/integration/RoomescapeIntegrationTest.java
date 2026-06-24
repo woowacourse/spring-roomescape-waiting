@@ -176,10 +176,10 @@ public class RoomescapeIntegrationTest {
     }
 
     private void insertTestData(LocalDate tomorrow) {
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                "테마1", "설명1", "thumbnail1.png");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                "테마2", "설명2", "thumbnail2.png");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
+                "테마1", "설명1", "thumbnail1.png", 50000L);
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url, price) VALUES (?, ?, ?, ?)",
+                "테마2", "설명2", "thumbnail2.png", 50000L);
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "10:00:00");
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "11:00:00");
         insertReservation("브라운", tomorrow, LocalDate.now().atStartOfDay(), 1L, 1L);

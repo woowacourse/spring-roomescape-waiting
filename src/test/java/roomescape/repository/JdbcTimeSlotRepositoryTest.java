@@ -83,7 +83,7 @@ class JdbcTimeSlotRepositoryTest {
     @DisplayName("예약이 존재하는 시간을 삭제할 수 없다.")
     void 예약이_존재하는_시간_삭제_예외_발생() {
         TimeSlot savedTimeSlot = timeRepository.save(new TimeSlot(LocalTime.of(10, 0)));
-        Theme savedTheme = themeRepository.save(new Theme("공포", "설명", "url"));
+        Theme savedTheme = themeRepository.save(new Theme("공포", "설명", "url", 50000L));
         ReservationSlot slot = reservationSlotRepository.save(
                 new ReservationSlot(LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
         reservationRepository.save(

@@ -46,7 +46,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail_url AS theme_thumbnail_url
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    th.price AS theme_price
                 FROM reservation r 
                 INNER JOIN reservation_slot rs ON r.slot_id = rs.id
                 INNER JOIN time_slot ts ON rs.time_id = ts.id 
@@ -70,7 +71,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail_url AS theme_thumbnail_url
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    th.price AS theme_price
                 FROM reservation r
                 INNER JOIN reservation_slot rs ON r.slot_id = rs.id
                 INNER JOIN time_slot ts ON rs.time_id = ts.id
@@ -96,7 +98,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail_url AS theme_thumbnail_url
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    th.price AS theme_price
                 FROM reservation r
                 INNER JOIN reservation_slot rs ON r.slot_id = rs.id
                 INNER JOIN time_slot ts ON rs.time_id = ts.id
@@ -121,7 +124,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail_url AS theme_thumbnail_url
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    th.price AS theme_price
                 FROM reservation r
                 INNER JOIN reservation_slot rs ON r.slot_id = rs.id
                 INNER JOIN time_slot ts ON rs.time_id = ts.id
@@ -146,7 +150,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.id AS theme_id,
                 th.name AS theme_name,
                 th.description AS theme_description,
-                th.thumbnail_url AS theme_thumbnail_url
+                th.thumbnail_url AS theme_thumbnail_url,
+                th.price AS theme_price
             FROM reservation r
             INNER JOIN reservation_slot rs ON r.slot_id = rs.id
             INNER JOIN time_slot ts ON rs.time_id = ts.id
@@ -196,7 +201,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail_url AS theme_thumbnail_url
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    th.price AS theme_price
                 FROM reservation r
                 INNER JOIN reservation_slot rs ON r.slot_id = rs.id
                 INNER JOIN time_slot ts ON rs.time_id = ts.id
@@ -278,7 +284,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                 rs.getLong("theme_id"),
                                 rs.getString("theme_name"),
                                 rs.getString("theme_description"),
-                                rs.getString("theme_thumbnail_url")
+                                rs.getString("theme_thumbnail_url"),
+                                rs.getLong("theme_price")
                         )
                 ),
                 rs.getObject("created_at", LocalDateTime.class),

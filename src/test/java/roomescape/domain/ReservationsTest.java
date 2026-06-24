@@ -21,7 +21,7 @@ public class ReservationsTest {
 
     private static final LocalDate DATE = LocalDate.now().plusDays(1);
     private static final TimeSlot TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));
-    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com");
+    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com", 50000L);
 
     @Test
     @DisplayName("예약된 목록에 예약을 추가하면 대기 상태가 된다.")

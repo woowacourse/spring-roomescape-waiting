@@ -19,7 +19,7 @@ import roomescape.exception.PastTimeException;
 class ReservationTest {
 
     private static final TimeSlot TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));
-    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com");
+    private static final Theme THEME = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com", 50000L);
 
     @Test
     @DisplayName("정상적인 값을 입력하면 예약 객체가 생성된다.")

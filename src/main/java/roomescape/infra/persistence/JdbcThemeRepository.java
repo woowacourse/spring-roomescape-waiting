@@ -27,19 +27,20 @@ public class JdbcThemeRepository implements ThemeRepository {
         return Map.of(
                 "name", theme.getName(),
                 "description", theme.getDescription(),
-                "thumbnail_url", theme.getThumbnailUrl()
+                "thumbnail_url", theme.getThumbnailUrl(),
+                "price", theme.getPrice()
         );
     }
 
     @Override
     public List<Theme> findAll() {
-        String sql = "SELECT id, name, description, thumbnail_url FROM theme";
+        String sql = "SELECT id, name, description, thumbnail_url, price FROM theme";
         return jdbcTemplate.query(sql, rowMapper());
     }
 
     @Override
     public Optional<Theme> findById(long id) {
-        String sql = "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ?";
+        String sql = "SELECT id, name, description, thumbnail_url, price FROM theme WHERE id = ?";
         List<Theme> themes = jdbcTemplate.query(sql, rowMapper(), id);
         return Optional.ofNullable(DataAccessUtils.singleResult(themes));
     }
@@ -53,7 +54,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 id,
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnailUrl()
+                theme.getThumbnailUrl(),
+                theme.getPrice()
         );
     }
 
@@ -71,6 +73,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     t.name,
                     t.description,
                     t.thumbnail_url,
+                    t.price,
                     count(*) as reservation_count
                 FROM reservation r
                 INNER JOIN reservation_slot rs
@@ -97,6 +100,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
+                .usingColumns("name", "description", "thumbnail_url", "price")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -105,7 +109,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getString("description"),
-                rs.getString("thumbnail_url")
+                rs.getString("thumbnail_url"),
+                rs.getLong("price")
         );
     }
 }

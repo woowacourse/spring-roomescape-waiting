@@ -170,7 +170,7 @@ class ReservationControllerTest {
 
     private Reservation createMockReservation() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "테마", "설명", "url");
+        Theme theme = new Theme(1L, "테마", "설명", "url", 50000L);
         ReservationSlot slot = new ReservationSlot(1L, LocalDate.now(), timeSlot, theme);
         return new Reservation(1L, "브라운", slot, LocalDate.now().atStartOfDay(), ReservationStatus.RESERVED);
     }

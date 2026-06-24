@@ -49,7 +49,7 @@ class ReservationServiceTest {
                 reservationSlotRepository);
 
         savedTimeSlot = timeSlotRepository.save(new TimeSlot(LocalTime.of(10, 0)));
-        savedTheme = themeRepository.save(new Theme("이름", "설명", "test.com"));
+        savedTheme = themeRepository.save(new Theme("이름", "설명", "test.com", 50000L));
     }
 
     @Test

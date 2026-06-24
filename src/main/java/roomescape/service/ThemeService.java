@@ -33,8 +33,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme saveTheme(String name, String description, String thumbnailUrl) {
-        Theme theme = new Theme(name, description, thumbnailUrl);
+    public Theme saveTheme(String name, String description, String thumbnailUrl, Long price) {
+        Theme theme = new Theme(name, description, thumbnailUrl, price);
         return themeRepository.save(theme);
     }
 
