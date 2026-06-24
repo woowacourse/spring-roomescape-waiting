@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -22,10 +23,17 @@ import java.util.Optional;
 public class ReservationWaitingJdbcRepository implements ReservationWaitingRepository {
 
     private static final String WAITING_COLUMNS = """
-            rw.id as waiting_id, rw.name as waiting_name, rw.created_at,
-            r.id as reservation_id, r.name as reservation_name, r.date,
-            t.id as time_id, t.start_at as time_value,
-            th.id as theme_id, th.name as theme_name,
+            rw.id as waiting_id,
+            rw.name as waiting_name,
+            rw.created_at,
+            r.id as reservation_id,
+            r.name as reservation_name,
+            r.date,
+            r.reservation_status,
+            t.id as time_id,
+            t.start_at as time_value,
+            th.id as theme_id,
+            th.name as theme_name,
             th.description as theme_description,
             th.thumbnail_image_url as theme_thumbnail
             """;
@@ -76,7 +84,8 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 rs.getString("reservation_name"),
                 rs.getDate("date").toLocalDate(),
                 time,
-                theme
+                theme,
+                ReservationStatus.of(rs.getString("reservation_status"))
         );
         return new ReservationWaiting(
                 rs.getLong("waiting_id"),

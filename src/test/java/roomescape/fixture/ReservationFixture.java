@@ -1,6 +1,7 @@
 package roomescape.fixture;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -13,6 +14,7 @@ public class ReservationFixture {
     private LocalDate date = LocalDate.of(2026, 8, 5);
     private ReservationTime time = ReservationTimeFixture.create();
     private Theme theme = ThemeFixture.create();
+    private ReservationStatus status = ReservationStatus.CONFIRM;
 
     private ReservationFixture() {
     }
@@ -46,7 +48,8 @@ public class ReservationFixture {
                 name,
                 date,
                 time,
-                theme
+                theme,
+                status
         );
     }
 }

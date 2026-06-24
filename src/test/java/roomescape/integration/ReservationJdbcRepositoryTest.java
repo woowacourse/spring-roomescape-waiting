@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
@@ -234,7 +235,7 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void changeOwner는_예약의_이름을_바꾼다() {
+    void transferWithPendingStatus는_새_주인에게_예약을_넘기고_PENDING으로_전환한다() {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(
                 themeId,
@@ -243,16 +244,19 @@ class ReservationJdbcRepositoryTest {
                 "https://example.com/horror.jpg"
         );
         Reservation saved = repository.save(new Reservation(
+                null,
                 "브라운",
                 LocalDate.of(2026, 8, 5),
                 time,
-                theme
+                theme,
+                ReservationStatus.CONFIRM
         ));
 
-        repository.changeOwner(saved.getId(), "민욱");
+        repository.transferWithPendingStatus(saved.getId(), "민욱");
 
         Optional<Reservation> found = repository.findById(saved.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("민욱");
+        assertThat(found.get().getReservationStatus()).isEqualTo(ReservationStatus.PENDING);
     }
 }

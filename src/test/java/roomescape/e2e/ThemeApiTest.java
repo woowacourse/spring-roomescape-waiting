@@ -188,7 +188,7 @@ class ThemeApiTest extends AbstractE2eTest {
 
     private void insertReservation(String name, LocalDate date, Integer timeId, Integer themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, 'CONFIRM')",
                 name, date, timeId, themeId
         );
     }

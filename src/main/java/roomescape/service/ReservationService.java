@@ -70,8 +70,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void changeOwner(Long id, String name) {
-        reservationRepository.changeOwner(id, name);
+    public void transferWithPendingStatus(Long id, String name) {
+        reservationRepository.transferWithPendingStatus(id, name);
     }
 
     public boolean hasReservationsByThemeId(Long themeId) {
