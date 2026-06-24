@@ -3,6 +3,7 @@ package roomescape.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reservations;
@@ -112,7 +113,8 @@ public class ReservationApplicationService {
                 existing.getName(),
                 request.date(),
                 newTime,
-                existing.getTheme()
+                existing.getTheme(),
+                existing.getReservationStatus()
         );
 
         if (updated.isPast(now)) {
@@ -157,7 +159,7 @@ public class ReservationApplicationService {
     }
 
     private void promoteToReservation(Reservation reservation, ReservationWaiting waiting) {
-        reservationService.changeOwner(reservation.getId(), waiting.getName());
+        reservationService.transferWithPendingStatus(reservation.getId(), waiting.getName());
         reservationWaitingService.deleteById(waiting.getId());
     }
 

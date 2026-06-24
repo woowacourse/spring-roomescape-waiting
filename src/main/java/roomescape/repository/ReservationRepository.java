@@ -17,7 +17,7 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
-    void changeOwner(Long id, String name);
+    void transferWithPendingStatus(Long id, String name);
 
     void deleteById(Long id);
 

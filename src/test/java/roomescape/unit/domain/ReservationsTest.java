@@ -2,6 +2,7 @@ package roomescape.unit.domain;
 
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
@@ -65,7 +66,8 @@ class ReservationsTest {
                 "브라운",
                 LocalDate.of(2026, 8, 5),
                 TIME_10,
-                THEME
+                THEME,
+                ReservationStatus.CONFIRM
         );
         Reservations reservations = new Reservations(List.of(reservation));
 
@@ -87,14 +89,16 @@ class ReservationsTest {
                 "브라운",
                 LocalDate.of(2026, 8, 5),
                 TIME_10,
-                THEME
+                THEME,
+                ReservationStatus.CONFIRM
         );
         Reservation removed = new Reservation(
                 2L,
                 "티뉴",
                 LocalDate.of(2026, 8, 5),
                 TIME_11,
-                THEME
+                THEME,
+                ReservationStatus.CONFIRM
         );
         Reservations reservations = new Reservations(List.of(kept, removed));
 

@@ -659,7 +659,7 @@ class ReservationApiTest extends AbstractE2eTest {
 
     private Long insertPastReservation(String name, String date, Integer timeId, Integer themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, 'CONFIRM')",
                 name, LocalDate.parse(date), timeId, themeId
         );
         return jdbcTemplate.queryForObject(

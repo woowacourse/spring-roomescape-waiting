@@ -78,6 +78,7 @@ public class ThemeJdbcRepository implements ThemeRepository {
                 JOIN reservation as r
                 ON r.theme_id = t.id
                 WHERE r.date BETWEEN ? AND ?
+                AND r.reservation_status = 'CONFIRM'
                 GROUP BY
                     t.id,
                     t.name,

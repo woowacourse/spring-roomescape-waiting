@@ -71,7 +71,7 @@ class ReservationCancellationFailureTest {
         Long themeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM theme ORDER BY id DESC LIMIT 1", Long.class);
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, 'CONFIRM')",
                 "티뉴", LocalDate.of(2026, 8, 5), timeId, themeId
         );
         reservationId = jdbcTemplate.queryForObject(

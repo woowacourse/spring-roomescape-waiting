@@ -187,7 +187,7 @@ class ReservationApplicationServiceMockTest {
         assertThatThrownBy(() -> applicationService.cancelMyReservation(1L, "민욱"))
                 .isInstanceOf(BusinessRuleViolationException.class);
         verify(reservationService, never()).deleteReservation(anyLong());
-        verify(reservationService, never()).changeOwner(anyLong(), anyString());
+        verify(reservationService, never()).transferWithPendingStatus(anyLong(), anyString());
     }
 
     @Test
@@ -199,7 +199,7 @@ class ReservationApplicationServiceMockTest {
         applicationService.cancelMyReservation(1L, "민욱");
 
         verify(reservationService).deleteReservation(1L);
-        verify(reservationService, never()).changeOwner(anyLong(), anyString());
+        verify(reservationService, never()).transferWithPendingStatus(anyLong(), anyString());
     }
 
     @Test
@@ -211,7 +211,7 @@ class ReservationApplicationServiceMockTest {
 
         applicationService.cancelMyReservation(1L, "민욱");
 
-        verify(reservationService).changeOwner(1L, "브라운");
+        verify(reservationService).transferWithPendingStatus(1L, "브라운");
         verify(reservationWaitingService).deleteById(10L);
         verify(reservationService, never()).deleteReservation(anyLong());
     }
@@ -225,7 +225,7 @@ class ReservationApplicationServiceMockTest {
 
         applicationService.deleteReservation(1L);
 
-        verify(reservationService).changeOwner(1L, "브라운");
+        verify(reservationService).transferWithPendingStatus(1L, "브라운");
         verify(reservationWaitingService).deleteById(10L);
     }
 
@@ -248,6 +248,6 @@ class ReservationApplicationServiceMockTest {
         assertThatThrownBy(() -> applicationService.deleteReservation(1L))
                 .isInstanceOf(BusinessRuleViolationException.class);
         verify(reservationService, never()).deleteReservation(anyLong());
-        verify(reservationService, never()).changeOwner(anyLong(), anyString());
+        verify(reservationService, never()).transferWithPendingStatus(anyLong(), anyString());
     }
 }

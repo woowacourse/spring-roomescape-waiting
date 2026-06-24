@@ -47,7 +47,7 @@ class ReservationWaitingJdbcRepositoryTest {
         Long themeId = jdbcTemplate.queryForObject("SELECT id FROM theme LIMIT 1", Long.class);
 
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, 'CONFIRM')",
                 "티뉴", LocalDate.of(2026, 8, 5), timeId, themeId
         );
         Long reservationId = jdbcTemplate.queryForObject("SELECT id FROM reservation LIMIT 1", Long.class);

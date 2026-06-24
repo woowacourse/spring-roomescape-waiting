@@ -35,7 +35,7 @@ class ReservationWaitingH2IndexTest {
 
         for (int r = 0; r < 5; r++) {
             jdbcTemplate.update(
-                    "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, 'CONFIRM')",
                     "예약자" + r, LocalDate.of(2026, 8, 5), timeId, themeId
             );
         }
