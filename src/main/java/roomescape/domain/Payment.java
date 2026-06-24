@@ -26,6 +26,10 @@ public class Payment {
         this(null, orderId, amount, null, reservationId);
     }
 
+    public Payment withPaymentKey(String paymentKey) {
+        return new Payment(id, orderId, amount, paymentKey, reservationId);
+    }
+
     public Long getId() {
         return id;
     }

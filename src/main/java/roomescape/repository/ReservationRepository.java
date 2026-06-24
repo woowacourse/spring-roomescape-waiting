@@ -19,6 +19,8 @@ public interface ReservationRepository {
 
     void transferWithPendingStatus(Long id, String name);
 
+    void confirm(Long id);
+
     void deleteById(Long id);
 
     boolean existsByTimeId(Long timeId);

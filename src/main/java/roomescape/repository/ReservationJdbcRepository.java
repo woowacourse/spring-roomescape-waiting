@@ -138,6 +138,14 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
+    public void confirm(Long id) {
+        jdbcTemplate.update(
+                "UPDATE reservation SET reservation_status = ? WHERE id = ?",
+                ReservationStatus.CONFIRM.name(), id
+        );
+    }
+
+    @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }

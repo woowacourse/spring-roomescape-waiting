@@ -15,6 +15,8 @@ public enum ProblemType {
     MEDIA_TYPE_NOT_SUPPORTED("media-type-not-supported", "지원하지 않는 미디어 타입"),
     NOT_ACCEPTABLE("not-acceptable", "응답 가능한 미디어 타입 없음"),
     NO_RESOURCE("no-resource", "리소스를 찾을 수 없음"),
+    PAYMENT_AMOUNT_MISMATCH("payment-amount-mismatch", "결제 금액 불일치"),
+    PAYMENT_FAILED("payment-failed", "결제 실패"),
     INTERNAL_ERROR("internal-error", "서버 내부 오류");
 
     private static final String TYPE_BASE = "https://roomescape.example/problems/";

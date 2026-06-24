@@ -3,8 +3,13 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Payment;
+import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.PaymentGateway;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.PaymentAmountMismatchException;
 import roomescape.repository.PaymentRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -12,15 +17,35 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final PaymentGateway paymentGateway;
 
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(PaymentRepository paymentRepository, PaymentGateway paymentGateway) {
         this.paymentRepository = paymentRepository;
+        this.paymentGateway = paymentGateway;
     }
 
     @Transactional
     public Payment createOrder(Long reservationId, long amount) {
         String orderId = generateOrderId();
         return paymentRepository.save(new Payment(orderId, amount, reservationId));
+    }
+
+    public Optional<Payment> findByOrderId(String orderId) {
+        return paymentRepository.findByOrderId(orderId);
+    }
+
+    @Transactional
+    public Payment confirm(String paymentKey, String orderId, long amount) {
+        Payment order = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> NotFoundException.payment(orderId));
+        if (order.getAmount() != amount) {
+            throw new PaymentAmountMismatchException(order.getAmount(), amount);
+        }
+
+        paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+
+        paymentRepository.updatePaymentKey(orderId, paymentKey);
+        return order.withPaymentKey(paymentKey);
     }
 
     private String generateOrderId() {
