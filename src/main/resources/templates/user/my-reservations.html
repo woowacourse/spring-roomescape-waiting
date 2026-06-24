@@ -17,6 +17,7 @@
         .badge-reserved  { background: rgba(107, 207, 142, 0.15); color: var(--success); border: 1px solid rgba(107, 207, 142, 0.35); }
         .badge-waiting   { background: rgba(92, 157, 237, 0.15);  color: var(--accent);  border: 1px solid rgba(92, 157, 237, 0.35); }
         .badge-canceled  { background: rgba(139,156,179, 0.12);   color: var(--muted);   border: 1px solid rgba(139,156,179, 0.25); }
+        .badge-unknown   { background: rgba(255, 180, 0, 0.15);   color: #b8860b;        border: 1px solid rgba(255, 180, 0, 0.35); }
 
         .search-row {
             display: flex;
@@ -64,7 +65,11 @@
                 <th>날짜</th>
                 <th>시간</th>
                 <th>테마</th>
-                <th>상태</th>
+                <th>예약 상태</th>
+                <th>결제 상태</th>
+                <th>주문번호</th>
+                <th>결제키</th>
+                <th>금액</th>
                 <th></th>
             </tr>
             </thead>
@@ -93,10 +98,19 @@
         }
         const map = {
             RESERVED: ['reserved', '예약 확정'],
+            PENDING:  ['waiting',  '결제 대기'],
             CANCELED: ['canceled', '취소됨'],
         };
         const [cls, label] = map[status] ?? ['canceled', status];
         return `<span class="badge badge-${cls}">${label}</span>`;
+    }
+
+    function paymentBadge(status, paymentStatus) {
+        if (status === 'WAITING') return '-';
+        if (paymentStatus === 'DONE')    return '<span class="badge badge-reserved">결제 완료</span>';
+        if (paymentStatus === 'UNKNOWN') return '<span class="badge badge-unknown">확인 필요</span>';
+        if (status === 'PENDING')        return '<span class="badge badge-waiting">결제 대기</span>';
+        return '-';
     }
 
     function showMsg(el, text, ok) {
@@ -124,6 +138,10 @@
                 <td>${escapeHtml(timeLabel)}</td>
                 <td>${escapeHtml(themeName)}</td>
                 <td>${statusBadge(r.status, r.waitRank)}</td>
+                <td>${paymentBadge(r.status, r.paymentStatus)}</td>
+                <td>${escapeHtml(r.orderId ?? '-')}</td>
+                <td>${escapeHtml(r.paymentKey ?? '-')}</td>
+                <td>${r.paymentAmount != null ? Number(r.paymentAmount).toLocaleString() + '원' : '-'}</td>
                 <td><button class="btn btn-danger cancel-btn" data-id="${r.id}">취소</button></td>
             `;
             reservationBody.appendChild(tr);

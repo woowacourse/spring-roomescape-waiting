@@ -2,6 +2,7 @@ package roomescape.reservation.dao.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.reservation.domain.ReservationStatus;
 
 public record ReservationWithRank(
@@ -13,6 +14,10 @@ public record ReservationWithRank(
         Long themeId,
         String themeName,
         ReservationStatus status,
-        Long waitRank
+        Long waitRank,
+        String orderId,
+        String paymentKey,
+        Long paymentAmount,
+        PaymentStatus paymentStatus
 ) {
 }

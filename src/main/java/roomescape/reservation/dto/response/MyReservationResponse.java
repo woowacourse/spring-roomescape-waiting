@@ -1,6 +1,7 @@
 package roomescape.reservation.dto.response;
 
 import java.time.LocalDate;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.reservation.domain.ReservationStatus;
 
 public record MyReservationResponse(
@@ -10,6 +11,10 @@ public record MyReservationResponse(
         TimeResponse time,
         ThemeSimpleResponse theme,
         ReservationStatus status,
-        Long waitRank
+        Long waitRank,
+        String orderId,
+        String paymentKey,
+        Long paymentAmount,
+        PaymentStatus paymentStatus
 ) {
 }
