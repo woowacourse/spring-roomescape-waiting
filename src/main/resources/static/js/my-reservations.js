@@ -60,24 +60,37 @@ function renderAll(reservations, waitings) {
   rows.forEach(({type, data}) => {
     const tr = document.createElement('tr');
     if (type === 'reservation') {
+      const isPending   = data.status === 'PAYMENT_PENDING';
       const isUncertain = data.status === 'PAYMENT_UNCERTAIN';
-      const statusBadge = isUncertain
-        ? `<span class="status-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;">확인 필요</span>`
-        : `<span class="status-badge status-badge--reserved">예약 확정</span>`;
-      const paymentInfo = isUncertain
-        ? `<div style="font-size:0.78rem;color:#856404;margin-top:4px;">주문번호: ${data.orderId ?? '-'}</div>`
-        : `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">${data.amount != null ? data.amount.toLocaleString() + '원' : ''}</div>`;
+
+      let statusBadge, paymentInfo, actionButtons;
+
+      if (isPending) {
+        const checkoutUrl = `/payments/checkout?orderId=${encodeURIComponent(data.orderId)}&orderName=${encodeURIComponent(data.themeName)}`;
+        statusBadge  = `<span class="status-badge" style="background:#e2e3e5;color:#383d41;border:1px solid #d6d8db;">결제 대기</span>`;
+        paymentInfo  = `<div style="font-size:0.78rem;color:#6c757d;margin-top:4px;">${data.amount != null ? data.amount.toLocaleString() + '원' : ''}</div>`;
+        actionButtons = `
+          <a href="${checkoutUrl}" class="btn btn-primary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;">결제하기</a>
+          <button class="btn btn-danger" onclick="cancelReservation(${data.id}, this)">취소</button>`;
+      } else if (isUncertain) {
+        statusBadge  = `<span class="status-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;">확인 필요</span>`;
+        paymentInfo  = `<div style="font-size:0.78rem;color:#856404;margin-top:4px;">주문번호: ${data.orderId ?? '-'}</div>`;
+        actionButtons = `<button class="btn btn-danger" onclick="cancelReservation(${data.id}, this)">취소</button>`;
+      } else {
+        statusBadge  = `<span class="status-badge status-badge--reserved">예약 확정</span>`;
+        paymentInfo  = `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">${data.amount != null ? data.amount.toLocaleString() + '원' : ''}</div>`;
+        actionButtons = `
+          <button class="btn btn-secondary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
+            onclick="openEditModal(${data.id}, '${data.date}', ${data.themeId})">변경</button>
+          <button class="btn btn-danger" onclick="cancelReservation(${data.id}, this)">취소</button>`;
+      }
+
       tr.innerHTML = `
         <td>${data.date}</td>
         <td>${data.themeName}</td>
         <td>${formatTime(data.time.startAt)}</td>
         <td>${statusBadge}${paymentInfo}</td>
-        <td style="text-align:right;">
-          <button class="btn btn-secondary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
-            onclick="openEditModal(${data.id}, '${data.date}', ${data.themeId})">변경</button>
-          <button class="btn btn-danger"
-            onclick="cancelReservation(${data.id}, this)">취소</button>
-        </td>
+        <td style="text-align:right;">${actionButtons}</td>
       `;
     } else {
       tr.innerHTML = `
