@@ -10,9 +10,9 @@ import roomescape.payment.domain.exception.PaymentNotFoundException;
 import roomescape.payment.domain.exception.PaymentSessionExpiredException;
 import roomescape.payment.domain.exception.RetryablePaymentException;
 
-final class TossPaymentErrorMapper {
+final class TossPaymentExceptionMapper {
 
-    private TossPaymentErrorMapper() {
+    private TossPaymentExceptionMapper() {
     }
 
     static RuntimeException map(String code) {

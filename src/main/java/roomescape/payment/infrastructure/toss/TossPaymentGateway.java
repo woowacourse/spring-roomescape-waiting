@@ -49,7 +49,7 @@ public class TossPaymentGateway implements PaymentGateway {
                     try {
                         TossErrorResponse error = objectMapper.readValue(
                                 httpResponse.getBody(), TossErrorResponse.class);
-                        RuntimeException exception = TossPaymentErrorMapper.map(error.code());
+                        RuntimeException exception = TossPaymentExceptionMapper.map(error.code());
                         logExternalFailure(exception, error);
                         throw exception;
                     } catch (IOException e) {
