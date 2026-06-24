@@ -218,12 +218,15 @@ function submitReservation(name) {
       if (res.status === 201) return res.json();
       return res.json().then(body => { throw new Error(body.message || '예약에 실패했습니다.'); });
     })
-    .then(() => {
-      showToast('예약이 완료되었습니다.', 'success');
-      clearBookingBar();
-      refreshTimes();
+    .then(data => {
+      // 예약 대기(orderId·amount 저장) 완료 → 결제위젯 페이지로 이동해 결제수단 선택/인증을 진행한다.
+      const params = new URLSearchParams({
+        orderId: data.orderId,
+        orderName: `${data.themeName} 방탈출 예약`,
+      });
+      window.location.href = `/payments/checkout?${params.toString()}`;
     })
-    .catch(err => showToast(err.message));
+    .catch(err => showToast(err.message || '결제 중 오류가 발생했습니다.'));
 }
 
 function submitWaiting(name) {

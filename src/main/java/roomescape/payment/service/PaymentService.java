@@ -26,6 +26,12 @@ public class PaymentService {
         this.reservationRepository = reservationRepository;
     }
 
+    public long getAmount(String orderId) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+        return payment.getAmount();
+    }
+
     @Transactional
     public void confirm(String paymentKey, String orderId, Long amount) {
         Payment payment = paymentRepository.findByOrderId(orderId)

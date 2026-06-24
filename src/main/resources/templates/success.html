@@ -33,44 +33,28 @@
       line-height: 1.6;
     }
 
-    .row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-      gap: 16px;
-    }
-
-    .row .label {
-      color: #888;
-      white-space: nowrap;
-    }
-
-    .row .val {
-      text-align: right;
-      word-break: break-all;
-    }
-
     a {
       display: inline-block;
       margin-top: 24px;
-      color: #3182f6;
+      padding: 14px 22px;
+      background: #3182f6;
+      color: #fff;
+      border-radius: 10px;
       text-decoration: none;
       font-weight: 600;
+    }
+
+    a:hover {
+      background: #1b64da;
     }
   </style>
 </head>
 <body>
 <div class="card">
-  <h1>✅ 결제를 완료했어요</h1>
-  <p class="desc">브라우저 인증 후, <b>서버가 Toss 결제 승인 API(/v1/payments/confirm)를 직접 호출</b>해 결제를 확정했습니다.</p>
+  <h1>✅ 결제가 완료되었어요</h1>
+  <p class="desc">예약이 정상적으로 확정되었습니다.<br/>즐거운 방탈출 되세요!</p>
 
-  <div class="row"><span class="label">주문번호</span>
-    <span class="val" th:text="${orderId}">order-xxxx</span></div>
-  <div class="row"><span class="label">paymentKey</span>
-    <span class="val" th:text="${paymentKey}">tviva...</span></div>
-
-  <a href="/">← 다시 결제하기</a>
+  <a href="/reservation">예약 페이지로 돌아가기</a>
 </div>
 </body>
 </html>
