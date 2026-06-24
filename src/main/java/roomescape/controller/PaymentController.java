@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import roomescape.dto.PaymentConfirmRequest;
+import roomescape.dto.PaymentFailRequest;
 import roomescape.service.PaymentService;
 
 @RequestMapping("/payments")
@@ -25,5 +26,11 @@ public class PaymentController {
     public void confirm(@Valid @RequestBody PaymentConfirmRequest request) {
 
         paymentService.confirm(request);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("/fail")
+    public void fail(@RequestBody PaymentFailRequest request) {
+        paymentService.fail(request);
     }
 }

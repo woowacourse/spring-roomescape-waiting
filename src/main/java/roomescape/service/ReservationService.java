@@ -69,7 +69,8 @@ public class ReservationService {
         Reservation updatedReservation = newSlot.moveIn(promotedReservation.updatedReservation(), request.name(), now);
 
         reservationSlotRepository.updateReservation(updatedReservation);
-        promotedReservation.promotedReservation().ifPresent(reservationSlotRepository::updateReservation);
+        promotedReservation.promotedReservation()
+                .ifPresent(reservation -> updatePromotedReservation(currentSlot, reservation));
     }
 
     @Transactional
@@ -77,7 +78,8 @@ public class ReservationService {
         ReservationSlot currentSlot = reservationSlotRepository.findByReservationIdForUpdate(reservationId);
         ReservationDeletion promotedReservation = currentSlot.deleteReservation(reservationId, name, now);
         reservationSlotRepository.updateReservation(promotedReservation.deletedReservation());
-        promotedReservation.promotedReservation().ifPresent(reservationSlotRepository::updateReservation);
+        promotedReservation.promotedReservation()
+                .ifPresent(reservation -> updatePromotedReservation(currentSlot, reservation));
     }
 
     public List<ReservationResponse> findAllByName(String username) {
@@ -103,6 +105,13 @@ public class ReservationService {
 
     private Long calculateAmount(ReservationSlot reservationSlot) {
         return reservationSlot.getSlot().theme().getAmount();
+    }
+
+    private void updatePromotedReservation(ReservationSlot reservationSlot, Reservation reservation) {
+        reservationSlotRepository.updateReservation(reservation);
+        if (reservation.isPaymentPending()) {
+            saveOrderWithRetry(reservation.getId(), calculateAmount(reservationSlot));
+        }
     }
 
     private PaymentOrder saveOrderWithRetry(Long reservationId, Long amount) {

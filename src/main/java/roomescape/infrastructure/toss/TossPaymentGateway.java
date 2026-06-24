@@ -44,9 +44,9 @@ public class TossPaymentGateway implements PaymentGateway {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ConfirmRequest(confirmation.paymentKey(), confirmation.orderId(), confirmation.amount()))
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    TossErrorResponse error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
-                    throw TossPaymentException.of(response.getStatusCode(), error);
+                .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {
+                    TossErrorResponse error = objectMapper.readValue(errorResponse.getBody(), TossErrorResponse.class);
+                    throw TossPaymentException.of(errorResponse.getStatusCode(), error);
                 })
                 .body(TossPaymentResponse.class);
         return toResult(response);

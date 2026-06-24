@@ -42,7 +42,7 @@ public class Reservation {
         if (!isWaiting()) {
             throw new CustomException(ErrorCode.RESERVATION_STATUS_UNAVAILABLE);
         }
-        this.status = Status.RESERVED;
+        this.status = Status.PAYMENT_PENDING;
     }
 
     public void confirmPayment() {

@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Payment;
@@ -12,6 +13,7 @@ import roomescape.domain.repository.PaymentOrderRepository;
 import roomescape.domain.repository.PaymentRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.dto.PaymentConfirmRequest;
+import roomescape.dto.PaymentFailRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
@@ -54,5 +56,15 @@ public class PaymentService {
         );
         paymentRepository.save(Payment.create(paymentOrder.getId(), result.paymentKey(), result.amount()));
         reservationSlotRepository.confirmPayment(paymentOrder.getReservationId());
+    }
+
+    @Transactional
+    public void fail(PaymentFailRequest request) {
+        if (!StringUtils.hasText(request.orderId())) {
+            log.info("Payment failed without orderId. code={}, message={}", request.code(), request.message());
+            return;
+        }
+
+        log.info("Payment failed. orderId={}, code={}, message={}", request.orderId(), request.code(), request.message());
     }
 }
