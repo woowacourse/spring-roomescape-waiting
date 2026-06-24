@@ -35,6 +35,7 @@ import roomescape.repository.LockedReservationWriter;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeLockedAction;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.PaymentConfirmCommand;
 import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationCreateCommand;
@@ -45,6 +46,7 @@ import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
+import roomescape.service.exception.ThemeNotFoundException;
 import roomescape.service.exception.UnauthorizedReservationException;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,6 +75,8 @@ class UserReservationServiceTest {
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
     @Mock
+    private ThemeRepository themeRepository;
+    @Mock
     private PaymentService paymentService;
     @Mock
     private PaymentOrderRepository paymentOrderRepository;
@@ -92,6 +96,7 @@ class UserReservationServiceTest {
     void 미래_시점_주문은_결제대기로_저장된다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(themeRepository.existsById(1L)).willReturn(true);
 
         PaymentOrderResult result = userReservationService.createOrder(command);
 
@@ -100,6 +105,22 @@ class UserReservationServiceTest {
         verify(reservationTimeRepository, times(1)).findById(1L);
         verify(paymentOrderRepository, times(1)).save(any(PaymentOrder.class));
         verifyNoInteractions(reservationService, reservationRepository, paymentService);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 themeId로 주문하면 ThemeNotFoundException이 발생하고 주문이 저장되지 않는다")
+    void 존재하지_않는_themeId로_주문시_예외가_발생한다() {
+        ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(themeRepository.existsById(1L)).willReturn(false);
+
+        assertThrows(
+                ThemeNotFoundException.class,
+                () -> userReservationService.createOrder(command)
+        );
+
+        verify(themeRepository, times(1)).existsById(1L);
+        verifyNoInteractions(reservationService, reservationRepository, paymentService, paymentOrderRepository);
     }
 
     @Test

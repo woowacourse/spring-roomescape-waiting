@@ -19,6 +19,7 @@ import roomescape.payment.order.PaymentOrder;
 import roomescape.payment.order.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.PaymentConfirmCommand;
 import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationCreateCommand;
@@ -28,6 +29,7 @@ import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
+import roomescape.service.exception.ThemeNotFoundException;
 import roomescape.service.exception.UnauthorizedReservationException;
 
 @Service
@@ -41,6 +43,7 @@ public class UserReservationService {
     private final AdminReservationService reservationService;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
     private final PaymentService paymentService;
     private final PaymentOrderRepository paymentOrderRepository;
 
@@ -48,12 +51,14 @@ public class UserReservationService {
             AdminReservationService reservationService,
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository,
             PaymentService paymentService,
             PaymentOrderRepository paymentOrderRepository
     ) {
         this.reservationService = reservationService;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
         this.paymentService = paymentService;
         this.paymentOrderRepository = paymentOrderRepository;
     }
@@ -66,6 +71,11 @@ public class UserReservationService {
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), time.getStartAt(), "과거 시점에는 예약할 수 없습니다");
+
+        if (!themeRepository.existsById(command.themeId())) {
+            log.warn("존재하지 않는 테마로 주문 생성 시도: themeId={}", command.themeId());
+            throw new ThemeNotFoundException("존재하지 않는 테마입니다: themeId=" + command.themeId());
+        }
 
         String orderId = generateOrderId();
         paymentOrderRepository.save(PaymentOrder.pending(orderId, command, RESERVATION_AMOUNT));
