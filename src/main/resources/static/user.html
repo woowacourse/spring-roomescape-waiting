@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RoomEscape</title>
-  <script src="https://js.tosspayments.com/v1/payment"></script>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -477,6 +477,7 @@
     }
 
     .reservationSlotInfo-item.status-confirmed { border-left-color: #22c55e; }
+    .reservationSlotInfo-item.status-payment-pending { border-left-color: #38bdf8; }
     .reservationSlotInfo-item.status-waiting { border-left-color: #f59e0b; }
     .reservationSlotInfo-item.status-canceled { border-left-color: var(--danger); }
 
@@ -518,6 +519,11 @@
     .reservation-status.confirmed {
       background: rgba(34, 197, 94, 0.1);
       color: #86efac;
+    }
+
+    .reservation-status.payment-pending {
+      background: rgba(56, 189, 248, 0.12);
+      color: #7dd3fc;
     }
 
     .reservation-status.waiting {
@@ -802,6 +808,7 @@
   <div class="message-modal" role="dialog" aria-modal="true" aria-labelledby="message-modal-title" onclick="event.stopPropagation()">
     <h3 id="message-modal-title">알림</h3>
     <p id="message-modal-text"></p>
+    <div class="btn-row" id="message-modal-actions"></div>
     <button class="btn btn-accent" onclick="closeMessageModal()">확인</button>
   </div>
 </div>
@@ -841,6 +848,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) })
         }, '결제 승인에 실패했습니다.');
+        clearPendingPayment();
         showMessageModal('결제 완료', '결제가 승인되었습니다.');
       } catch (e) {
         showMessageModal('결제 승인 실패', e.message);
@@ -857,8 +865,23 @@
     }
 
     if (paymentResult === 'fail') {
+      const code = params.get('code');
       const message = params.get('message') || '결제가 취소되었거나 실패했습니다.';
-      showMessageModal('결제 실패', message);
+      const orderId = params.get('orderId');
+      try {
+        await fetchEmpty(`${API}/payments/fail`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, message, orderId })
+        }, '결제 실패 정보를 정리하지 못했습니다.');
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+      const retryPayment = getPendingPayment();
+      const actions = retryPayment
+        ? '<button class="btn btn-accent" onclick="retryPendingPayment()">다시 결제</button>'
+        : '';
+      showMessageModal('결제 실패', message, actions);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }
@@ -875,15 +898,17 @@
     setTimeout(() => { t.className = 'toast'; }, 3000);
   }
 
-  function showMessageModal(title, message) {
+  function showMessageModal(title, message, actions = '') {
     document.getElementById('message-modal-title').textContent = title;
     document.getElementById('message-modal-text').textContent = message;
+    document.getElementById('message-modal-actions').innerHTML = actions;
     document.getElementById('message-modal').classList.add('show');
   }
 
   function closeMessageModal(event) {
     if (event && event.target.id !== 'message-modal') return;
     document.getElementById('message-modal').classList.remove('show');
+    document.getElementById('message-modal-actions').innerHTML = '';
   }
 
   async function readErrorMessage(res, fallback) {
@@ -1239,15 +1264,67 @@
       return;
     }
 
-    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
-    await tossPayments.requestPayment('카드', {
+    const pendingPayment = {
       amount: payment.amount,
       orderId: payment.orderId,
       orderName: `${reservation.themeName || selectedTheme.name} 예약`,
-      customerName: reservation.name || username,
+      customerName: reservation.name || username
+    };
+    await requestTossPaymentWindow(pendingPayment);
+  }
+
+  function storePendingPayment(payment) {
+    sessionStorage.setItem('pendingPayment', JSON.stringify(payment));
+  }
+
+  function clearPendingPayment() {
+    sessionStorage.removeItem('pendingPayment');
+  }
+
+  function getPendingPayment() {
+    try {
+      const payment = JSON.parse(sessionStorage.getItem('pendingPayment') || 'null');
+      if (!payment?.orderId || !payment?.amount) return null;
+      return payment;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function retryPendingPayment() {
+    const payment = getPendingPayment();
+    if (!payment) {
+      showToast('다시 결제할 주문 정보를 찾을 수 없습니다.', 'error');
+      return;
+    }
+    await requestTossPaymentWindow(payment);
+  }
+
+  async function requestTossPaymentWindow(payment) {
+    storePendingPayment(payment);
+    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+    const tossPayment = tossPayments.payment({ customerKey: getTossCustomerKey() });
+    await tossPayment.requestPayment({
+      method: 'CARD',
+      amount: {
+        currency: 'KRW',
+        value: payment.amount
+      },
+      orderId: payment.orderId,
+      orderName: payment.orderName,
+      customerName: payment.customerName,
       successUrl: `${window.location.origin}/user.html`,
       failUrl: `${window.location.origin}/user.html?payment=fail`
     });
+  }
+
+  function getTossCustomerKey() {
+    const savedCustomerKey = localStorage.getItem('tossCustomerKey');
+    if (savedCustomerKey) return savedCustomerKey;
+
+    const customerKey = crypto.randomUUID().replaceAll('-', '');
+    localStorage.setItem('tossCustomerKey', customerKey);
+    return customerKey;
   }
 
   function extractPaymentInfo(reservation) {
@@ -1429,14 +1506,20 @@
     return String(r.status ?? '').toUpperCase() === 'CANCELED';
   }
 
+  function isPaymentPendingReservation(r) {
+    return String(r.status ?? '').toUpperCase() === 'PAYMENT_PENDING';
+  }
+
   function reservationState(r) {
     if (isCanceledReservation(r)) return 'canceled';
+    if (isPaymentPendingReservation(r)) return 'payment-pending';
     return Number(r.order ?? 0) > 0 ? 'waiting' : 'confirmed';
   }
 
   function reservationStatusLabel(r) {
     const state = reservationState(r);
     if (state === 'canceled') return '예약 취소';
+    if (state === 'payment-pending') return '결제 대기';
     if (state === 'waiting') return '대기';
     return '예약 확정';
   }
@@ -1451,11 +1534,35 @@
       return reservationStatusBadge(r);
     }
 
+    if (isPaymentPendingReservation(r)) {
+      return `
+        ${reservationStatusBadge(r)}
+        <button class="btn btn-accent" onclick="payPendingReservation(${JSON.stringify(r).replace(/"/g,'&quot;')})">결제하기</button>
+        <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
+        <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
+      `;
+    }
+
     return `
       ${reservationStatusBadge(r)}
       <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
       <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
     `;
+  }
+
+  async function payPendingReservation(reservation) {
+    const payment = extractPaymentInfo(reservation);
+    if (!payment.orderId || !payment.amount) {
+      showToast('결제 주문 정보를 찾을 수 없습니다.', 'error');
+      return;
+    }
+
+    await requestTossPaymentWindow({
+      amount: payment.amount,
+      orderId: payment.orderId,
+      orderName: `${reservation.themeName} 예약`,
+      customerName: reservation.name || username
+    });
   }
 
   async function deleteMyReservation(id) {

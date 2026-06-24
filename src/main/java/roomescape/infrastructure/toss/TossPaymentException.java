@@ -21,7 +21,7 @@ public class TossPaymentException extends RuntimeException{
             case "DUPLICATED_ORDER_ID" -> new DuplicatedOrder(error.message());
             case "NOT_FOUND_PAYMENT_SESSION" -> new SessionExpired(error.message());
             case "INVALID_REQUEST" -> new InvalidRequest(error.message());
-            case "UNAUTHORIZED_KEY", "INVALID_API_KEY" -> new GatewayConfig(error.message());
+            case "UNAUTHORIZED_KEY", "INVALID_API_KEY" -> new GatewayConfig(error.code(), error.message());
             case "REJECT_CARD_PAYMENT" -> new CardRejected(error.message());
             case "NOT_FOUND_PAYMENT" -> new PaymentNotFound(error.message());
             case "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING" -> new Retryable(error.message());
@@ -86,8 +86,8 @@ public class TossPaymentException extends RuntimeException{
      */
     public static class GatewayConfig extends TossPaymentException {
 
-        public GatewayConfig(String message) {
-            super(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED_KEY", message);
+        public GatewayConfig(String code, String message) {
+            super(HttpStatus.UNAUTHORIZED, code, message);
         }
 
     }

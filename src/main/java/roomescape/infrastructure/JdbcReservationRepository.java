@@ -35,8 +35,8 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                     rs.getString("theme_thumbnail"),
                     rs.getTime("time_value").toLocalTime(),
                     rs.getInt("waiting_order"),
-                    null,
-                    null
+                    rs.getString("order_id"),
+                    rs.getObject("amount", Long.class)
             );
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
@@ -54,6 +54,8 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                        th.description AS theme_description,
                        th.thumbnail_url AS theme_thumbnail,
                        t.start_at AS time_value,
+                       po.order_id AS order_id,
+                       po.amount AS amount,
                        CASE
                            WHEN rv.status = 'RESERVED' THEN 0
                            WHEN rv.status = 'PAYMENT_PENDING' THEN 0
@@ -73,6 +75,7 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                 INNER JOIN reservation_slot AS rs ON rv.reservation_slot_id = rs.id
                 INNER JOIN reservation_time AS t ON rs.time_id = t.id
                 INNER JOIN theme AS th ON rs.theme_id = th.id
+                LEFT JOIN payment_order AS po ON po.reservation_id = rv.id
                 WHERE rv.name = ?
                 """;
         return jdbcTemplate.query(sql, reservationResponseRowMapper, username);

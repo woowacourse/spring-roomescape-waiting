@@ -57,7 +57,7 @@ public class ReservationSlot {
     }
 
     private Optional<Reservation> promoteReservation(Reservation reservation) {
-        if (!reservation.isReserved()) {
+        if (!reservation.isReserved() && !reservation.isPaymentPending()) {
             return Optional.empty();
         }
 

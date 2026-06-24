@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.validation.ConstraintViolationException;
+import roomescape.infrastructure.toss.TossPaymentException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,6 +19,14 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.name(), errorCode.getMessage());
         return ResponseEntity
                 .status(errorCode.getStatus())
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleTossPaymentException(TossPaymentException e) {
+        ErrorResponse errorResponse = new ErrorResponse(e.getCode(), e.getClass().getSimpleName(), e.getMessage());
+        return ResponseEntity
+                .status(e.getStatus())
                 .body(errorResponse);
     }
 
