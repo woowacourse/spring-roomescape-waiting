@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS waiting;
+DROP TABLE IF EXISTS reservation_payment;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS theme;
 DROP TABLE IF EXISTS reservation_time;
@@ -45,4 +46,17 @@ CREATE TABLE waiting
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     CONSTRAINT unique_waiting UNIQUE (date, time_id, theme_id, name)
+);
+
+CREATE TABLE reservation_payment
+(
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id  BIGINT       NOT NULL UNIQUE,
+    order_id         VARCHAR(100) NOT NULL UNIQUE,
+    payment_key      VARCHAR(200),
+    amount           BIGINT       NOT NULL,
+    idempotency_key  VARCHAR(300) NOT NULL UNIQUE,
+    status           VARCHAR(30)  NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
 );

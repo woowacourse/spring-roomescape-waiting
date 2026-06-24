@@ -93,6 +93,16 @@ VALUES
     ('user1', '2026-06-06', 5, 20),
     ('user1', '2026-06-07', 8, 15);
 
+INSERT INTO reservation_payment
+    (reservation_id, order_id, payment_key, amount, idempotency_key, status)
+SELECT id,
+       CAST(RANDOM_UUID() AS VARCHAR),
+       NULL,
+       10000,
+       CAST(RANDOM_UUID() AS VARCHAR),
+       'PENDING'
+FROM reservation;
+
 -- 예약 대기 데이터
 INSERT INTO waiting (name, date, time_id, theme_id)
 VALUES ('waiting1', '2026-05-25', 1, 1),
