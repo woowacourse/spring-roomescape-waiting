@@ -99,6 +99,7 @@ class ReservationServiceTest {
 
         ReservationResponse response = reservationService.save(now, request);
 
+        assertThat(response.status()).isEqualTo("PAYMENT_PENDING");
         assertThat(response.order()).isZero();
         assertThat(response.orderId()).matches("[A-Za-z0-9_-]{6,64}");
         assertThat(response.amount()).isEqualTo(10000L);

@@ -30,12 +30,23 @@ public class Reservation {
         return status == Status.WAITING;
     }
 
+    public boolean isPaymentPending() {
+        return status == Status.PAYMENT_PENDING;
+    }
+
     public boolean isUpdatedAtBefore(Reservation other) {
         return updateAt.isBefore(other.updateAt);
     }
 
     public void promote() {
         if (!isWaiting()) {
+            throw new CustomException(ErrorCode.RESERVATION_STATUS_UNAVAILABLE);
+        }
+        this.status = Status.RESERVED;
+    }
+
+    public void confirmPayment() {
+        if (!isPaymentPending()) {
             throw new CustomException(ErrorCode.RESERVATION_STATUS_UNAVAILABLE);
         }
         this.status = Status.RESERVED;

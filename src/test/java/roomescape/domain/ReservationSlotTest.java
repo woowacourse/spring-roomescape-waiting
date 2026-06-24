@@ -21,8 +21,8 @@ class ReservationSlotTest {
     private static final LocalTime RESERVATION_TIME = LocalTime.of(15, 0);
 
     @Test
-    @DisplayName("첫 예약은 확정 상태로 예약한다")
-    void 첫_예약_확정() {
+    @DisplayName("첫 예약은 결제 대기 상태로 예약한다")
+    void 첫_예약_결제_대기() {
         LocalDateTime now = LocalDateTime.now();
         ReservationSlot reservationSlot = createReservationSlot(now, List.of());
 
@@ -30,16 +30,16 @@ class ReservationSlotTest {
 
         assertThat(reservation.getName()).isEqualTo("브라운");
         assertThat(reservation.getReservationSlotId()).isEqualTo(1L);
-        assertThat(reservation.getStatus()).isEqualTo(Status.RESERVED);
+        assertThat(reservation.getStatus()).isEqualTo(Status.PAYMENT_PENDING);
         assertThat(reservation.getUpdateAt()).isEqualTo(now);
     }
 
     @Test
-    @DisplayName("이미 확정 예약이 있으면 대기 상태로 예약한다")
-    void 확정_예약_존재시_대기() {
+    @DisplayName("이미 결제 대기 예약이 있으면 대기 상태로 예약한다")
+    void 결제_대기_예약_존재시_대기() {
         LocalDateTime now = LocalDateTime.now();
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
-                createReservation(1L, "브라운", Status.RESERVED, now)
+                createReservation(1L, "브라운", Status.PAYMENT_PENDING, now)
         )));
 
         Reservation reservation = reservationSlot.reserve("도니", now.plusMinutes(1));
@@ -48,10 +48,10 @@ class ReservationSlotTest {
     }
 
     @Test
-    @DisplayName("확정 예약의 대기 순서는 0이다")
-    void 확정_예약_순서() {
+    @DisplayName("결제 대기 예약의 대기 순서는 0이다")
+    void 결제_대기_예약_순서() {
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = createReservation(1L, "브라운", Status.RESERVED, now);
+        Reservation reservation = createReservation(1L, "브라운", Status.PAYMENT_PENDING, now);
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(reservation)));
 
         int order = reservationSlot.calculateOrder(reservation);
@@ -66,7 +66,7 @@ class ReservationSlotTest {
         Reservation firstWaiting = createReservation(2L, "도니", Status.WAITING, now.plusMinutes(1));
         Reservation secondWaiting = createReservation(3L, "모디", Status.WAITING, now.plusMinutes(2));
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
-                createReservation(1L, "브라운", Status.RESERVED, now),
+                createReservation(1L, "브라운", Status.PAYMENT_PENDING, now),
                 firstWaiting,
                 secondWaiting
         )));
@@ -81,7 +81,7 @@ class ReservationSlotTest {
     void 같은_이름_예약_예외() {
         LocalDateTime now = LocalDateTime.now();
         ReservationSlot reservationSlot = createReservationSlot(now, new ArrayList<>(List.of(
-                createReservation(1L, "브라운", Status.RESERVED, now)
+                createReservation(1L, "브라운", Status.PAYMENT_PENDING, now)
         )));
 
         assertThatThrownBy(() -> reservationSlot.reserve("브라운", now.plusMinutes(1)))

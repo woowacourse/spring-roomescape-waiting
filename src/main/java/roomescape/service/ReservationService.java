@@ -47,7 +47,7 @@ public class ReservationService {
         int order = reservationSlot.calculateOrder(newReservation);
         newReservation = reservationSlotRepository.saveReservation(newReservation);
         Order paymentOrder = null;
-        if (newReservation.isReserved()) {
+        if (newReservation.isPaymentPending()) {
             paymentOrder = saveOrderWithRetry(newReservation.getId(), calculateAmount(reservationSlot));
         }
         return ReservationResponse.from(newReservation, reservationSlot.getSlot(), order, paymentOrder);

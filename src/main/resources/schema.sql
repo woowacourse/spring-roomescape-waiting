@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS reservation
     updated_at DATETIME NOT NULL,
     PRIMARY KEY (id),
 
-    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','WAITING','CANCELED')),
+    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','PAYMENT_PENDING','WAITING','CANCELED')),
 
     FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id)
 );

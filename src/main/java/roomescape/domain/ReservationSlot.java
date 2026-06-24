@@ -51,7 +51,7 @@ public class ReservationSlot {
 
     private Status calculateStatus() {
         if (reservations.isEmpty()) {
-            return Status.RESERVED;
+            return Status.PAYMENT_PENDING;
         }
         return Status.WAITING;
     }
@@ -82,7 +82,7 @@ public class ReservationSlot {
     }
 
     public int calculateOrder(Reservation reservation) {
-        if (reservation.isReserved()) {
+        if (reservation.isReserved() || reservation.isPaymentPending()) {
             return 0;
         }
         return (int) reservations.stream()

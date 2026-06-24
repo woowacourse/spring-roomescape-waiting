@@ -56,6 +56,7 @@ public class JdbcReservationRepository implements ReservationQueryRepository {
                        t.start_at AS time_value,
                        CASE
                            WHEN rv.status = 'RESERVED' THEN 0
+                           WHEN rv.status = 'PAYMENT_PENDING' THEN 0
                            WHEN rv.status = 'CANCELED' THEN 0
                            ELSE (
                                SELECT COUNT(*)
