@@ -9,15 +9,13 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
 import roomescape.domain.WaitingWithOrder;
+import roomescape.fixture.ReservationFixture;
 import roomescape.repository.ReservationWaitingJdbcRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,15 +52,15 @@ class ReservationWaitingJdbcRepositoryTest {
         );
         Long reservationId = jdbcTemplate.queryForObject("SELECT id FROM reservation LIMIT 1", Long.class);
 
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        reservation = new Reservation(reservationId, "티뉴", LocalDate.of(2026, 8, 5), time, theme);
+        reservation = ReservationFixture.builder().id(reservationId).name("티뉴").build();
     }
 
     @Test
     void save는_생성된_id와_첫_순번을_부여해_반환한다() {
         ReservationWaiting waiting = new ReservationWaiting(
-                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation);
+                "민욱",
+                LocalDateTime.of(2026, 8, 1, 10, 0, 0),
+                reservation);
 
         WaitingWithOrder saved = repository.save(waiting);
 
@@ -83,12 +81,19 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void save는_같은_이름과_예약으로_중복_신청하면_DuplicateKeyException을_던진다() {
-        repository.save(new ReservationWaiting(
-                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+        repository.save(
+                new ReservationWaiting(
+                        "민욱",
+                        LocalDateTime.of(2026, 8, 1, 10, 0, 0),
+                        reservation)
+        );
 
-        assertThatThrownBy(() -> repository.save(new ReservationWaiting(
-                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation)))
-                .isInstanceOf(DuplicateKeyException.class);
+        assertThatThrownBy(() -> repository.save(
+                new ReservationWaiting(
+                        "민욱",
+                        LocalDateTime.of(2026, 8, 1, 10, 0, 1),
+                        reservation
+                ))).isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test

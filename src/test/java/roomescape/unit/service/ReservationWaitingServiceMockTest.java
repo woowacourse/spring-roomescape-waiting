@@ -6,19 +6,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
 import roomescape.domain.WaitingWithOrder;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
+import roomescape.fixture.ReservationFixture;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.service.ReservationWaitingService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,20 +37,7 @@ class ReservationWaitingServiceMockTest {
 
     @Test
     void addWaiting은_저장소에_위임하고_저장된_대기를_반환한다() {
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(
-                1L,
-                "공포",
-                "무서운 테마",
-                "https://example.com/horror.jpg"
-        );
-        Reservation reservation = new Reservation(
-                1L,
-                "티뉴",
-                LocalDate.of(2026, 8, 5),
-                time,
-                theme
-        );
+        Reservation reservation = ReservationFixture.create();
         ReservationWaiting toSave = new ReservationWaiting("민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
         WaitingWithOrder saved = new WaitingWithOrder(
                 new ReservationWaiting(
@@ -104,20 +89,7 @@ class ReservationWaitingServiceMockTest {
 
     @Test
     void cancelMyReservationWaiting은_지난_슬롯이면_BusinessRuleViolationException을_던진다() {
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(
-                1L,
-                "공포",
-                "무서운 테마",
-                "https://example.com/horror.jpg"
-        );
-        Reservation pastReservation = new Reservation(
-                1L,
-                "티뉴",
-                LocalDate.of(2020, 1, 1),
-                time,
-                theme
-        );
+        Reservation pastReservation = ReservationFixture.builder().date(LocalDate.of(2020, 1, 1)).build();
         ReservationWaiting waiting = new ReservationWaiting(
                 1L,
                 "민욱",
@@ -132,25 +104,11 @@ class ReservationWaitingServiceMockTest {
     }
 
     private ReservationWaiting waitingOwnedBy(Long id, String name) {
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(
-                1L,
-                "공포",
-                "무서운 테마",
-                "https://example.com/horror.jpg"
-        );
-        Reservation reservation = new Reservation(
-                1L,
-                "티뉴",
-                LocalDate.of(2026, 8, 5),
-                time,
-                theme
-        );
         return new ReservationWaiting(
                 id,
                 name,
                 LocalDateTime.of(2026, 8, 1, 10, 0),
-                reservation
+                ReservationFixture.create()
         );
     }
 }
