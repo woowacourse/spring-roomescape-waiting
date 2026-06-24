@@ -1,5 +1,19 @@
 # 변경 명세 — spring-roomescape-waiting
 
+## 개요
+
+| 구분                | 변경 내용                                                                                                   |
+|-------------------|---------------------------------------------------------------------------------------------------------|
+| **결제 ACL**        | `PaymentGateway` 포트 + `TossPaymentGateway` 어댑터 신규 도입. 토스 HTTP 타입이 서비스/도메인으로 누출되지 않도록 격리                 |
+| **결제 승인 흐름**      | `POST /reservations` 시 `paymentKey·orderId·amount` 수신 → Toss `/v1/payments/confirm` 호출 후 예약 저장          |
+| **orderId 서버 발급** | 클라이언트 생성 UUID 대신 `POST /payments/prepare` 가 서버에서 UUID를 생성·`pending_payment` 에 저장 후 반환                   |
+| **금액 위변조 방어**     | 결제 승인 전 `pending_payment.amount` ↔ 요청 `amount` 비교. 불일치 시 `PaymentAmountMismatchException` (400)         |
+| **결제 취소 정리**      | `DELETE /payments/prepare/{orderId}` 로 결제 실패·취소 시 pending 레코드 삭제                                        |
+| **예외 구조**         | `TossPaymentException` 8종 중첩 클래스 (AlreadyProcessed·CardRejected·Retryable 등), RFC 9457 ProblemDetail 응답 |
+| **DB 스키마**        | `reservation` 에 `amount·payment_key` 추가. `pending_payment` 테이블 신규                                       |
+
+---
+
 ## 1. Toss Payments 결제 연동
 
 ### 1-1. 도메인 객체
