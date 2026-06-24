@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.PaymentConfirmRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationUpdateRequest;
+import roomescape.payment.client.TossProperties;
 import roomescape.service.UserReservationService;
 import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.PaymentOrderResult;
@@ -43,6 +44,9 @@ class UserReservationControllerTest {
     @MockitoBean
     private UserReservationService userReservationService;
 
+    @MockitoBean
+    private TossProperties tossProperties;
+
     @Test
     @DisplayName("GET /user/reservations - 이름으로 예약 목록을 반환한다")
     void list() throws Exception {
@@ -59,6 +63,7 @@ class UserReservationControllerTest {
     void createOrder() throws Exception {
         given(userReservationService.createOrder(any()))
                 .willReturn(new PaymentOrderResult("order-1", 1000L, "방탈출 예약"));
+        given(tossProperties.clientKey()).willReturn("test_ck_docs");
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2099, 12, 31), 1L, 1L);
 
         mockMvc.perform(post("/user/reservations")

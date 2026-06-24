@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +22,7 @@ import roomescape.controller.dto.PaymentOrderResponse;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.ReservationUpdateRequest;
+import roomescape.payment.client.TossProperties;
 import roomescape.service.UserReservationService;
 import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationResult;
@@ -33,14 +33,14 @@ import roomescape.service.dto.ReservationResult;
 public class UserReservationController {
 
     private final UserReservationService userReservationService;
-    private final String clientKey;
+    private final TossProperties tossProperties;
 
     public UserReservationController(
             UserReservationService userReservationService,
-            @Value("${toss.client-key}") String clientKey
+            TossProperties tossProperties
     ) {
         this.userReservationService = userReservationService;
-        this.clientKey = clientKey;
+        this.tossProperties = tossProperties;
     }
 
     @GetMapping
@@ -55,7 +55,7 @@ public class UserReservationController {
     @PostMapping
     public PaymentOrderResponse createOrder(@RequestBody @Valid ReservationRequest request) {
         PaymentOrderResult order = userReservationService.createOrder(request.toCommand());
-        return PaymentOrderResponse.from(order, clientKey);
+        return PaymentOrderResponse.from(order, tossProperties.clientKey());
     }
 
     @PostMapping("/confirm")
