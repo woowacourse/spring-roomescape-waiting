@@ -54,39 +54,39 @@
 
 ## 1단계 - 결제 API 연동 및 예외 핸들링
 
-- [ ] 결제 전 주문 정보 저장
-    - [ ] 예약 생성 요청이 들어오면 결제 인증 전에 주문 정보(orderId, 최종 amount)를 먼저 저장한다.
-    - [ ] orderId는 서버가 생성하며(6~64자, 영숫자/-/_) 이후 금액 검증의 기준이 된다.
-    - [ ] 이 시점의 예약은 아직 확정이 아니다(결제 대기).
+- [x] 결제 전 주문 정보 저장
+    - [x] 예약 생성 요청이 들어오면 결제 인증 전에 주문 정보(orderId, 최종 amount)를 먼저 저장한다.
+    - [x] orderId는 서버가 생성하며(6~64자, 영숫자/-/_) 이후 금액 검증의 기준이 된다.
+    - [x] 이 시점의 예약은 아직 확정이 아니다(결제 대기).
 
-- [ ] 브라우저 결제창 연동 (클라이언트)
-    - [ ] 예약 페이지에 Toss 결제창 SDK를 붙여 인증받는다(위젯 초기화는 클라이언트 키 test_ck_).
-    - [ ] 카드 정보 입력·인증은 결제창과 카드사가 처리하며 서버는 카드번호를 절대 만지지 않는다.
-    - [ ] 인증이 성공하면 토스가 successUrl로 paymentKey, orderId, amount를 넘긴다.
+- [x] 브라우저 결제위젯 연동 (클라이언트)
+    - [x] 예약 페이지에서 주문을 생성한 뒤 Toss 결제위젯 SDK로 인증받는다(위젯 초기화는 클라이언트 키 test_gck_).
+    - [x] 카드 정보 입력·인증은 결제위젯과 카드사가 처리하며 서버는 카드번호를 절대 만지지 않는다.
+    - [x] 인증이 성공하면 토스가 successUrl로 paymentKey, orderId, amount를 넘긴다.
 
-- [ ] successUrl 콜백 — 금액 검증 후 승인
-    - [ ] 콜백으로 넘어온 amount를 그대로 믿지 않고 주문 저장 금액과 대조한다.
-    - [ ] 다르면 PaymentAmountMismatch류 예외로 승인 호출 전에 차단한다.
-    - [ ] 토스엔 금액 불일치 전용 코드가 없어 서버가 직접 검증해야 한다.
-    - [ ] 일치하면 승인 API를 호출한다. 성공하면 이후 조회·취소에 필요한 paymentKey를 DB에 저장하고 예약을 CONFIRMED로 바꾼다.
+- [x] successUrl 콜백 — 금액 검증 후 승인
+    - [x] 콜백으로 넘어온 amount를 그대로 믿지 않고 주문 저장 금액과 대조한다.
+    - [x] 다르면 PaymentAmountMismatch류 예외로 승인 호출 전에 차단한다.
+    - [x] 토스엔 금액 불일치 전용 코드가 없어 서버가 직접 검증해야 한다.
+    - [x] 일치하면 승인 API를 호출한다. 성공하면 이후 조회·취소에 필요한 paymentKey를 DB에 저장하고 예약을 CONFIRMED로 바꾼다.
 
-- [ ] 결제 승인 API 호출 (RestClient)
-    - [ ] POST https://api.tosspayments.com/v1/payments/confirm를 RestClient로 호출한다.
-        - [ ] 바디 3필드: paymentKey, orderId, amount (Content-Type application/json).
-        - [ ] 인증은 Basic: base64(시크릿키 + ":")를 Authorization: Basic ...로 보낸다(콜론 뒤 비밀번호는 비우고, 인코딩 시 UTF-8 명시).
-        - [ ] 시크릿 키(test_sk_)는 노출/하드코딩 금지 — application.yaml 등으로 외부화한다. 시크릿 키는 서버 승인 전용이다(클라이언트 키와 역할이 다름).
+- [x] 결제 승인 API 호출 (RestClient)
+    - [x] POST https://api.tosspayments.com/v1/payments/confirm를 RestClient로 호출한다.
+        - [x] 바디 3필드: paymentKey, orderId, amount (Content-Type application/json).
+        - [x] 인증은 Basic: base64(시크릿키 + ":")를 Authorization: Basic ...로 보낸다(콜론 뒤 비밀번호는 비우고, 인코딩 시 UTF-8 명시).
+        - [x] 시크릿 키(test_gsk_)는 노출/하드코딩 금지 — application.properties 등으로 외부화한다. 시크릿 키는 서버 승인 전용이다(클라이언트 키와 역할이 다름).
 
-- [ ] 관심사 분리 — 포트 & 어댑터
-    - [ ] 도메인/애플리케이션 계층에 PaymentGateway 포트와 도메인 모델(PaymentConfirmation, PaymentResult)을 둔다.
-    - [ ] PaymentService는 Toss와 Toss DTO를 몰라야한다.
-    - [ ] Toss DTO(요청/응답/에러) ↔ 도메인 모델 번역은 어댑터 TossPaymentGateway(부패 방지 계층, ACL)가 맡는다. PG사를 바꿔도 어댑터만 새로 만들면 되고 도메인은 그대로다.
+- [x] 관심사 분리 — 포트 & 어댑터
+    - [x] 도메인/애플리케이션 계층에 PaymentGateway 포트와 도메인 모델(PaymentConfirmation, PaymentResult)을 둔다.
+    - [x] PaymentService는 Toss와 Toss DTO를 몰라야한다.
+    - [x] Toss DTO(요청/응답/에러) ↔ 도메인 모델 번역은 어댑터 TossPaymentGateway(부패 방지 계층, ACL)가 맡는다. PG사를 바꿔도 어댑터만 새로 만들면 되고 도메인은 그대로다.
 
-- [ ] 에러 응답을 도메인 예외로 매핑
-    - [ ] onStatus(HttpStatusCode::isError, 핸들러)로 4xx/5xx를 가로챈다.
-    - [ ] 핸들러에서 본문을 TossErrorResponse({code, message})로 역직렬화한 뒤 도메인 예외로 변환한다.
-    - [ ] 변환은 어댑터 안에서 일어나고 Toss DTO는 밖으로 새지 않는다.
-    - [ ] 변환한 예외는 사용자 응답으로도 의미 있게 이어진다(카드 거절은 안내, 키 오류는 알람 등).
-    - [ ] code별 분기 방향(자기 서비스에 맞게 설계)
+- [x] 에러 응답을 도메인 예외로 매핑
+    - [x] onStatus(HttpStatusCode::isError, 핸들러)로 4xx/5xx를 가로챈다.
+    - [x] 핸들러에서 본문을 TossErrorResponse({code, message})로 역직렬화한 뒤 도메인 예외로 변환한다.
+    - [x] 변환은 어댑터 안에서 일어나고 Toss DTO는 밖으로 새지 않는다.
+    - [x] 변환한 예외는 사용자 응답으로도 의미 있게 이어진다(카드 거절은 안내, 키 오류는 알람 등).
+    - [x] code별 분기 방향(자기 서비스에 맞게 설계)
 
 | HTTP | code                                                              | 처리 방향             |
 |------|-------------------------------------------------------------------|-------------------|
@@ -98,24 +98,23 @@
 | 500  | FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING                         | 토스 내부 오류 — 재시도 대상 |
 | 그 외  | 미정의                                                               | 기본 예외             |
 
-- [ ] failUrl(취소/실패) 처리
-    - [ ] failUrl로 code, message, orderId가 넘어온다.
-    - [ ] 실패 사유를 사용자에게 보여주고 결제 대기 상태의 주문/예약을 정리한다.
-    - [ ] 단, 사용자가 취소(PAY_PROCESS_CANCELED)하면 orderId가 없을 수 있으니 null 가드를 둔다.
+- [x] failUrl(취소/실패) 처리
+    - [x] failUrl로 code, message, orderId가 넘어온다.
+    - [x] 실패 사유를 사용자에게 보여주고 결제 대기 상태의 주문/예약을 정리한다.
+    - [x] 단, 사용자가 취소(PAY_PROCESS_CANCELED)하면 orderId가 없을 수 있으니 null 가드를 둔다.
 
 # 완료 기준
 
-- [ ] 테스트 카드로 결제 인증 → 승인 → 예약 확정(CONFIRMED) 전체 흐름이 동작한다.
-- [ ] 조작된 amount는 승인 호출 전에 차단되고 게이트웨이가 호출되지 않는다.
-- [ ] 주요 에러코드(이미 처리됨/카드 거절/키 오류/재시도 대상)가 도메인 예외와 사용자 응답으로 처리되고, 미정의 코드는 기본 예외로 떨어진다.
-- [ ] PaymentService가 Toss를 모른다(Toss DTO·에러 매핑이 어댑터 뒤로 격리됨).
-- [ ] 시크릿 키가 설정으로 외부화되어 있고, failUrl의 orderId 없는 취소에서도 NPE가 없다.
+- [x] 테스트 카드로 결제 인증 → 승인 → 예약 확정(CONFIRMED) 전체 흐름이 동작한다.
+- [x] 조작된 amount는 승인 호출 전에 차단되고 게이트웨이가 호출되지 않는다.
+- [x] 주요 에러코드(이미 처리됨/카드 거절/키 오류/재시도 대상)가 도메인 예외와 사용자 응답으로 처리되고, 미정의 코드는 기본 예외로 떨어진다.
+- [x] PaymentService가 Toss를 모른다(Toss DTO·에러 매핑이 어댑터 뒤로 격리됨).
+- [x] 시크릿 키가 설정으로 외부화되어 있고, failUrl의 orderId 없는 취소에서도 NPE가 없다.
 
 ### 관리자 API
 
 | 메서드    | 경로                   | 요청                                         | 성공 응답                                              |
 |--------|----------------------|--------------------------------------------|----------------------------------------------------|
-| GET    | `/reservations`      | `?page=0&size=20` (선택)                     | 200 `{ reservations: [...] }`                      |
 | DELETE | `/reservations/{id}` |                                            | 204                                                |
 | GET    | `/times`             |                                            | 200 `{ times: [...] }`                             |
 | POST   | `/times`             | `{ startAt }`                              | 201 `{ id, startAt }`                              |
@@ -123,20 +122,24 @@
 | GET    | `/themes`            |                                            | 200 `{ themes: [...] }`                            |
 | POST   | `/themes`            | `{ name, description, thumbnailImageUrl }` | 201 `{ id, name, description, thumbnailImageUrl }` |
 | DELETE | `/themes/{id}`       |                                            | 204                                                |
-| GET    | `/themes/popular`    | `?now=YYYY-MM-DD&days=7&limit=10` (모두 선택)  | 200 `{ themes: [...] }`                            |
 
 ### 사용자 API
 
-| 메서드    | 경로                      | 요청                                | 성공 응답                                                      |
-|--------|-------------------------|-----------------------------------|------------------------------------------------------------|
-| GET    | `/times/availability`   | `?date=YYYY-MM-DD&themeId={id}`   | 200 `{ times: [{ id, startAt, reserved }] }`               |
-| POST   | `/reservations`         | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme }`                      |
-| GET    | `/reservations/me`      | `?name={이름}`                      | 200 `{ reservations: [...] }`                              |
-| PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }` | 200 `{ id, name, date, time, theme }`                      |
-| DELETE | `/reservations/me/{id}` | `?name={이름}`                      | 204                                                        |
-| POST   | `/waitings`             | `{ name, date, time, theme }`     | 201 `{ id, name, date, time, theme, order }`               |
-| GET    | `/waitings/me`          | `?name={이름}`                      | 200 `{ waitings: [ id, name, order, date, time, theme ] }` |
-| DELETE | `/waitings/me/{id}`     | `?name={이름}`                      | 204                                                        |
+| 메서드    | 경로                      | 요청                                        | 성공 응답                                                      |
+|--------|-------------------------|-------------------------------------------|------------------------------------------------------------|
+| GET    | `/reservations`         | `?page=0&size=20` (선택)                    | 200 `{ reservations: [...] }`                              |
+| GET    | `/reservations/me`      | `?name={이름}`                              | 200 `{ reservations: [...] }`                              |
+| PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }`         | 200 `{ id, name, date, time, theme }`                      |
+| DELETE | `/reservations/me/{id}` | `?name={이름}`                              | 204                                                        |
+| POST   | `/reservation-orders`   | `{ name, date, timeId, themeId }`         | 201 `{ orderId, orderName, amount }`                       |
+| GET    | `/payments/checkout`    | `?orderId={orderId}`                      | 200 결제위젯 화면                                                |
+| GET    | `/payments/success`     | `?paymentKey&orderId&amount`              | 200 결제 완료 화면, 이후 내 예약 화면으로 이동                              |
+| GET    | `/payments/fail`        | `?code&message&orderId` (모두 선택)           | 200 결제 실패 화면                                               |
+| GET    | `/times/availability`   | `?date=YYYY-MM-DD&themeId={id}`           | 200 `{ times: [{ id, startAt, reserved }] }`               |
+| GET    | `/themes/popular`       | `?now=YYYY-MM-DD&days=7&limit=10` (모두 선택) | 200 `{ themes: [...] }`                                    |
+| POST   | `/waitings`             | `{ name, date, timeId, themeId }`         | 201 `{ id, name, date, time, theme, order }`               |
+| GET    | `/waitings/me`          | `?name={이름}`                              | 200 `{ waitings: [ id, name, order, date, time, theme ] }` |
+| DELETE | `/waitings/me/{id}`     | `?name={이름}`                              | 204                                                        |
 
 ## 에러 응답
 
