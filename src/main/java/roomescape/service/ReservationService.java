@@ -84,7 +84,10 @@ public class ReservationService {
 
     public List<MyReservationResponse> getMyReservations(Long memberId) {
         List<MyReservationResponse> reservations = reservationRepository.findByMember_Id(memberId).stream()
-                .map(MyReservationResponse::fromReservation)
+                .map(reservation -> MyReservationResponse.fromReservation(
+                        reservation,
+                        paymentOrderRepository.findByReservation_Id(reservation.getId()).orElse(null)
+                ))
                 .toList();
         List<MyReservationResponse> reservationWaitings = reservationWaitingRepository.findByMember_IdOrderByCreatedAt(memberId)
                 .stream()

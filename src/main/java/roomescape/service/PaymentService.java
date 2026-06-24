@@ -32,6 +32,7 @@ public class PaymentService {
         }
         PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount, order.getIdempotencyKey());
         PaymentResult paymentResult = paymentGateway.confirm(confirmation);
+        order.updatePaymentKey(paymentResult.paymentKey());
         if (paymentResult.status() == PaymentStatus.DONE) {
             order.getReservation().updateStatus();
         }

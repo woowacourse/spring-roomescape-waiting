@@ -1,6 +1,7 @@
 package roomescape.dto.response;
 
 import java.time.LocalDate;
+import roomescape.domain.PaymentOrder;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
 
@@ -11,12 +12,14 @@ public record MyReservationResponse(
         CreateReservationTimeResponse time,
         ThemeResponse theme,
         ReservationStatus status,
-        Integer order
+        Integer order,
+        String orderId,
+        String paymentKey,
+        Long amount
 ) {
-    public static MyReservationResponse fromReservation(Reservation reservation) {
-        ReservationStatus status = reservation.getReservationStatus() == roomescape.domain.ReservationStatus.CONFIRMED
-                ? ReservationStatus.RESERVED
-                : ReservationStatus.PENDING_PAYMENT;
+    public static MyReservationResponse fromReservation(Reservation reservation, PaymentOrder paymentOrder) {
+        ReservationStatus status = resolveStatus(reservation, paymentOrder);
+        String paymentKey = (paymentOrder != null) ? paymentOrder.getPaymentKey() : null;
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
@@ -32,8 +35,21 @@ public record MyReservationResponse(
                         reservation.getTheme().getThumbnail()
                 ),
                 status,
-                null
+                null,
+                (paymentOrder != null) ? paymentOrder.getOrderId() : null,
+                paymentKey,
+                (paymentOrder != null) ? paymentOrder.getAmount() : null
         );
+    }
+
+    private static ReservationStatus resolveStatus(Reservation reservation, PaymentOrder paymentOrder) {
+        if (reservation.getReservationStatus() == roomescape.domain.ReservationStatus.CONFIRMED) {
+            return ReservationStatus.RESERVED;
+        }
+        if (paymentOrder != null && paymentOrder.getPaymentKey() != null) {
+            return ReservationStatus.NEED_CHECK;
+        }
+        return ReservationStatus.PENDING_PAYMENT;
     }
 
     public static MyReservationResponse fromReservationWaiting(ReservationWaitingOrderResponse waitingOrderResponse) {
@@ -53,7 +69,10 @@ public record MyReservationResponse(
                         waiting.getTheme().getThumbnail()
                 ),
                 ReservationStatus.WAITING,
-                waitingOrderResponse.order()
+                waitingOrderResponse.order(),
+                null,
+                null,
+                null
         );
     }
 }

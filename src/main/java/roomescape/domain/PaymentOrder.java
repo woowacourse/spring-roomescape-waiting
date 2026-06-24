@@ -19,12 +19,12 @@ public class PaymentOrder {
 
     private String orderId;
     private Long amount;
+    private String paymentKey;
+    private String idempotencyKey;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
-
-    private String idempotencyKey;
 
     protected PaymentOrder() {
     }
@@ -58,6 +58,14 @@ public class PaymentOrder {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
+    }
+
+    public void updatePaymentKey(String paymentKey) {
+        this.paymentKey = paymentKey;
     }
 
     public String getIdempotencyKey() {
