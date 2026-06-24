@@ -2,6 +2,7 @@ package roomescape.api;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,5 +29,12 @@ public class PaymentController {
         Reservation confirmed = reservationApplicationService.confirmReservation(orderId, request);
 
         return ResponseEntity.ok(ReservationResponse.from(confirmed));
+    }
+
+    @DeleteMapping("/payments/{orderId}")
+    public ResponseEntity<Void> deletePendingPayment(@PathVariable String orderId) {
+        reservationApplicationService.deletePendingPayment(orderId);
+
+        return ResponseEntity.noContent().build();
     }
 }

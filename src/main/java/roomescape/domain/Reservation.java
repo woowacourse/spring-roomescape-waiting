@@ -49,6 +49,10 @@ public class Reservation {
         return this.time.equals(time);
     }
 
+    public boolean isPending() {
+        return reservationStatus == ReservationStatus.PENDING;
+    }
+
     public Long getId() {
         return id;
     }

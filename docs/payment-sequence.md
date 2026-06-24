@@ -30,7 +30,7 @@ sequenceDiagram
     카드사-->>토스: 인증 완료
     alt 인증 성공
         토스-->>클라이언트: successUrl 리다이렉트<br/>paymentKey · orderId · amount
-        클라이언트->>서버: 결제 승인 요청<br/>paymentKey · orderId · amount
+        클라이언트->>서버: POST /payments/{orderId}/confirmation<br/>paymentKey · amount
         Note over 서버: ② 승인 전 검증 (서버 내부)<br/>· orderId로 저장된 주문 조회<br/>· 요청 금액 = 저장 금액 검증 (위변조 차단)
         서버->>토스: POST /v1/payments/confirm (secretKey)<br/>paymentKey · orderId · amount
         토스->>카드사: 카드 승인(매입) 요청
@@ -41,8 +41,8 @@ sequenceDiagram
         서버-->>클라이언트: 예약 완료 응답
     else 결제창에서 실패·취소
         토스-->>클라이언트: failUrl 리다이렉트<br/>code · message · orderId
-        클라이언트->>서버: 결제 정리 요청 (orderId)
-        Note over 서버: 실패 정리 (서버 내부)<br/>· PENDING 예약·주문 삭제 (orderId 없어도 정상 응답)
+        클라이언트->>서버: DELETE /payments/{orderId}
+        Note over 서버: 실패 정리 (서버 내부)<br/>· PENDING 예약·주문 삭제
         서버-->>클라이언트: 실패 안내 페이지
     end
 ```

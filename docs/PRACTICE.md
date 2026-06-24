@@ -20,7 +20,7 @@
 - 예약은 `PENDING` → 결제 승인 시 `CONFIRMED`.
 - 주문 금액은 **50,000원 고정**.
 - 결제 승인은 Toss에 위임하되, **금액 검증은 우리 서버가 승인 호출 전에** 한다(조작 금액 차단).
-- 결제 실패/취소 시 `PENDING` 예약과 주문을 정리한다. `orderId`가 없어도 정상 응답.
+- 결제 실패/취소 시 `PENDING` 예약과 주문을 정리한다. 프론트는 `orderId`가 있을 때만 서버 정리를 요청한다.
 - 클라이언트는 SDK(`requestPayment`, clientKey), 서버는 REST(`/v1/payments/confirm`, secretKey).
 
 ---
@@ -70,7 +70,7 @@
 
 ## 슬라이스 3 — 결제하면 예약이 확정된다
 
-- **흐름:** 인증 성공 → `successUrl`(`paymentKey`,`orderId`,`amount`) → `POST /payments/confirm` → 금액 검증 → 토스 승인 → 예약 `CONFIRMED`
+- **흐름:** 인증 성공 → `successUrl`(`paymentKey`,`orderId`,`amount`) → `POST /payments/{orderId}/confirmation` → 금액 검증 → 토스 승인 → 예약 `CONFIRMED`
 - **spec 켜기:**
   ```
   git checkout step3 -- src/test/java/roomescape/e2e/PaymentApiTest.java
@@ -85,11 +85,11 @@
 
 ## 슬라이스 4 — 결제 실패/취소하면 정리된다
 
-- **흐름:** `failUrl`(`code`,`message`,`orderId`) 또는 모달 닫기 → `POST /payments/fail` → `PENDING` 예약·주문 정리 (`orderId` 없어도 200)
-- **spec:** 슬라이스 3에서 켠 `PaymentApiTest`의 나머지 2개가 대상.
-- **BE:** fail 엔드포인트 + 대기 주문 정리(`orderId` null/blank 안전).
+- **흐름:** `failUrl`(`code`,`message`,`orderId`) 또는 모달 닫기 → `DELETE /payments/{orderId}` → `PENDING` 예약·주문 정리
+- **spec:** 슬라이스 3에서 켠 `PaymentApiTest`의 실패 정리 테스트가 대상. `orderId` 없는 no-op은 프론트에서 호출하지 않는 책임으로 옮긴다.
+- **BE:** `DELETE /payments/{orderId}` 엔드포인트 + 대기 주문 정리.
 - **FE:** `payment/fail.html` + `payment-fail.js`, 모달 닫기 시 정리 요청.
-- **DoD:** `PaymentApiTest` 3개 전부 green + 수동 취소 시 PENDING 예약·주문 정리.
+- **DoD:** `PaymentApiTest` green + 수동 취소 시 PENDING 예약·주문 정리.
 
 ---
 
