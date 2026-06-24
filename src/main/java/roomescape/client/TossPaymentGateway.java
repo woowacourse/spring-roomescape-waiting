@@ -29,18 +29,25 @@ public class TossPaymentGateway implements PaymentGateway {
     public PaymentResult confirm(PaymentConfirmation confirmation) {
         ConfirmRequest request = new ConfirmRequest(confirmation.paymentKey(), confirmation.orderId(),
                 confirmation.amount());
-        TossPaymentResponse response = tossRestClient.post()
-                .uri("/v1/payments/confirm")
-                .body(request)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
-                    throw toException(error);
-                })
-                .body(TossPaymentResponse.class);
+        try {
+            TossPaymentResponse response = tossRestClient.post()
+                    .uri("/v1/payments/confirm")
+                    .body(request)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        TossErrorResponse error = objectMapper.readValue(res.getBody(), TossErrorResponse.class);
+                        if ("ALREADY_PROCESSED_PAYMENT".equals(error.code())) {
+                            throw new AlreadyProcessedPaymentException();
+                        }
+                        throw toException(error);
+                    })
+                    .body(TossPaymentResponse.class);
 
-        return new PaymentResult(request.paymentKey(), request.orderId(), PaymentStatus.from(response.status()),
-                response.totalAmount());
+            return new PaymentResult(request.paymentKey(), request.orderId(), PaymentStatus.from(response.status()),
+                    response.totalAmount());
+        } catch (AlreadyProcessedPaymentException exception) {
+            return new PaymentResult(request.paymentKey(), request.orderId(), PaymentStatus.DONE, request.amount());
+        }
     }
 
     private RoomEscapeException toException(TossErrorResponse error) {
@@ -58,4 +65,6 @@ public class TossPaymentGateway implements PaymentGateway {
         };
         return new RoomEscapeException(code);
     }
+
+    private static class AlreadyProcessedPaymentException extends RuntimeException {}
 }
