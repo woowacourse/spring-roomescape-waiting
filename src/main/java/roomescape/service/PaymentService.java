@@ -4,14 +4,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Payment;
+import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentResult;
 import roomescape.domain.repository.PaymentOrderRepository;
 import roomescape.domain.repository.PaymentRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
 import roomescape.dto.PaymentConfirmRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
-import roomescape.infrastructure.toss.TossPaymentGateway;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +27,18 @@ public class PaymentService {
     private final PaymentOrderRepository paymentOrderRepository;
     private final PaymentRepository paymentRepository;
     private final ReservationSlotRepository reservationSlotRepository;
-    private final TossPaymentGateway tossPaymentGateway;
+    private final PaymentGateway paymentGateway;
 
     public PaymentService(
             PaymentOrderRepository paymentOrderRepository,
             PaymentRepository paymentRepository,
             ReservationSlotRepository reservationSlotRepository,
-            TossPaymentGateway tossPaymentGateway
+            PaymentGateway paymentGateway
     ) {
         this.paymentOrderRepository = paymentOrderRepository;
         this.paymentRepository = paymentRepository;
         this.reservationSlotRepository = reservationSlotRepository;
-        this.tossPaymentGateway = tossPaymentGateway;
+        this.paymentGateway = paymentGateway;
     }
 
     @Transactional
@@ -47,8 +49,10 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
-        tossPaymentGateway.confirm(request.paymentKey(), request.orderId(), request.amount());
-        paymentRepository.save(Payment.create(paymentOrder.getId(), request.paymentKey(), request.amount()));
+        PaymentResult result = paymentGateway.confirm(
+                new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount())
+        );
+        paymentRepository.save(Payment.create(paymentOrder.getId(), result.paymentKey(), result.amount()));
         reservationSlotRepository.confirmPayment(paymentOrder.getReservationId());
     }
 }

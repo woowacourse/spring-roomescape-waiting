@@ -12,12 +12,16 @@ import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.PaymentGateway;
+import roomescape.domain.PaymentResult;
+import roomescape.domain.PaymentStatus;
 import roomescape.infrastructure.toss.dto.ConfirmRequest;
 import roomescape.infrastructure.toss.dto.TossErrorResponse;
 import roomescape.infrastructure.toss.dto.TossPaymentResponse;
 
 @Component
-public class TossPaymentGateway {
+public class TossPaymentGateway implements PaymentGateway {
     private static final String CONFIRM_URI = "/v1/payments/confirm";
 
     private final RestClient tossRestClient;
@@ -26,26 +30,35 @@ public class TossPaymentGateway {
     @Value("${payment.toss.secret-key}")
     private String secretKey;
 
-    public TossPaymentGateway(RestClient.Builder restClientBuilder, ObjectMapper objectMapper
+    public TossPaymentGateway(RestClient tossRestClient, ObjectMapper objectMapper
     ) {
-        this.tossRestClient = restClientBuilder
-                .baseUrl("https://api.tosspayments.com")
-                .build();
+        this.tossRestClient = tossRestClient;
         this.objectMapper = objectMapper;
     }
 
-    public void confirm(String paymentKey, String orderId, Long amount) {
-        tossRestClient.post()
+    @Override
+    public PaymentResult confirm(PaymentConfirmation confirmation) {
+        TossPaymentResponse response = tossRestClient.post()
                 .uri(CONFIRM_URI)
                 .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ConfirmRequest(paymentKey, orderId, amount))
+                .body(new ConfirmRequest(confirmation.paymentKey(), confirmation.orderId(), confirmation.amount()))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, response) -> {
                     TossErrorResponse error = objectMapper.readValue(response.getBody(), TossErrorResponse.class);
                     throw TossPaymentException.of(response.getStatusCode(), error);
                 })
                 .body(TossPaymentResponse.class);
+        return toResult(response);
+    }
+
+    private PaymentResult toResult(TossPaymentResponse response) {
+        return new PaymentResult(
+                response.paymentKey(),
+                response.orderId(),
+                PaymentStatus.from(response.status()),
+                response.totalAmount()
+        );
     }
 
     private String authorizationHeader() {
