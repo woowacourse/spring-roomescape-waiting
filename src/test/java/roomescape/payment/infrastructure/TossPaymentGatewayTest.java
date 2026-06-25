@@ -3,6 +3,7 @@ package roomescape.payment.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.endsWith;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -36,7 +37,7 @@ class TossPaymentGatewayTest {
     }
 
     private PaymentConfirmation confirmation() {
-        return new PaymentConfirmation("ORDER-12345678", "test_payment_key", 1000L);
+        return new PaymentConfirmation("ORDER-12345678", "test_payment_key", 1000L, "idem-key-1");
     }
 
     @Test
@@ -62,6 +63,23 @@ class TossPaymentGatewayTest {
         assertThat(result.paymentKey()).isEqualTo("pk_test_1");
         assertThat(result.status()).isEqualTo("DONE");
         assertThat(result.totalAmount()).isEqualTo(1000L);
+        server.verify();
+    }
+
+    @Test
+    void 멱등키를_Idempotency_Key_헤더로_전송한다() {
+        // given
+        server.expect(requestTo(endsWith("/v1/payments/confirm")))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "idem-key-1"))
+                .andRespond(withSuccess(
+                        "{\"paymentKey\":\"pk\",\"orderId\":\"ORDER-12345678\",\"status\":\"DONE\",\"totalAmount\":1000}",
+                        MediaType.APPLICATION_JSON));
+
+        // when
+        gateway.confirm(confirmation());
+
+        // then
         server.verify();
     }
 
