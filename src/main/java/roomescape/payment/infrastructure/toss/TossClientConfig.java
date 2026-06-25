@@ -28,6 +28,7 @@ public class TossClientConfig {
     public RestClient tossRestClient(
             @Value("${payment.toss.base-url}") String baseUrl,
             @Value("${payment.toss.secret-key}") String secretKey,
+            @Value("${payment.toss.connection-request-timeout-ms}") int connectionRequestTimeoutMs,
             @Value("${payment.toss.connect-timeout-ms}") int connectTimeoutMs,
             @Value("${payment.toss.read-timeout-ms}") int readTimeoutMs,
             @Value("${payment.toss.max-attempts}") int maxAttempts,
@@ -37,6 +38,7 @@ public class TossClientConfig {
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
 
         var requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(connectionRequestTimeoutMs, TimeUnit.MILLISECONDS)
                 .setConnectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
                 .setResponseTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
                 .build();

@@ -117,7 +117,7 @@ class TossPaymentGatewayTimeoutTest {
         // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(3초) 이 끊어 실패시킨다.
         TokenBucketRateLimiter noopLimiter = new TokenBucketRateLimiter(1_000, 1_000.0, System::nanoTime);
         TossPaymentGateway gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_sk_dummy", 500, 500, 3, noopLimiter),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_sk_dummy", 500, 500, 500, 3, noopLimiter),
                 new ObjectMapper());
 
         long start = System.nanoTime();
