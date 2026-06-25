@@ -2,6 +2,7 @@ package roomescape.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.ProblemType;
 
@@ -9,8 +10,10 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 class ReservationApiTest extends AbstractE2eTest {
 
@@ -46,6 +49,41 @@ class ReservationApiTest extends AbstractE2eTest {
                 .body("id", notNullValue())
                 .body("name", is("민욱"))
                 .body("date", is("2026-08-05"));
+    }
+
+    @Test
+    void 예약을_추가하면_PENDING으로_저장되고_주문정보를_반환한다() {
+        Integer timeId = createTime("16:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "민욱");
+        params.put("date", "2026-08-05");
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
+
+        JsonPath response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("orderId", notNullValue())
+                .body("amount", is(50000))
+                .extract().jsonPath();
+
+        Integer reservationId = response.get("id");
+        String orderId = response.getString("orderId");
+
+        String status = jdbcTemplate.queryForObject(
+                "SELECT reservation_status FROM reservation WHERE id = ?", String.class, reservationId);
+        assertThat(status).isEqualTo("PENDING");
+
+        Integer paymentCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM payment WHERE order_id = ? AND reservation_id = ?",
+                Integer.class, orderId, reservationId);
+        assertThat(paymentCount).isEqualTo(1);
     }
 
     @Test
@@ -371,6 +409,22 @@ class ReservationApiTest extends AbstractE2eTest {
                 .statusCode(200)
                 .body("reservations.size()", is(1))
                 .body("reservations[0].name", is("민욱"));
+    }
+
+    @Test
+    void 본인_예약_조회는_결제_상태와_주문_정보를_포함한다() {
+        Integer timeId = createTime("13:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        createReservation("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations/me?name=민욱")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations[0].paymentStatus", is("PENDING"))
+                .body("reservations[0].orderId", notNullValue())
+                .body("reservations[0].amount", is(50000))
+                .body("reservations[0].paymentKey", nullValue());
     }
 
     @Test

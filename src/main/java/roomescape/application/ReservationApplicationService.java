@@ -2,12 +2,14 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Payment;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingWithOrder;
+import roomescape.dto.PaymentConfirmRequest;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservationWaitingRequest;
@@ -15,6 +17,7 @@ import roomescape.dto.TimeWithStatusResponse;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
+import roomescape.service.PaymentService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
@@ -38,22 +41,27 @@ public class ReservationApplicationService {
     private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String PAST_RESERVATION_DELETE_REJECTED = "지난 예약은 삭제할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
+    private static final String ONLY_PENDING_PAYMENT_CAN_BE_DELETED = "결제 대기 중인 예약만 정리할 수 있습니다.";
+    private static final long PAYMENT_AMOUNT = 50_000L;
 
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
     private final ReservationWaitingService reservationWaitingService;
     private final ThemeService themeService;
+    private final PaymentService paymentService;
 
     public ReservationApplicationService(
             ReservationService reservationService,
             ReservationTimeService reservationTimeService,
             ReservationWaitingService reservationWaitingService,
-            ThemeService themeService
+            ThemeService themeService,
+            PaymentService paymentService
     ) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.reservationWaitingService = reservationWaitingService;
         this.themeService = themeService;
+        this.paymentService = paymentService;
     }
 
     @Transactional
@@ -73,7 +81,7 @@ public class ReservationApplicationService {
     }
 
     @Transactional
-    public Reservation addReservation(ReservationRequest request) {
+    public ReservationPayment addReservation(ReservationRequest request) {
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
 
@@ -93,7 +101,31 @@ public class ReservationApplicationService {
             throw new ConflictException(ALREADY_EXISTS_ADD_RESERVATION);
         }
 
-        return reservationService.addReservation(reservation);
+        Reservation saved = reservationService.addReservation(reservation);
+        Payment payment = paymentService.createOrder(saved.getId(), PAYMENT_AMOUNT);
+        return new ReservationPayment(saved, payment);
+    }
+
+    @Transactional
+    public Reservation confirmReservation(String orderId, PaymentConfirmRequest request) {
+        Payment payment = paymentService.confirm(request.paymentKey(), orderId, request.amount());
+        reservationService.confirm(payment.getReservationId());
+        return reservationService.findReservation(payment.getReservationId())
+                .orElseThrow(() -> NotFoundException.reservation(payment.getReservationId()));
+    }
+
+    @Transactional
+    public void deletePendingPayment(String orderId) {
+        Payment payment = paymentService.findByOrderId(orderId)
+                .orElseThrow(() -> NotFoundException.payment(orderId));
+        Reservation reservation = reservationService.findReservation(payment.getReservationId())
+                .orElseThrow(() -> NotFoundException.reservation(payment.getReservationId()));
+
+        if (!reservation.isPending()) {
+            throw new BusinessRuleViolationException(ONLY_PENDING_PAYMENT_CAN_BE_DELETED);
+        }
+
+        reservationService.deleteReservation(reservation.getId());
     }
 
     @Transactional
@@ -112,7 +144,8 @@ public class ReservationApplicationService {
                 existing.getName(),
                 request.date(),
                 newTime,
-                existing.getTheme()
+                existing.getTheme(),
+                existing.getReservationStatus()
         );
 
         if (updated.isPast(now)) {
@@ -157,7 +190,7 @@ public class ReservationApplicationService {
     }
 
     private void promoteToReservation(Reservation reservation, ReservationWaiting waiting) {
-        reservationService.changeOwner(reservation.getId(), waiting.getName());
+        reservationService.transferWithPendingStatus(reservation.getId(), waiting.getName());
         reservationWaitingService.deleteById(waiting.getId());
     }
 

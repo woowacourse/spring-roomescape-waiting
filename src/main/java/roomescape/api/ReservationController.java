@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationApplicationService;
+import roomescape.application.ReservationPayment;
 import roomescape.domain.Reservation;
+import roomescape.dto.MyReservationResponses;
+import roomescape.dto.ReservationCreateResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.dto.ReservationResponses;
@@ -42,7 +45,7 @@ public class ReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ReservationResponses> searchMine(
+    public ResponseEntity<MyReservationResponses> searchMine(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
@@ -51,9 +54,9 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> add(@RequestBody @Valid ReservationRequest request) {
-        Reservation reservation = reservationApplicationService.addReservation(request);
-        ReservationResponse response = ReservationResponse.from(reservation);
+    public ResponseEntity<ReservationCreateResponse> add(@RequestBody @Valid ReservationRequest request) {
+        ReservationPayment created = reservationApplicationService.addReservation(request);
+        ReservationCreateResponse response = ReservationCreateResponse.of(created.reservation(), created.payment());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

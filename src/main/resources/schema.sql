@@ -21,6 +21,7 @@ CREATE TABLE reservation
     date     DATE NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
+    reservation_status     VARCHAR(255) NOT NULL DEFAULT 'PENDING',
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
@@ -41,3 +42,16 @@ CREATE INDEX idx_waiting_reservation_created
 
 ALTER TABLE reservation_waiting
     ADD FOREIGN KEY (reservation_id) REFERENCES reservation (id);
+
+CREATE TABLE payment
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id       VARCHAR(64)  NOT NULL,
+    amount         BIGINT       NOT NULL,
+    payment_key    VARCHAR(255),
+    reservation_id BIGINT       NOT NULL,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    PRIMARY KEY (id),
+    CONSTRAINT uk_payment_order_id UNIQUE (order_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
+);

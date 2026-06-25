@@ -10,19 +10,22 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final ReservationStatus reservationStatus;
 
     public Reservation(
             Long id,
             String name,
             LocalDate date,
             ReservationTime time,
-            Theme theme
+            Theme theme,
+            ReservationStatus reservationStatus
     ) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.reservationStatus = reservationStatus;
     }
 
     public Reservation(
@@ -31,7 +34,7 @@ public class Reservation {
             ReservationTime time,
             Theme theme
     ) {
-        this(null, name, date, time, theme);
+        this(null, name, date, time, theme, ReservationStatus.PENDING);
     }
 
     public boolean isOwnedBy(String name) {
@@ -44,6 +47,10 @@ public class Reservation {
 
     public boolean isSameTime(ReservationTime time) {
         return this.time.equals(time);
+    }
+
+    public boolean isPending() {
+        return reservationStatus == ReservationStatus.PENDING;
     }
 
     public Long getId() {
@@ -68,6 +75,10 @@ public class Reservation {
 
     public Long getThemeId() {
         return theme.getId();
+    }
+
+    public ReservationStatus getReservationStatus() {
+        return reservationStatus;
     }
 
     @Override

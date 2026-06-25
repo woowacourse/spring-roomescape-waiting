@@ -83,7 +83,7 @@ function render(rows) {
     isEditing = false;
 
     if (rows.length === 0) {
-        showEmptyState(tbody, 6, '예약 및 대기 내역이 없습니다.');
+        showEmptyState(tbody, 9, '예약 및 대기 내역이 없습니다.');
         return;
     }
 
@@ -100,6 +100,16 @@ function renderRow(tbody, item) {
     row.insertCell().textContent = reservation.date;
     row.insertCell().textContent = reservation.time ? reservation.time.startAt : '-';
     row.insertCell().textContent = item.type === 'waiting' ? reservation.order : '-';
+
+    const isReservation = item.type === 'reservation';
+    const paymentCell = row.insertCell();
+    paymentCell.textContent = isReservation ? paymentStatusLabel(reservation.paymentStatus) : '-';
+    if (isReservation && reservation.paymentKey) {
+        paymentCell.title = `결제키: ${reservation.paymentKey}`;
+    }
+    row.insertCell().textContent = isReservation && reservation.amount != null
+        ? `${reservation.amount.toLocaleString()}원` : '-';
+    row.insertCell().textContent = isReservation && reservation.orderId ? reservation.orderId : '-';
 
     const actions = row.insertCell();
     actions.className = 'actions';
@@ -132,6 +142,21 @@ function createStatusBadge(label, type) {
     return badge;
 }
 
+function paymentStatusLabel(status) {
+    switch (status) {
+        case 'CONFIRMED':
+            return '확정';
+        case 'PENDING':
+            return '결제 대기';
+        case 'UNCERTAIN':
+            return '확인 필요';
+        case 'FAILED':
+            return '실패';
+        default:
+            return '-';
+    }
+}
+
 function startEdit(row, reservation) {
     if (isEditing) return;
     if (!reservation.theme || !reservation.time) {
@@ -143,7 +168,7 @@ function startEdit(row, reservation) {
 
     const dateCell = row.cells[2];
     const timeCell = row.cells[3];
-    const actions = row.cells[5];
+    const actions = row.cells[8];
 
     const dateInput = createInput('date');
     dateInput.value = reservation.date;

@@ -36,7 +36,12 @@ class ThemeJdbcRepositoryTest {
 
     @Test
     void save는_생성된_id를_부여한_테마를_반환한다() {
-        Theme theme = new Theme(null, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        Theme theme = new Theme(
+                null,
+                "공포",
+                "무서운 테마",
+                "https://example.com/horror.jpg"
+        );
 
         Theme saved = repository.save(theme);
 
@@ -46,8 +51,18 @@ class ThemeJdbcRepositoryTest {
 
     @Test
     void getPopularThemes는_윈도우_내_예약수가_많은_테마부터_반환한다() {
-        Long themeA = repository.save(new Theme(null, "공포", "A", "url")).getId();
-        Long themeB = repository.save(new Theme(null, "추리", "B", "url")).getId();
+        Long themeA = repository.save(new Theme(
+                null,
+                "공포",
+                "A",
+                "url"
+        )).getId();
+        Long themeB = repository.save(new Theme(
+                null,
+                "추리",
+                "B",
+                "url"
+        )).getId();
 
         // 윈도우: 2026-04-29 ~ 2026-05-05
         insertReservation("u1", LocalDate.of(2026, 5, 5), themeA);
@@ -67,7 +82,12 @@ class ThemeJdbcRepositoryTest {
 
     @Test
     void getPopularThemes는_윈도우_밖_예약을_세지_않는다() {
-        Long themeId = repository.save(new Theme(null, "공포", "A", "url")).getId();
+        Long themeId = repository.save(new Theme(
+                null,
+                "공포",
+                "A",
+                "url"
+        )).getId();
 
         // 윈도우: 2026-04-29 ~ 2026-05-05
         insertReservation("u1", LocalDate.of(2026, 4, 28), themeId); // 윈도우 직전
@@ -84,9 +104,24 @@ class ThemeJdbcRepositoryTest {
 
     @Test
     void getPopularThemes는_limit으로_결과_개수를_제한한다() {
-        Long themeA = repository.save(new Theme(null, "A", "", "url")).getId();
-        Long themeB = repository.save(new Theme(null, "B", "", "url")).getId();
-        Long themeC = repository.save(new Theme(null, "C", "", "url")).getId();
+        Long themeA = repository.save(new Theme(
+                null,
+                "A",
+                "",
+                "url"
+        )).getId();
+        Long themeB = repository.save(new Theme(
+                null,
+                "B",
+                "",
+                "url"
+        )).getId();
+        Long themeC = repository.save(new Theme(
+                null,
+                "C",
+                "",
+                "url"
+        )).getId();
 
         insertReservation("u1", LocalDate.of(2026, 5, 5), themeA);
         insertReservation("u2", LocalDate.of(2026, 5, 4), themeB);
@@ -103,7 +138,7 @@ class ThemeJdbcRepositoryTest {
 
     private void insertReservation(String name, LocalDate date, Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, 'CONFIRM')",
                 name, date, timeId, themeId
         );
     }

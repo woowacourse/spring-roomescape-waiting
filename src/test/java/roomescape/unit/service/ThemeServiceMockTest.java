@@ -38,7 +38,12 @@ class ThemeServiceMockTest {
 
     @Test
     void findById는_존재하면_테마를_반환한다() {
-        Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        Theme theme = new Theme(
+                1L,
+                "공포",
+                "무서운 테마",
+                "https://example.com/horror.jpg"
+        );
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
 
         assertThat(themeService.findById(1L)).isEqualTo(theme);

@@ -2,8 +2,10 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Payment;
 import roomescape.domain.Reservation;
 import roomescape.domain.Reservations;
+import roomescape.dto.MyReservationResponses;
 import roomescape.dto.ReservationResponses;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
@@ -11,7 +13,9 @@ import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,9 +24,11 @@ public class ReservationService {
     private static final String NOT_OWNER = "본인의 예약이 아닙니다.";
 
     private final ReservationRepository reservationRepository;
+    private final PaymentService paymentService;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, PaymentService paymentService) {
         this.reservationRepository = reservationRepository;
+        this.paymentService = paymentService;
     }
 
     public ReservationResponses getReservationPage(int page, int size) {
@@ -31,10 +37,13 @@ public class ReservationService {
         return ReservationResponses.from(reservations, totalCount, page, size);
     }
 
-    public ReservationResponses getMyReservations(String name, int page, int size) {
+    public MyReservationResponses getMyReservations(String name, int page, int size) {
         List<Reservation> reservations = reservationRepository.findByName(name, page * size, size);
         long totalCount = reservationRepository.countByName(name);
-        return ReservationResponses.from(reservations, totalCount, page, size);
+        Map<Long, Payment> paymentsByReservationId = paymentService.findByReservationIds(
+                        reservations.stream().map(Reservation::getId).toList()).stream()
+                .collect(Collectors.toMap(Payment::getReservationId, payment -> payment, (existing, ignored) -> existing));
+        return MyReservationResponses.from(reservations, paymentsByReservationId, totalCount, page, size);
     }
 
     public boolean hasReservationsByTimeId(Long timeId) {
@@ -70,8 +79,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void changeOwner(Long id, String name) {
-        reservationRepository.changeOwner(id, name);
+    public void transferWithPendingStatus(Long id, String name) {
+        reservationRepository.transferWithPendingStatus(id, name);
+    }
+
+    @Transactional
+    public void confirm(Long id) {
+        reservationRepository.confirm(id);
     }
 
     public boolean hasReservationsByThemeId(Long themeId) {

@@ -2,12 +2,25 @@ const API = '/reservations';
 const WAITINGS_API = '/waitings';
 const TIMES_API = '/times';
 const THEMES_API = '/themes';
+const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
 
 let isEditing = false;
 let cachedThemes = [];
+let pendingOrder = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', startAdd);
+
+    document.getElementById('payment-modal-close').addEventListener('click', closePaymentModal);
+    document.getElementById('payment-modal').addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) closePaymentModal();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !document.getElementById('payment-modal').hidden) {
+            closePaymentModal();
+        }
+    });
+
     refresh();
 });
 
@@ -196,29 +209,111 @@ async function saveRow(name, date, themeId, timeId, timeSelect) {
 
     const selectedOption = timeSelect.options[timeSelect.selectedIndex];
     const isWaiting = selectedOption && selectedOption.dataset.reserved === 'true';
-    const endpoint = isWaiting ? WAITINGS_API : API;
+    const body = JSON.stringify({
+        name,
+        date,
+        themeId: Number(themeId),
+        timeId: Number(timeId)
+    });
+
+    if (isWaiting) {
+        try {
+            await fetchJson(WAITINGS_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body
+            });
+            isEditing = false;
+            alert('대기 신청이 완료되었습니다. 내 예약에서 대기 순번을 확인할 수 있습니다.');
+            refresh();
+        } catch (error) {
+            console.error('대기 신청 실패:', error);
+            alert(getErrorMessage(error, '대기 신청에 실패했습니다.'));
+        }
+        return;
+    }
 
     try {
-        await fetchJson(endpoint, {
+        // 예약은 결제 대기(PENDING)로 생성되고 orderId·결제금액을 돌려받는다.
+        const order = await fetchJson(API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                date,
-                themeId: Number(themeId),
-                timeId: Number(timeId)
-            })
+            body
         });
-
         isEditing = false;
-        if (isWaiting) {
-            alert('대기 신청이 완료되었습니다. 내 예약에서 대기 순번을 확인할 수 있습니다.');
-        }
-        refresh();
+        await openPaymentModal(order);
     } catch (error) {
-        console.error(isWaiting ? '대기 신청 실패:' : '예약 추가 실패:', error);
-        alert(getErrorMessage(error, isWaiting ? '대기 신청에 실패했습니다.' : '예약 추가에 실패했습니다.'));
+        console.error('예약 추가 실패:', error);
+        alert(getErrorMessage(error, '예약 추가에 실패했습니다.'));
     }
+}
+
+async function openPaymentModal(order) {
+    pendingOrder = order;
+
+    const themeName = order.theme ? order.theme.name : '방탈출';
+    const orderName = `방탈출 예약 - ${themeName}`;
+
+    document.getElementById('order-name').textContent = orderName;
+    document.getElementById('order-amount').textContent = `${order.amount.toLocaleString()}원`;
+
+    // 이전 모달의 위젯 iframe이 남아 있지 않도록 비우고 새로 렌더한다.
+    document.getElementById('payment-method').innerHTML = '';
+    document.getElementById('agreement').innerHTML = '';
+
+    const payButton = document.getElementById('payment-button');
+    payButton.disabled = true;
+    document.getElementById('payment-modal').hidden = false;
+
+    try {
+        const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+        const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+        await widgets.setAmount({ currency: 'KRW', value: order.amount });
+        await Promise.all([
+            widgets.renderPaymentMethods({ selector: '#payment-method', variantKey: 'DEFAULT' }),
+            widgets.renderAgreement({ selector: '#agreement', variantKey: 'AGREEMENT' })
+        ]);
+
+        payButton.disabled = false;
+        payButton.onclick = async () => {
+            payButton.disabled = true;
+            try {
+                // 성공·실패 모두 토스가 successUrl·failUrl 로 페이지를 리다이렉트한다.
+                await widgets.requestPayment({
+                    orderId: order.orderId,
+                    orderName,
+                    successUrl: `${window.location.origin}/payment/success`,
+                    failUrl: `${window.location.origin}/payment/fail`
+                });
+            } catch (error) {
+                // 위젯 단계 오류(약관 미동의·검증 실패 등)는 모달을 유지해 재시도할 수 있게 둔다.
+                console.error('결제 요청 실패:', error);
+                payButton.disabled = false;
+            }
+        };
+    } catch (error) {
+        console.error('결제 위젯 초기화 실패:', error);
+        alert('결제 위젯을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+        await closePaymentModal();
+    }
+}
+
+async function closePaymentModal() {
+    document.getElementById('payment-modal').hidden = true;
+
+    const order = pendingOrder;
+    pendingOrder = null;
+
+    if (order) {
+        // 결제를 마치지 않고 모달을 닫으면 결제 대기(PENDING) 주문을 정리한다.
+        try {
+            await fetchJson(`/payments/${encodeURIComponent(order.orderId)}`, { method: 'DELETE' });
+        } catch (error) {
+            console.error('결제 대기 주문 정리 실패:', error);
+        }
+    }
+
+    refresh();
 }
 
 async function deleteRow(id) {

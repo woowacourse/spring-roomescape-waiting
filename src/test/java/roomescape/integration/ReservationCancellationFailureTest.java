@@ -13,16 +13,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.ReservationApplicationService;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
 import roomescape.exception.ProblemType;
+import roomescape.fixture.ReservationWaitingFixture;
 import roomescape.service.ReservationWaitingService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,7 +71,7 @@ class ReservationCancellationFailureTest {
         Long themeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM theme ORDER BY id DESC LIMIT 1", Long.class);
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, 'CONFIRM')",
                 "티뉴", LocalDate.of(2026, 8, 5), timeId, themeId
         );
         reservationId = jdbcTemplate.queryForObject(
@@ -84,8 +80,7 @@ class ReservationCancellationFailureTest {
 
     @Test
     void 예약_취소로_대기를_승계하는_중_대기_삭제가_실패하면_먼저_바뀐_예약_주인도_함께_롤백되어_원래_예약자가_유지된다() {
-        ReservationWaiting promoted = new ReservationWaiting(
-                99L, "민욱", LocalDateTime.of(2026, 8, 1, 10, 0), anyReservation());
+        ReservationWaiting promoted = ReservationWaitingFixture.builder().id(99L).name("민욱").build();
         given(reservationWaitingService.findEarliestByReservationId(reservationId))
                 .willReturn(Optional.of(promoted));
         willThrow(new DataAccessResourceFailureException("대기 삭제 중 DB 접근 실패"))
@@ -107,13 +102,5 @@ class ReservationCancellationFailureTest {
         mockMvc.perform(delete("/reservations/me/{id}", reservationId).param("name", "티뉴"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.type").value(ProblemType.CONCURRENCY_CONFLICT.uri().toString()));
-    }
-
-    private Reservation anyReservation() {
-        return new Reservation(
-                reservationId, "티뉴", LocalDate.of(2026, 8, 5),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg")
-        );
     }
 }

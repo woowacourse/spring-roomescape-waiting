@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import roomescape.payment.toss.TossPaymentException;
 
 import java.net.URI;
 import java.util.List;
@@ -30,6 +31,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String DETAIL_DUPLICATE_KEY = "요청이 현재 상태와 충돌하여 처리할 수 없습니다.";
     private static final String DETAIL_TRANSIENT = "일시적인 문제로 요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.";
     private static final String DETAIL_INTERNAL_ERROR = "요청을 처리하는 중 알 수 없는 오류가 발생했습니다.";
+    private static final String DETAIL_PAYMENT_FAILED = "결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+    private static final String DETAIL_PAYMENT_UNCERTAIN = "결제 승인 결과를 확인하지 못했습니다. 잠시 후 주문 내역에서 결제 상태를 확인해주세요.";
     private static final String ERRORS_PROPERTY = "errors";
     private static final String POINTER_PREFIX = "/";
 
@@ -56,6 +59,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ProblemDetail handleBusinessRuleViolation(BusinessRuleViolationException ex, WebRequest request) {
         return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, ProblemType.BUSINESS_RULE_VIOLATION, Level.INFO, ex, request);
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    public ProblemDetail handlePaymentAmountMismatch(PaymentAmountMismatchException ex, WebRequest request) {
+        return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, ProblemType.PAYMENT_AMOUNT_MISMATCH, Level.WARN, ex, request);
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ProblemDetail handleTossPayment(TossPaymentException ex, WebRequest request) {
+        return buildProblem(HttpStatus.BAD_GATEWAY, ProblemType.PAYMENT_FAILED, DETAIL_PAYMENT_FAILED, Level.WARN, ex, request);
+    }
+
+    @ExceptionHandler(PaymentUncertainException.class)
+    public ProblemDetail handlePaymentUncertain(PaymentUncertainException ex, WebRequest request) {
+        return buildProblem(HttpStatus.GATEWAY_TIMEOUT, ProblemType.PAYMENT_UNCERTAIN, DETAIL_PAYMENT_UNCERTAIN, Level.WARN, ex, request);
     }
 
     @ExceptionHandler(TransientDataAccessException.class)

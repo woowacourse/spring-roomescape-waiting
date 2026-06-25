@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
@@ -26,11 +27,17 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     private static final String SELECT_BASE = """
-            SELECT r.id as reservation_id, r.name, r.date,
-                   t.id as time_id, t.start_at as time_value,
-                   th.id as theme_id, th.name as theme_name,
-                   th.description as theme_description,
-                   th.thumbnail_image_url as theme_thumbnail
+            SELECT
+                r.id as reservation_id,
+                r.name,
+                r.date,
+                r.reservation_status,
+                t.id as time_id,
+                t.start_at as time_value,
+                th.id as theme_id,
+                th.name as theme_name,
+                th.description as theme_description,
+                th.thumbnail_image_url as theme_thumbnail
             FROM reservation as r
             INNER JOIN reservation_time as t ON r.time_id = t.id
             INNER JOIN theme as th ON r.theme_id = th.id
@@ -52,7 +59,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 rs.getString("name"),
                 rs.getDate("date").toLocalDate(),
                 time,
-                theme
+                theme,
+                ReservationStatus.of(rs.getString("reservation_status"))
         );
     };
 
@@ -84,7 +92,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (name, date, time_id, theme_id, reservation_status) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -93,6 +101,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
             ps.setDate(2, Date.valueOf(reservation.getDate()));
             ps.setLong(3, reservation.getTime().getId());
             ps.setLong(4, reservation.getTheme().getId());
+            ps.setString(5, reservation.getReservationStatus().name());
             return ps;
         }, keyHolder);
 
@@ -102,7 +111,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                reservation.getTheme()
+                reservation.getTheme(),
+                ReservationStatus.of(reservation.getReservationStatus().name())
         );
     }
 
@@ -120,8 +130,19 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public void changeOwner(Long id, String name) {
-        jdbcTemplate.update("UPDATE reservation SET name = ? WHERE id = ?", name, id);
+    public void transferWithPendingStatus(Long id, String name) {
+        jdbcTemplate.update(
+                "UPDATE reservation SET name = ?, reservation_status = ? WHERE id = ?",
+                name, ReservationStatus.PENDING.name(), id
+        );
+    }
+
+    @Override
+    public void confirm(Long id) {
+        jdbcTemplate.update(
+                "UPDATE reservation SET reservation_status = ? WHERE id = ?",
+                ReservationStatus.CONFIRM.name(), id
+        );
     }
 
     @Override
