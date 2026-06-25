@@ -62,6 +62,7 @@ class TossPaymentGatewayTest {
         RecordedRequest request = server.takeRequest();
         assertThat(request.getMethod()).isEqualTo("POST");
         assertThat(request.getPath()).isEqualTo("/v1/payments/confirm");
+        assertThat(request.getHeader("Idempotency-Key")).isEqualTo("payment_123456789012345678901");
         assertThat(request.getBody().readUtf8())
                 .contains("\"paymentKey\":\"test_payment_key\"")
                 .contains("\"orderId\":\"payment_123456789012345678901\"")
