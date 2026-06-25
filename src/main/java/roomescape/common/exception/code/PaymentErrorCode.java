@@ -13,6 +13,7 @@ public enum PaymentErrorCode implements ErrorCode {
     GATEWAY_CONFIG_ERROR("결제 설정 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     GATEWAY_INTERNAL_ERROR("결제 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.", HttpStatus.BAD_GATEWAY),
     UNKNOWN("결제 처리 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    RATE_LIMIT_EXCEEDED("결제 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.", HttpStatus.TOO_MANY_REQUESTS),
     ;
 
     private final String message;

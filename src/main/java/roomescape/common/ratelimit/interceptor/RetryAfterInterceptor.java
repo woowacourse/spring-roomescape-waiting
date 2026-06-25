@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.code.PaymentErrorCode;
 
 public class RetryAfterInterceptor implements ClientHttpRequestInterceptor {
 
@@ -30,6 +32,10 @@ public class RetryAfterInterceptor implements ClientHttpRequestInterceptor {
             sleepSeconds(waitSeconds);
             response = execution.execute(request, body);
             attempt++;
+        }
+        if (isTooManyRequests(response)) {
+            response.close();
+            throw new RoomEscapeException(PaymentErrorCode.RATE_LIMIT_EXCEEDED);
         }
         return response;
     }
