@@ -9,16 +9,22 @@ public class PaymentOrder {
     private final String orderId;
     private final Long reservationId;
     private final Long amount;
+    private final PaymentStatus status;
 
     public static PaymentOrder create(Long reservationId, Long amount) {
-        return new PaymentOrder(null, reservationId, generateOrderId(), amount);
+        return new PaymentOrder(null, reservationId, generateOrderId(), amount, PaymentStatus.PENDING);
     }
 
     public PaymentOrder(Long id, Long reservationId, String orderId, Long amount) {
+        this(id, reservationId, orderId, amount, PaymentStatus.PENDING);
+    }
+
+    public PaymentOrder(Long id, Long reservationId, String orderId, Long amount, PaymentStatus status) {
         this.id = id;
         this.reservationId = reservationId;
         this.orderId = orderId;
         this.amount = amount;
+        this.status = status;
     }
 
     public Long getId() {
@@ -39,6 +45,10 @@ public class PaymentOrder {
 
     public Long getAmount() {
         return amount;
+    }
+
+    public PaymentStatus getStatus() {
+        return status;
     }
 
     private static String generateOrderId() {

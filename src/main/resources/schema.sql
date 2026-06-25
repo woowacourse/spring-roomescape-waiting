@@ -57,8 +57,10 @@ CREATE TABLE IF NOT EXISTS payment_order
     id              BIGINT       NOT NULL AUTO_INCREMENT,
     reservation_id  BIGINT       NOT NULL,
     order_id        VARCHAR(64)  NOT NULL UNIQUE,
-    amount            BIGINT       NOT NULL,
+    amount          BIGINT       NOT NULL,
+    payment_status  VARCHAR(20)  NOT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT check_payment_status CHECK (payment_status IN ('PENDING','CONFIRMED','FAILED','UNKNOWN')),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
 
@@ -69,5 +71,6 @@ CREATE TABLE IF NOT EXISTS payment
     payment_key     VARCHAR(255) NOT NULL UNIQUE,
     amount          BIGINT       NOT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT unique_payment_order UNIQUE(payment_order_id),
     FOREIGN KEY (payment_order_id) REFERENCES payment_order (id)
 );

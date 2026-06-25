@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClientException;
 
 import roomescape.domain.Payment;
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentStatus;
 import roomescape.domain.repository.PaymentOrderRepository;
 import roomescape.domain.repository.PaymentRepository;
 import roomescape.domain.repository.ReservationSlotRepository;
@@ -20,6 +21,7 @@ import roomescape.dto.PaymentConfirmRequest;
 import roomescape.dto.PaymentFailRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
+import roomescape.infrastructure.toss.TossPaymentException;
 import roomescape.service.port.PaymentGateway;
 
 import org.slf4j.Logger;
@@ -57,7 +59,10 @@ public class PaymentService {
         }
 
         PaymentResult result = confirmPayment(request, paymentOrder);
-        paymentRepository.save(Payment.create(paymentOrder.getId(), result.paymentKey(), result.amount()));
+        if (!paymentRepository.existsByPaymentOrderId(paymentOrder.getId())) {
+            paymentRepository.save(Payment.create(paymentOrder.getId(), result.paymentKey(), result.amount()));
+        }
+        paymentOrderRepository.updateStatus(paymentOrder.getId(), PaymentStatus.CONFIRMED);
         reservationSlotRepository.confirmPayment(paymentOrder.getReservationId());
     }
 
@@ -72,14 +77,23 @@ public class PaymentService {
                     )
             );
         } catch (ResourceAccessException e) {
+            if (isReadTimeout(e)) {
+                paymentOrderRepository.updateStatus(paymentOrder.getId(), PaymentStatus.UNKNOWN);
+                throw new CustomException(ErrorCode.PAYMENT_CONFIRM_RESULT_UNKNOWN);
+            }
             if (hasCause(e, ConnectException.class) || hasCause(e, SocketTimeoutException.class)) {
+                paymentOrderRepository.updateStatus(paymentOrder.getId(), PaymentStatus.FAILED);
                 throw new CustomException(ErrorCode.PAYMENT_GATEWAY_CONNECTION_FAILED);
             }
             throw e;
         } catch (RestClientException e) {
-            if (hasCause(e, SocketTimeoutException.class)) {
+            if (isReadTimeout(e)) {
+                paymentOrderRepository.updateStatus(paymentOrder.getId(), PaymentStatus.UNKNOWN);
                 throw new CustomException(ErrorCode.PAYMENT_CONFIRM_RESULT_UNKNOWN);
             }
+            throw e;
+        } catch (TossPaymentException e) {
+            paymentOrderRepository.updateStatus(paymentOrder.getId(), PaymentStatus.FAILED);
             throw e;
         }
     }
@@ -95,6 +109,18 @@ public class PaymentService {
         return false;
     }
 
+    private boolean isReadTimeout(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof SocketTimeoutException && current.getMessage() != null
+                    && current.getMessage().toLowerCase().contains("read")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
     @Transactional
     public void fail(PaymentFailRequest request) {
         if (!StringUtils.hasText(request.orderId())) {
@@ -103,5 +129,7 @@ public class PaymentService {
         }
 
         log.info("Payment failed. orderId={}, code={}, message={}", request.orderId(), request.code(), request.message());
+        PaymentOrder paymentOrder = paymentOrderRepository.getByOrderId(request.orderId());
+        paymentOrderRepository.updateStatus(paymentOrder.getId(), PaymentStatus.FAILED);
     }
 }
