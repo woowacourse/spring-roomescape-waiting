@@ -36,7 +36,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                     rs.getLong("theme_id"),
                     rs.getString("theme_name"),
                     rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail")
+                    rs.getString("theme_thumbnail"),
+                    rs.getLong("theme_amount")
             )
     );
 
@@ -99,7 +100,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                        th.id AS theme_id,
                        th.name AS theme_name,
                        th.description AS theme_description,
-                       th.thumbnail_url AS theme_thumbnail
+                       th.thumbnail_url AS theme_thumbnail,
+                       th.amount AS theme_amount
                 FROM reservation_slot rs
                 JOIN reservation_time t ON rs.time_id = t.id
                 JOIN theme th ON rs.theme_id = th.id
@@ -154,7 +156,8 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                        th.id AS theme_id, 
                        th.name AS theme_name, 
                        th.description AS theme_description, 
-                       th.thumbnail_url AS theme_thumbnail
+                       th.thumbnail_url AS theme_thumbnail,
+                       th.amount AS theme_amount
                 FROM reservation_slot AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
@@ -201,6 +204,18 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 reservation.getStatus().name(),
                 reservation.getUpdateAt(),
                 reservation.getId()
+        );
+    }
+
+    @Override
+    public void confirmPayment(long reservationId) {
+        jdbcTemplate.update("""
+                        UPDATE reservation
+                        SET status = 'RESERVED'
+                        WHERE id = ?
+                          AND status = 'PAYMENT_PENDING'
+                        """,
+                reservationId
         );
     }
 }

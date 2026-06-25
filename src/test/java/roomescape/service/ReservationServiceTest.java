@@ -91,6 +91,36 @@ class ReservationServiceTest {
         assertThat(secondResponse.order()).isEqualTo(1);
     }
 
+    @DisplayName("예약이 확정되면 결제 주문 정보가 응답에 포함된다.")
+    @Test
+    void 예약_확정시_결제_주문_정보_응답_테스트() {
+        LocalDateTime now = LocalDateTime.now();
+        ReservationRequest request = new ReservationRequest("김철수", now.toLocalDate().plusDays(70), 2L, 1L);
+
+        ReservationResponse response = reservationService.save(now, request);
+
+        assertThat(response.status()).isEqualTo("PAYMENT_PENDING");
+        assertThat(response.order()).isZero();
+        assertThat(response.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(response.amount()).isEqualTo(10000L);
+    }
+
+    @DisplayName("예약 대기이면 결제 주문 정보가 응답에 포함되지 않는다.")
+    @Test
+    void 예약_대기시_결제_주문_정보_응답_제외_테스트() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate reservationDate = now.toLocalDate().plusDays(71);
+        ReservationRequest firstRequest = new ReservationRequest("김철수", reservationDate, 2L, 1L);
+        ReservationRequest secondRequest = new ReservationRequest("이영희", reservationDate, 2L, 1L);
+
+        reservationService.save(now, firstRequest);
+        ReservationResponse waitingResponse = reservationService.save(now.plusSeconds(1), secondRequest);
+
+        assertThat(waitingResponse.order()).isEqualTo(1);
+        assertThat(waitingResponse.orderId()).isNull();
+        assertThat(waitingResponse.amount()).isNull();
+    }
+
     @DisplayName("같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
     @Test
     void 같은_사용자_중복_대기_예외_테스트() {
@@ -120,6 +150,47 @@ class ReservationServiceTest {
                     assertThat(reservation.reservationId()).isEqualTo(response.reservationId());
                     assertThat(reservation.status()).isEqualTo("CANCELED");
                 });
+    }
+
+    @DisplayName("결제 대기 예약을 취소하면 다음 대기자가 결제 대기로 승격되고 결제 주문 정보가 조회된다.")
+    @Test
+    void 결제_대기_취소시_다음_대기자_결제_대기_승격() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate reservationDate = now.toLocalDate().plusDays(80);
+        ReservationRequest firstRequest = new ReservationRequest("취소승격1", reservationDate, 2L, 1L);
+        ReservationRequest waitingRequest = new ReservationRequest("취소승격2", reservationDate, 2L, 1L);
+
+        ReservationResponse firstResponse = reservationService.save(now, firstRequest);
+        reservationService.save(now.plusSeconds(1), waitingRequest);
+
+        reservationService.delete(now.plusSeconds(2), firstResponse.reservationId(), "취소승격1");
+
+        ReservationResponse promoted = reservationService.findAllByName("취소승격2").get(0);
+        assertThat(promoted.status()).isEqualTo("PAYMENT_PENDING");
+        assertThat(promoted.order()).isZero();
+        assertThat(promoted.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(promoted.amount()).isEqualTo(10000L);
+    }
+
+    @DisplayName("결제 대기 예약을 수정하면 기존 슬롯의 다음 대기자가 결제 대기로 승격되고 결제 주문 정보가 조회된다.")
+    @Test
+    void 결제_대기_수정시_다음_대기자_결제_대기_승격() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate reservationDate = now.toLocalDate().plusDays(81);
+        ReservationRequest firstRequest = new ReservationRequest("수정승격1", reservationDate, 2L, 1L);
+        ReservationRequest waitingRequest = new ReservationRequest("수정승격2", reservationDate, 2L, 1L);
+        ReservationRequest updateRequest = new ReservationRequest("수정승격1", reservationDate, 3L, 1L);
+
+        ReservationResponse firstResponse = reservationService.save(now, firstRequest);
+        reservationService.save(now.plusSeconds(1), waitingRequest);
+
+        reservationService.update(firstResponse.reservationId(), now.plusSeconds(2), updateRequest);
+
+        ReservationResponse promoted = reservationService.findAllByName("수정승격2").get(0);
+        assertThat(promoted.status()).isEqualTo("PAYMENT_PENDING");
+        assertThat(promoted.order()).isZero();
+        assertThat(promoted.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(promoted.amount()).isEqualTo(10000L);
     }
 
     @DisplayName("본인 예약이 아니면 예약 대기를 취소할 수 없다.")

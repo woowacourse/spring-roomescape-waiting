@@ -23,7 +23,8 @@ public class JdbcThemeRepository implements ThemeRepository {
             rs.getLong("id"),
             rs.getString("name"),
             rs.getString("description"),
-            rs.getString("thumbnail_url")
+            rs.getString("thumbnail_url"),
+            rs.getLong("amount")
     );
 
     private final RowMapper<AvailableTimeResponse> availableReservationTimeRowMapper =
@@ -48,7 +49,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                     th.id,
                     th.name,
                     th.description,
-                    th.thumbnail_url
+                    th.thumbnail_url,
+                    th.amount
                 FROM reservation_slot AS r
                 INNER JOIN theme AS th ON r.theme_id = th.id
                 WHERE r.date BETWEEN ? AND ?
@@ -56,7 +58,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                     th.id,
                     th.name,
                     th.description,
-                    th.thumbnail_url
+                    th.thumbnail_url,
+                    th.amount
                 ORDER BY COUNT(r.id) DESC
                 LIMIT ?
                 """;
@@ -96,15 +99,16 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public List<Theme> findAll() {
-        return jdbcTemplate.query("SELECT id, name, description, thumbnail_url FROM theme", themeRowMapper);
+        return jdbcTemplate.query("SELECT id, name, description, thumbnail_url, amount FROM theme", themeRowMapper);
     }
 
     @Override
-    public Long save(String name, String description, String thumbnailUrl) {
+    public Long save(String name, String description, String thumbnailUrl, Long amount) {
         return jdbcInsert.executeAndReturnKey(Map.of(
                 "name", name,
                 "description", description,
-                "thumbnail_url", thumbnailUrl
+                "thumbnail_url", thumbnailUrl,
+                "amount", amount
         )).longValue();
     }
 

@@ -7,6 +7,8 @@ public enum ErrorCode {
     COMMON_UNAUTHORIZED("COMMON_401", "권한이 없습니다.", HttpStatus.UNAUTHORIZED),
     COMMON_SERVER_ERROR("COMMON_500", "500 서버 에러", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    PAYMENT_AMOUNT_MISMATCH("PAYMENT_400", "결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+
     THEME_NAME_TOO_LONG("THEME_400", "테마 이름은 255자 이하여야합니다.", HttpStatus.BAD_REQUEST),
     THEME_DESCRIPTION_TOO_LONG("THEME_400", "테마 설명은 255자 이하여야합니다.", HttpStatus.BAD_REQUEST),
     THEME_THUMBNAIL_TOO_LONG("THEME_400", "테마 썸네일 URL은 255자 이하여야합니다.", HttpStatus.BAD_REQUEST),

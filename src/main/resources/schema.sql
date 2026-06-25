@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS payment;
+DROP TABLE IF EXISTS payment_order;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_slot;
 DROP TABLE IF EXISTS theme;
@@ -16,6 +18,7 @@ CREATE TABLE IF NOT EXISTS theme
     name          VARCHAR(255) NOT NULL UNIQUE,
     description   VARCHAR(255) NOT NULL,
     thumbnail_url TEXT NOT NULL,
+    amount        BIGINT       NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -44,7 +47,27 @@ CREATE TABLE IF NOT EXISTS reservation
     updated_at DATETIME NOT NULL,
     PRIMARY KEY (id),
 
-    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','WAITING','CANCELED')),
+    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','PAYMENT_PENDING','WAITING','CANCELED')),
 
     FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id)
+);
+
+CREATE TABLE IF NOT EXISTS payment_order
+(
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id  BIGINT       NOT NULL,
+    order_id        VARCHAR(64)  NOT NULL UNIQUE,
+    amount            BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+);
+
+CREATE TABLE IF NOT EXISTS payment
+(
+    id              BIGINT       NOT NULL AUTO_INCREMENT,
+    payment_order_id BIGINT     NOT NULL,
+    payment_key     VARCHAR(255) NOT NULL UNIQUE,
+    amount          BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (payment_order_id) REFERENCES payment_order (id)
 );

@@ -10,6 +10,6 @@ public interface ThemeRepository {
     List<Theme> findPopularThemes(int size, LocalDate from, LocalDate to);
     List<AvailableTimeResponse> findAvailableTimeById(long themeId, String date);
     List<Theme> findAll();
-    Long save(String name, String description, String thumbnailUrl);
+    Long save(String name, String description, String thumbnailUrl, Long amount);
     void delete(long id);
 }

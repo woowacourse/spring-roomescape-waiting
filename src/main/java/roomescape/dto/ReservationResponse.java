@@ -5,6 +5,7 @@ import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import roomescape.domain.PaymentOrder;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
@@ -20,8 +21,14 @@ public record ReservationResponse(
         String themeThumbnailUrl,
         @JsonFormat(pattern = "HH:mm")
         LocalTime time,
-        int order) {
+        int order,
+        String orderId,
+        Long amount) {
     public static ReservationResponse from(Reservation reservation, ReservationSlotInfo reservationSlotInfo, int order) {
+        return from(reservation, reservationSlotInfo, order, null);
+    }
+
+    public static ReservationResponse from(Reservation reservation, ReservationSlotInfo reservationSlotInfo, int order, PaymentOrder paymentOrder) {
         Theme theme = reservationSlotInfo.theme();
         Time time = reservationSlotInfo.time();
 
@@ -34,7 +41,9 @@ public record ReservationResponse(
                 theme.getDescription(),
                 theme.getThumbnailUrl(),
                 time.getStartAt(),
-                order
+                order,
+                paymentOrder == null ? null : paymentOrder.getOrderId(),
+                paymentOrder == null ? null : paymentOrder.getAmount()
         );
     }
 }

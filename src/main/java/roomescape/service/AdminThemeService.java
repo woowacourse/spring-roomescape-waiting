@@ -20,7 +20,7 @@ public class AdminThemeService {
 
     public Long save(ThemeRequest request) {
         try {
-            return themeRepository.save(request.name(), request.description(), request.thumbnailUrl());
+            return themeRepository.save(request.name(), request.description(), request.thumbnailUrl(), request.amount());
         } catch (DuplicateKeyException e) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_THEME);
         }

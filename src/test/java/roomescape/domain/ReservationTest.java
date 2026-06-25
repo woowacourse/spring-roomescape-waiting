@@ -136,13 +136,13 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("대기 예약을 확정 예약으로 승격한다")
+    @DisplayName("대기 예약을 결제 대기 예약으로 승격한다")
     void 대기_예약_승격() {
         Reservation reservation = new Reservation(1L, "브라운", 1L, Status.WAITING, LocalDateTime.now());
 
         reservation.promote();
 
-        assertThat(reservation.getStatus()).isEqualTo(Status.RESERVED);
+        assertThat(reservation.getStatus()).isEqualTo(Status.PAYMENT_PENDING);
     }
 
     @Test

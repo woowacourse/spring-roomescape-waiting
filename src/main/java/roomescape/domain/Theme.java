@@ -10,8 +10,9 @@ public class Theme {
     private final String name;
     private final String description;
     private final String thumbnailUrl;
+    private final Long amount;
 
-    public Theme(Long id, String name, String description, String thumbnailUrl) {
+    public Theme(Long id, String name, String description, String thumbnailUrl, Long amount) {
         validateNameLength(name);
         validateDescriptionLength(description);
         validateThumbnailUrlLength(thumbnailUrl);
@@ -19,6 +20,7 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
+        this.amount = amount;
     }
 
     private void validateNameLength(String name) {
@@ -53,6 +55,10 @@ public class Theme {
 
     public String getThumbnailUrl() {
         return thumbnailUrl;
+    }
+
+    public Long getAmount() {
+        return amount;
     }
 
     @Override
