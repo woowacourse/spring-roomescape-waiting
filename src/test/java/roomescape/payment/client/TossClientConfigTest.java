@@ -33,7 +33,7 @@ class TossClientConfigTest {
                 .setBody("slow response")
                 .setBodyDelay(1, TimeUnit.SECONDS));
         RestClient restClient = new TossClientConfig()
-                .tossRestClient(server.url("/").toString(), "test_secret_key", 500, 100, 3);
+                .tossRestClient(server.url("/").toString(), "test_secret_key", 500, 100, 3, 100, 100);
 
         assertThatThrownBy(() -> restClient.get()
                 .uri("/")
