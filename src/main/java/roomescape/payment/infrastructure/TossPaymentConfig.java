@@ -16,12 +16,17 @@ import org.springframework.web.client.RestClient;
 public class TossPaymentConfig {
 
     @Bean
-    public RestClient tossRestClient(TossProperties properties) {
+    public RestClient tossRestClient(TossProperties properties,
+                                     OutboundRateLimitInterceptor outboundRateLimitInterceptor,
+                                     RetryAfterInterceptor retryAfterInterceptor) {
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())
                 .requestFactory(timeoutRequestFactory(properties))
                 .defaultHeader(HttpHeaders.AUTHORIZATION, basicAuth(properties.secretKey()))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                // 나가는 한도(호출당 토큰 1개)를 먼저 적용한 뒤, 토스 429에 대한 백오프 재시도를 건다.
+                .requestInterceptor(outboundRateLimitInterceptor)
+                .requestInterceptor(retryAfterInterceptor)
                 .build();
     }
 
