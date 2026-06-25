@@ -1,7 +1,9 @@
 package roomescape.payment;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.payment.order.PaymentOrder;
+import roomescape.payment.order.PaymentOrderHistory;
 import roomescape.payment.order.PaymentOrderRepository;
 
 @Service
@@ -26,5 +28,9 @@ public class PaymentService {
 
     public void cancel(String paymentKey, String reason) {
         paymentGateway.cancel(paymentKey, reason);
+    }
+
+    public List<PaymentOrderHistory> findOrderHistories(String reserverName) {
+        return orderRepository.findHistoriesByReserverName(reserverName);
     }
 }

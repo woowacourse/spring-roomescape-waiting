@@ -1,6 +1,7 @@
 package roomescape.payment.order;
 
 import java.sql.Date;
+import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -8,6 +9,16 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
+
+    private static final RowMapper<PaymentOrderHistory> HISTORY_ROW_MAPPER = (rs, rowNum) -> new PaymentOrderHistory(
+            rs.getString("order_id"),
+            rs.getDate("date").toLocalDate(),
+            rs.getTime("start_at").toLocalTime(),
+            rs.getString("theme_name"),
+            rs.getLong("amount"),
+            rs.getString("payment_key"),
+            PaymentOrderStatus.valueOf(rs.getString("status"))
+    );
 
     private static final RowMapper<PaymentOrder> ROW_MAPPER = (rs, rowNum) -> new PaymentOrder(
             rs.getString("order_id"),
@@ -57,6 +68,18 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         } catch (EmptyResultDataAccessException e) {
             throw new PaymentOrderNotFoundException("주문을 찾을 수 없습니다: orderId=" + orderId);
         }
+    }
+
+    @Override
+    public List<PaymentOrderHistory> findHistoriesByReserverName(String reserverName) {
+        String sql = "SELECT po.order_id, po.date, t.start_at, th.name AS theme_name, "
+                + "po.amount, po.payment_key, po.status "
+                + "FROM payment_order po "
+                + "JOIN reservation_time t ON po.time_id = t.id "
+                + "JOIN theme th ON po.theme_id = th.id "
+                + "WHERE po.reserver_name = ? "
+                + "ORDER BY po.created_at DESC";
+        return jdbcTemplate.query(sql, HISTORY_ROW_MAPPER, reserverName);
     }
 
     @Override
