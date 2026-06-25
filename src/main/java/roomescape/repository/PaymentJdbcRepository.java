@@ -8,7 +8,10 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Payment;
 
 import java.sql.PreparedStatement;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class PaymentJdbcRepository implements PaymentRepository {
@@ -55,6 +58,19 @@ public class PaymentJdbcRepository implements PaymentRepository {
     public Optional<Payment> findByOrderId(String orderId) {
         String sql = "SELECT id, order_id, amount, payment_key, reservation_id FROM payment WHERE order_id = ?";
         return jdbcTemplate.query(sql, paymentRowMapper, orderId).stream().findFirst();
+    }
+
+    @Override
+    public List<Payment> findByReservationIds(Collection<Long> reservationIds) {
+        if (reservationIds.isEmpty()) {
+            return List.of();
+        }
+        String placeholders = reservationIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+        String sql = "SELECT id, order_id, amount, payment_key, reservation_id FROM payment WHERE reservation_id IN ("
+                + placeholders + ")";
+        return jdbcTemplate.query(sql, paymentRowMapper, reservationIds.toArray());
     }
 
     @Override

@@ -9,6 +9,8 @@ import roomescape.exception.NotFoundException;
 import roomescape.exception.PaymentAmountMismatchException;
 import roomescape.repository.PaymentRepository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +34,10 @@ public class PaymentService {
 
     public Optional<Payment> findByOrderId(String orderId) {
         return paymentRepository.findByOrderId(orderId);
+    }
+
+    public List<Payment> findByReservationIds(Collection<Long> reservationIds) {
+        return paymentRepository.findByReservationIds(reservationIds);
     }
 
     @Transactional

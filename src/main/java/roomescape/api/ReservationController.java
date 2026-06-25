@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationApplicationService;
 import roomescape.application.ReservationPayment;
 import roomescape.domain.Reservation;
+import roomescape.dto.MyReservationResponses;
 import roomescape.dto.ReservationCreateResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
@@ -44,7 +45,7 @@ public class ReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ReservationResponses> searchMine(
+    public ResponseEntity<MyReservationResponses> searchMine(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size

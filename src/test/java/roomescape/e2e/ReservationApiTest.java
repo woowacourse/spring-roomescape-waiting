@@ -13,6 +13,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 class ReservationApiTest extends AbstractE2eTest {
 
@@ -408,6 +409,22 @@ class ReservationApiTest extends AbstractE2eTest {
                 .statusCode(200)
                 .body("reservations.size()", is(1))
                 .body("reservations[0].name", is("민욱"));
+    }
+
+    @Test
+    void 본인_예약_조회는_결제_상태와_주문_정보를_포함한다() {
+        Integer timeId = createTime("13:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        createReservation("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations/me?name=민욱")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations[0].paymentStatus", is("PENDING"))
+                .body("reservations[0].orderId", notNullValue())
+                .body("reservations[0].amount", is(50000))
+                .body("reservations[0].paymentKey", nullValue());
     }
 
     @Test
