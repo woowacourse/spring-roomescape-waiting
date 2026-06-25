@@ -4,5 +4,6 @@ public enum PaymentFailureCategory {
     DEFINITIVE,
     UNKNOWN,
     CONFIRMATION_UNKNOWN,
-    CONFIGURATION
+    CONFIGURATION,
+    RATE_LIMITED
 }
