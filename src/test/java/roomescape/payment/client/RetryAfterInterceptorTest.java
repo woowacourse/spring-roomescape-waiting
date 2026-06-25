@@ -44,6 +44,24 @@ class RetryAfterInterceptorTest {
     }
 
     @Test
+    void RetryAfter_헤더가_없으면_1초_고정_간격으로_폴백해_재시도한다() {
+        server.enqueue(new MockResponse().setResponseCode(429));
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                .setBody("{\"status\":\"DONE\"}"));
+        RestClient client = clientWith(3);
+
+        long startNanos = System.nanoTime();
+        String body = client.post().uri("/v1/payments/confirm").retrieve().body(String.class);
+        long elapsedMillis = (System.nanoTime() - startNanos) / 1_000_000L;
+
+        assertThat(body).contains("DONE");
+        assertThat(server.getRequestCount()).isEqualTo(2);
+        assertThat(elapsedMillis).isGreaterThanOrEqualTo(1_000L);
+    }
+
+    @Test
     void 재시도를_모두_소진해도_429면_게이트웨이_Rate_Limit_예외로_실패한다() {
         server.enqueue(new MockResponse().setResponseCode(429).setHeader(HttpHeaders.RETRY_AFTER, "0"));
         server.enqueue(new MockResponse().setResponseCode(429).setHeader(HttpHeaders.RETRY_AFTER, "0"));
