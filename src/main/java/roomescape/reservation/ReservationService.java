@@ -14,6 +14,7 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
+import roomescape.payment.domain.PaymentOrderRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,14 +24,17 @@ public class ReservationService {
     private final ReservationTimeDao reservationTimeDao;
     private final ReservationWaitDao reservationWaitDao;
     private final ReservationHistoryService reservationHistoryService;
+    private final PaymentOrderRepository paymentOrderRepository;
 
     public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao,
                               ReservationWaitDao reservationWaitDao,
-                              ReservationHistoryService reservationHistoryService) {
+                              ReservationHistoryService reservationHistoryService,
+                              PaymentOrderRepository paymentOrderRepository) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.reservationWaitDao = reservationWaitDao;
         this.reservationHistoryService = reservationHistoryService;
+        this.paymentOrderRepository = paymentOrderRepository;
     }
 
     public List<Reservation> getReservations(Long memberId) {
@@ -97,6 +101,12 @@ public class ReservationService {
     }
 
     private void deleteOrPromoteWait(Reservation reservation, Long actorId) {
+        if (!reservation.isConfirmed()) {
+            reservationWaitDao.deleteAllByReservationId(reservation.getId());
+            paymentOrderRepository.deleteByReservationId(reservation.getId());
+            reservationDao.delete(reservation.getId());
+            return;
+        }
         if (reservation.isPast()) {
             reservationWaitDao.deleteAllByReservationId(reservation.getId());
             reservationDao.delete(reservation.getId());

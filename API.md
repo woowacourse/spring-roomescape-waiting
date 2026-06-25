@@ -832,3 +832,54 @@ GET /api/v1/reservations HTTP/1.1
 Host: localhost:8080
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
+
+---
+
+## 8. 결제
+
+### 8-1. 결제 대기 예약 생성
+
+`POST /api/v1/reservations` · **USER**
+
+기존 예약 생성 요청을 받으면 `PENDING` 예약과 서버 생성 주문 정보를 먼저 저장한다. 응답의 `clientKey`, `orderId`, `amount`로 브라우저 Toss 결제창을 연다.
+
+```json
+{
+  "id": 1,
+  "memberId": 1,
+  "reservationId": 1,
+  "reservationStatus": "PENDING",
+  "orderId": "order-0123456789abcdef0123456789abcdef",
+  "orderName": "방탈출 예약",
+  "amount": 50000,
+  "clientKey": "test_ck_..."
+}
+```
+
+### 8-2. 결제 승인
+
+`POST /api/v1/payments/confirm` · **USER**
+
+```json
+{
+  "paymentKey": "tgen_...",
+  "orderId": "order-0123456789abcdef0123456789abcdef",
+  "amount": 50000
+}
+```
+
+서버는 저장된 주문 금액을 먼저 비교하고 일치할 때만 Toss `POST /v1/payments/confirm`을 호출한다. 성공하면 `paymentKey`를 저장하고 예약을 `CONFIRMED`로 바꾼다.
+
+### 8-3. 결제 실패 정리
+
+`POST /api/v1/payments/fail` · **USER**
+
+```json
+{
+  "code": "PAY_PROCESS_CANCELED",
+  "message": "사용자가 결제를 취소했습니다.",
+  "orderId": null
+}
+```
+
+`orderId`가 있으면 해당 `PENDING` 주문과 예약을 정리한다. 사용자가 결제창을 취소하여 `orderId`가 없는 경우에도 `204 No Content`로 안전하게 종료한다.

@@ -1091,7 +1091,16 @@
         </div>
 
         <div class="button-row">
-            <button id="userReserveButton" class="btn btn-primary" type="button" disabled>예약하기</button>
+            <button id="userReserveButton" class="btn btn-primary" type="button" disabled>결제 준비하기</button>
+        </div>
+
+        <div id="paymentWidgetPanel" class="hidden">
+            <div id="payment-method"></div>
+            <div id="agreement"></div>
+            <div class="button-row">
+                <button id="paymentCancelButton" class="btn btn-secondary" type="button">결제 취소</button>
+                <button id="paymentRequestButton" class="btn btn-primary" type="button" disabled>50,000원 결제하기</button>
+            </div>
         </div>
     </section>
 
@@ -1200,6 +1209,7 @@
     </div>
 </div>
 
+<script src="https://js.tosspayments.com/v2/standard"></script>
 <script>
     "use strict";
 
@@ -1214,6 +1224,8 @@
         userSelectedDate: null,
         userSelectedTimeId: null,
         userAvailableTimes: [], // [{ time: {id, startAt}, available }]
+        paymentWidgets: null,
+        pendingCheckout: null,
         editingReservationId: null,
     };
 
@@ -1240,6 +1252,11 @@
     const userTimeHint = document.getElementById("userTimeHint");
     const userTimeGrid = document.getElementById("userTimeGrid");
     const userReserveButton = document.getElementById("userReserveButton");
+    const paymentWidgetPanel = document.getElementById("paymentWidgetPanel");
+    const paymentMethod = document.getElementById("payment-method");
+    const agreement = document.getElementById("agreement");
+    const paymentCancelButton = document.getElementById("paymentCancelButton");
+    const paymentRequestButton = document.getElementById("paymentRequestButton");
     const loadMyReservationsButton = document.getElementById("loadMyReservationsButton");
     const myReservationsList = document.getElementById("myReservationsList");
     const myReservationsEmpty = document.getElementById("myReservationsEmpty");
@@ -1322,6 +1339,18 @@
         RESERVATION_WAIT404_001: "요청한 예약 대기를 찾을 수 없습니다.",
         RESERVATION_WAIT409_001: "이미 해당 슬롯에 대기 중입니다.",
         RESERVATION_WAIT422_001: "이미 지난 슬롯에는 대기를 신청할 수 없습니다.",
+        RESERVATION_WAIT422_003: "결제가 완료되지 않은 예약에는 대기를 신청할 수 없습니다.",
+        PAYMENT400_001: "결제 금액이 올바르지 않습니다. 다시 예약해 주세요.",
+        PAYMENT400_002: "결제 승인 요청이 올바르지 않습니다.",
+        PAYMENT403_001: "본인의 결제만 처리할 수 있습니다.",
+        PAYMENT404_001: "결제 주문을 찾을 수 없습니다.",
+        PAYMENT409_001: "이미 처리된 결제입니다.",
+        PAYMENT409_002: "이미 사용된 주문 번호입니다.",
+        PAYMENT410_001: "결제 시간이 만료되었습니다. 다시 예약해 주세요.",
+        PAYMENT422_001: "카드 결제가 거절되었습니다. 결제 수단을 확인해 주세요.",
+        PAYMENT500_001: "결제 설정에 문제가 있습니다. 관리자에게 문의해 주세요.",
+        PAYMENT502_001: "결제 승인 중 문제가 발생했습니다.",
+        PAYMENT503_001: "결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해 주세요.",
         THEME404_001: "선택한 테마를 찾을 수 없습니다.",
         THEME409_001: "이미 예약이 존재하는 테마는 삭제할 수 없습니다.",
         COMMON400_001: "입력값이 올바르지 않습니다.",
@@ -1586,14 +1615,15 @@
 
         const date = userReservationDate.value;
         const themeId = state.userSelectedThemeId;
-        if (!date || !themeId) {
+        const storeId = state.userSelectedStoreId;
+        if (!date || !themeId || !storeId) {
             userTimeHint.textContent = "매장, 테마, 날짜를 모두 선택하면 가능한 시간이 표시됩니다.";
             updateReserveButton();
             return;
         }
 
         try {
-            const data = await getJson(`/api/v1/reservation-times/availability?date=${date}&themeId=${themeId}`);
+            const data = await getJson(`/api/v1/reservation-times/availability?date=${date}&themeId=${themeId}&storeId=${storeId}`);
             state.userAvailableTimes = data;
             if (!data.length) {
                 userTimeHint.textContent = "표시할 시간이 없습니다.";
@@ -1603,9 +1633,11 @@
             const renderSlot = item => {
                 const isSelected = state.userSelectedTimeId === item.id;
                 const reservationIdAttr = item.reservationId != null ? `data-reservation-id="${item.reservationId}"` : "";
-                const slotClass = ["time-slot", isSelected ? "selected" : "", item.available ? "" : "wait-eligible"].filter(Boolean).join(" ");
-                const titleAttr = item.available ? "" : `title="이미 예약된 슬롯 — 대기 신청"`;
-                return `<button type="button" class="${slotClass}" data-time-id="${item.id}" ${reservationIdAttr} ${titleAttr}>${item.time.slice(0, 5)}</button>`;
+                const slotClass = ["time-slot", isSelected ? "selected" : "", item.waitable ? "wait-eligible" : ""].filter(Boolean).join(" ");
+                const titleAttr = item.waitable ? `title="이미 예약된 슬롯 — 대기 신청"`
+                    : (!item.available ? `title="다른 사용자가 결제를 진행 중입니다"` : "");
+                const disabledAttr = !item.available && !item.waitable ? "disabled" : "";
+                return `<button type="button" class="${slotClass}" data-time-id="${item.id}" ${reservationIdAttr} ${titleAttr} ${disabledAttr}>${item.time.slice(0, 5)}</button>`;
             };
 
             const groups = [
@@ -1651,7 +1683,7 @@
     function updateReserveButton() {
         const ok = state.userSelectedStoreId && state.userSelectedThemeId
             && userReservationDate.value && state.userSelectedTimeId;
-        userReserveButton.disabled = !ok;
+        userReserveButton.disabled = !ok || state.pendingCheckout !== null;
     }
 
     async function reserve() {
@@ -1662,13 +1694,115 @@
             storeId: state.userSelectedStoreId,
         };
         try {
-            await postJson("/api/v1/reservations", body);
-            setStatus(userStatus, "success", "예약이 완료되었습니다.");
-            state.userSelectedTimeId = null;
-            await refreshAvailableTimes();
-            await loadMyReservations();
+            const checkout = await postJson("/api/v1/reservations", body);
+            if (!checkout.clientKey || typeof TossPayments !== "function") {
+                throw new Error("결제 클라이언트 설정을 확인해 주세요.");
+            }
+            sessionStorage.setItem("pendingPaymentOrderId", checkout.orderId);
+            const tossPayments = TossPayments(checkout.clientKey);
+            const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
+            state.pendingCheckout = checkout;
+            state.paymentWidgets = widgets;
+            setCheckoutLocked(true);
+            paymentWidgetPanel.classList.remove("hidden");
+            paymentRequestButton.disabled = true;
+            paymentRequestButton.textContent = `${checkout.amount.toLocaleString()}원 결제하기`;
+
+            await widgets.setAmount({currency: "KRW", value: checkout.amount});
+            await Promise.all([
+                widgets.renderPaymentMethods({selector: "#payment-method", variantKey: "DEFAULT"}),
+                widgets.renderAgreement({selector: "#agreement", variantKey: "AGREEMENT"}),
+            ]);
+            paymentRequestButton.disabled = false;
+            setStatus(userStatus, "info", "결제수단과 약관을 확인한 뒤 결제하기를 눌러 주세요.");
+        } catch (e) {
+            await cleanupPendingPayment("WIDGET_RENDER_FAILED", e.message);
+            setStatus(userStatus, "error", e.message);
+        }
+    }
+
+    async function requestPayment() {
+        if (!state.paymentWidgets || !state.pendingCheckout) return;
+        const checkout = state.pendingCheckout;
+        try {
+            paymentRequestButton.disabled = true;
+            await state.paymentWidgets.requestPayment({
+                orderId: checkout.orderId,
+                orderName: checkout.orderName,
+                successUrl: `${window.location.origin}/?payment=success`,
+                failUrl: `${window.location.origin}/?payment=fail`,
+            });
+        } catch (e) {
+            await cleanupPendingPayment(e.code || "PAYMENT_REQUEST_FAILED", e.message);
+            const errorDetail = e.code ? `[${e.code}] ${e.message || "결제 요청에 실패했습니다."}`
+                : (e.message || "결제 요청에 실패했습니다.");
+            setStatus(userStatus, "error",
+                e.code === "USER_CANCEL" ? "결제가 취소되었습니다." : errorDetail);
+        }
+    }
+
+    async function cleanupPendingPayment(code, message) {
+        const orderId = state.pendingCheckout?.orderId
+            || sessionStorage.getItem("pendingPaymentOrderId");
+        try {
+            await postJson("/api/v1/payments/fail", {code, message, orderId});
+        } catch { /* 원래 오류 안내를 유지한다. */ }
+        resetPaymentWidget();
+    }
+
+    function resetPaymentWidget() {
+        state.paymentWidgets = null;
+        state.pendingCheckout = null;
+        sessionStorage.removeItem("pendingPaymentOrderId");
+        paymentMethod.innerHTML = "";
+        agreement.innerHTML = "";
+        paymentWidgetPanel.classList.add("hidden");
+        paymentRequestButton.disabled = true;
+        setCheckoutLocked(false);
+        updateReserveButton();
+    }
+
+    function setCheckoutLocked(locked) {
+        userStoreSelect.disabled = locked;
+        userReservationDate.disabled = locked;
+        userThemeGrid.querySelectorAll("button").forEach(button => button.disabled = locked);
+        userTimeGrid.querySelectorAll("button").forEach(button => button.disabled = locked);
+        userReserveButton.disabled = locked;
+    }
+
+    async function handlePaymentRedirect() {
+        const params = new URLSearchParams(window.location.search);
+        const paymentFlow = params.get("payment");
+        if (!paymentFlow) return;
+
+        const storedOrderId = sessionStorage.getItem("pendingPaymentOrderId");
+        try {
+            if (!state.user) {
+                throw new Error("결제 결과를 처리하려면 다시 로그인해 주세요.");
+            }
+            if (paymentFlow === "success") {
+                await postJson("/api/v1/payments/confirm", {
+                    paymentKey: params.get("paymentKey"),
+                    orderId: params.get("orderId"),
+                    amount: Number(params.get("amount")),
+                });
+                setStatus(userStatus, "success", "결제가 승인되어 예약이 확정되었습니다.");
+                state.userSelectedTimeId = null;
+                await loadMyReservations();
+            } else if (paymentFlow === "fail") {
+                const orderId = params.get("orderId") || storedOrderId;
+                await postJson("/api/v1/payments/fail", {
+                    code: params.get("code"),
+                    message: params.get("message"),
+                    orderId,
+                });
+                setStatus(userStatus, "error", params.get("message") || "결제가 취소되었습니다.");
+            }
         } catch (e) {
             setStatus(userStatus, "error", e.message);
+        } finally {
+            sessionStorage.removeItem("pendingPaymentOrderId");
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
     }
 
@@ -1953,6 +2087,7 @@
         await tryLoadCurrentUser();
         await Promise.all([loadStoresAndThemes(), loadAllTimes()]);
         renderView();
+        await handlePaymentRedirect();
     }
 
     // ─── Event bindings ──────────────────────
@@ -1966,12 +2101,19 @@
 
     userStoreSelect.addEventListener("change", () => {
         state.userSelectedStoreId = userStoreSelect.value ? Number(userStoreSelect.value) : null;
+        state.userSelectedTimeId = null;
+        refreshAvailableTimes();
         updateReserveButton();
     });
     userReservationDate.addEventListener("change", () => {
         refreshAvailableTimes();
     });
     userReserveButton.addEventListener("click", reserve);
+    paymentRequestButton.addEventListener("click", requestPayment);
+    paymentCancelButton.addEventListener("click", async () => {
+        await cleanupPendingPayment("PAY_PROCESS_CANCELED", "사용자가 결제를 취소했습니다.");
+        setStatus(userStatus, "error", "결제가 취소되었습니다.");
+    });
     loadMyReservationsButton.addEventListener("click", loadMyReservations);
     tabReservations.addEventListener("click", () => switchTab("reservations"));
     tabWaitings.addEventListener("click", () => switchTab("waitings"));

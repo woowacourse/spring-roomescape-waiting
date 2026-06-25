@@ -43,12 +43,30 @@ CREATE TABLE reservation
     time_id   BIGINT       NOT NULL,
     theme_id  BIGINT       NOT NULL,
     store_id  BIGINT       NOT NULL,
+    status    VARCHAR(20)  NOT NULL DEFAULT 'CONFIRMED'
+        CHECK (status IN ('PENDING', 'CONFIRMED')),
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (store_id) REFERENCES store (id),
     CONSTRAINT uq_reservation_store_date_time_theme UNIQUE (store_id, date, time_id, theme_id)
+);
+
+CREATE TABLE payment_order
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id       VARCHAR(64)  NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    amount         BIGINT       NOT NULL CHECK (amount > 0),
+    payment_key    VARCHAR(200),
+    status         VARCHAR(20)  NOT NULL DEFAULT 'READY'
+        CHECK (status IN ('READY', 'DONE')),
+    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT uq_payment_order_order_id UNIQUE (order_id),
+    CONSTRAINT uq_payment_order_reservation UNIQUE (reservation_id),
+    CONSTRAINT uq_payment_order_payment_key UNIQUE (payment_key)
 );
 
 CREATE TABLE reservation_wait

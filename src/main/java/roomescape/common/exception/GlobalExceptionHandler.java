@@ -21,85 +21,48 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        ErrorType errorType = e.getErrorType();
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(e.getErrorType());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgument(MethodArgumentNotValidException e) {
-        ErrorType errorType = ErrorType.METHOD_ARGUMENT_NOT_VALID;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.METHOD_ARGUMENT_NOT_VALID);
     }
 
     @ExceptionHandler(MissingPathVariableException.class)
     public ResponseEntity<ErrorResponse> handleMissingPathVariable(MissingPathVariableException e) {
-        ErrorType errorType = ErrorType.MISSING_PATH_VARIABLE;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.MISSING_PATH_VARIABLE);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
             MissingServletRequestParameterException e) {
-        ErrorType errorType = ErrorType.MISSING_REQUEST_PARAMETER;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.MISSING_REQUEST_PARAMETER);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        ErrorType errorType = ErrorType.HTTP_MESSAGE_NOT_READABLE;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.HTTP_MESSAGE_NOT_READABLE);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
-        ErrorType errorType = ErrorType.METHOD_ARGUMENT_TYPE_MISMATCH;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.METHOD_ARGUMENT_TYPE_MISMATCH);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException e) {
-        ErrorType errorType = ErrorType.CONSTRAINT_VIOLATION;
-
-        return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+        return toResponse(CommonErrorType.CONSTRAINT_VIOLATION);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpectedException(
-            Exception e,
-            HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e, HttpServletRequest request) {
         log.error("[예기치 못한 오류] {} {}", request.getMethod(), request.getRequestURI(), e);
+        return toResponse(CommonErrorType.UNEXPECTED_EXCEPTION);
+    }
 
-        ErrorType errorType = ErrorType.UNEXPECTED_EXCEPTION;
+    private ResponseEntity<ErrorResponse> toResponse(ErrorType errorType) {
         return ResponseEntity.status(errorType.getHttpStatus())
-                .body(new ErrorResponse(
-                        errorType.getErrorMessage(),
-                        errorType.getErrorCode()));
+                .body(new ErrorResponse(errorType.getErrorMessage(), errorType.getErrorCode()));
     }
 }

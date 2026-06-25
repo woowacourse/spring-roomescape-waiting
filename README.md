@@ -209,3 +209,18 @@ WHERE reservation_id = ?
 - 도메인 객체의 자기 책임으로 표현하는 게 의미상 더 명확할 때
 
 기준: **"SQL이 잘하는 일은 SQL에 맡기고, 도메인 규칙은 자바에 둔다."**
+
+## Toss Payments 테스트 설정
+
+결제창에는 클라이언트 키, 서버 승인 API에는 시크릿 키를 사용한다. 실제 키는 커밋하지 않고 프로젝트 루트의 `.env` 또는 실행 환경변수로 주입한다.
+
+```properties
+TOSS_CLIENT_KEY=test_ck_...
+TOSS_SECRET_KEY=test_sk_...
+TOSS_BASE_URL=https://api.tosspayments.com
+RESERVATION_PAYMENT_AMOUNT=50000
+```
+
+예약 생성 시 서버가 `orderId`와 금액을 저장하고 예약을 `PENDING`으로 만든다. 브라우저 인증이 끝난 후 서버 승인까지 성공해야 `CONFIRMED` 예약과 생성 이력이 남는다.
+
+실제 샌드박스 어댑터 테스트는 기본 테스트에서 제외된다. `RUN_REAL_API=true`와 `TOSS_SECRET_KEY`를 주입하면 오류 응답 변환을 확인할 수 있고, 브라우저 인증 결과인 `TOSS_TEST_PAYMENT_KEY`, `TOSS_TEST_ORDER_ID`, `TOSS_TEST_AMOUNT`까지 주입하면 성공 승인도 검증한다.

@@ -79,6 +79,36 @@ public class ReservationTimeDao {
         return jdbcTemplate.query(sql, getMapResultSetExtractor(), id, date);
     }
 
+    public List<ReservationTimeAvailability> findAvailableTimes(LocalDate date, Long themeId, Long storeId) {
+        String sql = """
+                SELECT
+                    rt.id AS time_id,
+                    rt.start_at,
+                    r.id AS reservation_id,
+                    r.status AS reservation_status
+                FROM reservation_time rt
+                LEFT JOIN reservation r
+                    ON r.time_id = rt.id
+                   AND r.theme_id = ?
+                   AND r.store_id = ?
+                   AND r.date = ?
+                ORDER BY rt.id
+                """;
+        return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+            ReservationTime reservationTime = new ReservationTime(
+                    resultSet.getLong("time_id"),
+                    LocalTime.parse(resultSet.getString("start_at"))
+            );
+            Long reservationId = resultSet.getObject("reservation_id", Long.class);
+            String rawStatus = resultSet.getString("reservation_status");
+            return new ReservationTimeAvailability(
+                    reservationTime,
+                    reservationId,
+                    rawStatus == null ? null : roomescape.reservation.ReservationStatus.valueOf(rawStatus)
+            );
+        }, themeId, storeId, date);
+    }
+
     private ResultSetExtractor<Map<ReservationTime, Long>> getMapResultSetExtractor() {
         return (ResultSet rs) -> {
             Map<ReservationTime, Long> results = new LinkedHashMap<>();

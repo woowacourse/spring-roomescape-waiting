@@ -38,5 +38,6 @@ out/
 /.nb-gradle/
 
 ### VS Code ###
+.DS_Store
 .vscode/
 AGENTS.md

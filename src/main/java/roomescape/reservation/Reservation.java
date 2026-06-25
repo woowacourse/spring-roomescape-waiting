@@ -16,13 +16,20 @@ public class Reservation {
     private final ReservationTime time;
     private final Long themeId;
     private final Long storeId;
+    private final ReservationStatus status;
 
     public Reservation(Long id, Long memberId, LocalDate date, ReservationTime time, Long themeId, Long storeId) {
+        this(id, memberId, date, time, themeId, storeId, ReservationStatus.CONFIRMED);
+    }
+
+    public Reservation(Long id, Long memberId, LocalDate date, ReservationTime time, Long themeId, Long storeId,
+                       ReservationStatus status) {
         validateMemberId(memberId);
         validateDate(date);
         validateTime(time);
         validateThemeId(themeId);
         validateStoreId(storeId);
+        validateStatus(status);
 
         this.id = id;
         this.memberId = memberId;
@@ -30,10 +37,21 @@ public class Reservation {
         this.time = time;
         this.themeId = themeId;
         this.storeId = storeId;
+        this.status = status;
     }
 
     public static Reservation create(Long memberId, LocalDate date, ReservationTime time, Long themeId, Long storeId) {
         Reservation candidate = new Reservation(null, memberId, date, time, themeId, storeId);
+        if (candidate.isPast()) {
+            throw new PastReservationNotAllowedException();
+        }
+        return candidate;
+    }
+
+    public static Reservation createPending(Long memberId, LocalDate date, ReservationTime time, Long themeId,
+                                            Long storeId) {
+        Reservation candidate = new Reservation(
+                null, memberId, date, time, themeId, storeId, ReservationStatus.PENDING);
         if (candidate.isPast()) {
             throw new PastReservationNotAllowedException();
         }
@@ -64,6 +82,18 @@ public class Reservation {
         return storeId;
     }
 
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
+    public boolean isConfirmed() {
+        return status == ReservationStatus.CONFIRMED;
+    }
+
+    public Reservation confirm() {
+        return new Reservation(id, memberId, date, time, themeId, storeId, ReservationStatus.CONFIRMED);
+    }
+
     public void validateStoreOwnership(Member member) {
         if (!this.storeId.equals(member.getStoreId())) {
             throw new WrongStoreAccessException();
@@ -82,7 +112,7 @@ public class Reservation {
         if (!isReservedBy(requestingMemberId)) {
             throw new ReservationOwnerMismatchException();
         }
-        Reservation candidate = new Reservation(id, memberId, newDate, newTime, themeId, storeId);
+        Reservation candidate = new Reservation(id, memberId, newDate, newTime, themeId, storeId, status);
         if (candidate.isPast()) {
             throw new PastReservationNotAllowedException();
         }
@@ -91,7 +121,7 @@ public class Reservation {
 
     public Reservation changeToByManager(Member manager, LocalDate newDate, ReservationTime newTime) {
         validateStoreOwnership(manager);
-        Reservation candidate = new Reservation(id, memberId, newDate, newTime, themeId, storeId);
+        Reservation candidate = new Reservation(id, memberId, newDate, newTime, themeId, storeId, status);
         if (candidate.isPast()) {
             throw new PastReservationNotAllowedException();
         }
@@ -108,7 +138,7 @@ public class Reservation {
     }
 
     public Reservation promoteTo(Long newOwnerId) {
-        return new Reservation(id, newOwnerId, date, time, themeId, storeId);
+        return new Reservation(id, newOwnerId, date, time, themeId, storeId, status);
     }
 
     private void validateMemberId(Long memberId) {
@@ -138,6 +168,12 @@ public class Reservation {
     private void validateStoreId(Long storeId) {
         if (storeId == null) {
             throw new IllegalArgumentException("매장 ID는 비어 있을 수 없습니다.");
+        }
+    }
+
+    private void validateStatus(ReservationStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("예약 상태는 비어 있을 수 없습니다.");
         }
     }
 }

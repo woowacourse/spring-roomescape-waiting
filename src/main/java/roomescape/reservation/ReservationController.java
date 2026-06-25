@@ -3,6 +3,7 @@ package roomescape.reservation;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
+import roomescape.payment.application.PaymentCheckout;
+import roomescape.payment.application.PaymentService;
+import roomescape.payment.ui.dto.PaymentCheckoutResponse;
+import roomescape.payment.domain.exception.PaymentGatewayConfigurationException;
 import roomescape.reservationwait.dto.WaitingResult;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationUpdateRequest;
@@ -27,11 +32,17 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final ReservationWaitService reservationWaitService;
+    private final PaymentService paymentService;
+    private final String paymentClientKey;
 
     public ReservationController(ReservationService reservationService,
-                                 ReservationWaitService reservationWaitService) {
+                                 ReservationWaitService reservationWaitService,
+                                 PaymentService paymentService,
+                                 @Value("${payment.toss.client-key}") String paymentClientKey) {
         this.reservationService = reservationService;
         this.reservationWaitService = reservationWaitService;
+        this.paymentService = paymentService;
+        this.paymentClientKey = paymentClientKey;
     }
 
     @GetMapping
@@ -44,19 +55,26 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(
+    public ResponseEntity<PaymentCheckoutResponse> createReservation(
             @Valid @RequestBody ReservationCreateRequest reservationCreateRequest,
             @LoginMember Long memberId) {
-        Reservation savedReservation = reservationService.createReservation(
+        validatePaymentClientKey();
+        PaymentCheckout checkout = paymentService.prepareReservation(
                 memberId,
                 reservationCreateRequest.date(),
                 reservationCreateRequest.timeId(),
                 reservationCreateRequest.themeId(),
                 reservationCreateRequest.storeId()
         );
-        ReservationResponse reservationResponse = ReservationResponse.from(savedReservation);
-        return ResponseEntity.created(URI.create("/api/v1/reservations/" + reservationResponse.id()))
-                .body(reservationResponse);
+        PaymentCheckoutResponse response = PaymentCheckoutResponse.from(checkout, paymentClientKey);
+        return ResponseEntity.created(URI.create("/api/v1/reservations/" + response.reservationId()))
+                .body(response);
+    }
+
+    private void validatePaymentClientKey() {
+        if (paymentClientKey == null || paymentClientKey.isBlank()) {
+            throw new PaymentGatewayConfigurationException();
+        }
     }
 
     @PatchMapping("/{id}")
