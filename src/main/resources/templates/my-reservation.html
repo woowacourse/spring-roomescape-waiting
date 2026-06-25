@@ -184,28 +184,64 @@
     function renderDetailRow(reservation) {
         const payment = reservation.payment;
         return `
-            <tr class="edit-row">
+            <tr class="detail-row">
                 <td colspan="8">
-                    <div class="edit-panel">
-                        <div class="edit-current">
-                            상세 정보: ${reservation.date} ${formatTime(reservation.time?.startAt)} · ${escapeHtml(reservation.theme?.name || '')}
+                    <div class="booking-detail-panel">
+                        <div class="booking-detail-title">
+                            ${escapeHtml(reservation.theme?.name || '')}
+                            <span>${reservation.date} ${formatTime(reservation.time?.startAt)}</span>
                         </div>
-                        <div class="edit-grid">
-                            <div class="edit-field">
-                                <span>예약 정보</span>
-                                <div>${escapeHtml(reservation.name || '')}</div>
-                                <div>${escapeHtml(reservation.theme?.name || '')}</div>
-                                <div>${reservation.date} ${formatTime(reservation.time?.startAt)}</div>
+                        <div class="booking-detail-grid">
+                            <div class="booking-detail-section">
+                                <h3>예약 정보</h3>
+                                <dl>
+                                    <div>
+                                        <dt>예약자</dt>
+                                        <dd>${escapeHtml(reservation.name || '')}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>테마</dt>
+                                        <dd>${escapeHtml(reservation.theme?.name || '')}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>예약 일시</dt>
+                                        <dd>${reservation.date} ${formatTime(reservation.time?.startAt)}</dd>
+                                    </div>
+                                </dl>
                             </div>
-                            <div class="edit-field">
-                                <span>결제 정보</span>
+                            <div class="booking-detail-section">
+                                <h3>결제 정보</h3>
                                 ${payment ? `
-                                    <div>상태: ${getPaymentStatusLabel(payment.status)}</div>
-                                    <div>주문번호: ${escapeHtml(payment.orderId || '-')}</div>
-                                    <div>승인키: ${escapeHtml(payment.paymentKey || '-')}</div>
-                                    <div>금액: ${formatAmount(payment.amount)}</div>
-                                    ${payment.failureCode ? `<div>실패 코드: ${escapeHtml(payment.failureCode)}</div>` : ''}
-                                    ${payment.failureMessage ? `<div>사유: ${escapeHtml(payment.failureMessage)}</div>` : ''}
+                                    <dl>
+                                        <div>
+                                            <dt>상태</dt>
+                                            <dd>${getPaymentStatusLabel(payment.status)}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>주문번호</dt>
+                                            <dd class="code-value">${escapeHtml(payment.orderId || '-')}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>승인키</dt>
+                                            <dd class="code-value">${escapeHtml(payment.paymentKey || '-')}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>금액</dt>
+                                            <dd>${formatAmount(payment.amount)}</dd>
+                                        </div>
+                                        ${payment.failureCode ? `
+                                            <div>
+                                                <dt>실패 코드</dt>
+                                                <dd class="code-value">${escapeHtml(payment.failureCode)}</dd>
+                                            </div>
+                                        ` : ''}
+                                        ${payment.failureMessage ? `
+                                            <div>
+                                                <dt>사유</dt>
+                                                <dd>${escapeHtml(payment.failureMessage)}</dd>
+                                            </div>
+                                        ` : ''}
+                                    </dl>
                                 ` : '<div class="muted">결제 정보가 없습니다.</div>'}
                             </div>
                         </div>
@@ -480,7 +516,6 @@
         return `
             ${detailButton}
             <button type="button" class="btn-text" onclick="openEditForm(${reservation.id}, 'RESERVATION')">변경</button>
-            <span class="muted">결제 취소 기능 준비 중</span>
         `;
     }
 
