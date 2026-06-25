@@ -5,6 +5,8 @@ import roomescape.domain.payment.dto.PaymentConfirmRequest;
 import roomescape.domain.payment.dto.PaymentConfirmResponse;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.ratelimit.OutboundRateLimitException;
+import roomescape.ratelimit.PaymentRateLimitExceededException;
 
 @Service
 public class PaymentService {
@@ -35,6 +37,8 @@ public class PaymentService {
             throw exception;
         } catch (PaymentConnectionException exception) {
             paymentRepository.updateStatus(request.orderId(), PaymentStatus.FAILED);
+            throw exception;
+        } catch (OutboundRateLimitException | PaymentRateLimitExceededException exception) {
             throw exception;
         } catch (PaymentException exception) {
             if ("ALREADY_PROCESSED_PAYMENT".equals(exception.getCode())) {
