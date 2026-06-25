@@ -6,6 +6,11 @@
     <title>방탈출 예약</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/app.css">
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <script th:inline="javascript">
+        window.paymentClientKey = /*[[${clientKey}]]*/ "test_gck_xxx";
+    </script>
+    <script src="/js/payment-window.js"></script>
 </head>
 <body>
 
@@ -86,6 +91,7 @@
             <input type="text" id="user-name" placeholder="신청자 성함을 입력하세요">
             <button type="submit" class="btn-reserve" id="btn-reserve">예약하기</button>
         </form>
+        <div class="booking-summary" id="payment-pending-actions" style="display: none;"></div>
     </div>
 
 </main>
@@ -98,6 +104,8 @@
     let selectedTimeId = null;
     let selectedTimeLabel = null;
     let selectedSlotAvailable = true;
+    let activePayment = null;
+    let activePaymentName = null;
 
     const themeGrid = document.getElementById('theme-grid');
     const dateSelect = document.getElementById('date-select');
@@ -249,10 +257,15 @@
             </div>
             <div class="summary-row">
                 <span class="summary-label">신청 구분</span>
-                <span class="summary-value">${selectedSlotAvailable ? '예약' : '대기'}</span>
+                <span class="summary-value">${selectedSlotAvailable ? '예약 · 결제 필요' : '대기'}</span>
             </div>
+            ${selectedSlotAvailable ? `
+            <div class="summary-row">
+                <span class="summary-label">결제 금액</span>
+                <span class="summary-value accent">20,000원</span>
+            </div>` : ''}
         `;
-        document.getElementById('btn-reserve').textContent = selectedSlotAvailable ? '예약하기' : '대기 신청하기';
+        document.getElementById('btn-reserve').textContent = selectedSlotAvailable ? '결제하기' : '대기 신청하기';
         bookingSection.style.display = 'block';
         bookingSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         setTimeout(() => document.getElementById('user-name').focus(), 300);
@@ -272,7 +285,7 @@
 
         const btn = document.getElementById('btn-reserve');
         btn.disabled = true;
-        btn.textContent = selectedSlotAvailable ? '예약 중...' : '대기 신청 중...';
+        btn.textContent = selectedSlotAvailable ? '결제 정보 생성 중...' : '대기 신청 중...';
 
         const body = {
             themeId: parseInt(selectedThemeId),
@@ -289,20 +302,27 @@
             body: JSON.stringify(body)
         })
             .then(res => {
-                if (res.ok) {
-                    showToast(selectedSlotAvailable ? '예약이 완료되었습니다' : '대기 신청이 완료되었습니다', 'success');
-                    setTimeout(() => window.location.href = `/reservation/me?name=${encodeURIComponent(name)}`, 1500);
+                if (!res.ok) {
+                    return res.json()
+                        .then(error => {
+                            throw new Error(error.detail || '신청 중 오류가 발생했습니다');
+                        });
+                }
+                return res.json();
+            })
+            .then(result => {
+                if (selectedSlotAvailable) {
+                    showPendingPaymentActions(result, name);
+                    openPaymentWindow(result, name).catch(error => showPaymentError(error.message));
                     return;
                 }
-                return res.json()
-                    .then(error => {
-                        throw new Error(error.detail || '신청 중 오류가 발생했습니다');
-                    });
+                showToast('대기 신청이 완료되었습니다', 'success');
+                setTimeout(() => window.location.href = `/reservation/me?name=${encodeURIComponent(name)}`, 1500);
             })
             .catch(error => {
                 showToast(error.message || '신청 중 오류가 발생했습니다', 'error');
                 btn.disabled = false;
-                btn.textContent = selectedSlotAvailable ? '예약하기' : '대기 신청하기';
+                btn.textContent = selectedSlotAvailable ? '결제하기' : '대기 신청하기';
             });
     }
 
@@ -333,6 +353,31 @@
         toast.textContent = msg;
         toast.className = `toast ${type} show`;
         setTimeout(() => toast.className = 'toast', 2800);
+    }
+
+    function showPendingPaymentActions(payment, name) {
+        activePayment = payment;
+        activePaymentName = name;
+        const actions = document.getElementById('payment-pending-actions');
+        actions.style.display = 'block';
+        actions.innerHTML = `
+            <div class="summary-row">
+                <span class="summary-label">결제 상태</span>
+                <span class="summary-value accent">결제 대기</span>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn-text" onclick="reopenPaymentWindow()">결제 다시 열기</button>
+                <a class="btn-text" href="/reservation/me?name=${encodeURIComponent(name)}">내 예약 보기</a>
+            </div>
+        `;
+    }
+
+    function reopenPaymentWindow() {
+        openPaymentWindow(activePayment, activePaymentName).catch(error => showPaymentError(error.message));
+    }
+
+    function showPaymentError(message) {
+        showToast(message || '결제창을 열지 못했습니다', 'error');
     }
 
     function handleResponse(response) {

@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reserver;
 import roomescape.domain.Theme;
@@ -38,7 +39,8 @@ public class ReservationRepository {
         return new Reservation(
                 resultSet.getLong("reservation_id"),
                 new Reserver(resultSet.getString("username")),
-                slot
+                slot,
+                ReservationStatus.valueOf(resultSet.getString("reservation_status"))
         );
     };
 
@@ -52,6 +54,7 @@ public class ReservationRepository {
                     r.id as reservation_id,
                     r.name as username,
                     r.date,
+                    r.status as reservation_status,
                     rt.id as time_id,
                     rt.start_at as time_value,
                     t.id as theme_id,
@@ -73,6 +76,7 @@ public class ReservationRepository {
                     r.id as reservation_id,
                     r.name as username,
                     r.date,
+                    r.status as reservation_status,
                     rt.id as time_id,
                     rt.start_at as time_value,
                     t.id as theme_id,
@@ -101,6 +105,7 @@ public class ReservationRepository {
                     r.id as reservation_id,
                     r.name as username,
                     r.date,
+                    r.status as reservation_status,
                     rt.id as time_id,
                     rt.start_at as time_value,
                     t.id as theme_id,
@@ -121,6 +126,7 @@ public class ReservationRepository {
                     r.id as reservation_id,
                     r.name as username,
                     r.date,
+                    r.status as reservation_status,
                     rt.id as time_id,
                     rt.start_at as time_value,
                     t.id as theme_id,
@@ -140,7 +146,7 @@ public class ReservationRepository {
 
     public Reservation insert(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
-        String sql = "INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?);";
+        String sql = "INSERT INTO reservation(name, date, time_id, theme_id, status) VALUES (?, ?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement pstmt = connection.prepareStatement(
@@ -151,6 +157,7 @@ public class ReservationRepository {
             pstmt.setObject(2, slot.getDate());
             pstmt.setLong(3, slot.getTime().getId());
             pstmt.setLong(4, slot.getTheme().getId());
+            pstmt.setString(5, reservation.getStatus().name());
             return pstmt;
         }, keyHolder);
         Long id = keyHolder.getKey().longValue();
@@ -172,6 +179,11 @@ public class ReservationRepository {
                 slot.getTime().getId(),
                 slot.getTheme().getId(),
                 reservation.getId());
+    }
+
+    public int updateStatus(Long id, ReservationStatus status) {
+        String sql = "UPDATE reservation SET status = ? WHERE id = ?;";
+        return jdbcTemplate.update(sql, status.name(), id);
     }
 
     public boolean existsBySlot(ReservationSlot slot) {

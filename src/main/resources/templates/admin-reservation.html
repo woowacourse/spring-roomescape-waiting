@@ -122,7 +122,7 @@
     function loadReservations() {
         const startDate = document.getElementById('start-date-input').value;
         const endDate = document.getElementById('end-date-input').value;
-        return fetch(`/admin/reservation-statuses?startDate=${startDate}&endDate=${endDate}`)
+        return fetch(`/admin/bookings?startDate=${startDate}&endDate=${endDate}`)
             .then(handleResponse)
             .then(data => {
                 reservations = data;
@@ -164,7 +164,7 @@
                     reservation.date,
                     reservation.time?.startAt,
                     reservation.theme?.name,
-                    getStatusLabel(reservation.status),
+                    getStatusLabel(reservation),
                     reservation.turn
                 ].join(' ').toLowerCase();
                 return haystack.includes(query);
@@ -183,7 +183,7 @@
                 <td>${reservation.date}</td>
                 <td class="accent">${formatTime(reservation.time?.startAt)}</td>
                 <td>${escapeHtml(reservation.theme?.name || '')}</td>
-                <td>${renderStatusBadge(reservation.status)}</td>
+                <td>${renderStatusBadge(reservation)}</td>
                 <td>${reservation.turn ?? '-'}</td>
                 <td class="right">${renderActions(reservation)}</td>
             </tr>
@@ -204,7 +204,7 @@
     }
 
     function matchesStatusFilter(reservation) {
-        if (reservation.status === 'WAITING') {
+        if (reservation.bookingType === 'WAITING') {
             return document.getElementById('show-waiting-checkbox').checked;
         }
         return document.getElementById('show-reserved-checkbox').checked;
@@ -237,7 +237,7 @@
         if (themeResult !== 0) {
             return themeResult;
         }
-        const statusResult = getStatusOrder(a.status) - getStatusOrder(b.status);
+        const statusResult = getStatusOrder(a) - getStatusOrder(b);
         if (statusResult !== 0) {
             return statusResult;
         }
@@ -255,7 +255,7 @@
             date: reservation.date,
             time: reservation.time?.startAt,
             theme: reservation.theme?.name,
-            status: getStatusOrder(reservation.status),
+            status: getStatusOrder(reservation),
             turn: getTurnOrder(reservation.turn)
         };
         return values[key] ?? '';
@@ -375,25 +375,34 @@
     }
 
     function renderActions(reservation) {
-        if (reservation.status === 'WAITING') {
+        if (reservation.bookingType === 'WAITING') {
             return `<button class="btn-danger table-action-button" onclick="deleteWaiting(${reservation.id})">삭제</button>`;
         }
         return `<button class="btn-danger table-action-button" onclick="deleteReservation(${reservation.id})">삭제</button>`;
     }
 
-    function renderStatusBadge(status) {
-        if (status === 'WAITING') {
+    function renderStatusBadge(reservation) {
+        if (reservation.bookingType === 'WAITING') {
             return '<span class="status-badge waiting">대기</span>';
         }
-        return '<span class="status-badge reserved">예약</span>';
+        if (reservation.reservationStatus === 'PENDING') {
+            return '<span class="status-badge waiting">결제 대기</span>';
+        }
+        return '<span class="status-badge reserved">예약 확정</span>';
     }
 
-    function getStatusLabel(status) {
-        return status === 'WAITING' ? '대기' : '예약';
+    function getStatusLabel(reservation) {
+        if (reservation.bookingType === 'WAITING') {
+            return '대기';
+        }
+        return reservation.reservationStatus === 'PENDING' ? '결제 대기' : '예약 확정';
     }
 
-    function getStatusOrder(status) {
-        return status === 'WAITING' ? 1 : 0;
+    function getStatusOrder(reservation) {
+        if (reservation.bookingType === 'WAITING') {
+            return 2;
+        }
+        return reservation.reservationStatus === 'PENDING' ? 1 : 0;
     }
 
     function getTurnOrder(turn) {

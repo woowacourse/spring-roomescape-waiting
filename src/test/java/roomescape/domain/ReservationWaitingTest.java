@@ -84,6 +84,7 @@ class ReservationWaitingTest {
         assertThat(result.getId()).isNull();
         assertThat(result.getName()).isEqualTo(waiting.getName());
         assertThat(result.getSlot()).isEqualTo(slot);
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.PENDING);
     }
 
     private ReservationWaiting waiting(String name, LocalDate date, ReservationTime time) {

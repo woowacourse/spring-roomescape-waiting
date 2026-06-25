@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>결제 완료 | ESCAPE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css?v=payment-result-20260625-2">
+</head>
+<body class="payment-result-page payment-result-success">
+<header>
+    <a href="/" class="escape-logo">ESC<span>A</span>PE</a>
+    <a href="/reservation" class="header-link">새 예약</a>
+</header>
+
+<main class="payment-result-main">
+    <section class="payment-result-card" aria-labelledby="payment-result-title">
+        <p class="payment-result-eyebrow">PAYMENT COMPLETE</p>
+        <div class="payment-result-symbol" aria-hidden="true">✓</div>
+        <h1 id="payment-result-title">결제를 완료했어요</h1>
+        <p class="payment-result-description">예약이 확정되었습니다. 즐거운 방탈출 되세요.</p>
+
+        <h2 class="payment-result-detail-title">예약 정보</h2>
+        <dl class="payment-result-details">
+            <div>
+                <dt>예약자</dt>
+                <dd th:text="${reservation.reserverName}">브라운</dd>
+            </div>
+            <div>
+                <dt>테마</dt>
+                <dd th:text="${reservation.themeName}">미스터리 룸</dd>
+            </div>
+            <div>
+                <dt>예약 일시</dt>
+                <dd><span th:text="${reservation.date}">2026. 06. 30.</span> <span th:text="${reservation.time}">14:00</span></dd>
+            </div>
+        </dl>
+
+        <h2 class="payment-result-detail-title">결제 정보</h2>
+        <dl class="payment-result-details">
+            <div>
+                <dt>주문번호</dt>
+                <dd th:text="${result.orderId}">payment-xxxx</dd>
+            </div>
+            <div>
+                <dt>승인 금액</dt>
+                <dd><span th:text="${#numbers.formatInteger(result.approvedAmount, 0, 'COMMA')}">20,000</span>원</dd>
+            </div>
+        </dl>
+
+        <div class="payment-result-actions">
+            <a class="payment-result-primary" th:if="${name != null}" th:href="@{/reservation/me(name=${name})}">내 예약 보기</a>
+            <a class="payment-result-primary" th:unless="${name != null}" href="/reservation/me">내 예약 보기</a>
+            <a class="payment-result-secondary" href="/reservation">새 예약하기</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

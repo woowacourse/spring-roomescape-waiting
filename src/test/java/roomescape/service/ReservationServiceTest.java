@@ -182,7 +182,7 @@ class ReservationServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        Reservation reservation = reservation(id, name, date);
+        Reservation reservation = pendingReservation(id, name, date);
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
@@ -206,7 +206,7 @@ class ReservationServiceTest {
         Long id = 1L;
         Long waitingId = 2L;
         String name = "브라운";
-        Reservation reservation = reservation(id, name, date);
+        Reservation reservation = pendingReservation(id, name, date);
         ReservationWaiting waiting = waiting(waitingId, "구구", reservation.getSlot());
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
@@ -231,7 +231,25 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(promotedReservation.getId()).isNull(),
                 () -> assertThat(promotedReservation.getName()).isEqualTo(waiting.getName()),
-                () -> assertThat(promotedReservation.getSlot()).isEqualTo(waiting.getSlot()));
+                () -> assertThat(promotedReservation.getSlot()).isEqualTo(waiting.getSlot()),
+                () -> assertThat(promotedReservation.getStatus()).isEqualTo(ReservationStatus.PENDING));
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
+    void 결제_확정_예약은_사용자가_삭제할_수_없다() {
+        Long id = 1L;
+        Reservation reservation = reservation(id, "브라운", date);
+        when(reservationRepository.findByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> service.deleteByUser(id, "브라운", now))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_CANCELLATION_REQUIRED)
+                .hasMessage("결제가 완료된 예약은 결제 취소 후 삭제할 수 있습니다.");
+
+        verify(reservationRepository).findByIdForUpdate(id);
+        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
+        verify(reservationRepository, never()).delete(any());
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
@@ -453,7 +471,8 @@ class ReservationServiceTest {
                 () -> assertThat(updatedReservation.getSlot().getTime()).isEqualTo(updateTime),
                 () -> assertThat(promotedReservation.getId()).isNull(),
                 () -> assertThat(promotedReservation.getName()).isEqualTo(waiting.getName()),
-                () -> assertThat(promotedReservation.getSlot()).isEqualTo(waiting.getSlot()));
+                () -> assertThat(promotedReservation.getSlot()).isEqualTo(waiting.getSlot()),
+                () -> assertThat(promotedReservation.getStatus()).isEqualTo(ReservationStatus.PENDING));
         verify(reservationTimeRepository, times(1)).findById(timeId);
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
@@ -488,6 +507,24 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).update(any(Reservation.class));
         verify(reservationRepository, never()).insert(any(Reservation.class));
         verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
+    void 결제_대기_예약은_사용자가_변경할_수_없다() {
+        Long id = 1L;
+        Reservation reservation = pendingReservation(id, "브라운", date);
+        when(reservationRepository.findByIdForUpdate(id)).thenReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> service.updateByUser(id, "브라운", date.plusDays(1), 2L, now))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PENDING_RESERVATION_LOCKED)
+                .hasMessage("결제 대기 중인 예약은 변경할 수 없습니다.");
+
+        verify(reservationRepository).findByIdForUpdate(id);
+        verify(reservationTimeRepository, never()).findById(any());
+        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
+        verify(reservationRepository, never()).update(any());
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
@@ -548,6 +585,11 @@ class ReservationServiceTest {
                 id,
                 new Reserver(name),
                 new ReservationSlot(date, time, theme));
+    }
+
+    private Reservation pendingReservation(Long id, String name, LocalDate date) {
+        return new Reservation(id, new Reserver(name), new ReservationSlot(date, time(1L), theme(1L)),
+                ReservationStatus.PENDING);
     }
 
     private ReservationWaiting waiting(Long id, String name, ReservationSlot slot) {

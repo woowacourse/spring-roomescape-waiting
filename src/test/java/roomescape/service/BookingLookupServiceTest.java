@@ -1,27 +1,33 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.Test;
-import roomescape.domain.*;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
-import roomescape.service.dto.ReservationStatus;
-import roomescape.service.dto.Status;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class ReservationLookupServiceTest {
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Reserver;
+import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithTurn;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
+import roomescape.service.dto.BookingStatus;
+import roomescape.service.dto.BookingType;
+
+class BookingLookupServiceTest {
 
     private final ReservationService reservationService = mock();
     private final ReservationWaitingService reservationWaitingService = mock();
-    private final ReservationLookupService service = new ReservationLookupService(
+    private final BookingLookupService service = new BookingLookupService(
             reservationService,
             reservationWaitingService);
 
@@ -31,35 +37,29 @@ class ReservationLookupServiceTest {
 
     @Test
     void 이름으로_예약과_예약_대기를_함께_조회한다() {
-        // given
         String name = "브라운";
         Reservation reservation = new Reservation(1L, new Reserver(name), new ReservationSlot(date, time, theme));
         WaitingWithTurn waiting = new WaitingWithTurn(
                 new ReservationWaiting(2L, new Reserver(name), new ReservationSlot(date.plusDays(1), time, theme)),
                 1L);
 
-        when(reservationService.findByName(name))
-                .thenReturn(List.of(reservation));
-        when(reservationWaitingService.findByName(name))
-                .thenReturn(List.of(waiting));
+        when(reservationService.findByName(name)).thenReturn(List.of(reservation));
+        when(reservationWaitingService.findByName(name)).thenReturn(List.of(waiting));
 
-        // when
-        List<ReservationStatus> result = service.findByName(name);
+        List<BookingStatus> result = service.findByName(name);
 
-        // then
         assertAll(
                 () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(ReservationStatus::id)
-                        .containsExactly(2L, 1L),
-                () -> assertThat(result).extracting(ReservationStatus::status)
-                        .containsExactly(Status.WAITING, Status.RESERVED),
-                () -> assertThat(result).extracting(ReservationStatus::turn)
-                        .containsExactly(1L, null));
+                () -> assertThat(result).extracting(BookingStatus::id).containsExactly(2L, 1L),
+                () -> assertThat(result).extracting(BookingStatus::bookingType)
+                        .containsExactly(BookingType.WAITING, BookingType.RESERVATION),
+                () -> assertThat(result).extracting(BookingStatus::reservationStatus)
+                        .containsExactly(null, ReservationStatus.CONFIRMED),
+                () -> assertThat(result).extracting(BookingStatus::turn).containsExactly(1L, null));
     }
 
     @Test
     void 예약과_예약_대기를_날짜와_시간_내림차순으로_조회한다() {
-        // given
         String name = "브라운";
         ReservationTime earlyTime = new ReservationTime(1L, LocalTime.parse("10:00"));
         ReservationTime lateTime = new ReservationTime(2L, LocalTime.parse("12:00"));
@@ -70,22 +70,16 @@ class ReservationLookupServiceTest {
                 new ReservationWaiting(3L, new Reserver(name), new ReservationSlot(date.plusDays(1), earlyTime, theme)),
                 1L);
 
-        when(reservationService.findByName(name))
-                .thenReturn(List.of(earlyReservation, lateReservation));
-        when(reservationWaitingService.findByName(name))
-                .thenReturn(List.of(futureWaiting));
+        when(reservationService.findByName(name)).thenReturn(List.of(earlyReservation, lateReservation));
+        when(reservationWaitingService.findByName(name)).thenReturn(List.of(futureWaiting));
 
-        // when
-        List<ReservationStatus> result = service.findByName(name);
+        List<BookingStatus> result = service.findByName(name);
 
-        // then
-        assertThat(result).extracting(ReservationStatus::id)
-                .containsExactly(3L, 2L, 1L);
+        assertThat(result).extracting(BookingStatus::id).containsExactly(3L, 2L, 1L);
     }
 
     @Test
-    void 기간으로_예약과_예약_대기를_조회할_때_날짜_시간_테마_상태_순번순으로_정렬한다() {
-        // given
+    void 기간으로_예약과_예약_대기를_날짜_시간_테마_유형_순번순으로_정렬한다() {
         LocalDate startDate = date.minusDays(1);
         LocalDate endDate = date.plusDays(1);
         ReservationTime sameTime = new ReservationTime(1L, LocalTime.parse("10:00"));
@@ -109,26 +103,25 @@ class ReservationLookupServiceTest {
         when(reservationWaitingService.findByDateRange(startDate, endDate))
                 .thenReturn(List.of(theme3Waiting, theme1Waiting));
 
-        // when
-        List<ReservationStatus> result = service.findByDateRange(startDate, endDate);
+        List<BookingStatus> result = service.findByDateRange(startDate, endDate);
 
-        // then
         assertAll(
-                () -> assertThat(result).extracting(ReservationStatus::id)
-                        .containsExactly(4L, 1L, 2L, 3L, 5L),
-                () -> assertThat(result).extracting(ReservationStatus::status)
-                        .containsExactly(Status.RESERVED, Status.RESERVED, Status.WAITING, Status.WAITING, Status.RESERVED),
+                () -> assertThat(result).extracting(BookingStatus::id).containsExactly(4L, 1L, 2L, 3L, 5L),
+                () -> assertThat(result).extracting(BookingStatus::bookingType)
+                        .containsExactly(BookingType.RESERVATION, BookingType.RESERVATION, BookingType.WAITING,
+                                BookingType.WAITING, BookingType.RESERVATION),
+                () -> assertThat(result).extracting(BookingStatus::reservationStatus)
+                        .containsExactly(ReservationStatus.CONFIRMED, ReservationStatus.CONFIRMED, null, null,
+                                ReservationStatus.CONFIRMED),
                 () -> assertThat(result).extracting(status -> status.theme().getName())
                         .containsExactly("테마1", "테마1", "테마1", "테마3", "테마1"));
     }
 
     @Test
     void 시작일이_종료일보다_늦으면_예외가_발생한다() {
-        // given
         LocalDate startDate = date.plusDays(1);
         LocalDate endDate = date;
 
-        // when & then
         assertThatThrownBy(() -> service.findByDateRange(startDate, endDate))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT)

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reserver;
@@ -56,10 +57,42 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    public Reservation findById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
+    }
+
+    @Transactional
+    public Reservation findPendingByUser(Long id, String name, LocalDateTime now) {
+        Reservation reservation = findReservation(id);
+        reservationValidator.validatePaymentRetryByUser(reservation, name, now);
+        return reservation;
+    }
+
+    @Transactional
+    public void confirmPayment(Long id) {
+        Reservation reservation = findReservation(id);
+        if (!reservation.isPending()) {
+            throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRMATION_NOT_ALLOWED,
+                    "결제 대기 중인 예약만 확정할 수 있습니다.");
+        }
+        reservationRepository.updateStatus(id, ReservationStatus.CONFIRMED);
+    }
+
     @Transactional
     public Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
+        return createByUser(name, date, timeId, themeId, now, ReservationStatus.CONFIRMED);
+    }
+
+    @Transactional
+    public Reservation createPendingByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
+        return createByUser(name, date, timeId, themeId, now, ReservationStatus.PENDING);
+    }
+
+    private Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now,
+                                     ReservationStatus status) {
         ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));
-        Reservation reservation = new Reservation(null, new Reserver(name), slot);
+        Reservation reservation = new Reservation(null, new Reserver(name), slot, status);
         reservationValidator.validateCreatableByUser(reservation, now);
 
         return insertReservation(reservation);
@@ -77,7 +110,7 @@ public class ReservationService {
     @Transactional
     public void deleteByUser(Long id, String name, LocalDateTime now) {
         Reservation reservation = findReservation(id);
-        reservationValidator.validateModifiableByUser(reservation, name, now);
+        reservationValidator.validateDeletableByUser(reservation, name, now);
         deleteAndPromoteWaiting(reservation);
     }
 
@@ -100,7 +133,7 @@ public class ReservationService {
     @Transactional
     public Reservation updateByUser(Long id, String name, LocalDate updateDate, Long updateTimeId, LocalDateTime now) {
         Reservation reservation = findReservation(id);
-        reservationValidator.validateModifiableByUser(reservation, name, now);
+        reservationValidator.validateUpdatableByUser(reservation, name, now);
 
         Reservation updatedReservation = createUpdatedReservation(reservation, updateDate, updateTimeId);
         reservationValidator.validateUpdatedReservation(reservation, updatedReservation, now);
@@ -143,7 +176,8 @@ public class ReservationService {
                         resolveUpdateDate(originalSlot.getDate(), updateDate),
                         resolveUpdateTime(originalSlot.getTime(), updateTimeId),
                         originalSlot.getTheme()
-                ));
+                ),
+                reservation.getStatus());
     }
 
     private LocalDate resolveUpdateDate(LocalDate originalDate, LocalDate updateDate) {

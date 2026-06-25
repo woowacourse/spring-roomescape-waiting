@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -25,6 +26,7 @@ public class MissionStepTest {
     @BeforeEach
     void setup() {
         jdbcTemplate.update("DELETE FROM reservation_waiting;");
+        jdbcTemplate.update("DELETE FROM payment;");
         jdbcTemplate.update("DELETE FROM reservation;");
         jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1;");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
@@ -118,7 +120,8 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("id", is(1));
+                .body("reservationId", is(1))
+                .body("paymentId", is(1));
 
         Map<String, String> firstWaitingParams = waitingRequest(reservationParams, "구구");
         Map<String, String> secondWaitingParams = waitingRequest(reservationParams, "포비");
@@ -141,28 +144,29 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")
-                .when().delete("/reservations/1")
+                .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .queryParam("name", "구구")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("RESERVED"))
+                .body("[0].bookingType", is("RESERVATION"))
+                .body("[0].reservationStatus", is("PENDING"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", nullValue());
 
         RestAssured.given().log().all()
                 .queryParam("name", "포비")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("WAITING"))
+                .body("[0].bookingType", is("WAITING"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", is(1));
@@ -175,7 +179,7 @@ public class MissionStepTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationParams)
-                .when().post("/reservations")
+                .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201)
                 .body("id", is(1));
@@ -212,33 +216,33 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("RESERVED"))
+                .body("[0].bookingType", is("RESERVATION"))
                 .body("[0].date", is(updateParams.get("date")))
                 .body("[0].time.id", is(2))
                 .body("[0].turn", nullValue());
 
         RestAssured.given().log().all()
                 .queryParam("name", "구구")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("RESERVED"))
+                .body("[0].bookingType", is("RESERVATION"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", nullValue());
 
         RestAssured.given().log().all()
                 .queryParam("name", "포비")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("WAITING"))
+                .body("[0].bookingType", is("WAITING"))
                 .body("[0].date", is(reservationParams.get("date")))
                 .body("[0].time.id", is(1))
                 .body("[0].turn", is(1));
@@ -328,14 +332,41 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")
-                .when().get("/reservation-statuses")
+                .when().get("/bookings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
                 .body("name", everyItem(is("브라운")))
-                .body("status", containsInAnyOrder("RESERVED", "WAITING"))
-                .body("find { it.status == 'RESERVED' }.turn", nullValue())
-                .body("find { it.status == 'WAITING' }.turn", is(1));
+                .body("bookingType", containsInAnyOrder("RESERVATION", "WAITING"))
+                .body("find { it.bookingType == 'RESERVATION' }.turn", nullValue())
+                .body("find { it.bookingType == 'WAITING' }.turn", is(1));
+    }
+
+    @Test
+    void 실패한_결제_대기_예약은_새_결제를_생성해_재시도할_수_있다() {
+        Map<String, String> reservationParams = reservationRequest("브라운", LocalDate.now().plusDays(1), "1", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("reservationId", is(1))
+                .body("paymentId", is(1));
+
+        jdbcTemplate.update("UPDATE payment SET status = 'FAILED' WHERE id = 1;");
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().post("/reservations/1/payments")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservationId", is(1))
+                .body("paymentId", is(2));
+
+        assertThat(jdbcTemplate.queryForObject("SELECT count(*) FROM payment WHERE reservation_id = 1", Integer.class))
+                .isEqualTo(2);
     }
 
     private Map<String, String> reservationRequest(String name, LocalDate date, String timeId, String themeId) {

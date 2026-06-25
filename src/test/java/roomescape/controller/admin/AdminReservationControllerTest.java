@@ -47,7 +47,8 @@ class AdminReservationControllerTest {
                 .andExpect(jsonPath("$[0].date").value("2099-01-01"))
                 .andExpect(jsonPath("$[0].time.id").value(1))
                 .andExpect(jsonPath("$[0].theme.id").value(1))
-                .andExpect(jsonPath("$[0].theme.name").value("테마"));
+                .andExpect(jsonPath("$[0].theme.name").value("테마"))
+                .andExpect(jsonPath("$[0].status").value("CONFIRMED"));
 
         verify(reservationService, times(1)).findAll();
         verifyNoMoreInteractions(reservationService);
@@ -68,7 +69,8 @@ class AdminReservationControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/admin/reservations/1"))
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("브라운"));
+                .andExpect(jsonPath("$.name").value("브라운"))
+                .andExpect(jsonPath("$.status").value("CONFIRMED"));
 
         verify(reservationService, times(1)).createByAdmin(
                 "브라운",

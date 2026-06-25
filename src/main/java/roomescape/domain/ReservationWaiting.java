@@ -30,7 +30,7 @@ public class ReservationWaiting {
     }
 
     public Reservation promoteToReservation() {
-        return new Reservation(null, reserver, slot);
+        return new Reservation(null, reserver, slot, ReservationStatus.PENDING);
     }
 
     public ReservationSlot getSlot() {
