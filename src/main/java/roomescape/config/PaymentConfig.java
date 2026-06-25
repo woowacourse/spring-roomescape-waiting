@@ -14,6 +14,7 @@ import roomescape.payment.adapter.TossPaymentGateway;
 import roomescape.payment.port.PaymentGateway;
 import roomescape.ratelimit.OutboundRateLimitInterceptor;
 import roomescape.ratelimit.OutboundRateLimitProperties;
+import roomescape.ratelimit.RetryAfterInterceptor;
 import roomescape.ratelimit.TokenBucketRateLimiter;
 
 @Configuration
@@ -39,6 +40,7 @@ public class PaymentConfig {
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoded)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .requestFactory(factory)
+                .requestInterceptor(new RetryAfterInterceptor(properties.maxRetryAttempts()))
                 .requestInterceptor(new OutboundRateLimitInterceptor(outboundRateLimiter))
                 .build();
     }
