@@ -68,6 +68,14 @@ public class Payment {
                 failureCode, failureMessage);
     }
 
+    public Payment checkRequired(String failureCode, String failureMessage) {
+        if (status != PaymentStatus.READY) {
+            throw new IllegalStateException("결제 대기 상태에서만 확인 필요 처리할 수 있습니다.");
+        }
+        return new Payment(id, reservationId, orderId, amount, paymentKey, PaymentStatus.CHECK_REQUIRED,
+                failureCode, failureMessage);
+    }
+
     public Long getId() {
         return id;
     }
@@ -141,9 +149,10 @@ public class Payment {
         if (status == PaymentStatus.CONFIRMED && (paymentKey == null || paymentKey.isBlank())) {
             throw new IllegalArgumentException("승인된 결제는 paymentKey가 필요합니다.");
         }
-        if ((status == PaymentStatus.FAILED || status == PaymentStatus.CANCELED)
+        if ((status == PaymentStatus.FAILED || status == PaymentStatus.CANCELED
+                || status == PaymentStatus.CHECK_REQUIRED)
                 && (failureCode == null || failureCode.isBlank())) {
-            throw new IllegalArgumentException("실패 또는 취소된 결제는 실패 코드가 필요합니다.");
+            throw new IllegalArgumentException("실패, 취소 또는 확인 필요 결제는 실패 코드가 필요합니다.");
         }
     }
 }

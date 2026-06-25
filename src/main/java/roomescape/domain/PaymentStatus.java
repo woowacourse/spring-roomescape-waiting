@@ -4,6 +4,7 @@ public enum PaymentStatus {
     READY,
     FAILED,
     CANCELED,
+    CHECK_REQUIRED,
     CONFIRMED;
 
     public static PaymentStatus fromTossStatus(String tossStatus) {

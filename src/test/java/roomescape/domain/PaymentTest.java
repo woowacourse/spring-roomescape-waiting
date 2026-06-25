@@ -37,6 +37,17 @@ class PaymentTest {
         assertThatThrownBy(() -> Payment.restore(1L, 1L, "payment_failed_123456789012345678", 20_000L,
                 null, PaymentStatus.FAILED, null, "카드 거절"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("실패 또는 취소된 결제는 실패 코드가 필요합니다.");
+                .hasMessage("실패, 취소 또는 확인 필요 결제는 실패 코드가 필요합니다.");
+    }
+
+    @Test
+    void 결제_승인_결과_확인이_필요한_상태로_변경한다() {
+        Payment payment = Payment.ready(1L, 20_000L);
+
+        Payment checkRequiredPayment = payment.checkRequired(
+                "PAYMENT_CONFIRMATION_UNKNOWN", "결제 승인 결과를 확인할 수 없습니다.");
+
+        assertThat(checkRequiredPayment.getStatus()).isEqualTo(PaymentStatus.CHECK_REQUIRED);
+        assertThat(checkRequiredPayment.getFailureCode()).isEqualTo("PAYMENT_CONFIRMATION_UNKNOWN");
     }
 }

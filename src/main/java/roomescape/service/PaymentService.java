@@ -78,6 +78,9 @@ public class PaymentService {
             if (e.isDefinitiveFailure()) {
                 paymentRepository.update(payment.fail(e.getCode(), e.getMessage()));
             }
+            if (e.requiresConfirmationCheck()) {
+                paymentRepository.update(payment.checkRequired(e.getCode(), e.getMessage()));
+            }
             throw e;
         }
         if (result.status() != PaymentStatus.CONFIRMED) {
