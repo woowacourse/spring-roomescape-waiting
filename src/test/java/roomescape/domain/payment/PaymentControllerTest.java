@@ -25,7 +25,7 @@ class PaymentControllerTest {
     private int port;
 
     @MockitoBean
-    private PaymentClient paymentClient;
+    private PaymentService paymentService;
 
     @BeforeEach
     void setUp() {
@@ -34,7 +34,7 @@ class PaymentControllerTest {
 
     @Test
     void 결제_승인_요청_성공_테스트() {
-        given(paymentClient.confirm(any(PaymentConfirmRequest.class)))
+        given(paymentService.confirm(any(PaymentConfirmRequest.class)))
             .willReturn(new PaymentConfirmResponse("paymentKey", "orderId", 1000L, "DONE"));
 
         Map<String, Object> params = new HashMap<>();
@@ -72,7 +72,7 @@ class PaymentControllerTest {
 
     @Test
     void 토스_승인_에러의_code와_message를_반환한다() {
-        given(paymentClient.confirm(any(PaymentConfirmRequest.class)))
+        given(paymentService.confirm(any(PaymentConfirmRequest.class)))
             .willThrow(new PaymentException(
                 HttpStatus.BAD_REQUEST,
                 "ALREADY_PROCESSED_PAYMENT",

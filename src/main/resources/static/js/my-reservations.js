@@ -70,9 +70,16 @@ function buildRow(r) {
   row.appendChild(cell(r.themeName || '-'));
   row.appendChild(cell(r.date));
   row.appendChild(cell(formatTime(r.time)));
+  row.appendChild(paymentStatusCell(r.paymentStatus));
+  row.appendChild(cell(r.orderId || '-'));
+  row.appendChild(cell(r.paymentKey || '-'));
+  row.appendChild(cell(formatAmount(r.amount)));
 
   const actions = document.createElement('td');
   actions.className = 'actions-cell';
+  if (r.paymentStatus === 'REQUIRES_CONFIRMATION') {
+    actions.appendChild(button('결제 재확인', 'btn btn-success btn-sm', () => retryPayment(r)));
+  }
   actions.appendChild(button('수정', 'btn btn-primary btn-sm', () => startEdit(row, r)));
   actions.appendChild(button('삭제', 'btn btn-danger btn-sm', () => deleteReservation(r.id, row)));
   row.appendChild(actions);
@@ -119,7 +126,7 @@ function startEdit(row, r) {
   });
   cells[3].appendChild(timeSelect);
 
-  const actions = cells[4];
+  const actions = cells[8];
   actions.innerHTML = '';
   actions.className = 'actions-cell';
   actions.appendChild(button('저장', 'btn btn-success btn-sm', () => {
@@ -158,6 +165,23 @@ function deleteReservation(id, row) {
     .catch(showError);
 }
 
+function retryPayment(reservation) {
+  apiFetch('/payments/confirm', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      paymentKey: reservation.paymentKey,
+      orderId: reservation.orderId,
+      amount: reservation.amount
+    })
+  })
+    .then(() => {
+      alert('결제 결과가 확인되었습니다.');
+      searchReservations();
+    })
+    .catch(showError);
+}
+
 function deleteWaiting(id, row) {
   if (!confirm('이 예약 대기를 삭제하시겠습니까?')) return;
   apiFetch(`/reservations/waiting/${id}`, { method: 'DELETE' })
@@ -175,6 +199,26 @@ function cell(text) {
   const td = document.createElement('td');
   td.textContent = text;
   return td;
+}
+
+function paymentStatusCell(status) {
+  const labels = {
+    PENDING: '결제 대기',
+    CONFIRMED: '확정',
+    FAILED: '실패',
+    REQUIRES_CONFIRMATION: '확인 필요'
+  };
+  const td = document.createElement('td');
+  const badge = document.createElement('span');
+  badge.className = `payment-status payment-status-${(status || 'PENDING').toLowerCase()}`;
+  badge.textContent = labels[status] || labels.PENDING;
+  td.appendChild(badge);
+  return td;
+}
+
+function formatAmount(amount) {
+  if (amount === null || amount === undefined) return '-';
+  return `${Number(amount).toLocaleString('ko-KR')}원`;
 }
 
 function button(label, className, handler) {

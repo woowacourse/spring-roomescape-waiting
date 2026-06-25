@@ -313,6 +313,20 @@ img { max-width: 100%; display: block; }
 .actions-cell > .btn + .btn { margin-left: 6px; }
 .actions-cell > .btn { vertical-align: middle; }
 
+.payment-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.payment-status-pending { background: #fff4cc; color: #765900; }
+.payment-status-confirmed { background: #dff5e5; color: #176b36; }
+.payment-status-failed { background: #fde3e3; color: #a12828; }
+.payment-status-requires_confirmation { background: #e8e5ff; color: #4d3aa8; }
+
 /* ─── Section ─── */
 .section { margin-top: 56px; }
 .section:first-of-type { margin-top: 0; }
@@ -507,7 +521,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-sm);
 }
 
@@ -534,6 +548,9 @@ table.table tbody td {
 }
 
 table.table tbody tr:hover { background: var(--surface-2); }
+
+.payment-history-table { min-width: 1250px; }
+.payment-history-table td { overflow-wrap: anywhere; }
 
 table.table td .form-control { height: 36px; padding: 6px 10px; }
 
