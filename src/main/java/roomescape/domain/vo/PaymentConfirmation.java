@@ -1,4 +1,4 @@
 package roomescape.domain.vo;
 
-public record PaymentConfirmation(String paymentKey, String orderId, Long amount) {
+public record PaymentConfirmation(String paymentKey, String orderId, Long amount, String idempotencyKey) {
 }

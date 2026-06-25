@@ -56,15 +56,20 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
-        PaymentResult result = confirmPayment(request);
+        PaymentResult result = confirmPayment(request, paymentOrder);
         paymentRepository.save(Payment.create(paymentOrder.getId(), result.paymentKey(), result.amount()));
         reservationSlotRepository.confirmPayment(paymentOrder.getReservationId());
     }
 
-    private PaymentResult confirmPayment(PaymentConfirmRequest request) {
+    private PaymentResult confirmPayment(PaymentConfirmRequest request, PaymentOrder paymentOrder) {
         try {
             return paymentGateway.confirm(
-                    new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount())
+                    new PaymentConfirmation(
+                            request.paymentKey(),
+                            paymentOrder.getOrderId(),
+                            request.amount(),
+                            paymentOrder.getIdempotencyKey()
+                    )
             );
         } catch (ResourceAccessException e) {
             if (hasCause(e, ConnectException.class) || hasCause(e, SocketTimeoutException.class)) {

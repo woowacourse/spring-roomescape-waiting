@@ -3,6 +3,8 @@ package roomescape.domain;
 import java.util.UUID;
 
 public class PaymentOrder {
+    public static final int MAX_IDEMPOTENCY_KEY_LENGTH = 300;
+
     private final Long id;
     private final String orderId;
     private final Long reservationId;
@@ -24,6 +26,10 @@ public class PaymentOrder {
     }
 
     public String getOrderId() {
+        return orderId;
+    }
+
+    public String getIdempotencyKey() {
         return orderId;
     }
 
