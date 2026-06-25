@@ -14,20 +14,19 @@ import java.util.Base64;
 @Configuration
 public class TossClientConfig {
 
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(2);
-    private static final Duration READ_TIMEOUT = Duration.ofSeconds(5);
-
     @Bean
     public RestClient tossRestClient(
             @Value("${toss.base-url}") String baseUrl,
-            @Value("${toss.secret-key}") String secretKey
+            @Value("${toss.secret-key}") String secretKey,
+            @Value("${toss.connect-timeout}") Duration connectTimeout,
+            @Value("${toss.read-timeout}") Duration readTimeout
     ) {
         String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(CONNECT_TIMEOUT);
-        requestFactory.setReadTimeout(READ_TIMEOUT);
+        requestFactory.setConnectTimeout(connectTimeout);
+        requestFactory.setReadTimeout(readTimeout);
 
         return RestClient.builder()
                 .baseUrl(baseUrl)
