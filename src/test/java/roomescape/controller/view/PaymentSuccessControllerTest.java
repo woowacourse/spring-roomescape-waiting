@@ -114,7 +114,29 @@ class PaymentSuccessControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("payment-fail"))
                 .andExpect(model().attribute("code", "PAY_PROCESS_CANCELED"))
+                .andExpect(model().attribute("confirmationUnknown", false))
                 .andExpect(model().attribute("orderId", (Object) null));
+    }
+
+    @Test
+    void 결제_승인_결과를_알_수_없으면_확인_필요_상태로_렌더링한다() throws Exception {
+        String orderId = "payment_123456789012345678901";
+        given(paymentService.confirm("test_payment_key", orderId, 20_000L))
+                .willThrow(new PaymentGatewayException(
+                        PaymentFailureCategory.CONFIRMATION_UNKNOWN,
+                        "PAYMENT_CONFIRMATION_UNKNOWN",
+                        "결제 승인 결과를 확인할 수 없습니다."));
+        given(paymentService.findReservationByOrderId(orderId)).willReturn(reservation());
+
+        mockMvc.perform(get("/payments/success")
+                        .param("paymentKey", "test_payment_key")
+                        .param("orderId", orderId)
+                        .param("amount", "20000"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("payment-fail"))
+                .andExpect(model().attribute("code", "PAYMENT_CONFIRMATION_UNKNOWN"))
+                .andExpect(model().attribute("confirmationUnknown", true))
+                .andExpect(model().attribute("reservation", PaymentReservationView.from(reservation())));
     }
 
     private Reservation reservation() {

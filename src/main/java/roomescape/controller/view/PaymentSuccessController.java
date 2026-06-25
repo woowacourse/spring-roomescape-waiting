@@ -16,6 +16,8 @@ import roomescape.service.PaymentService;
 @Controller
 public class PaymentSuccessController {
 
+    private static final String PAYMENT_CONFIRMATION_UNKNOWN = "PAYMENT_CONFIRMATION_UNKNOWN";
+
     private final PaymentService paymentService;
 
     public PaymentSuccessController(PaymentService paymentService) {
@@ -68,6 +70,7 @@ public class PaymentSuccessController {
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
         model.addAttribute("name", name);
+        model.addAttribute("confirmationUnknown", PAYMENT_CONFIRMATION_UNKNOWN.equals(code));
         if (reservation != null) {
             model.addAttribute("reservation", PaymentReservationView.from(reservation));
         }
