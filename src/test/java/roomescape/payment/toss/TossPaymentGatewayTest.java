@@ -8,6 +8,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentResult;
+import roomescape.domain.PaymentStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,7 +39,7 @@ class TossPaymentGatewayTest {
                 .andExpect(method(POST))
                 .andExpect(header("Idempotency-Key", "order-1"))
                 .andRespond(withSuccess(
-                        "{\"paymentKey\":\"pk_1\",\"orderId\":\"order-1\",\"totalAmount\":50000}",
+                        "{\"paymentKey\":\"pk_1\",\"orderId\":\"order-1\",\"totalAmount\":50000,\"status\":\"DONE\"}",
                         MediaType.APPLICATION_JSON
                 ));
 
@@ -46,6 +47,21 @@ class TossPaymentGatewayTest {
 
         assertThat(result.paymentKey()).isEqualTo("pk_1");
         assertThat(result.orderId()).isEqualTo("order-1");
+        assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
+        server.verify();
+    }
+
+    @Test
+    void confirm은_DONE이_아닌_상태면_TossPaymentException을_던진다() {
+        server.expect(requestTo(CONFIRM_URL))
+                .andExpect(method(POST))
+                .andRespond(withSuccess(
+                        "{\"paymentKey\":\"pk_1\",\"orderId\":\"order-1\",\"status\":\"ABORTED\"}",
+                        MediaType.APPLICATION_JSON
+                ));
+
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("pk_1", "order-1", 50_000L)))
+                .isInstanceOf(TossPaymentException.class);
         server.verify();
     }
 

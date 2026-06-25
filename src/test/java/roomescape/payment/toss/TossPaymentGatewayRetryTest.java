@@ -22,7 +22,7 @@ class TossPaymentGatewayRetryTest {
 
     private static final Duration READ_TIMEOUT = Duration.ofMillis(500);
     private static final String SUCCESS_BODY =
-            "{\"paymentKey\":\"pk_1\",\"orderId\":\"order-1\",\"totalAmount\":50000}";
+            "{\"paymentKey\":\"pk_1\",\"orderId\":\"order-1\",\"totalAmount\":50000,\"status\":\"DONE\"}";
 
     private MockWebServer mockWebServer;
     private TossPaymentGateway gateway;

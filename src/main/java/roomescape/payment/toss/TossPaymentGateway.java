@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClientException;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentResult;
+import roomescape.domain.PaymentStatus;
 import roomescape.payment.toss.dto.ConfirmRequest;
 import roomescape.payment.toss.dto.TossPaymentResponse;
 
@@ -58,7 +59,11 @@ public class TossPaymentGateway implements PaymentGateway {
                 })
                 .body(TossPaymentResponse.class);
 
-        return new PaymentResult(response.paymentKey(), response.orderId());
+        PaymentStatus status = PaymentStatus.from(response.status());
+        if (status != PaymentStatus.DONE) {
+            throw new TossPaymentException("토스 결제가 완료되지 않았습니다. status=" + status);
+        }
+        return new PaymentResult(response.paymentKey(), response.orderId(), status);
     }
 
     private boolean isRetryable(RestClientException exception) {
