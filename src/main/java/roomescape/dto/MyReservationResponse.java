@@ -17,7 +17,6 @@ public record MyReservationResponse(
         Long amount
 ) {
     public static MyReservationResponse of(Reservation reservation, Payment payment) {
-        String paymentStatus = reservation.isPending() ? "PENDING" : "CONFIRMED";
         if (payment == null) {
             return new MyReservationResponse(
                     reservation.getId(),
@@ -25,7 +24,7 @@ public record MyReservationResponse(
                     reservation.getDate(),
                     ReservationTimeResponse.from(reservation.getTime()),
                     ThemeResponse.from(reservation.getTheme()),
-                    paymentStatus,
+                    null,
                     null,
                     null,
                     null
@@ -37,7 +36,7 @@ public record MyReservationResponse(
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                paymentStatus,
+                payment.getStatus().name(),
                 payment.getOrderId(),
                 payment.getPaymentKey(),
                 payment.getAmount()

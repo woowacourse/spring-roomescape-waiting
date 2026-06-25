@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.domain.OrderStatus;
 import roomescape.domain.Payment;
 import roomescape.repository.PaymentJdbcRepository;
 
@@ -63,5 +64,26 @@ class PaymentJdbcRepositoryTest {
     @Test
     void findByOrderId는_없는_주문이면_빈_Optional을_반환한다() {
         assertThat(repository.findByOrderId("order-none")).isEmpty();
+    }
+
+    @Test
+    void save된_결제의_기본_상태는_PENDING이다() {
+        Payment saved = repository.save(new Payment("order-abc123", 50_000L, reservationId));
+
+        Optional<Payment> found = repository.findByOrderId(saved.getOrderId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getStatus()).isEqualTo(OrderStatus.PENDING);
+    }
+
+    @Test
+    void updateStatus는_결제_상태를_변경한다() {
+        repository.save(new Payment("order-abc123", 50_000L, reservationId));
+
+        repository.updateStatus("order-abc123", OrderStatus.UNCERTAIN);
+
+        Optional<Payment> found = repository.findByOrderId("order-abc123");
+        assertThat(found).isPresent();
+        assertThat(found.get().getStatus()).isEqualTo(OrderStatus.UNCERTAIN);
     }
 }

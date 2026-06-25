@@ -50,6 +50,7 @@ CREATE TABLE payment
     amount         BIGINT       NOT NULL,
     payment_key    VARCHAR(255),
     reservation_id BIGINT       NOT NULL,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
     PRIMARY KEY (id),
     CONSTRAINT uk_payment_order_id UNIQUE (order_id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE

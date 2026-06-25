@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.OrderStatus;
 import roomescape.domain.Payment;
 
 import java.sql.PreparedStatement;
@@ -27,7 +28,8 @@ public class PaymentJdbcRepository implements PaymentRepository {
             rs.getString("order_id"),
             rs.getLong("amount"),
             rs.getString("payment_key"),
-            rs.getLong("reservation_id")
+            rs.getLong("reservation_id"),
+            OrderStatus.valueOf(rs.getString("status"))
     );
 
     @Override
@@ -56,7 +58,7 @@ public class PaymentJdbcRepository implements PaymentRepository {
 
     @Override
     public Optional<Payment> findByOrderId(String orderId) {
-        String sql = "SELECT id, order_id, amount, payment_key, reservation_id FROM payment WHERE order_id = ?";
+        String sql = "SELECT id, order_id, amount, payment_key, reservation_id, status FROM payment WHERE order_id = ?";
         return jdbcTemplate.query(sql, paymentRowMapper, orderId).stream().findFirst();
     }
 
@@ -68,7 +70,7 @@ public class PaymentJdbcRepository implements PaymentRepository {
         String placeholders = reservationIds.stream()
                 .map(id -> "?")
                 .collect(Collectors.joining(", "));
-        String sql = "SELECT id, order_id, amount, payment_key, reservation_id FROM payment WHERE reservation_id IN ("
+        String sql = "SELECT id, order_id, amount, payment_key, reservation_id, status FROM payment WHERE reservation_id IN ("
                 + placeholders + ")";
         return jdbcTemplate.query(sql, paymentRowMapper, reservationIds.toArray());
     }
@@ -76,5 +78,10 @@ public class PaymentJdbcRepository implements PaymentRepository {
     @Override
     public void updatePaymentKey(String orderId, String paymentKey) {
         jdbcTemplate.update("UPDATE payment SET payment_key = ? WHERE order_id = ?", paymentKey, orderId);
+    }
+
+    @Override
+    public void updateStatus(String orderId, OrderStatus status) {
+        jdbcTemplate.update("UPDATE payment SET status = ? WHERE order_id = ?", status.name(), orderId);
     }
 }

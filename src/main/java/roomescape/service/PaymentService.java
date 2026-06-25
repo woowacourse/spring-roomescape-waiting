@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.OrderStatus;
 import roomescape.domain.Payment;
 import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
@@ -51,7 +52,18 @@ public class PaymentService {
         paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
 
         paymentRepository.updatePaymentKey(orderId, paymentKey);
+        paymentRepository.updateStatus(orderId, OrderStatus.CONFIRMED);
         return order.withPaymentKey(paymentKey);
+    }
+
+    @Transactional
+    public void markUncertain(String orderId) {
+        paymentRepository.updateStatus(orderId, OrderStatus.UNCERTAIN);
+    }
+
+    @Transactional
+    public void markFailed(String orderId) {
+        paymentRepository.updateStatus(orderId, OrderStatus.FAILED);
     }
 
     private String generateOrderId() {

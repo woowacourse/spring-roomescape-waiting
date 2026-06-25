@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import roomescape.domain.OrderStatus;
 import roomescape.domain.Payment;
 
 import java.util.Collection;
@@ -15,4 +16,6 @@ public interface PaymentRepository {
     List<Payment> findByReservationIds(Collection<Long> reservationIds);
 
     void updatePaymentKey(String orderId, String paymentKey);
+
+    void updateStatus(String orderId, OrderStatus status);
 }

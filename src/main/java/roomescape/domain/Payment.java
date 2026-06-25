@@ -7,27 +7,38 @@ public class Payment {
     private final long amount;
     private final String paymentKey;
     private final Long reservationId;
+    private final OrderStatus status;
 
     public Payment(
             Long id,
             String orderId,
             long amount,
             String paymentKey,
-            Long reservationId
+            Long reservationId,
+            OrderStatus status
     ) {
         this.id = id;
         this.orderId = orderId;
         this.amount = amount;
         this.paymentKey = paymentKey;
         this.reservationId = reservationId;
+        this.status = status;
+    }
+
+    public Payment(Long id, String orderId, long amount, String paymentKey, Long reservationId) {
+        this(id, orderId, amount, paymentKey, reservationId, OrderStatus.PENDING);
     }
 
     public Payment(String orderId, long amount, Long reservationId) {
-        this(null, orderId, amount, null, reservationId);
+        this(null, orderId, amount, null, reservationId, OrderStatus.PENDING);
     }
 
     public Payment withPaymentKey(String paymentKey) {
-        return new Payment(id, orderId, amount, paymentKey, reservationId);
+        return new Payment(id, orderId, amount, paymentKey, reservationId, status);
+    }
+
+    public OrderStatus getStatus() {
+        return status;
     }
 
     public Long getId() {

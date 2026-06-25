@@ -11,14 +11,20 @@ import roomescape.application.ReservationApplicationService;
 import roomescape.domain.Reservation;
 import roomescape.dto.PaymentConfirmRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.exception.PaymentUncertainException;
+import roomescape.payment.toss.TossPaymentException;
+import roomescape.service.PaymentService;
 
 @RestController
 public class PaymentController {
 
     private final ReservationApplicationService reservationApplicationService;
+    private final PaymentService paymentService;
 
-    public PaymentController(ReservationApplicationService reservationApplicationService) {
+    public PaymentController(ReservationApplicationService reservationApplicationService,
+                             PaymentService paymentService) {
         this.reservationApplicationService = reservationApplicationService;
+        this.paymentService = paymentService;
     }
 
     @PostMapping("/payments/{orderId}/confirmation")
@@ -26,9 +32,16 @@ public class PaymentController {
             @PathVariable String orderId,
             @RequestBody @Valid PaymentConfirmRequest request
     ) {
-        Reservation confirmed = reservationApplicationService.confirmReservation(orderId, request);
-
-        return ResponseEntity.ok(ReservationResponse.from(confirmed));
+        try {
+            Reservation confirmed = reservationApplicationService.confirmReservation(orderId, request);
+            return ResponseEntity.ok(ReservationResponse.from(confirmed));
+        } catch (PaymentUncertainException e) {
+            paymentService.markUncertain(orderId);
+            throw e;
+        } catch (TossPaymentException e) {
+            paymentService.markFailed(orderId);
+            throw e;
+        }
     }
 
     @DeleteMapping("/payments/{orderId}")
