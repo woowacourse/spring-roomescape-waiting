@@ -41,6 +41,7 @@ public class TossPaymentGateway implements PaymentGateway {
                 .uri(CONFIRM_URI)
                 .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Idempotency-Key", confirmation.idempotencyKey())
                 .body(new ConfirmRequest(confirmation.paymentKey(), confirmation.orderId(), confirmation.amount()))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, errorResponse) -> {

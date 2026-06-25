@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.PaymentOrder;
+import roomescape.domain.PaymentStatus;
 import roomescape.domain.repository.PaymentOrderRepository;
 
 @Repository
@@ -27,7 +28,8 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 SELECT id,
                        reservation_id,
                        order_id,
-                       amount
+                       amount,
+                       payment_status
                 FROM payment_order
                 WHERE order_id = ?
                 """;
@@ -35,7 +37,8 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 rs.getLong("id"),
                 rs.getLong("reservation_id"),
                 rs.getString("order_id"),
-                rs.getLong("amount")
+                rs.getLong("amount"),
+                PaymentStatus.valueOf(rs.getString("payment_status"))
         ), orderId);
     }
 
@@ -44,7 +47,20 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         paymentOrderInsert.execute(Map.of(
                 "reservation_id", paymentOrder.getReservationId(),
                 "order_id", paymentOrder.getOrderId(),
-                "amount", paymentOrder.getAmount()
+                "amount", paymentOrder.getAmount(),
+                "payment_status", paymentOrder.getStatus().name()
         ));
+    }
+
+    @Override
+    public void updateStatus(long id, PaymentStatus status) {
+        jdbcTemplate.update("""
+                        UPDATE payment_order
+                        SET payment_status = ?
+                        WHERE id = ?
+                        """,
+                status.name(),
+                id
+        );
     }
 }

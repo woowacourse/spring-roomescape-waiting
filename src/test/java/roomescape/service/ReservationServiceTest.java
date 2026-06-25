@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.dto.ReservationRequest;
@@ -26,6 +27,8 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @DisplayName("예약 정상 테스트")
     @Test
@@ -102,7 +105,50 @@ class ReservationServiceTest {
         assertThat(response.status()).isEqualTo("PAYMENT_PENDING");
         assertThat(response.order()).isZero();
         assertThat(response.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(response.paymentStatus()).isEqualTo("PENDING");
+        assertThat(response.paymentKey()).isNull();
         assertThat(response.amount()).isEqualTo(10000L);
+    }
+
+    @DisplayName("결제 확정 예약은 주문번호, 결제 상태, paymentKey, 금액이 함께 조회된다.")
+    @Test
+    void 결제_확정_예약_결제_정보_조회() {
+        LocalDateTime now = LocalDateTime.now();
+        ReservationRequest request = new ReservationRequest("결제확정조회", now.toLocalDate().plusDays(72), 2L, 1L);
+        ReservationResponse response = reservationService.save(now, request);
+        Long paymentOrderId = findPaymentOrderId(response.orderId());
+
+        jdbcTemplate.update("UPDATE payment_order SET payment_status = 'CONFIRMED' WHERE id = ?", paymentOrderId);
+        jdbcTemplate.update(
+                "INSERT INTO payment (payment_order_id, payment_key, amount) VALUES (?, ?, ?)",
+                paymentOrderId,
+                "payment-key-confirmed",
+                response.amount()
+        );
+
+        ReservationResponse reservation = reservationService.findAllByName("결제확정조회").get(0);
+
+        assertThat(reservation.paymentStatus()).isEqualTo("CONFIRMED");
+        assertThat(reservation.orderId()).isEqualTo(response.orderId());
+        assertThat(reservation.paymentKey()).isEqualTo("payment-key-confirmed");
+        assertThat(reservation.amount()).isEqualTo(10000L);
+    }
+
+    @DisplayName("결과가 불명확한 예약은 결제 실패가 아닌 확인 필요 상태로 조회된다.")
+    @Test
+    void 결제_확인_필요_예약_조회() {
+        LocalDateTime now = LocalDateTime.now();
+        ReservationRequest request = new ReservationRequest("결제확인필요", now.toLocalDate().plusDays(73), 2L, 1L);
+        ReservationResponse response = reservationService.save(now, request);
+
+        jdbcTemplate.update("UPDATE payment_order SET payment_status = 'UNKNOWN' WHERE order_id = ?", response.orderId());
+
+        ReservationResponse reservation = reservationService.findAllByName("결제확인필요").get(0);
+
+        assertThat(reservation.paymentStatus()).isEqualTo("UNKNOWN");
+        assertThat(reservation.paymentKey()).isNull();
+        assertThat(reservation.orderId()).isEqualTo(response.orderId());
+        assertThat(reservation.amount()).isEqualTo(10000L);
     }
 
     @DisplayName("예약 대기이면 결제 주문 정보가 응답에 포함되지 않는다.")
@@ -118,6 +164,8 @@ class ReservationServiceTest {
 
         assertThat(waitingResponse.order()).isEqualTo(1);
         assertThat(waitingResponse.orderId()).isNull();
+        assertThat(waitingResponse.paymentStatus()).isNull();
+        assertThat(waitingResponse.paymentKey()).isNull();
         assertThat(waitingResponse.amount()).isNull();
     }
 
@@ -169,6 +217,7 @@ class ReservationServiceTest {
         assertThat(promoted.status()).isEqualTo("PAYMENT_PENDING");
         assertThat(promoted.order()).isZero();
         assertThat(promoted.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(promoted.paymentStatus()).isEqualTo("PENDING");
         assertThat(promoted.amount()).isEqualTo(10000L);
     }
 
@@ -190,6 +239,7 @@ class ReservationServiceTest {
         assertThat(promoted.status()).isEqualTo("PAYMENT_PENDING");
         assertThat(promoted.order()).isZero();
         assertThat(promoted.orderId()).matches("[A-Za-z0-9_-]{6,64}");
+        assertThat(promoted.paymentStatus()).isEqualTo("PENDING");
         assertThat(promoted.amount()).isEqualTo(10000L);
     }
 
@@ -238,5 +288,13 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.update(secondResponse.reservationId(), now, updateRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_EXISTS_RESERVATION.getMessage());
+    }
+
+    private Long findPaymentOrderId(String orderId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM payment_order WHERE order_id = ?",
+                Long.class,
+                orderId
+        );
     }
 }

@@ -4,4 +4,5 @@ import roomescape.domain.Payment;
 
 public interface PaymentRepository {
     void save(Payment payment);
+    boolean existsByPaymentOrderId(long paymentOrderId);
 }

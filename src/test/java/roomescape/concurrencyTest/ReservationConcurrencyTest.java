@@ -35,7 +35,7 @@ class ReservationConcurrencyTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    void 같은_슬롯에_동시에_예약하면_확정_예약은_하나만_생긴다() throws Exception {
+    void 같은_슬롯에_동시에_예약하면_결제_대기_예약은_하나만_생긴다() throws Exception {
         LocalDate date = LocalDate.now().plusDays(30);
         Long timeId = 2L;
         Long themeId = 1L;
@@ -84,7 +84,7 @@ class ReservationConcurrencyTest {
 
         assertThat(exceptions).isEmpty();
 
-        Integer reservedCount = jdbcTemplate.queryForObject("""
+        Integer paymentPendingCount = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation r
                 INNER JOIN reservation_slot rs
@@ -92,7 +92,7 @@ class ReservationConcurrencyTest {
                 WHERE rs.date = ?
                   AND rs.time_id = ?
                   AND rs.theme_id = ?
-                  AND r.status = 'RESERVED'
+                  AND r.status = 'PAYMENT_PENDING'
                 """, Integer.class, date, timeId, themeId);
 
         Integer waitingCount = jdbcTemplate.queryForObject("""
@@ -105,14 +105,12 @@ class ReservationConcurrencyTest {
                   AND rs.theme_id = ?
                   AND r.status = 'WAITING'
                 """, Integer.class, date, timeId, themeId);
-        assertThat(reservedCount).isEqualTo(1);
+        assertThat(paymentPendingCount).isEqualTo(1);
         assertThat(waitingCount).isEqualTo(threadCount - 1);
-//        System.out.println("reserved인 행 수 : " + reservedCount);
-//        System.out.println("waiting인 행 수 : " + waitingCount);
     }
 
     @Test
-    void 같은_슬롯에서_확정_예약과_첫번째_대기를_동시에_취소해도_확정_예약은_하나만_남는다() throws Exception {
+    void 같은_슬롯에서_결제_대기_예약과_첫번째_대기를_동시에_취소해도_결제_대기_예약은_하나만_남는다() throws Exception {
         LocalDate date = LocalDate.now().plusDays(31);
         Long timeId = 3L;
         Long themeId = 1L;
@@ -136,17 +134,13 @@ class ReservationConcurrencyTest {
                 () -> reservationService.delete(LocalDateTime.now(), firstWaiting.reservationId(), "취소대기1")
         ));
 
-
-        System.out.println("reserved인 행 수 : " + countReservations(date, timeId, themeId, "RESERVED"));
-        System.out.println("waiting인 행 수 : " + countReservations(date, timeId, themeId, "WAITING"));
-
-        assertThat(countReservations(date, timeId, themeId, "RESERVED")).isEqualTo(1);
+        assertThat(countReservations(date, timeId, themeId, "PAYMENT_PENDING")).isEqualTo(1);
         assertThat(countReservations(date, timeId, themeId, "WAITING")).isZero();
-        assertThat(findStatusByName("취소대기2")).isEqualTo("RESERVED");
+        assertThat(findStatusByName("취소대기2")).isEqualTo("PAYMENT_PENDING");
     }
 
     @Test
-    void 같은_슬롯에서_확정_예약과_첫번째_대기를_동시에_수정해도_기존_슬롯에는_확정_예약이_하나만_남는다() throws Exception {
+    void 같은_슬롯에서_결제_대기_예약과_첫번째_대기를_동시에_수정해도_기존_슬롯에는_결제_대기_예약이_하나만_남는다() throws Exception {
         LocalDate date = LocalDate.now().plusDays(32);
         Long currentTimeId = 4L;
         Long firstTargetTimeId = 5L;
@@ -183,9 +177,9 @@ class ReservationConcurrencyTest {
                 )
         ));
 
-        assertThat(countReservations(date, currentTimeId, themeId, "RESERVED")).isEqualTo(1);
+        assertThat(countReservations(date, currentTimeId, themeId, "PAYMENT_PENDING")).isEqualTo(1);
         assertThat(countReservations(date, currentTimeId, themeId, "WAITING")).isZero();
-        assertThat(findStatusByName("수정대기2")).isEqualTo("RESERVED");
+        assertThat(findStatusByName("수정대기2")).isEqualTo("PAYMENT_PENDING");
     }
 
     private void runConcurrently(List<ConcurrentTask> tasks) throws Exception {

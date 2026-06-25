@@ -8,6 +8,8 @@ public enum ErrorCode {
     COMMON_SERVER_ERROR("COMMON_500", "500 서버 에러", HttpStatus.INTERNAL_SERVER_ERROR),
 
     PAYMENT_AMOUNT_MISMATCH("PAYMENT_400", "결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    PAYMENT_GATEWAY_CONNECTION_FAILED("PAYMENT_503", "결제 승인 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.", HttpStatus.SERVICE_UNAVAILABLE),
+    PAYMENT_CONFIRM_RESULT_UNKNOWN("PAYMENT_504", "결제 승인 결과를 확인하지 못했습니다. 실제 결제가 승인되었을 수 있으니 결제 내역을 확인해주세요.", HttpStatus.GATEWAY_TIMEOUT),
 
     THEME_NAME_TOO_LONG("THEME_400", "테마 이름은 255자 이하여야합니다.", HttpStatus.BAD_REQUEST),
     THEME_DESCRIPTION_TOO_LONG("THEME_400", "테마 설명은 255자 이하여야합니다.", HttpStatus.BAD_REQUEST),

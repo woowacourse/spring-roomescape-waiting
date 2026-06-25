@@ -23,6 +23,8 @@ public record ReservationResponse(
         LocalTime time,
         int order,
         String orderId,
+        String paymentStatus,
+        String paymentKey,
         Long amount) {
     public static ReservationResponse from(Reservation reservation, ReservationSlotInfo reservationSlotInfo, int order) {
         return from(reservation, reservationSlotInfo, order, null);
@@ -43,6 +45,8 @@ public record ReservationResponse(
                 time.getStartAt(),
                 order,
                 paymentOrder == null ? null : paymentOrder.getOrderId(),
+                paymentOrder == null ? null : paymentOrder.getStatus().name(),
+                null,
                 paymentOrder == null ? null : paymentOrder.getAmount()
         );
     }
