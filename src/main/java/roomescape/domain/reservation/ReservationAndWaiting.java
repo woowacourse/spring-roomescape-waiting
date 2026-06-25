@@ -11,17 +11,22 @@ public record ReservationAndWaiting(
         TimeSlot timeSlot,
         Theme theme,
         boolean isReserved,
-        Integer waitingIndex
+        Integer waitingIndex,
+        ReservationPaymentInfo paymentInfo
 ) {
 
     public static ReservationAndWaiting fromReservation(Reservation reservation) {
         return new ReservationAndWaiting(reservation.getId(), reservation.getName(), reservation.getDate(), reservation.getTimeSlot(),
-                reservation.getTheme(), true, null);
+                reservation.getTheme(), true, null, null);
     }
 
     public static ReservationAndWaiting fromWaiting(WaitingWithNumber waitingWithNumber) {
         Reservation waiting = waitingWithNumber.waiting();
         return new ReservationAndWaiting(waiting.getId(), waiting.getName(), waiting.getDate(), waiting.getTimeSlot(),
-                waiting.getTheme(), false, waitingWithNumber.waitingIndex());
+                waiting.getTheme(), false, waitingWithNumber.waitingIndex(), null);
+    }
+
+    public ReservationAndWaiting withPaymentInfo(ReservationPaymentInfo paymentInfo) {
+        return new ReservationAndWaiting(id, name, date, timeSlot, theme, isReserved, waitingIndex, paymentInfo);
     }
 }

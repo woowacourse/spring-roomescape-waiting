@@ -17,10 +17,14 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.payment.Order;
+import roomescape.domain.payment.OrderStatus;
+import roomescape.domain.payment.Payment;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.PastTimeException;
 import roomescape.repository.FakeOrderRepository;
+import roomescape.repository.FakePaymentRepository;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeReservationSlotRepository;
 import roomescape.repository.FakeThemeRepository;
@@ -37,6 +41,7 @@ class ReservationServiceTest {
     private FakeTimeSlotRepository timeSlotRepository;
     private FakeThemeRepository themeRepository;
     private FakeOrderRepository orderRepository;
+    private FakePaymentRepository paymentRepository;
 
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
@@ -48,9 +53,10 @@ class ReservationServiceTest {
         reservationSlotRepository = new FakeReservationSlotRepository();
         themeRepository = new FakeThemeRepository();
         orderRepository = new FakeOrderRepository();
+        paymentRepository = new FakePaymentRepository();
 
         reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository,
-                reservationSlotRepository, orderRepository);
+                reservationSlotRepository, orderRepository, paymentRepository);
 
         savedTimeSlot = timeSlotRepository.save(new TimeSlot(LocalTime.of(10, 0)));
         savedTheme = themeRepository.save(new Theme("이름", "설명", "test.com", 50000L));
@@ -78,6 +84,25 @@ class ReservationServiceTest {
         assertThat(result.orderId()).isNotBlank();
         assertThat(result.amount()).isEqualTo(50000L);
         assertThat(orderRepository.findByOrderId(result.orderId())).isPresent();
+    }
+
+    @Test
+    @DisplayName("사용자의 예약 목록을 조회하면 결제 정보를 함께 반환한다.")
+    void 사용자_예약_결제_정보_조회() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        ReservationCreateResult result = reservationService.saveReservationWithOrder(
+                "브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), REQUEST_TIME
+        );
+        orderRepository.updateStatus(result.orderId(), OrderStatus.CONFIRMED);
+        paymentRepository.save(new Payment("payment-key", result.orderId()));
+
+        List<ReservationAndWaiting> reservations = reservationService.findReservationAndWaitingByName("브라운");
+
+        assertThat(reservations).hasSize(1);
+        assertThat(reservations.getFirst().paymentInfo().status()).isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(reservations.getFirst().paymentInfo().orderId()).isEqualTo(result.orderId());
+        assertThat(reservations.getFirst().paymentInfo().paymentKey()).isEqualTo("payment-key");
+        assertThat(reservations.getFirst().paymentInfo().amount()).isEqualTo(50000L);
     }
 
     @Test
