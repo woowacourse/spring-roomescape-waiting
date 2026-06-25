@@ -13,12 +13,13 @@ public class Payment {
     private final String failureCode;
     private final String failureMessage;
 
-    public Payment(Long id, Long reservationId, String orderId, Long amount, String paymentKey,
-                   PaymentStatus status, String failureCode, String failureMessage) {
+    private Payment(Long id, Long reservationId, String orderId, Long amount, String paymentKey,
+                    PaymentStatus status, String failureCode, String failureMessage) {
         validateReservationId(reservationId);
         validateOrderId(orderId);
         validateAmount(amount);
         validateStatus(status);
+        validateStatusFields(status, paymentKey, failureCode);
 
         this.id = id;
         this.reservationId = reservationId;
@@ -34,7 +35,14 @@ public class Payment {
         return new Payment(null, reservationId, generateOrderId(), amount, null, PaymentStatus.READY, null, null);
     }
 
+    public static Payment restore(Long id, Long reservationId, String orderId, Long amount, String paymentKey,
+                                  PaymentStatus status, String failureCode, String failureMessage) {
+        validateId(id);
+        return new Payment(id, reservationId, orderId, amount, paymentKey, status, failureCode, failureMessage);
+    }
+
     public Payment withId(Long id) {
+        validateId(id);
         return new Payment(id, reservationId, orderId, amount, paymentKey, status, failureCode, failureMessage);
     }
 
@@ -96,6 +104,12 @@ public class Payment {
         return "payment_" + UUID.randomUUID().toString().replace("-", "");
     }
 
+    private static void validateId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("id는 양수여야 합니다.");
+        }
+    }
+
     private void validateReservationId(Long reservationId) {
         if (reservationId == null || reservationId <= 0) {
             throw new IllegalArgumentException("reservationId는 양수여야 합니다.");
@@ -117,6 +131,19 @@ public class Payment {
     private void validateStatus(PaymentStatus status) {
         if (status == null) {
             throw new IllegalArgumentException("status는 비어 있을 수 없습니다.");
+        }
+    }
+
+    private void validateStatusFields(PaymentStatus status, String paymentKey, String failureCode) {
+        if (status == PaymentStatus.READY && (paymentKey != null || failureCode != null)) {
+            throw new IllegalArgumentException("결제 대기 상태는 paymentKey나 실패 코드를 가질 수 없습니다.");
+        }
+        if (status == PaymentStatus.CONFIRMED && (paymentKey == null || paymentKey.isBlank())) {
+            throw new IllegalArgumentException("승인된 결제는 paymentKey가 필요합니다.");
+        }
+        if ((status == PaymentStatus.FAILED || status == PaymentStatus.CANCELED)
+                && (failureCode == null || failureCode.isBlank())) {
+            throw new IllegalArgumentException("실패 또는 취소된 결제는 실패 코드가 필요합니다.");
         }
     }
 }

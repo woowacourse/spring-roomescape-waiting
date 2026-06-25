@@ -23,4 +23,20 @@ class PaymentTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("reservationId는 양수여야 합니다.");
     }
+
+    @Test
+    void 승인된_결제는_paymentKey가_필요하다() {
+        assertThatThrownBy(() -> Payment.restore(1L, 1L, "payment_confirmed_123456789012345", 20_000L,
+                null, PaymentStatus.CONFIRMED, null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("승인된 결제는 paymentKey가 필요합니다.");
+    }
+
+    @Test
+    void 실패한_결제는_실패_코드가_필요하다() {
+        assertThatThrownBy(() -> Payment.restore(1L, 1L, "payment_failed_123456789012345678", 20_000L,
+                null, PaymentStatus.FAILED, null, "카드 거절"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("실패 또는 취소된 결제는 실패 코드가 필요합니다.");
+    }
 }

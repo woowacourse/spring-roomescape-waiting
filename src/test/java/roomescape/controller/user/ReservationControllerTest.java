@@ -315,7 +315,7 @@ class ReservationControllerTest {
     }
 
     private Payment payment() {
-        return new Payment(1L, 1L, "payment_12345678901234567890123456789012", 20_000L, null,
+        return Payment.restore(1L, 1L, "payment_12345678901234567890123456789012", 20_000L, null,
                 PaymentStatus.READY, null, null);
     }
 }
