@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import roomescape.domain.PaymentConfirmation;
+import roomescape.exception.PaymentUncertainException;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -45,14 +45,14 @@ class TossPaymentGatewayTimeoutTest {
     }
 
     @Test
-    void 응답이_read_timeout을_넘기면_예외를_던진다() {
+    void 재시도해도_계속_read_timeout이면_결제_불명확_예외를_던진다() {
         mockWebServer.enqueue(new MockResponse()
                 .setHeader("Content-Type", "application/json")
                 .setBody("{\"paymentKey\":\"pk_1\",\"orderId\":\"order-1\",\"totalAmount\":50000}")
                 .setBodyDelay(2, TimeUnit.SECONDS));
 
         assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("pk_1", "order-1", 50_000L)))
-                .isInstanceOf(RestClientException.class)
+                .isInstanceOf(PaymentUncertainException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
     }
 }

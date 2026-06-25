@@ -10,6 +10,7 @@ import roomescape.domain.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
 import roomescape.domain.PaymentResult;
 import roomescape.domain.PaymentStatus;
+import roomescape.exception.PaymentUncertainException;
 import roomescape.payment.toss.dto.ConfirmRequest;
 import roomescape.payment.toss.dto.TossPaymentResponse;
 
@@ -40,8 +41,12 @@ public class TossPaymentGateway implements PaymentGateway {
             try {
                 return requestConfirm(request, confirmation.orderId());
             } catch (RestClientException e) {
-                if (!isRetryable(e) || attempt == MAX_ATTEMPTS) {
+                if (!isRetryable(e)) {
                     throw e;
+                }
+                if (attempt == MAX_ATTEMPTS) {
+                    throw new PaymentUncertainException(
+                            "결제 승인 결과를 확인하지 못했습니다. orderId=" + confirmation.orderId(), e);
                 }
             }
         }

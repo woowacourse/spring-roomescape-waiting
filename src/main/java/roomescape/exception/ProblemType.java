@@ -17,6 +17,7 @@ public enum ProblemType {
     NO_RESOURCE("no-resource", "리소스를 찾을 수 없음"),
     PAYMENT_AMOUNT_MISMATCH("payment-amount-mismatch", "결제 금액 불일치"),
     PAYMENT_FAILED("payment-failed", "결제 실패"),
+    PAYMENT_UNCERTAIN("payment-uncertain", "결제 결과 확인 필요"),
     INTERNAL_ERROR("internal-error", "서버 내부 오류");
 
     private static final String TYPE_BASE = "https://roomescape.example/problems/";
