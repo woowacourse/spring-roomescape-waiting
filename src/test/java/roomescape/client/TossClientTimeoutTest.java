@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import roomescape.common.config.TossClientConfig;
 import roomescape.dto.request.PaymentConfirmation;
 import roomescape.domain.PaymentStatus;
 
@@ -114,7 +115,7 @@ class TossClientTimeoutTest {
         // 학생이 채운 tossRestClient 의 connect timeout 을 그대로 검증한다.
         // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(3초)이 끊어 실패시킨다.
         var gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_gsk_dummy", 500, 500, 3, 100L, 10.0),
                 new ObjectMapper()
         );
 
