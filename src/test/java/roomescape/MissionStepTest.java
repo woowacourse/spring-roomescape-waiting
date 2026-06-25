@@ -355,7 +355,11 @@ public class MissionStepTest {
                 .body("reservationId", is(1))
                 .body("paymentId", is(1));
 
-        jdbcTemplate.update("UPDATE payment SET status = 'FAILED' WHERE id = 1;");
+        jdbcTemplate.update("""
+                UPDATE payment
+                SET status = 'FAILED', failure_code = 'REJECT_CARD_PAYMENT', failure_message = '카드가 거절되었습니다.'
+                WHERE id = 1;
+                """);
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")

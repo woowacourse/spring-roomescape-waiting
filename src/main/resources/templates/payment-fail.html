@@ -15,10 +15,13 @@
 
 <main class="payment-result-main">
     <section class="payment-result-card" aria-labelledby="payment-result-title">
-        <p class="payment-result-eyebrow">PAYMENT NOT COMPLETED</p>
+        <p class="payment-result-eyebrow"
+           th:text="${confirmationUnknown} ? 'PAYMENT CHECK REQUIRED' : 'PAYMENT NOT COMPLETED'">PAYMENT NOT COMPLETED</p>
         <div class="payment-result-symbol" aria-hidden="true">!</div>
-        <h1 id="payment-result-title">결제를 완료하지 못했어요</h1>
-        <p class="payment-result-description">예약은 결제 대기 상태로 유지됩니다. 내 예약에서 다시 결제하거나 취소할 수 있어요.</p>
+        <h1 id="payment-result-title"
+            th:text="${confirmationUnknown} ? '결제 승인 결과 확인이 필요해요' : '결제를 완료하지 못했어요'">결제를 완료하지 못했어요</h1>
+        <p class="payment-result-description"
+           th:text="${confirmationUnknown} ? '결제 요청 결과를 바로 확인하지 못했습니다. 내 예약에서 상태를 확인하거나 다시 시도해주세요.' : '예약은 결제 대기 상태로 유지됩니다. 내 예약에서 다시 결제하거나 취소할 수 있어요.'">예약은 결제 대기 상태로 유지됩니다. 내 예약에서 다시 결제하거나 취소할 수 있어요.</p>
 
         <div th:if="${reservation != null}">
             <h2 class="payment-result-detail-title">예약 정보</h2>
@@ -38,7 +41,8 @@
             </dl>
         </div>
 
-        <h2 class="payment-result-detail-title payment-result-failure-title">결제 실패 정보</h2>
+        <h2 class="payment-result-detail-title payment-result-failure-title"
+            th:text="${confirmationUnknown} ? '결제 확인 필요 정보' : '결제 실패 정보'">결제 실패 정보</h2>
         <dl class="payment-result-details">
             <div>
                 <dt>에러 코드</dt>

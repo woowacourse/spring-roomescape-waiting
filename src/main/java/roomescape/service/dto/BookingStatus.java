@@ -1,6 +1,7 @@
 package roomescape.service.dto;
 
 import java.time.LocalDate;
+import roomescape.domain.Payment;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
@@ -17,9 +18,19 @@ public record BookingStatus(
         Theme theme,
         BookingType bookingType,
         ReservationStatus reservationStatus,
-        Long turn
+        Long turn,
+        BookingPaymentInfo payment
 ) {
+    public BookingStatus(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
+                         BookingType bookingType, ReservationStatus reservationStatus, Long turn) {
+        this(id, name, date, time, theme, bookingType, reservationStatus, turn, null);
+    }
+
     public static BookingStatus reservation(Reservation reservation) {
+        return reservation(reservation, null);
+    }
+
+    public static BookingStatus reservation(Reservation reservation, Payment payment) {
         ReservationSlot slot = reservation.getSlot();
         return new BookingStatus(
                 reservation.getId(),
@@ -29,7 +40,8 @@ public record BookingStatus(
                 slot.getTheme(),
                 BookingType.RESERVATION,
                 reservation.getStatus(),
-                null
+                null,
+                BookingPaymentInfo.from(payment)
         );
     }
 
@@ -44,7 +56,8 @@ public record BookingStatus(
                 slot.getTheme(),
                 BookingType.WAITING,
                 null,
-                waitingWithTurn.turn()
+                waitingWithTurn.turn(),
+                null
         );
     }
 }

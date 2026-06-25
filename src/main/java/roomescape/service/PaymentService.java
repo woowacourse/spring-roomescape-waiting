@@ -66,9 +66,9 @@ public class PaymentService {
         if (!payment.getAmount().equals(amount)) {
             throw new PaymentAmountMismatchException(payment.getAmount(), amount);
         }
-        if (payment.getStatus() != PaymentStatus.READY) {
+        if (!canConfirm(payment)) {
             throw new RoomescapeException(ErrorCode.PAYMENT_CONFIRMATION_NOT_ALLOWED,
-                    "결제 대기 상태의 결제만 승인할 수 있습니다.");
+                    "결제 대기 또는 확인 필요 상태의 결제만 승인할 수 있습니다.");
         }
 
         PaymentResult result;
@@ -77,6 +77,9 @@ public class PaymentService {
         } catch (PaymentGatewayException e) {
             if (e.isDefinitiveFailure()) {
                 paymentRepository.update(payment.fail(e.getCode(), e.getMessage()));
+            }
+            if (e.requiresConfirmationCheck()) {
+                paymentRepository.update(payment.checkRequired(e.getCode(), e.getMessage()));
             }
             throw e;
         }
@@ -107,5 +110,9 @@ public class PaymentService {
         }
         throw new RoomescapeException(ErrorCode.PAYMENT_RETRY_NOT_ALLOWED,
                 "결제를 다시 시도할 수 없는 상태입니다.");
+    }
+
+    private boolean canConfirm(Payment payment) {
+        return payment.getStatus() == PaymentStatus.READY || payment.getStatus() == PaymentStatus.CHECK_REQUIRED;
     }
 }

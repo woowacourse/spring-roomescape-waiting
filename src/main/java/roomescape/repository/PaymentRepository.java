@@ -15,7 +15,7 @@ public class PaymentRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Payment> paymentRowMapper = (resultSet, rowNum) -> new Payment(
+    private final RowMapper<Payment> paymentRowMapper = (resultSet, rowNum) -> Payment.restore(
             resultSet.getLong("id"),
             resultSet.getLong("reservation_id"),
             resultSet.getString("order_id"),
