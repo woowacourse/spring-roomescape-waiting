@@ -55,9 +55,11 @@ class AdminBookingControllerTest {
                 .andExpect(jsonPath("$[0].bookingType").value("RESERVATION"))
                 .andExpect(jsonPath("$[0].reservationStatus").value("CONFIRMED"))
                 .andExpect(jsonPath("$[0].turn").value(nullValue()))
+                .andExpect(jsonPath("$[0].payment").value(nullValue()))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].bookingType").value("WAITING"))
                 .andExpect(jsonPath("$[1].reservationStatus").value(nullValue()))
+                .andExpect(jsonPath("$[1].payment").value(nullValue()))
                 .andExpect(jsonPath("$[1].turn").value(1));
 
         verify(bookingLookupService, times(1)).findByDateRange(startDate, endDate);

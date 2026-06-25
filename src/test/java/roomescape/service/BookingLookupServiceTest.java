@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Payment;
+import roomescape.domain.PaymentStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
@@ -20,6 +22,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.WaitingWithTurn;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.repository.PaymentRepository;
 import roomescape.service.dto.BookingStatus;
 import roomescape.service.dto.BookingType;
 
@@ -27,9 +30,11 @@ class BookingLookupServiceTest {
 
     private final ReservationService reservationService = mock();
     private final ReservationWaitingService reservationWaitingService = mock();
+    private final PaymentRepository paymentRepository = mock();
     private final BookingLookupService service = new BookingLookupService(
             reservationService,
-            reservationWaitingService);
+            reservationWaitingService,
+            paymentRepository);
 
     private final LocalDate date = LocalDate.now().plusDays(1);
     private final ReservationTime time = new ReservationTime(1L, LocalTime.parse("10:00"));
@@ -45,6 +50,10 @@ class BookingLookupServiceTest {
 
         when(reservationService.findByName(name)).thenReturn(List.of(reservation));
         when(reservationWaitingService.findByName(name)).thenReturn(List.of(waiting));
+        when(paymentRepository.findLatestByReservationId(1L)).thenReturn(java.util.Optional.of(
+                Payment.restore(1L, 1L, "payment_ready_123456789012345678901", 20_000L, null,
+                        PaymentStatus.READY, null, null)
+        ));
 
         List<BookingStatus> result = service.findByName(name);
 
@@ -55,7 +64,10 @@ class BookingLookupServiceTest {
                         .containsExactly(BookingType.WAITING, BookingType.RESERVATION),
                 () -> assertThat(result).extracting(BookingStatus::reservationStatus)
                         .containsExactly(null, ReservationStatus.CONFIRMED),
-                () -> assertThat(result).extracting(BookingStatus::turn).containsExactly(1L, null));
+                () -> assertThat(result).extracting(BookingStatus::turn).containsExactly(1L, null),
+                () -> assertThat(result.get(1).payment().orderId()).isEqualTo("payment_ready_123456789012345678901"),
+                () -> assertThat(result.get(1).payment().status()).isEqualTo(PaymentStatus.READY),
+                () -> assertThat(result.get(0).payment()).isNull());
     }
 
     @Test

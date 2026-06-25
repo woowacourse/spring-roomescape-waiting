@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.repository.PaymentRepository;
 import roomescape.service.dto.BookingStatus;
 
 @Service
@@ -16,17 +17,23 @@ import roomescape.service.dto.BookingStatus;
 public class BookingLookupService {
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
+    private final PaymentRepository paymentRepository;
 
     public BookingLookupService(ReservationService reservationService,
-                                ReservationWaitingService reservationWaitingService) {
+                                ReservationWaitingService reservationWaitingService,
+                                PaymentRepository paymentRepository) {
         this.reservationService = reservationService;
         this.reservationWaitingService = reservationWaitingService;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<BookingStatus> findByName(String name) {
         return Stream.concat(
                         reservationService.findByName(name).stream()
-                                .map(BookingStatus::reservation),
+                                .map(reservation -> BookingStatus.reservation(
+                                        reservation,
+                                        paymentRepository.findLatestByReservationId(reservation.getId()).orElse(null)
+                                )),
                         reservationWaitingService.findByName(name).stream()
                                 .map(BookingStatus::waiting))
                 .sorted(Comparator
@@ -41,7 +48,10 @@ public class BookingLookupService {
         }
         return Stream.concat(
                         reservationService.findByDateRange(startDate, endDate).stream()
-                                .map(BookingStatus::reservation),
+                                .map(reservation -> BookingStatus.reservation(
+                                        reservation,
+                                        paymentRepository.findLatestByReservationId(reservation.getId()).orElse(null)
+                                )),
                         reservationWaitingService.findByDateRange(startDate, endDate).stream()
                                 .map(BookingStatus::waiting))
                 .sorted(Comparator

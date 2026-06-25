@@ -20,8 +20,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.PaymentStatus;
 import roomescape.domain.Theme;
 import roomescape.service.BookingLookupService;
+import roomescape.service.dto.BookingPaymentInfo;
 import roomescape.service.dto.BookingStatus;
 import roomescape.service.dto.BookingType;
 
@@ -51,9 +53,14 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].bookingType").value("RESERVATION"))
                 .andExpect(jsonPath("$[0].reservationStatus").value("CONFIRMED"))
                 .andExpect(jsonPath("$[0].turn").value(nullValue()))
+                .andExpect(jsonPath("$[0].payment.orderId").value("payment_confirmed_123456789012345"))
+                .andExpect(jsonPath("$[0].payment.amount").value(20000))
+                .andExpect(jsonPath("$[0].payment.paymentKey").value("test_payment_key"))
+                .andExpect(jsonPath("$[0].payment.status").value("CONFIRMED"))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].bookingType").value("WAITING"))
                 .andExpect(jsonPath("$[1].reservationStatus").value(nullValue()))
+                .andExpect(jsonPath("$[1].payment").value(nullValue()))
                 .andExpect(jsonPath("$[1].turn").value(1));
 
         verify(bookingLookupService, times(1)).findByName("브라운");
@@ -74,7 +81,9 @@ class BookingControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
         return new BookingStatus(1L, "브라운", LocalDate.of(2099, 1, 1), time, theme,
-                BookingType.RESERVATION, ReservationStatus.CONFIRMED, null);
+                BookingType.RESERVATION, ReservationStatus.CONFIRMED, null,
+                new BookingPaymentInfo("payment_confirmed_123456789012345", 20_000L,
+                        "test_payment_key", PaymentStatus.CONFIRMED, null, null));
     }
 
     private BookingStatus waitingBooking() {

@@ -13,7 +13,8 @@ public record BookingStatusResponse(
         ReservationThemeResponse theme,
         BookingType bookingType,
         ReservationStatus reservationStatus,
-        Long turn
+        Long turn,
+        BookingPaymentResponse payment
 ) {
 
     public static BookingStatusResponse from(BookingStatus bookingStatus) {
@@ -25,7 +26,8 @@ public record BookingStatusResponse(
                 ReservationThemeResponse.from(bookingStatus.theme()),
                 bookingStatus.bookingType(),
                 bookingStatus.reservationStatus(),
-                bookingStatus.turn()
+                bookingStatus.turn(),
+                BookingPaymentResponse.from(bookingStatus.payment())
         );
     }
 }
