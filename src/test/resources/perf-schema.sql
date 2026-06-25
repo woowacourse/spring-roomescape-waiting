@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS payment_order;
 DROP TABLE IF EXISTS waiting;
 DROP TABLE IF EXISTS reservation_confirmed;
 DROP TABLE IF EXISTS reservation;

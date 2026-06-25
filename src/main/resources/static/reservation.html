@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>예약하기</title>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -224,6 +225,15 @@
         <button id="submit" class="submit-btn" disabled>예약하기</button>
         <div id="result"></div>
     </div>
+
+    <div id="payment-step" class="step hidden">
+        <p class="step-label">Step 4</p>
+        <h3>결제</h3>
+        <div id="payment-method"></div>
+        <div id="agreement"></div>
+        <button id="payButton" class="submit-btn" disabled>결제하기</button>
+        <div id="pay-result"></div>
+    </div>
 </main>
 
 <script>
@@ -283,7 +293,9 @@
         // 이전 선택 초기화
         selectedTimeId = null;
         document.getElementById('name-step').classList.add('hidden');
+        document.getElementById('payment-step').classList.add('hidden');
         document.getElementById('result').innerHTML = '';
+        document.getElementById('submit').disabled = false;
 
         const container = document.getElementById('times');
         const step = document.getElementById('time-step');
@@ -338,6 +350,7 @@
         submitBtn.disabled = true;
         result.innerHTML = '';
 
+        let order;
         try {
             const res = await fetch('/user/reservations', {
                 method: 'POST',
@@ -354,12 +367,55 @@
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.message || `서버 오류 (${res.status})`);
             }
-
-            alert('예약이 완료되었습니다.');
-            location.reload();
+            order = await res.json();
         } catch (e) {
-            result.innerHTML = `<p class="error">예약에 실패했습니다. ${e.message}</p>`;
+            result.innerHTML = `<p class="error">주문 생성에 실패했습니다. ${e.message}</p>`;
             submitBtn.disabled = false;
+            return;
+        }
+
+        await setupPaymentWidget(order);
+    }
+
+    async function setupPaymentWidget(order) {
+        const paymentStep = document.getElementById('payment-step');
+        const payButton = document.getElementById('payButton');
+        const payResult = document.getElementById('pay-result');
+
+        paymentStep.classList.remove('hidden');
+        payButton.disabled = true;
+        payResult.innerHTML = '';
+        document.getElementById('payment-method').innerHTML = '';
+        document.getElementById('agreement').innerHTML = '';
+
+        try {
+            const tossPayments = TossPayments(order.clientKey);
+            const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
+            await widgets.setAmount({currency: 'KRW', value: order.amount});
+            await Promise.all([
+                widgets.renderPaymentMethods({selector: '#payment-method', variantKey: 'DEFAULT'}),
+                widgets.renderAgreement({selector: '#agreement', variantKey: 'AGREEMENT'})
+            ]);
+            payButton.disabled = false;
+
+            payButton.onclick = async () => {
+                payButton.disabled = true;
+                try {
+                    await widgets.requestPayment({
+                        orderId: order.orderId,
+                        orderName: order.orderName,
+                        successUrl: window.location.origin + '/reservation-success.html',
+                        failUrl: window.location.origin + '/reservation-fail.html'
+                    });
+                } catch (e) {
+                    if (e.code !== 'USER_CANCEL') {
+                        payResult.innerHTML = `<p class="error">결제 요청 실패: ${e.message}</p>`;
+                    }
+                    payButton.disabled = false;
+                }
+            };
+        } catch (e) {
+            payResult.innerHTML = `<p class="error">결제위젯을 불러오지 못했습니다. ${e.message}</p>`;
         }
     }
 </script>

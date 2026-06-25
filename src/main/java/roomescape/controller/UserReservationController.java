@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.PaymentOrderResponse;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.ReservationUpdateRequest;
+import roomescape.payment.client.TossProperties;
 import roomescape.service.UserReservationService;
+import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationResult;
 
 @RestController
@@ -28,9 +31,14 @@ import roomescape.service.dto.ReservationResult;
 public class UserReservationController {
 
     private final UserReservationService userReservationService;
+    private final TossProperties tossProperties;
 
-    public UserReservationController(UserReservationService userReservationService) {
+    public UserReservationController(
+            UserReservationService userReservationService,
+            TossProperties tossProperties
+    ) {
         this.userReservationService = userReservationService;
+        this.tossProperties = tossProperties;
     }
 
     @GetMapping
@@ -43,9 +51,9 @@ public class UserReservationController {
     }
 
     @PostMapping
-    public ReservationResponse create(@RequestBody @Valid ReservationRequest request) {
-        ReservationResult saved = userReservationService.create(request.toCommand());
-        return ReservationResponse.from(saved);
+    public PaymentOrderResponse createOrder(@RequestBody @Valid ReservationRequest request) {
+        PaymentOrderResult order = userReservationService.createOrder(request.toCommand());
+        return PaymentOrderResponse.from(order, tossProperties.clientKey());
     }
 
     @PatchMapping("/{id}")

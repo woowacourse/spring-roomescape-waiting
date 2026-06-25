@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,15 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithWaitingOrder;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentService;
+import roomescape.payment.order.PaymentOrder;
+import roomescape.payment.order.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.PaymentConfirmCommand;
+import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -21,6 +29,7 @@ import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
+import roomescape.service.exception.ThemeNotFoundException;
 import roomescape.service.exception.UnauthorizedReservationException;
 
 @Service
@@ -28,29 +37,93 @@ public class UserReservationService {
 
     private static final Logger log = LoggerFactory.getLogger(UserReservationService.class);
 
+    private static final long RESERVATION_AMOUNT = 1000L;
+    private static final String ORDER_NAME = "방탈출 예약";
+
     private final AdminReservationService reservationService;
+    private final ReservationConfirmer reservationConfirmer;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final PaymentService paymentService;
+    private final PaymentOrderRepository paymentOrderRepository;
 
     public UserReservationService(
             AdminReservationService reservationService,
+            ReservationConfirmer reservationConfirmer,
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository,
+            PaymentService paymentService,
+            PaymentOrderRepository paymentOrderRepository
     ) {
         this.reservationService = reservationService;
+        this.reservationConfirmer = reservationConfirmer;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.paymentService = paymentService;
+        this.paymentOrderRepository = paymentOrderRepository;
     }
 
-    public ReservationResult create(ReservationCreateCommand command) {
+    public PaymentOrderResult createOrder(ReservationCreateCommand command) {
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
-                    log.warn("존재하지 않는 시간으로 예약 생성 시도: timeId={}", command.timeId());
+                    log.warn("존재하지 않는 시간으로 주문 생성 시도: timeId={}", command.timeId());
                     return new ReservationTimeNotFoundException(
                             "존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), time.getStartAt(), "과거 시점에는 예약할 수 없습니다");
-        return reservationService.create(command);
+
+        if (!themeRepository.existsById(command.themeId())) {
+            log.warn("존재하지 않는 테마로 주문 생성 시도: themeId={}", command.themeId());
+            throw new ThemeNotFoundException("존재하지 않는 테마입니다: themeId=" + command.themeId());
+        }
+
+        String orderId = generateOrderId();
+        paymentOrderRepository.save(PaymentOrder.pending(
+                orderId, command.reserverName(), command.date(),
+                command.timeId(), command.themeId(), RESERVATION_AMOUNT));
+        log.info("주문 생성 완료: orderId={}, reserverName={}, date={}, timeId={}, themeId={}, amount={}",
+                orderId, command.reserverName(), command.date(), command.timeId(), command.themeId(),
+                RESERVATION_AMOUNT);
+        return new PaymentOrderResult(orderId, RESERVATION_AMOUNT, ORDER_NAME);
+    }
+
+    public ReservationResult confirm(PaymentConfirmCommand command) {
+        PaymentResult payment = paymentService.confirm(
+                command.paymentKey(), command.orderId(), command.amount());
+        try {
+            ReservationResult reservation = reservationConfirmer.confirmReservation(
+                    command.orderId(), payment.paymentKey());
+            log.info("결제 승인 후 예약 생성 완료: orderId={}, reservationId={}, status={}",
+                    command.orderId(), reservation.id(), reservation.status());
+            return reservation;
+        } catch (Exception e) {
+            log.error("결제 승인 후 예약 생성 실패, 보상(결제 취소)을 시도합니다: orderId={}", command.orderId(), e);
+            compensate(command.orderId(), payment.paymentKey());
+            throw e;
+        }
+    }
+
+    private void compensate(String orderId, String paymentKey) {
+        try {
+            paymentService.cancel(paymentKey, "예약 생성 실패로 인한 자동 결제 취소");
+            paymentOrderRepository.markCanceled(orderId);
+            log.info("보상 결제 취소 완료: orderId={}", orderId);
+        } catch (Exception cancelError) {
+            log.error("보상 결제 취소 실패 - 수동 정산이 필요합니다: orderId={}, paymentKey={}",
+                    orderId, paymentKey, cancelError);
+        }
+    }
+
+    public void cancelOrder(String orderId) {
+        paymentOrderRepository.markCanceled(orderId);
+        log.info("결제 대기 주문 취소: orderId={}", orderId);
+    }
+
+    private String generateOrderId() {
+        return "order-" + UUID.randomUUID().toString().replace("-", "");
     }
 
     public List<ReservationResult> findByReserverName(String reserverName) {

@@ -26,10 +26,18 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
+import roomescape.payment.PaymentResult;
+import roomescape.payment.PaymentService;
+import roomescape.payment.PaymentStatus;
+import roomescape.payment.order.PaymentOrder;
+import roomescape.payment.order.PaymentOrderRepository;
 import roomescape.repository.LockedReservationWriter;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeLockedAction;
+import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.PaymentConfirmCommand;
+import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -38,6 +46,7 @@ import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
+import roomescape.service.exception.ThemeNotFoundException;
 import roomescape.service.exception.UnauthorizedReservationException;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,11 +69,19 @@ class UserReservationServiceTest {
     @Mock
     private AdminReservationService reservationService;
     @Mock
+    private ReservationConfirmer reservationConfirmer;
+    @Mock
     private ReservationRepository reservationRepository;
     @Mock
     private LockedReservationWriter reservationWriter;
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
+    @Mock
+    private ThemeRepository themeRepository;
+    @Mock
+    private PaymentService paymentService;
+    @Mock
+    private PaymentOrderRepository paymentOrderRepository;
     @InjectMocks
     private UserReservationService userReservationService;
 
@@ -77,46 +94,105 @@ class UserReservationServiceTest {
     }
 
     @Test
-    @DisplayName("미래 시점에 예약하면 정상적으로 생성된다")
-    void 미래_시점_예약은_정상_생성된다() {
+    @DisplayName("미래 시점에 주문하면 결제 대기 주문이 저장되고 예약은 아직 생성되지 않는다")
+    void 미래_시점_주문은_결제대기로_저장된다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(themeRepository.existsById(1L)).willReturn(true);
 
-        assertDoesNotThrow(() -> userReservationService.create(command));
+        PaymentOrderResult result = userReservationService.createOrder(command);
 
+        assertThat(result.orderId()).isNotBlank();
+        assertThat(result.amount()).isPositive();
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(reservationService, times(1)).create(command);
-        verifyNoInteractions(reservationRepository);
+        verify(paymentOrderRepository, times(1)).save(any(PaymentOrder.class));
+        verifyNoInteractions(reservationService, reservationRepository, paymentService);
     }
 
     @Test
-    @DisplayName("과거 날짜로 예약하면 PastReservationException이 발생한다")
-    void 과거_날짜_예약시_예외가_발생한다() {
+    @DisplayName("존재하지 않는 themeId로 주문하면 ThemeNotFoundException이 발생하고 주문이 저장되지 않는다")
+    void 존재하지_않는_themeId로_주문시_예외가_발생한다() {
+        ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(themeRepository.existsById(1L)).willReturn(false);
+
+        assertThrows(
+                ThemeNotFoundException.class,
+                () -> userReservationService.createOrder(command)
+        );
+
+        verify(themeRepository, times(1)).existsById(1L);
+        verifyNoInteractions(reservationService, reservationRepository, paymentService, paymentOrderRepository);
+    }
+
+    @Test
+    @DisplayName("과거 날짜로 주문하면 PastReservationException이 발생하고 주문이 저장되지 않는다")
+    void 과거_날짜_주문시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, PAST_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
 
         assertThrows(
                 PastReservationException.class,
-                () -> userReservationService.create(command)
+                () -> userReservationService.createOrder(command)
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationRepository);
+        verifyNoInteractions(reservationService, reservationRepository, paymentService, paymentOrderRepository);
     }
 
     @Test
-    @DisplayName("존재하지 않는 timeId로 예약하면 ReservationTimeNotFoundException이 발생한다")
-    void 존재하지_않는_timeId로_예약시_예외가_발생한다() {
+    @DisplayName("존재하지 않는 timeId로 주문하면 ReservationTimeNotFoundException이 발생한다")
+    void 존재하지_않는_timeId로_주문시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationTimeNotFoundException.class,
-                () -> userReservationService.create(command)
+                () -> userReservationService.createOrder(command)
         );
 
         verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationRepository);
+        verifyNoInteractions(reservationService, reservationRepository, paymentService, paymentOrderRepository);
+    }
+
+    @Test
+    @DisplayName("결제가 승인되면 예약 확정 단위에 위임하고 결과를 반환한다")
+    void 결제_승인시_예약을_생성하고_주문을_확정한다() {
+        PaymentConfirmCommand command = new PaymentConfirmCommand("test_pk_1", "order-1", 1000L);
+        ReservationResult created = new ReservationResult(
+                10L, OWNER, FUTURE_DATE,
+                new roomescape.service.dto.ReservationTimeResult(1L, LocalTime.of(10, 0)),
+                new roomescape.service.dto.ThemeResult(1L, "무인도 탈출", "설명", "https://example.com/thumb.jpg"),
+                0L, ReservationStatus.CONFIRMED);
+        given(paymentService.confirm("test_pk_1", "order-1", 1000L))
+                .willReturn(new PaymentResult("test_pk_1", "order-1", PaymentStatus.DONE, 1000L));
+        given(reservationConfirmer.confirmReservation("order-1", "test_pk_1")).willReturn(created);
+
+        ReservationResult result = userReservationService.confirm(command);
+
+        assertThat(result.id()).isEqualTo(10L);
+        assertThat(result.status()).isEqualTo(ReservationStatus.CONFIRMED);
+        verify(paymentService, times(1)).confirm("test_pk_1", "order-1", 1000L);
+        verify(reservationConfirmer, times(1)).confirmReservation("order-1", "test_pk_1");
+        verify(paymentService, never()).cancel(any(), any());
+    }
+
+    @Test
+    @DisplayName("결제 승인 후 예약 생성이 실패하면 결제를 취소(보상)하고 주문을 취소 처리한 뒤 예외를 전파한다")
+    void 예약_생성_실패시_결제를_취소하고_예외를_전파한다() {
+        PaymentConfirmCommand command = new PaymentConfirmCommand("test_pk_1", "order-1", 1000L);
+        given(paymentService.confirm("test_pk_1", "order-1", 1000L))
+                .willReturn(new PaymentResult("test_pk_1", "order-1", PaymentStatus.DONE, 1000L));
+        given(reservationConfirmer.confirmReservation("order-1", "test_pk_1"))
+                .willThrow(new ReservationConflictException("이미 확정된 슬롯"));
+
+        assertThrows(
+                ReservationConflictException.class,
+                () -> userReservationService.confirm(command)
+        );
+
+        verify(paymentService, times(1)).cancel(eq("test_pk_1"), any());
+        verify(paymentOrderRepository, times(1)).markCanceled("order-1");
     }
 
     @Test

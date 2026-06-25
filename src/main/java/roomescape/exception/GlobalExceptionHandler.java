@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.domain.exception.DomainValidationException;
+import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.client.TossPaymentException;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ResourceConflictException;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -32,6 +35,20 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlePastReservation(PastReservationException e) {
         return new ErrorResponse(ErrorCode.PAST_RESERVATION.name(), e.getMessage());
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlePaymentAmountMismatch(PaymentAmountMismatchException e) {
+        log.warn("결제 금액 위변조 차단: {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.PAYMENT_AMOUNT_MISMATCH.name(), e.getMessage());
+    }
+
+    @ExceptionHandler(TossPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleTossPayment(TossPaymentException e) {
+        log.warn("결제 승인 실패: status={}, code={}, message={}", e.getStatus(), e.getCode(), e.getMessage());
+        ErrorResponse body = new ErrorResponse(e.getCode(), e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(body);
     }
 
     @ExceptionHandler(ResourceConflictException.class)

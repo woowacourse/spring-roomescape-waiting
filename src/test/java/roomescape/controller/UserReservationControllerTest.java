@@ -23,8 +23,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationUpdateRequest;
+import roomescape.payment.client.TossProperties;
 import roomescape.service.UserReservationService;
 import roomescape.domain.ReservationStatus;
+import roomescape.service.dto.PaymentOrderResult;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationTimeResult;
 import roomescape.service.dto.ThemeResult;
@@ -41,6 +43,9 @@ class UserReservationControllerTest {
     @MockitoBean
     private UserReservationService userReservationService;
 
+    @MockitoBean
+    private TossProperties tossProperties;
+
     @Test
     @DisplayName("GET /user/reservations - 이름으로 예약 목록을 반환한다")
     void list() throws Exception {
@@ -53,22 +58,26 @@ class UserReservationControllerTest {
     }
 
     @Test
-    @DisplayName("POST /user/reservations - 유효한 요청이면 예약을 생성한다")
-    void create() throws Exception {
-        given(userReservationService.create(any())).willReturn(sampleResult());
+    @DisplayName("POST /user/reservations - 유효한 요청이면 결제 대기 주문 정보를 반환한다")
+    void createOrder() throws Exception {
+        given(userReservationService.createOrder(any()))
+                .willReturn(new PaymentOrderResult("order-1", 1000L, "방탈출 예약"));
+        given(tossProperties.clientKey()).willReturn("test_ck_docs");
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2099, 12, 31), 1L, 1L);
 
         mockMvc.perform(post("/user/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reserverName").value("브라운"));
+                .andExpect(jsonPath("$.orderId").value("order-1"))
+                .andExpect(jsonPath("$.amount").value(1000))
+                .andExpect(jsonPath("$.clientKey").isNotEmpty());
     }
 
     @Test
     @DisplayName("POST /user/reservations - 동시 중복 등 무결성 제약 위반이면 409를 반환한다")
-    void create_duplicate_conflict() throws Exception {
-        given(userReservationService.create(any()))
+    void createOrder_duplicate_conflict() throws Exception {
+        given(userReservationService.createOrder(any()))
                 .willThrow(new DataIntegrityViolationException("duplicate"));
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2099, 12, 31), 1L, 1L);
 
@@ -80,7 +89,7 @@ class UserReservationControllerTest {
 
     @Test
     @DisplayName("POST /user/reservations - 이름이 비어있으면 400을 반환한다")
-    void create_invalid() throws Exception {
+    void createOrder_invalid() throws Exception {
         ReservationRequest request = new ReservationRequest("", LocalDate.of(2099, 12, 31), 1L, 1L);
 
         mockMvc.perform(post("/user/reservations")
