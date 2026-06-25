@@ -9,6 +9,11 @@ public abstract class RoomescapeException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
+    public RoomescapeException(String errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
     public String getErrorCode() {
         return errorCode;
     }

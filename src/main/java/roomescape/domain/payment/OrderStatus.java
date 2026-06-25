@@ -4,5 +4,6 @@ public enum OrderStatus {
     PENDING,
     CONFIRMED,
     FAILED,
-    EXPIRED
+    EXPIRED,
+    REQUIRES_CONFIRMATION
 }
