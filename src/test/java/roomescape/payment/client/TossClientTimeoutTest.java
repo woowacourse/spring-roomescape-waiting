@@ -64,7 +64,7 @@ class TossClientTimeoutTest {
         TossPaymentGateway gateway = gateway(mockWebServer.url("/").toString());
 
         long start = System.nanoTime();
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "idem-1")))
                 .isInstanceOf(PaymentTimeoutException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
@@ -76,7 +76,7 @@ class TossClientTimeoutTest {
     void 연결자체가_실패하면_PaymentConnectionException으로_실패한다() {
         TossPaymentGateway gateway = gateway(BLACKHOLE_URL);
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "idem-1")))
                 .isInstanceOf(PaymentConnectionException.class);
     }
 }

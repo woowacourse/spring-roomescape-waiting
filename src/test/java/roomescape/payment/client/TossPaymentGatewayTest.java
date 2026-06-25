@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -32,6 +33,7 @@ class TossPaymentGatewayTest {
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
         server.expect(requestTo(CONFIRM_URI))
                 .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "idem-1"))
                 .andRespond(withStatus(status)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(body));
@@ -54,7 +56,7 @@ class TossPaymentGatewayTest {
                 }
                 """);
 
-        var result = gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L));
+        var result = gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "idem-1"));
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.approvedAmount()).isEqualTo(10000L);
@@ -66,7 +68,7 @@ class TossPaymentGatewayTest {
                 {"code": "ALREADY_PROCESSED_PAYMENT", "message": "이미 처리된 결제 입니다."}
                 """);
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "idem-1")))
                 .isInstanceOf(TossPaymentException.AlreadyProcessed.class);
     }
 
@@ -107,7 +109,7 @@ class TossPaymentGatewayTest {
         TossPaymentGateway gateway = gatewayResponding(httpStatus,
                 "{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}");
 
-        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "idem-1")))
                 .isInstanceOf(expected);
     }
 

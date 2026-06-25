@@ -1,6 +1,7 @@
 package roomescape.payment.order;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class PaymentOrder {
 
@@ -11,11 +12,13 @@ public class PaymentOrder {
     private final Long themeId;
     private final Long amount;
     private final String paymentKey;
+    private final String idempotencyKey;
     private final PaymentOrderStatus status;
     private final Long reservationId;
 
     public PaymentOrder(String orderId, String reserverName, LocalDate date, Long timeId, Long themeId,
-                        Long amount, String paymentKey, PaymentOrderStatus status, Long reservationId) {
+                        Long amount, String paymentKey, String idempotencyKey,
+                        PaymentOrderStatus status, Long reservationId) {
         this.orderId = orderId;
         this.reserverName = reserverName;
         this.date = date;
@@ -23,6 +26,7 @@ public class PaymentOrder {
         this.themeId = themeId;
         this.amount = amount;
         this.paymentKey = paymentKey;
+        this.idempotencyKey = idempotencyKey;
         this.status = status;
         this.reservationId = reservationId;
     }
@@ -37,6 +41,7 @@ public class PaymentOrder {
                 themeId,
                 amount,
                 null,
+                UUID.randomUUID().toString(),
                 PaymentOrderStatus.PENDING,
                 null
         );
@@ -68,6 +73,10 @@ public class PaymentOrder {
 
     public String getPaymentKey() {
         return paymentKey;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
     public PaymentOrderStatus getStatus() {

@@ -17,6 +17,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
             rs.getLong("theme_id"),
             rs.getLong("amount"),
             rs.getString("payment_key"),
+            rs.getString("idempotency_key"),
             PaymentOrderStatus.valueOf(rs.getString("status")),
             (Long) rs.getObject("reservation_id")
     );
@@ -30,8 +31,8 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
     @Override
     public void save(PaymentOrder order) {
         String sql = "INSERT INTO payment_order "
-                + "(order_id, reserver_name, date, time_id, theme_id, amount, payment_key, status, reservation_id) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "(order_id, reserver_name, date, time_id, theme_id, amount, payment_key, idempotency_key, status, reservation_id) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(
                 sql,
                 order.getOrderId(),
@@ -41,6 +42,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 order.getThemeId(),
                 order.getAmount(),
                 order.getPaymentKey(),
+                order.getIdempotencyKey(),
                 order.getStatus().name(),
                 order.getReservationId()
         );
@@ -48,7 +50,7 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
 
     @Override
     public PaymentOrder getByOrderId(String orderId) {
-        String sql = "SELECT order_id, reserver_name, date, time_id, theme_id, amount, payment_key, status, reservation_id "
+        String sql = "SELECT order_id, reserver_name, date, time_id, theme_id, amount, payment_key, idempotency_key, status, reservation_id "
                 + "FROM payment_order WHERE order_id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, ROW_MAPPER, orderId);

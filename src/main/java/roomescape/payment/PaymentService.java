@@ -20,7 +20,8 @@ public class PaymentService {
         if (!order.getAmount().equals(amount)) {
             throw new PaymentAmountMismatchException(order.getAmount(), amount);
         }
-        return paymentGateway.confirm(new PaymentConfirmation(paymentKey, orderId, amount));
+        return paymentGateway.confirm(
+                new PaymentConfirmation(paymentKey, orderId, amount, order.getIdempotencyKey()));
     }
 
     public void cancel(String paymentKey, String reason) {
