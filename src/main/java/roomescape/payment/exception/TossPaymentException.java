@@ -98,4 +98,11 @@ public class TossPaymentException extends RuntimeException {
 
   }
 
+  public static class RateLimitExceeded extends TossPaymentException {
+
+    public RateLimitExceeded(String message) {
+      super(HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED", message);
+    }
+  }
+
 }
