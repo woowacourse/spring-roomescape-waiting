@@ -2,6 +2,8 @@ package roomescape.payment.infrastructure;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -50,6 +52,17 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
         String sql = "select id, order_id, reservation_id, amount, payment_key, status, created_at "
                 + "from payment_order where order_id = ? for update";
         return jdbcTemplate.query(sql, rowMapper(), orderId).stream().findFirst();
+    }
+
+    @Override
+    public List<PaymentOrder> findAllByReservationIdIn(List<Long> reservationIds) {
+        if (reservationIds == null || reservationIds.isEmpty()) {
+            return List.of();
+        }
+        String placeholders = String.join(",", Collections.nCopies(reservationIds.size(), "?"));
+        String sql = "select id, order_id, reservation_id, amount, payment_key, status, created_at "
+                + "from payment_order where reservation_id in (" + placeholders + ")";
+        return jdbcTemplate.query(sql, rowMapper(), reservationIds.toArray());
     }
 
     @Override

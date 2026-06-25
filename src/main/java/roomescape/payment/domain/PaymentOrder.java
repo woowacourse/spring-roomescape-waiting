@@ -2,6 +2,8 @@ package roomescape.payment.domain;
 
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
+import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentGatewayException;
 
 public class PaymentOrder {
 
@@ -42,8 +44,59 @@ public class PaymentOrder {
                 PaymentOrderStatus.DONE, createdAt);
     }
 
+    public PaymentOrder markUnconfirmed(String attemptedPaymentKey) {
+        if (status != PaymentOrderStatus.READY) {
+            throw new IllegalStateException("READY 상태의 결제 주문만 결과 불명확으로 표시할 수 있습니다.");
+        }
+        if (attemptedPaymentKey == null || attemptedPaymentKey.isBlank()) {
+            throw new IllegalArgumentException("결제 키는 비어 있을 수 없습니다.");
+        }
+        return new PaymentOrder(id, orderId, reservationId, amount, attemptedPaymentKey,
+                PaymentOrderStatus.UNCONFIRMED, createdAt);
+    }
+
+    public PaymentOrder confirmAfterRecovery(String approvedPaymentKey) {
+        if (status != PaymentOrderStatus.UNCONFIRMED) {
+            throw new IllegalStateException("결과 불명확 상태의 결제 주문만 회복 확정할 수 있습니다.");
+        }
+        if (approvedPaymentKey == null || approvedPaymentKey.isBlank()) {
+            throw new IllegalArgumentException("결제 키는 비어 있을 수 없습니다.");
+        }
+        if (!paymentKey.equals(approvedPaymentKey)) {
+            throw new IllegalStateException("결제 키가 일치하지 않습니다.");
+        }
+        return new PaymentOrder(id, orderId, reservationId, amount, approvedPaymentKey,
+                PaymentOrderStatus.DONE, createdAt);
+    }
+
+    public PaymentOrder confirmWith(String approvedPaymentKey) {
+        return isUnconfirmed()
+                ? confirmAfterRecovery(approvedPaymentKey)
+                : complete(approvedPaymentKey);
+    }
+
+    public void requireAmount(Long requested) {
+        if (!this.amount.equals(requested)) {
+            throw new PaymentAmountMismatchException();
+        }
+    }
+
+    public void requireMatchingResult(String attemptedPaymentKey, PaymentResult result) {
+        if (result == null
+                || result.status() != PaymentStatus.DONE
+                || !this.orderId.equals(result.orderId())
+                || !this.amount.equals(result.approvedAmount())
+                || !attemptedPaymentKey.equals(result.paymentKey())) {
+            throw new PaymentGatewayException();
+        }
+    }
+
     public boolean isDone() {
         return status == PaymentOrderStatus.DONE;
+    }
+
+    public boolean isUnconfirmed() {
+        return status == PaymentOrderStatus.UNCONFIRMED;
     }
 
     public Long getId() {

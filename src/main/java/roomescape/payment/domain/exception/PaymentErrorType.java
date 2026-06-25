@@ -13,9 +13,10 @@ public enum PaymentErrorType implements ErrorType {
     OWNER_MISMATCH(HttpStatus.FORBIDDEN, "PAYMENT403_001", "본인의 결제 주문만 처리할 수 있습니다."),
     CARD_REJECTED(HttpStatus.UNPROCESSABLE_ENTITY, "PAYMENT422_001", "카드 결제가 거절되었습니다. 결제 수단을 확인해 주세요."),
     GATEWAY_CONFIGURATION(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500_001", "결제 설정 오류가 발생했습니다."),
-    GATEWAY_RETRYABLE(HttpStatus.SERVICE_UNAVAILABLE, "PAYMENT503_001",
-            "결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해 주세요."),
-    GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "PAYMENT502_001", "결제 승인 중 오류가 발생했습니다.");
+    GATEWAY_RETRYABLE(HttpStatus.SERVICE_UNAVAILABLE, "PAYMENT503_001", "결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해 주세요."),
+    GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "PAYMENT502_001", "결제 승인 중 오류가 발생했습니다."),
+    GATEWAY_CONNECTION_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "PAYMENT504_001", "결제 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."),
+    GATEWAY_RESPONSE_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "PAYMENT504_002", "결제 결과 확인이 필요합니다. 내 결제 내역에서 상태를 확인해 주세요.");
 
     private final HttpStatus httpStatus;
     private final String errorCode;

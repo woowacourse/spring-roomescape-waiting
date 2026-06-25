@@ -47,10 +47,10 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<MyReservationsAndWaitsResponse> getReservations(@LoginMember Long memberId) {
-        List<Reservation> reservations = reservationService.getReservations(memberId);
+        List<ReservationResponse> reservations = reservationService.getReservationsWithPayments(memberId);
         List<WaitingResult> waitingResponseResults = reservationWaitService.getWaitings(memberId);
         MyReservationsAndWaitsResponse myReservationsAndWaitsResponse = new MyReservationsAndWaitsResponse(
-                ReservationResponse.fromAll(reservations), WaitingResponse.fromAll(waitingResponseResults));
+                reservations, WaitingResponse.fromAll(waitingResponseResults));
         return ResponseEntity.ok().body(myReservationsAndWaitsResponse);
     }
 

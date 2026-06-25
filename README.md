@@ -224,3 +224,39 @@ RESERVATION_PAYMENT_AMOUNT=50000
 예약 생성 시 서버가 `orderId`와 금액을 저장하고 예약을 `PENDING`으로 만든다. 브라우저 인증이 끝난 후 서버 승인까지 성공해야 `CONFIRMED` 예약과 생성 이력이 남는다.
 
 실제 샌드박스 어댑터 테스트는 기본 테스트에서 제외된다. `RUN_REAL_API=true`와 `TOSS_SECRET_KEY`를 주입하면 오류 응답 변환을 확인할 수 있고, 브라우저 인증 결과인 `TOSS_TEST_PAYMENT_KEY`, `TOSS_TEST_ORDER_ID`, `TOSS_TEST_AMOUNT`까지 주입하면 성공 승인도 검증한다.
+
+## 결과 불명확 결제와 회복 흐름 (확인 필요 상태)
+
+토스 confirm 호출이 read timeout으로 끊겼을 때 "이 결제가 처리됐는지 아닌지"를 우리 서버가 알 수 없다. "결제 실패"로 단정 짓지 않는다 — 결과가 불명확한 상태를 별도로 표현해 사용자가 회복할 수 있도록 만든다.
+
+### 상태와 전이
+
+`PaymentOrderStatus`는 `READY → UNCONFIRMED → DONE` 흐름을 갖는다.
+
+- **READY** — 결제 시도 전. 사용자가 결제창에서 진행하기 전.
+- **UNCONFIRMED** — 토스 응답을 못 받아 결과 미확정. 클라이언트가 보낸 `paymentKey`는 저장돼 회복용 식별자로 쓰인다.
+- **DONE** — 토스가 승인을 확인해 줬고, 예약은 `CONFIRMED`. 이력 1건 기록.
+
+### 자동 재시도 + 트랜잭션 분리
+
+`PaymentService.confirm`은 외부 호출을 트랜잭션 밖으로 빼고 `TransactionTemplate`로 세 구간을 나눈다.
+
+1. `prepareConfirm` — 잠금 조회, 소유·금액 검증, 이미 DONE이면 멱등 단축.
+2. 외부 호출 — `PaymentGatewayResponseTimeoutException`이면 지수 백오프(500ms → 1s → 2s)로 최대 3회 시도. `Idempotency-Key`(`orderId`)가 함께 박혀 이중 승인은 토스 측에서도 차단된다.
+3. 결과 분기 — 성공이면 `finalizeConfirm`으로 DONE 전이 + 예약 CONFIRMED + 이력 기록. 끝까지 timeout이면 `markUnconfirmed`로 `UNCONFIRMED` 상태와 `paymentKey`를 커밋하고 예외를 전파한다.
+
+같은 트랜잭션 안에서 던지면 마킹도 함께 롤백되기 때문에 트랜잭션을 잘게 쪼갠다. `TransactionTemplate`은 Spring 프록시를 거치지 않아 한 클래스 안에서 self-invocation 함정 없이 안전하게 분리된다.
+
+### 사용자 회복 동선
+
+"내 예약" 페이지(`GET /api/v1/reservations`) 응답이 결제 정보를 함께 내려준다(`orderId`, `paymentKey`, `amount`, `paymentStatus`).
+
+- `paymentStatus = DONE` → "결제 완료" pill.
+- `paymentStatus = UNCONFIRMED` → "확인 필요" pill + ↻ "다시 확인" 버튼.
+- `paymentStatus = READY` → "결제 대기" pill.
+
+"다시 확인"은 같은 `paymentKey` / `orderId` / `amount`로 `POST /api/v1/payments/confirm`을 재호출한다. 토스 측 멱등성과 `Idempotency-Key`로 이중 청구가 발생하지 않으며, 우리 서버는 `confirmAfterRecovery`로 `UNCONFIRMED → DONE` 전이 후 예약을 `CONFIRMED`로 마무리한다.
+
+### 한계와 후속
+
+`UNCONFIRMED`인데 `paymentKey`가 비어 있는 경우(클라이언트가 키를 받기도 전에 끊긴 흐름)는 자동 회복 대상이 아니다. 화면에서 "다시 확인" 버튼이 비활성화되며, 사용자는 결제창에서 다시 진행하거나 운영자가 수동 정정한다. 결제 조회 API를 도입하는 다음 사이클에서, `UNCONFIRMED` 주문의 실제 상태를 토스에 직접 물어 자동 정정하는 보상 흐름으로 확장할 수 있다.

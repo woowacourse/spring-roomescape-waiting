@@ -61,7 +61,7 @@ CREATE TABLE payment_order
     amount         BIGINT       NOT NULL CHECK (amount > 0),
     payment_key    VARCHAR(200),
     status         VARCHAR(20)  NOT NULL DEFAULT 'READY'
-        CHECK (status IN ('READY', 'DONE')),
+        CHECK (status IN ('READY', 'UNCONFIRMED', 'DONE')),
     created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     CONSTRAINT uq_payment_order_order_id UNIQUE (order_id),
