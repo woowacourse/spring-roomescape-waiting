@@ -2,19 +2,24 @@ package roomescape.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.payment.domain.PaymentOrder;
+import roomescape.payment.domain.PaymentOrderRepository;
+import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeDao;
+import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
 import roomescape.reservationwait.ReservationWaitDao;
 import roomescape.member.Member;
 import roomescape.reservationhistory.ReservationHistoryService;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.reservation.exception.ReservationAlreadyExistsException;
-import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
-import roomescape.payment.domain.PaymentOrderRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -39,6 +44,17 @@ public class ReservationService {
 
     public List<Reservation> getReservations(Long memberId) {
         return reservationDao.findAllReservationsByMemberId(memberId);
+    }
+
+    public List<ReservationResponse> getReservationsWithPayments(Long memberId) {
+        List<Reservation> reservations = reservationDao.findAllReservationsByMemberId(memberId);
+        List<Long> reservationIds = reservations.stream().map(Reservation::getId).toList();
+        Map<Long, PaymentOrder> byReservationId = paymentOrderRepository.findAllByReservationIdIn(reservationIds)
+                .stream()
+                .collect(Collectors.toMap(PaymentOrder::getReservationId, Function.identity()));
+        return reservations.stream()
+                .map(r -> ReservationResponse.from(r, byReservationId.get(r.getId())))
+                .toList();
     }
 
     public List<Reservation> findReservationsByStoreId(Long storeId) {

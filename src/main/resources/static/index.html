@@ -1351,6 +1351,8 @@
         PAYMENT500_001: "결제 설정에 문제가 있습니다. 관리자에게 문의해 주세요.",
         PAYMENT502_001: "결제 승인 중 문제가 발생했습니다.",
         PAYMENT503_001: "결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해 주세요.",
+        PAYMENT504_001: "결제 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+        PAYMENT504_002: "결제 결과 확인이 필요합니다. 내 결제 내역에서 상태를 확인해 주세요.",
         THEME404_001: "선택한 테마를 찾을 수 없습니다.",
         THEME409_001: "이미 예약이 존재하는 테마는 삭제할 수 없습니다.",
         COMMON400_001: "입력값이 올바르지 않습니다.",
@@ -1806,6 +1808,35 @@
         }
     }
 
+    function paymentBadge(r) {
+        if (!r.paymentStatus) {
+            return `<span class="pill pill--confirmed">확정</span>`;
+        }
+        switch (r.paymentStatus) {
+            case "DONE":
+                return `<span class="pill pill--confirmed" title="결제 완료${r.amount ? ` · ${r.amount.toLocaleString()}원` : ""}">결제 완료</span>`;
+            case "UNCONFIRMED":
+                return `<span class="pill" style="background:#fef3c7;color:#92400e;" title="결제 결과 확인 필요">확인 필요</span>`;
+            case "READY":
+                return `<span class="pill" style="background:#dbeafe;color:#1e40af;" title="결제 진행 전 / 미완">결제 대기</span>`;
+            default:
+                return `<span class="pill pill--confirmed">확정</span>`;
+        }
+    }
+
+    function paymentReconfirmButton(r) {
+        if (r.paymentStatus !== "UNCONFIRMED") return "";
+        if (!r.paymentKey) {
+            return `<button type="button" class="btn-icon" disabled title="결제창에서 다시 시도해 주세요" aria-label="결제 키 없음">↻</button>`;
+        }
+        return `<button type="button" class="btn-icon"
+                data-reconfirm="1"
+                data-payment-key="${r.paymentKey}"
+                data-order-id="${r.orderId}"
+                data-amount="${r.amount}"
+                title="결제 결과를 다시 확인합니다" aria-label="결제 다시 확인">↻</button>`;
+    }
+
     async function loadMyReservations() {
         try {
             const data = await getJson("/api/v1/reservations");
@@ -1841,7 +1872,8 @@
                             </div>
                         </div>
                         <div class="row-actions">
-                            <span class="pill pill--confirmed">확정</span>
+                            ${paymentBadge(r)}
+                            ${paymentReconfirmButton(r)}
                             <button type="button" class="btn-icon" data-cancel-id="${r.id}" title="예약 취소" aria-label="예약 취소">✕</button>
                         </div>
                     </div>
@@ -1856,6 +1888,22 @@
                             await loadMyReservations();
                         } catch (e) {
                             setStatus(userStatus, "error", e.message);
+                        }
+                    });
+                });
+
+                myReservationsList.querySelectorAll("[data-reconfirm]").forEach(el => {
+                    el.addEventListener("click", async () => {
+                        try {
+                            await postJson("/api/v1/payments/confirm", {
+                                paymentKey: el.dataset.paymentKey,
+                                orderId: el.dataset.orderId,
+                                amount: Number(el.dataset.amount),
+                            });
+                            setStatus(userStatus, "success", "결제가 확인되었습니다.");
+                            await loadMyReservations();
+                        } catch (e) {
+                            setStatus(userStatus, "error", e.message || "결제 확인에 실패했습니다.");
                         }
                     });
                 });

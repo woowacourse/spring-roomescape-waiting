@@ -42,8 +42,37 @@ public class PaymentOrder {
                 PaymentOrderStatus.DONE, createdAt);
     }
 
+    public PaymentOrder markUnconfirmed(String attemptedPaymentKey) {
+        if (status != PaymentOrderStatus.READY) {
+            throw new IllegalStateException("READY 상태의 결제 주문만 결과 불명확으로 표시할 수 있습니다.");
+        }
+        if (attemptedPaymentKey == null || attemptedPaymentKey.isBlank()) {
+            throw new IllegalArgumentException("결제 키는 비어 있을 수 없습니다.");
+        }
+        return new PaymentOrder(id, orderId, reservationId, amount, attemptedPaymentKey,
+                PaymentOrderStatus.UNCONFIRMED, createdAt);
+    }
+
+    public PaymentOrder confirmAfterRecovery(String approvedPaymentKey) {
+        if (status != PaymentOrderStatus.UNCONFIRMED) {
+            throw new IllegalStateException("결과 불명확 상태의 결제 주문만 회복 확정할 수 있습니다.");
+        }
+        if (approvedPaymentKey == null || approvedPaymentKey.isBlank()) {
+            throw new IllegalArgumentException("결제 키는 비어 있을 수 없습니다.");
+        }
+        if (!paymentKey.equals(approvedPaymentKey)) {
+            throw new IllegalStateException("결제 키가 일치하지 않습니다.");
+        }
+        return new PaymentOrder(id, orderId, reservationId, amount, approvedPaymentKey,
+                PaymentOrderStatus.DONE, createdAt);
+    }
+
     public boolean isDone() {
         return status == PaymentOrderStatus.DONE;
+    }
+
+    public boolean isUnconfirmed() {
+        return status == PaymentOrderStatus.UNCONFIRMED;
     }
 
     public Long getId() {

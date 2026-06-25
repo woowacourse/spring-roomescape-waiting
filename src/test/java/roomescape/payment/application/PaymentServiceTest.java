@@ -23,6 +23,7 @@ import roomescape.payment.domain.PaymentGateway;
 import roomescape.payment.domain.PaymentResult;
 import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentGatewayResponseTimeoutException;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -94,6 +95,43 @@ class PaymentServiceTest {
 
         assertThat(retried.status()).isEqualTo(PaymentStatus.DONE);
         verify(paymentGateway, times(1)).confirm(any());
+        assertThat(value("SELECT COUNT(*) FROM reservation_history", Integer.class)).isEqualTo(1);
+    }
+
+    @Test
+    void read_timeout이_재시도_끝까지_계속되면_PaymentOrder가_UNCONFIRMED로_저장되고_예외가_전파된다() {
+        PaymentCheckout checkout = prepare();
+        given(paymentGateway.confirm(any())).willThrow(new PaymentGatewayResponseTimeoutException());
+
+        assertThatThrownBy(() -> paymentService.confirm(1L, "payment-key", checkout.orderId(), 50_000L))
+                .isInstanceOf(PaymentGatewayResponseTimeoutException.class);
+
+        verify(paymentGateway, times(3)).confirm(any());
+        assertThat(value("SELECT status FROM payment_order WHERE reservation_id = 1", String.class))
+                .isEqualTo("UNCONFIRMED");
+        assertThat(value("SELECT payment_key FROM payment_order WHERE reservation_id = 1", String.class))
+                .isEqualTo("payment-key");
+        assertThat(value("SELECT status FROM reservation WHERE id = 1", String.class)).isEqualTo("PENDING");
+        assertThat(value("SELECT COUNT(*) FROM reservation_history", Integer.class)).isZero();
+    }
+
+    @Test
+    void UNCONFIRMED_주문에_같은_paymentKey로_재confirm하면_DONE으로_복구되고_예약은_CONFIRMED로_전환된다() {
+        PaymentCheckout checkout = prepare();
+        given(paymentGateway.confirm(any()))
+                .willThrow(new PaymentGatewayResponseTimeoutException())
+                .willThrow(new PaymentGatewayResponseTimeoutException())
+                .willThrow(new PaymentGatewayResponseTimeoutException())
+                .willReturn(new PaymentResult("payment-key", checkout.orderId(), PaymentStatus.DONE, 50_000L));
+
+        assertThatThrownBy(() -> paymentService.confirm(1L, "payment-key", checkout.orderId(), 50_000L))
+                .isInstanceOf(PaymentGatewayResponseTimeoutException.class);
+
+        PaymentResult result = paymentService.confirm(1L, "payment-key", checkout.orderId(), 50_000L);
+
+        assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
+        assertThat(value("SELECT status FROM payment_order WHERE reservation_id = 1", String.class)).isEqualTo("DONE");
+        assertThat(value("SELECT status FROM reservation WHERE id = 1", String.class)).isEqualTo("CONFIRMED");
         assertThat(value("SELECT COUNT(*) FROM reservation_history", Integer.class)).isEqualTo(1);
     }
 
