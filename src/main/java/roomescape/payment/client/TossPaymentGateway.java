@@ -1,6 +1,7 @@
 package roomescape.payment.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.SocketTimeoutException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -49,8 +50,22 @@ public class TossPaymentGateway implements PaymentGateway {
         } catch (ResourceAccessException e) {
             throw new PaymentConnectionException("결제 서버에 연결하지 못했습니다.", e);
         } catch (RestClientException e) {
-            throw new PaymentTimeoutException("결제 승인 응답을 받지 못해 결과가 불확실합니다.", e);
+            if (isReadTimeout(e)) {
+                throw new PaymentTimeoutException("결제 승인 응답을 받지 못해 결과가 불확실합니다.", e);
+            }
+            throw e;
         }
+    }
+
+    private boolean isReadTimeout(Throwable e) {
+        Throwable cause = e;
+        while (cause != null) {
+            if (cause instanceof SocketTimeoutException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     @Override
