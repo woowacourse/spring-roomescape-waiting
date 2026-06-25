@@ -47,19 +47,19 @@ public class Payment {
     }
 
     public Payment confirm(String paymentKey) {
-        if (status != PaymentStatus.READY) {
-            throw new IllegalStateException("결제 대기 상태에서만 승인할 수 있습니다.");
+        if (!canConfirm()) {
+            throw new IllegalStateException("결제 대기 또는 확인 필요 상태에서만 승인할 수 있습니다.");
         }
         if (paymentKey == null || paymentKey.isBlank()) {
             throw new IllegalArgumentException("paymentKey는 비어 있을 수 없습니다.");
         }
         return new Payment(id, reservationId, orderId, amount, paymentKey, PaymentStatus.CONFIRMED,
-                failureCode, failureMessage);
+                null, null);
     }
 
     public Payment fail(String failureCode, String failureMessage) {
-        if (status != PaymentStatus.READY) {
-            throw new IllegalStateException("결제 대기 상태에서만 실패 처리할 수 있습니다.");
+        if (!canConfirm()) {
+            throw new IllegalStateException("결제 대기 또는 확인 필요 상태에서만 실패 처리할 수 있습니다.");
         }
         PaymentStatus failedStatus = "PAY_PROCESS_CANCELED".equals(failureCode)
                 ? PaymentStatus.CANCELED
@@ -69,8 +69,8 @@ public class Payment {
     }
 
     public Payment checkRequired(String failureCode, String failureMessage) {
-        if (status != PaymentStatus.READY) {
-            throw new IllegalStateException("결제 대기 상태에서만 확인 필요 처리할 수 있습니다.");
+        if (!canConfirm()) {
+            throw new IllegalStateException("결제 대기 또는 확인 필요 상태에서만 확인 필요 처리할 수 있습니다.");
         }
         return new Payment(id, reservationId, orderId, amount, paymentKey, PaymentStatus.CHECK_REQUIRED,
                 failureCode, failureMessage);
@@ -154,5 +154,9 @@ public class Payment {
                 && (failureCode == null || failureCode.isBlank())) {
             throw new IllegalArgumentException("실패, 취소 또는 확인 필요 결제는 실패 코드가 필요합니다.");
         }
+    }
+
+    private boolean canConfirm() {
+        return status == PaymentStatus.READY || status == PaymentStatus.CHECK_REQUIRED;
     }
 }

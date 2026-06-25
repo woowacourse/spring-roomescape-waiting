@@ -146,6 +146,28 @@ class PaymentServiceTest {
     }
 
     @Test
+    void 확인_필요_상태의_결제도_같은_주문으로_승인을_재시도할_수_있다() {
+        Payment payment = Payment.restore(1L, 1L, "payment_check_required_123456789", 20_000L,
+                null, PaymentStatus.CHECK_REQUIRED,
+                "PAYMENT_CONFIRMATION_UNKNOWN", "결제 승인 결과를 확인할 수 없습니다.");
+        PaymentConfirmation confirmation = new PaymentConfirmation("test_payment_key", payment.getOrderId(), 20_000L);
+        PaymentResult result = new PaymentResult("test_payment_key", payment.getOrderId(), PaymentStatus.CONFIRMED, 20_000L);
+        when(paymentRepository.findByOrderId(payment.getOrderId())).thenReturn(Optional.of(payment));
+        when(paymentGateway.confirm(confirmation)).thenReturn(result);
+
+        PaymentResult actual = paymentService.confirm("test_payment_key", payment.getOrderId(), 20_000L);
+
+        assertThat(actual).isEqualTo(result);
+        verify(paymentGateway).confirm(confirmation);
+        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository).update(paymentCaptor.capture());
+        assertThat(paymentCaptor.getValue().getStatus()).isEqualTo(PaymentStatus.CONFIRMED);
+        assertThat(paymentCaptor.getValue().getPaymentKey()).isEqualTo("test_payment_key");
+        assertThat(paymentCaptor.getValue().getFailureCode()).isNull();
+        verify(reservationService).confirmPayment(1L);
+    }
+
+    @Test
     void 확정적인_승인_실패는_결제를_실패_상태로_저장한다() {
         Payment payment = readyPayment();
         PaymentConfirmation confirmation = new PaymentConfirmation("test_payment_key", payment.getOrderId(), 20_000L);

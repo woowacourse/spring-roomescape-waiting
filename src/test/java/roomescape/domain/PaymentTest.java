@@ -50,4 +50,18 @@ class PaymentTest {
         assertThat(checkRequiredPayment.getStatus()).isEqualTo(PaymentStatus.CHECK_REQUIRED);
         assertThat(checkRequiredPayment.getFailureCode()).isEqualTo("PAYMENT_CONFIRMATION_UNKNOWN");
     }
+
+    @Test
+    void 결제_승인_결과_확인이_필요한_결제를_승인하면_실패_정보를_초기화한다() {
+        Payment payment = Payment.restore(1L, 1L, "payment_check_required_123456789", 20_000L,
+                null, PaymentStatus.CHECK_REQUIRED,
+                "PAYMENT_CONFIRMATION_UNKNOWN", "결제 승인 결과를 확인할 수 없습니다.");
+
+        Payment confirmedPayment = payment.confirm("test_payment_key");
+
+        assertThat(confirmedPayment.getStatus()).isEqualTo(PaymentStatus.CONFIRMED);
+        assertThat(confirmedPayment.getPaymentKey()).isEqualTo("test_payment_key");
+        assertThat(confirmedPayment.getFailureCode()).isNull();
+        assertThat(confirmedPayment.getFailureMessage()).isNull();
+    }
 }
