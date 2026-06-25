@@ -12,6 +12,7 @@ import roomescape.domain.PaymentResult;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -35,6 +36,7 @@ class TossPaymentGatewayTest {
     void confirm은_성공_응답을_PaymentResult로_변환한다() {
         server.expect(requestTo(CONFIRM_URL))
                 .andExpect(method(POST))
+                .andExpect(header("Idempotency-Key", "order-1"))
                 .andRespond(withSuccess(
                         "{\"paymentKey\":\"pk_1\",\"orderId\":\"order-1\",\"totalAmount\":50000}",
                         MediaType.APPLICATION_JSON

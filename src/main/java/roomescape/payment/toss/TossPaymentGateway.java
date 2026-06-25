@@ -14,6 +14,7 @@ import roomescape.payment.toss.dto.TossPaymentResponse;
 public class TossPaymentGateway implements PaymentGateway {
 
     private static final String CONFIRM_PATH = "/v1/payments/confirm";
+    private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
 
     private final RestClient tossRestClient;
 
@@ -32,6 +33,7 @@ public class TossPaymentGateway implements PaymentGateway {
         TossPaymentResponse response = tossRestClient.post()
                 .uri(CONFIRM_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(IDEMPOTENCY_KEY_HEADER, confirmation.orderId())
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (req, res) -> {
