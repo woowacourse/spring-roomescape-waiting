@@ -65,15 +65,15 @@ class ReservationServiceTest {
       // stubbing
       when(reservationTimeDao.findById(any())).thenReturn(null);
       when(reservationDao.findByDateTimeThemeStatus(DATE, TIME_ID, THEME_ID)).thenReturn(false);
-      when(reservationDao.insert(NAME, LocalDate.parse(DATE), TIME_ID, THEME_ID, ReservationStatus.RESERVED))
+      when(reservationDao.insert(NAME, LocalDate.parse(DATE), TIME_ID, THEME_ID, ReservationStatus.PENDING))
           .thenReturn(
-              Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED));
+              Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.PENDING));
 
       // when
       ReservationCreateResponse response = reservationService.create(request);
 
       // then
-      assertThat(response.status()).isEqualTo(ReservationStatus.RESERVED);
+      assertThat(response.status()).isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test

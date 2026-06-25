@@ -134,7 +134,7 @@ public class ReservationApiTest {
         .when().post("/reservations")
         .then().log().all()
         .statusCode(201)
-        .body("status", is("RESERVED"));
+        .body("status", is("PENDING"));
   }
 
   @Test
@@ -207,7 +207,7 @@ public class ReservationApiTest {
         .when().post("/reservations")
         .then().log().all()
         .statusCode(201)
-        .body("status", is("RESERVED"));
+        .body("status", is("PENDING"));
   }
 
   @Test

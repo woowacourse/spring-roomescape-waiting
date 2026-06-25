@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS payment;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
-DROP TABLE IF EXISTS payment;
 
 CREATE TABLE reservation_time
 (
