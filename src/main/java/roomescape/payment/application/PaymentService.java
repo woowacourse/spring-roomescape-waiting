@@ -18,8 +18,6 @@ import roomescape.payment.domain.PaymentOrderRepository;
 import roomescape.payment.domain.PaymentResult;
 import roomescape.payment.domain.PaymentStatus;
 import roomescape.payment.domain.exception.PaymentAlreadyProcessedException;
-import roomescape.payment.domain.exception.PaymentAmountMismatchException;
-import roomescape.payment.domain.exception.PaymentGatewayException;
 import roomescape.payment.domain.exception.PaymentGatewayResponseTimeoutException;
 import roomescape.payment.domain.exception.PaymentNotFoundException;
 import roomescape.payment.domain.exception.PaymentOwnerMismatchException;
@@ -123,7 +121,7 @@ public class PaymentService {
         PaymentOrder order = findPaymentOrder(orderId);
         Reservation reservation = findReservation(order.getReservationId());
         validateOwner(reservation, memberId);
-        validateAmount(order, amount);
+        order.requireAmount(amount);
 
         if (order.isDone()) {
             if (order.getPaymentKey().equals(paymentKey)) {
@@ -140,16 +138,13 @@ public class PaymentService {
 
     private PaymentResult finalizeConfirm(String orderId, String paymentKey, Long memberId, PaymentResult result) {
         PaymentOrder order = findPaymentOrder(orderId);
-        validateResult(order, paymentKey, result);
+        order.requireMatchingResult(paymentKey, result);
 
         if (order.isDone()) {
             return result;
         }
 
-        PaymentOrder completed = order.isUnconfirmed()
-                ? order.confirmAfterRecovery(result.paymentKey())
-                : order.complete(result.paymentKey());
-        paymentOrderRepository.update(completed);
+        paymentOrderRepository.update(order.confirmWith(result.paymentKey()));
 
         Reservation reservation = findReservation(order.getReservationId());
         if (!reservation.isConfirmed()) {
@@ -200,22 +195,6 @@ public class PaymentService {
     private void validateOwner(Reservation reservation, Long memberId) {
         if (!reservation.isReservedBy(memberId)) {
             throw new PaymentOwnerMismatchException();
-        }
-    }
-
-    private void validateAmount(PaymentOrder order, Long amount) {
-        if (!order.getAmount().equals(amount)) {
-            throw new PaymentAmountMismatchException();
-        }
-    }
-
-    private void validateResult(PaymentOrder order, String paymentKey, PaymentResult result) {
-        if (result == null
-                || result.status() != PaymentStatus.DONE
-                || !order.getOrderId().equals(result.orderId())
-                || !order.getAmount().equals(result.approvedAmount())
-                || !paymentKey.equals(result.paymentKey())) {
-            throw new PaymentGatewayException();
         }
     }
 

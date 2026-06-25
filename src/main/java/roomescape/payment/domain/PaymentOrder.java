@@ -2,6 +2,8 @@ package roomescape.payment.domain;
 
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
+import roomescape.payment.domain.exception.PaymentAmountMismatchException;
+import roomescape.payment.domain.exception.PaymentGatewayException;
 
 public class PaymentOrder {
 
@@ -65,6 +67,28 @@ public class PaymentOrder {
         }
         return new PaymentOrder(id, orderId, reservationId, amount, approvedPaymentKey,
                 PaymentOrderStatus.DONE, createdAt);
+    }
+
+    public PaymentOrder confirmWith(String approvedPaymentKey) {
+        return isUnconfirmed()
+                ? confirmAfterRecovery(approvedPaymentKey)
+                : complete(approvedPaymentKey);
+    }
+
+    public void requireAmount(Long requested) {
+        if (!this.amount.equals(requested)) {
+            throw new PaymentAmountMismatchException();
+        }
+    }
+
+    public void requireMatchingResult(String attemptedPaymentKey, PaymentResult result) {
+        if (result == null
+                || result.status() != PaymentStatus.DONE
+                || !this.orderId.equals(result.orderId())
+                || !this.amount.equals(result.approvedAmount())
+                || !attemptedPaymentKey.equals(result.paymentKey())) {
+            throw new PaymentGatewayException();
+        }
     }
 
     public boolean isDone() {
