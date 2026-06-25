@@ -526,9 +526,51 @@
       color: #7dd3fc;
     }
 
+    .reservation-status.payment-confirmed {
+      background: rgba(34, 197, 94, 0.1);
+      color: #86efac;
+    }
+
+    .reservation-status.payment-failed {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+    }
+
+    .reservation-status.payment-unknown {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+    }
+
     .reservation-status.waiting {
       background: rgba(245, 158, 11, 0.12);
       color: #fbbf24;
+    }
+
+    .payment-detail {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .payment-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      max-width: 100%;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    .payment-chip strong {
+      color: #d1d5db;
+      font-weight: 700;
     }
 
     /* Empty state */
@@ -825,14 +867,14 @@
   let cachedThemes = null;
   let cachedAdminReservations = null;
 
-  function init() {
+  async function init() {
     username = localStorage.getItem('username');
     if (!username) {
       window.location.href = '/index.html';
       return;
     }
     document.getElementById('headerName').textContent = username;
-    handlePaymentRedirect();
+    if (await handlePaymentRedirect()) return;
     switchSection('popular');
   }
 
@@ -843,25 +885,32 @@
     const amount = params.get('amount');
     if (paymentKey && orderId && amount) {
       try {
+        storePendingConfirm({ paymentKey, orderId, amount: Number(amount) });
         await fetchEmpty(`${API}/payments/confirm`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) })
         }, '결제 승인에 실패했습니다.');
+        clearPendingConfirm();
         clearPendingPayment();
         showMessageModal('결제 완료', '결제가 승인되었습니다.');
       } catch (e) {
-        showMessageModal('결제 승인 실패', e.message);
+        showMessageModal(
+          e.code === 'PAYMENT_504' ? '결제 확인 필요' : '결제 승인 실패',
+          e.message
+        );
       }
       window.history.replaceState({}, document.title, window.location.pathname);
-      return;
+      switchSection('my');
+      return true;
     }
 
     const paymentResult = params.get('payment');
     if (paymentResult === 'success') {
       showMessageModal('결제 인증 완료', '결제 인증이 완료되었습니다. 서버 승인 API 연동이 완료되면 이 단계에서 예약이 확정됩니다.');
       window.history.replaceState({}, document.title, window.location.pathname);
-      return;
+      switchSection('my');
+      return true;
     }
 
     if (paymentResult === 'fail') {
@@ -883,7 +932,11 @@
         : '';
       showMessageModal('결제 실패', message, actions);
       window.history.replaceState({}, document.title, window.location.pathname);
+      switchSection('my');
+      return true;
     }
+
+    return false;
   }
 
   function logout() {
@@ -1451,6 +1504,7 @@
           <div class="reservationSlotInfo-info">
             <div class="reservationSlotInfo-theme">${r.themeName}</div>
             <div class="reservationSlotInfo-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
+            ${paymentDetail(r)}
           </div>
           <div class="reservationSlotInfo-actions">${reservationActions(r)}</div>
         </div>
@@ -1510,8 +1564,57 @@
     return String(r.status ?? '').toUpperCase() === 'PAYMENT_PENDING';
   }
 
+  function storePendingConfirm(confirmRequest) {
+    sessionStorage.setItem('pendingConfirm', JSON.stringify(confirmRequest));
+  }
+
+  function clearPendingConfirm() {
+    sessionStorage.removeItem('pendingConfirm');
+  }
+
+  function getPendingConfirm() {
+    try {
+      const confirmRequest = JSON.parse(sessionStorage.getItem('pendingConfirm') || 'null');
+      if (!confirmRequest?.paymentKey || !confirmRequest?.orderId || !confirmRequest?.amount) return null;
+      return confirmRequest;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function retryPendingConfirm(orderId = null) {
+    const confirmRequest = getPendingConfirm();
+    if (!confirmRequest || (orderId && confirmRequest.orderId !== orderId)) {
+      return false;
+    }
+
+    try {
+      await fetchEmpty(`${API}/payments/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(confirmRequest)
+      }, '결제 결과 확인에 실패했습니다.');
+      clearPendingConfirm();
+      clearPendingPayment();
+      showMessageModal('결제 완료', '결제가 승인되었습니다.');
+      await loadMyReservations();
+      return true;
+    } catch (e) {
+      showMessageModal('결제 확인 필요', e.message);
+      await loadMyReservations();
+      return true;
+    }
+  }
+
+  function paymentState(r) {
+    return String(r.paymentStatus ?? '').toUpperCase();
+  }
+
   function reservationState(r) {
     if (isCanceledReservation(r)) return 'canceled';
+    if (paymentState(r) === 'CONFIRMED') return 'payment-confirmed';
+    if (paymentState(r) === 'FAILED') return 'payment-failed';
+    if (paymentState(r) === 'UNKNOWN') return 'payment-unknown';
     if (isPaymentPendingReservation(r)) return 'payment-pending';
     return Number(r.order ?? 0) > 0 ? 'waiting' : 'confirmed';
   }
@@ -1519,6 +1622,9 @@
   function reservationStatusLabel(r) {
     const state = reservationState(r);
     if (state === 'canceled') return '예약 취소';
+    if (state === 'payment-confirmed') return '결제 확정';
+    if (state === 'payment-failed') return '결제 실패';
+    if (state === 'payment-unknown') return '확인 필요';
     if (state === 'payment-pending') return '결제 대기';
     if (state === 'waiting') return '대기';
     return '예약 확정';
@@ -1534,10 +1640,10 @@
       return reservationStatusBadge(r);
     }
 
-    if (isPaymentPendingReservation(r)) {
+    if (isPaymentPendingReservation(r) || paymentState(r) === 'FAILED' || paymentState(r) === 'UNKNOWN') {
       return `
         ${reservationStatusBadge(r)}
-        <button class="btn btn-accent" onclick="payPendingReservation(${JSON.stringify(r).replace(/"/g,'&quot;')})">결제하기</button>
+        <button class="btn btn-accent" onclick="payPendingReservation(${JSON.stringify(r).replace(/"/g,'&quot;')})">${paymentActionLabel(r)}</button>
         <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
         <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
       `;
@@ -1550,7 +1656,35 @@
     `;
   }
 
+  function paymentDetail(r) {
+    if (isCanceledReservation(r)) return '';
+
+    const chips = [];
+    if (r.paymentStatus) chips.push(paymentChip('상태', paymentStatusLabel(r.paymentStatus)));
+    if (r.orderId) chips.push(paymentChip('orderId', r.orderId));
+    if (r.paymentKey) chips.push(paymentChip('paymentKey', r.paymentKey));
+    if (r.amount) chips.push(paymentChip('금액', formatCurrency(r.amount)));
+    return chips.length ? `<div class="payment-detail">${chips.join('')}</div>` : '';
+  }
+
+  function paymentChip(label, value) {
+    return `<span class="payment-chip"><strong>${label}</strong>${value}</span>`;
+  }
+
+  function paymentStatusLabel(status) {
+    const normalized = String(status ?? '').toUpperCase();
+    if (normalized === 'PENDING') return '결제 대기';
+    if (normalized === 'CONFIRMED') return '확정(CONFIRMED)';
+    if (normalized === 'FAILED') return '실패';
+    if (normalized === 'UNKNOWN') return '확인 필요';
+    return status;
+  }
+
   async function payPendingReservation(reservation) {
+    if (paymentState(reservation) === 'UNKNOWN' && await retryPendingConfirm(reservation.orderId)) {
+      return;
+    }
+
     const payment = extractPaymentInfo(reservation);
     if (!payment.orderId || !payment.amount) {
       showToast('결제 주문 정보를 찾을 수 없습니다.', 'error');
@@ -1563,6 +1697,12 @@
       orderName: `${reservation.themeName} 예약`,
       customerName: reservation.name || username
     });
+  }
+
+  function paymentActionLabel(r) {
+    if (paymentState(r) === 'UNKNOWN') return '다시 확인';
+    if (paymentState(r) === 'FAILED') return '다시 결제';
+    return '결제하기';
   }
 
   async function deleteMyReservation(id) {
