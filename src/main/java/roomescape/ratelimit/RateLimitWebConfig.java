@@ -1,5 +1,6 @@
 package roomescape.ratelimit;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -12,17 +13,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class RateLimitWebConfig implements WebMvcConfigurer {
 
     private final TokenBucketRateLimiter rateLimiter;
+    private final ObjectMapper objectMapper;
 
     public RateLimitWebConfig(
+            ObjectMapper objectMapper,
             @Value("${rate-limit.capacity:100}") long capacity,
             @Value("${rate-limit.refill-per-second:100}") double refillPerSecond
     ) {
+        this.objectMapper = objectMapper;
         this.rateLimiter = new TokenBucketRateLimiter(capacity, refillPerSecond, System::nanoTime);
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new RateLimitInterceptor(rateLimiter))
+        registry.addInterceptor(new RateLimitInterceptor(rateLimiter, objectMapper))
                 .addPathPatterns("/reservations", "/reservations/*/payments", "/payments/success");
     }
 }

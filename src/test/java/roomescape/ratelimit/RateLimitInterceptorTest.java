@@ -2,7 +2,9 @@ package roomescape.ratelimit;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -31,7 +33,10 @@ class RateLimitInterceptorTest {
 
         mockMvc.perform(post("/reservations").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(header().exists("Retry-After"));
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value("TOO_MANY_REQUESTS"))
+                .andExpect(jsonPath("$.detail").exists());
     }
 
     @Test

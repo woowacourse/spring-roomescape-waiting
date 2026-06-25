@@ -18,6 +18,7 @@ public enum ErrorCode {
     PAYMENT_RETRY_NOT_ALLOWED(HttpStatus.CONFLICT, "결제를 다시 시도할 수 없는 예약입니다."),
     PAYMENT_CONFIRMATION_NOT_ALLOWED(HttpStatus.CONFLICT, "결제 승인을 진행할 수 없는 상태입니다."),
     TEMPORARY_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요."),
+    TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "요청이 많아 처리하지 못했습니다. 잠시 후 다시 시도해주세요."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 발생했습니다.");
 
     private final HttpStatus status;
