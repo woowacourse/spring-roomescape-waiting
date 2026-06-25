@@ -15,6 +15,7 @@ import roomescape.order.service.OrderService;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.dto.request.ConfirmRequest;
 import roomescape.payment.exception.PaymentAmountMismatchException;
+import roomescape.payment.exception.PaymentResultUnknownException;
 import roomescape.payment.service.PaymentService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -148,9 +149,16 @@ public class ReservationFacade {
         if (!order.amount().equals(request.amount())) {
             throw new PaymentAmountMismatchException("요청 금액과 인증 금액이 일치하지 않습니다.");
         }
-        paymentService.approve(order.reservationId(), new PaymentConfirmation(request.paymentKey(),
-            request.orderId(), request.amount()));
-        reservationService.confirm(order.reservationId());
+        try {
+            paymentService.approve(order.reservationId(),
+                new PaymentConfirmation(request.paymentKey(),
+                    request.orderId(), request.amount()));
+            reservationService.confirm(order.reservationId());
+        } catch (PaymentResultUnknownException e) {
+            paymentService.saveUnknown(order.reservationId(),
+                request.paymentKey(), request.orderId(), request.amount());
+            throw e;
+        }
     }
 
     @Transactional

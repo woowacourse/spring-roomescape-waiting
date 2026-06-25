@@ -50,6 +50,7 @@ CREATE TABLE payment
     payment_key    VARCHAR(255) NOT NULL UNIQUE,
     order_id       VARCHAR(255) NOT NULL,
     amount         BIGINT       NOT NULL,
+    status         VARCHAR(50)  NOT NULL DEFAULT 'DONE',
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import roomescape.payment.domain.PaymentStatus;
 import roomescape.reservation.dao.dto.ReservationWithRank;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -182,20 +183,23 @@ public class ReservationDao {
   }
 
   public List<ReservationWithRank> findAllByName(String name) {
-    String sql = "with waiting_rank as ( "
-        + "  select id, rank() over (partition by date, time_id, theme_id order by id) as wait_rank "
-        + "  from reservation "
-        + "  where status = 'WAITING' "
+    String sql = "WITH waiting_rank AS ( "
+        + "  SELECT id, RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY id) AS wait_rank "
+        + "  FROM reservation WHERE status = 'WAITING' "
         + ") "
-        + "select r.id, r.name, r.date, r.status, "
-        + "       t.id as time_id, t.start_at, "
-        + "       th.id as theme_id, th.name as theme_name, "
-        + "       wr.wait_rank "
-        + "from reservation r "
-        + "inner join reservation_time t on r.time_id = t.id "
-        + "inner join theme th           on r.theme_id = th.id "
-        + "left  join waiting_rank wr    on r.id = wr.id "
-        + "where r.name = ?";
+        + "SELECT r.id, r.name, r.date, r.status, "
+        + "       t.id AS time_id, t.start_at, "
+        + "       th.id AS theme_id, th.name AS theme_name, "
+        + "       wr.wait_rank, "
+        + "       o.order_id, "
+        + "       p.payment_key, p.amount AS payment_amount, p.status AS payment_status "
+        + "FROM reservation r "
+        + "INNER JOIN reservation_time t ON r.time_id = t.id "
+        + "INNER JOIN theme th           ON r.theme_id = th.id "
+        + "LEFT  JOIN waiting_rank wr    ON r.id = wr.id "
+        + "LEFT  JOIN orders o           ON r.id = o.reservation_id "
+        + "LEFT  JOIN payment p          ON r.id = p.reservation_id "
+        + "WHERE r.name = ?";
 
     return jdbcTemplate.query(sql, (rs, rowNum) -> new ReservationWithRank(
         rs.getLong("id"),
@@ -206,7 +210,13 @@ public class ReservationDao {
         rs.getLong("theme_id"),
         rs.getString("theme_name"),
         ReservationStatus.valueOf(rs.getString("status")),
-        rs.getObject("wait_rank", Long.class)
+        rs.getObject("wait_rank", Long.class),
+        rs.getString("order_id"),
+        rs.getString("payment_key"),
+        rs.getObject("payment_amount", Long.class),
+        rs.getString("payment_status") != null
+            ? PaymentStatus.from(rs.getString("payment_status"))
+            : null
     ), name);
   }
 }
