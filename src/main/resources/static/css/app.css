@@ -897,6 +897,12 @@ tbody tr.edit-row:hover {
     background: var(--accent-dim);
 }
 
+.status-badge.failed {
+    border-color: rgba(213,108,91,0.45);
+    color: var(--danger);
+    background: rgba(213,108,91,0.08);
+}
+
 .action-buttons {
     display: flex;
     justify-content: flex-end;
