@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,7 @@ import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.domain.Member;
-import roomescape.domain.PaymentOrder;
+import roomescape.domain.Order;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
@@ -24,7 +25,7 @@ import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationWaitingOrderResponse;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.PaymentOrderRepository;
+import roomescape.repository.OrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
@@ -38,7 +39,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final PaymentOrderRepository paymentOrderRepository;
+    private final OrderRepository orderRepository;
     private final ReservationWaitingService waitingService;
 
     public ReservationService(ReservationRepository reservationRepository,
@@ -46,14 +47,14 @@ public class ReservationService {
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
                               MemberRepository memberRepository,
-                              PaymentOrderRepository paymentOrderRepository,
+                              OrderRepository orderRepository,
                               ReservationWaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.paymentOrderRepository = paymentOrderRepository;
+        this.orderRepository = orderRepository;
         this.waitingService = waitingService;
     }
 
@@ -71,7 +72,7 @@ public class ReservationService {
         Reservation savedReservation = reservationRepository.save(reservation);
 
         String orderId = generateOrderId();
-        paymentOrderRepository.save(PaymentOrder.createWithoutId(orderId, command.amount(), savedReservation));
+        orderRepository.save(Order.createWithoutId(orderId, command.amount(), savedReservation));
 
         return ReservationResponse.from(savedReservation, orderId);
     }
@@ -84,7 +85,10 @@ public class ReservationService {
 
     public List<MyReservationResponse> getMyReservations(Long memberId) {
         List<MyReservationResponse> reservations = reservationRepository.findByMember_Id(memberId).stream()
-                .map(MyReservationResponse::fromReservation)
+                .map(reservation -> MyReservationResponse.fromReservation(
+                        reservation,
+                        orderRepository.findByReservation_Id(reservation.getId()).orElse(null)
+                ))
                 .toList();
         List<MyReservationResponse> reservationWaitings = reservationWaitingRepository.findByMember_IdOrderByCreatedAt(memberId)
                 .stream()
@@ -114,11 +118,12 @@ public class ReservationService {
     @Transactional
     public void delete(Long reservationId) {
         Reservation reservation = getReservation(reservationId);
-        paymentOrderRepository.findByReservation_Id(reservationId)
-                .ifPresent(paymentOrderRepository::delete);
+        Optional<Order> orderOpt = orderRepository.findByReservation_Id(reservationId);
+        Long amount = orderOpt.map(Order::getAmount).orElse(null);
+        orderOpt.ifPresent(orderRepository::delete);
         reservationRepository.deleteById(reservationId);
         reservationRepository.flush();
-        waitingService.promoteFirstWaiting(reservation.getSlot());
+        waitingService.promoteFirstWaiting(reservation.getSlot(), amount);
     }
 
     @Transactional
@@ -126,10 +131,10 @@ public class ReservationService {
         if (orderId == null) {
             return;
         }
-        paymentOrderRepository.findByOrderId(orderId).ifPresent(order -> {
+        orderRepository.findByOrderId(orderId).ifPresent(order -> {
             Reservation reservation = order.getReservation();
-            paymentOrderRepository.delete(order);
-            paymentOrderRepository.flush();
+            orderRepository.delete(order);
+            orderRepository.flush();
             reservationRepository.delete(reservation);
         });
     }

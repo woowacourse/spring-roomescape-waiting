@@ -7,10 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
-public class PaymentOrder {
+@Table(name = "orders")
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,15 +21,17 @@ public class PaymentOrder {
 
     private String orderId;
     private Long amount;
+    private String paymentKey;
+    private String idempotencyKey;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
-    protected PaymentOrder() {
+    protected Order() {
     }
 
-    public PaymentOrder(Long id, String orderId, Long amount, Reservation reservation) {
+    public Order(Long id, String orderId, Long amount, Reservation reservation) {
         Objects.requireNonNull(orderId, "주문 id는 필수값 입니다.");
         Objects.requireNonNull(amount, "결제 금액은 필수값 입니다.");
         Objects.requireNonNull(reservation, "예약은 필수값 입니다.");
@@ -34,10 +39,11 @@ public class PaymentOrder {
         this.orderId = orderId;
         this.amount = amount;
         this.reservation = reservation;
+        this.idempotencyKey = UUID.randomUUID().toString();
     }
 
-    public static PaymentOrder createWithoutId(String orderId, Long amount, Reservation reservation) {
-        return new PaymentOrder(null, orderId, amount, reservation);
+    public static Order createWithoutId(String orderId, Long amount, Reservation reservation) {
+        return new Order(null, orderId, amount, reservation);
     }
 
     public Long getId() {
@@ -56,19 +62,30 @@ public class PaymentOrder {
         return reservation;
     }
 
+    public String getPaymentKey() {
+        return paymentKey;
+    }
+
+    public void updatePaymentKey(String paymentKey) {
+        this.paymentKey = paymentKey;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-
-        PaymentOrder paymentOrder = (PaymentOrder) object;
-        if (id != null && paymentOrder.id != null) {
-            return Objects.equals(id, paymentOrder.id);
+        Order order = (Order) object;
+        if (id != null && order.id != null) {
+            return Objects.equals(id, order.id);
         }
-        return Objects.equals(orderId, paymentOrder.orderId)
-                && Objects.equals(amount, paymentOrder.amount)
-                && Objects.equals(reservation, paymentOrder.reservation);
+        return Objects.equals(orderId, order.orderId)
+                && Objects.equals(amount, order.amount)
+                && Objects.equals(reservation, order.reservation);
     }
 
     @Override

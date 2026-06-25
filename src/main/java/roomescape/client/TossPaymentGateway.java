@@ -2,16 +2,18 @@ package roomescape.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import roomescape.client.dto.ConfirmRequest;
 import roomescape.client.dto.TossErrorResponse;
 import roomescape.client.dto.TossPaymentResponse;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
-import roomescape.domain.PaymentConfirmation;
+import roomescape.dto.request.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
-import roomescape.domain.PaymentResult;
+import roomescape.dto.response.PaymentResult;
 import roomescape.domain.PaymentStatus;
 
 @Component
@@ -32,6 +34,8 @@ public class TossPaymentGateway implements PaymentGateway {
         try {
             TossPaymentResponse response = tossRestClient.post()
                     .uri("/v1/payments/confirm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Idempotency-Key", confirmation.idempotencyKey())
                     .body(request)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (req, res) -> {
@@ -47,6 +51,8 @@ public class TossPaymentGateway implements PaymentGateway {
                     response.totalAmount());
         } catch (AlreadyProcessedPaymentException exception) {
             return new PaymentResult(request.paymentKey(), request.orderId(), PaymentStatus.DONE, request.amount());
+        } catch (RestClientException exception) {
+            return new PaymentResult(request.paymentKey(), request.orderId(), PaymentStatus.NO_RESPONSE, request.amount());
         }
     }
 

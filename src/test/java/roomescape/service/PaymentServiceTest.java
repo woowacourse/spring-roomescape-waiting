@@ -20,10 +20,10 @@ import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
 import roomescape.domain.Member;
-import roomescape.domain.PaymentConfirmation;
+import roomescape.domain.Order;
+import roomescape.dto.request.PaymentConfirmation;
 import roomescape.domain.PaymentGateway;
-import roomescape.domain.PaymentOrder;
-import roomescape.domain.PaymentResult;
+import roomescape.dto.response.PaymentResult;
 import roomescape.domain.PaymentStatus;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
@@ -31,7 +31,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.PaymentOrderRepository;
+import roomescape.repository.OrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -62,7 +62,7 @@ class PaymentServiceTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private PaymentOrderRepository paymentOrderRepository;
+    private OrderRepository orderRepository;
 
     private Long savedReservationId;
 
@@ -76,7 +76,7 @@ class PaymentServiceTest {
                 Reservation.createWithoutId(member, new ReservationSlot(LocalDate.now().plusDays(1), time, theme))
         );
         savedReservationId = reservation.getId();
-        paymentOrderRepository.save(PaymentOrder.createWithoutId("order-1", 10000L, reservation));
+        orderRepository.save(Order.createWithoutId("order-1", 10000L, reservation));
     }
 
     @Test
@@ -97,7 +97,7 @@ class PaymentServiceTest {
         PaymentResult result = paymentService.confirm("test_pk_1", "order-1", 10000L);
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
-        verify(paymentGateway).confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L));
+        verify(paymentGateway).confirm(any(PaymentConfirmation.class));
 
         Reservation updated = reservationRepository.findById(savedReservationId).orElseThrow();
         assertThat(updated.getReservationStatus()).isEqualTo(ReservationStatus.CONFIRMED);

@@ -1,4 +1,6 @@
-package roomescape.domain;
+package roomescape.dto.response;
+
+import roomescape.domain.PaymentStatus;
 
 public record PaymentResult(
         String paymentKey,

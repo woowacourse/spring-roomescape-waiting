@@ -20,7 +20,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.PaymentErrorCode;
-import roomescape.domain.PaymentConfirmation;
+import roomescape.dto.request.PaymentConfirmation;
 import roomescape.domain.PaymentStatus;
 
 @SpringBootTest
@@ -44,6 +44,8 @@ class TossPaymentGatewayTest {
     static void tossProperties(DynamicPropertyRegistry registry) {
         registry.add("toss.base-url", () -> mockWebServer.url("/").toString());
         registry.add("toss.secret-key", () -> "test_gsk_dummy");
+        registry.add("toss.connect-timeout-ms", () -> "1000");
+        registry.add("toss.read-timeout-ms", () -> "1000");
     }
 
     @AfterAll
@@ -74,23 +76,22 @@ class TossPaymentGatewayTest {
                 }
                 """);
 
-        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L));
+        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "test-idempotency-key"));
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.approvedAmount()).isEqualTo(10000L);
     }
 
     @Test
-    void 이미_처리된_결제면_ALREADY_PROCESSED_에러코드의_예외가_던져진다() {
+    void 이미_처리된_결제면_예외_없이_DONE_결과를_반환한다() {
         enqueue(400, """
                 {"code": "ALREADY_PROCESSED_PAYMENT", "message": "이미 처리된 결제 입니다."}
                 """);
 
-        assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
-                .isInstanceOf(RoomEscapeException.class)
-                .satisfies(e -> assertThat(((RoomEscapeException) e).getErrorCode())
-                        .isEqualTo(PaymentErrorCode.ALREADY_PROCESSED));
+        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L, "test-idempotency-key"));
+
+        assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
+        assertThat(result.approvedAmount()).isEqualTo(10000L);
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")
@@ -100,7 +101,7 @@ class TossPaymentGatewayTest {
         enqueue(httpStatus, "{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}");
 
         assertThatThrownBy(() -> tossPaymentGateway.confirm(
-                new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+                new PaymentConfirmation("test_pk_1", "order-1", 10000L, "test-idempotency-key")))
                 .isInstanceOf(RoomEscapeException.class)
                 .satisfies(e -> assertThat(((RoomEscapeException) e).getErrorCode())
                         .isEqualTo(expectedErrorCode));
@@ -108,12 +109,11 @@ class TossPaymentGatewayTest {
 
     static Stream<Arguments> errorCases() {
         return Stream.of(
-                arguments(400, "ALREADY_PROCESSED_PAYMENT",  PaymentErrorCode.ALREADY_PROCESSED),
                 arguments(400, "DUPLICATED_ORDER_ID",         PaymentErrorCode.DUPLICATED_ORDER),
                 arguments(400, "NOT_FOUND_PAYMENT_SESSION",   PaymentErrorCode.SESSION_EXPIRED),
                 arguments(400, "INVALID_REQUEST",             PaymentErrorCode.INVALID_REQUEST),
-                arguments(401, "UNAUTHORIZED_KEY",            PaymentErrorCode.GATEWAY_CONFIG_ERROR),
-                arguments(401, "INVALID_API_KEY",             PaymentErrorCode.GATEWAY_CONFIG_ERROR),
+                arguments(400, "UNAUTHORIZED_KEY",            PaymentErrorCode.GATEWAY_CONFIG_ERROR),
+                arguments(400, "INVALID_API_KEY",             PaymentErrorCode.GATEWAY_CONFIG_ERROR),
                 arguments(403, "REJECT_CARD_PAYMENT",         PaymentErrorCode.CARD_REJECTED),
                 arguments(404, "NOT_FOUND_PAYMENT",           PaymentErrorCode.NOT_FOUND),
                 arguments(500, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", PaymentErrorCode.GATEWAY_INTERNAL_ERROR),

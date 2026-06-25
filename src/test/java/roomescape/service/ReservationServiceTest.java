@@ -27,7 +27,9 @@ import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationStatus;
+import roomescape.domain.Order;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.OrderRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
@@ -57,6 +59,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationWaitingRepository waitingDao;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @BeforeEach
     void setUp() {
@@ -282,6 +287,27 @@ class ReservationServiceTest {
 
         assertThat(reservationRepository.findByMember_Id(roji.getId())).hasSize(1);
         assertThat(waitingDao.findAll()).isEmpty();
+    }
+
+    @Test
+    void 예약_취소_시_대기자가_승격되면_Order가_생성된다() {
+        Member brown = saveMember("브라운");
+        Member roji = saveMember("로지");
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = saveReservation(brown, date, time, theme);
+        orderRepository.save(Order.createWithoutId("order-original", 15000L, reservation));
+        waitingDao.save(ReservationWaiting.createWithoutId(roji, LocalDateTime.now(),
+                new ReservationSlot(date, time, theme)));
+
+        reservationService.delete(reservation.getId());
+
+        Reservation promoted = reservationRepository.findByMember_Id(roji.getId()).getFirst();
+        Order promotedOrder = orderRepository.findByReservation_Id(promoted.getId()).orElseThrow();
+        assertThat(promotedOrder.getAmount()).isEqualTo(15000L);
+        assertThat(promotedOrder.getOrderId()).isNotBlank();
+        assertThat(promotedOrder.getIdempotencyKey()).isNotBlank();
     }
 
     @Test
