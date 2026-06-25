@@ -16,12 +16,10 @@ import roomescape.exception.ErrorCode;
  * 들어오는 요청에 토큰 버킷 Rate Limit 을 적용하는 인터셉터.
  *
  * <p>토큰이 없으면 컨트롤러를 호출하지 않고 429 + Retry-After 로 거부하며, 응답 본문은 앱 공통 에러 포맷
- * ({@link ErrorResponse})으로 내려준다. 결제로 이어지는 요청(쓰기 요청과 결제 승인 트리거)만 토큰을 소비하므로,
- * 같은 경로의 조회(GET)는 한도와 무관하게 통과한다.
+ * ({@link ErrorResponse})으로 내려준다. 쓰기(POST) 요청만 토큰을 소비하므로, 같은 경로의 조회(GET)는 한도와
+ * 무관하게 통과한다.
  */
 public class RateLimitInterceptor implements HandlerInterceptor {
-
-    private static final String PAYMENT_CONFIRM_PATH = "/payments/success";
 
     private final TokenBucketRateLimiter rateLimiter;
     private final ObjectMapper objectMapper;
@@ -45,8 +43,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private boolean consumesToken(HttpServletRequest request) {
-        return HttpMethod.POST.matches(request.getMethod())
-                || PAYMENT_CONFIRM_PATH.equals(request.getRequestURI());
+        return HttpMethod.POST.matches(request.getMethod());
     }
 
     private void rejectWithTooManyRequests(HttpServletResponse response) throws IOException {

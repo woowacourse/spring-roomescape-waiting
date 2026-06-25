@@ -27,6 +27,6 @@ public class RateLimitWebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new RateLimitInterceptor(rateLimiter, objectMapper))
-                .addPathPatterns("/reservations", "/reservations/*/payments", "/payments/success");
+                .addPathPatterns("/reservations", "/reservations/*/payments");
     }
 }
