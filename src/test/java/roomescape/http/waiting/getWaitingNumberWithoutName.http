@@ -1,0 +1,2 @@
+GET localhost:8080/waitings?date=2026-08-05&timeId=1&themeId=1 HTTP/1.1
+Content-Type: application/json

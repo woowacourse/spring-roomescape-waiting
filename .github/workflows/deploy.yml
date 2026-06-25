@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ step2 ]
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, ARM64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build jar
+        run: ./gradlew bootJar -x test
+
+      - name: Deploy
+        run: |
+          cp build/libs/*.jar /home/ubuntu/app/roomescape.jar
+          sudo service roomescape restart
+          sleep 5
+          sudo service roomescape status
