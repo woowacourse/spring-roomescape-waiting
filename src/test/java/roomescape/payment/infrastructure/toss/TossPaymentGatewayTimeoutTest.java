@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeUnit;
+import roomescape.common.ratelimit.TokenBucketRateLimiter;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -114,8 +115,9 @@ class TossPaymentGatewayTimeoutTest {
     void 라우팅불가_IP면_connectTimeout만큼_기다렸다가_SocketTimeout으로_실패한다() {
         // TossClientConfig.tossRestClient 가 채워둔 connect timeout 을 그대로 검증한다.
         // 설정 전(initial)엔 타임아웃이 없어 블랙홀 연결이 매달리므로 @Timeout(3초) 이 끊어 실패시킨다.
+        TokenBucketRateLimiter noopLimiter = new TokenBucketRateLimiter(1_000, 1_000.0, System::nanoTime);
         TossPaymentGateway gateway = new TossPaymentGateway(
-                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_sk_dummy", 500, 500),
+                new TossClientConfig().tossRestClient(BLACKHOLE_URL, "test_sk_dummy", 500, 500, 3, noopLimiter),
                 new ObjectMapper());
 
         long start = System.nanoTime();
