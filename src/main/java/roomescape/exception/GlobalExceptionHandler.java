@@ -19,6 +19,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentConnectionException;
+import roomescape.payment.PaymentTimeoutException;
 import roomescape.payment.client.TossPaymentException;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ResourceConflictException;
@@ -49,6 +51,22 @@ public class GlobalExceptionHandler {
         log.warn("결제 승인 실패: status={}, code={}, message={}", e.getStatus(), e.getCode(), e.getMessage());
         ErrorResponse body = new ErrorResponse(e.getCode(), e.getMessage());
         return ResponseEntity.status(e.getStatus()).body(body);
+    }
+
+    @ExceptionHandler(PaymentTimeoutException.class)
+    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+    public ErrorResponse handlePaymentTimeout(PaymentTimeoutException e) {
+        log.warn("결제 승인 결과 불확실(read timeout): {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.PAYMENT_RESULT_UNKNOWN.name(),
+                "결제 결과를 확인 중입니다. 잠시 후 결제 내역에서 상태를 확인해 주세요.");
+    }
+
+    @ExceptionHandler(PaymentConnectionException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handlePaymentConnection(PaymentConnectionException e) {
+        log.warn("결제 서버 연결 실패: {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.PAYMENT_GATEWAY_UNAVAILABLE.name(),
+                "결제 서버에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
     }
 
     @ExceptionHandler(ResourceConflictException.class)

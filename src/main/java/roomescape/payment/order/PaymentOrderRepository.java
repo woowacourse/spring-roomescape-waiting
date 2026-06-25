@@ -9,4 +9,6 @@ public interface PaymentOrderRepository {
     void markConfirmed(String orderId, String paymentKey, Long reservationId);
 
     void markCanceled(String orderId);
+
+    void markUnknown(String orderId);
 }

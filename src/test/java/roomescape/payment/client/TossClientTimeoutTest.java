@@ -16,12 +16,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import roomescape.payment.PaymentConfirmation;
+import roomescape.payment.PaymentConnectionException;
+import roomescape.payment.PaymentTimeoutException;
 
 class TossClientTimeoutTest {
 
     private static final int READ_TIMEOUT_MS = 500;
+    private static final String BLACKHOLE_URL = "http://10.255.255.1:81";
     private static final String SUCCESS_BODY = """
             {"paymentKey": "test_pk_1", "orderId": "order-1", "status": "DONE", "totalAmount": 10000}
             """;
@@ -39,12 +41,12 @@ class TossClientTimeoutTest {
         mockWebServer.shutdown();
     }
 
-    private TossPaymentGateway gateway() {
+    private TossPaymentGateway gateway(String baseUrl) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofMillis(READ_TIMEOUT_MS));
         factory.setReadTimeout(Duration.ofMillis(READ_TIMEOUT_MS));
         RestClient restClient = RestClient.builder()
-                .baseUrl(mockWebServer.url("/").toString())
+                .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic dGVzdDo=")
                 .requestFactory(factory)
                 .build();
@@ -52,19 +54,29 @@ class TossClientTimeoutTest {
     }
 
     @Test
-    void 읽기타임아웃이면_readTimeout만큼만_기다렸다가_실패한다() {
+    void 읽기타임아웃이면_readTimeout만큼만_기다렸다가_PaymentTimeoutException으로_실패한다() {
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
                 .setBody(SUCCESS_BODY)
                 .setHeadersDelay(2, TimeUnit.SECONDS));
 
+        TossPaymentGateway gateway = gateway(mockWebServer.url("/").toString());
+
         long start = System.nanoTime();
-        assertThatThrownBy(() -> gateway().confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
-                .isInstanceOf(RestClientException.class)
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+                .isInstanceOf(PaymentTimeoutException.class)
                 .hasRootCauseInstanceOf(SocketTimeoutException.class);
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
         assertThat(elapsedMs).isLessThan(1500);
+    }
+
+    @Test
+    void 연결자체가_실패하면_PaymentConnectionException으로_실패한다() {
+        TossPaymentGateway gateway = gateway(BLACKHOLE_URL);
+
+        assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L)))
+                .isInstanceOf(PaymentConnectionException.class);
     }
 }

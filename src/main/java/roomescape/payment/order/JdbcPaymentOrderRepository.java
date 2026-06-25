@@ -73,4 +73,12 @@ public class JdbcPaymentOrderRepository implements PaymentOrderRepository {
                 PaymentOrderStatus.CANCELED.name(), orderId
         );
     }
+
+    @Override
+    public void markUnknown(String orderId) {
+        jdbcTemplate.update(
+                "UPDATE payment_order SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE order_id = ?",
+                PaymentOrderStatus.UNKNOWN.name(), orderId
+        );
+    }
 }

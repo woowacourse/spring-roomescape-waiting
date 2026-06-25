@@ -15,6 +15,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithWaitingOrder;
 import roomescape.payment.PaymentResult;
 import roomescape.payment.PaymentService;
+import roomescape.payment.PaymentTimeoutException;
 import roomescape.payment.order.PaymentOrder;
 import roomescape.payment.order.PaymentOrderRepository;
 import roomescape.repository.ReservationRepository;
@@ -91,8 +92,15 @@ public class UserReservationService {
     }
 
     public ReservationResult confirm(PaymentConfirmCommand command) {
-        PaymentResult payment = paymentService.confirm(
-                command.paymentKey(), command.orderId(), command.amount());
+        PaymentResult payment;
+        try {
+            payment = paymentService.confirm(
+                    command.paymentKey(), command.orderId(), command.amount());
+        } catch (PaymentTimeoutException e) {
+            paymentOrderRepository.markUnknown(command.orderId());
+            log.warn("결제 승인 응답 불확실(read timeout), 주문을 확인 필요 상태로 보류: orderId={}", command.orderId(), e);
+            throw e;
+        }
         try {
             ReservationResult reservation = reservationConfirmer.confirmReservation(
                     command.orderId(), payment.paymentKey());
