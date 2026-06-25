@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.web.client.RestClient;
 import roomescape.domain.PaymentStatus;
 import roomescape.service.payment.PaymentConfirmation;
 import roomescape.service.payment.PaymentFailureCategory;
+import roomescape.service.payment.PaymentGatewayException;
 import roomescape.service.payment.PaymentResult;
 
 import java.util.stream.Stream;
@@ -64,6 +66,20 @@ class TossPaymentGatewayTest {
                 .contains("\"paymentKey\":\"test_payment_key\"")
                 .contains("\"orderId\":\"payment_123456789012345678901\"")
                 .contains("\"amount\":20000");
+    }
+
+    @Test
+    void 토스_통신_예외를_승인_결과_확인_필요_예외로_변환한다() {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+        TossPaymentGateway gateway = new TossPaymentGateway(RestClient.builder()
+                .baseUrl(server.url("/").toString())
+                .build(), new ObjectMapper());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation(
+                        "test_payment_key", "payment_123456789012345678901", 20_000L)))
+                .isInstanceOf(PaymentGatewayException.class)
+                .hasFieldOrPropertyWithValue("code", "PAYMENT_CONFIRMATION_UNKNOWN")
+                .hasFieldOrPropertyWithValue("failureCategory", PaymentFailureCategory.CONFIRMATION_UNKNOWN);
     }
 
     @ParameterizedTest
