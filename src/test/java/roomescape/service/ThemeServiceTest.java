@@ -6,13 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Theme;
-import roomescape.dto.ThemeCreateCommand;
-import roomescape.dto.ThemeResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
+import roomescape.service.dto.command.ThemeCreateCommand;
+import roomescape.service.dto.result.ThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,8 +42,8 @@ class ThemeServiceTest {
     @Test
     void 테마_생성() {
         // given
-        ThemeCreateCommand request = new ThemeCreateCommand("우주 탈출", "우주선에서 탈출하는 재미있는 테마입니다.", "https://example.com/space.jpg");
-        Theme savedTheme = Theme.createWithId(1L, "우주 탈출", "우주선에서 탈출하는 재미있는 테마입니다.", "https://example.com/space.jpg");
+        ThemeCreateCommand request = new ThemeCreateCommand("우주 탈출", "우주선에서 탈출하는 재미있는 테마입니다.", "https://example.com/space.jpg", 30000L);
+        Theme savedTheme = Theme.createWithId(1L, "우주 탈출", "우주선에서 탈출하는 재미있는 테마입니다.", "https://example.com/space.jpg", 30000L);
 
         given(themeRepository.save(any(Theme.class))).willReturn(savedTheme);
 
@@ -116,8 +116,8 @@ class ThemeServiceTest {
     @Test
     void 인기_테마_목록_조회() {
         // given
-        Theme theme1 = Theme.createWithId(1L, "호러 병원", "아주 무서운 병원 테마입니다.", "https://example.com/hospital.jpg");
-        Theme theme2 = Theme.createWithId(2L, "마법 학교", "마법사가 되어 방을 탈출하세요.", "https://example.com/magic.jpg");
+        Theme theme1 = Theme.createWithId(1L, "호러 병원", "아주 무서운 병원 테마입니다.", "https://example.com/hospital.jpg", 30000L);
+        Theme theme2 = Theme.createWithId(2L, "마법 학교", "마법사가 되어 방을 탈출하세요.", "https://example.com/magic.jpg", 30000L);
 
         given(themeRepository.findPopularThemes(any(LocalDate.class), any(LocalDate.class)))
                 .willReturn(List.of(theme1, theme2));
@@ -137,7 +137,7 @@ class ThemeServiceTest {
     @Test
     void 전체_테마_목록_조회() {
         // given
-        Theme theme = Theme.createWithId(1L, "감옥 탈출", "감옥에서 조용히 빠져나가는 테마", "https://example.com/prison.jpg");
+        Theme theme = Theme.createWithId(1L, "감옥 탈출", "감옥에서 조용히 빠져나가는 테마", "https://example.com/prison.jpg", 30000L);
         given(themeRepository.findAll()).willReturn(List.of(theme));
 
         // when

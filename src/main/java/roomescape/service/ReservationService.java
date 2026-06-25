@@ -3,23 +3,28 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.AvailableDateResult;
-import roomescape.dto.ReservationAvailableEvent;
-import roomescape.dto.ReservationCreateCommand;
-import roomescape.dto.ReservationDeleteCommand;
-import roomescape.dto.ReservationModifyCommand;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.ReservationTimeStatusResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
+import roomescape.service.dto.ReservationAvailableEvent;
+import roomescape.service.dto.ReservationConfirmationEvent;
+import roomescape.service.dto.command.ReservationCreateCommand;
+import roomescape.service.dto.command.ReservationDeleteCommand;
+import roomescape.service.dto.command.ReservationModifyCommand;
+import roomescape.service.dto.result.AvailableDateResult;
+import roomescape.service.dto.result.ReservationResult;
+import roomescape.service.dto.result.ReservationTimeStatusResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -49,7 +54,7 @@ public class ReservationService {
 
         validateAvailable(date, timeId, themeId);
 
-        final Reservation newReservation = Reservation.create(data.name(), date, reservationTime, theme);
+        final Reservation newReservation = Reservation.prepare(data.name(), date, reservationTime, theme);
 
         final Reservation savedReservation = reservationRepository.save(newReservation);
         return ReservationResult.from(savedReservation);
@@ -72,7 +77,7 @@ public class ReservationService {
                 originalTime.getId()
         );
         final ReservationTime reservationTime = getReservationTime(timeId);
-        final Reservation modifiedReservation = originalReservation.modify(
+        final Reservation modifiedReservation = originalReservation.modifyDateAndTime(
                 reservationModifyCommand.date(),
                 reservationTime
         );
@@ -82,7 +87,7 @@ public class ReservationService {
         validateFutureOrPresentTime(date, reservationTime);
         validateAvailable(date, timeId, modifiedReservation.getTheme().getId());
 
-        reservationRepository.updateDateAndTime(modifiedReservation);
+        reservationRepository.update(modifiedReservation);
         callEventListenerForWaitingListApproval(originalReservation);
         return ReservationResult.from(modifiedReservation);
     }
@@ -112,6 +117,12 @@ public class ReservationService {
         if (!deleted) {
             throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
         }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void confirmReservation(final ReservationConfirmationEvent event) {
+        reservationRepository.updateStatusById(event.reservationId(), ReservationStatus.CONFIRMED);
     }
 
     public List<ReservationResult> getReservations() {

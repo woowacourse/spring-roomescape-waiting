@@ -8,11 +8,12 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationTimesWithStatus;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.repository.dto.ReservationTimesWithStatus;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -38,7 +39,7 @@ public class ReservationRepository {
         }
     }
 
-    public void updateDateAndTime(final Reservation reservation) {
+    public void update(final Reservation reservation) {
         final String sql = """
                 UPDATE reservation
                 SET date = ?, time_id = ?
@@ -50,6 +51,20 @@ public class ReservationRepository {
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getId()
+        );
+    }
+
+    public void updateStatusById(final Long reservationId, final ReservationStatus reservationStatus) {
+        final String sql = """
+                UPDATE reservation
+                SET status = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(
+                sql,
+                reservationStatus.name(),
+                reservationId
         );
     }
 
@@ -68,13 +83,15 @@ public class ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id 
@@ -92,13 +109,15 @@ public class ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id 
@@ -117,13 +136,15 @@ public class ReservationRepository {
                     r.id AS reservation_id,
                     r.name AS reservation_name,
                     r.date AS reservation_date,
+                    r.status AS reservation_status,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    h.price AS theme_price
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id 
@@ -141,6 +162,18 @@ public class ReservationRepository {
         } catch (final EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public boolean existsById(final Long id) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE id = ?
+                """;
+
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+
+        return count != null && count > 0;
     }
 
     public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
@@ -207,14 +240,13 @@ public class ReservationRepository {
                         themeId,
                         date,
                         themeId
-                ).stream()
-                .toList();
+                ).stream().toList();
     }
 
     private long insertReservation(final Reservation reservation) {
         final String sql = """
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, date, time_id, theme_id, status)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -229,6 +261,7 @@ public class ReservationRepository {
             preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
             preparedStatement.setLong(3, reservation.getTime().getId());
             preparedStatement.setLong(4, reservation.getTheme().getId());
+            preparedStatement.setString(5, reservation.getStatus().name());
 
             return preparedStatement;
         }, keyHolder);
@@ -250,15 +283,17 @@ public class ReservationRepository {
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail_url")
+                resultSet.getString("theme_thumbnail_url"),
+                resultSet.getLong("theme_price")
         );
 
-        return Reservation.createWithId(
+        return Reservation.from(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 resultSet.getDate("reservation_date").toLocalDate(),
                 reservationTime,
-                theme
+                theme,
+                ReservationStatus.valueOf(resultSet.getString("reservation_status"))
         );
     }
 

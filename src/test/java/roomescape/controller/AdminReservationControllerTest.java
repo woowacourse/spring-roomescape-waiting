@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.dto.ReservationResult;
+import roomescape.service.dto.result.ReservationResult;
 import roomescape.support.SpringBootApiTest;
 
 import java.time.LocalDate;

@@ -11,14 +11,16 @@ public class Theme {
     private final ThemeName name;
     private final String description;
     private final String thumbnailUrl;
+    private final Long price;
 
-    private Theme(final Long id, final ThemeName name, final String description, final String thumbnailUrl) {
+    private Theme(final Long id, final ThemeName name, final String description, final String thumbnailUrl, final Long price) {
         this.id = id;
         this.name = name;
         validateDescription(description);
         this.description = description;
         validateThumbnailUrl(thumbnailUrl);
         this.thumbnailUrl = thumbnailUrl;
+        this.price = price;
     }
 
     private static void validateId(final Long id) {
@@ -43,12 +45,13 @@ public class Theme {
         }
     }
 
-    public static Theme create(final String name, final String description, final String thumbnailUrl) {
+    public static Theme create(final String name, final String description, final String thumbnailUrl, final Long price) {
         return new Theme(
                 null,
                 new ThemeName(name),
                 description,
-                thumbnailUrl
+                thumbnailUrl,
+                price
         );
     }
 
@@ -56,14 +59,16 @@ public class Theme {
             final Long id,
             final String name,
             final String description,
-            final String thumbnailUrl
+            final String thumbnailUrl,
+            final Long price
     ) {
         validateId(id);
         return new Theme(
                 id,
                 new ThemeName(name),
                 description,
-                thumbnailUrl
+                thumbnailUrl,
+                price
         );
     }
 
@@ -73,7 +78,8 @@ public class Theme {
                 id,
                 this.name,
                 this.description,
-                this.thumbnailUrl
+                this.thumbnailUrl,
+                this.price
         );
     }
 

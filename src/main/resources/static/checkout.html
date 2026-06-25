@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roomescape — 결제하기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <style>
+        .checkout-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+        }
+        .checkout-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .loading-text {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="app-container">
+        <div class="header-inner">
+            <a class="logo" href="/">Room<span>escape</span></a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="app-container">
+        <div class="checkout-container">
+            <h2 class="checkout-title">결제 진행</h2>
+
+            <div id="loading" class="loading-text">결제 정보를 불러오는 중입니다...</div>
+            <div id="error-message" class="loading-text" style="display: none; color: var(--danger);"></div>
+
+            <div id="payment-wrapper" style="display: none;">
+                <div id="payment-method"></div>
+                <div id="agreement"></div>
+                <button class="btn-primary" id="payment-button" style="width: 100%; margin-top: 24px; padding: 16px; font-size: 16px;" disabled>
+                    결제하기
+                </button>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const reservationId = urlParams.get('reservationId');
+        const amount = Number(urlParams.get('amount'));
+
+        const $loading = document.getElementById('loading');
+        const $error = document.getElementById('error-message');
+        const $wrapper = document.getElementById('payment-wrapper');
+        const $payButton = document.getElementById('payment-button');
+
+        if (!orderId || !reservationId || !amount) {
+            showError('잘못된 접근입니다. 예약 정보가 없습니다.');
+            return;
+        }
+
+        // 토스 결제 위젯 렌더링 시작
+        $loading.style.display = 'none';
+        $wrapper.style.display = 'block';
+        initializeToss(orderId, amount);
+
+        function showError(msg) {
+            $loading.style.display = 'none';
+            $error.style.display = 'block';
+            $error.textContent = msg;
+        }
+
+        function initializeToss(orderId, amount) {
+            const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+            const tossPayments = TossPayments(clientKey);
+            const widgets = tossPayments.widgets({ customerKey: TossPayments.ANONYMOUS });
+
+            (async () => {
+                try {
+                    await widgets.setAmount({ currency: "KRW", value: amount });
+                    await Promise.all([
+                        widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" }),
+                        widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" })
+                    ]);
+                    $payButton.disabled = false;
+                } catch (error) {
+                    showError("결제위젯 렌더링 실패: " + error.message);
+                }
+            })();
+
+            $payButton.addEventListener("click", async function () {
+                try {
+                    await widgets.requestPayment({
+                        orderId: orderId,
+                        orderName: "방탈출 예약",
+                        successUrl: window.location.origin + "/page/payments/success",
+                        failUrl: window.location.origin + `/page/payments/fail?reservationId=${reservationId}`
+                    });
+                } catch (error) {
+                    if (error.code !== "USER_CANCEL") {
+                        alert("결제 요청 실패: " + error.message);
+                    }
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

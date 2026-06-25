@@ -5,7 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.dto.WaitingListResult;
+import roomescape.service.dto.result.WaitingListResult;
 import roomescape.support.SpringBootApiTest;
 
 import java.time.LocalDate;

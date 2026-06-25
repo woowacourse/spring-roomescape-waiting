@@ -12,16 +12,16 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.ReservationAvailableEvent;
-import roomescape.dto.WaitingListCreateCommand;
-import roomescape.dto.WaitingListDeleteCommand;
-import roomescape.dto.WaitingListResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
+import roomescape.service.dto.ReservationAvailableEvent;
+import roomescape.service.dto.command.WaitingListCreateCommand;
+import roomescape.service.dto.command.WaitingListDeleteCommand;
+import roomescape.service.dto.result.WaitingListResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -94,7 +94,7 @@ public class WaitingListService {
             }
 
             final WaitingList waiting = nextWaiting.get();
-            final Reservation newReservation = Reservation.create(
+            final Reservation newReservation = Reservation.prepare(
                     waiting.getName(),
                     waiting.getReservationDate().date(),
                     waiting.getReservationTime(),

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.dto.ThemeResult;
+import roomescape.service.dto.result.ThemeResult;
 import roomescape.support.SpringBootApiTest;
 
 import java.util.HashMap;
@@ -62,8 +62,8 @@ class ThemeControllerTest {
         assertThat(popularThemes)
                 .hasSize(10)
                 .doesNotContain(
-                new ThemeResult(11L, "마녀의 숲", "깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마", "https://example.com/images/witch-forest.jpg"),
-                new ThemeResult(12L, "사라진 열차", "한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마", "https://example.com/images/missing-train.jpg")
+                new ThemeResult(11L, "마녀의 숲", "깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마", "https://example.com/images/witch-forest.jpg", 30000L),
+                new ThemeResult(12L, "사라진 열차", "한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마", "https://example.com/images/missing-train.jpg", 30000L)
         );
     }
 
@@ -73,6 +73,7 @@ class ThemeControllerTest {
         params.put("name", "링");
         params.put("description", "공포 테마");
         params.put("thumbnailUrl", "https://~");
+        params.put("price", 30000);
 
         ThemeResult response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

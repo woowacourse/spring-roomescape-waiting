@@ -123,6 +123,29 @@
   </div>
 </div>
 
+<!-- 예약 내역(Pre-Payment) 모달 -->
+<div class="modal-overlay" id="pre-payment-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="pre-payment-modal-title-text">예약 확정</h2>
+      <button class="modal-close" id="pre-payment-modal-close-btn" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="booking-summary">
+        <div><div class="summary-item-label">날짜</div><div class="summary-item-value" id="pre-payment-modal-date">—</div></div>
+        <div><div class="summary-item-label">테마</div><div class="summary-item-value" id="pre-payment-modal-theme">—</div></div>
+        <div><div class="summary-item-label">시간</div><div class="summary-item-value" id="pre-payment-modal-time">—</div></div>
+        <div><div class="summary-item-label">예약자</div><div class="summary-item-value" id="pre-payment-booking-name">-</div></div>
+          <div><div class="summary-item-label">결제 금액</div><div class="summary-item-value" id="pre-payment-price">-</div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="pre-payment-modal-cancel-btn">취소</button>
+      <button class="btn-primary" id="confirm-pre-payment-btn">결제하기</button>
+    </div>
+  </div>
+</div>
+
 <!-- 예약 대기 신청 모달 -->
 <div class="modal-overlay" id="waiting-list-modal" role="dialog" aria-modal="true" aria-labelledby="waiting-list-modal-title-text">
   <div class="modal">

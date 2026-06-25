@@ -8,22 +8,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationAvailableEvent;
-import roomescape.dto.ReservationCreateCommand;
-import roomescape.dto.ReservationDeleteCommand;
-import roomescape.dto.ReservationModifyCommand;
-import roomescape.dto.ReservationResult;
-import roomescape.dto.ReservationStatus;
-import roomescape.dto.ReservationTimeStatusResult;
-import roomescape.dto.ReservationTimesWithStatus;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
+import roomescape.repository.dto.ReservationTimesWithStatus;
+import roomescape.service.dto.ReservationAvailableEvent;
+import roomescape.service.dto.ReservationTimeStatus;
+import roomescape.service.dto.command.ReservationCreateCommand;
+import roomescape.service.dto.command.ReservationDeleteCommand;
+import roomescape.service.dto.command.ReservationModifyCommand;
+import roomescape.service.dto.result.ReservationResult;
+import roomescape.service.dto.result.ReservationTimeStatusResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -65,7 +66,7 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         time = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        theme = Theme.createWithId(1L, "테스트 테마", "테스트용 테마 설명입니다.", "https://test.com/img.jpg");
+        theme = Theme.createWithId(1L, "테스트 테마", "테스트용 테마 설명입니다.", "https://test.com/img.jpg", 30000L);
         futureDate = LocalDate.now().plusDays(1);
     }
 
@@ -78,7 +79,7 @@ class ReservationServiceTest {
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
 
-        Reservation savedReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        Reservation savedReservation = Reservation.from(1L, "오리", futureDate, time, theme, ReservationStatus.PENDING);
         given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
 
         // when
@@ -140,7 +141,7 @@ class ReservationServiceTest {
     void 변경을_시도하는_사용자명과_예약자명_일치시_예약_변경_및_대기_승인_이벤트_발생() {
         // given
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", futureDate.plusDays(1), 2L);
-        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        Reservation originalReservation = Reservation.from(1L, "오리", futureDate, time, theme, ReservationStatus.PENDING);
         ReservationTime newTime = ReservationTime.createWithId(2L, LocalTime.of(13, 0), LocalTime.of(14, 0));
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
@@ -154,7 +155,7 @@ class ReservationServiceTest {
         // then
         assertThat(response.date()).isEqualTo(request.date());
         assertThat(response.time().id()).isEqualTo(2L);
-        verify(reservationRepository).updateDateAndTime(any(Reservation.class));
+        verify(reservationRepository).update(any(Reservation.class));
         verify(eventPublisher).publishEvent(any(ReservationAvailableEvent.class));
     }
 
@@ -162,7 +163,7 @@ class ReservationServiceTest {
     void 변경을_시도하는_사용자명과_예약자명_불일치시_예외발생_및_대기_승인_이벤트_미발생() {
         // given
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "리오", futureDate.plusDays(1), 2L);
-        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        Reservation originalReservation = Reservation.from(1L, "오리", futureDate, time, theme, ReservationStatus.PENDING);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
 
@@ -179,7 +180,7 @@ class ReservationServiceTest {
         LocalDate newDate = futureDate.plusDays(1);
         Long newTimeId = 2L;
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", newDate, newTimeId);
-        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        Reservation originalReservation = Reservation.from(1L, "오리", futureDate, time, theme, ReservationStatus.PENDING);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
         ReservationTime newTime = ReservationTime.createWithId(newTimeId, LocalTime.of(13, 0), LocalTime.of(14, 0));
@@ -199,7 +200,7 @@ class ReservationServiceTest {
         LocalDate newDate = futureDate.plusDays(1);
         Long newTimeId = 2L;
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", newDate, newTimeId);
-        Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        Reservation originalReservation = Reservation.from(1L, "오리", futureDate, time, theme, ReservationStatus.PENDING);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
         ReservationTime newTime = ReservationTime.createWithId(newTimeId, LocalTime.of(13, 0), LocalTime.of(14, 0));
@@ -217,7 +218,7 @@ class ReservationServiceTest {
     @Test
     void 삭제를_시도하는_사용자명과_예약자명_일치시_예약_삭제_및_대기_승인_이벤트_발생() {
         // given
-        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        Reservation reservation = Reservation.from(1L, "오리", futureDate, time, theme, ReservationStatus.PENDING);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationRepository.deleteById(1L)).willReturn(true);
         ReservationDeleteCommand correctDeleteCommand = new ReservationDeleteCommand(1L, "오리");
@@ -233,7 +234,7 @@ class ReservationServiceTest {
     @Test
     void 삭제를_시도하는_사용자명과_예약자명_불일치시_예외발생_및_대기_승인_이벤트_미발생() {
         // given
-        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        Reservation reservation = Reservation.from(1L, "오리", futureDate, time, theme, ReservationStatus.PENDING);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         ReservationDeleteCommand wrongDeleteCommand = new ReservationDeleteCommand(1L, "거위");
 
@@ -266,7 +267,7 @@ class ReservationServiceTest {
     void 사용자명으로_예약_목록_조회() {
         // given
         String name = "검프";
-        Reservation reservation = Reservation.createWithId(1L, name, futureDate, time, theme);
+        Reservation reservation = Reservation.from(1L, name, futureDate, time, theme, ReservationStatus.PENDING);
 
         given(reservationRepository.findByName(name)).willReturn(List.of(reservation));
 
@@ -276,6 +277,6 @@ class ReservationServiceTest {
         // then
         assertThat(responses).hasSize(1);
         assertThat(responses.getFirst().name()).isEqualTo(name);
-        assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.RESERVATION);
+        assertThat(responses.getFirst().status()).isEqualTo(ReservationTimeStatus.RESERVATION);
     }
 }
