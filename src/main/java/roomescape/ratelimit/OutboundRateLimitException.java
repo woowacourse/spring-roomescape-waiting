@@ -1,7 +1,15 @@
 package roomescape.ratelimit;
 
 public class OutboundRateLimitException extends RuntimeException {
-    public OutboundRateLimitException(String message) {
+
+    private final long retryAfterSeconds;
+
+    public OutboundRateLimitException(String message, long retryAfterSeconds) {
         super(message);
+        this.retryAfterSeconds = retryAfterSeconds;
+    }
+
+    public long getRetryAfterSeconds() {
+        return retryAfterSeconds;
     }
 }

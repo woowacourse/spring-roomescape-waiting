@@ -18,6 +18,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.payment.TossPaymentException;
+import roomescape.ratelimit.OutboundRateLimitException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -110,6 +111,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn("Toss 결제 오류 [{}]: {}", e.getCode(), e.getMessage());
         return ResponseEntity.status(e.getStatus())
                 .body(new ErrorResponse(e.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handleOutboundRateLimit(OutboundRateLimitException e) {
+        log.warn("아웃바운드 Rate Limit 초과: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(e.getRetryAfterSeconds()))
+                .body(new ErrorResponse("OUTBOUND_RATE_LIMIT_EXCEEDED", "현재 결제 요청이 너무 많습니다. 잠시 후 다시 시도해주세요."));
     }
 
     @ExceptionHandler(Exception.class)
