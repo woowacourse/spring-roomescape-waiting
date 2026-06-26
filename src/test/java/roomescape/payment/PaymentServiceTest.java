@@ -55,6 +55,7 @@ class PaymentServiceTest {
         PaymentResult result = paymentService.confirm("test_pk_1", "order-1", 10000L);
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
-        verify(paymentGateway).confirm(new PaymentConfirmation("test_pk_1", "order-1", 10000L));
+        verify(paymentGateway).confirm(
+                new PaymentConfirmation("test_pk_1", "order-1", 10000L, order.getIdempotencyKey()));
     }
 }
