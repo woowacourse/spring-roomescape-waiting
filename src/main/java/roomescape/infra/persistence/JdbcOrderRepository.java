@@ -49,6 +49,17 @@ public class JdbcOrderRepository implements OrderRepository {
     }
 
     @Override
+    public Optional<Order> findByReservationId(long reservationId) {
+        String sql = """
+                SELECT id, order_id, amount, reservation_id, status
+                FROM orders
+                WHERE reservation_id = ?
+                """;
+        List<Order> orders = jdbcTemplate.query(sql, rowMapper(), reservationId);
+        return Optional.ofNullable(DataAccessUtils.singleResult(orders));
+    }
+
+    @Override
     public Order updateStatus(String orderId, OrderStatus status) {
         String sql = "UPDATE orders SET status = ? WHERE order_id = ?";
         jdbcTemplate.update(sql, status.name(), orderId);

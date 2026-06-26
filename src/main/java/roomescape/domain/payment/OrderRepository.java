@@ -8,5 +8,7 @@ public interface OrderRepository {
 
     Optional<Order> findByOrderId(String orderId);
 
+    Optional<Order> findByReservationId(long reservationId);
+
     Order updateStatus(String orderId, OrderStatus status);
 }

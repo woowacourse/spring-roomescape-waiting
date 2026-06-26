@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.domain.payment.PaymentResult;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.PaymentAmountMismatchException;
+import roomescape.exception.PaymentConfirmationUnknownException;
+import roomescape.exception.PaymentConnectionException;
+import roomescape.exception.PaymentGatewayException;
 import roomescape.infra.toss.TossPaymentException;
 import roomescape.service.PaymentService;
 
@@ -53,6 +56,8 @@ public class PaymentViewController {
             model.addAttribute("result", result);
             return "success";
         } catch (PaymentAmountMismatchException | NotFoundException exception) {
+            return failView(model, exception.getErrorCode(), exception.getMessage(), orderId);
+        } catch (PaymentConnectionException | PaymentConfirmationUnknownException | PaymentGatewayException exception) {
             return failView(model, exception.getErrorCode(), exception.getMessage(), orderId);
         } catch (TossPaymentException exception) {
             return failView(model, exception.getCode(), exception.getMessage(), orderId);

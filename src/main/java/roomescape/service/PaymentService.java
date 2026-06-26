@@ -12,6 +12,8 @@ import roomescape.domain.payment.PaymentRepository;
 import roomescape.domain.payment.PaymentResult;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.PaymentAmountMismatchException;
+import roomescape.exception.PaymentConfirmationUnknownException;
+import roomescape.infra.toss.TossPaymentException;
 
 @Service
 public class PaymentService {
@@ -27,7 +29,7 @@ public class PaymentService {
         this.paymentRepository = paymentRepository;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = {TossPaymentException.class, PaymentConfirmationUnknownException.class})
     public PaymentResult confirm(String paymentKey, String orderId, long amount) {
         Order order = getOrder(orderId);
         if (!order.getAmount().equals(amount)) {
@@ -35,12 +37,24 @@ public class PaymentService {
         }
 
         PaymentConfirmation confirmation = new PaymentConfirmation(paymentKey, orderId, amount);
-        PaymentResult result = paymentGateway.confirm(confirmation);
+        PaymentResult result = confirmPayment(confirmation, orderId);
 
         paymentRepository.save(new Payment(result.paymentKey(), result.orderId()));
         orderRepository.updateStatus(orderId, OrderStatus.CONFIRMED);
 
         return result;
+    }
+
+    private PaymentResult confirmPayment(PaymentConfirmation confirmation, String orderId) {
+        try {
+            return paymentGateway.confirm(confirmation);
+        } catch (PaymentConfirmationUnknownException exception) {
+            orderRepository.updateStatus(orderId, OrderStatus.REQUIRES_CONFIRMATION);
+            throw exception;
+        } catch (TossPaymentException exception) {
+            orderRepository.updateStatus(orderId, OrderStatus.FAILED);
+            throw exception;
+        }
     }
 
     private Order getOrder(String orderId) {
