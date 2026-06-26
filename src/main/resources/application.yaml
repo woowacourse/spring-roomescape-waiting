@@ -20,6 +20,8 @@ toss:
   secret-key: ${TOSS_SECRET_KEY}
   max-attempts: 3
   fallback-retry-after-seconds: 1
+  connect-timeout-ms: ${TOSS_CONNECT_TIMEOUT_MS:1000}
+  read-timeout-ms: ${TOSS_READ_TIMEOUT_MS:2000}
 
 rate-limit:
   capacity: 5

@@ -34,6 +34,13 @@ public class FakeOrderRepository implements OrderRepository {
     }
 
     @Override
+    public Optional<Order> findByReservationId(long reservationId) {
+        return storage.values().stream()
+                .filter(order -> order.getReservationId().equals(reservationId))
+                .findAny();
+    }
+
+    @Override
     public Order updateStatus(String orderId, OrderStatus status) {
         Order order = findByOrderId(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주문 정보를 찾을 수 없습니다."));

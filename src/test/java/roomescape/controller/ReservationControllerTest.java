@@ -27,7 +27,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.UpdateReservationRequest;
+import roomescape.domain.payment.OrderStatus;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAndWaiting;
+import roomescape.domain.reservation.ReservationPaymentInfo;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
@@ -68,6 +71,21 @@ class ReservationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("브라운"))
                 .andExpect(jsonPath("$.status").value("RESERVED"));
+    }
+
+    @Test
+    @DisplayName("사용자 이름으로 예약과 결제 정보를 함께 조회한다.")
+    void 사용자_예약_결제_정보_조회() throws Exception {
+        given(reservationService.findReservationAndWaitingByName("브라운"))
+                .willReturn(List.of(createMockReservationAndWaiting()));
+
+        mockMvc.perform(get("/reservations").param("userName", "브라운"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationAndWaitingResponses[0].name").value("브라운"))
+                .andExpect(jsonPath("$.reservationAndWaitingResponses[0].paymentStatus").value("CONFIRMED"))
+                .andExpect(jsonPath("$.reservationAndWaitingResponses[0].orderId").value("order-1"))
+                .andExpect(jsonPath("$.reservationAndWaitingResponses[0].paymentKey").value("payment-key"))
+                .andExpect(jsonPath("$.reservationAndWaitingResponses[0].amount").value(50000));
     }
 
     @Test
@@ -178,5 +196,16 @@ class ReservationControllerTest {
         Theme theme = new Theme(1L, "테마", "설명", "url", 50000L);
         ReservationSlot slot = new ReservationSlot(1L, LocalDate.now(), timeSlot, theme);
         return new Reservation(1L, "브라운", slot, LocalDate.now().atStartOfDay(), ReservationStatus.RESERVED);
+    }
+
+    private ReservationAndWaiting createMockReservationAndWaiting() {
+        Reservation reservation = createMockReservation();
+        return ReservationAndWaiting.fromReservation(reservation)
+                .withPaymentInfo(new ReservationPaymentInfo(
+                        OrderStatus.CONFIRMED,
+                        "order-1",
+                        "payment-key",
+                        50000L
+                ));
     }
 }

@@ -66,6 +66,19 @@ class JdbcOrderRepositoryTest {
     }
 
     @Test
+    @DisplayName("예약 식별자로 주문 정보를 조회한다.")
+    void 예약_식별자로_주문_조회() {
+        Long reservationId = insertReservation();
+        jdbcOrderRepository.save(new Order("order-1", 50000L, reservationId));
+
+        Optional<Order> foundOrder = jdbcOrderRepository.findByReservationId(reservationId);
+
+        assertThat(foundOrder).isPresent();
+        assertThat(foundOrder.get().getOrderId()).isEqualTo("order-1");
+        assertThat(foundOrder.get().getAmount()).isEqualTo(50000L);
+    }
+
+    @Test
     @DisplayName("주문 번호로 주문 상태를 업데이트한다.")
     void 주문_상태_업데이트() {
         Long reservationId = insertReservation();

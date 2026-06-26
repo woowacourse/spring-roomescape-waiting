@@ -267,6 +267,44 @@
             color: var(--success);
         }
 
+        .payment-meta {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            row-gap: 0.6rem;
+        }
+
+        .payment-status {
+            display: inline-block;
+            width: fit-content;
+            font-size: 0.58rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 3px 7px;
+            border-radius: 2px;
+        }
+
+        .payment-pending {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+        }
+
+        .payment-confirmed {
+            background: rgba(76,175,125,0.12);
+            color: var(--success);
+        }
+
+        .payment-failed {
+            background: rgba(220,88,88,0.12);
+            color: var(--danger);
+        }
+
+        .payment-check {
+            background: rgba(200,169,110,0.12);
+            color: var(--accent);
+        }
+
         .reservation-actions {
             display: flex;
             gap: 0.6rem;
@@ -810,6 +848,7 @@
                     <span class="reservation-status ${statusClass}">
                         ${statusText}
                     </span>
+                    ${renderPaymentInfo(r)}
                 </div>
                 <div class="reservation-actions">
                     ${isReserved
@@ -827,6 +866,52 @@
 
         container.innerHTML = '';
         container.appendChild(list);
+    }
+
+    function renderPaymentInfo(reservation) {
+        if (!reservation.orderId) {
+            return '';
+        }
+
+        const status = paymentStatus(reservation.paymentStatus);
+        const orderId = escapeHtml(reservation.orderId);
+        const paymentKey = reservation.paymentKey ? escapeHtml(reservation.paymentKey) : '-';
+        const amount = reservation.amount == null ? '-' : `${Number(reservation.amount).toLocaleString('ko-KR')}원`;
+
+        return `
+            <div class="reservation-meta payment-meta">
+                <div class="reservation-meta-item">
+                    <span class="meta-label">결제 상태</span>
+                    <span class="payment-status ${status.className}">${status.text}</span>
+                </div>
+                <div class="reservation-meta-item">
+                    <span class="meta-label">주문 번호</span>
+                    <span class="meta-value">${orderId}</span>
+                </div>
+                <div class="reservation-meta-item">
+                    <span class="meta-label">결제 키</span>
+                    <span class="meta-value">${paymentKey}</span>
+                </div>
+                <div class="reservation-meta-item">
+                    <span class="meta-label">금액</span>
+                    <span class="meta-value">${amount}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function paymentStatus(status) {
+        switch (status) {
+            case 'CONFIRMED':
+                return { text: '결제 확정', className: 'payment-confirmed' };
+            case 'FAILED':
+                return { text: '결제 실패', className: 'payment-failed' };
+            case 'REQUIRES_CONFIRMATION':
+                return { text: '확인 필요', className: 'payment-check' };
+            case 'PENDING':
+            default:
+                return { text: '결제 대기', className: 'payment-pending' };
+        }
     }
 
     // ── 예약 취소 ─────────────────────────────────────

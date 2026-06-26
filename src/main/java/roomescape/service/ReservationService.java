@@ -11,8 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.payment.Order;
 import roomescape.domain.payment.OrderRepository;
+import roomescape.domain.payment.Payment;
+import roomescape.domain.payment.PaymentRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationAndWaiting;
+import roomescape.domain.reservation.ReservationPaymentInfo;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
@@ -37,13 +40,15 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             TimeSlotRepository timeSlotRepository,
             ThemeRepository themeRepository,
             ReservationSlotRepository reservationSlotRepository,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            PaymentRepository paymentRepository
     ) {
 
         this.reservationRepository = reservationRepository;
@@ -51,6 +56,7 @@ public class ReservationService {
         this.themeRepository = themeRepository;
         this.reservationSlotRepository = reservationSlotRepository;
         this.orderRepository = orderRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<Reservation> findAllReservations() {
@@ -68,7 +74,9 @@ public class ReservationService {
         List<WaitingWithNumber> waitings = createWaitingsWithNumber(reservationsByName);
 
         UserReservations userReservations = new UserReservations(name, reservations, waitings);
-        return userReservations.getReservationAndWaitings();
+        return userReservations.getReservationAndWaitings().stream()
+                .map(this::attachPaymentInfo)
+                .toList();
     }
 
     @Transactional
@@ -126,6 +134,29 @@ public class ReservationService {
 
     private String createOrderId() {
         return UUID.randomUUID().toString();
+    }
+
+    private ReservationAndWaiting attachPaymentInfo(ReservationAndWaiting reservationAndWaiting) {
+        if (!reservationAndWaiting.isReserved()) {
+            return reservationAndWaiting;
+        }
+
+        return orderRepository.findByReservationId(reservationAndWaiting.id())
+                .map(order -> reservationAndWaiting.withPaymentInfo(createPaymentInfo(order)))
+                .orElse(reservationAndWaiting);
+    }
+
+    private ReservationPaymentInfo createPaymentInfo(Order order) {
+        String paymentKey = paymentRepository.findByOrderId(order.getOrderId())
+                .map(Payment::getPaymentKey)
+                .orElse(null);
+
+        return new ReservationPaymentInfo(
+                order.getStatus(),
+                order.getOrderId(),
+                paymentKey,
+                order.getAmount()
+        );
     }
 
     private void deleteReservationAndPromoteWaiting(Reservation reservation, String requestName,
