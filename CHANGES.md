@@ -221,6 +221,31 @@ DELETE /payments/prepare/{orderId}
 
 ---
 
+---
+
+# [3차] 타임아웃 방어 · 멱등 재시도 · 주문/결제 내역
+
+> 1단계에서 붙인 토스 호출에 타임아웃·멱등 재시도 방어를 더한다. 느린 호출이 스레드를 무한정
+> 잡지 못하게 하고, 결과가 불명확한 read timeout을 "실패"로 단정하지 않으며, 주문당 고정
+> Idempotency-Key로 중복 승인을 막고, 사용자가 주문/결제 상태를 확인할 수 있게 한다.
+>
+> 요구사항별로 커밋을 나눴고, 아래 각 절이 그 단계에 대응한다.
+
+## 14. 학습 테스트 — learning-test-2-timeout
+
+**파일**: `src/test/java/roomescape/learning/TimeoutLearningTest.java`
+
+본 구현 전에 타임아웃의 감각을 먼저 잡는 학습 테스트. `MockWebServer`로 느린 서버를 흉내 내,
+connect/read timeout을 걸었을 때 **얼마나 기다렸다 어떤 예외로 실패하는지**를 경과 시간 단언으로 확인한다.
+
+| 테스트 | 재현 | 확인 |
+|---|---|---|
+| read timeout | 바디 지연(3s) > read timeout(0.5s) | read timeout만큼만 기다린 뒤 `RestClientException`(root `SocketTimeoutException` "Read timed out") |
+| connect timeout | SYN 무응답 블랙홀 IP(`10.255.255.1:81`) | connect timeout(1s)만큼만 기다린 뒤 `ResourceAccessException`(root `SocketTimeoutException` "Connect timed out") — OS 기본값(수십 초)까지 잡히지 않음 |
+| TPS | 빠른 3건 + 느린 1건 | 느린 1건이 read timeout으로 잘려, 전체가 서버 지연(3s)에 묶이지 않고 빠른 3건 성공 |
+
+---
+
 ### **TODO**
 
 - 자동 승격 예약 결제 처리
