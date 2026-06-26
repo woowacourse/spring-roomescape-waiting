@@ -35,4 +35,23 @@ class OutboundRateLimitInterceptorTest {
                 .hasMessageContaining("한도");
         verify(execution, times(1)).execute(any(), any());
     }
+
+    @Test
+    @DisplayName("토큰이 보충되면 나가는 호출을 다시 보낸다")
+    void intercept_refilled() throws IOException {
+        AtomicLong now = new AtomicLong(0);
+        OutboundRateLimitInterceptor interceptor = new OutboundRateLimitInterceptor(
+                new TokenBucketRateLimiter(1, 1, now::get)
+        );
+        HttpRequest request = mock(HttpRequest.class);
+        ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
+
+        interceptor.intercept(request, new byte[0], execution);
+
+        now.addAndGet(1_000_000_000L);
+
+        interceptor.intercept(request, new byte[0], execution);
+
+        verify(execution, times(2)).execute(any(), any());
+    }
 }

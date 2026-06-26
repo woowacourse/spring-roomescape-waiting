@@ -30,4 +30,23 @@ class RateLimitInterceptorTest {
         assertThat(response.getStatus()).isEqualTo(429);
         assertThat(response.getHeader(HttpHeaders.RETRY_AFTER)).isEqualTo("1");
     }
+
+    @Test
+    @DisplayName("토큰이 보충되면 다시 요청을 통과시킨다")
+    void preHandle_refilled() throws Exception {
+        AtomicLong now = new AtomicLong(0);
+        RateLimitInterceptor interceptor = new RateLimitInterceptor(
+                new TokenBucketRateLimiter(1, 1, now::get)
+        );
+
+        assertThat(interceptor.preHandle(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object()))
+                .isTrue();
+        assertThat(interceptor.preHandle(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object()))
+                .isFalse();
+
+        now.addAndGet(1_000_000_000L);
+
+        assertThat(interceptor.preHandle(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object()))
+                .isTrue();
+    }
 }
