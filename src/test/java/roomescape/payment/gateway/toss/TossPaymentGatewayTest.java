@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import roomescape.payment.PaymentResultUnknownException;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.domain.PaymentStatus;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +45,9 @@ class TossPaymentGatewayTest {
     static void tossProperties(DynamicPropertyRegistry registry) {
         registry.add("toss.base-url", () -> mockWebServer.url("/").toString());
         registry.add("toss.secret-key", () -> "test_gsk_dummy");
+        // 느린 응답을 일찍 포기하는지 확인하기 위해 read timeout을 짧게 둔다
+        registry.add("toss.connect-timeout-ms", () -> 1000);
+        registry.add("toss.read-timeout-ms", () -> 1000);
     }
 
     @AfterAll
@@ -68,10 +73,23 @@ class TossPaymentGatewayTest {
                 }
                 """);
 
-        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 50000L));
+        var result = tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 50000L, "idem-1"));
 
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(result.approvedAmount()).isEqualTo(50000L);
+    }
+
+    @Test
+    void read_timeout이면_PaymentResultUnknownException으로_표면화된다() {
+        // 응답 바디를 read timeout보다 늦게 흘려보내 읽기 단계 타임아웃을 유발한다
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"paymentKey\":\"pk\",\"orderId\":\"order-1\",\"status\":\"DONE\",\"totalAmount\":50000}")
+                .setBodyDelay(3, TimeUnit.SECONDS));
+
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 50000L, "idem-1")))
+                .isInstanceOf(PaymentResultUnknownException.class);
     }
 
     @ParameterizedTest(name = "[{0}] {1} -> {2}")
@@ -79,7 +97,7 @@ class TossPaymentGatewayTest {
     void 에러코드별로_매핑된_예외가_던져진다(int httpStatus, String code, Class<? extends Throwable> expected) {
         enqueue(httpStatus, "{\"code\": \"" + code + "\", \"message\": \"에러 메시지\"}");
 
-        assertThatThrownBy(() -> tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 50000L)))
+        assertThatThrownBy(() -> tossPaymentGateway.confirm(new PaymentConfirmation("test_pk_1", "order-1", 50000L, "idem-1")))
                 .isInstanceOf(expected);
     }
 

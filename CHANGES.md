@@ -259,6 +259,67 @@ RFC 9457 ProblemDetail 응답 규약을 정의한다. (게이트웨이에서 이
 
 핵심: 결과가 불명확한 실패를 성공/실패 둘 중 하나로 성급히 결론짓지 않는다.
 
+## 16. [요구사항 3] Idempotency-Key · 결제 원장 · 게이트웨이 연동
+
+### 16-1. payment_order (결제 원장)
+
+`pending_payment`(orderId·amount만 보유, 승인 후 삭제)를 주문 생애주기를 담는 `payment_order`로 확장.
+승인 성공/실패 후에도 삭제하지 않고 상태를 남겨 내역 조회(§17)의 근거가 된다.
+
+```sql
+CREATE TABLE payment_order (
+    order_id        VARCHAR(64)  NOT NULL,
+    amount          BIGINT       NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,                    -- 주문당 고정 멱등키(≤300자)
+    status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING',  -- PENDING/CONFIRMED/FAILED/UNKNOWN
+    name            VARCHAR(255) NULL,
+    session_id      BIGINT       NULL REFERENCES session(id),
+    payment_key     VARCHAR(255) NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (order_id)
+);
+```
+
+| 파일 | 설명 |
+|---|---|
+| `domain/PaymentOrder.java`, `domain/PaymentOrderStatus.java` | 주문 원장 도메인 + 상태 전이(`confirmed`/`failed`/`unknown`/`retryable`) |
+| `repository/PaymentOrderRepository.java`, `JdbcPaymentOrderRepository.java` | save/update/findByOrderId/findByName/delete |
+| `service/PaymentOrderService.java` | prepare/cancel/confirm + 실패 기록 |
+| `service/dto/PaymentHistory.java` | 내역 read-model (엔드포인트는 §17) |
+
+`PendingPayment` 도메인/레포 및 관련 테스트는 삭제, `FakePaymentOrderRepository`로 교체.
+
+### 16-2. Idempotency-Key (주문당 고정 UUID)
+
+**파일**: `payment/domain/PaymentConfirmation.java`, `payment/gateway/toss/TossPaymentGateway.java`
+
+주문 생성(`/payments/prepare`) 시 멱등키(UUID)를 발급·저장하고, confirm 호출에 `Idempotency-Key`
+헤더로 전송한다. 키는 주문에 고정되어 **재시도해도 같은 키** → 토스가 첫 응답을 그대로 반환해
+이중 승인 방지. 1차의 `ALREADY_PROCESSED_PAYMENT` 처리와 함께 두 겹 방어.
+추가로 우리 쪽에서도 주문이 이미 `CONFIRMED`면 토스를 다시 부르지 않고 기존 예약을 반환(success 새로고침 방어).
+
+### 16-3. 게이트웨이 예외 변환 (§15 타입으로 연동)
+
+`TossPaymentGateway`가 `RestClient`의 전송 실패(`RestClientException`)를 root cause로 분기해
+§15의 `PaymentConnectionException`/`PaymentResultUnknownException`으로 변환한다. onStatus가 던지는
+`TossPaymentException`은 `RestClientException`이 아니므로 토스 에러와 깔끔히 분리된다.
+
+### 16-4. makeReservation 흐름 + 롤백돼도 살아남는 실패 기록
+
+**파일**: `service/SessionService.java`, `service/PaymentOrderService.java`
+
+`makeReservation`은 `@Transactional`이라 confirm 실패로 예외를 던지면 롤백된다.
+"확인 필요(UNKNOWN)"/"실패(FAILED)" 상태가 사라지지 않도록 실패 기록은 `PaymentOrderService`의
+`@Transactional(REQUIRES_NEW)`(별도 빈) 메서드로 독립 커밋한다. 성공 기록(CONFIRMED)은 예약 저장과
+원자성이 필요하므로 외부 트랜잭션에 합류시킨다.
+
+| confirm 결과 | 기록 | 상태 |
+|---|---|---|
+| 성공(DONE) | 외부 tx 합류 | CONFIRMED + 예약 저장 |
+| read timeout | REQUIRES_NEW | UNKNOWN (확인 필요) |
+| 토스 거절/오류 | REQUIRES_NEW | FAILED |
+| 연결 실패 | REQUIRES_NEW | PENDING 유지(재시도 안전) |
+
 ---
 
 ### **TODO**
