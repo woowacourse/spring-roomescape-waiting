@@ -16,7 +16,9 @@ public enum PaymentErrorType implements ErrorType {
     GATEWAY_RETRYABLE(HttpStatus.SERVICE_UNAVAILABLE, "PAYMENT503_001", "결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해 주세요."),
     GATEWAY_ERROR(HttpStatus.BAD_GATEWAY, "PAYMENT502_001", "결제 승인 중 오류가 발생했습니다."),
     GATEWAY_CONNECTION_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "PAYMENT504_001", "결제 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."),
-    GATEWAY_RESPONSE_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "PAYMENT504_002", "결제 결과 확인이 필요합니다. 내 결제 내역에서 상태를 확인해 주세요.");
+    GATEWAY_RESPONSE_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "PAYMENT504_002", "결제 결과 확인이 필요합니다. 내 결제 내역에서 상태를 확인해 주세요."),
+    OUTBOUND_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "PAYMENT429_001",
+            "결제 서비스 호출이 잠시 몰리고 있습니다. 잠시 후 다시 시도해 주세요.");
 
     private final HttpStatus httpStatus;
     private final String errorCode;

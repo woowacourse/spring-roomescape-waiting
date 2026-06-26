@@ -3,6 +3,7 @@ package roomescape.payment.infrastructure.toss;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import org.apache.hc.client5.http.ConnectTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,8 +92,12 @@ public class TossPaymentGateway implements PaymentGateway {
             log.warn("Toss 연결 실패 — orderId={}", orderId, e);
             return new PaymentGatewayConnectionTimeoutException();
         }
-        log.warn("Toss 응답 대기 중 타임아웃 — orderId={}", orderId, e);
-        return new PaymentGatewayResponseTimeoutException();
+        if (cause instanceof SocketTimeoutException) {
+            log.warn("Toss 응답 대기 중 타임아웃 — orderId={}", orderId, e);
+            return new PaymentGatewayResponseTimeoutException();
+        }
+        log.warn("Toss 호출 중 알 수 없는 I/O 오류 — orderId={}", orderId, e);
+        return new PaymentGatewayException();
     }
 
     private void logExternalFailure(RuntimeException exception, TossErrorResponse error) {

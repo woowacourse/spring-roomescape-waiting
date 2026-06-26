@@ -260,3 +260,31 @@ RESERVATION_PAYMENT_AMOUNT=50000
 ### 한계와 후속
 
 `UNCONFIRMED`인데 `paymentKey`가 비어 있는 경우(클라이언트가 키를 받기도 전에 끊긴 흐름)는 자동 회복 대상이 아니다. 화면에서 "다시 확인" 버튼이 비활성화되며, 사용자는 결제창에서 다시 진행하거나 운영자가 수동 정정한다. 결제 조회 API를 도입하는 다음 사이클에서, `UNCONFIRMED` 주문의 실제 상태를 토스에 직접 물어 자동 정정하는 보상 흐름으로 확장할 수 있다.
+
+## Rate Limit — 양방향 토큰 버킷
+
+3단계는 호출량 상한(Rate Limit)을 다룬다. **알고리즘은 하나(토큰 버킷), 적용 방향은 둘**이다.
+
+### 들어오는 요청 (서버 입장)
+
+`RateLimitInterceptor`가 결제·예약 엔드포인트(`/api/v1/payments/**`, `/api/v1/reservations/**`)에 걸린다. `preHandle`에서 토큰을 소비하지 못하면 컨트롤러를 호출하지 않고 `429` + `Retry-After` 헤더로 거부한다. `capacity`(허용 버스트), `refill-per-sec`(평균 TPS 상한)은 `rate-limit.*`로 외부화.
+
+### 나가는 호출 (클라이언트 입장)
+
+토스 호출용 `RestClient`에 두 인터셉터를 차례로 등록.
+
+1. **`OutboundRateLimitInterceptor`** — 호출 전 토큰을 소비. 한도 초과면 외부로 보내지 않고 `OutboundRateLimitException`(HTTP 429)으로 즉시 거부.
+2. **`RetryAfterInterceptor`** — 응답이 `429`면 `Retry-After`(초)만큼 대기 후 재시도. 헤더가 없으면 1초 폴백. `maxAttempts` 회 초과시 마지막 응답 그대로 반환.
+
+들어오는·나가는 쪽은 같은 `TokenBucketRateLimiter` 클래스를 재사용하되 **버킷 인스턴스는 분리**된다(다른 빈, 다른 정책). 나가는 한도는 토스가 우리에게 허용한 몫을 우리가 스스로 지키는 자기 통제. `outbound-rate-limit.*`로 외부화.
+
+### 핵심 설계 결정
+
+- **재시도 시 멱등키 유지**: 2단계의 `Idempotency-Key`(`orderId`)는 그대로 유지. read timeout(됐는지 모름)과 달리 `429`는 "아직 처리 안 됨"이라 본질적으로 재시도 안전하지만, 같은 키로 보내야 이전 사이클의 안전망과 결합된다.
+- **인터셉터 등록 순서**: outbound → retry. 첫 호출은 토큰 1개 소비. 그 후 `429` 받아 재시도하는 호출은 같은 인터셉터 체인을 거치지 않으므로 추가 토큰을 소비하지 않는다.
+- **fail-fast vs 블로킹 대기**: 나가는 한도 초과 시 즉시 거부(`OutboundRateLimitException`). 토큰이 찰 때까지 블로킹 대기시키면 스레드를 잡고 결정적 테스트가 어려워진다.
+- **사용자별 분리는 후속**: 현재는 전역 버킷 하나. 운영에선 사용자/IP별 분리가 일반적이지만 이번 사이클 범위 밖.
+
+### 결정적 테스트
+
+`TokenBucketRateLimiter`는 `LongSupplier` 가짜 시계를 주입받아 시간 의존 로직을 결정적으로 검증한다. `Thread.sleep` 없는 단위 테스트로 capacity·refill·동시성을 한 번에 확인 가능.
