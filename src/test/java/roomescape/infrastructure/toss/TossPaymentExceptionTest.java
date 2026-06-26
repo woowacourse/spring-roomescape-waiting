@@ -63,6 +63,19 @@ class TossPaymentExceptionTest {
     }
 
     @Test
+    @DisplayName("토스 호출량 초과 에러를 RateLimited 예외로 매핑한다")
+    void rateLimited() {
+        TossPaymentException exception = TossPaymentException.of(
+                HttpStatus.TOO_MANY_REQUESTS,
+                new TossErrorResponse("TOO_MANY_REQUESTS", "잠시 후 다시 시도해주세요.")
+        );
+
+        assertThat(exception).isInstanceOf(TossPaymentException.RateLimited.class);
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(exception.getCode()).isEqualTo("TOO_MANY_REQUESTS");
+    }
+
+    @Test
     @DisplayName("정의하지 않은 에러 코드는 기본 예외로 매핑한다")
     void unknown() {
         TossPaymentException exception = TossPaymentException.of(
