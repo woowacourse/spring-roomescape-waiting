@@ -49,8 +49,10 @@ class TossPaymentGatewayTest {
 
         PaymentResult result = gateway.confirm(new PaymentConfirmation("payment-key", "order-1", 50000L));
 
+        assertThat(result.paymentKey()).isEqualTo("payment-key");
         assertThat(result.orderId()).isEqualTo("order-1");
         assertThat(result.status()).isEqualTo(PaymentStatus.DONE);
+        assertThat(result.approvedAmount()).isEqualTo(50000L);
         server.verify();
     }
 }
