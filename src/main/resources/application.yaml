@@ -18,3 +18,7 @@ toss:
   base-url: https://api.tosspayments.com
   client-key: ${TOSS_CLIENT_KEY}
   secret-key: ${TOSS_SECRET_KEY}
+
+rate-limit:
+  capacity: 5
+  refill-per-second: 1.0

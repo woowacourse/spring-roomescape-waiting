@@ -6,3 +6,7 @@ toss:
   base-url: http://localhost:8089
   client-key: test_client_key
   secret-key: test_secret_key
+
+rate-limit:
+  capacity: 10000
+  refill-per-second: 10000.0
