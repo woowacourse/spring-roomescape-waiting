@@ -320,8 +320,20 @@ CREATE TABLE payment_order (
 | 토스 거절/오류 | REQUIRES_NEW | FAILED |
 | 연결 실패 | REQUIRES_NEW | PENDING 유지(재시도 안전) |
 
+## 17. [요구사항 4] 주문/결제 내역 조회
+
+**파일**: `controller/PaymentController.java` (`GET /payments?userName=`),
+`controller/dto/PaymentHistoryResponse.java`
+
+로그인 사용자의 주문 목록을 예약 정보(날짜·시간·테마)와 결제 상태로 함께 반환한다.
+상태 라벨: `PENDING`→결제 대기, `CONFIRMED`→확정, `FAILED`→실패, `UNKNOWN`→**확인 필요**.
+`orderId`·`paymentKey`(승인 시)·`amount` 포함. read timeout으로 불명확한 주문은 "실패"가 아닌
+"확인 필요"로 보여 주며, §16의 멱등키로 안전한 재시도가 보장된다.
+(화면은 외부 클라이언트가 이 API를 소비)
+
 ---
 
 ### **TODO**
 
 - 자동 승격 예약 결제 처리
+- "확인 필요(UNKNOWN)" 주문의 수렴: 결제 조회 API + 멱등 재시도로 성공/실패로 확정
