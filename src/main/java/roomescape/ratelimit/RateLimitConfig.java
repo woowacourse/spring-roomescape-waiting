@@ -14,4 +14,12 @@ public class RateLimitConfig {
     ) {
         return new TokenBucketRateLimiter(capacity, refillPerSec, System::nanoTime);
     }
+
+    @Bean
+    public TokenBucketRateLimiter outboundRateLimiter(
+            @Value("${outbound-rate-limit.capacity}") long capacity,
+            @Value("${outbound-rate-limit.refill-per-sec}") double refillPerSec
+    ) {
+        return new TokenBucketRateLimiter(capacity, refillPerSec, System::nanoTime);
+    }
 }
