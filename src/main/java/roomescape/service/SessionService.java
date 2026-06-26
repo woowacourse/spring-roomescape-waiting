@@ -8,19 +8,21 @@ import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.*;
 import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentConnectionException;
+import roomescape.payment.PaymentResultUnknownException;
 import roomescape.payment.domain.PaymentConfirmation;
 import roomescape.payment.gateway.PaymentGateway;
+import roomescape.payment.gateway.toss.TossPaymentException;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateSessionException;
 import roomescape.exception.InvalidWaitingPrerequisiteException;
 import roomescape.exception.SessionNotFoundException;
-import roomescape.repository.PendingPaymentRepository;
 import roomescape.repository.SessionRepository;
 import roomescape.service.dto.AvailableTimeSlot;
 
 import java.util.Objects;
-import java.util.UUID;
 import roomescape.service.dto.Booking;
+import roomescape.service.dto.PaymentHistory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,19 +39,19 @@ public class SessionService {
     private final ReservationService reservationService;
     private final WaitingService waitingService;
     private final PaymentGateway paymentGateway;
-    private final PendingPaymentRepository pendingPaymentRepository;
+    private final PaymentOrderService paymentOrderService;
 
     public SessionService(SessionRepository sessionRepository, TimeSlotService timeSlotService,
                           ThemeService themeService, ReservationService reservationService,
                           WaitingService waitingService, PaymentGateway paymentGateway,
-                          PendingPaymentRepository pendingPaymentRepository) {
+                          PaymentOrderService paymentOrderService) {
         this.sessionRepository = sessionRepository;
         this.timeSlotService = timeSlotService;
         this.themeService = themeService;
         this.reservationService = reservationService;
         this.waitingService = waitingService;
         this.paymentGateway = paymentGateway;
-        this.pendingPaymentRepository = pendingPaymentRepository;
+        this.paymentOrderService = paymentOrderService;
     }
 
     public List<Session> allSessions() {
@@ -104,27 +106,57 @@ public class SessionService {
 
     @Transactional
     public String preparePayment(Long amount) {
-        String orderId = UUID.randomUUID().toString();
-        pendingPaymentRepository.save(new PendingPayment(orderId, amount));
-        return orderId;
+        return paymentOrderService.prepare(amount).orderId();
     }
 
     @Transactional
     public void cancelPreparedPayment(String orderId) {
-        pendingPaymentRepository.deleteByOrderId(orderId);
+        paymentOrderService.cancel(orderId);
+    }
+
+    public List<PaymentHistory> findPaymentHistory(String userName) {
+        return paymentOrderService.findByName(userName).stream()
+                .map(order -> PaymentHistory.of(order, findSessionOrNull(order.sessionId())))
+                .toList();
     }
 
     @Transactional
     public Reservation makeReservation(PaymentReservationRequest request) {
         Session session = findSessionOrThrow(request.date(), request.timeId(), request.themeId());
-        PendingPayment pending = pendingPaymentRepository.findByOrderId(request.orderId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다: " + request.orderId()));
-        if (!pending.amount().equals(request.amount())) {
-            throw new PaymentAmountMismatchException(pending.amount(), request.amount());
+        PaymentOrder order = paymentOrderService.getByOrderId(request.orderId());
+
+        // 이미 확정된 주문이면(success 새로고침 등) 토스를 다시 부르지 않고 기존 예약을 그대로 돌려준다
+        if (order.isConfirmed()) {
+            return reservationService.findBySession(session)
+                    .orElseThrow(() -> new IllegalStateException("확정된 주문의 예약을 찾을 수 없습니다: " + request.orderId()));
         }
-        paymentGateway.confirm(new PaymentConfirmation(request.paymentKey(), request.orderId(), request.amount()));
-        pendingPaymentRepository.deleteByOrderId(request.orderId());
+        if (!order.amount().equals(request.amount())) {
+            throw new PaymentAmountMismatchException(order.amount(), request.amount());
+        }
+
+        confirmWithGateway(order, session, request);
+        paymentOrderService.confirm(order, request.name(), session.getId(), request.paymentKey());
         return reservationService.save(request.name(), session, request.amount(), request.paymentKey());
+    }
+
+    private void confirmWithGateway(PaymentOrder order, Session session, PaymentReservationRequest request) {
+        PaymentConfirmation confirmation = new PaymentConfirmation(
+                request.paymentKey(), order.orderId(), request.amount(), order.idempotencyKey());
+        try {
+            paymentGateway.confirm(confirmation);
+        } catch (PaymentResultUnknownException e) {
+            // read timeout — 승인 여부 불명확. "확인 필요"로 기록(별도 트랜잭션)하고 그대로 알린다
+            paymentOrderService.recordUnknown(order.orderId(), request.name(), session.getId(), request.paymentKey());
+            throw e;
+        } catch (PaymentConnectionException e) {
+            // 연결조차 못 함 — 토스에 닿지 않았으니 재시도 안전. PENDING 유지
+            paymentOrderService.recordRetryable(order.orderId(), request.name(), session.getId());
+            throw e;
+        } catch (TossPaymentException e) {
+            // 토스가 명시적으로 거절/오류 — "실패"로 기록
+            paymentOrderService.recordFailed(order.orderId(), request.name(), session.getId());
+            throw e;
+        }
     }
 
     @Transactional
@@ -190,6 +222,13 @@ public class SessionService {
     private Session findSessionOrThrow(LocalDate date, Long timeId, Long themeId) {
         return sessionRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
                 .orElseThrow(SessionNotFoundException::new);
+    }
+
+    private Session findSessionOrNull(Long sessionId) {
+        if (sessionId == null) {
+            return null;
+        }
+        return sessionRepository.findById(sessionId).orElse(null);
     }
 
     private void promoteWaitingIfExists(Session session) {

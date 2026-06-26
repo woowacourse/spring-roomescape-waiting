@@ -1,8 +1,10 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.controller.dto.PaymentHistoryResponse;
 import roomescape.controller.dto.PreparePaymentRequest;
 import roomescape.service.SessionService;
 
@@ -16,6 +18,14 @@ public class PaymentController {
 
     public PaymentController(SessionService sessionService) {
         this.sessionService = sessionService;
+    }
+
+    @GetMapping(params = "userName")
+    public ResponseEntity<List<PaymentHistoryResponse>> history(@RequestParam String userName) {
+        List<PaymentHistoryResponse> responses = sessionService.findPaymentHistory(userName).stream()
+                .map(PaymentHistoryResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/prepare")

@@ -8,7 +8,6 @@ import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.*;
-import roomescape.domain.PendingPayment;
 import roomescape.exception.*;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.domain.PaymentResult;
@@ -33,7 +32,7 @@ class SessionServiceTest {
     private FakeSessionRepository sessionRepository;
     private FakeTimeSlotRepository timeSlotRepository;
     private FakeThemeRepository themeRepository;
-    private FakePendingPaymentRepository pendingPaymentRepository;
+    private FakePaymentOrderRepository paymentOrderRepository;
 
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
@@ -54,10 +53,11 @@ class SessionServiceTest {
         // ponytail: no-op stub — tests cover domain logic, not payment gateway
         PaymentGateway paymentGateway = confirmation -> new PaymentResult(
                 confirmation.paymentKey(), confirmation.orderId(), PaymentStatus.DONE, confirmation.amount());
-        pendingPaymentRepository = new FakePendingPaymentRepository();
-        pendingPaymentRepository.save(new PendingPayment("order_test", 0L));
+        paymentOrderRepository = new FakePaymentOrderRepository();
+        PaymentOrderService paymentOrderService = new PaymentOrderService(paymentOrderRepository);
+        paymentOrderRepository.save(PaymentOrder.prepare("order_test", 0L));
         sessionService = new SessionService(sessionRepository, timeSlotService, themeService,
-                reservationService, waitingService, paymentGateway, pendingPaymentRepository);
+                reservationService, waitingService, paymentGateway, paymentOrderService);
 
         savedTimeSlot = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         savedTheme = themeRepository.save(Theme.transientOf("이름", "설명", "test.com"));
@@ -237,14 +237,17 @@ class SessionServiceTest {
     @Test
     @DisplayName("저장 금액과 다른 amount가 들어오면 승인 호출 전에 차단된다.")
     void makeReservation_AmountMismatch() {
-        pendingPaymentRepository.save(new PendingPayment("order_mismatch", 10000L));
+        paymentOrderRepository.save(PaymentOrder.prepare("order_mismatch", 10000L));
         assertThatThrownBy(() -> sessionService.makeReservation(
                 new PaymentReservationRequest("브라운", futureDate, savedTimeSlot.getId(), savedTheme.getId(), 9000L, "pk_test", "order_mismatch")))
                 .isInstanceOf(PaymentAmountMismatchException.class);
     }
 
     private PaymentReservationRequest basicRequest(String name) {
-        return new PaymentReservationRequest(name, futureDate, savedTimeSlot.getId(), savedTheme.getId(), 0L, "pk_test", "order_test");
+        // 주문은 결제 1건당 하나 — 사용자별로 고유 주문을 발급해 멱등 단축회로가 다른 사용자의 예약을 가리지 않게 한다
+        String orderId = "order_" + name;
+        paymentOrderRepository.save(PaymentOrder.prepare(orderId, 0L));
+        return new PaymentReservationRequest(name, futureDate, savedTimeSlot.getId(), savedTheme.getId(), 0L, "pk_test", orderId);
     }
 
     private Reservation savePastReservation() {

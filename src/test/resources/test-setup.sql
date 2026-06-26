@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS theme CASCADE;
 DROP TABLE IF EXISTS time_slot CASCADE;
 DROP TABLE IF EXISTS session CASCADE;
 DROP TABLE IF EXISTS reservation CASCADE;
-DROP TABLE IF EXISTS pending_payment CASCADE;
+DROP TABLE IF EXISTS payment_order CASCADE;
 DROP TABLE IF EXISTS waiting CASCADE;
 
 CREATE TABLE theme
@@ -48,12 +48,18 @@ CREATE TABLE reservation
     CONSTRAINT uk_reservation_session UNIQUE (session_id)
 );
 
-CREATE TABLE pending_payment
+CREATE TABLE payment_order
 (
-    order_id   VARCHAR(64) NOT NULL,
-    amount     BIGINT      NOT NULL,
-    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (order_id)
+    order_id        VARCHAR(64)  NOT NULL,
+    amount          BIGINT       NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,
+    status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    name            VARCHAR(255) NULL,
+    session_id      BIGINT       NULL,
+    payment_key     VARCHAR(255) NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (order_id),
+    FOREIGN KEY (session_id) REFERENCES session (id)
 );
 
 CREATE TABLE waiting
@@ -67,7 +73,7 @@ CREATE TABLE waiting
     CONSTRAINT uk_waiting_name_session UNIQUE (name, session_id)
 );
 
-DELETE FROM pending_payment;
+DELETE FROM payment_order;
 TRUNCATE TABLE waiting RESTART IDENTITY;
 TRUNCATE TABLE reservation RESTART IDENTITY;
 TRUNCATE TABLE session RESTART IDENTITY;

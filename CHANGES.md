@@ -221,6 +221,118 @@ DELETE /payments/prepare/{orderId}
 
 ---
 
+---
+
+# [3차] 타임아웃 방어 · 멱등 재시도 · 주문/결제 내역
+
+> 1단계에서 붙인 토스 호출에 타임아웃·멱등 재시도 방어를 더한다. 느린 호출이 스레드를 무한정
+> 잡지 못하게 하고, 결과가 불명확한 read timeout을 "실패"로 단정하지 않으며, 주문당 고정
+> Idempotency-Key로 중복 승인을 막고, 사용자가 주문/결제 상태를 확인할 수 있게 한다.
+
+## 14. 학습 테스트 — learning-test-2-timeout
+
+**파일**: `src/test/java/roomescape/learning/TimeoutLearningTest.java`
+
+본 구현 전에 타임아웃의 감각을 먼저 잡는 학습 테스트. `MockWebServer`로 느린 서버를 흉내 내,
+connect/read timeout을 걸었을 때 **얼마나 기다렸다 어떤 예외로 실패하는지**를 경과 시간 단언으로 확인한다.
+
+| 테스트             | 재현                                | 확인                                                                                                                                |
+|-----------------|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| read timeout    | 바디 지연(3s) > read timeout(0.5s)    | read timeout만큼만 기다린 뒤 `RestClientException`(root `SocketTimeoutException` "Read timed out")                                       |
+| connect timeout | SYN 무응답 블랙홀 IP(`10.255.255.1:81`) | connect timeout(1s)만큼만 기다린 뒤 `ResourceAccessException`(root `SocketTimeoutException` "Connect timed out") — OS 기본값(수십 초)까지 잡히지 않음 |
+| TPS             | 빠른 3건 + 느린 1건                     | 느린 1건이 read timeout으로 잘려, 전체가 서버 지연(3s)에 묶이지 않고 빠른 3건 성공                                                                          |
+
+## 15. [요구사항 2] 타임아웃·연결 실패 예외 구분
+
+**파일**: `payment/PaymentConnectionException.java`, `payment/PaymentResultUnknownException.java`,
+`exception/ProblemDetailsAdvice.java`
+
+타임아웃·연결 실패를 토스 에러 응답(`{code,message}`)과 구분하기 위한 도메인 예외 타입과
+RFC 9457 ProblemDetail 응답 규약을 정의한다. (게이트웨이에서 이 타입으로 변환하는 연동은 §16)
+
+| 도메인 예외                          | 상황 / 근본 원인                                                                                | 의미                                  | 응답                                              |
+|---------------------------------|-------------------------------------------------------------------------------------------|-------------------------------------|-------------------------------------------------|
+| `PaymentConnectionException`    | 연결 거부·connect timeout (`ConnectException` / `SocketTimeoutException` "Connect timed out") | 토스에 닿지 못함 → **안 됨, 재시도 안전**         | 503 `PAYMENT_GATEWAY_UNREACHABLE`               |
+| `PaymentResultUnknownException` | read timeout (`SocketTimeoutException` "Read timed out")                                  | 승인 여부 불명확 → **"실패"로 단정하지 않고 확인 필요** | 504 `PAYMENT_RESULT_UNKNOWN` + "내역에서 확인/재시도" 안내 |
+
+핵심: 결과가 불명확한 실패를 성공/실패 둘 중 하나로 성급히 결론짓지 않는다.
+
+## 16. [요구사항 3] Idempotency-Key · 결제 원장 · 게이트웨이 연동
+
+### 16-1. payment_order (결제 원장)
+
+`pending_payment`(orderId·amount만 보유, 승인 후 삭제)를 주문 생애주기를 담는 `payment_order`로 확장.
+승인 성공/실패 후에도 삭제하지 않고 상태를 남겨 내역 조회(§17)의 근거가 된다.
+
+```sql
+CREATE TABLE payment_order
+(
+    order_id        VARCHAR(64)  NOT NULL,
+    amount          BIGINT       NOT NULL,
+    idempotency_key VARCHAR(300) NOT NULL,                   -- 주문당 고정 멱등키(≤300자)
+    status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING', -- PENDING/CONFIRMED/FAILED/UNKNOWN
+    name            VARCHAR(255) NULL,
+    session_id      BIGINT NULL REFERENCES session(id),
+    payment_key     VARCHAR(255) NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (order_id)
+);
+```
+
+| 파일                                                                          | 설명                                                            |
+|-----------------------------------------------------------------------------|---------------------------------------------------------------|
+| `domain/PaymentOrder.java`, `domain/PaymentOrderStatus.java`                | 주문 원장 도메인 + 상태 전이(`confirmed`/`failed`/`unknown`/`retryable`) |
+| `repository/PaymentOrderRepository.java`, `JdbcPaymentOrderRepository.java` | save/update/findByOrderId/findByName/delete                   |
+| `service/PaymentOrderService.java`                                          | prepare/cancel/confirm + 실패 기록                                |
+| `service/dto/PaymentHistory.java`                                           | 내역 read-model (엔드포인트는 §17)                                    |
+
+`PendingPayment` 도메인/레포 및 관련 테스트는 삭제, `FakePaymentOrderRepository`로 교체.
+
+### 16-2. Idempotency-Key (주문당 고정 UUID)
+
+**파일**: `payment/domain/PaymentConfirmation.java`, `payment/gateway/toss/TossPaymentGateway.java`
+
+주문 생성(`/payments/prepare`) 시 멱등키(UUID)를 발급·저장하고, confirm 호출에 `Idempotency-Key`
+헤더로 전송한다. 키는 주문에 고정되어 **재시도해도 같은 키** → 토스가 첫 응답을 그대로 반환해
+이중 승인 방지. 1차의 `ALREADY_PROCESSED_PAYMENT` 처리와 함께 두 겹 방어.
+추가로 우리 쪽에서도 주문이 이미 `CONFIRMED`면 토스를 다시 부르지 않고 기존 예약을 반환(success 새로고침 방어).
+
+### 16-3. 게이트웨이 예외 변환 (§15 타입으로 연동)
+
+`TossPaymentGateway`가 `RestClient`의 전송 실패(`RestClientException`)를 root cause로 분기해
+§15의 `PaymentConnectionException`/`PaymentResultUnknownException`으로 변환한다. onStatus가 던지는
+`TossPaymentException`은 `RestClientException`이 아니므로 토스 에러와 깔끔히 분리된다.
+
+### 16-4. makeReservation 흐름 + 롤백돼도 살아남는 실패 기록
+
+**파일**: `service/SessionService.java`, `service/PaymentOrderService.java`
+
+`makeReservation`은 `@Transactional`이라 confirm 실패로 예외를 던지면 롤백된다.
+"확인 필요(UNKNOWN)"/"실패(FAILED)" 상태가 사라지지 않도록 실패 기록은 `PaymentOrderService`의
+`@Transactional(REQUIRES_NEW)`(별도 빈) 메서드로 독립 커밋한다. 성공 기록(CONFIRMED)은 예약 저장과
+원자성이 필요하므로 외부 트랜잭션에 합류시킨다.
+
+| confirm 결과   | 기록           | 상태                 |
+|--------------|--------------|--------------------|
+| 성공(DONE)     | 외부 tx 합류     | CONFIRMED + 예약 저장  |
+| read timeout | REQUIRES_NEW | UNKNOWN (확인 필요)    |
+| 토스 거절/오류     | REQUIRES_NEW | FAILED             |
+| 연결 실패        | REQUIRES_NEW | PENDING 유지(재시도 안전) |
+
+## 17. [요구사항 4] 주문/결제 내역 조회
+
+**파일**: `controller/PaymentController.java` (`GET /payments?userName=`),
+`controller/dto/PaymentHistoryResponse.java`
+
+로그인 사용자의 주문 목록을 예약 정보(날짜·시간·테마)와 결제 상태로 함께 반환한다.
+상태 라벨: `PENDING`→결제 대기, `CONFIRMED`→확정, `FAILED`→실패, `UNKNOWN`→**확인 필요**.
+`orderId`·`paymentKey`(승인 시)·`amount` 포함. read timeout으로 불명확한 주문은 "실패"가 아닌
+"확인 필요"로 보여 주며, §16의 멱등키로 안전한 재시도가 보장된다.
+(화면은 외부 클라이언트가 이 API를 소비)
+
+---
+
 ### **TODO**
 
 - 자동 승격 예약 결제 처리
+- 주문의 수렴: 결제 조회 API + 멱등 재시도로 성공/실패로 확정
