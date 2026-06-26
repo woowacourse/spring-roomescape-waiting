@@ -98,7 +98,7 @@ class TokenBucketRateLimiterTest {
         AtomicInteger passed = new AtomicInteger();
         CountDownLatch ready = new CountDownLatch(threadCount);
         CountDownLatch start = new CountDownLatch(1);
-        ExecutorService executor = Executors.newFixedThreadPool(64);
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
