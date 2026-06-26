@@ -359,6 +359,18 @@ CREATE TABLE payment_order
 - 시간은 `LongSupplier` 가짜 시계 주입으로 결정적 테스트, `synchronized`로 동시성 안전
   (테스트: 가짜 시계 보충 검증 + 동시 요청에서 정확히 `capacity`개만 통과)
 
+## 20. [요구사항 2] 서버 관점 — 한도 초과 요청 거부
+
+**파일**: `ratelimit/RateLimitInterceptor.java`, `config/RateLimitConfig.java`, `application.properties`
+
+결제·예약 엔드포인트(`/reservations`, `/payments` 및 하위 경로)에 토큰 버킷을 적용한다.
+`preHandle`에서 `tryConsume()`이 false면 컨트롤러를 호출하지 않고(false 반환) 429와 `Retry-After`
+(= `retryAfterSeconds()`)를 응답한다. `capacity`/`refillPerSec`는 `rate-limit.*`로 외부화.
+
+`WebMvcConfigurer` 생성자 `@Value`는 placeholder 해결 전에 인스턴스화돼 실패하므로,
+`@Bean MappedInterceptor`로 등록한다(`@Bean` 메서드 파라미터 `@Value`는 정상 해결, `@WebMvcTest` 슬라이스도 비침투).
+(테스트: 인터셉터 단위 테스트 + `rate-limit.capacity`만 바꿔 거부 시점이 달라지는 통합 테스트)
+
 ---
 
 ### **TODO**
