@@ -12,25 +12,36 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import roomescape.payment.adapter.TossPaymentGateway;
 import roomescape.payment.port.PaymentGateway;
+import roomescape.ratelimit.OutboundRateLimitInterceptor;
+import roomescape.ratelimit.OutboundRateLimitProperties;
+import roomescape.ratelimit.RetryAfterInterceptor;
+import roomescape.ratelimit.TokenBucketRateLimiter;
 
 @Configuration
 @EnableConfigurationProperties(TossPaymentProperties.class)
 public class PaymentConfig {
 
     @Bean
-    public RestClient tossRestClient(TossPaymentProperties properties) {
+    public TokenBucketRateLimiter outboundRateLimiter(OutboundRateLimitProperties properties) {
+        return new TokenBucketRateLimiter(properties.capacity(), properties.refillPerSec(), System::nanoTime);
+    }
+
+    @Bean
+    public RestClient tossRestClient(TossPaymentProperties properties, TokenBucketRateLimiter outboundRateLimiter) {
         String encoded = Base64.getEncoder()
                 .encodeToString((properties.secretKey() + ":").getBytes(StandardCharsets.UTF_8));
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(properties.connectTimeoutMs());  // SYN -> ACK 대기 최대 시간
-        factory.setReadTimeout(properties.readTimeoutMs());  // 연결 후 응답 도착 최대 시간
+        factory.setConnectTimeout(properties.connectTimeoutMs());
+        factory.setReadTimeout(properties.readTimeoutMs());
 
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoded)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .requestFactory(factory)
+                .requestInterceptor(new RetryAfterInterceptor(properties.maxRetryAttempts()))
+                .requestInterceptor(new OutboundRateLimitInterceptor(outboundRateLimiter))
                 .build();
     }
 
