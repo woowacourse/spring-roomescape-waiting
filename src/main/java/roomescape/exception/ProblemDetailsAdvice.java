@@ -1,6 +1,7 @@
 package roomescape.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import roomescape.payment.OutboundRateLimitException;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConnectionException;
 import roomescape.payment.PaymentResultUnknownException;
@@ -85,6 +86,16 @@ public class ProblemDetailsAdvice {
                 exception.getMessage() + " 잠시 후 다시 시도해 주세요.");
         problemDetail.setProperty("code", "PAYMENT_GATEWAY_UNREACHABLE");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problemDetail);
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<ProblemDetail> handleOutboundRateLimitException(OutboundRateLimitException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
+                exception.getMessage());
+        problemDetail.setProperty("code", "PAYMENT_OUTBOUND_RATE_LIMITED");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.getRetryAfterSeconds()))
+                .body(problemDetail);
     }
 
     @ExceptionHandler(TossRateLimitException.class)

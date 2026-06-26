@@ -48,6 +48,7 @@ class TossPaymentGatewayTest {
         // 느린 응답을 일찍 포기하는지 확인하기 위해 read timeout을 짧게 둔다
         registry.add("toss.connect-timeout-ms", () -> 1000);
         registry.add("toss.read-timeout-ms", () -> 1000);
+        registry.add("outbound-rate-limit.capacity", () -> 1000);
     }
 
     @AfterAll

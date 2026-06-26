@@ -384,6 +384,19 @@ CREATE TABLE payment_order
 재시도는 같은 요청을 그대로 다시 보내므로 2단계의 주문당 고정 `Idempotency-Key` 헤더가 유지된다.
 `toss.retry.*`로 외부화. (테스트: 429→대기→200, 폴백, maxAttempts 초과 예외)
 
+## 22. [요구사항 4] 클라이언트 관점 — 나가는 호출에 Rate Limit
+
+**파일**: `ratelimit/OutboundRateLimitInterceptor.java`, `payment/OutboundRateLimitException.java`,
+`config/TossClientConfig.java`, `exception/ProblemDetailsAdvice.java`
+
+같은 `TokenBucketRateLimiter`(요구사항 1)를 방향만 바꿔 나가는 호출에 적용한다. 요구사항 3과 같은
+게이트웨이 `RestClient`에 인터셉터를 하나 더 등록한다(재시도 바깥, 레이트리밋 안쪽 — 재시도마다 토큰 소비).
+호출 전 `tryConsume()`으로 토큰을 소비하고, 없으면 외부로 보내지 않고 `OutboundRateLimitException`
+(503 `PAYMENT_OUTBOUND_RATE_LIMITED` + Retry-After)으로 거부한다. 토큰이 보충되면 다시 나간다.
+
+나가는 한도는 `outbound-rate-limit.*`로 들어오는 쪽(`rate-limit.*`)과 분리해 외부화한다.
+들어오는/나가는 Rate Limit은 같은 알고리즘·다른 방향이다.
+
 ---
 
 ### **TODO**
