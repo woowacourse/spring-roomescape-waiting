@@ -371,6 +371,19 @@ CREATE TABLE payment_order
 `@Bean MappedInterceptor`로 등록한다(`@Bean` 메서드 파라미터 `@Value`는 정상 해결, `@WebMvcTest` 슬라이스도 비침투).
 (테스트: 인터셉터 단위 테스트 + `rate-limit.capacity`만 바꿔 거부 시점이 달라지는 통합 테스트)
 
+## 21. [요구사항 3] 클라이언트 관점 — 토스의 429에 백오프 재시도
+
+**파일**: `ratelimit/RetryAfterInterceptor.java`, `payment/TossRateLimitException.java`,
+`config/TossClientConfig.java`, `exception/ProblemDetailsAdvice.java`
+
+토스 호출 `RestClient`에 `ClientHttpRequestInterceptor`를 등록한다. 응답이 429이고 시도 횟수가
+`maxAttempts` 미만이면 `Retry-After`(초)만큼 대기 후 재시도하고, `Retry-After`가 없으면 고정 간격
+(`toss.retry.fallback-seconds`, 기본 1초)으로 폴백한다. `maxAttempts`를 넘어도 429면
+`TossRateLimitException`(503 `TOSS_RATE_LIMITED` + Retry-After)으로 실패한다(무한 재시도 금지).
+
+재시도는 같은 요청을 그대로 다시 보내므로 2단계의 주문당 고정 `Idempotency-Key` 헤더가 유지된다.
+`toss.retry.*`로 외부화. (테스트: 429→대기→200, 폴백, maxAttempts 초과 예외)
+
 ---
 
 ### **TODO**

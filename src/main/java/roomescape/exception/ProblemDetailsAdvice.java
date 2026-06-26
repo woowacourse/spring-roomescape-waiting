@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConnectionException;
 import roomescape.payment.PaymentResultUnknownException;
+import roomescape.payment.TossRateLimitException;
 import roomescape.payment.gateway.toss.TossPaymentException;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -83,6 +85,16 @@ public class ProblemDetailsAdvice {
                 exception.getMessage() + " 잠시 후 다시 시도해 주세요.");
         problemDetail.setProperty("code", "PAYMENT_GATEWAY_UNREACHABLE");
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problemDetail);
+    }
+
+    @ExceptionHandler(TossRateLimitException.class)
+    public ResponseEntity<ProblemDetail> handleTossRateLimitException(TossRateLimitException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
+                exception.getMessage());
+        problemDetail.setProperty("code", "TOSS_RATE_LIMITED");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.getRetryAfterSeconds()))
+                .body(problemDetail);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
