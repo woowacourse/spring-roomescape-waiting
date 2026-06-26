@@ -347,6 +347,18 @@ CREATE TABLE payment_order
 토큰 버킷 하나로 순간 버스트(`capacity`)와 평균 처리량 상한(`refillPerSec`)을 어떻게 거는지,
 같은 알고리즘을 방향만 바꿔 들어오는 요청과 나가는 호출에 어떻게 적용하는지를 결정적 가짜 시계로 확인한다.
 
+## 19. [요구사항 1] 토큰 버킷
+
+**파일**: `ratelimit/TokenBucketRateLimiter.java`
+
+`capacity`(허용 버스트)와 `refillPerSec`(평균 TPS 상한)을 가진 토큰 버킷. 외부 의존성 없음.
+
+- 보충 = "마지막 보충 이후 경과 시간 × refillPerSec", `capacity`를 넘지 않음
+- `tryConsume()`: 토큰 ≥1이면 1개 소비 후 통과, 없으면 거부
+- `retryAfterSeconds()`: 1개가 찰 때까지 필요한 초를 올림(`Math.ceil`)
+- 시간은 `LongSupplier` 가짜 시계 주입으로 결정적 테스트, `synchronized`로 동시성 안전
+  (테스트: 가짜 시계 보충 검증 + 동시 요청에서 정확히 `capacity`개만 통과)
+
 ---
 
 ### **TODO**
