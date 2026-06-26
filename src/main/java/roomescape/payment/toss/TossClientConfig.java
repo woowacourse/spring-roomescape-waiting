@@ -15,11 +15,26 @@ import java.util.Base64;
 public class TossClientConfig {
 
     @Bean
+    public Sleeper tossBackoffSleeper() {
+        return new ThreadSleeper();
+    }
+
+    @Bean
+    public RetryAfterInterceptor tossRetryAfterInterceptor(
+            @Value("${toss.retry.max-attempts}") int maxAttempts,
+            @Value("${toss.retry.default-backoff}") Duration defaultBackoff,
+            Sleeper tossBackoffSleeper
+    ) {
+        return new RetryAfterInterceptor(maxAttempts, defaultBackoff, tossBackoffSleeper);
+    }
+
+    @Bean
     public RestClient tossRestClient(
             @Value("${toss.base-url}") String baseUrl,
             @Value("${toss.secret-key}") String secretKey,
             @Value("${toss.connect-timeout}") Duration connectTimeout,
-            @Value("${toss.read-timeout}") Duration readTimeout
+            @Value("${toss.read-timeout}") Duration readTimeout,
+            RetryAfterInterceptor tossRetryAfterInterceptor
     ) {
         String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
@@ -32,6 +47,7 @@ public class TossClientConfig {
                 .baseUrl(baseUrl)
                 .requestFactory(requestFactory)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
+                .requestInterceptor(tossRetryAfterInterceptor)
                 .build();
     }
 }
