@@ -332,6 +332,23 @@ CREATE TABLE payment_order
 
 ---
 
+---
+
+# [4차] Rate Limit (호출량 상한)
+
+> 같은 토큰 버킷 알고리즘을 두 경계에 적용한다. 들어오는 요청이 몰리면 초과분을 429로 거부하고(서버 입장),
+> 토스를 호출할 땐 나가는 호출량을 스스로 조절한다(클라이언트 입장). 토스가 429를 주면 Retry-After를
+> 존중해 백오프 재시도한다. 요구사항별로 커밋을 나눴고, 아래 각 절이 그 단계에 대응한다.
+
+## 18. 학습 테스트 — learning-test-3-ratelimit
+
+**파일**: `src/test/java/roomescape/learning/RateLimitLearningTest.java`
+
+토큰 버킷 하나로 순간 버스트(`capacity`)와 평균 처리량 상한(`refillPerSec`)을 어떻게 거는지,
+같은 알고리즘을 방향만 바꿔 들어오는 요청과 나가는 호출에 어떻게 적용하는지를 결정적 가짜 시계로 확인한다.
+
+---
+
 ### **TODO**
 
 - 자동 승격 예약 결제 처리
