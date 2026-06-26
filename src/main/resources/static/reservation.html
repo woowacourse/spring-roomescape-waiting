@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>예약하기</title>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+            margin: 0;
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        header {
+            background: #1d1d1f;
+            color: #fff;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header nav {
+            display: flex;
+            gap: 16px;
+        }
+
+        header a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        header a:hover {
+            color: #fff;
+        }
+
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .theme-info {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .theme-info img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            display: block;
+            background: #e0e0e0;
+        }
+
+        .theme-info-body {
+            padding: 20px 24px;
+        }
+
+        .theme-info h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+        }
+
+        .theme-info p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .step {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .step-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #007aff;
+            margin: 0 0 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .step h3 {
+            margin: 0 0 16px;
+            font-size: 18px;
+        }
+
+        input[type="date"], input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input[type="date"]:focus, input[type="text"]:focus {
+            border-color: #007aff;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+        }
+
+        .time-btn {
+            padding: 12px;
+            background: #f0f0f3;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .time-btn:hover {
+            background: #e8e8ed;
+        }
+
+        .time-btn.selected {
+            background: #007aff;
+            color: #fff;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #007aff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #0066cc;
+        }
+
+        .submit-btn:disabled {
+            background: #d2d2d7;
+            cursor: not-allowed;
+        }
+
+        .empty, .error {
+            color: #999;
+            font-size: 14px;
+            padding: 16px 0;
+        }
+
+        .error {
+            color: #ff3b30;
+        }
+
+        .success {
+            background: #d1f5d3;
+            color: #1d6b1f;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>🔑 방탈출 예약</h1>
+    <nav>
+        <a href="my-reservations.html">내 예약</a>
+        <a href="index.html">← 메인으로</a>
+    </nav>
+</header>
+<main>
+    <div id="theme-info" class="theme-info">
+        <div class="theme-info-body">
+            <p class="empty">테마 정보를 불러오는 중...</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <p class="step-label">Step 1</p>
+        <h3>날짜 선택</h3>
+        <input type="date" id="date-input">
+    </div>
+
+    <div id="time-step" class="step hidden">
+        <p class="step-label">Step 2</p>
+        <h3>시간 선택</h3>
+        <div id="times" class="time-grid"></div>
+    </div>
+
+    <div id="name-step" class="step hidden">
+        <p class="step-label">Step 3</p>
+        <h3>예약자 이름</h3>
+        <input type="text" id="name-input" placeholder="이름을 입력하세요" maxlength="30">
+        <button id="submit" class="submit-btn" disabled>예약하기</button>
+        <div id="result"></div>
+    </div>
+
+    <div id="payment-step" class="step hidden">
+        <p class="step-label">Step 4</p>
+        <h3>결제</h3>
+        <div id="payment-method"></div>
+        <div id="agreement"></div>
+        <button id="payButton" class="submit-btn" disabled>결제하기</button>
+        <div id="pay-result"></div>
+    </div>
+</main>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const themeId = params.get('themeId');
+
+    let selectedTimeId = null;
+
+    if (!themeId) {
+        document.querySelector('main').innerHTML = '<p class="error">테마가 선택되지 않았습니다. <a href="index.html">메인으로</a></p>';
+    } else {
+        init();
+    }
+
+    async function init() {
+        await loadTheme();
+        setupDateInput();
+    }
+
+    async function loadTheme() {
+        const container = document.getElementById('theme-info');
+        try {
+            const res = await fetch('/user/themes');
+            const themes = await res.json();
+            const theme = themes.find(t => String(t.id) === String(themeId));
+            if (!theme) {
+                container.innerHTML = '<div class="theme-info-body"><p class="error">테마를 찾을 수 없습니다.</p></div>';
+                return;
+            }
+            container.innerHTML = `
+                <img src="${theme.thumbnailUrl}" alt="${theme.name}"
+                     onerror="this.style.background='#e0e0e0'; this.removeAttribute('src');">
+                <div class="theme-info-body">
+                    <h2>${theme.name}</h2>
+                    <p>${theme.description}</p>
+                </div>
+            `;
+        } catch (e) {
+            container.innerHTML = '<div class="theme-info-body"><p class="error">테마 정보를 불러오지 못했습니다.</p></div>';
+        }
+    }
+
+    function setupDateInput() {
+        const input = document.getElementById('date-input');
+        // 오늘 이후만 선택 가능 (UI 안내 — 실제 검증은 서버/사이클 2)
+        const today = new Date().toISOString().split('T')[0];
+        input.min = today;
+        input.value = today;
+        input.addEventListener('change', loadAvailableTimes);
+        loadAvailableTimes();
+    }
+
+    async function loadAvailableTimes() {
+        const date = document.getElementById('date-input').value;
+        if (!date) return;
+
+        // 이전 선택 초기화
+        selectedTimeId = null;
+        document.getElementById('name-step').classList.add('hidden');
+        document.getElementById('payment-step').classList.add('hidden');
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('submit').disabled = false;
+
+        const container = document.getElementById('times');
+        const step = document.getElementById('time-step');
+        step.classList.remove('hidden');
+        container.innerHTML = '<p class="empty">불러오는 중...</p>';
+
+        try {
+            const res = await fetch(`/user/themes/${themeId}/available-times?date=${date}`);
+            if (!res.ok) throw new Error(res.status);
+            const times = await res.json();
+
+            if (times.length === 0) {
+                container.innerHTML = '<p class="empty">예약 가능한 시간이 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = times.map(t =>
+                `<button class="time-btn" data-id="${t.id}">${t.startAt}</button>`
+            ).join('');
+
+            container.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', () => selectTime(btn));
+            });
+        } catch (e) {
+            container.innerHTML = '<p class="error">예약 가능 시간을 불러오지 못했습니다.</p>';
+        }
+    }
+
+    function selectTime(btn) {
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedTimeId = btn.dataset.id;
+
+        document.getElementById('name-step').classList.remove('hidden');
+        validateForm();
+    }
+
+    document.getElementById('name-input').addEventListener('input', validateForm);
+    document.getElementById('submit').addEventListener('click', submit);
+
+    function validateForm() {
+        const name = document.getElementById('name-input').value.trim();
+        document.getElementById('submit').disabled = !(name && selectedTimeId);
+    }
+
+    async function submit() {
+        const name = document.getElementById('name-input').value.trim();
+        const date = document.getElementById('date-input').value;
+        const result = document.getElementById('result');
+        const submitBtn = document.getElementById('submit');
+
+        submitBtn.disabled = true;
+        result.innerHTML = '';
+
+        let order;
+        try {
+            const res = await fetch('/user/reservations', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    reserverName: name,
+                    date: date,
+                    timeId: Number(selectedTimeId),
+                    themeId: Number(themeId)
+                })
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `서버 오류 (${res.status})`);
+            }
+            order = await res.json();
+        } catch (e) {
+            result.innerHTML = `<p class="error">주문 생성에 실패했습니다. ${e.message}</p>`;
+            submitBtn.disabled = false;
+            return;
+        }
+
+        await setupPaymentWidget(order);
+    }
+
+    async function setupPaymentWidget(order) {
+        const paymentStep = document.getElementById('payment-step');
+        const payButton = document.getElementById('payButton');
+        const payResult = document.getElementById('pay-result');
+
+        paymentStep.classList.remove('hidden');
+        payButton.disabled = true;
+        payResult.innerHTML = '';
+        document.getElementById('payment-method').innerHTML = '';
+        document.getElementById('agreement').innerHTML = '';
+
+        try {
+            const tossPayments = TossPayments(order.clientKey);
+            const widgets = tossPayments.widgets({customerKey: TossPayments.ANONYMOUS});
+            await widgets.setAmount({currency: 'KRW', value: order.amount});
+            await Promise.all([
+                widgets.renderPaymentMethods({selector: '#payment-method', variantKey: 'DEFAULT'}),
+                widgets.renderAgreement({selector: '#agreement', variantKey: 'AGREEMENT'})
+            ]);
+            payButton.disabled = false;
+
+            payButton.onclick = async () => {
+                payButton.disabled = true;
+                try {
+                    await widgets.requestPayment({
+                        orderId: order.orderId,
+                        orderName: order.orderName,
+                        successUrl: window.location.origin + '/reservation-success.html',
+                        failUrl: window.location.origin + '/reservation-fail.html'
+                    });
+                } catch (e) {
+                    if (e.code !== 'USER_CANCEL') {
+                        payResult.innerHTML = `<p class="error">결제 요청 실패: ${e.message}</p>`;
+                    }
+                    payButton.disabled = false;
+                }
+            };
+        } catch (e) {
+            payResult.innerHTML = `<p class="error">결제위젯을 불러오지 못했습니다. ${e.message}</p>`;
+        }
+    }
+</script>
+</body>
+</html>
