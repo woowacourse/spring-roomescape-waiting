@@ -2,6 +2,8 @@ package roomescape.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import roomescape.payment.PaymentAmountMismatchException;
+import roomescape.payment.PaymentConnectionException;
+import roomescape.payment.PaymentResultUnknownException;
 import roomescape.payment.gateway.toss.TossPaymentException;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,24 @@ public class ProblemDetailsAdvice {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(exception.getStatus(), exception.getMessage());
         problemDetail.setProperty("code", exception.getCode());
         return ResponseEntity.status(exception.getStatus()).body(problemDetail);
+    }
+
+    @ExceptionHandler(PaymentResultUnknownException.class)
+    public ResponseEntity<ProblemDetail> handlePaymentResultUnknownException(PaymentResultUnknownException exception) {
+        // read timeout 등 결과 불명확 — "실패"로 단정하지 않는다. 504 + 안내. 주문 내역에서 상태 확인/재시도 가능.
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.GATEWAY_TIMEOUT,
+                exception.getMessage() + " 주문/결제 내역에서 상태를 확인하거나 다시 시도해 주세요.");
+        problemDetail.setProperty("code", "PAYMENT_RESULT_UNKNOWN");
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(problemDetail);
+    }
+
+    @ExceptionHandler(PaymentConnectionException.class)
+    public ResponseEntity<ProblemDetail> handlePaymentConnectionException(PaymentConnectionException exception) {
+        // 연결 실패 — 승인 안 됨이 확실, 재시도 안전. 503으로 안내.
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
+                exception.getMessage() + " 잠시 후 다시 시도해 주세요.");
+        problemDetail.setProperty("code", "PAYMENT_GATEWAY_UNREACHABLE");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problemDetail);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

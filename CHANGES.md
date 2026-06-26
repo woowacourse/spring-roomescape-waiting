@@ -244,6 +244,21 @@ connect/read timeout을 걸었을 때 **얼마나 기다렸다 어떤 예외로 
 | connect timeout | SYN 무응답 블랙홀 IP(`10.255.255.1:81`) | connect timeout(1s)만큼만 기다린 뒤 `ResourceAccessException`(root `SocketTimeoutException` "Connect timed out") — OS 기본값(수십 초)까지 잡히지 않음 |
 | TPS | 빠른 3건 + 느린 1건 | 느린 1건이 read timeout으로 잘려, 전체가 서버 지연(3s)에 묶이지 않고 빠른 3건 성공 |
 
+## 15. [요구사항 2] 타임아웃·연결 실패 예외 구분
+
+**파일**: `payment/PaymentConnectionException.java`, `payment/PaymentResultUnknownException.java`,
+`exception/ProblemDetailsAdvice.java`
+
+타임아웃·연결 실패를 토스 에러 응답(`{code,message}`)과 구분하기 위한 도메인 예외 타입과
+RFC 9457 ProblemDetail 응답 규약을 정의한다. (게이트웨이에서 이 타입으로 변환하는 연동은 §16)
+
+| 도메인 예외 | 상황 / 근본 원인 | 의미 | 응답 |
+|---|---|---|---|
+| `PaymentConnectionException` | 연결 거부·connect timeout (`ConnectException` / `SocketTimeoutException` "Connect timed out") | 토스에 닿지 못함 → **안 됨, 재시도 안전** | 503 `PAYMENT_GATEWAY_UNREACHABLE` |
+| `PaymentResultUnknownException` | read timeout (`SocketTimeoutException` "Read timed out") | 승인 여부 불명확 → **"실패"로 단정하지 않고 확인 필요** | 504 `PAYMENT_RESULT_UNKNOWN` + "내역에서 확인/재시도" 안내 |
+
+핵심: 결과가 불명확한 실패를 성공/실패 둘 중 하나로 성급히 결론짓지 않는다.
+
 ---
 
 ### **TODO**
