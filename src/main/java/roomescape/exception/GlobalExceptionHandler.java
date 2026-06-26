@@ -20,7 +20,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.payment.PaymentAmountMismatchException;
 import roomescape.payment.PaymentConnectionException;
+import roomescape.payment.PaymentRetryExhaustedException;
 import roomescape.payment.PaymentTimeoutException;
+import roomescape.payment.client.OutboundRateLimitException;
 import roomescape.payment.client.TossPaymentException;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ResourceConflictException;
@@ -67,6 +69,22 @@ public class GlobalExceptionHandler {
         log.warn("결제 서버 연결 실패: {}", e.getMessage());
         return new ErrorResponse(ErrorCode.PAYMENT_GATEWAY_UNAVAILABLE.name(),
                 "결제 서버에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handleOutboundRateLimit(OutboundRateLimitException e) {
+        log.warn("나가는 결제 호출 Rate Limit 초과로 차단: {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.PAYMENT_GATEWAY_BUSY.name(),
+                "결제 요청이 많아 잠시 후 다시 시도해 주세요.");
+    }
+
+    @ExceptionHandler(PaymentRetryExhaustedException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handlePaymentRetryExhausted(PaymentRetryExhaustedException e) {
+        log.warn("결제 서버 혼잡으로 재시도 한도 초과: {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.PAYMENT_GATEWAY_BUSY.name(),
+                "결제 서버가 혼잡합니다. 잠시 후 다시 시도해 주세요.");
     }
 
     @ExceptionHandler(ResourceConflictException.class)
