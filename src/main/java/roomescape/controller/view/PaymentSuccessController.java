@@ -3,8 +3,10 @@ package roomescape.controller.view;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import roomescape.controller.view.dto.PaymentFailRequest;
 import roomescape.controller.view.dto.PaymentReservationView;
+import roomescape.controller.view.dto.PaymentSuccessRequest;
 import roomescape.domain.Reservation;
 import roomescape.service.payment.PaymentAmountMismatchException;
 import roomescape.service.payment.PaymentGatewayException;
@@ -14,6 +16,8 @@ import roomescape.service.PaymentService;
 @Controller
 public class PaymentSuccessController {
 
+    private static final String PAYMENT_CONFIRMATION_UNKNOWN = "PAYMENT_CONFIRMATION_UNKNOWN";
+
     private final PaymentService paymentService;
 
     public PaymentSuccessController(PaymentService paymentService) {
@@ -22,44 +26,37 @@ public class PaymentSuccessController {
 
     @GetMapping("/payments/success")
     public String success(
-            @RequestParam String paymentKey,
-            @RequestParam String orderId,
-            @RequestParam Long amount,
-            @RequestParam(required = false) String name,
+            @ModelAttribute PaymentSuccessRequest request,
             Model model
     ) {
         try {
-            PaymentResult result = paymentService.confirm(paymentKey, orderId, amount);
+            PaymentResult result = paymentService.confirm(request.paymentKey(), request.orderId(), request.amount());
             model.addAttribute("result", result);
-            addReservationViewByOrderId(model, orderId);
-            model.addAttribute("name", name);
+            addReservationViewByOrderId(model, request.orderId());
+            model.addAttribute("name", request.name());
             return "payment-success";
         } catch (PaymentAmountMismatchException e) {
-            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), orderId, name,
-                    paymentService.findReservationByOrderId(orderId));
+            return failView(model, "AMOUNT_MISMATCH", e.getMessage(), request.orderId(), request.name(),
+                    paymentService.findReservationByOrderId(request.orderId()));
         } catch (PaymentGatewayException e) {
-            return failView(model, e.getCode(), e.getMessage(), orderId, name,
-                    paymentService.findReservationByOrderId(orderId));
+            return failView(model, e.getCode(), e.getMessage(), request.orderId(), request.name(),
+                    paymentService.findReservationByOrderId(request.orderId()));
         }
     }
 
     @GetMapping("/payments/fail")
     public String fail(
-            @RequestParam(required = false) String code,
-            @RequestParam(required = false) String message,
-            @RequestParam(required = false) String orderId,
-            @RequestParam(required = false) Long paymentId,
-            @RequestParam(required = false) String name,
+            @ModelAttribute PaymentFailRequest request,
             Model model
     ) {
         Reservation reservation = null;
-        if (paymentId != null) {
-            paymentService.fail(paymentId, code, message);
-            reservation = paymentService.findReservationByPaymentId(paymentId);
-        } else if (orderId != null) {
-            reservation = paymentService.findReservationByOrderId(orderId);
+        if (request.paymentId() != null) {
+            paymentService.fail(request.paymentId(), request.code(), request.message());
+            reservation = paymentService.findReservationByPaymentId(request.paymentId());
+        } else if (request.orderId() != null) {
+            reservation = paymentService.findReservationByOrderId(request.orderId());
         }
-        return failView(model, code, message, orderId, name, reservation);
+        return failView(model, request.code(), request.message(), request.orderId(), request.name(), reservation);
     }
 
     private void addReservationViewByOrderId(Model model, String orderId) {
@@ -73,6 +70,7 @@ public class PaymentSuccessController {
         model.addAttribute("message", message);
         model.addAttribute("orderId", orderId);
         model.addAttribute("name", name);
+        model.addAttribute("confirmationUnknown", PAYMENT_CONFIRMATION_UNKNOWN.equals(code));
         if (reservation != null) {
             model.addAttribute("reservation", PaymentReservationView.from(reservation));
         }

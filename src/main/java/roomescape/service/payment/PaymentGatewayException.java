@@ -22,4 +22,8 @@ public class PaymentGatewayException extends RuntimeException {
     public boolean isDefinitiveFailure() {
         return failureCategory == PaymentFailureCategory.DEFINITIVE;
     }
+
+    public boolean requiresConfirmationCheck() {
+        return failureCategory == PaymentFailureCategory.CONFIRMATION_UNKNOWN;
+    }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.web.client.RestClient;
 import roomescape.domain.PaymentStatus;
 import roomescape.service.payment.PaymentConfirmation;
 import roomescape.service.payment.PaymentFailureCategory;
+import roomescape.service.payment.PaymentGatewayException;
 import roomescape.service.payment.PaymentResult;
 
 import java.util.stream.Stream;
@@ -60,10 +62,53 @@ class TossPaymentGatewayTest {
         RecordedRequest request = server.takeRequest();
         assertThat(request.getMethod()).isEqualTo("POST");
         assertThat(request.getPath()).isEqualTo("/v1/payments/confirm");
+        assertThat(request.getHeader("Idempotency-Key")).isEqualTo("payment_123456789012345678901");
         assertThat(request.getBody().readUtf8())
                 .contains("\"paymentKey\":\"test_payment_key\"")
                 .contains("\"orderId\":\"payment_123456789012345678901\"")
                 .contains("\"amount\":20000");
+    }
+
+    @Test
+    void 토스가_429를_주어_재시도해도_멱등키는_유지된다() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(429).setHeader(HttpHeaders.RETRY_AFTER, "0"));
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                .setBody("""
+                        {
+                          "paymentKey": "test_payment_key",
+                          "orderId": "payment_123456789012345678901",
+                          "status": "DONE",
+                          "totalAmount": 20000
+                        }
+                        """));
+        TossPaymentGateway gateway = new TossPaymentGateway(RestClient.builder()
+                .baseUrl(server.url("/").toString())
+                .requestInterceptor(new RetryAfterInterceptor(3))
+                .build(), new ObjectMapper());
+
+        gateway.confirm(new PaymentConfirmation(
+                "test_payment_key", "payment_123456789012345678901", 20_000L));
+
+        assertThat(server.getRequestCount()).isEqualTo(2);
+        RecordedRequest first = server.takeRequest();
+        RecordedRequest retried = server.takeRequest();
+        assertThat(first.getHeader("Idempotency-Key")).isEqualTo("payment_123456789012345678901");
+        assertThat(retried.getHeader("Idempotency-Key")).isEqualTo("payment_123456789012345678901");
+    }
+
+    @Test
+    void 토스_통신_예외를_승인_결과_확인_필요_예외로_변환한다() {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+        TossPaymentGateway gateway = new TossPaymentGateway(RestClient.builder()
+                .baseUrl(server.url("/").toString())
+                .build(), new ObjectMapper());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> gateway.confirm(new PaymentConfirmation(
+                        "test_payment_key", "payment_123456789012345678901", 20_000L)))
+                .isInstanceOf(PaymentGatewayException.class)
+                .hasFieldOrPropertyWithValue("code", "PAYMENT_CONFIRMATION_UNKNOWN")
+                .hasFieldOrPropertyWithValue("failureCategory", PaymentFailureCategory.CONFIRMATION_UNKNOWN);
     }
 
     @ParameterizedTest
