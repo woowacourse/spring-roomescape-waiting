@@ -18,6 +18,8 @@ toss:
   base-url: https://api.tosspayments.com
   client-key: ${TOSS_CLIENT_KEY}
   secret-key: ${TOSS_SECRET_KEY}
+  max-attempts: 3
+  fallback-retry-after-seconds: 1
 
 rate-limit:
   capacity: 5

@@ -6,6 +6,8 @@ toss:
   base-url: http://localhost:8089
   client-key: test_client_key
   secret-key: test_secret_key
+  max-attempts: 3
+  fallback-retry-after-seconds: 1
 
 rate-limit:
   capacity: 10000

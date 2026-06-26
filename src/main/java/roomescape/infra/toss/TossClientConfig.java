@@ -14,7 +14,9 @@ public class TossClientConfig {
     @Bean
     public RestClient tossRestClient(
             @Value("${toss.base-url}") String baseUrl,
-            @Value("${toss.secret-key}") String secretKey
+            @Value("${toss.secret-key}") String secretKey,
+            @Value("${toss.max-attempts}") int maxAttempts,
+            @Value("${toss.fallback-retry-after-seconds}") long fallbackRetryAfterSeconds
     ) {
         String basic = Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
@@ -22,6 +24,7 @@ public class TossClientConfig {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic " + basic)
+                .requestInterceptor(new RetryAfterInterceptor(maxAttempts, fallbackRetryAfterSeconds))
                 .build();
     }
 }

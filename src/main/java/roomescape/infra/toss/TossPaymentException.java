@@ -123,4 +123,15 @@ public class TossPaymentException extends RuntimeException {
         }
 
     }
+
+    /**
+     * 429 - 토스 요청 한도 초과.
+     */
+    public static class TooManyRequests extends TossPaymentException {
+
+        public TooManyRequests(String message) {
+            super(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", message);
+        }
+
+    }
 }
