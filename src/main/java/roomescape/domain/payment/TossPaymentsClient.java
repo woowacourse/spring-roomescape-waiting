@@ -9,6 +9,7 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -21,6 +22,8 @@ import roomescape.domain.payment.dto.PaymentConfirmResponse;
 import roomescape.domain.payment.dto.PaymentErrorResponse;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.ratelimit.OutboundRateLimitInterceptor;
+import roomescape.ratelimit.RetryAfterInterceptor;
 
 @Component
 public class TossPaymentsClient implements PaymentClient {
@@ -36,7 +39,31 @@ public class TossPaymentsClient implements PaymentClient {
         @Value("${toss.payments.base-url:https://api.tosspayments.com}") String baseUrl,
         @Value("${toss.payments.secret-key:}") String secretKey,
         @Value("${toss.payments.connect-timeout}") Duration connectTimeout,
-        @Value("${toss.payments.read-timeout}") Duration readTimeout
+        @Value("${toss.payments.read-timeout}") Duration readTimeout,
+        RetryAfterInterceptor retryAfterInterceptor,
+        OutboundRateLimitInterceptor outboundRateLimitInterceptor
+    ) {
+        this(
+            buildRestClient(
+                restClientBuilder,
+                baseUrl,
+                connectTimeout,
+                readTimeout,
+                retryAfterInterceptor,
+                outboundRateLimitInterceptor
+            ),
+            objectMapper,
+            secretKey
+        );
+    }
+
+    TossPaymentsClient(
+        RestClient.Builder restClientBuilder,
+        ObjectMapper objectMapper,
+        String baseUrl,
+        String secretKey,
+        Duration connectTimeout,
+        Duration readTimeout
     ) {
         this(
             buildRestClient(restClientBuilder, baseUrl, connectTimeout, readTimeout),
@@ -124,7 +151,8 @@ public class TossPaymentsClient implements PaymentClient {
         RestClient.Builder restClientBuilder,
         String baseUrl,
         Duration connectTimeout,
-        Duration readTimeout
+        Duration readTimeout,
+        ClientHttpRequestInterceptor... interceptors
     ) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(connectTimeout);
@@ -132,6 +160,11 @@ public class TossPaymentsClient implements PaymentClient {
         return restClientBuilder
             .baseUrl(baseUrl)
             .requestFactory(requestFactory)
+            .requestInterceptors(list -> {
+                for (ClientHttpRequestInterceptor interceptor : interceptors) {
+                    list.add(interceptor);
+                }
+            })
             .build();
     }
 }

@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.RoomescapeException;
 import roomescape.domain.payment.dto.PaymentConfirmRequest;
 import roomescape.domain.payment.dto.PaymentConfirmResponse;
+import roomescape.ratelimit.OutboundRateLimitException;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -110,5 +111,28 @@ class PaymentServiceTest {
             .isInstanceOf(RoomescapeException.class);
 
         verify(paymentClient, never()).confirm(request, "fixed-idempotency-key");
+    }
+
+    @Test
+    void 아웃바운드_한도_초과는_결제_실패로_변경하지_않는다() {
+        PaymentConfirmRequest request = new PaymentConfirmRequest("paymentKey", "orderId", 1000L);
+        ReservationPayment payment = new ReservationPayment(
+            1L,
+            1L,
+            "orderId",
+            null,
+            1000L,
+            "fixed-idempotency-key",
+            PaymentStatus.PENDING
+        );
+        given(paymentRepository.findByOrderId("orderId")).willReturn(Optional.of(payment));
+        given(paymentClient.confirm(request, "fixed-idempotency-key"))
+            .willThrow(new OutboundRateLimitException(1));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> paymentService.confirm(request))
+            .isInstanceOf(OutboundRateLimitException.class);
+
+        verify(paymentRepository, never()).updateStatus("orderId", PaymentStatus.FAILED);
+        verify(paymentRepository, never()).updateRequiresConfirmation("orderId", "paymentKey");
     }
 }
