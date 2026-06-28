@@ -33,6 +33,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String DETAIL_INTERNAL_ERROR = "요청을 처리하는 중 알 수 없는 오류가 발생했습니다.";
     private static final String DETAIL_PAYMENT_FAILED = "결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
     private static final String DETAIL_PAYMENT_UNCERTAIN = "결제 승인 결과를 확인하지 못했습니다. 잠시 후 주문 내역에서 결제 상태를 확인해주세요.";
+    private static final String DETAIL_OUTBOUND_RATE_LIMITED = "외부 결제 API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.";
     private static final String ERRORS_PROPERTY = "errors";
     private static final String POINTER_PREFIX = "/";
 
@@ -79,6 +80,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(TransientDataAccessException.class)
     public ProblemDetail handleTransient(TransientDataAccessException ex, WebRequest request) {
         return buildProblem(HttpStatus.CONFLICT, ProblemType.CONCURRENCY_CONFLICT, DETAIL_TRANSIENT, Level.WARN, ex, request);
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<ProblemDetail> handleOutboundRateLimit(OutboundRateLimitException ex, WebRequest request) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, DETAIL_OUTBOUND_RATE_LIMITED);
+        applyType(problem, ProblemType.OUTBOUND_RATE_LIMITED, request);
+        logException(Level.WARN, ex, HttpStatus.SERVICE_UNAVAILABLE, request);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.retryAfterSeconds()))
+                .body(problem);
     }
 
     @ExceptionHandler(Exception.class)

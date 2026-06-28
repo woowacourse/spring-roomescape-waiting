@@ -18,6 +18,7 @@ public enum ProblemType {
     PAYMENT_AMOUNT_MISMATCH("payment-amount-mismatch", "결제 금액 불일치"),
     PAYMENT_FAILED("payment-failed", "결제 실패"),
     PAYMENT_UNCERTAIN("payment-uncertain", "결제 결과 확인 필요"),
+    OUTBOUND_RATE_LIMITED("outbound-rate-limited", "외부 호출 한도 초과"),
     INTERNAL_ERROR("internal-error", "서버 내부 오류");
 
     private static final String TYPE_BASE = "https://roomescape.example/problems/";
