@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.validation.ConstraintViolationException;
+import roomescape.infrastructure.toss.OutboundRateLimitException;
 import roomescape.infrastructure.toss.TossPaymentException;
 
 @RestControllerAdvice
@@ -27,6 +28,15 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(e.getCode(), e.getClass().getSimpleName(), e.getMessage());
         return ResponseEntity
                 .status(e.getStatus())
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(OutboundRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handleOutboundRateLimitException(OutboundRateLimitException e) {
+        ErrorResponse errorResponse = new ErrorResponse("OUTBOUND_RATE_LIMIT_429", e.getClass().getSimpleName(), e.getMessage());
+        return ResponseEntity
+                .status(429)
+                .header("Retry-After", String.valueOf(e.getRetryAfterSeconds()))
                 .body(errorResponse);
     }
 

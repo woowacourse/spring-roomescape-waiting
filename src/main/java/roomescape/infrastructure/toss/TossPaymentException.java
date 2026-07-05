@@ -17,6 +17,7 @@ public class TossPaymentException extends RuntimeException{
 
     public static TossPaymentException of(HttpStatusCode status, TossErrorResponse error) {
         return switch (error.code()){
+            case "TOO_MANY_REQUESTS" -> new RateLimited(error.message());
             case "ALREADY_PROCESSED_PAYMENT" -> new AlreadyProcessed(error.message());
             case "DUPLICATED_ORDER_ID" -> new DuplicatedOrder(error.message());
             case "NOT_FOUND_PAYMENT_SESSION" -> new SessionExpired(error.message());
@@ -121,6 +122,17 @@ public class TossPaymentException extends RuntimeException{
 
         public Retryable(String message) {
             super(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_PAYMENT_INTERNAL_SYSTEM_PROCESSING", message);
+        }
+
+    }
+
+    /**
+     * 429 - 토스 호출량 한도 초과.
+     */
+    public static class RateLimited extends TossPaymentException {
+
+        public RateLimited(String message) {
+            super(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", message);
         }
 
     }
