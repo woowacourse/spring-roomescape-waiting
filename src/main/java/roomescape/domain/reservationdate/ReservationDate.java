@@ -1,15 +1,25 @@
 package roomescape.domain.reservationdate;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalDate;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.RoomescapeException;
 
 @Getter
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationDate {
 
-    private final Long id;
-    private final LocalDate playDay;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate playDay;
 
     private ReservationDate(Long id, LocalDate playDay) {
         validate(playDay);

@@ -2,13 +2,16 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,9 +25,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
-import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
 import roomescape.support.exception.RoomescapeException;
@@ -34,19 +35,23 @@ class ReservationServiceTest {
     private static final Clock CLOCK = Clock.systemDefaultZone();
 
     private ReservationService reservationService;
-    private FakeReservationRepository reservationRepository;
-    private FakeReservationDateRepository reservationDateRepository;
-    private FakeReservationTimeRepository reservationTimeRepository;
-    private FakeThemeRepository themeRepository;
-    private FakeWaitingReservationRepository waitingReservationRepository;
+    private ReservationRepository reservationRepository;
+    private ReservationDateRepository reservationDateRepository;
+    private ReservationTimeRepository reservationTimeRepository;
+    private ThemeRepository themeRepository;
+    private WaitingReservationRepository waitingReservationRepository;
 
     @BeforeEach
     void setUp() {
-        reservationRepository = new FakeReservationRepository();
-        reservationDateRepository = new FakeReservationDateRepository();
-        reservationTimeRepository = new FakeReservationTimeRepository();
-        themeRepository = new FakeThemeRepository();
-        waitingReservationRepository = new FakeWaitingReservationRepository();
+        reservationRepository = mock(ReservationRepository.class);
+        reservationDateRepository = mock(ReservationDateRepository.class);
+        reservationTimeRepository = mock(ReservationTimeRepository.class);
+        themeRepository = mock(ThemeRepository.class);
+        configureReservationRepository(reservationRepository);
+        configureReservationDateRepository(reservationDateRepository);
+        configureReservationTimeRepository(reservationTimeRepository);
+        configureThemeRepository(themeRepository);
+        waitingReservationRepository = mock(WaitingReservationRepository.class);
 
         reservationService = new ReservationService(
                 reservationRepository,
@@ -54,6 +59,146 @@ class ReservationServiceTest {
                 waitingReservationRepository,
                 CLOCK
         );
+    }
+
+    private void configureReservationRepository(ReservationRepository repository) {
+        List<Reservation> reservations = new ArrayList<>();
+        long[] idCounter = {1L};
+        when(repository.save(any(Reservation.class))).thenAnswer(invocation -> {
+            Reservation reservation = invocation.getArgument(0);
+            Reservation saved = Reservation.of(
+                    idCounter[0]++,
+                    reservation.getName(),
+                    reservation.getDate(),
+                    reservation.getTime(),
+                    reservation.getTheme()
+            );
+            reservations.add(saved);
+            return saved;
+        });
+        when(repository.findAll()).thenAnswer(invocation -> reservations);
+        doAnswer(invocation -> {
+            Reservation target = invocation.getArgument(0);
+            reservations.removeIf(reservation -> reservation.getId().equals(target.getId()));
+            return null;
+        }).when(repository).delete(any(Reservation.class));
+        when(repository.countByTimeId(any(Long.class))).thenAnswer(invocation -> {
+            Long timeId = invocation.getArgument(0);
+            return (int) reservations.stream()
+                    .filter(reservation -> reservation.getTime().getId().equals(timeId))
+                    .count();
+        });
+        when(repository.countByDateId(any(Long.class))).thenAnswer(invocation -> {
+            Long dateId = invocation.getArgument(0);
+            return (int) reservations.stream()
+                    .filter(reservation -> reservation.getDate().getId().equals(dateId))
+                    .count();
+        });
+        when(repository.findReservedTimes(any(Long.class), any(Long.class))).thenAnswer(invocation -> {
+            Long themeId = invocation.getArgument(0);
+            Long dateId = invocation.getArgument(1);
+            return reservations.stream()
+                    .filter(reservation -> reservation.getTheme().getId().equals(themeId)
+                            && reservation.getDate().getId().equals(dateId))
+                    .map(reservation -> reservation.getTime().getId())
+                    .toList();
+        });
+        when(repository.countByThemeId(any(Long.class))).thenAnswer(invocation -> {
+            Long themeId = invocation.getArgument(0);
+            return (int) reservations.stream()
+                    .filter(reservation -> reservation.getTheme().getId().equals(themeId))
+                    .count();
+        });
+        when(repository.findByName(any(String.class))).thenAnswer(invocation -> {
+            String name = invocation.getArgument(0);
+            return reservations.stream()
+                    .filter(reservation -> reservation.getName().equals(name))
+                    .toList();
+        });
+        when(repository.findUpcomingByName(any(String.class), any(LocalDate.class), any(LocalTime.class)))
+                .thenAnswer(invocation -> {
+                    String name = invocation.getArgument(0);
+                    LocalDate currentDate = invocation.getArgument(1);
+                    LocalTime currentTime = invocation.getArgument(2);
+                    return reservations.stream()
+                            .filter(reservation -> reservation.getName().equals(name))
+                            .filter(reservation -> reservation.getDate().getPlayDay().isAfter(currentDate)
+                                    || (reservation.getDate().getPlayDay().isEqual(currentDate)
+                                    && reservation.getTime().getStartAt().isAfter(currentTime)))
+                            .toList();
+                });
+        when(repository.findById(any(Long.class))).thenAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            return reservations.stream()
+                    .filter(reservation -> reservation.getId().equals(id))
+                    .findFirst();
+        });
+        when(repository.existsByDateIdAndTimeIdAndThemeId(any(Long.class), any(Long.class), any(Long.class)))
+                .thenAnswer(invocation -> {
+                    Long dateId = invocation.getArgument(0);
+                    Long timeId = invocation.getArgument(1);
+                    Long themeId = invocation.getArgument(2);
+                    return reservations.stream()
+                            .anyMatch(reservation -> reservation.getDate().getId().equals(dateId)
+                                    && reservation.getTime().getId().equals(timeId)
+                                    && reservation.getTheme().getId().equals(themeId));
+                });
+    }
+
+    private void configureReservationDateRepository(ReservationDateRepository repository) {
+        List<ReservationDate> dates = new ArrayList<>();
+        long[] idCounter = {1L};
+        when(repository.save(any(ReservationDate.class))).thenAnswer(invocation -> {
+            ReservationDate reservationDate = invocation.getArgument(0);
+            ReservationDate saved = ReservationDate.of(idCounter[0]++, reservationDate.getPlayDay());
+            dates.add(saved);
+            return saved;
+        });
+        when(repository.findById(any(Long.class))).thenAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            return dates.stream().filter(date -> date.getId().equals(id)).findFirst();
+        });
+        when(repository.findAll()).thenAnswer(invocation -> dates);
+        when(repository.existsByPlayDay(any(LocalDate.class))).thenAnswer(invocation -> {
+            LocalDate playDay = invocation.getArgument(0);
+            return dates.stream().anyMatch(date -> date.getPlayDay().equals(playDay));
+        });
+    }
+
+    private void configureReservationTimeRepository(ReservationTimeRepository repository) {
+        List<ReservationTime> times = new ArrayList<>();
+        long[] idCounter = {1L};
+        when(repository.save(any(ReservationTime.class))).thenAnswer(invocation -> {
+            ReservationTime reservationTime = invocation.getArgument(0);
+            ReservationTime saved = ReservationTime.of(idCounter[0]++, reservationTime.getStartAt());
+            times.add(saved);
+            return saved;
+        });
+        when(repository.findById(any(Long.class))).thenAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            return times.stream().filter(time -> time.getId().equals(id)).findFirst();
+        });
+        when(repository.findAll()).thenAnswer(invocation -> times);
+        when(repository.existsByStartAt(any(LocalTime.class))).thenAnswer(invocation -> {
+            LocalTime startAt = invocation.getArgument(0);
+            return times.stream().anyMatch(time -> time.getStartAt().equals(startAt));
+        });
+    }
+
+    private void configureThemeRepository(ThemeRepository repository) {
+        List<Theme> themes = new ArrayList<>();
+        long[] idCounter = {1L};
+        when(repository.save(any(Theme.class))).thenAnswer(invocation -> {
+            Theme theme = invocation.getArgument(0);
+            Theme saved = Theme.of(idCounter[0]++, theme.getName(), theme.getContent(), theme.getUrl());
+            themes.add(saved);
+            return saved;
+        });
+        when(repository.findById(any(Long.class))).thenAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            return themes.stream().filter(theme -> theme.getId().equals(id)).findFirst();
+        });
+        when(repository.findAll()).thenAnswer(invocation -> themes);
     }
 
     @Test
@@ -308,239 +453,4 @@ class ReservationServiceTest {
                 .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
-    private static class FakeReservationRepository implements ReservationRepository {
-
-        private final List<Reservation> reservations = new ArrayList<>();
-        private Long idCounter = 1L;
-
-        @Override
-        public Reservation save(Reservation reservation) {
-            Reservation saved = Reservation.of(idCounter++, reservation.getName(), reservation.getDate(),
-                    reservation.getTime(), reservation.getTheme());
-            reservations.add(saved);
-            return saved;
-        }
-
-        @Override
-        public List<Reservation> findAll() {
-            return reservations;
-        }
-
-        @Override
-        public int deleteById(Long id) {
-            boolean removed = reservations.removeIf(r -> r.getId().equals(id));
-            return removed ? 1 : 0;
-        }
-
-        @Override
-        public int countByTimeId(Long timeId) {
-            return (int) reservations.stream().filter(r -> r.getTime().getId().equals(timeId)).count();
-        }
-
-        @Override
-        public int countByReservationDateId(Long dateId) {
-            return (int) reservations.stream().filter(r -> r.getDate().getId().equals(dateId)).count();
-        }
-
-        @Override
-        public List<Long> findReservedTimes(Long themeId, Long dateId) {
-            return reservations.stream()
-                    .filter(r -> r.getTheme().getId().equals(themeId) && r.getDate().getId().equals(dateId))
-                    .map(r -> r.getTime().getId())
-                    .toList();
-        }
-
-        @Override
-        public int countByThemeId(Long id) {
-            return (int) reservations.stream().filter(r -> r.getTheme().getId().equals(id)).count();
-        }
-
-        @Override
-        public List<Reservation> findByName(String name) {
-            return reservations.stream().filter(r -> r.getName().equals(name)).toList();
-        }
-
-        @Override
-        public List<Reservation> findUpcomingByName(String name, LocalDate currentDate, LocalTime currentTime) {
-            return findByName(name).stream()
-                    .filter(r -> r.getDate().getPlayDay().isAfter(currentDate)
-                            || (r.getDate().getPlayDay().isEqual(currentDate)
-                            && r.getTime().getStartAt().isAfter(currentTime)))
-                    .toList();
-        }
-
-        @Override
-        public Optional<Reservation> findById(Long id) {
-            return reservations.stream().filter(r -> r.getId().equals(id)).findFirst();
-        }
-
-        @Override
-        public int updateReservation(Long id, Long dateId, Long timeId) {
-            Optional<Reservation> target = findById(id);
-            if (target.isPresent()) {
-                Reservation existing = target.get();
-                ReservationDate updatedDate = ReservationDate.of(dateId, existing.getDate().getPlayDay().plusDays(1));
-                ReservationTime updatedTime = ReservationTime.of(timeId, LocalTime.now());
-
-                Reservation updated = Reservation.of(id, existing.getName(), updatedDate, updatedTime,
-                        existing.getTheme());
-                reservations.remove(existing);
-                reservations.add(updated);
-                return 1;
-            }
-            return 0;
-        }
-
-        @Override
-        public boolean existsByDateIdAndTimeIdAndThemeId(Long dateId, Long timeId, Long themeId) {
-            return reservations.stream().anyMatch(
-                    r -> r.getDate().getId().equals(dateId) && r.getTime().getId().equals(timeId) && r.getTheme()
-                            .getId()
-                            .equals(themeId));
-        }
-    }
-
-    private static class FakeWaitingReservationRepository implements WaitingReservationRepository {
-
-        @Override
-        public WaitingReservation save(WaitingReservation waitingReservation) {
-            return waitingReservation;
-        }
-
-        @Override
-        public boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, long dateId, long timeId, long themeId) {
-            return false;
-        }
-
-        @Override
-        public Optional<WaitingReservation> findOldestBySlot(long dateId, long timeId, long themeId) {
-            return Optional.empty();
-        }
-
-        @Override
-        public List<WaitingReservationWithRank> findAllByNameWithRank(String name) {
-            return List.of();
-        }
-
-        @Override
-        public List<WaitingReservationWithRank> findUpcomingByNameWithRank(
-                String name,
-                LocalDate currentDate,
-                LocalTime currentTime
-        ) {
-            return List.of();
-        }
-
-        @Override
-        public int deleteById(Long id) {
-            return 0;
-        }
-
-        @Override
-        public Optional<WaitingReservation> findById(Long id) {
-            return Optional.empty();
-        }
-    }
-
-    private static class FakeReservationDateRepository implements ReservationDateRepository {
-
-        private final List<ReservationDate> dates = new ArrayList<>();
-        private Long idCounter = 1L;
-
-        @Override
-        public Optional<ReservationDate> findById(Long id) {
-            return dates.stream().filter(d -> d.getId().equals(id)).findFirst();
-        }
-
-        @Override
-        public List<ReservationDate> findAll() {
-            return dates;
-        }
-
-        @Override
-        public ReservationDate save(ReservationDate reservationDate) {
-            ReservationDate saved = ReservationDate.of(idCounter++, reservationDate.getPlayDay());
-            dates.add(saved);
-            return saved;
-        }
-
-        @Override
-        public int deleteById(Long id) {
-            dates.removeIf(d -> d.getId().equals(id));
-            return 1;
-        }
-
-        @Override
-        public boolean existsByPlayDay(LocalDate playDay) {
-            return dates.stream().anyMatch(d -> d.getPlayDay().equals(playDay));
-        }
-    }
-
-    private static class FakeReservationTimeRepository implements ReservationTimeRepository {
-
-        private final List<ReservationTime> times = new ArrayList<>();
-        private Long idCounter = 1L;
-
-        @Override
-        public Optional<ReservationTime> findById(Long id) {
-            return times.stream().filter(t -> t.getId().equals(id)).findFirst();
-        }
-
-        @Override
-        public ReservationTime save(ReservationTime reservationTime) {
-            ReservationTime saved = ReservationTime.of(idCounter++, reservationTime.getStartAt());
-            times.add(saved);
-            return saved;
-        }
-
-        @Override
-        public List<ReservationTime> findAll() {
-            return times;
-        }
-
-        @Override
-        public int deleteById(Long id) {
-            times.removeIf(t -> t.getId().equals(id));
-            return 1;
-        }
-
-        @Override
-        public boolean existsByStartAt(LocalTime startAt) {
-            return times.stream().anyMatch(t -> t.getStartAt().equals(startAt));
-        }
-    }
-
-    private static class FakeThemeRepository implements ThemeRepository {
-
-        private final List<Theme> themes = new ArrayList<>();
-        private Long idCounter = 1L;
-
-        @Override
-        public Optional<Theme> findById(Long id) {
-            return themes.stream().filter(t -> t.getId().equals(id)).findFirst();
-        }
-
-        @Override
-        public List<Theme> findAll() {
-            return themes;
-        }
-
-        @Override
-        public Theme save(Theme theme) {
-            Theme saved = Theme.of(idCounter++, theme.getName(), theme.getContent(), theme.getUrl());
-            themes.add(saved);
-            return saved;
-        }
-
-        @Override
-        public int deleteById(Long id) {
-            themes.removeIf(t -> t.getId().equals(id));
-            return 1;
-        }
-
-        @Override
-        public List<Theme> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate endDay) {
-            return List.of();
-        }
-    }
 }

@@ -3,31 +3,43 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface ReservationRepository {
-
-    Reservation save(Reservation reservation);
-
-    List<Reservation> findAll();
-
-    int deleteById(Long id);
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     int countByTimeId(Long timeId);
 
-    int countByReservationDateId(Long dateId);
+    int countByDateId(Long dateId);
 
-    List<Long> findReservedTimes(Long themeId, Long dateId);
+    List<Reservation> findByThemeIdAndDateId(Long themeId, Long dateId);
+
+    default List<Long> findReservedTimes(Long themeId, Long dateId) {
+        return findByThemeIdAndDateId(themeId, dateId).stream()
+                .map(reservation -> reservation.getTime().getId())
+                .toList();
+    }
 
     int countByThemeId(Long id);
 
     List<Reservation> findByName(String name);
 
-    List<Reservation> findUpcomingByName(String name, LocalDate currentDate, LocalTime currentTime);
-
-    Optional<Reservation> findById(Long id);
-
-    int updateReservation(Long id, Long dateId, Long timeId);
+    @EntityGraph(attributePaths = {"date", "time", "theme"})
+    @Query("""
+            select r
+            from Reservation r
+            where r.name = :name
+              and (r.date.playDay > :currentDate
+                or (r.date.playDay = :currentDate and r.time.startAt > :currentTime))
+            order by r.date.playDay, r.time.startAt
+            """)
+    List<Reservation> findUpcomingByName(
+            @Param("name") String name,
+            @Param("currentDate") LocalDate currentDate,
+            @Param("currentTime") LocalTime currentTime
+    );
 
     boolean existsByDateIdAndTimeIdAndThemeId(Long dateId, Long timeId, Long themeId);
 }

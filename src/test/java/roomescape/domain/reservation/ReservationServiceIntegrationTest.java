@@ -200,10 +200,11 @@ class ReservationServiceIntegrationTest {
         );
         doThrow(new IllegalStateException("예약 대기 삭제 실패"))
             .when(waitingReservationRepository)
-            .deleteById(firstWaiting.getId());
+            .delete(argThat(waiting -> waiting.getId().equals(firstWaiting.getId())));
 
         assertThatThrownBy(() -> reservationService.cancelReservation(cancelledReservation.getId()))
-            .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("예약 대기 삭제 실패");
 
         verify(reservationRepository).save(argThat(reservation -> isPromotedReservation(reservation, cancelledSlot)));
         assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
@@ -231,7 +232,7 @@ class ReservationServiceIntegrationTest {
         );
         doThrow(new IllegalStateException("예약 대기 삭제 실패"))
             .when(waitingReservationRepository)
-            .deleteById(firstWaiting.getId());
+            .delete(argThat(waiting -> waiting.getId().equals(firstWaiting.getId())));
 
         assertThatThrownBy(() -> reservationService.updateReservation(
             updatedReservation.getId(),
@@ -239,7 +240,8 @@ class ReservationServiceIntegrationTest {
                 newSlot.date().getId(),
                 newSlot.time().getId()
             )
-        )).isInstanceOf(IllegalStateException.class);
+        )).isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("예약 대기 삭제 실패");
 
         verify(reservationRepository).save(argThat(reservation -> isPromotedReservation(reservation, cancelledSlot)));
         Reservation rollbackedReservation = reservationRepository.findById(updatedReservation.getId()).orElseThrow();

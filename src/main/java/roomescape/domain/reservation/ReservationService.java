@@ -18,7 +18,6 @@ import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
 import roomescape.support.exception.RoomescapeException;
-import roomescape.support.exception.RoomescapeErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +49,10 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
-        int deletedCount = reservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND);
-        }
+        Reservation reservation = getReservation(id);
+        reservationRepository.delete(reservation);
     }
 
     @Transactional
@@ -63,6 +61,7 @@ public class ReservationService {
         validateReservableDate(reservation);
 
         deleteReservationOrThrow(id);
+        reservationRepository.flush();
         promoteOldestWaiting(ReservationSlot.from(reservation));
     }
 
@@ -85,9 +84,10 @@ public class ReservationService {
 
         validateReservableDate(newSlot);
         validateNotDuplicated(newSlot);
-        updateReservationOrThrow(id, request);
+        reservation.changeSlot(newSlot.date(), newSlot.time());
+        reservationRepository.flush();
         promoteOldestWaiting(currentSlot);
-        return ReservationResponse.from(getReservation(id));
+        return ReservationResponse.from(reservation);
     }
 
     private void promoteOldestWaiting(ReservationSlot slot) {
@@ -107,28 +107,12 @@ public class ReservationService {
                 waitingReservation.getTime(),
                 waitingReservation.getTheme()
         ));
-        deleteWaitingReservationOrThrow(waitingReservation.getId());
+        waitingReservationRepository.delete(waitingReservation);
     }
 
     private void deleteReservationOrThrow(Long id) {
-        int deletedCount = reservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new RoomescapeException(RoomescapeErrorCode.DATA_CONSISTENCY_VIOLATION);
-        }
-    }
-
-    private void deleteWaitingReservationOrThrow(Long id) {
-        int deletedCount = waitingReservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new RoomescapeException(RoomescapeErrorCode.DATA_CONSISTENCY_VIOLATION);
-        }
-    }
-
-    private void updateReservationOrThrow(Long id, ReservationUpdateRequest request) {
-        int updatedCount = reservationRepository.updateReservation(id, request.dateId(), request.timeId());
-        if (updatedCount == 0) {
-            throw new RoomescapeException(RoomescapeErrorCode.DATA_CONSISTENCY_VIOLATION);
-        }
+        Reservation reservation = getReservation(id);
+        reservationRepository.delete(reservation);
     }
 
     private Reservation getReservation(Long id) {

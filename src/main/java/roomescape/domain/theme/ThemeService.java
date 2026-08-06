@@ -38,13 +38,12 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
+        Theme theme = themeRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ThemeErrorCode.THEME_NOT_EXIST));
         if (reservationRepository.countByThemeId(id) > 0) {
             throw new RoomescapeException(ThemeErrorCode.THEME_IN_USE);
         }
-        int deletedCount = themeRepository.deleteById(id);
-        if (deletedCount == 0) {
-            log.warn("삭제할 테마가 존재하지 않습니다. themeId = {}", id);
-        }
+        themeRepository.delete(theme);
     }
 
     public List<ThemeResponse> getAllTheme() {
@@ -61,10 +60,5 @@ public class ThemeService {
         return populateThemes.stream()
             .map(ThemeRankResponse::from)
             .toList();
-    }
-
-    public Theme findById(Long id) {
-        return themeRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ThemeErrorCode.THEME_NOT_EXIST));
     }
 }
