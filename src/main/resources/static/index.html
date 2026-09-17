@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 예약 대기</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 32px; color: #222; }
+        main { max-width: 960px; margin: 0 auto; }
+        section { border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        label { display: block; margin: 8px 0; font-weight: 600; }
+        input { padding: 8px; margin-left: 8px; }
+        button { padding: 8px 12px; margin: 4px; border: 0; border-radius: 8px; background: #2563eb; color: white; cursor: pointer; }
+        button.cancel { background: #dc2626; }
+        button:disabled { background: #aaa; cursor: wait; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+        .confirmed { background: #dcfce7; color: #166534; }
+        .pending { background: #fef9c3; color: #854d0e; }
+        .cancelled { background: #fee2e2; color: #991b1b; }
+        .completed { background: #e0e7ff; color: #3730a3; }
+        #message { min-height: 24px; font-weight: 700; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>방탈출 예약 대기</h1>
+    <p>확정 예약 취소 시 첫 번째 대기가 자동 확정되고, 남은 대기 순번은 다시 계산된다.</p>
+
+    <section>
+        <h2>예약/대기 신청</h2>
+        <label>이름 <input id="createName" placeholder="브라운"></label>
+        <label>테마 슬롯 ID <input id="themeSlotId" type="number" min="1" placeholder="GET /times 응답 id"></label>
+        <button id="createButton">예약 또는 대기 신청</button>
+    </section>
+
+    <section>
+        <h2>내 예약 조회</h2>
+        <label>이름 <input id="searchName" placeholder="브라운"></label>
+        <button id="searchButton">조회</button>
+        <p id="message"></p>
+    </section>
+
+    <section>
+        <h2>예약 내역</h2>
+        <table>
+            <thead>
+            <tr><th>ID</th><th>테마</th><th>날짜</th><th>시간</th><th>상태</th><th>동작</th></tr>
+            </thead>
+            <tbody id="reservations"></tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>대기 내역</h2>
+        <table>
+            <thead>
+            <tr><th>ID</th><th>테마</th><th>날짜</th><th>시간</th><th>대기 순번</th><th>상태</th><th>동작</th></tr>
+            </thead>
+            <tbody id="waitingReservations"></tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+const createButton = document.querySelector('#createButton');
+const searchButton = document.querySelector('#searchButton');
+const message = document.querySelector('#message');
+
+createButton.addEventListener('click', createReservation);
+searchButton.addEventListener('click', loadMyReservations);
+document.addEventListener('click', event => {
+    if (!event.target.matches('[data-cancel-id]')) {
+        return;
+    }
+    cancelReservation(Number(event.target.dataset.cancelId), event.target.dataset.cancelName);
+});
+
+async function createReservation() {
+    const name = document.querySelector('#createName').value.trim();
+    const themeSlotId = Number(document.querySelector('#themeSlotId').value);
+    if (!name || !themeSlotId) {
+        showMessage('이름과 테마 슬롯 ID를 입력하세요.');
+        return;
+    }
+    await request('/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, themeSlotId })
+    });
+    document.querySelector('#searchName').value = name;
+    await loadMyReservations();
+}
+
+async function loadMyReservations() {
+    const name = document.querySelector('#searchName').value.trim();
+    if (!name) {
+        showMessage('조회할 이름을 입력하세요.');
+        return;
+    }
+    const data = await request(`/reservations?name=${encodeURIComponent(name)}`);
+    renderReservations(data.reservationResponses, name);
+    renderWaitingReservations(data.waitingReservationResponses, name);
+    showMessage('조회 완료. 취소 후 목록을 다시 불러와 자동 승격과 순번 재정렬을 보여준다.');
+}
+
+async function cancelReservation(id, name) {
+    await request(`/reservations/${id}/cancel?name=${encodeURIComponent(name)}`, { method: 'PATCH' });
+    await loadMyReservations();
+}
+
+async function request(url, options = {}) {
+    setLoading(true);
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ errorMessage: response.statusText }));
+            throw new Error(error.errorMessage || response.statusText);
+        }
+        if (response.status === 204) {
+            return null;
+        }
+        return response.json();
+    } catch (error) {
+        showMessage(error.message);
+        throw error;
+    } finally {
+        setLoading(false);
+    }
+}
+
+function renderReservations(reservations, name) {
+    const tbody = document.querySelector('#reservations');
+    tbody.innerHTML = reservations.map(reservation => `
+        <tr>
+            <td>${reservation.id}</td>
+            <td>${reservation.theme.name}</td>
+            <td>${reservation.date}</td>
+            <td>${reservation.time.startAt}</td>
+            <td>${statusBadge(reservation.status)}</td>
+            <td>${cancelButton(reservation, name)}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="6">예약 내역 없음</td></tr>';
+}
+
+function renderWaitingReservations(waitingReservations, name) {
+    const tbody = document.querySelector('#waitingReservations');
+    tbody.innerHTML = waitingReservations.map(reservation => `
+        <tr>
+            <td>${reservation.id}</td>
+            <td>${reservation.theme.name}</td>
+            <td>${reservation.date}</td>
+            <td>${reservation.time.startAt}</td>
+            <td>${reservation.waitingOrder}</td>
+            <td>${statusBadge(reservation.status)}</td>
+            <td>${cancelButton(reservation, name)}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="7">대기 내역 없음</td></tr>';
+}
+
+function statusBadge(status) {
+    return `<span class="badge ${status.toLowerCase()}">${status}</span>`;
+}
+
+function cancelButton(reservation, name) {
+    if (reservation.status !== 'CONFIRMED' && reservation.status !== 'PENDING') {
+        return '-';
+    }
+    return `<button class="cancel" data-cancel-id="${reservation.id}" data-cancel-name="${escapeHtml(name)}">취소</button>`;
+}
+
+function showMessage(text) {
+    message.textContent = text;
+}
+
+function setLoading(isLoading) {
+    createButton.disabled = isLoading;
+    searchButton.disabled = isLoading;
+}
+
+function escapeHtml(text) {
+    return text.replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[character]));
+}
+</script>
+</body>
+</html>

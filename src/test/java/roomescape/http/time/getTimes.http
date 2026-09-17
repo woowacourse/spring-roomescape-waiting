@@ -1,0 +1,2 @@
+GET localhost:8080/times?themeId=1&date=2026-05-28 HTTP/1.1
+Content-Type: application/json
